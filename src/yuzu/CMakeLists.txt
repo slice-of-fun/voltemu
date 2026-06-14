@@ -7,14 +7,14 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 # Set the RPATH for Qt Libraries
-# This must be done before the `yuzu` target is created
-if (YUZU_USE_BUNDLED_QT AND PLATFORM_LINUX)
+# This must be done before the `volt` target is created
+if (VOLT_USE_BUNDLED_QT AND PLATFORM_LINUX)
     set(CMAKE_BUILD_RPATH "${CMAKE_BINARY_DIR}/bin/lib/")
 endif()
 
 find_package(Qt6 REQUIRED COMPONENTS Widgets)
 
-add_executable(yuzu
+add_executable(volt
     Info.plist
     about_dialog.cpp
     about_dialog.h
@@ -221,8 +221,8 @@ add_executable(yuzu
 
     user_data_migration.h user_data_migration.cpp
 
-    yuzu.qrc
-    yuzu.rc
+    volt.qrc
+    volt.rc
     migration_dialog.h migration_dialog.cpp
     migration_worker.h migration_worker.cpp
     libqt_common.h libqt_common.cpp
@@ -241,19 +241,19 @@ add_executable(yuzu
     render/performance_overlay.h render/performance_overlay.cpp render/performance_overlay.ui
     updater/update_dialog.h updater/update_dialog.cpp updater/update_dialog.ui)
 
-set_target_properties(yuzu PROPERTIES OUTPUT_NAME "eden")
+set_target_properties(volt PROPERTIES OUTPUT_NAME "volt")
 
-if (YUZU_CRASH_DUMPS)
-    target_sources(yuzu PRIVATE
+if (VOLT_CRASH_DUMPS)
+    target_sources(volt PRIVATE
         breakpad.cpp
         breakpad.h)
 
-    target_link_libraries(yuzu PRIVATE libbreakpad_client)
-    target_compile_definitions(yuzu PRIVATE YUZU_CRASH_DUMPS)
+    target_link_libraries(volt PRIVATE libbreakpad_client)
+    target_compile_definitions(volt PRIVATE VOLT_CRASH_DUMPS)
 endif()
 
 if (CXX_CLANG)
-    target_compile_definitions(yuzu PRIVATE
+    target_compile_definitions(volt PRIVATE
         $<$<VERSION_LESS:$<CXX_COMPILER_VERSION>,15>:CANNOT_EXPLICITLY_INSTANTIATE>)
 endif()
 
@@ -264,28 +264,28 @@ file(GLOB_RECURSE ICONS ${PROJECT_SOURCE_DIR}/dist/icons/*)
 file(GLOB_RECURSE THEMES ${PROJECT_SOURCE_DIR}/dist/qt_themes/*)
 
 if (ENABLE_UPDATE_CHECKER)
-    target_compile_definitions(yuzu PUBLIC ENABLE_UPDATE_CHECKER)
+    target_compile_definitions(volt PUBLIC ENABLE_UPDATE_CHECKER)
 endif()
 
 if (ENABLE_QT_TRANSLATION)
-    set(YUZU_QT_LANGUAGES "${PROJECT_SOURCE_DIR}/dist/languages" CACHE PATH "Path to the translation bundle for the Qt frontend")
+    set(VOLT_QT_LANGUAGES "${PROJECT_SOURCE_DIR}/dist/languages" CACHE PATH "Path to the translation bundle for the Qt frontend")
     option(GENERATE_QT_TRANSLATION "Generate en.ts as the translation source file" OFF)
     option(WORKAROUND_BROKEN_LUPDATE "Run lupdate directly through CMake if Qt's convenience wrappers don't work" OFF)
 
     # Update source TS file if enabled
     if (GENERATE_QT_TRANSLATION)
-        get_target_property(SRCS yuzu SOURCES)
+        get_target_property(SRCS volt SOURCES)
         # these calls to qt_create_translation also creates a rule to generate en.qm which conflicts with providing english plurals
         # so we have to set a OUTPUT_LOCATION so that we don't have multiple rules to generate en.qm
-        set_source_files_properties(${YUZU_QT_LANGUAGES}/en.ts PROPERTIES OUTPUT_LOCATION "${CMAKE_CURRENT_BINARY_DIR}/translations")
+        set_source_files_properties(${VOLT_QT_LANGUAGES}/en.ts PROPERTIES OUTPUT_LOCATION "${CMAKE_CURRENT_BINARY_DIR}/translations")
         if (WORKAROUND_BROKEN_LUPDATE)
-            add_custom_command(OUTPUT ${YUZU_QT_LANGUAGES}/en.ts
+            add_custom_command(OUTPUT ${VOLT_QT_LANGUAGES}/en.ts
                 COMMAND lupdate
                     -source-language en_US
                     -target-language en_US
                     ${SRCS}
                     ${UIS}
-                    -ts ${YUZU_QT_LANGUAGES}/en.ts
+                    -ts ${VOLT_QT_LANGUAGES}/en.ts
                 DEPENDS
                     ${SRCS}
                     ${UIS}
@@ -295,7 +295,7 @@ if (ENABLE_QT_TRANSLATION)
             qt_create_translation(QM_FILES
                 ${SRCS}
                 ${UIS}
-                ${YUZU_QT_LANGUAGES}/en.ts
+                ${VOLT_QT_LANGUAGES}/en.ts
             OPTIONS
                 -source-language en_US
                 -target-language en_US)
@@ -321,12 +321,12 @@ if (ENABLE_QT_TRANSLATION)
             qt_create_translation(QM_FILES ${SRCS} ${UIS} ${GENERATED_PLURALS_FILE} OPTIONS -pluralonly -source-language en_US -target-language en_US)
         endif()
 
-        add_custom_target(translation ALL DEPENDS ${YUZU_QT_LANGUAGES}/en.ts ${GENERATED_PLURALS_FILE})
+        add_custom_target(translation ALL DEPENDS ${VOLT_QT_LANGUAGES}/en.ts ${GENERATED_PLURALS_FILE})
     endif()
 
     # Find all TS files except en.ts
-    file(GLOB_RECURSE LANGUAGES_TS ${YUZU_QT_LANGUAGES}/*.ts)
-    list(REMOVE_ITEM LANGUAGES_TS ${YUZU_QT_LANGUAGES}/en.ts)
+    file(GLOB_RECURSE LANGUAGES_TS ${VOLT_QT_LANGUAGES}/*.ts)
+    list(REMOVE_ITEM LANGUAGES_TS ${VOLT_QT_LANGUAGES}/en.ts)
 
     # Compile TS files to QM files
     qt_add_translation(LANGUAGES_QM ${LANGUAGES_TS})
@@ -349,7 +349,7 @@ else()
     set(LANGUAGES)
 endif()
 
-target_sources(yuzu
+target_sources(volt
     PRIVATE
         ${COMPAT_LIST}
         ${ICONS}
@@ -376,10 +376,10 @@ if (APPLE)
 
     set_source_files_properties(${_icons} PROPERTIES
         MACOSX_PACKAGE_LOCATION Resources)
-    target_sources(yuzu PRIVATE ${_icons})
+    target_sources(volt PRIVATE ${_icons})
 
-    set_target_properties(yuzu PROPERTIES MACOSX_BUNDLE TRUE)
-    set_target_properties(yuzu PROPERTIES MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/Info.plist)
+    set_target_properties(volt PROPERTIES MACOSX_BUNDLE TRUE)
+    set_target_properties(volt PROPERTIES MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/Info.plist)
 
     set(CMAKE_FIND_LIBRARY_SUFFIXES ".dylib")
     find_library(MOLTENVK_LIBRARY MoltenVK REQUIRED)
@@ -388,69 +388,69 @@ if (APPLE)
     set_source_files_properties(${MOLTENVK_LIBRARY} PROPERTIES
         MACOSX_PACKAGE_LOCATION Frameworks
         XCODE_FILE_ATTRIBUTES "CodeSignOnCopy")
-    target_sources(yuzu PRIVATE ${MOLTENVK_LIBRARY})
+    target_sources(volt PRIVATE ${MOLTENVK_LIBRARY})
 elseif(WIN32)
     # compile as a win32 gui application instead of a console application
-    target_link_libraries(yuzu PRIVATE Qt6::EntryPointPrivate)
+    target_link_libraries(volt PRIVATE Qt6::EntryPointPrivate)
     if(MSVC)
-        target_link_libraries(yuzu PRIVATE version.lib)
-        set_target_properties(yuzu PROPERTIES LINK_FLAGS_RELEASE "/SUBSYSTEM:WINDOWS")
+        target_link_libraries(volt PRIVATE version.lib)
+        set_target_properties(volt PROPERTIES LINK_FLAGS_RELEASE "/SUBSYSTEM:WINDOWS")
     elseif(MINGW)
-        set_target_properties(yuzu PROPERTIES LINK_FLAGS_RELEASE "-Wl,--subsystem,windows")
-        target_link_libraries(yuzu PRIVATE dwmapi)
+        set_target_properties(volt PROPERTIES LINK_FLAGS_RELEASE "-Wl,--subsystem,windows")
+        target_link_libraries(volt PRIVATE dwmapi)
     endif()
 endif()
 
-target_link_libraries(yuzu PRIVATE nlohmann_json::nlohmann_json)
-target_link_libraries(yuzu PRIVATE common core input_common frontend_common network video_core qt_common)
-target_link_libraries(yuzu PRIVATE Boost::headers Qt6::Widgets Qt6::Charts Qt6::Concurrent)
-target_link_libraries(yuzu PRIVATE ${PLATFORM_LIBRARIES} Threads::Threads)
+target_link_libraries(volt PRIVATE nlohmann_json::nlohmann_json)
+target_link_libraries(volt PRIVATE common core input_common frontend_common network video_core qt_common)
+target_link_libraries(volt PRIVATE Boost::headers Qt6::Widgets Qt6::Charts Qt6::Concurrent)
+target_link_libraries(volt PRIVATE ${PLATFORM_LIBRARIES} Threads::Threads)
 if (ENABLE_OPENGL)
-    target_link_libraries(yuzu PRIVATE glad)
+    target_link_libraries(volt PRIVATE glad)
 endif()
 
 if (UNIX AND NOT APPLE)
-    target_link_libraries(yuzu PRIVATE Qt6::DBus)
+    target_link_libraries(volt PRIVATE Qt6::DBus)
 endif()
 
-if (YUZU_ENABLE_COMPATIBILITY_REPORTING)
-    target_compile_definitions(yuzu PRIVATE YUZU_ENABLE_COMPATIBILITY_REPORTING)
+if (VOLT_ENABLE_COMPATIBILITY_REPORTING)
+    target_compile_definitions(volt PRIVATE VOLT_ENABLE_COMPATIBILITY_REPORTING)
 endif()
 
 if (ENABLE_WEB_SERVICE)
-    target_compile_definitions(yuzu PRIVATE ENABLE_WEB_SERVICE)
+    target_compile_definitions(volt PRIVATE ENABLE_WEB_SERVICE)
 endif()
 
-if (YUZU_USE_QT_MULTIMEDIA)
-    target_link_libraries(yuzu PRIVATE Qt6::Multimedia)
-    target_compile_definitions(yuzu PRIVATE YUZU_USE_QT_MULTIMEDIA)
+if (VOLT_USE_QT_MULTIMEDIA)
+    target_link_libraries(volt PRIVATE Qt6::Multimedia)
+    target_compile_definitions(volt PRIVATE VOLT_USE_QT_MULTIMEDIA)
 endif ()
 
-if (YUZU_USE_QT_WEB_ENGINE)
-    target_link_libraries(yuzu PRIVATE Qt6::WebEngineCore Qt6::WebEngineWidgets)
-    target_compile_definitions(yuzu PRIVATE YUZU_USE_QT_WEB_ENGINE)
+if (VOLT_USE_QT_WEB_ENGINE)
+    target_link_libraries(volt PRIVATE Qt6::WebEngineCore Qt6::WebEngineWidgets)
+    target_compile_definitions(volt PRIVATE VOLT_USE_QT_WEB_ENGINE)
 endif ()
 
 if(UNIX AND NOT APPLE)
-    install(TARGETS yuzu)
+    install(TARGETS volt)
 endif()
 
-if (WIN32 AND NOT YUZU_USE_BUNDLED_QT)
-    set(YUZU_EXE_DIR "$<TARGET_FILE_DIR:yuzu>")
-    add_custom_command(TARGET yuzu POST_BUILD COMMAND ${WINDEPLOYQT_EXECUTABLE} "${YUZU_EXE_DIR}/eden.exe" --dir "${YUZU_EXE_DIR}" --libdir "${YUZU_EXE_DIR}" --plugindir "${YUZU_EXE_DIR}/plugins" --no-compiler-runtime --no-opengl-sw --no-system-d3d-compiler --no-translations --verbose 0)
+if (WIN32 AND NOT VOLT_USE_BUNDLED_QT)
+    set(VOLT_EXE_DIR "$<TARGET_FILE_DIR:volt>")
+    add_custom_command(TARGET volt POST_BUILD COMMAND ${WINDEPLOYQT_EXECUTABLE} "${VOLT_EXE_DIR}/volt.exe" --dir "${VOLT_EXE_DIR}" --libdir "${VOLT_EXE_DIR}" --plugindir "${VOLT_EXE_DIR}/plugins" --no-compiler-runtime --no-opengl-sw --no-system-d3d-compiler --no-translations --verbose 0)
 endif()
 
 if (ARCHITECTURE_x86_64 OR ARCHITECTURE_arm64)
-    target_link_libraries(yuzu PRIVATE dynarmic::dynarmic)
+    target_link_libraries(volt PRIVATE dynarmic::dynarmic)
 endif()
 
-if (YUZU_ROOM)
-    target_link_libraries(yuzu PRIVATE yuzu-room)
+if (VOLT_ROOM)
+    target_link_libraries(volt PRIVATE volt-room)
 endif()
 
-if (NOT MSVC AND (APPLE OR NOT YUZU_STATIC_BUILD))
+if (NOT MSVC AND (APPLE OR NOT VOLT_STATIC_BUILD))
     # needed for vma
-    target_compile_options(yuzu PRIVATE
+    target_compile_options(volt PRIVATE
         $<$<COMPILE_LANGUAGE:C,CXX>:-Wno-conversion>
         $<$<COMPILE_LANGUAGE:C,CXX>:-Wno-unused-variable>
         $<$<COMPILE_LANGUAGE:C,CXX>:-Wno-unused-parameter>
@@ -458,6 +458,6 @@ if (NOT MSVC AND (APPLE OR NOT YUZU_STATIC_BUILD))
 endif()
 
 # Remember that the linker is incredibly stupid.
-target_link_libraries(yuzu PRIVATE OpenSSL::SSL OpenSSL::Crypto SDL3::SDL3)
+target_link_libraries(volt PRIVATE OpenSSL::SSL OpenSSL::Crypto SDL3::SDL3)
 
-create_target_directory_groups(yuzu)
+create_target_directory_groups(volt)

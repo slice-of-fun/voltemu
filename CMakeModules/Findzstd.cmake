@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: Copyright 2025 Eden Emulator Project
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-# SPDX-FileCopyrightText: 2022 yuzu Emulator Project
+# SPDX-FileCopyrightText: 2022 volt Emulator Project
 # SPDX-License-Identifier: GPL-2.0-or-later
 
 include(FindPackageHandleStandardArgs)
@@ -18,7 +18,7 @@ else()
 endif()
 
 if (zstd_FOUND AND NOT TARGET zstd::zstd)
-    if (TARGET zstd::libzstd_shared AND NOT YUZU_STATIC_BUILD)
+    if (TARGET zstd::libzstd_shared AND NOT VOLT_STATIC_BUILD)
         add_library(zstd::zstd ALIAS zstd::libzstd_shared)
     elseif (TARGET zstd::libzstd_static)
         add_library(zstd::zstd ALIAS zstd::libzstd_static)
@@ -35,7 +35,7 @@ if (NOT TARGET zstd::libzstd)
     else()
         add_library(zstd::libzstd ALIAS zstd::zstd)
     endif()
-elseif(YUZU_STATIC_BUILD AND TARGET zstd::libzstd_static)
+elseif(VOLT_STATIC_BUILD AND TARGET zstd::libzstd_static)
     # zstd::libzstd links to shared zstd by default
     set_target_properties(zstd::libzstd PROPERTIES INTERFACE_LINK_LIBRARIES zstd::libzstd_static)
 endif()

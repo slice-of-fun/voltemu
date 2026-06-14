@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-# SPDX-FileCopyrightText: 2018 yuzu Emulator Project
+# SPDX-FileCopyrightText: 2018 volt Emulator Project
 # SPDX-License-Identifier: GPL-2.0-or-later
 
 # Credits to Samantas5855 and others for this function.
@@ -24,7 +24,7 @@ else()
     set(OPENGL_SOURCES "")
 endif()
 
-add_executable(yuzu-cmd
+add_executable(volt-cmd
     emu_window/emu_window_sdl3.cpp
     emu_window/emu_window_sdl3.h
     emu_window/emu_window_sdl3_null.cpp
@@ -33,43 +33,43 @@ add_executable(yuzu-cmd
     emu_window/emu_window_sdl3_vk.h
     sdl_config.cpp
     sdl_config.h
-    yuzu.cpp
-    yuzu.rc
+    volt.cpp
+    volt.rc
     ${OPENGL_SOURCES}
 )
 
-target_link_libraries(yuzu-cmd PRIVATE common core input_common frontend_common video_core)
+target_link_libraries(volt-cmd PRIVATE common core input_common frontend_common video_core)
 if (ENABLE_OPENGL)
-    target_link_libraries(yuzu-cmd PRIVATE glad)
+    target_link_libraries(volt-cmd PRIVATE glad)
 endif()
 if (MSVC)
-    target_link_libraries(yuzu-cmd PRIVATE getopt)
+    target_link_libraries(volt-cmd PRIVATE getopt)
 endif()
-target_link_libraries(yuzu-cmd PRIVATE ${PLATFORM_LIBRARIES} Threads::Threads)
+target_link_libraries(volt-cmd PRIVATE ${PLATFORM_LIBRARIES} Threads::Threads)
 
-create_resource("../../dist/eden.bmp" "yuzu_cmd/yuzu_icon.h" "yuzu_icon")
-target_include_directories(yuzu-cmd PRIVATE ${RESOURCES_DIR})
+create_resource("../../dist/eden.bmp" "volt_cmd/volt_icon.h" "volt_icon")
+target_include_directories(volt-cmd PRIVATE ${RESOURCES_DIR})
 
-target_link_libraries(yuzu-cmd PRIVATE SDL3::SDL3)
+target_link_libraries(volt-cmd PRIVATE SDL3::SDL3)
 
 if(UNIX AND NOT APPLE)
-    install(TARGETS yuzu-cmd)
+    install(TARGETS volt-cmd)
 endif()
 
 if(WIN32)
     # compile as a win32 gui application instead of a console application
     if(MSVC)
-        set_target_properties(yuzu-cmd PROPERTIES LINK_FLAGS_RELEASE "/SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup")
+        set_target_properties(volt-cmd PROPERTIES LINK_FLAGS_RELEASE "/SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup")
     elseif(MINGW)
-        set_target_properties(yuzu-cmd PROPERTIES LINK_FLAGS_RELEASE "-Wl,--subsystem,windows")
+        set_target_properties(volt-cmd PROPERTIES LINK_FLAGS_RELEASE "-Wl,--subsystem,windows")
     endif()
 endif()
 
-create_target_directory_groups(yuzu-cmd)
+create_target_directory_groups(volt-cmd)
 
 # needed for vma
 if (NOT MSVC)
-    target_compile_options(yuzu-cmd PRIVATE
+    target_compile_options(volt-cmd PRIVATE
         $<$<COMPILE_LANGUAGE:C,CXX>:-Wno-conversion>
         $<$<COMPILE_LANGUAGE:C,CXX>:-Wno-unused-variable>
         $<$<COMPILE_LANGUAGE:C,CXX>:-Wno-unused-parameter>

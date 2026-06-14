@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-# SPDX-FileCopyrightText: 2021 yuzu Emulator Project
+# SPDX-FileCopyrightText: 2021 volt Emulator Project
 # SPDX-License-Identifier: GPL-2.0-or-later
 
 # TODO(crueter, MaranBr): Externals FFmpeg 8.0
@@ -11,7 +11,7 @@ set(FFmpeg_HWACCEL_FLAGS)
 set(FFmpeg_HWACCEL_INCLUDE_DIRS)
 set(FFmpeg_HWACCEL_LDFLAGS)
 
-if (NOT YUZU_USE_BUNDLED_FFMPEG)
+if (NOT VOLT_USE_BUNDLED_FFMPEG)
     set(FFmpeg_CROSS_COMPILE_FLAGS "")
     if (ANDROID)
         # TODO: Maybe use CMAKE_SYSROOT? and probably provide a toolchain file for android
@@ -175,7 +175,7 @@ elseif (PLATFORM_MANAGARM)
     )
 endif()
 
-if (YUZU_USE_BUNDLED_FFMPEG)
+if (VOLT_USE_BUNDLED_FFMPEG)
     AddJsonPackage(ffmpeg-ci)
 
     set(FFmpeg_INCLUDE_DIR
@@ -245,7 +245,7 @@ else()
 
     find_program(BASH_PROGRAM bash REQUIRED)
 
-    # `configure` parameters builds only exactly what yuzu needs from FFmpeg
+    # `configure` parameters builds only exactly what volt needs from FFmpeg
     # `--disable-vdpau` is needed to avoid linking issues
     set(FFmpeg_CC ${CMAKE_C_COMPILER_LAUNCHER}  ${CMAKE_C_COMPILER})
     set(FFmpeg_CXX ${CMAKE_CXX_COMPILER_LAUNCHER}  ${CMAKE_CXX_COMPILER})

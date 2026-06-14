@@ -3,7 +3,7 @@
 
 cmake_minimum_required(VERSION 3.31)
 
-project(yuzu)
+project(volt)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules")
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/externals/cmake-modules")
@@ -43,14 +43,14 @@ if (PLATFORM_NETBSD)
     set(ENV{PKG_CONFIG_PATH} "${PKG_CONFIG_PATH}:${CMAKE_SYSROOT}/usr/pkg/lib/ffmpeg7/pkgconfig")
 endif()
 
-cmake_dependent_option(YUZU_STATIC_ROOM "Build a static room executable only (CI only)" OFF "PLATFORM_LINUX" OFF)
-if (YUZU_STATIC_ROOM)
-    set(YUZU_ROOM ON)
-    set(YUZU_ROOM_STANDALONE ON)
+cmake_dependent_option(VOLT_STATIC_ROOM "Build a static room executable only (CI only)" OFF "PLATFORM_LINUX" OFF)
+if (VOLT_STATIC_ROOM)
+    set(VOLT_ROOM ON)
+    set(VOLT_ROOM_STANDALONE ON)
 
     # disable e v e r y t h i n g
     set(ENABLE_QT OFF)
-    set(YUZU_CMD OFF)
+    set(VOLT_CMD OFF)
     set(ENABLE_CUBEB OFF)
     set(ENABLE_UPDATE_CHECKER OFF)
     set(USE_DISCORD_PRESENCE OFF)
@@ -71,24 +71,24 @@ endif()
 option(ENABLE_QT "Enable the Qt frontend" ON)
 option(ENABLE_QT_TRANSLATION "Enable translations for the Qt frontend" OFF)
 option(ENABLE_UPDATE_CHECKER "Enable update checker (for Qt and Android)" OFF)
-cmake_dependent_option(YUZU_USE_QT_MULTIMEDIA "Use QtMultimedia for Camera"  OFF "NOT YUZU_USE_BUNDLED_QT" OFF)
-cmake_dependent_option(YUZU_USE_QT_WEB_ENGINE "Use QtWebEngine for web applet implementation" OFF "NOT YUZU_USE_BUNDLED_QT" OFF)
-set(YUZU_QT_MIRROR "" CACHE STRING "What mirror to use for downloading the bundled Qt libraries")
-cmake_dependent_option(YUZU_USE_BUNDLED_QT "Download bundled Qt binaries" "${MSVC}" "ENABLE_QT" OFF)
+cmake_dependent_option(VOLT_USE_QT_MULTIMEDIA "Use QtMultimedia for Camera"  OFF "NOT VOLT_USE_BUNDLED_QT" OFF)
+cmake_dependent_option(VOLT_USE_QT_WEB_ENGINE "Use QtWebEngine for web applet implementation" OFF "NOT VOLT_USE_BUNDLED_QT" OFF)
+set(VOLT_QT_MIRROR "" CACHE STRING "What mirror to use for downloading the bundled Qt libraries")
+cmake_dependent_option(VOLT_USE_BUNDLED_QT "Download bundled Qt binaries" "${MSVC}" "ENABLE_QT" OFF)
 
 option(ENABLE_DEBUG_TOOLS "Enable debugging tools (maxwell disassembler, SPIRV translator, etc)" OFF)
 
 # non-linux bundled qt are static
-if (YUZU_USE_BUNDLED_QT AND (APPLE OR NOT UNIX))
-    set(YUZU_STATIC_BUILD ON)
+if (VOLT_USE_BUNDLED_QT AND (APPLE OR NOT UNIX))
+    set(VOLT_STATIC_BUILD ON)
 endif()
 
 # TODO: does mingw need any of this anymore
 # static stuff
-option(YUZU_STATIC_BUILD "Use static libraries and executables if available" OFF)
+option(VOLT_STATIC_BUILD "Use static libraries and executables if available" OFF)
 
 # TODO: StaticBuild.cmake
-if (YUZU_STATIC_BUILD)
+if (VOLT_STATIC_BUILD)
     # lol
     set(Boost_USE_STATIC_LIBS ON)
     set(BUILD_SHARED_LIBS OFF)
@@ -121,15 +121,15 @@ if (YUZU_STATIC_BUILD)
         # msys2 quazip does not build a static lib
         set(QuaZip-Qt6_FORCE_BUNDLED ON)
 
-        set(YUZU_USE_BUNDLED_FFMPEG ON)
-        set(YUZU_USE_BUNDLED_SDL3 ON)
-        set(YUZU_USE_BUNDLED_OPENSSL ON)
+        set(VOLT_USE_BUNDLED_FFMPEG ON)
+        set(VOLT_USE_BUNDLED_SDL3 ON)
+        set(VOLT_USE_BUNDLED_OPENSSL ON)
 
         set(HTTPLIB_USE_BROTLI_IF_AVAILABLE OFF)
     elseif(APPLE)
-        set(YUZU_USE_BUNDLED_FFMPEG ON)
-        set(YUZU_USE_BUNDLED_SDL3 ON)
-        set(YUZU_USE_BUNDLED_OPENSSL ON)
+        set(VOLT_USE_BUNDLED_FFMPEG ON)
+        set(VOLT_USE_BUNDLED_SDL3 ON)
+        set(VOLT_USE_BUNDLED_OPENSSL ON)
 
         # these libs do not properly provide static libs/let you do it with cmake
         set(fmt_FORCE_BUNDLED ON)
@@ -174,7 +174,7 @@ endif()
 
 # Set runtime library to MD/MDd for all configurations
 if(MSVC)
-    if (YUZU_USE_BUNDLED_QT AND ARCHITECTURE_arm64)
+    if (VOLT_USE_BUNDLED_QT AND ARCHITECTURE_arm64)
         set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
         set(libflag MT)
     else()
@@ -197,7 +197,7 @@ if(MSVC)
 endif()
 
 # TODO(crueter): Cleanup, each dep that has a bundled option should allow to choose between bundled, external, system
-cmake_dependent_option(YUZU_USE_BUNDLED_SDL3 "Download bundled SDL3 build" "${MSVC}" "NOT ANDROID" OFF)
+cmake_dependent_option(VOLT_USE_BUNDLED_SDL3 "Download bundled SDL3 build" "${MSVC}" "NOT ANDROID" OFF)
 
 option(ENABLE_CUBEB "Enables the cubeb audio backend" ON)
 
@@ -207,8 +207,8 @@ if (MSVC OR ANDROID)
 endif()
 
 # ffmpeg
-option(YUZU_USE_BUNDLED_FFMPEG "Download bundled FFmpeg" ${EXT_DEFAULT})
-cmake_dependent_option(YUZU_USE_EXTERNAL_FFMPEG "Build FFmpeg from external source" "${PLATFORM_SUN}" "NOT WIN32 AND NOT ANDROID" OFF)
+option(VOLT_USE_BUNDLED_FFMPEG "Download bundled FFmpeg" ${EXT_DEFAULT})
+cmake_dependent_option(VOLT_USE_EXTERNAL_FFMPEG "Build FFmpeg from external source" "${PLATFORM_SUN}" "NOT WIN32 AND NOT ANDROID" OFF)
 
 # sirit
 set(BUNDLED_SIRIT_DEFAULT OFF)
@@ -216,7 +216,7 @@ if (MSVC AND NOT (CMAKE_BUILD_TYPE MATCHES "Deb") OR ANDROID)
     set(BUNDLED_SIRIT_DEFAULT ON)
 endif()
 
-option(YUZU_USE_BUNDLED_SIRIT "Download bundled sirit" ${BUNDLED_SIRIT_DEFAULT})
+option(VOLT_USE_BUNDLED_SIRIT "Download bundled sirit" ${BUNDLED_SIRIT_DEFAULT})
 
 # FreeBSD 15+ has libusb, versions below should disable it
 cmake_dependent_option(ENABLE_LIBUSB "Enable the use of LibUSB" ON "WIN32 OR PLATFORM_LINUX OR PLATFORM_FREEBSD OR APPLE" OFF)
@@ -229,40 +229,40 @@ option(ENABLE_WIFI_SCAN "Enable WiFi scanning" OFF)
 
 cmake_dependent_option(USE_DISCORD_PRESENCE "Enables Discord Rich Presence" OFF "ENABLE_QT" OFF)
 
-option(YUZU_TESTS "Compile tests" "${BUILD_TESTING}")
+option(VOLT_TESTS "Compile tests" "${BUILD_TESTING}")
 
 # Install udev rules on Linux (mainly for gyros)
 # Only acts on joysticks and nothing else.
-cmake_dependent_option(YUZU_INSTALL_UDEV_RULES "Install udev rules for gyro access" OFF "PLATFORM_LINUX" OFF)
+cmake_dependent_option(VOLT_INSTALL_UDEV_RULES "Install udev rules for gyro access" OFF "PLATFORM_LINUX" OFF)
 
-option(YUZU_DOWNLOAD_ANDROID_VVL "Download validation layer binary for android" ON)
+option(VOLT_DOWNLOAD_ANDROID_VVL "Download validation layer binary for android" ON)
 
-option(YUZU_LEGACY "Apply patches that improve compatibility with older GPUs (e.g. Snapdragon 865) at the cost of performance" OFF)
+option(VOLT_LEGACY "Apply patches that improve compatibility with older GPUs (e.g. Snapdragon 865) at the cost of performance" OFF)
 
 option(NIGHTLY_BUILD "Use Nightly qualifiers in the update checker and build metadata" OFF)
 
-cmake_dependent_option(YUZU_ROOM "Enable dedicated room functionality" ON "NOT ANDROID" OFF)
-cmake_dependent_option(YUZU_ROOM_STANDALONE "Enable standalone room executable" ON "YUZU_ROOM" OFF)
+cmake_dependent_option(VOLT_ROOM "Enable dedicated room functionality" ON "NOT ANDROID" OFF)
+cmake_dependent_option(VOLT_ROOM_STANDALONE "Enable standalone room executable" ON "VOLT_ROOM" OFF)
 
-cmake_dependent_option(YUZU_CMD "Compile the eden-cli executable" ON "NOT ANDROID" OFF)
+cmake_dependent_option(VOLT_CMD "Compile the volt-cli executable" ON "NOT ANDROID" OFF)
 
-cmake_dependent_option(YUZU_CRASH_DUMPS "Compile crash dump (Minidump) support" OFF "WIN32 OR PLATFORM_LINUX" OFF)
+cmake_dependent_option(VOLT_CRASH_DUMPS "Compile crash dump (Minidump) support" OFF "WIN32 OR PLATFORM_LINUX" OFF)
 
-option(YUZU_DOWNLOAD_TIME_ZONE_DATA "Always download time zone binaries" ON)
-set(YUZU_TZDB_PATH "" CACHE STRING "Path to a pre-downloaded timezone database")
+option(VOLT_DOWNLOAD_TIME_ZONE_DATA "Always download time zone binaries" ON)
+set(VOLT_TZDB_PATH "" CACHE STRING "Path to a pre-downloaded timezone database")
 
-cmake_dependent_option(YUZU_USE_BUNDLED_MOLTENVK "Download bundled MoltenVK lib" ON "APPLE" OFF)
+cmake_dependent_option(VOLT_USE_BUNDLED_MOLTENVK "Download bundled MoltenVK lib" ON "APPLE" OFF)
 
-option(YUZU_DISABLE_LLVM "Disable LLVM (useful for CI)" OFF)
+option(VOLT_DISABLE_LLVM "Disable LLVM (useful for CI)" OFF)
 
-set(DEFAULT_YUZU_USE_BUNDLED_OPENSSL OFF)
+set(DEFAULT_VOLT_USE_BUNDLED_OPENSSL OFF)
 if (EXT_DEFAULT OR PLATFORM_SUN OR PLATFORM_OPENBSD)
-    set(DEFAULT_YUZU_USE_BUNDLED_OPENSSL ON)
+    set(DEFAULT_VOLT_USE_BUNDLED_OPENSSL ON)
 endif()
 
-option(YUZU_USE_BUNDLED_OPENSSL "Download bundled OpenSSL build" ${DEFAULT_YUZU_USE_BUNDLED_OPENSSL})
+option(VOLT_USE_BUNDLED_OPENSSL "Download bundled OpenSSL build" ${DEFAULT_VOLT_USE_BUNDLED_OPENSSL})
 
-if (ANDROID AND YUZU_DOWNLOAD_ANDROID_VVL)
+if (ANDROID AND VOLT_DOWNLOAD_ANDROID_VVL)
     AddJsonPackage(vulkan-validation-layers)
 
     set(abi ${CMAKE_ANDROID_ARCH_ABI})
@@ -303,8 +303,8 @@ if (ARCHITECTURE_arm64 AND (ANDROID OR PLATFORM_LINUX))
     add_compile_definitions(HAS_NCE=1)
 endif()
 
-if (YUZU_ROOM)
-    add_compile_definitions(YUZU_ROOM)
+if (VOLT_ROOM)
+    add_compile_definitions(VOLT_ROOM)
 endif()
 
 if (UNIX AND NOT (PLATFORM_LINUX OR WIN32))
@@ -325,34 +325,34 @@ if (CXX_GCC OR CXX_CLANG)
         # See https://gcc.gnu.org/onlinedocs/gcc/x86-Options.html
         # Generic supports Pentium Pro instruction set and above
         # TODO: if a value is unknown, pass that as march and mtune
-        set(YUZU_BUILD_PRESET "custom" CACHE STRING "Build preset to use. One of: custom, generic, v3, zen2, zen4, native")
+        set(VOLT_BUILD_PRESET "custom" CACHE STRING "Build preset to use. One of: custom, generic, v3, zen2, zen4, native")
 
-        if (${YUZU_BUILD_PRESET} STREQUAL "generic")
+        if (${VOLT_BUILD_PRESET} STREQUAL "generic")
             set(march x86-64)
             set(mtune generic)
-        elseif (${YUZU_BUILD_PRESET} STREQUAL "v3")
+        elseif (${VOLT_BUILD_PRESET} STREQUAL "v3")
             set(march x86-64-v3)
             set(mtune generic)
-        elseif (${YUZU_BUILD_PRESET} STREQUAL "zen2")
+        elseif (${VOLT_BUILD_PRESET} STREQUAL "zen2")
             set(march znver2)
             set(mtune znver2)
-        elseif (${YUZU_BUILD_PRESET} STREQUAL "zen4")
+        elseif (${VOLT_BUILD_PRESET} STREQUAL "zen4")
             set(march znver4)
             set(mtune znver4)
         endif()
     elseif(ARCHITECTURE_arm64)
         # See https://gcc.gnu.org/onlinedocs/gcc/AArch64-Options.html
-        set(YUZU_BUILD_PRESET "custom" CACHE STRING "Build preset to use. One of: custom, generic, armv9, native")
+        set(VOLT_BUILD_PRESET "custom" CACHE STRING "Build preset to use. One of: custom, generic, armv9, native")
         set(mtune generic)
 
-        if (${YUZU_BUILD_PRESET} STREQUAL "generic")
+        if (${VOLT_BUILD_PRESET} STREQUAL "generic")
             set(march armv8-a)
-        elseif (${YUZU_BUILD_PRESET} STREQUAL "armv9")
+        elseif (${VOLT_BUILD_PRESET} STREQUAL "armv9")
             set(march armv9-a)
         endif()
     endif()
 
-    if ("${YUZU_BUILD_PRESET}" STREQUAL "native")
+    if ("${VOLT_BUILD_PRESET}" STREQUAL "native")
         set(march native)
         set(mtune native)
     endif()
@@ -382,7 +382,7 @@ find_package(Threads REQUIRED)
 find_package(RenderDoc MODULE)
 
 # openssl funniness
-if (YUZU_USE_BUNDLED_OPENSSL)
+if (VOLT_USE_BUNDLED_OPENSSL)
     set(BUILD_SHARED_LIBS OFF)
     AddJsonPackage(openssl-ci)
 else()
@@ -396,7 +396,7 @@ else()
 endif()
 
 if (OpenSSL_ADDED)
-    add_compile_definitions(YUZU_BUNDLED_OPENSSL)
+    add_compile_definitions(VOLT_BUNDLED_OPENSSL)
 endif()
 
 message(STATUS "Fetching needed dependencies with CPM")
@@ -416,7 +416,7 @@ set(BOOST_NO_HEADERS ${Boost_ADDED})
 
 if (Boost_ADDED)
     if (MSVC OR ANDROID)
-        add_compile_definitions(YUZU_BOOST_v1)
+        add_compile_definitions(VOLT_BOOST_v1)
     endif()
 
     if (NOT MSVC OR CXX_CLANG)
@@ -455,7 +455,7 @@ endif()
 # nlohmann
 AddJsonPackage(nlohmann)
 
-if (NOT YUZU_STATIC_ROOM)
+if (NOT VOLT_STATIC_ROOM)
     # zlib
     AddJsonPackage(zlib)
 
@@ -547,7 +547,7 @@ if (ARCHITECTURE_x86 OR ARCHITECTURE_x86_64)
     find_package(xbyak)
 endif()
 
-if (NOT YUZU_STATIC_ROOM)
+if (NOT VOLT_STATIC_ROOM)
     find_package(libusb)
     find_package(VulkanMemoryAllocator)
     find_package(VulkanUtilityLibraries)
@@ -580,14 +580,14 @@ if (NOT YUZU_STATIC_ROOM)
         find_package(cubeb)
     endif()
 
-    if (YUZU_TESTS OR DYNARMIC_TESTS)
+    if (VOLT_TESTS OR DYNARMIC_TESTS)
         find_package(Catch2)
     endif()
 endif()
 
 # Qt stuff
 if (ENABLE_QT)
-    if (YUZU_USE_BUNDLED_QT)
+    if (VOLT_USE_BUNDLED_QT)
         # Qt 6.8+ is broken on macOS (??)
         if (APPLE)
             AddQt(Eden-CI/Qt 6.7.3)
@@ -625,27 +625,27 @@ if (ENABLE_QT)
     ## Components ##
 
     # Best practice is to ask for all components at once, so they are from the same version
-    set(YUZU_QT_COMPONENTS Core Widgets Charts Concurrent Gui)
+    set(VOLT_QT_COMPONENTS Core Widgets Charts Concurrent Gui)
     if (PLATFORM_LINUX OR PLATFORM_FREEBSD)
-        list(APPEND YUZU_QT_COMPONENTS DBus)
+        list(APPEND VOLT_QT_COMPONENTS DBus)
         # yes Qt, we get it
         set(QT_NO_PRIVATE_MODULE_WARNING ON)
-        list(APPEND YUZU_QT_OPTIONAL GuiPrivate)
+        list(APPEND VOLT_QT_OPTIONAL GuiPrivate)
     endif()
 
-    if (YUZU_USE_QT_MULTIMEDIA)
-        list(APPEND YUZU_QT_COMPONENTS Multimedia)
+    if (VOLT_USE_QT_MULTIMEDIA)
+        list(APPEND VOLT_QT_COMPONENTS Multimedia)
     endif()
 
-    if (YUZU_USE_QT_WEB_ENGINE)
-        list(APPEND YUZU_QT_COMPONENTS WebEngineCore WebEngineWidgets)
+    if (VOLT_USE_QT_WEB_ENGINE)
+        list(APPEND VOLT_QT_COMPONENTS WebEngineCore WebEngineWidgets)
     endif()
 
     if (ENABLE_QT_TRANSLATION)
-        list(APPEND YUZU_QT_COMPONENTS LinguistTools)
+        list(APPEND VOLT_QT_COMPONENTS LinguistTools)
     endif()
 
-    find_package(Qt6 REQUIRED COMPONENTS ${YUZU_QT_COMPONENTS} OPTIONAL_COMPONENTS ${YUZU_QT_OPTIONAL})
+    find_package(Qt6 REQUIRED COMPONENTS ${VOLT_QT_COMPONENTS} OPTIONAL_COMPONENTS ${VOLT_QT_OPTIONAL})
     set(QT_MAJOR_VERSION 6)
     # Qt6 sets cxx_std_17 and we need to undo that
     set_target_properties(Qt6::Platform PROPERTIES INTERFACE_COMPILE_FEATURES "")
@@ -656,7 +656,7 @@ if (ENABLE_QT)
     AddJsonPackage(quazip)
 endif()
 
-if (NOT YUZU_STATIC_ROOM AND NOT (YUZU_USE_BUNDLED_FFMPEG OR YUZU_USE_EXTERNAL_FFMPEG))
+if (NOT VOLT_STATIC_ROOM AND NOT (VOLT_USE_BUNDLED_FFMPEG OR VOLT_USE_EXTERNAL_FFMPEG))
     # Use system installed FFmpeg
     find_package(FFmpeg REQUIRED QUIET COMPONENTS ${FFmpeg_COMPONENTS})
 
@@ -666,8 +666,8 @@ if (NOT YUZU_STATIC_ROOM AND NOT (YUZU_USE_BUNDLED_FFMPEG OR YUZU_USE_EXTERNAL_F
     set_property(GLOBAL APPEND PROPERTY CPM_PACKAGE_URLS "https://github.com/FFmpeg/FFmpeg")
 endif()
 
-if (WIN32 AND YUZU_CRASH_DUMPS)
-    message(STATUS "YUZU_CRASH_DUMPS is unimplemented on Windows. Check back later.")
+if (WIN32 AND VOLT_CRASH_DUMPS)
+    message(STATUS "VOLT_CRASH_DUMPS is unimplemented on Windows. Check back later.")
     # set(BREAKPAD_VER "breakpad-c89f9dd")
     # download_bundled_external("breakpad/" ${BREAKPAD_VER} "breakpad-win" BREAKPAD_PREFIX "c89f9dd")
 
@@ -719,11 +719,11 @@ if (ENABLE_DEBUG_TOOLS)
     add_subdirectory(tools/maxwell-ir)
 endif()
 
-# Set yuzu project or yuzu-cmd project as default StartUp Project in Visual Studio depending on whether QT is enabled or not
+# Set volt project or volt-cmd project as default StartUp Project in Visual Studio depending on whether QT is enabled or not
 if(ENABLE_QT)
-    set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT yuzu)
+    set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT volt)
 else()
-    set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT yuzu-cmd)
+    set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT volt-cmd)
 endif()
 
 # Installation instructions
@@ -737,19 +737,19 @@ endif()
 
 # TODO: Icon/install handling n such should be put into dist/CMakeLists.txt
 if(ENABLE_QT AND UNIX AND NOT APPLE)
-    install(FILES "dist/dev.eden_emu.eden.desktop"
+    install(FILES "dist/dev.volt_emu.volt.desktop"
         DESTINATION "share/applications")
-    install(FILES "dist/dev.eden_emu.eden.svg"
+    install(FILES "dist/dev.volt_emu.volt.svg"
         DESTINATION "share/icons/hicolor/scalable/apps")
 
     # TODO: these files need to be updated.
-    install(FILES "dist/dev.eden_emu.eden.xml"
+    install(FILES "dist/dev.volt_emu.volt.xml"
         DESTINATION "share/mime/packages")
-    install(FILES "dist/dev.eden_emu.eden.metainfo.xml"
+    install(FILES "dist/dev.volt_emu.volt.metainfo.xml"
         DESTINATION "share/metainfo")
 endif()
 
-if (YUZU_INSTALL_UDEV_RULES)
+if (VOLT_INSTALL_UDEV_RULES)
     include(GNUInstallDirs)
 
     install(FILES "dist/72-eden-input.rules"
