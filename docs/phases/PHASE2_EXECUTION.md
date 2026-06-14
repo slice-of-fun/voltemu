@@ -1,0 +1,86 @@
+# Phase 2 — Codebase Cleanup Execution
+
+This document tracks the execution of **Phase 2: Codebase Cleanup** as defined in the project `ROADMAP.md`. 
+
+The goal is to improve maintainability, readability, and architectural quality without altering emulation behavior. Due to the scale of the codebase, this phase is executed in iterative steps.
+
+## Progress Overview
+
+- [ ] Step 1: Code Quality & Formatting
+- [ ] Step 2: Dead Code Removal
+- [ ] Step 3: Module Boundaries & Dependencies
+- [ ] Step 4: Documentation & Testing
+
+---
+
+## Step 1: Code Quality & Formatting (Quick Wins)
+
+**Objective:** Standardize code style and naming conventions across the project.
+
+### 1.1 clang-format
+- [ ] Verify `.clang-format` rules are present and correct.
+- [ ] Run `clang-format` across `src/` to enforce consistent style.
+- [ ] Fix any manual formatting issues that `clang-format` struggles with.
+
+### 1.2 Naming Conventions
+- [ ] Ensure all file names use `snake_case`.
+- [ ] Ensure all class/struct names use `PascalCase`.
+- [ ] Standardize constants to `UPPER_SNAKE_CASE`.
+
+### 1.3 Modern C++ Idioms
+- [ ] Replace raw `#define` constants with `constexpr`.
+- [ ] Replace `typedef` with `using` in core headers.
+
+---
+
+## Step 2: Dead Code Removal
+
+**Objective:** Prune unused and unreachable code to reduce compilation times and cognitive load.
+
+### 2.1 Unreachable Code
+- [ ] Identify and remove dead code paths using static analysis.
+
+### 2.2 Deprecations
+- [ ] Remove Yuzu/Eden legacy compatibility shims.
+- [ ] Remove commented-out code blocks older than 6 months.
+
+### 2.3 Build & Localization Cleanup
+- [ ] Remove unused CMake options and variables.
+- [ ] Prune unused localization translation strings.
+
+---
+
+## Step 3: Module Boundaries & Dependencies
+
+**Objective:** Clean up architectural coupling between core components.
+
+### 3.1 Include Reductions
+- [ ] Audit and remove unnecessary `#include` directives.
+- [ ] Resolve circular dependencies.
+- [ ] Move implementation details from headers (`.h`) to source files (`.cpp`).
+
+### 3.2 Public API Boundaries
+- [ ] Define strict public APIs for `core`, `video_core`, and `audio_core`.
+- [ ] Introduce interface headers where appropriate.
+
+---
+
+## Step 4: Documentation & Testing
+
+**Objective:** Ensure all systems are well documented and have foundational test coverage.
+
+### 4.1 Subsystem Documentation
+- [ ] Write `README.md` for `src/core/`.
+- [ ] Write `README.md` for `src/video_core/`.
+- [ ] Write `README.md` for `src/audio_core/`.
+- [ ] Write `README.md` for `src/input_common/`.
+- [ ] Add Doxygen blocks to all major public headers.
+
+### 4.2 Unit Tests
+- [ ] Audit existing `tests/` coverage.
+- [ ] Add unit tests for untested utilities in `src/common/`.
+- [ ] Set up code coverage reporting scripts.
+
+---
+
+*This document will be updated as work progresses.*
