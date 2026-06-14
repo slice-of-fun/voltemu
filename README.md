@@ -1,6 +1,6 @@
 <h1 align="center">
   <br>
-  <a href="https://github.com/pushkarverse/volt-emu"><img src="./dist/volt_logo.png" alt="Volt Emulator" width="200"></a>
+  <a href="https://github.com/pushkarverse/volt-emu"><img src="./dist/dev.volt_emu.volt.svg" alt="Volt Emulator" width="200"></a>
   <br>
   <b>Volt Emulator</b>
   <br>
