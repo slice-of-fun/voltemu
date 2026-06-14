@@ -18,9 +18,15 @@ The goal is to improve maintainability, readability, and architectural quality w
 **Objective:** Standardize code style and naming conventions across the project.
 
 ### 1.1 clang-format
-- [ ] Verify `.clang-format` rules are present and correct.
-- [ ] Run `clang-format` across `src/` to enforce consistent style.
-- [ ] Fix any manual formatting issues that `clang-format` struggles with.
+- [x] Verify `.clang-format` rules are present and correct.
+- [x] Run `clang-format` across `src/` to enforce consistent style.
+- [x] Fix any manual formatting issues that `clang-format` struggles with.
+
+> Done in commits `style(format): consolidate clang-format config to repo root`
+> and `style(format): apply clang-format across src/`. Root `.clang-format` is now
+> the single source of truth; legacy `src/.clang-format` removed; vendored
+> `src/dynarmic/` excluded. CI pinned to clang-format 14. All SPDX/license headers
+> verified intact (7451 → 7451). Result is idempotent (`--dry-run --Werror` passes).
 
 ### 1.2 Naming Conventions
 - [ ] Ensure all file names use `snake_case`.
