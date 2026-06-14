@@ -1,33 +1,27 @@
-<!--
-# SPDX-FileCopyrightText: Copyright 2025 Eden Emulator Project
-# SPDX-License-Identifier: GPL-3.0-or-later
-
-# SPDX-FileCopyrightText: 2018 yuzu Emulator Project
-# SPDX-License-Identifier: GPL-2.0-or-later
--->
-<!-- lang: en-GB -->
-
 <h1 align="center">
   <br>
-  <a href="https://git.eden-emu.dev/eden-emu/eden"><img src="./dist/qt_themes/default/icons/256x256/eden.png" alt="Eden" width="200"></a>
+  <a href="https://github.com/pushkarverse/volt-emu"><img src="./dist/volt_logo.png" alt="Volt Emulator" width="200"></a>
   <br>
-  <b>Eden</b>
+  <b>Volt Emulator</b>
   <br>
 </h1>
 
-<h4 align="center"><b>Eden</b> is a free and opensource (FOSS) Switch 1 emulator, derived from Yuzu and Sudachi - started by developer Camille LaVey.
-It's written in C++ with portability in mind, with builds for Windows, Linux, macOS, Android, FreeBSD and more.
+<h4 align="center"><b>Volt Emulator</b> is a free and open-source (FOSS) Nintendo Switch emulator, derived from Eden, Sudachi, and Yuzu.
+It is written in C++ with portability in mind, with builds for Windows, Linux, Android, and more.
 </h4>
 
 <p align="center">
+    <a href="https://github.com/pushkarverse/volt-emu/releases">
+        <img src="https://img.shields.io/github/v/release/pushkarverse/volt-emu?color=5865F2&label=Latest%20Release&logo=github"
+            alt="Latest Release">
     </a>
-    <a href="https://discord.gg/HstXbPch7X">
-        <img src="https://img.shields.io/discord/1367654015269339267?color=5865F2&label=Eden&logo=discord&logoColor=white"
-            alt="Discord">
+    <a href="https://github.com/pushkarverse/volt-emu/issues">
+        <img src="https://img.shields.io/github/issues/pushkarverse/volt-emu?color=orange&label=Issues&logo=github"
+            alt="Issues">
     </a>
-    <a href="https://stt.gg/qKgFEAbH">
-        <img src="https://img.shields.io/revolt/invite/qKgFEAbH?color=d61f3a&label=Stoat"
-            alt="Stoat">
+    <a href="https://github.com/pushkarverse/volt-emu/blob/dev/LICENSE.txt">
+        <img src="https://img.shields.io/badge/License-GPL--3.0-blue.svg"
+            alt="License: GPL-3.0">
     </a>
 </p>
 
@@ -36,60 +30,54 @@ It's written in C++ with portability in mind, with builds for Windows, Linux, ma
   <a href="#development">Development</a> |
   <a href="#building">Building</a> |
   <a href="#download">Download</a> |
-  <a href="#support">Support</a> |
+  <a href="#attribution">Attribution</a> |
   <a href="#license">License</a>
 </p>
 
 ## Compatibility
 
-The emulator is capable of running most commercial games at full speed, provided you meet the necessary hardware requirements.
+Volt Emulator is capable of running most commercial Nintendo Switch games at full speed, provided you meet the necessary hardware requirements.
 
-A list of supported games will be available in future. Please be patient.
-
-Check out our [website](https://eden-emu.dev) for the latest news on exciting features, monthly progress reports, and more!
-
-[![Packaging status](https://repology.org/badge/vertical-allrepos/eden-emulator.svg)](https://repology.org/project/eden-emulator/versions)
+A compatibility list will be available in a future update. For now, games that work on Eden are expected to work on Volt Emulator as well.
 
 ## Development
 
-Most of the development happens on our Git server. It is also where [our central repository](https://git.eden-emu.dev/eden-emu/eden) is hosted. For development discussions, please join us on [Discord](https://discord.gg/HstXbPch7X) or [Stoat](https://stt.gg/qKgFEAbH).
-You can also follow us on [X (Twitter)](https://nitter.poast.org/edenemuofficial) for updates and announcements.
+Development takes place on [GitHub](https://github.com/pushkarverse/volt-emu). For discussions, issues, and contributions, please use the GitHub repository.
 
-If you would like to contribute, we are open to new developers and pull requests. Please ensure that your work is of a high standard and properly documented. You can also contact any of the developers on Discord or Stoat to learn more about the current state of the emulator.
-
-See the [sign-up instructions](docs/SIGNUP.md) for information on registration.
-
-Alternatively, if you wish to add translations, go to the [Eden project on Transifex](https://app.transifex.com/edenemu/eden-emulator) and review [the translations README](./dist/languages).
+If you would like to contribute, please read [`CONTRIBUTING.md`](CONTRIBUTING.md) and [`docs/standards/CODING_STANDARDS.md`](docs/standards/CODING_STANDARDS.md) before submitting a pull request.
 
 ## Documentation
 
-We have a user manual! See our [User Handbook](./docs/user/README.md).
+- [Setup Guide](docs/SETUP.md) — How to install and configure Volt Emulator
+- [Building](docs/BUILDING.md) — How to build from source
+- [Architecture](docs/architecture/ARCHITECTURE.md) — Project structure overview
+- [Roadmap](docs/phases/ROADMAP.md) — Development roadmap
+- [Configuration](docs/CONFIGURATION.md) — Settings and options reference
 
 ## Building
 
-See the [General Build Guide](docs/Build.md)
+See the [Building Guide](docs/BUILDING.md) for platform-specific instructions (Windows, Linux, Android).
 
-For information on provided development tooling, see the [Tools directory](./tools)
+For information on provided development tooling, see the [Tools directory](./tools).
 
 ## Download
 
-You can download the latest releases from [here](https://git.eden-emu.dev/eden-emu/eden/releases).
+You can download the latest releases from the [Releases page](https://github.com/pushkarverse/volt-emu/releases).
 
-Save us some bandwidth! We have [mirrors available](./docs/user/ThirdParty.md#mirrors) as well.
+## Attribution
 
-## Support
+Volt Emulator is built on the foundational work of:
 
-If you enjoy the project and would like to support us financially, please check out our developers' [donation pages](https://eden-emu.dev/donations)!
+- **[Eden](https://git.eden-emu.dev/eden-emu/eden)** — Direct upstream fork
+- **[Sudachi](https://github.com/sudachi-emu/sudachi)** — Eden's upstream
+- **[Yuzu](https://github.com/yuzu-emu/yuzu)** — Original Nintendo Switch emulator (archived)
+- **[Dynarmic](https://github.com/merryhime/dynarmic)** — ARM JIT recompiler
+- All third-party library authors listed in [`docs/legal/THIRD_PARTY_LICENSES.md`](docs/legal/THIRD_PARTY_LICENSES.md)
 
-Any donations received will go towards things such as:
-* Switch consoles to explore and reverse-engineer the hardware
-* Switch games for testing, reverse-engineering, and implementing new features
-* Web hosting and infrastructure setup
-* Additional hardware (e.g. GPUs as needed to improve rendering support, other peripherals to add support for, etc.)
-* CI Infrastructure
-
-If you would prefer to support us in a different way, please join our [Discord](https://discord.gg/HstXbPch7X) and talk to Camille or any of our other developers.
+Full upstream attribution is documented in [`ATTRIBUTION.md`](ATTRIBUTION.md).
 
 ## License
 
-Eden is licensed under the GPLv3 (or any later version). Refer to the [LICENSE.txt](https://git.eden-emu.dev/eden-emu/eden/src/branch/master/LICENSE.txt) file.
+Volt Emulator is licensed under the **GPL-3.0-or-later**. Refer to the [LICENSE.txt](LICENSE.txt) file.
+
+All upstream copyright notices and license headers are preserved in full as required by the GPL.
