@@ -18,12 +18,12 @@ namespace AudioCore::Sink {
 class NullSinkStreamImpl final : public SinkStream {
 public:
     explicit NullSinkStreamImpl(Core::System& system_, StreamType type_)
-        : SinkStream{system_, type_} {}
+        : SinkStream{system_, type_}
+    {
+    }
     ~NullSinkStreamImpl() override {}
     void AppendBuffer(SinkBuffer&, std::span<s16>) override {}
-    std::vector<s16> ReleaseBuffer(u64) override {
-        return {};
-    }
+    std::vector<s16> ReleaseBuffer(u64) override { return {}; }
 };
 
 /**
@@ -35,7 +35,8 @@ public:
     ~NullSink() override = default;
 
     SinkStream* AcquireSinkStream(Core::System& system, u32, const std::string&,
-                                  StreamType type) override {
+                                  StreamType type) override
+    {
         if (null_sink == nullptr) {
             null_sink = std::make_unique<NullSinkStreamImpl>(system, type);
         }
@@ -44,9 +45,7 @@ public:
 
     void CloseStream(SinkStream*) override {}
     void CloseStreams() override {}
-    f32 GetDeviceVolume() const override {
-        return 1.0f;
-    }
+    f32 GetDeviceVolume() const override { return 1.0f; }
     void SetDeviceVolume(f32 volume) override {}
     void SetSystemVolume(f32 volume) override {}
 

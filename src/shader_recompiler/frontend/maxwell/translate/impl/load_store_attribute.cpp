@@ -29,7 +29,8 @@ enum class SampleMode : u64 {
     Offset,
 };
 
-u32 NumElements(Size size) {
+u32 NumElements(Size size)
+{
     switch (size) {
     case Size::B32:
         return 1;
@@ -43,8 +44,9 @@ u32 NumElements(Size size) {
     throw InvalidArgument("Invalid size {}", size);
 }
 
-template <typename F>
-void HandleIndexed(TranslatorVisitor& v, IR::Reg index_reg, u32 num_elements, F&& f) {
+template<typename F>
+void HandleIndexed(TranslatorVisitor& v, IR::Reg index_reg, u32 num_elements, F&& f)
+{
     const IR::U32 index_value{v.X(index_reg)};
     for (u32 element = 0; element < num_elements; ++element) {
         const IR::U32 final_offset{
@@ -55,7 +57,8 @@ void HandleIndexed(TranslatorVisitor& v, IR::Reg index_reg, u32 num_elements, F&
 
 } // Anonymous namespace
 
-void TranslatorVisitor::ALD(u64 insn) {
+void TranslatorVisitor::ALD(u64 insn)
+{
     union {
         u64 raw;
         BitField<0, 8, IR::Reg> dest_reg;
@@ -94,7 +97,8 @@ void TranslatorVisitor::ALD(u64 insn) {
     });
 }
 
-void TranslatorVisitor::AST(u64 insn) {
+void TranslatorVisitor::AST(u64 insn)
+{
     union {
         u64 raw;
         BitField<0, 8, IR::Reg> src_reg;
@@ -135,7 +139,8 @@ void TranslatorVisitor::AST(u64 insn) {
     });
 }
 
-void TranslatorVisitor::IPA(u64 insn) {
+void TranslatorVisitor::IPA(u64 insn)
+{
     // IPA is the instruction used to read varyings from a fragment shader.
     // gl_FragCoord is mapped to the gl_Position attribute.
     // It yields unknown results when used outside of the fragment shader stage.

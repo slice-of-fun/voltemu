@@ -20,42 +20,56 @@ namespace Kernel {
 
 class KThread;
 
-template <typename T>
-concept KPriorityQueueAffinityMask = !
-std::is_reference_v<T>&& requires(T& t) {
-                             { t.GetAffinityMask() } -> std::convertible_to<u64>;
-                             { t.SetAffinityMask(0) };
+template<typename T>
+concept KPriorityQueueAffinityMask = !std::is_reference_v<T> && requires(T & t)
+{
+    {
+        t.GetAffinityMask()
+        } -> std::convertible_to<u64>;
+    {t.SetAffinityMask(0)};
 
-                             { t.GetAffinity(0) } -> std::same_as<bool>;
-                             { t.SetAffinity(0, false) };
-                             { t.SetAll() };
-                         };
+    {
+        t.GetAffinity(0)
+        } -> std::same_as<bool>;
+    {t.SetAffinity(0, false)};
+    {t.SetAll()};
+};
 
-template <typename T>
-concept KPriorityQueueMember = !
-std::is_reference_v<T>&& requires(T& t) {
-                             { typename T::QueueEntry() };
-                             { (typename T::QueueEntry()).Initialize() };
-                             { (typename T::QueueEntry()).SetPrev(std::addressof(t)) };
-                             { (typename T::QueueEntry()).SetNext(std::addressof(t)) };
-                             { (typename T::QueueEntry()).GetNext() } -> std::same_as<T*>;
-                             { (typename T::QueueEntry()).GetPrev() } -> std::same_as<T*>;
-                             {
-                                 t.GetPriorityQueueEntry(0)
-                                 } -> std::same_as<typename T::QueueEntry&>;
+template<typename T>
+concept KPriorityQueueMember = !std::is_reference_v<T> && requires(T & t)
+{
+    {typename T::QueueEntry()};
+    {(typename T::QueueEntry()).Initialize()};
+    {(typename T::QueueEntry()).SetPrev(std::addressof(t))};
+    {(typename T::QueueEntry()).SetNext(std::addressof(t))};
+    {
+        (typename T::QueueEntry()).GetNext()
+        } -> std::same_as<T*>;
+    {
+        (typename T::QueueEntry()).GetPrev()
+        } -> std::same_as<T*>;
+    {
+        t.GetPriorityQueueEntry(0)
+        } -> std::same_as<typename T::QueueEntry&>;
 
-                             { t.GetAffinityMask() };
-                             {
-                                 std::remove_cvref_t<decltype(t.GetAffinityMask())>()
-                                 } -> KPriorityQueueAffinityMask;
+    {t.GetAffinityMask()};
+    {
+        std::remove_cvref_t<decltype(t.GetAffinityMask())>()
+        } -> KPriorityQueueAffinityMask;
 
-                             { t.GetActiveCore() } -> std::convertible_to<s32>;
-                             { t.GetPriority() } -> std::convertible_to<s32>;
-                             { t.IsDummyThread() } -> std::convertible_to<bool>;
-                         };
+    {
+        t.GetActiveCore()
+        } -> std::convertible_to<s32>;
+    {
+        t.GetPriority()
+        } -> std::convertible_to<s32>;
+    {
+        t.IsDummyThread()
+        } -> std::convertible_to<bool>;
+};
 
-template <typename Member, size_t NumCores_, int LowestPriority, int HighestPriority>
-    requires KPriorityQueueMember<Member>
+template<typename Member, size_t NumCores_, int LowestPriority, int HighestPriority>
+requires KPriorityQueueMember<Member>
 class KPriorityQueue {
 public:
     using AffinityMaskType = std::remove_cv_t<
@@ -67,11 +81,13 @@ public:
     static constexpr size_t NumPriority = LowestPriority - HighestPriority + 1;
     static constexpr size_t NumCores = NumCores_;
 
-    static constexpr bool IsValidCore(s32 core) {
+    static constexpr bool IsValidCore(s32 core)
+    {
         return 0 <= core && core < static_cast<s32>(NumCores);
     }
 
-    static constexpr bool IsValidPriority(s32 priority) {
+    static constexpr bool IsValidPriority(s32 priority)
+    {
         return HighestPriority <= priority && priority <= LowestPriority + 1;
     }
 
@@ -84,13 +100,15 @@ public:
         std::array<Entry, NumCores> m_root{};
 
     public:
-        constexpr KPerCoreQueue() {
+        constexpr KPerCoreQueue()
+        {
             for (auto& per_core_root : m_root) {
                 per_core_root.Initialize();
             }
         }
 
-        constexpr bool PushBack(s32 core, Member* member) {
+        constexpr bool PushBack(s32 core, Member* member)
+        {
             // Get the entry associated with the member.
             Entry& member_entry = member->GetPriorityQueueEntry(core);
 
@@ -108,7 +126,8 @@ public:
             return tail == nullptr;
         }
 
-        constexpr bool PushFront(s32 core, Member* member) {
+        constexpr bool PushFront(s32 core, Member* member)
+        {
             // Get the entry associated with the member.
             Entry& member_entry = member->GetPriorityQueueEntry(core);
 
@@ -126,7 +145,8 @@ public:
             return (head == nullptr);
         }
 
-        constexpr bool Remove(s32 core, Member* member) {
+        constexpr bool Remove(s32 core, Member* member)
+        {
             // Get the entry associated with the member.
             Entry& member_entry = member->GetPriorityQueueEntry(core);
 
@@ -145,16 +165,15 @@ public:
             return (this->GetFront(core) == nullptr);
         }
 
-        constexpr Member* GetFront(s32 core) const {
-            return m_root[core].GetNext();
-        }
+        constexpr Member* GetFront(s32 core) const { return m_root[core].GetNext(); }
     };
 
     class KPriorityQueueImpl {
     public:
         constexpr KPriorityQueueImpl() = default;
 
-        constexpr void PushBack(s32 priority, s32 core, Member* member) {
+        constexpr void PushBack(s32 priority, s32 core, Member* member)
+        {
             ASSERT(IsValidCore(core));
             ASSERT(IsValidPriority(priority));
 
@@ -167,7 +186,8 @@ public:
             }
         }
 
-        constexpr void PushFront(s32 priority, s32 core, Member* member) {
+        constexpr void PushFront(s32 priority, s32 core, Member* member)
+        {
             ASSERT(IsValidCore(core));
             ASSERT(IsValidPriority(priority));
 
@@ -180,7 +200,8 @@ public:
             }
         }
 
-        constexpr void Remove(s32 priority, s32 core, Member* member) {
+        constexpr void Remove(s32 priority, s32 core, Member* member)
+        {
             ASSERT(IsValidCore(core));
             ASSERT(IsValidPriority(priority));
 
@@ -193,7 +214,8 @@ public:
             }
         }
 
-        constexpr Member* GetFront(s32 core) const {
+        constexpr Member* GetFront(s32 core) const
+        {
             ASSERT(IsValidCore(core));
 
             const s32 priority = s32([](auto const& e) {
@@ -209,7 +231,8 @@ public:
             }
         }
 
-        constexpr Member* GetFront(s32 priority, s32 core) const {
+        constexpr Member* GetFront(s32 priority, s32 core) const
+        {
             ASSERT(IsValidCore(core));
             ASSERT(IsValidPriority(priority));
 
@@ -220,15 +243,16 @@ public:
             }
         }
 
-        template<size_t N>
-        constexpr size_t GetNextSet(std::bitset<N> const& bit, size_t n) const {
+        template<size_t N> constexpr size_t GetNextSet(std::bitset<N> const& bit, size_t n) const
+        {
             for (size_t i = n + 1; i < bit.size(); i++)
                 if (bit[i])
                     return i;
             return bit.size();
         }
 
-        constexpr Member* GetNext(s32 core, const Member* member) const {
+        constexpr Member* GetNext(s32 core, const Member* member) const
+        {
             ASSERT(IsValidCore(core));
 
             Member* next = member->GetPriorityQueueEntry(core).GetNext();
@@ -240,7 +264,8 @@ public:
             return next;
         }
 
-        constexpr void MoveToFront(s32 priority, s32 core, Member* member) {
+        constexpr void MoveToFront(s32 priority, s32 core, Member* member)
+        {
             ASSERT(IsValidCore(core));
             ASSERT(IsValidPriority(priority));
 
@@ -250,7 +275,8 @@ public:
             }
         }
 
-        constexpr Member* MoveToBack(s32 priority, s32 core, Member* member) {
+        constexpr Member* MoveToBack(s32 priority, s32 core, Member* member)
+        {
             ASSERT(IsValidCore(core));
             ASSERT(IsValidPriority(priority));
 
@@ -273,17 +299,20 @@ private:
     KPriorityQueueImpl m_suggested_queue;
 
 private:
-    static constexpr void ClearAffinityBit(u64& affinity, s32 core) {
+    static constexpr void ClearAffinityBit(u64& affinity, s32 core)
+    {
         affinity &= ~(UINT64_C(1) << core);
     }
 
-    static constexpr s32 GetNextCore(u64& affinity) {
+    static constexpr s32 GetNextCore(u64& affinity)
+    {
         const s32 core = std::countr_zero(affinity);
         ClearAffinityBit(affinity, core);
         return core;
     }
 
-    constexpr void PushBack(s32 priority, Member* member) {
+    constexpr void PushBack(s32 priority, Member* member)
+    {
         ASSERT(IsValidPriority(priority));
 
         // Push onto the scheduled queue for its core, if we can.
@@ -299,7 +328,8 @@ private:
         }
     }
 
-    constexpr void PushFront(s32 priority, Member* member) {
+    constexpr void PushFront(s32 priority, Member* member)
+    {
         ASSERT(IsValidPriority(priority));
 
         // Push onto the scheduled queue for its core, if we can.
@@ -316,7 +346,8 @@ private:
         }
     }
 
-    constexpr void Remove(s32 priority, Member* member) {
+    constexpr void Remove(s32 priority, Member* member)
+    {
         ASSERT(IsValidPriority(priority));
 
         // Remove from the scheduled queue for its core.
@@ -336,36 +367,38 @@ public:
     constexpr KPriorityQueue() = default;
 
     // Getters.
-    constexpr Member* GetScheduledFront(s32 core) const {
-        return m_scheduled_queue.GetFront(core);
-    }
+    constexpr Member* GetScheduledFront(s32 core) const { return m_scheduled_queue.GetFront(core); }
 
-    constexpr Member* GetScheduledFront(s32 core, s32 priority) const {
+    constexpr Member* GetScheduledFront(s32 core, s32 priority) const
+    {
         return m_scheduled_queue.GetFront(priority, core);
     }
 
-    constexpr Member* GetSuggestedFront(s32 core) const {
-        return m_suggested_queue.GetFront(core);
-    }
+    constexpr Member* GetSuggestedFront(s32 core) const { return m_suggested_queue.GetFront(core); }
 
-    constexpr Member* GetSuggestedFront(s32 core, s32 priority) const {
+    constexpr Member* GetSuggestedFront(s32 core, s32 priority) const
+    {
         return m_suggested_queue.GetFront(priority, core);
     }
 
-    constexpr Member* GetScheduledNext(s32 core, const Member* member) const {
+    constexpr Member* GetScheduledNext(s32 core, const Member* member) const
+    {
         return m_scheduled_queue.GetNext(core, member);
     }
 
-    constexpr Member* GetSuggestedNext(s32 core, const Member* member) const {
+    constexpr Member* GetSuggestedNext(s32 core, const Member* member) const
+    {
         return m_suggested_queue.GetNext(core, member);
     }
 
-    constexpr Member* GetSamePriorityNext(s32 core, const Member* member) const {
+    constexpr Member* GetSamePriorityNext(s32 core, const Member* member) const
+    {
         return member->GetPriorityQueueEntry(core).GetNext();
     }
 
     // Mutators.
-    constexpr void PushBack(Member* member) {
+    constexpr void PushBack(Member* member)
+    {
         // This is for host (dummy) threads that we do not want to enter the priority queue.
         if (member->IsDummyThread()) {
             return;
@@ -374,7 +407,8 @@ public:
         this->PushBack(member->GetPriority(), member);
     }
 
-    constexpr void Remove(Member* member) {
+    constexpr void Remove(Member* member)
+    {
         // This is for host (dummy) threads that we do not want to enter the priority queue.
         if (member->IsDummyThread()) {
             return;
@@ -383,7 +417,8 @@ public:
         this->Remove(member->GetPriority(), member);
     }
 
-    constexpr void MoveToScheduledFront(Member* member) {
+    constexpr void MoveToScheduledFront(Member* member)
+    {
         // This is for host (dummy) threads that we do not want to enter the priority queue.
         if (member->IsDummyThread()) {
             return;
@@ -392,7 +427,8 @@ public:
         m_scheduled_queue.MoveToFront(member->GetPriority(), member->GetActiveCore(), member);
     }
 
-    constexpr KThread* MoveToScheduledBack(Member* member) {
+    constexpr KThread* MoveToScheduledBack(Member* member)
+    {
         // This is for host (dummy) threads that we do not want to enter the priority queue.
         if (member->IsDummyThread()) {
             return {};
@@ -402,7 +438,8 @@ public:
     }
 
     // First class fancy operations.
-    constexpr void ChangePriority(s32 prev_priority, bool is_running, Member* member) {
+    constexpr void ChangePriority(s32 prev_priority, bool is_running, Member* member)
+    {
         // This is for host (dummy) threads that we do not want to enter the priority queue.
         if (member->IsDummyThread()) {
             return;
@@ -423,7 +460,8 @@ public:
     }
 
     constexpr void ChangeAffinityMask(s32 prev_core, const AffinityMaskType& prev_affinity,
-                                      Member* member) {
+                                      Member* member)
+    {
         // This is for host (dummy) threads that we do not want to enter the priority queue.
         if (member->IsDummyThread()) {
             return;
@@ -457,7 +495,8 @@ public:
         }
     }
 
-    constexpr void ChangeCore(s32 prev_core, Member* member, bool to_front = false) {
+    constexpr void ChangeCore(s32 prev_core, Member* member, bool to_front = false)
+    {
         // This is for host (dummy) threads that we do not want to enter the priority queue.
         if (member->IsDummyThread()) {
             return;

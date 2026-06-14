@@ -4,28 +4,35 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "input_common/helpers/joycon_protocol/common_protocol.h"
+
 #include "common/input.h"
 #include "common/logging.h"
-#include "input_common/helpers/joycon_protocol/common_protocol.h"
 
 namespace InputCommon::Joycon {
 JoyconCommonProtocol::JoyconCommonProtocol(std::shared_ptr<JoyconHandle> hidapi_handle_)
-    : hidapi_handle{std::move(hidapi_handle_)} {}
+    : hidapi_handle{std::move(hidapi_handle_)}
+{
+}
 
-u8 JoyconCommonProtocol::GetCounter() {
+u8 JoyconCommonProtocol::GetCounter()
+{
     hidapi_handle->packet_counter = (hidapi_handle->packet_counter + 1) & 0x0F;
     return hidapi_handle->packet_counter;
 }
 
-void JoyconCommonProtocol::SetBlocking() {
+void JoyconCommonProtocol::SetBlocking()
+{
     SDL_hid_set_nonblocking(hidapi_handle->handle, 0);
 }
 
-void JoyconCommonProtocol::SetNonBlocking() {
+void JoyconCommonProtocol::SetNonBlocking()
+{
     SDL_hid_set_nonblocking(hidapi_handle->handle, 1);
 }
 
-Common::Input::DriverResult JoyconCommonProtocol::GetDeviceType(ControllerType& controller_type) {
+Common::Input::DriverResult JoyconCommonProtocol::GetDeviceType(ControllerType& controller_type)
+{
     const auto result = ReadSPI(SpiAddress::DEVICE_TYPE, controller_type);
 
     if (result == Common::Input::DriverResult::Success) {
@@ -38,8 +45,9 @@ Common::Input::DriverResult JoyconCommonProtocol::GetDeviceType(ControllerType& 
     return result;
 }
 
-Common::Input::DriverResult JoyconCommonProtocol::CheckDeviceAccess(
-    SDL_hid_device_info* device_info) {
+Common::Input::DriverResult
+JoyconCommonProtocol::CheckDeviceAccess(SDL_hid_device_info* device_info)
+{
     ControllerType controller_type{ControllerType::None};
     const auto result = GetDeviceType(controller_type);
 
@@ -60,12 +68,14 @@ Common::Input::DriverResult JoyconCommonProtocol::CheckDeviceAccess(
     return Common::Input::DriverResult::Success;
 }
 
-Common::Input::DriverResult JoyconCommonProtocol::SetReportMode(ReportMode report_mode) {
+Common::Input::DriverResult JoyconCommonProtocol::SetReportMode(ReportMode report_mode)
+{
     const std::array<u8, 1> buffer{static_cast<u8>(report_mode)};
     return SendSubCommand(SubCommand::SET_REPORT_MODE, buffer);
 }
 
-Common::Input::DriverResult JoyconCommonProtocol::SendRawData(std::span<const u8> buffer) {
+Common::Input::DriverResult JoyconCommonProtocol::SendRawData(std::span<const u8> buffer)
+{
     const auto result = SDL_hid_write(hidapi_handle->handle, buffer.data(), buffer.size());
 
     if (result == -1) {
@@ -75,8 +85,9 @@ Common::Input::DriverResult JoyconCommonProtocol::SendRawData(std::span<const u8
     return Common::Input::DriverResult::Success;
 }
 
-Common::Input::DriverResult JoyconCommonProtocol::GetSubCommandResponse(
-    SubCommand sc, SubCommandResponse& output) {
+Common::Input::DriverResult JoyconCommonProtocol::GetSubCommandResponse(SubCommand sc,
+                                                                        SubCommandResponse& output)
+{
     constexpr int timeout_mili = 66;
     constexpr int MaxTries = 10;
     int tries = 0;
@@ -99,7 +110,8 @@ Common::Input::DriverResult JoyconCommonProtocol::GetSubCommandResponse(
 
 Common::Input::DriverResult JoyconCommonProtocol::SendSubCommand(SubCommand sc,
                                                                  std::span<const u8> buffer,
-                                                                 SubCommandResponse& output) {
+                                                                 SubCommandResponse& output)
+{
     SubCommandPacket packet{
         .output_report = OutputReport::RUMBLE_AND_SUBCMD,
         .packet_counter = GetCounter(),
@@ -123,13 +135,15 @@ Common::Input::DriverResult JoyconCommonProtocol::SendSubCommand(SubCommand sc,
 }
 
 Common::Input::DriverResult JoyconCommonProtocol::SendSubCommand(SubCommand sc,
-                                                                 std::span<const u8> buffer) {
+                                                                 std::span<const u8> buffer)
+{
     SubCommandResponse output{};
     return SendSubCommand(sc, buffer, output);
 }
 
 Common::Input::DriverResult JoyconCommonProtocol::SendMCUCommand(SubCommand sc,
-                                                                 std::span<const u8> buffer) {
+                                                                 std::span<const u8> buffer)
+{
     SubCommandPacket packet{
         .output_report = OutputReport::MCU_DATA,
         .packet_counter = GetCounter(),
@@ -146,7 +160,8 @@ Common::Input::DriverResult JoyconCommonProtocol::SendMCUCommand(SubCommand sc,
     return SendData(packet);
 }
 
-Common::Input::DriverResult JoyconCommonProtocol::SendVibrationReport(std::span<const u8> buffer) {
+Common::Input::DriverResult JoyconCommonProtocol::SendVibrationReport(std::span<const u8> buffer)
+{
     VibrationPacket packet{
         .output_report = OutputReport::RUMBLE_ONLY,
         .packet_counter = GetCounter(),
@@ -162,8 +177,8 @@ Common::Input::DriverResult JoyconCommonProtocol::SendVibrationReport(std::span<
     return SendData(packet);
 }
 
-Common::Input::DriverResult JoyconCommonProtocol::ReadRawSPI(SpiAddress addr,
-                                                             std::span<u8> output) {
+Common::Input::DriverResult JoyconCommonProtocol::ReadRawSPI(SpiAddress addr, std::span<u8> output)
+{
     constexpr std::size_t HeaderSize = 5;
     constexpr std::size_t MaxTries = 5;
     std::size_t tries = 0;
@@ -195,7 +210,8 @@ Common::Input::DriverResult JoyconCommonProtocol::ReadRawSPI(SpiAddress addr,
     return Common::Input::DriverResult::Success;
 }
 
-Common::Input::DriverResult JoyconCommonProtocol::EnableMCU(bool enable) {
+Common::Input::DriverResult JoyconCommonProtocol::EnableMCU(bool enable)
+{
     const std::array<u8, 1> mcu_state{static_cast<u8>(enable ? 1 : 0)};
     const auto result = SendSubCommand(SubCommand::SET_MCU_STATE, mcu_state);
 
@@ -206,7 +222,8 @@ Common::Input::DriverResult JoyconCommonProtocol::EnableMCU(bool enable) {
     return result;
 }
 
-Common::Input::DriverResult JoyconCommonProtocol::ConfigureMCU(const MCUConfig& config) {
+Common::Input::DriverResult JoyconCommonProtocol::ConfigureMCU(const MCUConfig& config)
+{
     LOG_DEBUG(Input, "ConfigureMCU");
     std::array<u8, sizeof(MCUConfig)> config_buffer;
     memcpy(config_buffer.data(), &config, sizeof(MCUConfig));
@@ -222,7 +239,8 @@ Common::Input::DriverResult JoyconCommonProtocol::ConfigureMCU(const MCUConfig& 
 }
 
 Common::Input::DriverResult JoyconCommonProtocol::GetMCUDataResponse(ReportMode report_mode,
-                                                                     MCUCommandResponse& output) {
+                                                                     MCUCommandResponse& output)
+{
     constexpr int TimeoutMili = 200;
     constexpr int MaxTries = 9;
     int tries = 0;
@@ -246,7 +264,8 @@ Common::Input::DriverResult JoyconCommonProtocol::GetMCUDataResponse(ReportMode 
 Common::Input::DriverResult JoyconCommonProtocol::SendMCUData(ReportMode report_mode,
                                                               MCUSubCommand sc,
                                                               std::span<const u8> buffer,
-                                                              MCUCommandResponse& output) {
+                                                              MCUCommandResponse& output)
+{
     SubCommandPacket packet{
         .output_report = OutputReport::MCU_DATA,
         .packet_counter = GetCounter(),
@@ -272,7 +291,8 @@ Common::Input::DriverResult JoyconCommonProtocol::SendMCUData(ReportMode report_
 }
 
 Common::Input::DriverResult JoyconCommonProtocol::WaitSetMCUMode(ReportMode report_mode,
-                                                                 MCUMode mode) {
+                                                                 MCUMode mode)
+{
     MCUCommandResponse output{};
     constexpr std::size_t MaxTries{16};
     std::size_t tries{};
@@ -312,7 +332,8 @@ constexpr std::array<u8, 256> mcu_crc8_table = {
     0xAE, 0xA9, 0xA0, 0xA7, 0xB2, 0xB5, 0xBC, 0xBB, 0x96, 0x91, 0x98, 0x9F, 0x8A, 0x8D, 0x84, 0x83,
     0xDE, 0xD9, 0xD0, 0xD7, 0xC2, 0xC5, 0xCC, 0xCB, 0xE6, 0xE1, 0xE8, 0xEF, 0xFA, 0xFD, 0xF4, 0xF3};
 
-u8 JoyconCommonProtocol::CalculateMCU_CRC8(u8* buffer, u8 size) const {
+u8 JoyconCommonProtocol::CalculateMCU_CRC8(u8* buffer, u8 size) const
+{
     u8 crc8 = 0x0;
 
     for (int i = 0; i < size; ++i) {

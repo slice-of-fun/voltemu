@@ -4,16 +4,18 @@
 // SPDX-FileCopyrightText: Copyright 2021 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "video_core/renderer_opengl/gl_graphics_pipeline.h"
+
 #include <algorithm>
 #include <array>
-#include <string>
-#include <vector>
 #include <bit>
 #include <numeric>
+#include <string>
+#include <vector>
+
 #include "common/settings.h"
 #include "common/thread_worker.h"
 #include "shader_recompiler/shader_info.h"
-#include "video_core/renderer_opengl/gl_graphics_pipeline.h"
 #include "video_core/renderer_opengl/gl_shader_manager.h"
 #include "video_core/renderer_opengl/gl_shader_util.h"
 #include "video_core/renderer_opengl/gl_state_tracker.h"
@@ -39,7 +41,8 @@ using VideoCommon::ImageId;
 constexpr u32 MAX_TEXTURES = 64;
 constexpr u32 MAX_IMAGES = 8;
 
-GLenum Stage(size_t stage_index) {
+GLenum Stage(size_t stage_index)
+{
     switch (stage_index) {
     case 0:
         return GL_VERTEX_SHADER;
@@ -56,7 +59,8 @@ GLenum Stage(size_t stage_index) {
     return GL_NONE;
 }
 
-GLenum AssemblyStage(size_t stage_index) {
+GLenum AssemblyStage(size_t stage_index)
+{
     switch (stage_index) {
     case 0:
         return GL_VERTEX_PROGRAM_NV;
@@ -77,7 +81,8 @@ GLenum AssemblyStage(size_t stage_index) {
 /// @param location Hardware location
 /// @return Pair of ARB_transform_feedback3 token stream first and third arguments
 /// @note Read https://www.khronos.org/registry/OpenGL/extensions/ARB/ARB_transform_feedback3.txt
-std::pair<GLint, GLint> TransformFeedbackEnum(u32 location) {
+std::pair<GLint, GLint> TransformFeedbackEnum(u32 location)
+{
     const auto index = location / 4;
     if (index >= 8 && index <= 39) {
         return {GL_GENERIC_ATTRIB_NV, index - 8};
@@ -101,8 +106,9 @@ std::pair<GLint, GLint> TransformFeedbackEnum(u32 location) {
     return {GL_POSITION, 0};
 }
 
-template <typename Spec>
-bool Passes(const std::array<Shader::Info, 5>& stage_infos, u32 enabled_mask) {
+template<typename Spec>
+bool Passes(const std::array<Shader::Info, 5>& stage_infos, u32 enabled_mask)
+{
     for (size_t stage = 0; stage < stage_infos.size(); ++stage) {
         if (!Spec::enabled_stages[stage] && ((enabled_mask >> stage) & 1) != 0) {
             return false;
@@ -134,8 +140,9 @@ bool Passes(const std::array<Shader::Info, 5>& stage_infos, u32 enabled_mask) {
 
 using ConfigureFuncPtr = bool (*)(GraphicsPipeline*, bool);
 
-template <typename Spec, typename... Specs>
-ConfigureFuncPtr FindSpec(const std::array<Shader::Info, 5>& stage_infos, u32 enabled_mask) {
+template<typename Spec, typename... Specs>
+ConfigureFuncPtr FindSpec(const std::array<Shader::Info, 5>& stage_infos, u32 enabled_mask)
+{
     if constexpr (sizeof...(Specs) > 0) {
         if (!Passes<Spec>(stage_infos, enabled_mask)) {
             return FindSpec<Specs...>(stage_infos, enabled_mask);
@@ -168,7 +175,8 @@ struct DefaultSpec {
     static constexpr bool has_images = true;
 };
 
-ConfigureFuncPtr ConfigureFunc(const std::array<Shader::Info, 5>& infos, u32 enabled_mask) {
+ConfigureFuncPtr ConfigureFunc(const std::array<Shader::Info, 5>& infos, u32 enabled_mask)
+{
     return FindSpec<SimpleVertexSpec, SimpleVertexFragmentSpec, DefaultSpec>(infos, enabled_mask);
 }
 } // Anonymous namespace
@@ -182,7 +190,8 @@ GraphicsPipeline::GraphicsPipeline(const Device& device, TextureCache& texture_c
                                    const std::array<const Shader::Info*, 5>& infos,
                                    const GraphicsPipelineKey& key_, bool force_context_flush)
     : texture_cache{texture_cache_}, buffer_cache{buffer_cache_}, program_manager{program_manager_},
-      state_tracker{state_tracker_}, key{key_} {
+      state_tracker{state_tracker_}, key{key_}
+{
     if (shader_notify) {
         shader_notify->MarkShaderBuilding();
     }
@@ -246,7 +255,8 @@ GraphicsPipeline::GraphicsPipeline(const Device& device, TextureCache& texture_c
                 break;
             case Settings::RendererBackend::OpenGL_GLASM:
                 if (!sources_[stage].empty())
-                    assembly_programs[stage] = CompileProgram(sources_[stage], AssemblyStage(stage));
+                    assembly_programs[stage] =
+                        CompileProgram(sources_[stage], AssemblyStage(stage));
                 break;
             case Settings::RendererBackend::OpenGL_SPIRV:
                 if (!sources_spirv_[stage].empty())
@@ -276,8 +286,8 @@ GraphicsPipeline::GraphicsPipeline(const Device& device, TextureCache& texture_c
     }
 }
 
-template <typename Spec>
-bool GraphicsPipeline::ConfigureImpl(bool is_indexed) {
+template<typename Spec> bool GraphicsPipeline::ConfigureImpl(bool is_indexed)
+{
     std::array<VideoCommon::ImageViewInOut, MAX_TEXTURES + MAX_IMAGES> views;
     std::array<VideoCommon::SamplerId, MAX_TEXTURES> samplers;
     size_t views_index{};
@@ -566,13 +576,15 @@ bool GraphicsPipeline::ConfigureImpl(bool is_indexed) {
     return true;
 }
 
-void GraphicsPipeline::ConfigureTransformFeedbackImpl() const {
+void GraphicsPipeline::ConfigureTransformFeedbackImpl() const
+{
     const GLenum buffer_mode =
         num_xfb_buffers_active == 1 ? GL_INTERLEAVED_ATTRIBS : GL_SEPARATE_ATTRIBS;
     glTransformFeedbackAttribsNV(num_xfb_attribs, xfb_attribs.data(), buffer_mode);
 }
 
-void GraphicsPipeline::GenerateTransformFeedbackState() {
+void GraphicsPipeline::GenerateTransformFeedbackState()
+{
     // TODO(Rodrigo): Inject SKIP_COMPONENTS*_NV when required. An unimplemented message will signal
     // when this is required.
     GLint* cursor{xfb_attribs.data()};
@@ -622,7 +634,8 @@ void GraphicsPipeline::GenerateTransformFeedbackState() {
     num_xfb_attribs = static_cast<GLsizei>((cursor - xfb_attribs.data()) / XFB_ENTRY_STRIDE);
 }
 
-void GraphicsPipeline::WaitForBuild() {
+void GraphicsPipeline::WaitForBuild()
+{
     if (built_fence.handle == 0) {
         std::unique_lock lock{built_mutex};
         built_condvar.wait(lock, [this] { return built_fence.handle != 0; });
@@ -631,7 +644,8 @@ void GraphicsPipeline::WaitForBuild() {
     is_built = true;
 }
 
-bool GraphicsPipeline::IsBuilt() noexcept {
+bool GraphicsPipeline::IsBuilt() noexcept
+{
     if (is_built) {
         return true;
     }

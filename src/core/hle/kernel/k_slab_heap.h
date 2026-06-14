@@ -32,15 +32,12 @@ public:
 public:
     constexpr KSlabHeapImpl() = default;
 
-    void Initialize() {
-        ASSERT(m_head == nullptr);
-    }
+    void Initialize() { ASSERT(m_head == nullptr); }
 
-    Node* GetHead() const {
-        return m_head;
-    }
+    Node* GetHead() const { return m_head; }
 
-    void* Allocate() {
+    void* Allocate()
+    {
         // KScopedInterruptDisable di;
 
         m_lock.lock();
@@ -54,7 +51,8 @@ public:
         return ret;
     }
 
-    void Free(void* obj) {
+    void Free(void* obj)
+    {
         // KScopedInterruptDisable di;
 
         m_lock.lock();
@@ -73,8 +71,7 @@ private:
 
 } // namespace impl
 
-template <bool SupportDynamicExpansion>
-class KSlabHeapBase : protected impl::KSlabHeapImpl {
+template<bool SupportDynamicExpansion> class KSlabHeapBase : protected impl::KSlabHeapImpl {
     YUZU_NON_COPYABLE(KSlabHeapBase);
     YUZU_NON_MOVEABLE(KSlabHeapBase);
 
@@ -85,7 +82,8 @@ private:
     uintptr_t m_end{};
 
 private:
-    void UpdatePeakImpl(uintptr_t obj) {
+    void UpdatePeakImpl(uintptr_t obj)
+    {
         const uintptr_t alloc_peak = obj + this->GetObjectSize();
         uintptr_t cur_peak = m_peak;
         do {
@@ -99,11 +97,10 @@ private:
 public:
     constexpr KSlabHeapBase() = default;
 
-    bool Contains(uintptr_t address) const {
-        return m_start <= address && address < m_end;
-    }
+    bool Contains(uintptr_t address) const { return m_start <= address && address < m_end; }
 
-    void Initialize(size_t obj_size, void* memory, size_t memory_size) {
+    void Initialize(size_t obj_size, void* memory, size_t memory_size)
+    {
         // Ensure we don't initialize a slab using null memory.
         ASSERT(memory != nullptr);
 
@@ -128,28 +125,27 @@ public:
         }
     }
 
-    size_t GetSlabHeapSize() const {
-        return (m_end - m_start) / this->GetObjectSize();
-    }
+    size_t GetSlabHeapSize() const { return (m_end - m_start) / this->GetObjectSize(); }
 
-    size_t GetObjectSize() const {
-        return m_obj_size;
-    }
+    size_t GetObjectSize() const { return m_obj_size; }
 
-    void* Allocate() {
+    void* Allocate()
+    {
         void* obj = KSlabHeapImpl::Allocate();
 
         return obj;
     }
 
-    void Free(void* obj) {
+    void Free(void* obj)
+    {
         // Don't allow freeing an object that wasn't allocated from this heap.
         const bool contained = this->Contains(reinterpret_cast<uintptr_t>(obj));
         ASSERT(contained);
         KSlabHeapImpl::Free(obj);
     }
 
-    size_t GetObjectIndex(const void* obj) const {
+    size_t GetObjectIndex(const void* obj) const
+    {
         if constexpr (SupportDynamicExpansion) {
             if (!this->Contains(reinterpret_cast<uintptr_t>(obj))) {
                 return (std::numeric_limits<size_t>::max)();
@@ -159,33 +155,34 @@ public:
         return (reinterpret_cast<uintptr_t>(obj) - m_start) / this->GetObjectSize();
     }
 
-    size_t GetPeakIndex() const {
+    size_t GetPeakIndex() const
+    {
         return this->GetObjectIndex(reinterpret_cast<const void*>(m_peak));
     }
 
-    uintptr_t GetSlabHeapAddress() const {
-        return m_start;
-    }
+    uintptr_t GetSlabHeapAddress() const { return m_start; }
 
-    size_t GetNumRemaining() const {
+    size_t GetNumRemaining() const
+    {
         // Only calculate the number of remaining objects under debug configuration.
         return 0;
     }
 };
 
-template <typename T>
-class KSlabHeap final : public KSlabHeapBase<false> {
+template<typename T> class KSlabHeap final : public KSlabHeapBase<false> {
 private:
     using BaseHeap = KSlabHeapBase<false>;
 
 public:
     constexpr KSlabHeap() = default;
 
-    void Initialize(void* memory, size_t memory_size) {
+    void Initialize(void* memory, size_t memory_size)
+    {
         BaseHeap::Initialize(sizeof(T), memory, memory_size);
     }
 
-    T* Allocate() {
+    T* Allocate()
+    {
         T* obj = static_cast<T*>(BaseHeap::Allocate());
 
         if (obj != nullptr) [[likely]] {
@@ -194,7 +191,8 @@ public:
         return obj;
     }
 
-    T* Allocate(KernelCore& kernel) {
+    T* Allocate(KernelCore& kernel)
+    {
         T* obj = static_cast<T*>(BaseHeap::Allocate());
 
         if (obj != nullptr) [[likely]] {
@@ -203,13 +201,9 @@ public:
         return obj;
     }
 
-    void Free(T* obj) {
-        BaseHeap::Free(obj);
-    }
+    void Free(T* obj) { BaseHeap::Free(obj); }
 
-    size_t GetObjectIndex(const T* obj) const {
-        return BaseHeap::GetObjectIndex(obj);
-    }
+    size_t GetObjectIndex(const T* obj) const { return BaseHeap::GetObjectIndex(obj); }
 };
 
 } // namespace Kernel

@@ -14,8 +14,7 @@
 
 namespace Common {
 
-template <class Traits>
-class LeastRecentlyUsedCache {
+template<class Traits> class LeastRecentlyUsedCache {
     using ObjectType = typename Traits::ObjectType;
     using TickType = typename Traits::TickType;
 
@@ -30,7 +29,8 @@ public:
     LeastRecentlyUsedCache() : first_item{}, last_item{} {}
     ~LeastRecentlyUsedCache() = default;
 
-    size_t Insert(ObjectType obj, TickType tick) {
+    size_t Insert(ObjectType obj, TickType tick)
+    {
         const auto new_id = Build();
         auto& item = item_pool[new_id];
         item.obj = obj;
@@ -39,7 +39,8 @@ public:
         return new_id;
     }
 
-    void Touch(size_t id, TickType tick) {
+    void Touch(size_t id, TickType tick)
+    {
         auto& item = item_pool[id];
         if (item.tick >= tick) {
             return;
@@ -52,7 +53,8 @@ public:
         Attach(item);
     }
 
-    void Free(size_t id) {
+    void Free(size_t id)
+    {
         auto& item = item_pool[id];
         Detach(item);
         item.prev = nullptr;
@@ -60,8 +62,8 @@ public:
         free_items.push_back(id);
     }
 
-    template <typename Func>
-    void ForEachItemBelow(TickType tick, Func&& func) {
+    template<typename Func> void ForEachItemBelow(TickType tick, Func&& func)
+    {
         static constexpr bool RETURNS_BOOL =
             std::is_same_v<std::invoke_result_t<Func, ObjectType>, bool>;
         Item* iterator = first_item;
@@ -82,7 +84,8 @@ public:
     }
 
 private:
-    size_t Build() {
+    size_t Build()
+    {
         if (free_items.empty()) {
             const size_t item_id = item_pool.size();
             auto& item = item_pool.emplace_back();
@@ -98,7 +101,8 @@ private:
         return item_id;
     }
 
-    void Attach(Item& item) {
+    void Attach(Item& item)
+    {
         if (!first_item) {
             first_item = &item;
         }
@@ -112,7 +116,8 @@ private:
         }
     }
 
-    void Detach(Item& item) {
+    void Detach(Item& item)
+    {
         if (item.prev) {
             item.prev->next = item.next;
         }

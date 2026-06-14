@@ -25,7 +25,8 @@ public:
     struct AudioDeviceName {
         std::array<char, 0x100> name{};
 
-        constexpr AudioDeviceName(std::string_view name_) {
+        constexpr AudioDeviceName(std::string_view name_)
+        {
             name_.copy(name.data(), name.size() - 1);
         }
     };

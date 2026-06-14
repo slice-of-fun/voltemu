@@ -5,11 +5,12 @@
 
 #pragma once
 
-#include <memory>
 #include <QDialog>
 #include <QFutureWatcher>
 #include <QSortFilterProxyModel>
 #include <QStandardItemModel>
+#include <memory>
+
 #include "common/announce_multiplayer_room.h"
 #include "network/announce_multiplayer_session.h"
 #include "network/network.h"

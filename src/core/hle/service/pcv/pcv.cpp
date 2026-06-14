@@ -1,10 +1,11 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/pcv/pcv.h"
+
 #include <memory>
 
 #include "core/hle/service/ipc_helpers.h"
-#include "core/hle/service/pcv/pcv.h"
 #include "core/hle/service/server_manager.h"
 #include "core/hle/service/service.h"
 
@@ -12,7 +13,8 @@ namespace Service::PCV {
 
 class PCV final : public ServiceFramework<PCV> {
 public:
-    explicit PCV(Core::System& system_) : ServiceFramework{system_, "pcv"} {
+    explicit PCV(Core::System& system_) : ServiceFramework{system_, "pcv"}
+    {
         // clang-format off
         static const FunctionInfo functions[] = {
             {0, nullptr, "SetPowerEnabled"},
@@ -55,7 +57,8 @@ public:
 class IClkrstSession final : public ServiceFramework<IClkrstSession> {
 public:
     explicit IClkrstSession(Core::System& system_, DeviceCode device_code_)
-        : ServiceFramework{system_, "IClkrstSession"}, device_code(device_code_) {
+        : ServiceFramework{system_, "IClkrstSession"}, device_code(device_code_)
+    {
         // clang-format off
         static const FunctionInfo functions[] = {
             {0, nullptr, "SetClockEnabled"},
@@ -76,7 +79,8 @@ public:
     }
 
 private:
-    void SetClockRate(HLERequestContext& ctx) {
+    void SetClockRate(HLERequestContext& ctx)
+    {
         IPC::RequestParser rp{ctx};
         clock_rate = rp.Pop<u32>();
         LOG_DEBUG(Service_PCV, "(STUBBED) called, clock_rate={}", clock_rate);
@@ -85,7 +89,8 @@ private:
         rb.Push(ResultSuccess);
     }
 
-    void GetClockRate(HLERequestContext& ctx) {
+    void GetClockRate(HLERequestContext& ctx)
+    {
         LOG_DEBUG(Service_PCV, "(STUBBED) called");
 
         IPC::ResponseBuilder rb{ctx, 3};
@@ -99,7 +104,8 @@ private:
 
 class CLKRST final : public ServiceFramework<CLKRST> {
 public:
-    explicit CLKRST(Core::System& system_, const char* name) : ServiceFramework{system_, name} {
+    explicit CLKRST(Core::System& system_, const char* name) : ServiceFramework{system_, name}
+    {
         // clang-format off
         static const FunctionInfo functions[] = {
             {0, &CLKRST::OpenSession, "OpenSession"},
@@ -115,7 +121,8 @@ public:
     }
 
 private:
-    void OpenSession(HLERequestContext& ctx) {
+    void OpenSession(HLERequestContext& ctx)
+    {
         IPC::RequestParser rp{ctx};
         const auto device_code = static_cast<DeviceCode>(rp.Pop<u32>());
         const auto unknown_input = rp.Pop<u32>();
@@ -130,7 +137,8 @@ private:
 
 class CLKRST_A final : public ServiceFramework<CLKRST_A> {
 public:
-    explicit CLKRST_A(Core::System& system_) : ServiceFramework{system_, "clkrst:a"} {
+    explicit CLKRST_A(Core::System& system_) : ServiceFramework{system_, "clkrst:a"}
+    {
         // clang-format off
         static const FunctionInfo functions[] = {
             {0, nullptr, "ReleaseControl"},
@@ -141,7 +149,8 @@ public:
     }
 };
 
-void LoopProcess(Core::System& system) {
+void LoopProcess(Core::System& system)
+{
     auto server_manager = std::make_unique<ServerManager>(system);
 
     server_manager->RegisterNamedService("pcv", std::make_shared<PCV>(system));

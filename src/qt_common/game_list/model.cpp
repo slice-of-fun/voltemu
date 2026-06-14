@@ -1,6 +1,8 @@
 // SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+#include "qt_common/game_list/model.h"
+
 #include <QDir>
 #include <QIcon>
 #include <QJsonArray>
@@ -15,19 +17,18 @@
 #include "core/file_sys/registered_cache.h"
 #include "core/hle/service/filesystem/filesystem.h"
 #include "qt_common/config/uisettings.h"
-#include "qt_common/qt_common.h"
-#include "qt_common/util/game.h"
-
 #include "qt_common/game_list/game_list_p.h"
 #include "qt_common/game_list/worker.h"
-#include "qt_common/game_list/model.h"
+#include "qt_common/qt_common.h"
+#include "qt_common/util/game.h"
 
 GameListModel::GameListModel(std::shared_ptr<FileSys::VfsFilesystem> vfs_,
                              FileSys::ManualContentProvider* provider_,
                              const PlayTime::PlayTimeManager& play_time_manager_,
                              Core::System& system_, QObject* parent)
     : QStandardItemModel{parent}, vfs{std::move(vfs_)}, provider{provider_},
-      play_time_manager{play_time_manager_}, system{system_} {
+      play_time_manager{play_time_manager_}, system{system_}
+{
     watcher = new QFileSystemWatcher(this);
     external_watcher = new QFileSystemWatcher(this);
 
@@ -44,7 +45,8 @@ GameListModel::GameListModel(std::shared_ptr<FileSys::VfsFilesystem> vfs_,
 
 GameListModel::~GameListModel() = default;
 
-void GameListModel::PopulateAsync(QVector<UISettings::GameDir>& game_dirs) {
+void GameListModel::PopulateAsync(QVector<UISettings::GameDir>& game_dirs)
+{
     current_worker.reset();
     removeRows(0, rowCount());
 
@@ -57,18 +59,21 @@ void GameListModel::PopulateAsync(QVector<UISettings::GameDir>& game_dirs) {
     QThreadPool::globalInstance()->start(current_worker.get());
 }
 
-void GameListModel::WorkerEvent() {
+void GameListModel::WorkerEvent()
+{
     current_worker->ProcessEvents(this);
 }
 
-void GameListModel::AddDirEntry(GameListDir* entry_items) {
+void GameListModel::AddDirEntry(GameListDir* entry_items)
+{
     if (m_flat) {
         return;
     }
     invisibleRootItem()->appendRow(entry_items);
 }
 
-void GameListModel::AddEntry(const QList<QStandardItem*>& entry_items, GameListDir* parent) {
+void GameListModel::AddEntry(const QList<QStandardItem*>& entry_items, GameListDir* parent)
+{
     if (m_flat) {
         invisibleRootItem()->appendRow(entry_items);
     } else {
@@ -76,7 +81,8 @@ void GameListModel::AddEntry(const QList<QStandardItem*>& entry_items, GameListD
     }
 }
 
-void GameListModel::DonePopulating(const QStringList& watch_list) {
+void GameListModel::DonePopulating(const QStringList& watch_list)
+{
     emit ShowList(!IsEmpty());
 
     if (!m_flat) {
@@ -91,7 +97,8 @@ void GameListModel::DonePopulating(const QStringList& watch_list) {
     emit PopulatingCompleted(watch_list);
 }
 
-bool GameListModel::IsEmpty() const {
+bool GameListModel::IsEmpty() const
+{
     for (int i = 0; i < rowCount(); i++) {
         const QStandardItem* child = invisibleRootItem()->child(i);
         const auto type = static_cast<GameListItemType>(child->type());
@@ -107,7 +114,8 @@ bool GameListModel::IsEmpty() const {
     return !invisibleRootItem()->hasChildren();
 }
 
-void GameListModel::ToggleFavorite(u64 program_id) {
+void GameListModel::ToggleFavorite(u64 program_id)
+{
     if (!UISettings::values.favorited_ids.contains(program_id)) {
         UISettings::values.favorited_ids.append(program_id);
         AddFavorite(program_id);
@@ -118,7 +126,8 @@ void GameListModel::ToggleFavorite(u64 program_id) {
     emit SaveConfig();
 }
 
-void GameListModel::AddFavorite(u64 program_id) {
+void GameListModel::AddFavorite(u64 program_id)
+{
     auto* favorites_row = item(0);
 
     for (int i = 1; i < rowCount() - 1; i++) {
@@ -141,7 +150,8 @@ void GameListModel::AddFavorite(u64 program_id) {
     }
 }
 
-void GameListModel::RemoveFavorite(u64 program_id) {
+void GameListModel::RemoveFavorite(u64 program_id)
+{
     auto* favorites_row = item(0);
 
     for (int i = 0; i < favorites_row->rowCount(); i++) {
@@ -153,7 +163,8 @@ void GameListModel::RemoveFavorite(u64 program_id) {
     }
 }
 
-void GameListModel::LoadCompatibilityList() {
+void GameListModel::LoadCompatibilityList()
+{
     QFile compat_list{QStringLiteral(":compatibility_list/compatibility_list.json")};
 
     if (!compat_list.open(QFile::ReadOnly | QFile::Text)) {
@@ -197,7 +208,8 @@ void GameListModel::LoadCompatibilityList() {
     }
 }
 
-void GameListModel::RefreshGameDirectory() {
+void GameListModel::RefreshGameDirectory()
+{
     ResetExternalWatcher();
 
     if (!UISettings::values.game_dirs.empty() && current_worker != nullptr) {
@@ -207,7 +219,8 @@ void GameListModel::RefreshGameDirectory() {
     }
 }
 
-void GameListModel::RefreshExternalContent() {
+void GameListModel::RefreshExternalContent()
+{
     if (!UISettings::values.game_dirs.empty() && current_worker != nullptr) {
         LOG_INFO(Frontend, "External content directory changed. Clearing metadata cache.");
         QtCommon::Game::ResetMetadata(false);
@@ -216,7 +229,8 @@ void GameListModel::RefreshExternalContent() {
     }
 }
 
-void GameListModel::ResetExternalWatcher() {
+void GameListModel::ResetExternalWatcher()
+{
     auto watch_dirs = external_watcher->directories();
     if (!watch_dirs.isEmpty()) {
         external_watcher->removePaths(watch_dirs);
@@ -227,7 +241,8 @@ void GameListModel::ResetExternalWatcher() {
     }
 }
 
-void GameListModel::OnUpdateThemedIcons() {
+void GameListModel::OnUpdateThemedIcons()
+{
     for (int i = 0; i < invisibleRootItem()->rowCount(); i++) {
         QStandardItem* child = invisibleRootItem()->child(i);
 
@@ -281,7 +296,8 @@ void GameListModel::OnUpdateThemedIcons() {
     }
 }
 
-void GameListModel::RetranslateUI() {
+void GameListModel::RetranslateUI()
+{
     setHeaderData(COLUMN_NAME, Qt::Horizontal, tr("Name"));
     setHeaderData(COLUMN_COMPATIBILITY, Qt::Horizontal, tr("Compatibility"));
     setHeaderData(COLUMN_ADD_ONS, Qt::Horizontal, tr("Add-ons"));
@@ -290,14 +306,17 @@ void GameListModel::RetranslateUI() {
     setHeaderData(COLUMN_PLAY_TIME, Qt::Horizontal, tr("Play time"));
 }
 
-QFileSystemWatcher* GameListModel::GetWatcher() const {
+QFileSystemWatcher* GameListModel::GetWatcher() const
+{
     return watcher;
 }
 
-const CompatibilityList& GameListModel::GetCompatibilityList() const {
+const CompatibilityList& GameListModel::GetCompatibilityList() const
+{
     return compatibility_list;
 }
 
-void GameListModel::SetFlat(bool flat) {
+void GameListModel::SetFlat(bool flat)
+{
     m_flat = flat;
 }

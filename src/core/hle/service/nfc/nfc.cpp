@@ -4,12 +4,13 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/nfc/nfc.h"
+
 #include <memory>
 
 #include "common/logging.h"
 #include "common/settings.h"
 #include "core/hle/service/ipc_helpers.h"
-#include "core/hle/service/nfc/nfc.h"
 #include "core/hle/service/nfc/nfc_interface.h"
 #include "core/hle/service/server_manager.h"
 #include "core/hle/service/service.h"
@@ -18,7 +19,8 @@ namespace Service::NFC {
 
 class IUser final : public NfcInterface {
 public:
-    explicit IUser(Core::System& system_) : NfcInterface(system_, "NFC::IUser", BackendType::Nfc) {
+    explicit IUser(Core::System& system_) : NfcInterface(system_, "NFC::IUser", BackendType::Nfc)
+    {
         // clang-format off
         static const FunctionInfo functions[] = {
             {0, &NfcInterface::Initialize, "InitializeOld"},
@@ -53,7 +55,8 @@ public:
 class ISystem final : public NfcInterface {
 public:
     explicit ISystem(Core::System& system_)
-        : NfcInterface{system_, "NFC::ISystem", BackendType::Nfc} {
+        : NfcInterface{system_, "NFC::ISystem", BackendType::Nfc}
+    {
         // clang-format off
         static const FunctionInfo functions[] = {
             {0, &NfcInterface::Initialize, "InitializeOld"},
@@ -94,7 +97,8 @@ using MFInterface = NfcInterface;
 class MFIUser final : public MFInterface {
 public:
     explicit MFIUser(Core::System& system_)
-        : MFInterface{system_, "NFC::MFInterface", BackendType::Mifare} {
+        : MFInterface{system_, "NFC::MFInterface", BackendType::Mifare}
+    {
         // clang-format off
         static const FunctionInfoTyped<MFIUser> functions[] = {
             {0, &MFIUser::Initialize, "Initialize"},
@@ -120,7 +124,8 @@ public:
 
 class IAm final : public ServiceFramework<IAm> {
 public:
-    explicit IAm(Core::System& system_) : ServiceFramework{system_, "NFC::IAm"} {
+    explicit IAm(Core::System& system_) : ServiceFramework{system_, "NFC::IAm"}
+    {
         // clang-format off
         static const FunctionInfo functions[] = {
             {0, nullptr, "Initialize"},
@@ -135,7 +140,8 @@ public:
 
 class NFC_AM final : public ServiceFramework<NFC_AM> {
 public:
-    explicit NFC_AM(Core::System& system_) : ServiceFramework{system_, "nfc:am"} {
+    explicit NFC_AM(Core::System& system_) : ServiceFramework{system_, "nfc:am"}
+    {
         // clang-format off
         static const FunctionInfo functions[] = {
             {0, &NFC_AM::CreateAmNfcInterface, "CreateAmNfcInterface"},
@@ -146,7 +152,8 @@ public:
     }
 
 private:
-    void CreateAmNfcInterface(HLERequestContext& ctx) {
+    void CreateAmNfcInterface(HLERequestContext& ctx)
+    {
         LOG_DEBUG(Service_NFC, "called");
 
         IPC::ResponseBuilder rb{ctx, 2, 0, 1};
@@ -157,7 +164,8 @@ private:
 
 class NFC_MF_U final : public ServiceFramework<NFC_MF_U> {
 public:
-    explicit NFC_MF_U(Core::System& system_) : ServiceFramework{system_, "nfc:mf:u"} {
+    explicit NFC_MF_U(Core::System& system_) : ServiceFramework{system_, "nfc:mf:u"}
+    {
         // clang-format off
         static const FunctionInfo functions[] = {
             {0, &NFC_MF_U::CreateUserNfcInterface, "CreateUserNfcInterface"},
@@ -168,7 +176,8 @@ public:
     }
 
 private:
-    void CreateUserNfcInterface(HLERequestContext& ctx) {
+    void CreateUserNfcInterface(HLERequestContext& ctx)
+    {
         LOG_DEBUG(Service_NFC, "called");
 
         IPC::ResponseBuilder rb{ctx, 2, 0, 1};
@@ -179,7 +188,8 @@ private:
 
 class NFC_U final : public ServiceFramework<NFC_U> {
 public:
-    explicit NFC_U(Core::System& system_) : ServiceFramework{system_, "nfc:user"} {
+    explicit NFC_U(Core::System& system_) : ServiceFramework{system_, "nfc:user"}
+    {
         // clang-format off
         static const FunctionInfo functions[] = {
             {0, &NFC_U::CreateUserNfcInterface, "CreateUserNfcInterface"},
@@ -190,7 +200,8 @@ public:
     }
 
 private:
-    void CreateUserNfcInterface(HLERequestContext& ctx) {
+    void CreateUserNfcInterface(HLERequestContext& ctx)
+    {
         LOG_DEBUG(Service_NFC, "called");
 
         IPC::ResponseBuilder rb{ctx, 2, 0, 1};
@@ -201,7 +212,8 @@ private:
 
 class NFC_SYS final : public ServiceFramework<NFC_SYS> {
 public:
-    explicit NFC_SYS(Core::System& system_) : ServiceFramework{system_, "nfc:sys"} {
+    explicit NFC_SYS(Core::System& system_) : ServiceFramework{system_, "nfc:sys"}
+    {
         // clang-format off
         static const FunctionInfo functions[] = {
             {0, &NFC_SYS::CreateSystemNfcInterface, "CreateSystemNfcInterface"},
@@ -212,7 +224,8 @@ public:
     }
 
 private:
-    void CreateSystemNfcInterface(HLERequestContext& ctx) {
+    void CreateSystemNfcInterface(HLERequestContext& ctx)
+    {
         LOG_DEBUG(Service_NFC, "called");
 
         IPC::ResponseBuilder rb{ctx, 2, 0, 1};
@@ -221,7 +234,8 @@ private:
     }
 };
 
-void LoopProcess(Core::System& system) {
+void LoopProcess(Core::System& system)
+{
     auto server_manager = std::make_unique<ServerManager>(system);
 
     server_manager->RegisterNamedService("nfc:am", std::make_shared<NFC_AM>(system));

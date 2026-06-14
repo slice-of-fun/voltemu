@@ -6,10 +6,9 @@
 
 #pragma once
 
+#include "core/hle/service/bcat/news/news_storage.h"
 #include "core/hle/service/cmif_types.h"
 #include "core/hle/service/service.h"
-
-#include "core/hle/service/bcat/news/news_storage.h"
 
 namespace Core {
 class System;

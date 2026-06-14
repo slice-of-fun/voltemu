@@ -4,20 +4,24 @@
 // SPDX-FileCopyrightText: Copyright 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+#include "hid_core/resources/npad/npad_resource.h"
+
 #include "core/hle/kernel/k_event.h"
 #include "core/hle/kernel/k_readable_event.h"
 #include "hid_core/hid_result.h"
 #include "hid_core/hid_util.h"
-#include "hid_core/resources/npad/npad_resource.h"
 #include "hid_core/resources/npad/npad_types.h"
 
 namespace Service::HID {
 
-NPadResource::NPadResource(KernelHelpers::ServiceContext& context) : service_context{context} {}
+NPadResource::NPadResource(KernelHelpers::ServiceContext& context) : service_context{context}
+{
+}
 
 NPadResource::~NPadResource() = default;
 
-Result NPadResource::RegisterAppletResourceUserId(u64 aruid) {
+Result NPadResource::RegisterAppletResourceUserId(u64 aruid)
+{
     const auto aruid_index = GetIndexFromAruid(aruid);
     if (aruid_index < AruidIndexMax) {
         return ResultAruidAlreadyRegistered;
@@ -67,7 +71,8 @@ Result NPadResource::RegisterAppletResourceUserId(u64 aruid) {
     return ResultSuccess;
 }
 
-void NPadResource::UnregisterAppletResourceUserId(u64 aruid) {
+void NPadResource::UnregisterAppletResourceUserId(u64 aruid)
+{
     const u64 aruid_index = GetIndexFromAruid(aruid);
 
     FreeAppletResourceId(aruid);
@@ -83,7 +88,8 @@ void NPadResource::UnregisterAppletResourceUserId(u64 aruid) {
     }
 }
 
-void NPadResource::FreeAppletResourceId(u64 aruid) {
+void NPadResource::FreeAppletResourceId(u64 aruid)
+{
     const u64 aruid_index = GetIndexFromAruid(aruid);
 
     if (aruid_index >= AruidIndexMax) {
@@ -103,7 +109,8 @@ void NPadResource::FreeAppletResourceId(u64 aruid) {
     }
 }
 
-Result NPadResource::Activate(u64 aruid) {
+Result NPadResource::Activate(u64 aruid)
+{
     const u64 aruid_index = GetIndexFromAruid(aruid);
 
     if (aruid_index >= AruidIndexMax) {
@@ -128,7 +135,8 @@ Result NPadResource::Activate(u64 aruid) {
     return ResultSuccess;
 }
 
-Result NPadResource::Activate() {
+Result NPadResource::Activate()
+{
     if (ref_counter == (std::numeric_limits<s32>::max)() - 1) {
         return ResultAppletResourceOverflow;
     }
@@ -140,7 +148,8 @@ Result NPadResource::Activate() {
     return ResultSuccess;
 }
 
-Result NPadResource::Deactivate() {
+Result NPadResource::Deactivate()
+{
     if (ref_counter == 0) {
         return ResultAppletResourceNotInitialized;
     }
@@ -150,15 +159,18 @@ Result NPadResource::Deactivate() {
     return ResultSuccess;
 }
 
-NPadData* NPadResource::GetActiveData() {
+NPadData* NPadResource::GetActiveData()
+{
     return &active_data;
 }
 
-u64 NPadResource::GetActiveDataAruid() {
+u64 NPadResource::GetActiveDataAruid()
+{
     return active_data_aruid;
 }
 
-void NPadResource::SetAppletResourceUserId(u64 aruid) {
+void NPadResource::SetAppletResourceUserId(u64 aruid)
+{
     if (active_data_aruid == aruid) {
         return;
     }
@@ -182,7 +194,8 @@ void NPadResource::SetAppletResourceUserId(u64 aruid) {
     }
 }
 
-std::size_t NPadResource::GetIndexFromAruid(u64 aruid) const {
+std::size_t NPadResource::GetIndexFromAruid(u64 aruid) const
+{
     for (std::size_t i = 0; i < AruidIndexMax; i++) {
         if (registration_list.flag[i] == RegistrationStatus::Initialized &&
             registration_list.aruid[i] == aruid) {
@@ -192,7 +205,8 @@ std::size_t NPadResource::GetIndexFromAruid(u64 aruid) const {
     return AruidIndexMax;
 }
 
-Result NPadResource::ApplyNpadSystemCommonPolicy(u64 aruid, bool is_full_policy) {
+Result NPadResource::ApplyNpadSystemCommonPolicy(u64 aruid, bool is_full_policy)
+{
     const u64 aruid_index = GetIndexFromAruid(aruid);
     if (aruid_index >= AruidIndexMax) {
         return ResultNpadNotConnected;
@@ -208,7 +222,8 @@ Result NPadResource::ApplyNpadSystemCommonPolicy(u64 aruid, bool is_full_policy)
     return ResultSuccess;
 }
 
-Result NPadResource::ClearNpadSystemCommonPolicy(u64 aruid) {
+Result NPadResource::ClearNpadSystemCommonPolicy(u64 aruid)
+{
     const u64 aruid_index = GetIndexFromAruid(aruid);
     if (aruid_index >= AruidIndexMax) {
         return ResultNpadNotConnected;
@@ -221,7 +236,8 @@ Result NPadResource::ClearNpadSystemCommonPolicy(u64 aruid) {
     return ResultSuccess;
 }
 
-Result NPadResource::SetSupportedNpadStyleSet(u64 aruid, Core::HID::NpadStyleSet style_set) {
+Result NPadResource::SetSupportedNpadStyleSet(u64 aruid, Core::HID::NpadStyleSet style_set)
+{
     const u64 aruid_index = GetIndexFromAruid(aruid);
     if (aruid_index >= AruidIndexMax) {
         return ResultNpadNotConnected;
@@ -237,7 +253,8 @@ Result NPadResource::SetSupportedNpadStyleSet(u64 aruid, Core::HID::NpadStyleSet
 }
 
 Result NPadResource::GetSupportedNpadStyleSet(Core::HID::NpadStyleSet& out_style_Set,
-                                              u64 aruid) const {
+                                              u64 aruid) const
+{
     const u64 aruid_index = GetIndexFromAruid(aruid);
     if (aruid_index >= AruidIndexMax) {
         return ResultNpadNotConnected;
@@ -253,7 +270,8 @@ Result NPadResource::GetSupportedNpadStyleSet(Core::HID::NpadStyleSet& out_style
 }
 
 Result NPadResource::GetMaskedSupportedNpadStyleSet(Core::HID::NpadStyleSet& out_style_set,
-                                                    u64 aruid) const {
+                                                    u64 aruid) const
+{
     if (aruid == SystemAruid) {
         out_style_set = Core::HID::NpadStyleSet::Fullkey | Core::HID::NpadStyleSet::Handheld |
                         Core::HID::NpadStyleSet::JoyDual | Core::HID::NpadStyleSet::JoyLeft |
@@ -311,7 +329,8 @@ Result NPadResource::GetMaskedSupportedNpadStyleSet(Core::HID::NpadStyleSet& out
     return ResultSuccess;
 }
 
-Result NPadResource::GetAvailableStyleset(Core::HID::NpadStyleSet& out_style_set, u64 aruid) const {
+Result NPadResource::GetAvailableStyleset(Core::HID::NpadStyleSet& out_style_set, u64 aruid) const
+{
     const u64 aruid_index = GetIndexFromAruid(aruid);
     if (aruid_index >= AruidIndexMax) {
         return ResultNpadNotConnected;
@@ -361,7 +380,8 @@ Result NPadResource::GetAvailableStyleset(Core::HID::NpadStyleSet& out_style_set
     return ResultSuccess;
 }
 
-NpadRevision NPadResource::GetNpadRevision(u64 aruid) const {
+NpadRevision NPadResource::GetNpadRevision(u64 aruid) const
+{
     const u64 aruid_index = GetIndexFromAruid(aruid);
     if (aruid_index >= AruidIndexMax) {
         return NpadRevision::Revision0;
@@ -370,7 +390,8 @@ NpadRevision NPadResource::GetNpadRevision(u64 aruid) const {
     return state[aruid_index].npad_revision;
 }
 
-Result NPadResource::IsSupportedNpadStyleSet(bool& is_set, u64 aruid) {
+Result NPadResource::IsSupportedNpadStyleSet(bool& is_set, u64 aruid)
+{
     const u64 aruid_index = GetIndexFromAruid(aruid);
     if (aruid_index >= AruidIndexMax) {
         return ResultNpadNotConnected;
@@ -380,7 +401,8 @@ Result NPadResource::IsSupportedNpadStyleSet(bool& is_set, u64 aruid) {
     return ResultSuccess;
 }
 
-Result NPadResource::SetNpadJoyHoldType(u64 aruid, NpadJoyHoldType hold_type) {
+Result NPadResource::SetNpadJoyHoldType(u64 aruid, NpadJoyHoldType hold_type)
+{
     const u64 aruid_index = GetIndexFromAruid(aruid);
     if (aruid_index >= AruidIndexMax) {
         return ResultNpadNotConnected;
@@ -393,7 +415,8 @@ Result NPadResource::SetNpadJoyHoldType(u64 aruid, NpadJoyHoldType hold_type) {
     return ResultSuccess;
 }
 
-Result NPadResource::GetNpadJoyHoldType(NpadJoyHoldType& hold_type, u64 aruid) const {
+Result NPadResource::GetNpadJoyHoldType(NpadJoyHoldType& hold_type, u64 aruid) const
+{
     const u64 aruid_index = GetIndexFromAruid(aruid);
     if (aruid_index >= AruidIndexMax) {
         return ResultNpadNotConnected;
@@ -409,7 +432,8 @@ Result NPadResource::GetNpadJoyHoldType(NpadJoyHoldType& hold_type, u64 aruid) c
 }
 
 Result NPadResource::SetNpadHandheldActivationMode(u64 aruid,
-                                                   NpadHandheldActivationMode activation_mode) {
+                                                   NpadHandheldActivationMode activation_mode)
+{
     const u64 aruid_index = GetIndexFromAruid(aruid);
     if (aruid_index >= AruidIndexMax) {
         return ResultNpadNotConnected;
@@ -423,7 +447,8 @@ Result NPadResource::SetNpadHandheldActivationMode(u64 aruid,
 }
 
 Result NPadResource::GetNpadHandheldActivationMode(NpadHandheldActivationMode& activation_mode,
-                                                   u64 aruid) const {
+                                                   u64 aruid) const
+{
     const u64 aruid_index = GetIndexFromAruid(aruid);
     if (aruid_index >= AruidIndexMax) {
         return ResultNpadNotConnected;
@@ -433,8 +458,10 @@ Result NPadResource::GetNpadHandheldActivationMode(NpadHandheldActivationMode& a
     return ResultSuccess;
 }
 
-Result NPadResource::SetSupportedNpadIdType(
-    u64 aruid, std::span<const Core::HID::NpadIdType> supported_npad_list) {
+Result
+NPadResource::SetSupportedNpadIdType(u64 aruid,
+                                     std::span<const Core::HID::NpadIdType> supported_npad_list)
+{
     const u64 aruid_index = GetIndexFromAruid(aruid);
     if (aruid_index >= AruidIndexMax) {
         return ResultNpadNotConnected;
@@ -451,7 +478,8 @@ Result NPadResource::SetSupportedNpadIdType(
     return result;
 }
 
-bool NPadResource::IsControllerSupported(u64 aruid, Core::HID::NpadStyleIndex style_index) const {
+bool NPadResource::IsControllerSupported(u64 aruid, Core::HID::NpadStyleIndex style_index) const
+{
     const u64 aruid_index = GetIndexFromAruid(aruid);
     if (aruid_index >= AruidIndexMax) {
         return false;
@@ -459,7 +487,8 @@ bool NPadResource::IsControllerSupported(u64 aruid, Core::HID::NpadStyleIndex st
     return state[aruid_index].data.IsNpadStyleIndexSupported(style_index);
 }
 
-Result NPadResource::SetLrAssignmentMode(u64 aruid, bool is_enabled) {
+Result NPadResource::SetLrAssignmentMode(u64 aruid, bool is_enabled)
+{
     const u64 aruid_index = GetIndexFromAruid(aruid);
     if (aruid_index >= AruidIndexMax) {
         return ResultNpadNotConnected;
@@ -472,7 +501,8 @@ Result NPadResource::SetLrAssignmentMode(u64 aruid, bool is_enabled) {
     return ResultSuccess;
 }
 
-Result NPadResource::GetLrAssignmentMode(bool& is_enabled, u64 aruid) const {
+Result NPadResource::GetLrAssignmentMode(bool& is_enabled, u64 aruid) const
+{
     const u64 aruid_index = GetIndexFromAruid(aruid);
     if (aruid_index >= AruidIndexMax) {
         return ResultNpadNotConnected;
@@ -482,7 +512,8 @@ Result NPadResource::GetLrAssignmentMode(bool& is_enabled, u64 aruid) const {
     return ResultSuccess;
 }
 
-Result NPadResource::SetAssigningSingleOnSlSrPress(u64 aruid, bool is_enabled) {
+Result NPadResource::SetAssigningSingleOnSlSrPress(u64 aruid, bool is_enabled)
+{
     const u64 aruid_index = GetIndexFromAruid(aruid);
     if (aruid_index >= AruidIndexMax) {
         return ResultNpadNotConnected;
@@ -495,7 +526,8 @@ Result NPadResource::SetAssigningSingleOnSlSrPress(u64 aruid, bool is_enabled) {
     return ResultSuccess;
 }
 
-Result NPadResource::IsAssigningSingleOnSlSrPressEnabled(bool& is_enabled, u64 aruid) const {
+Result NPadResource::IsAssigningSingleOnSlSrPressEnabled(bool& is_enabled, u64 aruid) const
+{
     const u64 aruid_index = GetIndexFromAruid(aruid);
     if (aruid_index >= AruidIndexMax) {
         return ResultNpadNotConnected;
@@ -507,7 +539,8 @@ Result NPadResource::IsAssigningSingleOnSlSrPressEnabled(bool& is_enabled, u64 a
 
 Result NPadResource::AcquireNpadStyleSetUpdateEventHandle(u64 aruid,
                                                           Kernel::KReadableEvent** out_event,
-                                                          Core::HID::NpadIdType npad_id) {
+                                                          Core::HID::NpadIdType npad_id)
+{
     const u64 aruid_index = GetIndexFromAruid(aruid);
     if (aruid_index >= AruidIndexMax) {
         return ResultNpadNotConnected;
@@ -532,7 +565,8 @@ Result NPadResource::AcquireNpadStyleSetUpdateEventHandle(u64 aruid,
     return ResultSuccess;
 }
 
-Result NPadResource::SignalStyleSetUpdateEvent(u64 aruid, Core::HID::NpadIdType npad_id) {
+Result NPadResource::SignalStyleSetUpdateEvent(u64 aruid, Core::HID::NpadIdType npad_id)
+{
     const u64 aruid_index = GetIndexFromAruid(aruid);
     if (aruid_index >= AruidIndexMax) {
         return ResultNpadNotConnected;
@@ -545,7 +579,8 @@ Result NPadResource::SignalStyleSetUpdateEvent(u64 aruid, Core::HID::NpadIdType 
 }
 
 Result NPadResource::GetHomeProtectionEnabled(bool& is_enabled, u64 aruid,
-                                              Core::HID::NpadIdType npad_id) const {
+                                              Core::HID::NpadIdType npad_id) const
+{
     const u64 aruid_index = GetIndexFromAruid(aruid);
     if (aruid_index >= AruidIndexMax) {
         return ResultNpadNotConnected;
@@ -556,7 +591,8 @@ Result NPadResource::GetHomeProtectionEnabled(bool& is_enabled, u64 aruid,
 }
 
 Result NPadResource::SetHomeProtectionEnabled(u64 aruid, Core::HID::NpadIdType npad_id,
-                                              bool is_enabled) {
+                                              bool is_enabled)
+{
     const u64 aruid_index = GetIndexFromAruid(aruid);
     if (aruid_index >= AruidIndexMax) {
         return ResultNpadNotConnected;
@@ -569,7 +605,8 @@ Result NPadResource::SetHomeProtectionEnabled(u64 aruid, Core::HID::NpadIdType n
     return ResultSuccess;
 }
 
-Result NPadResource::SetNpadAnalogStickUseCenterClamp(u64 aruid, bool is_enabled) {
+Result NPadResource::SetNpadAnalogStickUseCenterClamp(u64 aruid, bool is_enabled)
+{
     const u64 aruid_index = GetIndexFromAruid(aruid);
     if (aruid_index >= AruidIndexMax) {
         return ResultNpadNotConnected;
@@ -583,7 +620,8 @@ Result NPadResource::SetNpadAnalogStickUseCenterClamp(u64 aruid, bool is_enabled
 }
 
 Result NPadResource::SetButtonConfig(u64 aruid, Core::HID::NpadIdType npad_id, std::size_t index,
-                                     Core::HID::NpadButton button_config) {
+                                     Core::HID::NpadButton button_config)
+{
     const u64 aruid_index = GetIndexFromAruid(aruid);
     if (aruid_index >= AruidIndexMax) {
         return ResultNpadNotConnected;
@@ -595,7 +633,8 @@ Result NPadResource::SetButtonConfig(u64 aruid, Core::HID::NpadIdType npad_id, s
 
 Core::HID::NpadButton NPadResource::GetButtonConfig(u64 aruid, Core::HID::NpadIdType npad_id,
                                                     std::size_t index, Core::HID::NpadButton mask,
-                                                    bool is_enabled) {
+                                                    bool is_enabled)
+{
     const u64 aruid_index = GetIndexFromAruid(aruid);
     if (aruid_index >= AruidIndexMax) {
         return Core::HID::NpadButton::None;
@@ -611,7 +650,8 @@ Core::HID::NpadButton NPadResource::GetButtonConfig(u64 aruid, Core::HID::NpadId
     return Core::HID::NpadButton::None;
 }
 
-void NPadResource::ResetButtonConfig() {
+void NPadResource::ResetButtonConfig()
+{
     for (auto& selected_state : state) {
         selected_state.button_config = {};
     }
@@ -619,7 +659,8 @@ void NPadResource::ResetButtonConfig() {
 
 Result NPadResource::SetNpadCaptureButtonAssignment(u64 aruid,
                                                     Core::HID::NpadStyleSet npad_style_set,
-                                                    Core::HID::NpadButton button_assignment) {
+                                                    Core::HID::NpadButton button_assignment)
+{
     const u64 aruid_index = GetIndexFromAruid(aruid);
     if (aruid_index >= AruidIndexMax) {
         return ResultNpadNotConnected;
@@ -651,7 +692,8 @@ Result NPadResource::SetNpadCaptureButtonAssignment(u64 aruid,
     return ResultSuccess;
 }
 
-Result NPadResource::ClearNpadCaptureButtonAssignment(u64 aruid) {
+Result NPadResource::ClearNpadCaptureButtonAssignment(u64 aruid)
+{
     const u64 aruid_index = GetIndexFromAruid(aruid);
     if (aruid_index >= AruidIndexMax) {
         return ResultNpadNotConnected;
@@ -667,7 +709,8 @@ Result NPadResource::ClearNpadCaptureButtonAssignment(u64 aruid) {
 }
 
 std::size_t NPadResource::GetNpadCaptureButtonAssignment(std::span<Core::HID::NpadButton> out_list,
-                                                         u64 aruid) const {
+                                                         u64 aruid) const
+{
     const u64 aruid_index = GetIndexFromAruid(aruid);
     if (aruid_index >= AruidIndexMax) {
         return 0;
@@ -675,7 +718,8 @@ std::size_t NPadResource::GetNpadCaptureButtonAssignment(std::span<Core::HID::Np
     return state[aruid_index].data.GetNpadCaptureButtonAssignmentList(out_list);
 }
 
-void NPadResource::SetNpadRevision(u64 aruid, NpadRevision revision) {
+void NPadResource::SetNpadRevision(u64 aruid, NpadRevision revision)
+{
     const u64 aruid_index = GetIndexFromAruid(aruid);
     if (aruid_index >= AruidIndexMax) {
         return;
@@ -684,7 +728,8 @@ void NPadResource::SetNpadRevision(u64 aruid, NpadRevision revision) {
     state[aruid_index].npad_revision = revision;
 }
 
-Result NPadResource::SetNpadSystemExtStateEnabled(u64 aruid, bool is_enabled) {
+Result NPadResource::SetNpadSystemExtStateEnabled(u64 aruid, bool is_enabled)
+{
     const u64 aruid_index = GetIndexFromAruid(aruid);
     if (aruid_index >= AruidIndexMax) {
         return ResultNpadNotConnected;

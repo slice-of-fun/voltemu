@@ -12,9 +12,9 @@
 
 #include "video_core/host1x/gpu_device_memory_manager.h"
 #include "video_core/renderer_opengl/gl_resource_manager.h"
-#include "video_core/renderer_opengl/present/smaa.h"
-#include "video_core/renderer_opengl/present/fxaa.h"
 #include "video_core/renderer_opengl/present/fsr.h"
+#include "video_core/renderer_opengl/present/fxaa.h"
+#include "video_core/renderer_opengl/present/smaa.h"
 
 namespace Layout {
 struct FramebufferLayout;

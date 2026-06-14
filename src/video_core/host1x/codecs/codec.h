@@ -8,8 +8,9 @@
 
 #include <memory>
 #include <optional>
-#include <string_view>
 #include <queue>
+#include <string_view>
+
 #include "common/common_types.h"
 #include "video_core/host1x/codecs/h264.h"
 #include "video_core/host1x/codecs/vp8.h"

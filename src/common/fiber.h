@@ -48,6 +48,7 @@ public:
     void SetRewindPoint(std::function<void()>&& rewind_func);
     /// Only call from main thread's fiber
     void Exit();
+
 private:
     Fiber();
     void Start(boost::context::detail::transfer_t& transfer);

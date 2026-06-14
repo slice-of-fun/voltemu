@@ -4,12 +4,15 @@
 // SPDX-FileCopyrightText: Copyright 2017 Citra Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "yuzu/multiplayer/direct_connect.h"
+
 #include <QComboBox>
 #include <QFuture>
 #include <QIntValidator>
 #include <QRegularExpressionValidator>
 #include <QString>
 #include <QtConcurrentRun>
+
 #include "common/settings.h"
 #include "core/core.h"
 #include "core/internal_network/network_interface.h"
@@ -18,7 +21,6 @@
 #include "ui_direct_connect.h"
 #include "yuzu/main_window.h"
 #include "yuzu/multiplayer/client_room.h"
-#include "yuzu/multiplayer/direct_connect.h"
 #include "yuzu/multiplayer/message.h"
 #include "yuzu/multiplayer/state.h"
 #include "yuzu/multiplayer/validation.h"
@@ -27,7 +29,8 @@ enum class ConnectionType : u8 { TraversalServer, IP };
 
 DirectConnectWindow::DirectConnectWindow(Core::System& system_, QWidget* parent)
     : QDialog(parent, Qt::WindowTitleHint | Qt::WindowCloseButtonHint | Qt::WindowSystemMenuHint),
-      ui(std::make_unique<Ui::DirectConnect>()), system{system_} {
+      ui(std::make_unique<Ui::DirectConnect>()), system{system_}
+{
 
     ui->setupUi(this);
 
@@ -54,11 +57,13 @@ DirectConnectWindow::DirectConnectWindow(Core::System& system_, QWidget* parent)
 
 DirectConnectWindow::~DirectConnectWindow() = default;
 
-void DirectConnectWindow::RetranslateUi() {
+void DirectConnectWindow::RetranslateUi()
+{
     ui->retranslateUi(this);
 }
 
-void DirectConnectWindow::Connect() {
+void DirectConnectWindow::Connect()
+{
     if (!Network::GetSelectedNetworkInterface()) {
         NetworkMessage::ErrorManager::ShowError(
             NetworkMessage::ErrorManager::NO_INTERFACE_SELECTED);
@@ -118,17 +123,20 @@ void DirectConnectWindow::Connect() {
     BeginConnecting();
 }
 
-void DirectConnectWindow::BeginConnecting() {
+void DirectConnectWindow::BeginConnecting()
+{
     ui->connect->setEnabled(false);
     ui->connect->setText(tr("Connecting"));
 }
 
-void DirectConnectWindow::EndConnecting() {
+void DirectConnectWindow::EndConnecting()
+{
     ui->connect->setEnabled(true);
     ui->connect->setText(tr("Connect"));
 }
 
-void DirectConnectWindow::OnConnection() {
+void DirectConnectWindow::OnConnection()
+{
     EndConnecting();
 
     if (auto room_member = Network::GetRoomMember().lock()) {

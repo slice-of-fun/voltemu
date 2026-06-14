@@ -3,28 +3,29 @@
 
 #pragma once
 
-#include <span>
 #include <ankerl/unordered_dense.h>
-#include <vector>
+
 #include <oaknut/code_block.hpp>
 #include <oaknut/oaknut.hpp>
+#include <span>
+#include <utility>
+#include <vector>
 
-#include "common/logging.h"
 #include "common/common_types.h"
+#include "common/logging.h"
 #include "common/settings.h"
 #include "core/hle/kernel/code_set.h"
 #include "core/hle/kernel/k_typed_address.h"
-#include <utility>
-using ModuleID = std::array<u8, 32>;  // NSO build ID
+using ModuleID = std::array<u8, 32>; // NSO build ID
 struct PatchCacheKey {
     ModuleID module_id;
     uintptr_t offset;
     bool operator==(const PatchCacheKey&) const = default;
 };
 
-template <>
-struct std::hash<PatchCacheKey> {
-    size_t operator()(const PatchCacheKey& key) const {
+template<> struct std::hash<PatchCacheKey> {
+    size_t operator()(const PatchCacheKey& key) const
+    {
         // Simple XOR hash of first few bytes
         size_t hash_ = 0;
         for (size_t i = 0; i < key.module_id.size(); ++i) {
@@ -43,26 +44,22 @@ enum class PatchMode : u32 {
     Split,    ///< Patch sections are inserted before .text and after .data
 };
 
-
 using ModuleTextAddress = u64;
 using PatchTextAddress = u64;
 using EntryTrampolines = ankerl::unordered_dense::map<ModuleTextAddress, PatchTextAddress>;
 
 class Patcher {
 public:
-    void SetModuleID(const ModuleID& id) {
-        module_id = id;
-    }
+    void SetModuleID(const ModuleID& id) { module_id = id; }
     explicit Patcher();
     ~Patcher();
     bool PatchText(std::span<const u8> program_image, const Kernel::CodeSet::Segment& code);
-    bool RelocateAndCopy(Common::ProcessAddress load_base, const Kernel::CodeSet::Segment& code, std::vector<u8>& program_image, EntryTrampolines* out_trampolines);
+    bool RelocateAndCopy(Common::ProcessAddress load_base, const Kernel::CodeSet::Segment& code,
+                         std::vector<u8>& program_image, EntryTrampolines* out_trampolines);
     size_t GetSectionSize() const noexcept;
     size_t GetPreSectionSize() const noexcept;
 
-    [[nodiscard]] PatchMode GetPatchMode() const noexcept {
-        return mode;
-    }
+    [[nodiscard]] PatchMode GetPatchMode() const noexcept { return mode; }
 
 private:
     using ModuleDestLabel = uintptr_t;
@@ -77,47 +74,71 @@ private:
     void WriteSaveContext(oaknut::VectorCodeGenerator& code);
     void LockContext(oaknut::VectorCodeGenerator& code);
     void UnlockContext(oaknut::VectorCodeGenerator& code);
-    void WriteSvcTrampoline(ModuleDestLabel module_dest, u32 svc_id, oaknut::VectorCodeGenerator& code, oaknut::Label& save_ctx, oaknut::Label& load_ctx);
-    void WriteMrsHandler(ModuleDestLabel module_dest, oaknut::XReg dest_reg, oaknut::SystemReg src_reg, oaknut::VectorCodeGenerator& code);
-    void WriteMsrHandler(ModuleDestLabel module_dest, oaknut::XReg src_reg, oaknut::VectorCodeGenerator& code);
-    void WriteCntpctHandler(ModuleDestLabel module_dest, oaknut::XReg dest_reg, oaknut::VectorCodeGenerator& code);
+    void WriteSvcTrampoline(ModuleDestLabel module_dest, u32 svc_id,
+                            oaknut::VectorCodeGenerator& code, oaknut::Label& save_ctx,
+                            oaknut::Label& load_ctx);
+    void WriteMrsHandler(ModuleDestLabel module_dest, oaknut::XReg dest_reg,
+                         oaknut::SystemReg src_reg, oaknut::VectorCodeGenerator& code);
+    void WriteMsrHandler(ModuleDestLabel module_dest, oaknut::XReg src_reg,
+                         oaknut::VectorCodeGenerator& code);
+    void WriteCntpctHandler(ModuleDestLabel module_dest, oaknut::XReg dest_reg,
+                            oaknut::VectorCodeGenerator& code);
 
     // Convenience wrappers using default code generator
     void WriteLoadContext() { WriteLoadContext(c); }
     void WriteSaveContext() { WriteSaveContext(c); }
     void LockContext() { LockContext(c); }
     void UnlockContext() { UnlockContext(c); }
-    void WriteSvcTrampoline(ModuleDestLabel module_dest, u32 svc_id) { WriteSvcTrampoline(module_dest, svc_id, c, m_save_context, m_load_context); }
-    void WriteMrsHandler(ModuleDestLabel module_dest, oaknut::XReg dest_reg, oaknut::SystemReg src_reg) { WriteMrsHandler(module_dest, dest_reg, src_reg, c); }
-    void WriteMsrHandler(ModuleDestLabel module_dest, oaknut::XReg src_reg) { WriteMsrHandler(module_dest, src_reg, c); }
-    void WriteCntpctHandler(ModuleDestLabel module_dest, oaknut::XReg dest_reg) { WriteCntpctHandler(module_dest, dest_reg, c); }
+    void WriteSvcTrampoline(ModuleDestLabel module_dest, u32 svc_id)
+    {
+        WriteSvcTrampoline(module_dest, svc_id, c, m_save_context, m_load_context);
+    }
+    void WriteMrsHandler(ModuleDestLabel module_dest, oaknut::XReg dest_reg,
+                         oaknut::SystemReg src_reg)
+    {
+        WriteMrsHandler(module_dest, dest_reg, src_reg, c);
+    }
+    void WriteMsrHandler(ModuleDestLabel module_dest, oaknut::XReg src_reg)
+    {
+        WriteMsrHandler(module_dest, src_reg, c);
+    }
+    void WriteCntpctHandler(ModuleDestLabel module_dest, oaknut::XReg dest_reg)
+    {
+        WriteCntpctHandler(module_dest, dest_reg, c);
+    }
 
 private:
-    void BranchToPatch(uintptr_t module_dest) {
+    void BranchToPatch(uintptr_t module_dest)
+    {
         LOG_DEBUG(Core_ARM, "Patch for offset {:#x}", module_dest);
         curr_patch->m_branch_to_patch_relocations.push_back({c.offset(), module_dest});
     }
 
-    void BranchToPatchPre(uintptr_t module_dest) {
-         curr_patch->m_branch_to_pre_patch_relocations.push_back({c_pre.offset(), module_dest});
+    void BranchToPatchPre(uintptr_t module_dest)
+    {
+        curr_patch->m_branch_to_pre_patch_relocations.push_back({c_pre.offset(), module_dest});
     }
 
-    void BranchToModule(uintptr_t module_dest) {
+    void BranchToModule(uintptr_t module_dest)
+    {
         curr_patch->m_branch_to_module_relocations.push_back({c.offset(), module_dest});
         c.dw(0);
     }
 
-    void BranchToModulePre(uintptr_t module_dest) {
+    void BranchToModulePre(uintptr_t module_dest)
+    {
         curr_patch->m_branch_to_module_relocations_pre.push_back({c_pre.offset(), module_dest});
         c_pre.dw(0);
     }
 
-    void WriteModulePc(uintptr_t module_dest) {
+    void WriteModulePc(uintptr_t module_dest)
+    {
         curr_patch->m_write_module_pc_relocations.push_back({c.offset(), module_dest});
         c.dx(0);
     }
 
-    void WriteModulePcPre(uintptr_t module_dest) {
+    void WriteModulePcPre(uintptr_t module_dest)
+    {
         curr_patch->m_write_module_pc_relocations_pre.push_back({c_pre.offset(), module_dest});
         c_pre.dx(0);
     }

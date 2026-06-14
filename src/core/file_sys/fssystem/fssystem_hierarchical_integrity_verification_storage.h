@@ -27,17 +27,11 @@ struct HierarchicalIntegrityVerificationInformation {
     std::array<HierarchicalIntegrityVerificationLevelInformation, IntegrityMaxLayerCount - 1> info;
     HashSalt seed;
 
-    s64 GetLayeredHashSize() const {
-        return this->info[this->max_layers - 2].offset;
-    }
+    s64 GetLayeredHashSize() const { return this->info[this->max_layers - 2].offset; }
 
-    s64 GetDataOffset() const {
-        return this->info[this->max_layers - 2].offset;
-    }
+    s64 GetDataOffset() const { return this->info[this->max_layers - 2].offset; }
 
-    s64 GetDataSize() const {
-        return this->info[this->max_layers - 2].size;
-    }
+    s64 GetDataSize() const { return this->info[this->max_layers - 2].size; }
 };
 static_assert(std::is_trivial_v<HierarchicalIntegrityVerificationInformation>);
 
@@ -79,29 +73,16 @@ public:
         std::array<VirtualFile, DataStorage + 1> m_storages;
 
     public:
-        void SetMasterHashStorage(VirtualFile s) {
-            m_storages[MasterStorage] = s;
-        }
-        void SetLayer1HashStorage(VirtualFile s) {
-            m_storages[Layer1Storage] = s;
-        }
-        void SetLayer2HashStorage(VirtualFile s) {
-            m_storages[Layer2Storage] = s;
-        }
-        void SetLayer3HashStorage(VirtualFile s) {
-            m_storages[Layer3Storage] = s;
-        }
-        void SetLayer4HashStorage(VirtualFile s) {
-            m_storages[Layer4Storage] = s;
-        }
-        void SetLayer5HashStorage(VirtualFile s) {
-            m_storages[Layer5Storage] = s;
-        }
-        void SetDataStorage(VirtualFile s) {
-            m_storages[DataStorage] = s;
-        }
+        void SetMasterHashStorage(VirtualFile s) { m_storages[MasterStorage] = s; }
+        void SetLayer1HashStorage(VirtualFile s) { m_storages[Layer1Storage] = s; }
+        void SetLayer2HashStorage(VirtualFile s) { m_storages[Layer2Storage] = s; }
+        void SetLayer3HashStorage(VirtualFile s) { m_storages[Layer3Storage] = s; }
+        void SetLayer4HashStorage(VirtualFile s) { m_storages[Layer4Storage] = s; }
+        void SetLayer5HashStorage(VirtualFile s) { m_storages[Layer5Storage] = s; }
+        void SetDataStorage(VirtualFile s) { m_storages[DataStorage] = s; }
 
-        VirtualFile& operator[](s32 index) {
+        VirtualFile& operator[](s32 index)
+        {
             ASSERT(MasterStorage <= index && index <= DataStorage);
             return m_storages[index];
         }
@@ -109,9 +90,7 @@ public:
 
 public:
     HierarchicalIntegrityVerificationStorage();
-    virtual ~HierarchicalIntegrityVerificationStorage() override {
-        this->Finalize();
-    }
+    virtual ~HierarchicalIntegrityVerificationStorage() override { this->Finalize(); }
 
     Result Initialize(const HierarchicalIntegrityVerificationInformation& info,
                       HierarchicalStorageInformation storage, int max_data_cache_entries,
@@ -121,22 +100,23 @@ public:
     virtual size_t Read(u8* buffer, size_t size, size_t offset) const override;
     virtual size_t GetSize() const override;
 
-    bool IsInitialized() const {
-        return m_data_size >= 0;
-    }
+    bool IsInitialized() const { return m_data_size >= 0; }
 
-    s64 GetL1HashVerificationBlockSize() const {
+    s64 GetL1HashVerificationBlockSize() const
+    {
         return m_verify_storages[m_max_layers - 2]->GetBlockSize();
     }
 
-    VirtualFile GetL1HashStorage() {
+    VirtualFile GetL1HashStorage()
+    {
         return std::make_shared<OffsetVfsFile>(
             m_buffer_storages[m_max_layers - 3],
             Common::DivideUp(m_data_size, this->GetL1HashVerificationBlockSize()), 0);
     }
 
 public:
-    static constexpr s8 GetDefaultDataCacheBufferLevel(u32 max_layers) {
+    static constexpr s8 GetDefaultDataCacheBufferLevel(u32 max_layers)
+    {
         return static_cast<s8>(16 + max_layers - 2);
     }
 
@@ -147,9 +127,7 @@ protected:
 private:
     static GenerateRandomFunction s_generate_random;
 
-    static void SetGenerateRandomFunction(GenerateRandomFunction func) {
-        s_generate_random = func;
-    }
+    static void SetGenerateRandomFunction(GenerateRandomFunction func) { s_generate_random = func; }
 
 private:
     friend struct HierarchicalIntegrityVerificationMetaInformation;

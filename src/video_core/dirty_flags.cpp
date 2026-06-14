@@ -1,11 +1,12 @@
 // SPDX-FileCopyrightText: Copyright 2019 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "video_core/dirty_flags.h"
+
 #include <array>
 #include <cstddef>
 
 #include "common/common_types.h"
-#include "video_core/dirty_flags.h"
 
 #define OFF(field_name) MAXWELL3D_REG_INDEX(field_name)
 #define NUM(field_name) (sizeof(::Tegra::Engines::Maxwell3D::Regs::field_name) / (sizeof(u32)))
@@ -14,7 +15,8 @@ namespace VideoCommon::Dirty {
 namespace {
 using Tegra::Engines::Maxwell3D;
 
-void SetupDirtyVertexBuffers(Maxwell3D::DirtyState::Tables& tables) {
+void SetupDirtyVertexBuffers(Maxwell3D::DirtyState::Tables& tables)
+{
     static constexpr std::size_t num_array = 3;
     for (std::size_t i = 0; i < Maxwell3D::Regs::NumVertexArrays; ++i) {
         const std::size_t array_offset = OFF(vertex_streams) + i * NUM(vertex_streams[0]);
@@ -27,16 +29,19 @@ void SetupDirtyVertexBuffers(Maxwell3D::DirtyState::Tables& tables) {
     }
 }
 
-void SetupIndexBuffer(Maxwell3D::DirtyState::Tables& tables) {
+void SetupIndexBuffer(Maxwell3D::DirtyState::Tables& tables)
+{
     FillBlock(tables[0], OFF(index_buffer), NUM(index_buffer), IndexBuffer);
 }
 
-void SetupDirtyDescriptors(Maxwell3D::DirtyState::Tables& tables) {
+void SetupDirtyDescriptors(Maxwell3D::DirtyState::Tables& tables)
+{
     FillBlock(tables[0], OFF(tex_header), NUM(tex_header), Descriptors);
     FillBlock(tables[0], OFF(tex_sampler), NUM(tex_sampler), Descriptors);
 }
 
-void SetupDirtyRenderTargets(Maxwell3D::DirtyState::Tables& tables) {
+void SetupDirtyRenderTargets(Maxwell3D::DirtyState::Tables& tables)
+{
     static constexpr std::size_t num_per_rt = NUM(rt[0]);
     static constexpr std::size_t begin = OFF(rt);
     static constexpr std::size_t num = num_per_rt * Maxwell3D::Regs::NumRenderTargets;
@@ -60,13 +65,15 @@ void SetupDirtyRenderTargets(Maxwell3D::DirtyState::Tables& tables) {
     }
 }
 
-void SetupDirtyShaders(Maxwell3D::DirtyState::Tables& tables) {
+void SetupDirtyShaders(Maxwell3D::DirtyState::Tables& tables)
+{
     FillBlock(tables[0], OFF(pipelines), NUM(pipelines[0]) * Maxwell3D::Regs::MaxShaderProgram,
               Shaders);
 }
 } // Anonymous namespace
 
-void SetupDirtyFlags(Maxwell3D::DirtyState::Tables& tables) {
+void SetupDirtyFlags(Maxwell3D::DirtyState::Tables& tables)
+{
     SetupDirtyVertexBuffers(tables);
     SetupIndexBuffer(tables);
     SetupDirtyDescriptors(tables);

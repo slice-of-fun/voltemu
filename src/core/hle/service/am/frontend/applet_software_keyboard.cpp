@@ -4,11 +4,12 @@
 // SPDX-FileCopyrightText: Copyright 2021 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/am/frontend/applet_software_keyboard.h"
+
 #include "common/string_util.h"
 #include "core/core.h"
 #include "core/frontend/applets/software_keyboard.h"
 #include "core/hle/service/am/am.h"
-#include "core/hle/service/am/frontend/applet_software_keyboard.h"
 #include "core/hle/service/am/service/storage.h"
 
 namespace Service::AM::Frontend {
@@ -22,7 +23,8 @@ constexpr std::size_t REPLY_BASE_SIZE = sizeof(SwkbdState) + sizeof(SwkbdReplyTy
 constexpr std::size_t REPLY_UTF8_SIZE = 0x7D4;
 constexpr std::size_t REPLY_UTF16_SIZE = 0x3EC;
 
-constexpr const char* GetTextCheckResultName(SwkbdTextCheckResult text_check_result) {
+constexpr const char* GetTextCheckResultName(SwkbdTextCheckResult text_check_result)
+{
     switch (text_check_result) {
     case SwkbdTextCheckResult::Success:
         return "Success";
@@ -38,7 +40,8 @@ constexpr const char* GetTextCheckResultName(SwkbdTextCheckResult text_check_res
     }
 }
 
-void SetReplyBase(std::vector<u8>& reply, SwkbdState state, SwkbdReplyType reply_type) {
+void SetReplyBase(std::vector<u8>& reply, SwkbdState state, SwkbdReplyType reply_type)
+{
     std::memcpy(reply.data(), &state, sizeof(SwkbdState));
     std::memcpy(reply.data() + sizeof(SwkbdState), &reply_type, sizeof(SwkbdReplyType));
 }
@@ -48,11 +51,14 @@ void SetReplyBase(std::vector<u8>& reply, SwkbdState state, SwkbdReplyType reply
 SoftwareKeyboard::SoftwareKeyboard(Core::System& system_, std::shared_ptr<Applet> applet_,
                                    LibraryAppletMode applet_mode_,
                                    Core::Frontend::SoftwareKeyboardApplet& frontend_)
-    : FrontendApplet{system_, applet_, applet_mode_}, frontend{frontend_} {}
+    : FrontendApplet{system_, applet_, applet_mode_}, frontend{frontend_}
+{
+}
 
 SoftwareKeyboard::~SoftwareKeyboard() = default;
 
-void SoftwareKeyboard::Initialize() {
+void SoftwareKeyboard::Initialize()
+{
     FrontendApplet::Initialize();
 
     LOG_INFO(Service_AM, "Initializing Software Keyboard Applet with LibraryAppletMode={}",
@@ -81,11 +87,13 @@ void SoftwareKeyboard::Initialize() {
     }
 }
 
-Result SoftwareKeyboard::GetStatus() const {
+Result SoftwareKeyboard::GetStatus() const
+{
     return status;
 }
 
-void SoftwareKeyboard::ExecuteInteractive() {
+void SoftwareKeyboard::ExecuteInteractive()
+{
     if (complete) {
         return;
     }
@@ -97,7 +105,8 @@ void SoftwareKeyboard::ExecuteInteractive() {
     }
 }
 
-void SoftwareKeyboard::Execute() {
+void SoftwareKeyboard::Execute()
+{
     if (complete) {
         return;
     }
@@ -110,7 +119,8 @@ void SoftwareKeyboard::Execute() {
 }
 
 void SoftwareKeyboard::SubmitTextNormal(SwkbdResult result, std::u16string submitted_text,
-                                        bool confirmed) {
+                                        bool confirmed)
+{
     if (complete) {
         return;
     }
@@ -127,7 +137,8 @@ void SoftwareKeyboard::SubmitTextNormal(SwkbdResult result, std::u16string submi
 }
 
 void SoftwareKeyboard::SubmitTextInline(SwkbdReplyType reply_type, std::u16string submitted_text,
-                                        s32 cursor_position) {
+                                        s32 cursor_position)
+{
     if (complete) {
         return;
     }
@@ -180,7 +191,8 @@ void SoftwareKeyboard::SubmitTextInline(SwkbdReplyType reply_type, std::u16strin
     SendReply(reply_type);
 }
 
-void SoftwareKeyboard::InitializeForeground() {
+void SoftwareKeyboard::InitializeForeground()
+{
     LOG_INFO(Service_AM, "Initializing Normal Software Keyboard Applet.");
 
     is_background = false;
@@ -246,7 +258,8 @@ void SoftwareKeyboard::InitializeForeground() {
     InitializeFrontendNormalKeyboard();
 }
 
-void SoftwareKeyboard::InitializePartialForeground(LibraryAppletMode library_applet_mode) {
+void SoftwareKeyboard::InitializePartialForeground(LibraryAppletMode library_applet_mode)
+{
     LOG_INFO(Service_AM, "Initializing Inline Software Keyboard Applet.");
 
     is_background = true;
@@ -267,7 +280,8 @@ void SoftwareKeyboard::InitializePartialForeground(LibraryAppletMode library_app
     }
 }
 
-void SoftwareKeyboard::ProcessTextCheck() {
+void SoftwareKeyboard::ProcessTextCheck()
+{
     const auto text_check_storage = PopInteractiveInData();
     ASSERT(text_check_storage != nullptr);
 
@@ -314,7 +328,8 @@ void SoftwareKeyboard::ProcessTextCheck() {
     }
 }
 
-void SoftwareKeyboard::ProcessInlineKeyboardRequest() {
+void SoftwareKeyboard::ProcessInlineKeyboardRequest()
+{
     const auto request_data_storage = PopInteractiveInData();
     ASSERT(request_data_storage != nullptr);
 
@@ -356,8 +371,8 @@ void SoftwareKeyboard::ProcessInlineKeyboardRequest() {
     }
 }
 
-void SoftwareKeyboard::SubmitNormalOutputAndExit(SwkbdResult result,
-                                                 std::u16string submitted_text) {
+void SoftwareKeyboard::SubmitNormalOutputAndExit(SwkbdResult result, std::u16string submitted_text)
+{
     std::vector<u8> out_data(sizeof(SwkbdResult) + STRING_BUFFER_SIZE);
 
     if (swkbd_config_common.use_utf8) {
@@ -383,7 +398,8 @@ void SoftwareKeyboard::SubmitNormalOutputAndExit(SwkbdResult result,
     ExitKeyboard();
 }
 
-void SoftwareKeyboard::SubmitForTextCheck(std::u16string submitted_text) {
+void SoftwareKeyboard::SubmitForTextCheck(std::u16string submitted_text)
+{
     current_text = std::move(submitted_text);
 
     std::vector<u8> out_data(sizeof(u64) + STRING_BUFFER_SIZE);
@@ -414,7 +430,8 @@ void SoftwareKeyboard::SubmitForTextCheck(std::u16string submitted_text) {
     PushInteractiveOutData(std::make_shared<IStorage>(system, std::move(out_data)));
 }
 
-void SoftwareKeyboard::SendReply(SwkbdReplyType reply_type) {
+void SoftwareKeyboard::SendReply(SwkbdReplyType reply_type)
+{
     switch (reply_type) {
     case SwkbdReplyType::FinishedInitialize:
         ReplyFinishedInitialize();
@@ -474,13 +491,15 @@ void SoftwareKeyboard::SendReply(SwkbdReplyType reply_type) {
     }
 }
 
-void SoftwareKeyboard::ChangeState(SwkbdState state) {
+void SoftwareKeyboard::ChangeState(SwkbdState state)
+{
     swkbd_state = state;
 
     ReplyDefault();
 }
 
-void SoftwareKeyboard::InitializeFrontendNormalKeyboard() {
+void SoftwareKeyboard::InitializeFrontendNormalKeyboard()
+{
     std::u16string ok_text = Common::UTF16StringFromFixedZeroTerminatedBuffer(
         swkbd_config_common.ok_text.data(), swkbd_config_common.ok_text.size());
 
@@ -561,7 +580,8 @@ void SoftwareKeyboard::InitializeFrontendNormalKeyboard() {
 }
 
 void SoftwareKeyboard::InitializeFrontendInlineKeyboard(
-    Core::Frontend::KeyboardInitializeParameters initialize_parameters) {
+    Core::Frontend::KeyboardInitializeParameters initialize_parameters)
+{
     frontend.InitializeKeyboard(
         true, std::move(initialize_parameters), {},
         [this](SwkbdReplyType reply_type, std::u16string submitted_text, s32 cursor_position) {
@@ -569,7 +589,8 @@ void SoftwareKeyboard::InitializeFrontendInlineKeyboard(
         });
 }
 
-void SoftwareKeyboard::InitializeFrontendInlineKeyboardOld() {
+void SoftwareKeyboard::InitializeFrontendInlineKeyboardOld()
+{
     const auto& appear_arg = swkbd_calc_arg_old.appear_arg;
 
     std::u16string ok_text = Common::UTF16StringFromFixedZeroTerminatedBuffer(
@@ -612,7 +633,8 @@ void SoftwareKeyboard::InitializeFrontendInlineKeyboardOld() {
     InitializeFrontendInlineKeyboard(std::move(initialize_parameters));
 }
 
-void SoftwareKeyboard::InitializeFrontendInlineKeyboardNew() {
+void SoftwareKeyboard::InitializeFrontendInlineKeyboardNew()
+{
     const auto& appear_arg = swkbd_calc_arg_new.appear_arg;
 
     std::u16string ok_text = Common::UTF16StringFromFixedZeroTerminatedBuffer(
@@ -655,23 +677,26 @@ void SoftwareKeyboard::InitializeFrontendInlineKeyboardNew() {
     InitializeFrontendInlineKeyboard(std::move(initialize_parameters));
 }
 
-void SoftwareKeyboard::ShowNormalKeyboard() {
+void SoftwareKeyboard::ShowNormalKeyboard()
+{
     frontend.ShowNormalKeyboard();
 }
 
 void SoftwareKeyboard::ShowTextCheckDialog(SwkbdTextCheckResult text_check_result,
-                                           std::u16string text_check_message) {
+                                           std::u16string text_check_message)
+{
     frontend.ShowTextCheckDialog(text_check_result, std::move(text_check_message));
 }
 
-void SoftwareKeyboard::ShowInlineKeyboard(
-    Core::Frontend::InlineAppearParameters appear_parameters) {
+void SoftwareKeyboard::ShowInlineKeyboard(Core::Frontend::InlineAppearParameters appear_parameters)
+{
     frontend.ShowInlineKeyboard(std::move(appear_parameters));
 
     ChangeState(SwkbdState::InitializedIsShown);
 }
 
-void SoftwareKeyboard::ShowInlineKeyboardOld() {
+void SoftwareKeyboard::ShowInlineKeyboardOld()
+{
     if (swkbd_state != SwkbdState::InitializedIsHidden) {
         return;
     }
@@ -706,7 +731,8 @@ void SoftwareKeyboard::ShowInlineKeyboardOld() {
     ShowInlineKeyboard(std::move(appear_parameters));
 }
 
-void SoftwareKeyboard::ShowInlineKeyboardNew() {
+void SoftwareKeyboard::ShowInlineKeyboardNew()
+{
     if (swkbd_state != SwkbdState::InitializedIsHidden) {
         return;
     }
@@ -741,7 +767,8 @@ void SoftwareKeyboard::ShowInlineKeyboardNew() {
     ShowInlineKeyboard(std::move(appear_parameters));
 }
 
-void SoftwareKeyboard::HideInlineKeyboard() {
+void SoftwareKeyboard::HideInlineKeyboard()
+{
     if (swkbd_state != SwkbdState::InitializedIsShown) {
         return;
     }
@@ -753,7 +780,8 @@ void SoftwareKeyboard::HideInlineKeyboard() {
     ChangeState(SwkbdState::InitializedIsHidden);
 }
 
-void SoftwareKeyboard::InlineTextChanged() {
+void SoftwareKeyboard::InlineTextChanged()
+{
     Core::Frontend::InlineTextParameters text_parameters{
         .input_text{current_text},
         .cursor_position{current_cursor_position},
@@ -762,7 +790,8 @@ void SoftwareKeyboard::InlineTextChanged() {
     frontend.InlineTextChanged(std::move(text_parameters));
 }
 
-void SoftwareKeyboard::ExitKeyboard() {
+void SoftwareKeyboard::ExitKeyboard()
+{
     complete = true;
     status = ResultSuccess;
 
@@ -771,14 +800,16 @@ void SoftwareKeyboard::ExitKeyboard() {
     Exit();
 }
 
-Result SoftwareKeyboard::RequestExit() {
+Result SoftwareKeyboard::RequestExit()
+{
     frontend.Close();
     R_SUCCEED();
 }
 
 // Inline Software Keyboard Requests
 
-void SoftwareKeyboard::RequestFinalize(std::span<const u8> request_data) {
+void SoftwareKeyboard::RequestFinalize(std::span<const u8> request_data)
+{
     LOG_DEBUG(Service_AM, "Processing Request: Finalize");
 
     ChangeState(SwkbdState::NotInitialized);
@@ -786,17 +817,20 @@ void SoftwareKeyboard::RequestFinalize(std::span<const u8> request_data) {
     ExitKeyboard();
 }
 
-void SoftwareKeyboard::RequestSetUserWordInfo(std::span<const u8> request_data) {
+void SoftwareKeyboard::RequestSetUserWordInfo(std::span<const u8> request_data)
+{
     LOG_WARNING(Service_AM, "SetUserWordInfo is not implemented.");
 
     ReplyReleasedUserWordInfo();
 }
 
-void SoftwareKeyboard::RequestSetCustomizeDic(std::span<const u8> request_data) {
+void SoftwareKeyboard::RequestSetCustomizeDic(std::span<const u8> request_data)
+{
     LOG_WARNING(Service_AM, "SetCustomizeDic is not implemented.");
 }
 
-void SoftwareKeyboard::RequestCalc(std::span<const u8> request_data) {
+void SoftwareKeyboard::RequestCalc(std::span<const u8> request_data)
+{
     LOG_DEBUG(Service_AM, "Processing Request: Calc");
 
     ASSERT(request_data.size() >= sizeof(SwkbdRequestCommand) + sizeof(SwkbdCalcArgCommon));
@@ -833,7 +867,8 @@ void SoftwareKeyboard::RequestCalc(std::span<const u8> request_data) {
     }
 }
 
-void SoftwareKeyboard::RequestCalcOld() {
+void SoftwareKeyboard::RequestCalcOld()
+{
     if (swkbd_calc_arg_common.flags.set_input_text) {
         current_text = Common::UTF16StringFromFixedZeroTerminatedBuffer(
             swkbd_calc_arg_old.input_text.data(), swkbd_calc_arg_old.input_text.size());
@@ -883,7 +918,8 @@ void SoftwareKeyboard::RequestCalcOld() {
     }
 }
 
-void SoftwareKeyboard::RequestCalcNew() {
+void SoftwareKeyboard::RequestCalcNew()
+{
     if (swkbd_calc_arg_common.flags.set_input_text) {
         current_text = Common::UTF16StringFromFixedZeroTerminatedBuffer(
             swkbd_calc_arg_new.input_text.data(), swkbd_calc_arg_new.input_text.size());
@@ -933,17 +969,20 @@ void SoftwareKeyboard::RequestCalcNew() {
     }
 }
 
-void SoftwareKeyboard::RequestSetCustomizedDictionaries(std::span<const u8> request_data) {
+void SoftwareKeyboard::RequestSetCustomizedDictionaries(std::span<const u8> request_data)
+{
     LOG_WARNING(Service_AM, "SetCustomizedDictionaries is not implemented.");
 }
 
-void SoftwareKeyboard::RequestUnsetCustomizedDictionaries(std::span<const u8> request_data) {
+void SoftwareKeyboard::RequestUnsetCustomizedDictionaries(std::span<const u8> request_data)
+{
     LOG_WARNING(Service_AM, "(STUBBED) Processing Request: UnsetCustomizedDictionaries");
 
     ReplyUnsetCustomizedDictionaries();
 }
 
-void SoftwareKeyboard::RequestSetChangedStringV2Flag(std::span<const u8> request_data) {
+void SoftwareKeyboard::RequestSetChangedStringV2Flag(std::span<const u8> request_data)
+{
     LOG_DEBUG(Service_AM, "Processing Request: SetChangedStringV2Flag");
 
     ASSERT(request_data.size() == sizeof(SwkbdRequestCommand) + 1);
@@ -951,7 +990,8 @@ void SoftwareKeyboard::RequestSetChangedStringV2Flag(std::span<const u8> request
     std::memcpy(&use_changed_string_v2, request_data.data() + sizeof(SwkbdRequestCommand), 1);
 }
 
-void SoftwareKeyboard::RequestSetMovedCursorV2Flag(std::span<const u8> request_data) {
+void SoftwareKeyboard::RequestSetMovedCursorV2Flag(std::span<const u8> request_data)
+{
     LOG_DEBUG(Service_AM, "Processing Request: SetMovedCursorV2Flag");
 
     ASSERT(request_data.size() == sizeof(SwkbdRequestCommand) + 1);
@@ -961,7 +1001,8 @@ void SoftwareKeyboard::RequestSetMovedCursorV2Flag(std::span<const u8> request_d
 
 // Inline Software Keyboard Replies
 
-void SoftwareKeyboard::ReplyFinishedInitialize() {
+void SoftwareKeyboard::ReplyFinishedInitialize()
+{
     LOG_DEBUG(Service_AM, "Sending Reply: FinishedInitialize");
 
     std::vector<u8> reply(REPLY_BASE_SIZE + 1);
@@ -971,7 +1012,8 @@ void SoftwareKeyboard::ReplyFinishedInitialize() {
     PushInteractiveOutData(std::make_shared<IStorage>(system, std::move(reply)));
 }
 
-void SoftwareKeyboard::ReplyDefault() {
+void SoftwareKeyboard::ReplyDefault()
+{
     LOG_DEBUG(Service_AM, "Sending Reply: Default");
 
     std::vector<u8> reply(REPLY_BASE_SIZE);
@@ -981,7 +1023,8 @@ void SoftwareKeyboard::ReplyDefault() {
     PushInteractiveOutData(std::make_shared<IStorage>(system, std::move(reply)));
 }
 
-void SoftwareKeyboard::ReplyChangedString() {
+void SoftwareKeyboard::ReplyChangedString()
+{
     LOG_DEBUG(Service_AM, "Sending Reply: ChangedString");
 
     std::vector<u8> reply(REPLY_BASE_SIZE + REPLY_UTF16_SIZE + sizeof(SwkbdChangedStringArg));
@@ -1003,7 +1046,8 @@ void SoftwareKeyboard::ReplyChangedString() {
     PushInteractiveOutData(std::make_shared<IStorage>(system, std::move(reply)));
 }
 
-void SoftwareKeyboard::ReplyMovedCursor() {
+void SoftwareKeyboard::ReplyMovedCursor()
+{
     LOG_DEBUG(Service_AM, "Sending Reply: MovedCursor");
 
     std::vector<u8> reply(REPLY_BASE_SIZE + REPLY_UTF16_SIZE + sizeof(SwkbdMovedCursorArg));
@@ -1023,7 +1067,8 @@ void SoftwareKeyboard::ReplyMovedCursor() {
     PushInteractiveOutData(std::make_shared<IStorage>(system, std::move(reply)));
 }
 
-void SoftwareKeyboard::ReplyMovedTab() {
+void SoftwareKeyboard::ReplyMovedTab()
+{
     LOG_DEBUG(Service_AM, "Sending Reply: MovedTab");
 
     std::vector<u8> reply(REPLY_BASE_SIZE + REPLY_UTF16_SIZE + sizeof(SwkbdMovedTabArg));
@@ -1043,7 +1088,8 @@ void SoftwareKeyboard::ReplyMovedTab() {
     PushInteractiveOutData(std::make_shared<IStorage>(system, std::move(reply)));
 }
 
-void SoftwareKeyboard::ReplyDecidedEnter() {
+void SoftwareKeyboard::ReplyDecidedEnter()
+{
     LOG_DEBUG(Service_AM, "Sending Reply: DecidedEnter");
 
     std::vector<u8> reply(REPLY_BASE_SIZE + REPLY_UTF16_SIZE + sizeof(SwkbdDecidedEnterArg));
@@ -1064,7 +1110,8 @@ void SoftwareKeyboard::ReplyDecidedEnter() {
     HideInlineKeyboard();
 }
 
-void SoftwareKeyboard::ReplyDecidedCancel() {
+void SoftwareKeyboard::ReplyDecidedCancel()
+{
     LOG_DEBUG(Service_AM, "Sending Reply: DecidedCancel");
 
     std::vector<u8> reply(REPLY_BASE_SIZE);
@@ -1076,7 +1123,8 @@ void SoftwareKeyboard::ReplyDecidedCancel() {
     HideInlineKeyboard();
 }
 
-void SoftwareKeyboard::ReplyChangedStringUtf8() {
+void SoftwareKeyboard::ReplyChangedStringUtf8()
+{
     LOG_DEBUG(Service_AM, "Sending Reply: ChangedStringUtf8");
 
     std::vector<u8> reply(REPLY_BASE_SIZE + REPLY_UTF8_SIZE + sizeof(SwkbdChangedStringArg));
@@ -1099,7 +1147,8 @@ void SoftwareKeyboard::ReplyChangedStringUtf8() {
     PushInteractiveOutData(std::make_shared<IStorage>(system, std::move(reply)));
 }
 
-void SoftwareKeyboard::ReplyMovedCursorUtf8() {
+void SoftwareKeyboard::ReplyMovedCursorUtf8()
+{
     LOG_DEBUG(Service_AM, "Sending Reply: MovedCursorUtf8");
 
     std::vector<u8> reply(REPLY_BASE_SIZE + REPLY_UTF8_SIZE + sizeof(SwkbdMovedCursorArg));
@@ -1120,7 +1169,8 @@ void SoftwareKeyboard::ReplyMovedCursorUtf8() {
     PushInteractiveOutData(std::make_shared<IStorage>(system, std::move(reply)));
 }
 
-void SoftwareKeyboard::ReplyDecidedEnterUtf8() {
+void SoftwareKeyboard::ReplyDecidedEnterUtf8()
+{
     LOG_DEBUG(Service_AM, "Sending Reply: DecidedEnterUtf8");
 
     std::vector<u8> reply(REPLY_BASE_SIZE + REPLY_UTF8_SIZE + sizeof(SwkbdDecidedEnterArg));
@@ -1142,7 +1192,8 @@ void SoftwareKeyboard::ReplyDecidedEnterUtf8() {
     HideInlineKeyboard();
 }
 
-void SoftwareKeyboard::ReplyUnsetCustomizeDic() {
+void SoftwareKeyboard::ReplyUnsetCustomizeDic()
+{
     LOG_DEBUG(Service_AM, "Sending Reply: UnsetCustomizeDic");
 
     std::vector<u8> reply(REPLY_BASE_SIZE);
@@ -1152,7 +1203,8 @@ void SoftwareKeyboard::ReplyUnsetCustomizeDic() {
     PushInteractiveOutData(std::make_shared<IStorage>(system, std::move(reply)));
 }
 
-void SoftwareKeyboard::ReplyReleasedUserWordInfo() {
+void SoftwareKeyboard::ReplyReleasedUserWordInfo()
+{
     LOG_DEBUG(Service_AM, "Sending Reply: ReleasedUserWordInfo");
 
     std::vector<u8> reply(REPLY_BASE_SIZE);
@@ -1162,7 +1214,8 @@ void SoftwareKeyboard::ReplyReleasedUserWordInfo() {
     PushInteractiveOutData(std::make_shared<IStorage>(system, std::move(reply)));
 }
 
-void SoftwareKeyboard::ReplyUnsetCustomizedDictionaries() {
+void SoftwareKeyboard::ReplyUnsetCustomizedDictionaries()
+{
     LOG_DEBUG(Service_AM, "Sending Reply: UnsetCustomizedDictionaries");
 
     std::vector<u8> reply(REPLY_BASE_SIZE);
@@ -1172,7 +1225,8 @@ void SoftwareKeyboard::ReplyUnsetCustomizedDictionaries() {
     PushInteractiveOutData(std::make_shared<IStorage>(system, std::move(reply)));
 }
 
-void SoftwareKeyboard::ReplyChangedStringV2() {
+void SoftwareKeyboard::ReplyChangedStringV2()
+{
     LOG_DEBUG(Service_AM, "Sending Reply: ChangedStringV2");
 
     std::vector<u8> reply(REPLY_BASE_SIZE + REPLY_UTF16_SIZE + sizeof(SwkbdChangedStringArg) + 1);
@@ -1198,7 +1252,8 @@ void SoftwareKeyboard::ReplyChangedStringV2() {
     PushInteractiveOutData(std::make_shared<IStorage>(system, std::move(reply)));
 }
 
-void SoftwareKeyboard::ReplyMovedCursorV2() {
+void SoftwareKeyboard::ReplyMovedCursorV2()
+{
     LOG_DEBUG(Service_AM, "Sending Reply: MovedCursorV2");
 
     std::vector<u8> reply(REPLY_BASE_SIZE + REPLY_UTF16_SIZE + sizeof(SwkbdMovedCursorArg) + 1);
@@ -1222,7 +1277,8 @@ void SoftwareKeyboard::ReplyMovedCursorV2() {
     PushInteractiveOutData(std::make_shared<IStorage>(system, std::move(reply)));
 }
 
-void SoftwareKeyboard::ReplyChangedStringUtf8V2() {
+void SoftwareKeyboard::ReplyChangedStringUtf8V2()
+{
     LOG_DEBUG(Service_AM, "Sending Reply: ChangedStringUtf8V2");
 
     std::vector<u8> reply(REPLY_BASE_SIZE + REPLY_UTF8_SIZE + sizeof(SwkbdChangedStringArg) + 1);
@@ -1249,7 +1305,8 @@ void SoftwareKeyboard::ReplyChangedStringUtf8V2() {
     PushInteractiveOutData(std::make_shared<IStorage>(system, std::move(reply)));
 }
 
-void SoftwareKeyboard::ReplyMovedCursorUtf8V2() {
+void SoftwareKeyboard::ReplyMovedCursorUtf8V2()
+{
     LOG_DEBUG(Service_AM, "Sending Reply: MovedCursorUtf8V2");
 
     std::vector<u8> reply(REPLY_BASE_SIZE + REPLY_UTF8_SIZE + sizeof(SwkbdMovedCursorArg) + 1);

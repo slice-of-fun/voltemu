@@ -12,7 +12,8 @@
 namespace Common::X64 {
 
 #ifdef _MSC_VER
-__forceinline static u64 FencedRDTSC() {
+__forceinline static u64 FencedRDTSC()
+{
     _mm_lfence();
     _ReadWriteBarrier();
     const u64 result = __rdtsc();
@@ -21,7 +22,8 @@ __forceinline static u64 FencedRDTSC() {
     return result;
 }
 #else
-static inline u64 FencedRDTSC() {
+static inline u64 FencedRDTSC()
+{
     u64 eax;
     u64 edx;
     asm volatile("lfence\n\t"

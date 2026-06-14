@@ -6,9 +6,11 @@
 
 #pragma once
 
+#include <ankerl/unordered_dense.h>
+
 #include <cstddef>
 #include <mutex>
-#include <ankerl/unordered_dense.h>
+
 #include "common/common_types.h"
 #include "core/hle/service/hle_ipc.h"
 
@@ -49,15 +51,11 @@ static_assert(ServerSessionCountMax == 0x40,
 class ServiceFrameworkBase : public SessionRequestHandler {
 public:
     /// Returns the string identifier used to connect to the service.
-    [[nodiscard]] std::string_view GetServiceName() const noexcept {
-        return service_name;
-    }
+    [[nodiscard]] std::string_view GetServiceName() const noexcept { return service_name; }
 
-    /// @brief Returns the maximum number of sessions that can be connected to this service at the same
-    /// time.
-    u32 GetMaxSessions() const noexcept {
-        return max_sessions;
-    }
+    /// @brief Returns the maximum number of sessions that can be connected to this service at the
+    /// same time.
+    u32 GetMaxSessions() const noexcept { return max_sessions; }
 
     /// @brief Invokes a service request routine using the HIPC protocol.
     void InvokeRequest(HLERequestContext& ctx);
@@ -70,16 +68,16 @@ public:
 
 protected:
     /// Member-function pointer type of SyncRequest handlers.
-    template <typename Self>
-    using HandlerFnP = void (Self::*)(HLERequestContext&);
+    template<typename Self> using HandlerFnP = void (Self::*)(HLERequestContext&);
 
     /// Used to gain exclusive access to the service members, e.g. from CoreTiming thread.
-    [[nodiscard]] virtual std::unique_lock<std::mutex> LockService() noexcept {
+    [[nodiscard]] virtual std::unique_lock<std::mutex> LockService() noexcept
+    {
         return std::unique_lock{lock_service};
     }
+
 private:
-    template <typename T>
-    friend class ServiceFramework;
+    template<typename T> friend class ServiceFramework;
 
     struct FunctionInfoBase {
         u32 expected_header;
@@ -128,21 +126,25 @@ protected:
  * of the passed in function pointers and then delegate the actual work to the implementation in the
  * base class.
  */
-template <typename Self>
-class ServiceFramework : public ServiceFrameworkBase {
+template<typename Self> class ServiceFramework : public ServiceFrameworkBase {
 protected:
     /// Contains information about a request type which is handled by the service.
-    template <typename T>
-    struct FunctionInfoTyped : FunctionInfoBase {
+    template<typename T> struct FunctionInfoTyped : FunctionInfoBase {
         // TODO(yuriks): This function could be constexpr, but clang is the only compiler that
         // doesn't emit an ICE or a wrong diagnostic because of the static_cast.
 
         /// @brief Constructs a FunctionInfo for a function.
-        /// @param expected_header_ request header in the command buffer which will trigger dispatch to this handler
-        /// @param handler_callback_ member function in this service which will be called to handle the request
+        /// @param expected_header_ request header in the command buffer which will trigger dispatch
+        /// to this handler
+        /// @param handler_callback_ member function in this service which will be called to handle
+        /// the request
         /// @param name_ human-friendly name for the request. Used mostly for logging purposes.
-        constexpr FunctionInfoTyped(u32 expected_header_, HandlerFnP<T> handler_callback_, const char* name_)
-            : FunctionInfoBase{expected_header_, HandlerFnP<ServiceFrameworkBase>(handler_callback_), name_} {}
+        constexpr FunctionInfoTyped(u32 expected_header_, HandlerFnP<T> handler_callback_,
+                                    const char* name_)
+            : FunctionInfoBase{expected_header_,
+                               HandlerFnP<ServiceFrameworkBase>(handler_callback_), name_}
+        {
+        }
     };
     using FunctionInfo = FunctionInfoTyped<Self>;
 
@@ -154,12 +156,16 @@ protected:
      * @param max_sessions_ Maximum number of sessions that can be connected to this service at the
      * same time.
      */
-    explicit ServiceFramework(Core::System& system_, const char* service_name_, u32 max_sessions_ = ServerSessionCountMax)
-        : ServiceFrameworkBase(system_, service_name_, max_sessions_, Invoker) {}
+    explicit ServiceFramework(Core::System& system_, const char* service_name_,
+                              u32 max_sessions_ = ServerSessionCountMax)
+        : ServiceFrameworkBase(system_, service_name_, max_sessions_, Invoker)
+    {
+    }
 
     /// Registers handlers in the service.
-    template <typename T = Self, std::size_t N>
-    void RegisterHandlers(const FunctionInfoTyped<T> (&functions)[N]) {
+    template<typename T = Self, std::size_t N>
+    void RegisterHandlers(const FunctionInfoTyped<T> (&functions)[N])
+    {
         RegisterHandlers(functions, N);
     }
 
@@ -167,14 +173,16 @@ protected:
      * Registers handlers in the service. Usually prefer using the other RegisterHandlers
      * overload in order to avoid needing to specify the array size.
      */
-    template <typename T = Self>
-    void RegisterHandlers(const FunctionInfoTyped<T>* functions, std::size_t n) {
+    template<typename T = Self>
+    void RegisterHandlers(const FunctionInfoTyped<T>* functions, std::size_t n)
+    {
         RegisterHandlersBase(functions, n);
     }
 
     /// Registers handlers in the service.
-    template <typename T = Self, std::size_t N>
-    void RegisterHandlersTipc(const FunctionInfoTyped<T> (&functions)[N]) {
+    template<typename T = Self, std::size_t N>
+    void RegisterHandlersTipc(const FunctionInfoTyped<T> (&functions)[N])
+    {
         RegisterHandlersTipc(functions, N);
     }
 
@@ -182,26 +190,24 @@ protected:
      * Registers handlers in the service. Usually prefer using the other RegisterHandlers
      * overload in order to avoid needing to specify the array size.
      */
-    template <typename T = Self>
-    void RegisterHandlersTipc(const FunctionInfoTyped<T>* functions, std::size_t n) {
+    template<typename T = Self>
+    void RegisterHandlersTipc(const FunctionInfoTyped<T>* functions, std::size_t n)
+    {
         RegisterHandlersBaseTipc(functions, n);
     }
 
 protected:
-    template <bool Domain, auto F>
-    void CmifReplyWrap(HLERequestContext& ctx);
+    template<bool Domain, auto F> void CmifReplyWrap(HLERequestContext& ctx);
 
     /**
      * Wraps the template pointer-to-member function for use in a domain session.
      */
-    template <auto F>
-    static constexpr HandlerFnP<Self> D = &Self::template CmifReplyWrap<true, F>;
+    template<auto F> static constexpr HandlerFnP<Self> D = &Self::template CmifReplyWrap<true, F>;
 
     /**
      * Wraps the template pointer-to-member function for use in a non-domain session.
      */
-    template <auto F>
-    static constexpr HandlerFnP<Self> C = &Self::template CmifReplyWrap<false, F>;
+    template<auto F> static constexpr HandlerFnP<Self> C = &Self::template CmifReplyWrap<false, F>;
 
 private:
     /**
@@ -211,7 +217,8 @@ private:
      * of the derived class in order to invoke one of it's functions through a pointer.
      */
     static void Invoker(ServiceFrameworkBase* object, HandlerFnP<ServiceFrameworkBase> member,
-                        HLERequestContext& ctx) {
+                        HLERequestContext& ctx)
+    {
         // Cast back up to our original types and call the member function
         (static_cast<Self*>(object)->*HandlerFnP<Self>(member))(ctx);
     }

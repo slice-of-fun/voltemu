@@ -6,15 +6,18 @@
 
 namespace Kernel::Svc {
 
-void SleepSystem(Core::System& system) {
+void SleepSystem(Core::System& system)
+{
     UNIMPLEMENTED();
 }
 
-void SleepSystem64(Core::System& system) {
+void SleepSystem64(Core::System& system)
+{
     return SleepSystem(system);
 }
 
-void SleepSystem64From32(Core::System& system) {
+void SleepSystem64From32(Core::System& system)
+{
     return SleepSystem(system);
 }
 

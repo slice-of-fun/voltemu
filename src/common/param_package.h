@@ -6,9 +6,10 @@
 
 #pragma once
 
+#include <ankerl/unordered_dense.h>
+
 #include <initializer_list>
 #include <string>
-#include <ankerl/unordered_dense.h>
 
 namespace Common {
 

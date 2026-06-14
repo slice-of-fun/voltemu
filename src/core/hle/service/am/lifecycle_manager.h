@@ -45,28 +45,22 @@ public:
     Event& GetHDCPStateChangedEvent();
 
 public:
-    bool IsApplication() {
-        return m_is_application;
-    }
+    bool IsApplication() { return m_is_application; }
 
-    bool GetForcedSuspend() {
-        return m_forced_suspend;
-    }
+    bool GetForcedSuspend() { return m_forced_suspend; }
 
-    bool GetExitRequested() {
-        return m_has_requested_exit;
-    }
+    bool GetExitRequested() { return m_has_requested_exit; }
 
-    ActivityState GetActivityState() {
-        return m_activity_state;
-    }
+    ActivityState GetActivityState() { return m_activity_state; }
 
-    FocusState GetAndClearFocusState() {
+    FocusState GetAndClearFocusState()
+    {
         m_acknowledged_focus_state = m_requested_focus_state;
         return m_acknowledged_focus_state;
     }
 
-    void SetFocusState(FocusState state) {
+    void SetFocusState(FocusState state)
+    {
         if (m_requested_focus_state != state) {
             m_has_focus_state_changed = true;
         }
@@ -74,12 +68,14 @@ public:
         this->SignalSystemEventIfNeeded();
     }
 
-    void RequestExit() {
+    void RequestExit()
+    {
         m_has_requested_exit = true;
         this->SignalSystemEventIfNeeded();
     }
 
-    void RequestResumeNotification() {
+    void RequestResumeNotification()
+    {
         // NOTE: this appears to be a bug in am.
         // If an applet makes a concurrent request to receive resume notifications
         // while it is being suspended, the first resume notification will be lost.
@@ -92,36 +88,31 @@ public:
     void OnOperationAndPerformanceModeChanged();
 
 public:
-    void SetFocusStateChangedNotificationEnabled(bool enabled) {
+    void SetFocusStateChangedNotificationEnabled(bool enabled)
+    {
         m_focus_state_changed_notification_enabled = enabled;
         this->SignalSystemEventIfNeeded();
     }
 
-    void SetOperationModeChangedNotificationEnabled(bool enabled) {
+    void SetOperationModeChangedNotificationEnabled(bool enabled)
+    {
         m_operation_mode_changed_notification_enabled = enabled;
         this->SignalSystemEventIfNeeded();
     }
 
-    void SetPerformanceModeChangedNotificationEnabled(bool enabled) {
+    void SetPerformanceModeChangedNotificationEnabled(bool enabled)
+    {
         m_performance_mode_changed_notification_enabled = enabled;
         this->SignalSystemEventIfNeeded();
     }
 
-    void SetResumeNotificationEnabled(bool enabled) {
-        m_resume_notification_enabled = enabled;
-    }
+    void SetResumeNotificationEnabled(bool enabled) { m_resume_notification_enabled = enabled; }
 
-    void SetActivityState(ActivityState state) {
-        m_activity_state = state;
-    }
+    void SetActivityState(ActivityState state) { m_activity_state = state; }
 
-    void SetSuspendMode(SuspendMode mode) {
-        m_suspend_mode = mode;
-    }
+    void SetSuspendMode(SuspendMode mode) { m_suspend_mode = mode; }
 
-    void SetForcedSuspend(bool enabled) {
-        m_forced_suspend = enabled;
-    }
+    void SetForcedSuspend(bool enabled) { m_forced_suspend = enabled; }
 
 public:
     void SetFocusHandlingMode(bool suspend);

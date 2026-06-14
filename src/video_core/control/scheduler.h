@@ -6,9 +6,10 @@
 
 #pragma once
 
+#include <ankerl/unordered_dense.h>
+
 #include <memory>
 #include <mutex>
-#include <ankerl/unordered_dense.h>
 
 #include "video_core/dma_pusher.h"
 

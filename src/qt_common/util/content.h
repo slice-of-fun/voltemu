@@ -4,6 +4,7 @@
 #pragma once
 
 #include <QObject>
+
 #include "common/common_types.h"
 #include "frontend_common/data_manager.h"
 #include "frontend_common/firmware_manager.h"
@@ -22,7 +23,8 @@ enum class FirmwareInstallResult {
     FailedCorrupted,
 };
 
-inline const QString GetFirmwareInstallResultString(FirmwareInstallResult result) {
+inline const QString GetFirmwareInstallResultString(FirmwareInstallResult result)
+{
     return LOOKUP_ENUM(result, FwInstallSuccess);
 }
 
@@ -31,7 +33,8 @@ inline const QString GetFirmwareInstallResultString(FirmwareInstallResult result
  * \param result The result code.
  * \return A string representation of the passed result code.
  */
-inline const QString GetKeyInstallResultString(FirmwareManager::KeyInstallResult result) {
+inline const QString GetKeyInstallResultString(FirmwareManager::KeyInstallResult result)
+{
     return LOOKUP_ENUM(result, KeyInstallSuccess);
 }
 

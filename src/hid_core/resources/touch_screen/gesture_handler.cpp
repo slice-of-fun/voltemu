@@ -4,20 +4,27 @@
 // SPDX-FileCopyrightText: Copyright 2024 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#include "common/math_util.h"
 #include "hid_core/resources/touch_screen/gesture_handler.h"
+
+#include "common/math_util.h"
 
 namespace Service::HID {
 
-constexpr f32 Square(s32 num) {
+constexpr f32 Square(s32 num)
+{
     return static_cast<f32>(num * num);
 }
 
-GestureHandler::GestureHandler() {}
+GestureHandler::GestureHandler()
+{
+}
 
-GestureHandler::~GestureHandler() {}
+GestureHandler::~GestureHandler()
+{
+}
 
-void GestureHandler::SetTouchState(std::span<TouchState> touch_state, u32 count, s64 timestamp) {
+void GestureHandler::SetTouchState(std::span<TouchState> touch_state, u32 count, s64 timestamp)
+{
     gesture = {};
     gesture.active_points = (std::min)(MaxPoints, static_cast<std::size_t>(count));
 
@@ -50,7 +57,8 @@ void GestureHandler::SetTouchState(std::span<TouchState> touch_state, u32 count,
     time_difference = static_cast<f32>(timestamp - last_update_timestamp) / (1000 * 1000 * 1000);
 }
 
-bool GestureHandler::NeedsUpdate() {
+bool GestureHandler::NeedsUpdate()
+{
     if (force_update) {
         force_update = false;
         return true;
@@ -72,7 +80,8 @@ bool GestureHandler::NeedsUpdate() {
     return false;
 }
 
-void GestureHandler::UpdateGestureState(GestureState& next_state, s64 timestamp) {
+void GestureHandler::UpdateGestureState(GestureState& next_state, s64 timestamp)
+{
     last_update_timestamp = timestamp;
 
     GestureType type = GestureType::Idle;
@@ -108,7 +117,8 @@ void GestureHandler::UpdateGestureState(GestureState& next_state, s64 timestamp)
     last_gesture_state = next_state;
 }
 
-void GestureHandler::NewGesture(GestureType& type, GestureAttribute& attributes) {
+void GestureHandler::NewGesture(GestureType& type, GestureAttribute& attributes)
+{
     gesture.detection_count++;
     type = GestureType::Touch;
 
@@ -119,7 +129,8 @@ void GestureHandler::NewGesture(GestureType& type, GestureAttribute& attributes)
     }
 }
 
-void GestureHandler::UpdateExistingGesture(GestureState& next_state, GestureType& type) {
+void GestureHandler::UpdateExistingGesture(GestureState& next_state, GestureType& type)
+{
     // Promote to pan type if touch moved
     for (size_t id = 0; id < MaxPoints; id++) {
         if (gesture.points[id] != last_gesture.points[id]) {
@@ -151,7 +162,8 @@ void GestureHandler::UpdateExistingGesture(GestureState& next_state, GestureType
 }
 
 void GestureHandler::EndGesture(GestureState& next_state, GestureType& type,
-                                GestureAttribute& attributes) {
+                                GestureAttribute& attributes)
+{
     if (last_gesture.active_points != 0) {
         switch (last_gesture_state.type) {
         case GestureType::Touch:
@@ -184,7 +196,8 @@ void GestureHandler::EndGesture(GestureState& next_state, GestureType& type,
     }
 }
 
-void GestureHandler::SetTapEvent(GestureType& type, GestureAttribute& attributes) {
+void GestureHandler::SetTapEvent(GestureType& type, GestureAttribute& attributes)
+{
     type = GestureType::Tap;
     gesture = last_gesture;
     force_update = true;
@@ -196,7 +209,8 @@ void GestureHandler::SetTapEvent(GestureType& type, GestureAttribute& attributes
     }
 }
 
-void GestureHandler::UpdatePanEvent(GestureState& next_state, GestureType& type) {
+void GestureHandler::UpdatePanEvent(GestureState& next_state, GestureType& type)
+{
     next_state.delta = gesture.mid_point - last_gesture_state.pos;
     next_state.vel_x = static_cast<f32>(next_state.delta.x) / time_difference;
     next_state.vel_y = static_cast<f32>(next_state.delta.y) / time_difference;
@@ -218,7 +232,8 @@ void GestureHandler::UpdatePanEvent(GestureState& next_state, GestureType& type)
     }
 }
 
-void GestureHandler::EndPanEvent(GestureState& next_state, GestureType& type) {
+void GestureHandler::EndPanEvent(GestureState& next_state, GestureType& type)
+{
     next_state.vel_x =
         static_cast<f32>(last_gesture_state.delta.x) / (last_pan_time_difference + time_difference);
     next_state.vel_y =
@@ -239,7 +254,8 @@ void GestureHandler::EndPanEvent(GestureState& next_state, GestureType& type) {
     force_update = true;
 }
 
-void GestureHandler::SetSwipeEvent(GestureState& next_state, GestureType& type) {
+void GestureHandler::SetSwipeEvent(GestureState& next_state, GestureType& type)
+{
     type = GestureType::Swipe;
     gesture = last_gesture;
     force_update = true;

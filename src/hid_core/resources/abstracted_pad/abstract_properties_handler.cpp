@@ -4,9 +4,10 @@
 // SPDX-FileCopyrightText: Copyright 2024 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+#include "hid_core/resources/abstracted_pad/abstract_properties_handler.h"
+
 #include "hid_core/hid_util.h"
 #include "hid_core/resources/abstracted_pad/abstract_pad_holder.h"
-#include "hid_core/resources/abstracted_pad/abstract_properties_handler.h"
 #include "hid_core/resources/applet_resource.h"
 #include "hid_core/resources/npad/npad_resource.h"
 #include "hid_core/resources/npad/npad_types.h"
@@ -14,21 +15,26 @@
 
 namespace Service::HID {
 
-NpadAbstractPropertiesHandler::NpadAbstractPropertiesHandler() {}
+NpadAbstractPropertiesHandler::NpadAbstractPropertiesHandler()
+{
+}
 
 NpadAbstractPropertiesHandler::~NpadAbstractPropertiesHandler() = default;
 
-void NpadAbstractPropertiesHandler::SetAbstractPadHolder(NpadAbstractedPadHolder* holder) {
+void NpadAbstractPropertiesHandler::SetAbstractPadHolder(NpadAbstractedPadHolder* holder)
+{
     abstract_pad_holder = holder;
     return;
 }
 
-void NpadAbstractPropertiesHandler::SetAppletResource(AppletResourceHolder* applet_resource) {
+void NpadAbstractPropertiesHandler::SetAppletResource(AppletResourceHolder* applet_resource)
+{
     applet_resource_holder = applet_resource;
     return;
 }
 
-void NpadAbstractPropertiesHandler::SetNpadId(Core::HID::NpadIdType npad_id) {
+void NpadAbstractPropertiesHandler::SetNpadId(Core::HID::NpadIdType npad_id)
+{
     if (!IsNpadIdValid(npad_id)) {
         ASSERT_MSG(false, "Invalid npad id");
     }
@@ -36,11 +42,13 @@ void NpadAbstractPropertiesHandler::SetNpadId(Core::HID::NpadIdType npad_id) {
     npad_id_type = npad_id;
 }
 
-Core::HID::NpadIdType NpadAbstractPropertiesHandler::GetNpadId() const {
+Core::HID::NpadIdType NpadAbstractPropertiesHandler::GetNpadId() const
+{
     return npad_id_type;
 }
 
-Result NpadAbstractPropertiesHandler::IncrementRefCounter() {
+Result NpadAbstractPropertiesHandler::IncrementRefCounter()
+{
     if (ref_counter == (std::numeric_limits<s32>::max)() - 1) {
         return ResultNpadHandlerOverflow;
     }
@@ -103,7 +111,8 @@ Result NpadAbstractPropertiesHandler::IncrementRefCounter() {
     return ResultSuccess;
 }
 
-Result NpadAbstractPropertiesHandler::DecrementRefCounter() {
+Result NpadAbstractPropertiesHandler::DecrementRefCounter()
+{
     if (ref_counter == 0) {
         return ResultNpadHandlerNotInitialized;
     }
@@ -111,7 +120,8 @@ Result NpadAbstractPropertiesHandler::DecrementRefCounter() {
     return ResultSuccess;
 }
 
-Result NpadAbstractPropertiesHandler::ActivateNpadUnknown0x88(u64 aruid) {
+Result NpadAbstractPropertiesHandler::ActivateNpadUnknown0x88(u64 aruid)
+{
     const auto npad_index = NpadIdTypeToIndex(npad_id_type);
     for (std::size_t aruid_index = 0; aruid_index < AruidIndexMax; aruid_index++) {
         auto* data = applet_resource_holder->applet_resource->GetAruidData(aruid_index);
@@ -124,19 +134,23 @@ Result NpadAbstractPropertiesHandler::ActivateNpadUnknown0x88(u64 aruid) {
     return ResultSuccess;
 }
 
-void NpadAbstractPropertiesHandler::UpdateDeviceType() {
+void NpadAbstractPropertiesHandler::UpdateDeviceType()
+{
     // TODO
 }
 
-void NpadAbstractPropertiesHandler::UpdateDeviceColor() {
+void NpadAbstractPropertiesHandler::UpdateDeviceColor()
+{
     // TODO
 }
 
-void NpadAbstractPropertiesHandler::UpdateFooterAttributes() {
+void NpadAbstractPropertiesHandler::UpdateFooterAttributes()
+{
     // TODO
 }
 
-void NpadAbstractPropertiesHandler::UpdateAllDeviceProperties() {
+void NpadAbstractPropertiesHandler::UpdateAllDeviceProperties()
+{
     const auto npad_index = NpadIdTypeToIndex(npad_id_type);
     for (std::size_t aruid_index = 0; aruid_index < AruidIndexMax; aruid_index++) {
         auto* data = applet_resource_holder->applet_resource->GetAruidData(aruid_index);
@@ -148,7 +162,8 @@ void NpadAbstractPropertiesHandler::UpdateAllDeviceProperties() {
     }
 }
 
-Core::HID::NpadInterfaceType NpadAbstractPropertiesHandler::GetFullkeyInterfaceType() {
+Core::HID::NpadInterfaceType NpadAbstractPropertiesHandler::GetFullkeyInterfaceType()
+{
     std::array<IAbstractedPad*, 5> abstract_pads{};
     const std::size_t count = abstract_pad_holder->GetAbstractedPads(abstract_pads);
 
@@ -170,7 +185,8 @@ Core::HID::NpadInterfaceType NpadAbstractPropertiesHandler::GetFullkeyInterfaceT
     return Core::HID::NpadInterfaceType::None;
 }
 
-Core::HID::NpadInterfaceType NpadAbstractPropertiesHandler::GetInterfaceType() {
+Core::HID::NpadInterfaceType NpadAbstractPropertiesHandler::GetInterfaceType()
+{
     std::array<IAbstractedPad*, 5> abstract_pads{};
     const std::size_t count = abstract_pad_holder->GetAbstractedPads(abstract_pads);
 
@@ -191,13 +207,16 @@ Core::HID::NpadInterfaceType NpadAbstractPropertiesHandler::GetInterfaceType() {
     return Core::HID::NpadInterfaceType::None;
 }
 
-Core::HID::NpadStyleSet NpadAbstractPropertiesHandler::GetStyleSet(u64 aruid) {
+Core::HID::NpadStyleSet NpadAbstractPropertiesHandler::GetStyleSet(u64 aruid)
+{
     // TODO
     return Core::HID::NpadStyleSet::None;
 }
 
-std::size_t NpadAbstractPropertiesHandler::GetAbstractedPadsWithStyleTag(
-    std::span<IAbstractedPad*> list, Core::HID::NpadStyleTag style) {
+std::size_t
+NpadAbstractPropertiesHandler::GetAbstractedPadsWithStyleTag(std::span<IAbstractedPad*> list,
+                                                             Core::HID::NpadStyleTag style)
+{
     std::array<IAbstractedPad*, 5> abstract_pads{};
     const std::size_t count = abstract_pad_holder->GetAbstractedPads(abstract_pads);
 
@@ -229,26 +248,31 @@ std::size_t NpadAbstractPropertiesHandler::GetAbstractedPadsWithStyleTag(
     return filtered_count;
 }
 
-std::size_t NpadAbstractPropertiesHandler::GetAbstractedPads(std::span<IAbstractedPad*> list) {
+std::size_t NpadAbstractPropertiesHandler::GetAbstractedPads(std::span<IAbstractedPad*> list)
+{
     Core::HID::NpadStyleTag style{
         GetStyleSet(applet_resource_holder->applet_resource->GetActiveAruid())};
     return GetAbstractedPadsWithStyleTag(list, style);
 }
 
-AppletFooterUiType NpadAbstractPropertiesHandler::GetAppletFooterUiType() {
+AppletFooterUiType NpadAbstractPropertiesHandler::GetAppletFooterUiType()
+{
     return applet_ui_type.footer;
 }
 
-AppletDetailedUiType NpadAbstractPropertiesHandler::GetAppletDetailedUiType() {
+AppletDetailedUiType NpadAbstractPropertiesHandler::GetAppletDetailedUiType()
+{
     return applet_ui_type;
 }
 
 void NpadAbstractPropertiesHandler::UpdateDeviceProperties(u64 aruid,
-                                                           NpadSharedMemoryEntry& internal_state) {
+                                                           NpadSharedMemoryEntry& internal_state)
+{
     // TODO
 }
 
-Core::HID::NpadInterfaceType NpadAbstractPropertiesHandler::GetNpadInterfaceType() {
+Core::HID::NpadInterfaceType NpadAbstractPropertiesHandler::GetNpadInterfaceType()
+{
     std::array<IAbstractedPad*, 5> abstract_pads{};
     const std::size_t count = abstract_pad_holder->GetAbstractedPads(abstract_pads);
 
@@ -267,8 +291,9 @@ Core::HID::NpadInterfaceType NpadAbstractPropertiesHandler::GetNpadInterfaceType
     return Core::HID::NpadInterfaceType::None;
 }
 
-Result NpadAbstractPropertiesHandler::GetNpadFullKeyGripColor(
-    Core::HID::NpadColor& main_color, Core::HID::NpadColor& sub_color) const {
+Result NpadAbstractPropertiesHandler::GetNpadFullKeyGripColor(Core::HID::NpadColor& main_color,
+                                                              Core::HID::NpadColor& sub_color) const
+{
     std::array<IAbstractedPad*, 5> abstract_pads{};
     const std::size_t count = abstract_pad_holder->GetAbstractedPads(abstract_pads);
 
@@ -289,7 +314,8 @@ Result NpadAbstractPropertiesHandler::GetNpadFullKeyGripColor(
 
 void NpadAbstractPropertiesHandler::GetNpadLeftRightInterfaceType(
     Core::HID::NpadInterfaceType& out_left_interface,
-    Core::HID::NpadInterfaceType& out_right_interface) const {
+    Core::HID::NpadInterfaceType& out_right_interface) const
+{
     out_left_interface = Core::HID::NpadInterfaceType::None;
     out_right_interface = Core::HID::NpadInterfaceType::None;
 

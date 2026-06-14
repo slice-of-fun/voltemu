@@ -1,8 +1,9 @@
 // SPDX-FileCopyrightText: Copyright 2021 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include "common/settings.h"
 #include "hid_core/frontend/emulated_console.h"
+
+#include "common/settings.h"
 #include "hid_core/frontend/input_converter.h"
 
 namespace Core::HID {
@@ -10,7 +11,8 @@ EmulatedConsole::EmulatedConsole() = default;
 
 EmulatedConsole::~EmulatedConsole() = default;
 
-void EmulatedConsole::ReloadFromSettings() {
+void EmulatedConsole::ReloadFromSettings()
+{
     // Using first motion device from player 1. No need to assign any unique config at the moment
     const auto& player = Settings::values.players.GetValue()[0];
     motion_params[0] = Common::ParamPackage(player.motions[0]);
@@ -18,7 +20,8 @@ void EmulatedConsole::ReloadFromSettings() {
     ReloadInput();
 }
 
-void EmulatedConsole::SetTouchParams() {
+void EmulatedConsole::SetTouchParams()
+{
     std::size_t index = 0;
 
     // We can't use mouse as touch if native mouse is enabled
@@ -70,7 +73,8 @@ void EmulatedConsole::SetTouchParams() {
     }
 }
 
-void EmulatedConsole::ReloadInput() {
+void EmulatedConsole::ReloadInput()
+{
     // If you load any device here add the equivalent to the UnloadInput() function
     SetTouchParams();
 
@@ -115,7 +119,8 @@ void EmulatedConsole::ReloadInput() {
     }
 }
 
-void EmulatedConsole::UnloadInput() {
+void EmulatedConsole::UnloadInput()
+{
     for (auto& motion : motion_devices) {
         motion.reset();
     }
@@ -124,42 +129,50 @@ void EmulatedConsole::UnloadInput() {
     }
 }
 
-void EmulatedConsole::EnableConfiguration() {
+void EmulatedConsole::EnableConfiguration()
+{
     is_configuring = true;
     SaveCurrentConfig();
 }
 
-void EmulatedConsole::DisableConfiguration() {
+void EmulatedConsole::DisableConfiguration()
+{
     is_configuring = false;
 }
 
-bool EmulatedConsole::IsConfiguring() const {
+bool EmulatedConsole::IsConfiguring() const
+{
     return is_configuring;
 }
 
-void EmulatedConsole::SaveCurrentConfig() {
+void EmulatedConsole::SaveCurrentConfig()
+{
     if (!is_configuring) {
         return;
     }
 }
 
-void EmulatedConsole::RestoreConfig() {
+void EmulatedConsole::RestoreConfig()
+{
     if (!is_configuring) {
         return;
     }
     ReloadFromSettings();
 }
 
-Common::ParamPackage EmulatedConsole::GetMotionParam() const {
+Common::ParamPackage EmulatedConsole::GetMotionParam() const
+{
     return motion_params[0];
 }
 
-void EmulatedConsole::SetMotionParam(Common::ParamPackage param) {
+void EmulatedConsole::SetMotionParam(Common::ParamPackage param)
+{
     motion_params[0] = std::move(param);
     ReloadInput();
 }
 
-void EmulatedConsole::SetMotion(const Common::Input::CallbackStatus& callback) {
+void EmulatedConsole::SetMotion(const Common::Input::CallbackStatus& callback)
+{
     std::unique_lock lock{mutex};
     auto& raw_status = console.motion_values.raw_status;
     auto& emulated = console.motion_values.emulated;
@@ -199,7 +212,8 @@ void EmulatedConsole::SetMotion(const Common::Input::CallbackStatus& callback) {
     TriggerOnChange(ConsoleTriggerType::Motion);
 }
 
-void EmulatedConsole::SetTouch(const Common::Input::CallbackStatus& callback, std::size_t index) {
+void EmulatedConsole::SetTouch(const Common::Input::CallbackStatus& callback, std::size_t index)
+{
     if (index >= MaxTouchDevices) {
         return;
     }
@@ -254,27 +268,32 @@ void EmulatedConsole::SetTouch(const Common::Input::CallbackStatus& callback, st
     TriggerOnChange(ConsoleTriggerType::Touch);
 }
 
-ConsoleMotionValues EmulatedConsole::GetMotionValues() const {
+ConsoleMotionValues EmulatedConsole::GetMotionValues() const
+{
     std::scoped_lock lock{mutex};
     return console.motion_values;
 }
 
-TouchValues EmulatedConsole::GetTouchValues() const {
+TouchValues EmulatedConsole::GetTouchValues() const
+{
     std::scoped_lock lock{mutex};
     return console.touch_values;
 }
 
-ConsoleMotion EmulatedConsole::GetMotion() const {
+ConsoleMotion EmulatedConsole::GetMotion() const
+{
     std::scoped_lock lock{mutex};
     return console.motion_state;
 }
 
-TouchFingerState EmulatedConsole::GetTouch() const {
+TouchFingerState EmulatedConsole::GetTouch() const
+{
     std::scoped_lock lock{mutex};
     return console.touch_state;
 }
 
-std::optional<std::size_t> EmulatedConsole::GetIndexFromFingerId(std::size_t finger_id) const {
+std::optional<std::size_t> EmulatedConsole::GetIndexFromFingerId(std::size_t finger_id) const
+{
     for (std::size_t index = 0; index < MaxTouchDevices; ++index) {
         const auto& finger = console.touch_values[index];
         if (!finger.pressed.value) {
@@ -287,7 +306,8 @@ std::optional<std::size_t> EmulatedConsole::GetIndexFromFingerId(std::size_t fin
     return std::nullopt;
 }
 
-std::optional<std::size_t> EmulatedConsole::GetNextFreeIndex() const {
+std::optional<std::size_t> EmulatedConsole::GetNextFreeIndex() const
+{
     for (std::size_t index = 0; index < MaxTouchDevices; ++index) {
         if (!console.touch_values[index].pressed.value) {
             return index;
@@ -296,7 +316,8 @@ std::optional<std::size_t> EmulatedConsole::GetNextFreeIndex() const {
     return std::nullopt;
 }
 
-void EmulatedConsole::TriggerOnChange(ConsoleTriggerType type) {
+void EmulatedConsole::TriggerOnChange(ConsoleTriggerType type)
+{
     std::scoped_lock lock{callback_mutex};
     for (const auto& poller_pair : callback_list) {
         const ConsoleUpdateCallback& poller = poller_pair.second;
@@ -306,13 +327,15 @@ void EmulatedConsole::TriggerOnChange(ConsoleTriggerType type) {
     }
 }
 
-int EmulatedConsole::SetCallback(ConsoleUpdateCallback update_callback) {
+int EmulatedConsole::SetCallback(ConsoleUpdateCallback update_callback)
+{
     std::scoped_lock lock{callback_mutex};
     callback_list.insert_or_assign(last_callback_key, std::move(update_callback));
     return last_callback_key++;
 }
 
-void EmulatedConsole::DeleteCallback(int key) {
+void EmulatedConsole::DeleteCallback(int key)
+{
     std::scoped_lock lock{callback_mutex};
     const auto& iterator = callback_list.find(key);
     if (iterator == callback_list.end()) {

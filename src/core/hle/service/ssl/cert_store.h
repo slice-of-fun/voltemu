@@ -27,8 +27,7 @@ public:
                                  std::span<const CaCertificateId> certificate_ids);
 
 private:
-    template <typename F>
-    void ForEachCertificate(std::span<const CaCertificateId> certs, F&& f);
+    template<typename F> void ForEachCertificate(std::span<const CaCertificateId> certs, F&& f);
 
 private:
     struct Certificate {

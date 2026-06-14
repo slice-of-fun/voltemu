@@ -7,9 +7,9 @@
 // Parts of this implementation were based on:
 // https://cs.android.com/android/platform/superproject/+/android-5.1.1_r38:frameworks/native/libs/gui/BufferQueueCore.cpp
 
-#include "common/assert.h"
-
 #include "core/hle/service/nvnflinger/buffer_queue_core.h"
+
+#include "common/assert.h"
 
 namespace Service::android {
 
@@ -17,7 +17,9 @@ BufferQueueCore::BufferQueueCore() = default;
 
 BufferQueueCore::~BufferQueueCore() = default;
 
-void BufferQueueCore::PushHistory(u64 frame_number, s64 queue_time, s64 presentation_time, BufferState state) {
+void BufferQueueCore::PushHistory(u64 frame_number, s64 queue_time, s64 presentation_time,
+                                  BufferState state)
+{
     std::lock_guard lk(buffer_history_mutex);
 
     auto it = buffer_history_map.find(frame_number);
@@ -26,12 +28,8 @@ void BufferQueueCore::PushHistory(u64 frame_number, s64 queue_time, s64 presenta
         return;
     }
 
-    buffer_history_map.emplace(frame_number, BufferHistoryInfo{
-        frame_number,
-        queue_time,
-        presentation_time,
-        state
-    });
+    buffer_history_map.emplace(
+        frame_number, BufferHistoryInfo{frame_number, queue_time, presentation_time, state});
     buffer_history_order.push_back(frame_number);
 
     if (buffer_history_order.size() > BUFFER_HISTORY_SIZE) {
@@ -41,7 +39,8 @@ void BufferQueueCore::PushHistory(u64 frame_number, s64 queue_time, s64 presenta
     }
 }
 
-void BufferQueueCore::UpdateHistory(u64 frame_number, BufferState state) {
+void BufferQueueCore::UpdateHistory(u64 frame_number, BufferState state)
+{
     std::lock_guard lk(buffer_history_mutex);
 
     auto it = buffer_history_map.find(frame_number);
@@ -50,19 +49,22 @@ void BufferQueueCore::UpdateHistory(u64 frame_number, BufferState state) {
     }
 }
 
-void BufferQueueCore::SignalDequeueCondition() {
+void BufferQueueCore::SignalDequeueCondition()
+{
     dequeue_possible.store(true);
     dequeue_condition.notify_all();
 }
 
-bool BufferQueueCore::WaitForDequeueCondition(std::unique_lock<std::mutex>& lk) {
+bool BufferQueueCore::WaitForDequeueCondition(std::unique_lock<std::mutex>& lk)
+{
     dequeue_condition.wait(lk, [&] { return dequeue_possible.load(); });
     dequeue_possible.store(false);
 
     return true;
 }
 
-s32 BufferQueueCore::GetMinUndequeuedBufferCountLocked(bool async) const {
+s32 BufferQueueCore::GetMinUndequeuedBufferCountLocked(bool async) const
+{
     if (!use_async_buffer) {
         return 0;
     }
@@ -74,11 +76,13 @@ s32 BufferQueueCore::GetMinUndequeuedBufferCountLocked(bool async) const {
     return max_acquired_buffer_count;
 }
 
-s32 BufferQueueCore::GetMinMaxBufferCountLocked(bool async) const {
+s32 BufferQueueCore::GetMinMaxBufferCountLocked(bool async) const
+{
     return GetMinUndequeuedBufferCountLocked(async);
 }
 
-s32 BufferQueueCore::GetMaxBufferCountLocked(bool async) const {
+s32 BufferQueueCore::GetMaxBufferCountLocked(bool async) const
+{
     const auto min_buffer_count = GetMinMaxBufferCountLocked(async);
     auto max_buffer_count = std::max(default_max_buffer_count, min_buffer_count);
 
@@ -97,12 +101,14 @@ s32 BufferQueueCore::GetMaxBufferCountLocked(bool async) const {
     return max_buffer_count;
 }
 
-s32 BufferQueueCore::GetPreallocatedBufferCountLocked() const {
+s32 BufferQueueCore::GetPreallocatedBufferCountLocked() const
+{
     return static_cast<s32>(std::count_if(slots.begin(), slots.end(),
                                           [](const auto& slot) { return slot.is_preallocated; }));
 }
 
-void BufferQueueCore::FreeBufferLocked(s32 slot) {
+void BufferQueueCore::FreeBufferLocked(s32 slot)
+{
     LOG_DEBUG(Service_Nvnflinger, "slot {}", slot);
 
     slots[slot].graphic_buffer.reset();
@@ -117,7 +123,8 @@ void BufferQueueCore::FreeBufferLocked(s32 slot) {
     slots[slot].fence = Fence::NoFence();
 }
 
-void BufferQueueCore::FreeAllBuffersLocked() {
+void BufferQueueCore::FreeAllBuffersLocked()
+{
     buffer_has_been_queued = false;
 
     for (s32 slot = 0; slot < BufferQueueDefs::NUM_BUFFER_SLOTS; ++slot) {
@@ -125,13 +132,15 @@ void BufferQueueCore::FreeAllBuffersLocked() {
     }
 }
 
-bool BufferQueueCore::StillTracking(const BufferItem& item) const {
+bool BufferQueueCore::StillTracking(const BufferItem& item) const
+{
     const BufferSlot& slot = slots[item.slot];
 
     return (slot.graphic_buffer != nullptr) && (item.graphic_buffer == slot.graphic_buffer);
 }
 
-void BufferQueueCore::WaitWhileAllocatingLocked() const {
+void BufferQueueCore::WaitWhileAllocatingLocked() const
+{
     while (is_allocating) {
         is_allocating_condition.wait(mutex);
     }

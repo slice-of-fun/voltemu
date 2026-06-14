@@ -4,13 +4,14 @@
 // SPDX-FileCopyrightText: Copyright 2024 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+#include "hid_core/resources/abstracted_pad/abstract_vibration_handler.h"
+
 #include "hid_core/frontend/emulated_controller.h"
 #include "hid_core/hid_core.h"
 #include "hid_core/hid_result.h"
 #include "hid_core/hid_util.h"
 #include "hid_core/resources/abstracted_pad/abstract_pad_holder.h"
 #include "hid_core/resources/abstracted_pad/abstract_properties_handler.h"
-#include "hid_core/resources/abstracted_pad/abstract_vibration_handler.h"
 #include "hid_core/resources/applet_resource.h"
 #include "hid_core/resources/npad/npad_vibration.h"
 #include "hid_core/resources/vibration/gc_vibration_device.h"
@@ -19,45 +20,56 @@
 
 namespace Service::HID {
 
-NpadAbstractVibrationHandler::NpadAbstractVibrationHandler() {}
+NpadAbstractVibrationHandler::NpadAbstractVibrationHandler()
+{
+}
 
 NpadAbstractVibrationHandler::~NpadAbstractVibrationHandler() = default;
 
-void NpadAbstractVibrationHandler::SetAbstractPadHolder(NpadAbstractedPadHolder* holder) {
+void NpadAbstractVibrationHandler::SetAbstractPadHolder(NpadAbstractedPadHolder* holder)
+{
     abstract_pad_holder = holder;
 }
 
-void NpadAbstractVibrationHandler::SetAppletResource(AppletResourceHolder* applet_resource) {
+void NpadAbstractVibrationHandler::SetAppletResource(AppletResourceHolder* applet_resource)
+{
     applet_resource_holder = applet_resource;
 }
 
-void NpadAbstractVibrationHandler::SetPropertiesHandler(NpadAbstractPropertiesHandler* handler) {
+void NpadAbstractVibrationHandler::SetPropertiesHandler(NpadAbstractPropertiesHandler* handler)
+{
     properties_handler = handler;
 }
 
-void NpadAbstractVibrationHandler::SetVibrationHandler(NpadVibration* handler) {
+void NpadAbstractVibrationHandler::SetVibrationHandler(NpadVibration* handler)
+{
     vibration_handler = handler;
 }
 
-void NpadAbstractVibrationHandler::SetHidCore(Core::HID::HIDCore* core) {
+void NpadAbstractVibrationHandler::SetHidCore(Core::HID::HIDCore* core)
+{
     hid_core = core;
 }
 
-void NpadAbstractVibrationHandler::SetN64Vibration(NpadN64VibrationDevice* n64_device) {
+void NpadAbstractVibrationHandler::SetN64Vibration(NpadN64VibrationDevice* n64_device)
+{
     n64_vibration_device = n64_device;
 }
 
 void NpadAbstractVibrationHandler::SetVibration(NpadVibrationDevice* left_device,
-                                                NpadVibrationDevice* right_device) {
+                                                NpadVibrationDevice* right_device)
+{
     left_vibration_device = left_device;
     right_vibration_device = right_device;
 }
 
-void NpadAbstractVibrationHandler::SetGcVibration(NpadGcVibrationDevice* gc_device) {
+void NpadAbstractVibrationHandler::SetGcVibration(NpadGcVibrationDevice* gc_device)
+{
     gc_vibration_device = gc_device;
 }
 
-Result NpadAbstractVibrationHandler::IncrementRefCounter() {
+Result NpadAbstractVibrationHandler::IncrementRefCounter()
+{
     if (ref_counter == (std::numeric_limits<s32>::max)() - 1) {
         return ResultNpadHandlerOverflow;
     }
@@ -65,7 +77,8 @@ Result NpadAbstractVibrationHandler::IncrementRefCounter() {
     return ResultSuccess;
 }
 
-Result NpadAbstractVibrationHandler::DecrementRefCounter() {
+Result NpadAbstractVibrationHandler::DecrementRefCounter()
+{
     if (ref_counter == 0) {
         return ResultNpadHandlerNotInitialized;
     }
@@ -73,7 +86,8 @@ Result NpadAbstractVibrationHandler::DecrementRefCounter() {
     return ResultSuccess;
 }
 
-void NpadAbstractVibrationHandler::UpdateVibrationState() {
+void NpadAbstractVibrationHandler::UpdateVibrationState()
+{
     const bool is_handheld_hid_enabled =
         applet_resource_holder->handheld_config->is_handheld_hid_enabled;
     const bool is_force_handheld_style_vibration =

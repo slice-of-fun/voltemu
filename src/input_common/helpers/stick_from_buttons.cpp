@@ -1,11 +1,13 @@
 // SPDX-FileCopyrightText: 2017 Citra Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "input_common/helpers/stick_from_buttons.h"
+
 #include <chrono>
 #include <cmath>
+
 #include "common/math_util.h"
 #include "common/settings.h"
-#include "input_common/helpers/stick_from_buttons.h"
 
 namespace InputCommon {
 
@@ -25,7 +27,8 @@ public:
           float modifier_scale_, float modifier_angle_)
         : up(std::move(up_)), down(std::move(down_)), left(std::move(left_)),
           right(std::move(right_)), modifier(std::move(modifier_)), updater(std::move(updater_)),
-          modifier_scale(modifier_scale_), modifier_angle(modifier_angle_) {
+          modifier_scale(modifier_scale_), modifier_angle(modifier_angle_)
+    {
         up->SetCallback({
             .on_change =
                 [this](const Common::Input::CallbackStatus& callback_) {
@@ -63,19 +66,22 @@ public:
         last_y_axis_value = 0.0f;
     }
 
-    bool IsAngleGreater(float old_angle, float new_angle) const {
+    bool IsAngleGreater(float old_angle, float new_angle) const
+    {
         const float top_limit = new_angle + APERTURE;
         return (old_angle > new_angle && old_angle <= top_limit) ||
                (old_angle + TAU > new_angle && old_angle + TAU <= top_limit);
     }
 
-    bool IsAngleSmaller(float old_angle, float new_angle) const {
+    bool IsAngleSmaller(float old_angle, float new_angle) const
+    {
         const float bottom_limit = new_angle - APERTURE;
         return (old_angle >= bottom_limit && old_angle < new_angle) ||
                (old_angle - TAU >= bottom_limit && old_angle - TAU < new_angle);
     }
 
-    float GetAngle(std::chrono::time_point<std::chrono::steady_clock> now) const {
+    float GetAngle(std::chrono::time_point<std::chrono::steady_clock> now) const
+    {
         float new_angle = angle;
 
         auto time_difference = static_cast<float>(
@@ -107,7 +113,8 @@ public:
         return new_angle;
     }
 
-    void SetGoalAngle(bool r, bool l, bool u, bool d) {
+    void SetGoalAngle(bool r, bool l, bool u, bool d)
+    {
         // Move to the right
         if (r && !u && !d) {
             goal_angle = 0.0f;
@@ -149,27 +156,32 @@ public:
         }
     }
 
-    void UpdateUpButtonStatus(const Common::Input::CallbackStatus& button_callback) {
+    void UpdateUpButtonStatus(const Common::Input::CallbackStatus& button_callback)
+    {
         up_status = button_callback.button_status.value;
         UpdateStatus();
     }
 
-    void UpdateDownButtonStatus(const Common::Input::CallbackStatus& button_callback) {
+    void UpdateDownButtonStatus(const Common::Input::CallbackStatus& button_callback)
+    {
         down_status = button_callback.button_status.value;
         UpdateStatus();
     }
 
-    void UpdateLeftButtonStatus(const Common::Input::CallbackStatus& button_callback) {
+    void UpdateLeftButtonStatus(const Common::Input::CallbackStatus& button_callback)
+    {
         left_status = button_callback.button_status.value;
         UpdateStatus();
     }
 
-    void UpdateRightButtonStatus(const Common::Input::CallbackStatus& button_callback) {
+    void UpdateRightButtonStatus(const Common::Input::CallbackStatus& button_callback)
+    {
         right_status = button_callback.button_status.value;
         UpdateStatus();
     }
 
-    void UpdateModButtonStatus(const Common::Input::CallbackStatus& button_callback) {
+    void UpdateModButtonStatus(const Common::Input::CallbackStatus& button_callback)
+    {
         const auto& new_status = button_callback.button_status;
         const bool new_button_value = new_status.inverted ? !new_status.value : new_status.value;
         modifier_status.toggle = new_status.toggle;
@@ -196,7 +208,8 @@ public:
         UpdateStatus();
     }
 
-    void UpdateStatus() {
+    void UpdateStatus()
+    {
         bool r = right_status;
         bool l = left_status;
         bool u = up_status;
@@ -242,7 +255,8 @@ public:
         TriggerOnChange(status);
     }
 
-    void ForceUpdate() override {
+    void ForceUpdate() override
+    {
         up->ForceUpdate();
         down->ForceUpdate();
         left->ForceUpdate();
@@ -250,7 +264,8 @@ public:
         modifier->ForceUpdate();
     }
 
-    void SoftUpdate() {
+    void SoftUpdate()
+    {
         Common::Input::CallbackStatus status{
             .type = Common::Input::InputType::Stick,
             .stick_status = GetStatus(),
@@ -264,7 +279,8 @@ public:
         TriggerOnChange(status);
     }
 
-    Common::Input::StickStatus GetStatus() const {
+    Common::Input::StickStatus GetStatus() const
+    {
         Common::Input::StickStatus status{};
         status.x.properties = properties;
         status.y.properties = properties;
@@ -313,8 +329,9 @@ private:
     std::chrono::time_point<std::chrono::steady_clock> last_update;
 };
 
-std::unique_ptr<Common::Input::InputDevice> StickFromButton::Create(
-    const Common::ParamPackage& params) {
+std::unique_ptr<Common::Input::InputDevice>
+StickFromButton::Create(const Common::ParamPackage& params)
+{
     const std::string null_engine = Common::ParamPackage{{"engine", "null"}}.Serialize();
     auto up = Common::Input::CreateInputDeviceFromString(params.Get("up", null_engine));
     auto down = Common::Input::CreateInputDeviceFromString(params.Get("down", null_engine));

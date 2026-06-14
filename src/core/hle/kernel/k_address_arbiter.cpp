@@ -1,9 +1,10 @@
 // SPDX-FileCopyrightText: Copyright 2021 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/kernel/k_address_arbiter.h"
+
 #include "core/arm/exclusive_monitor.h"
 #include "core/core.h"
-#include "core/hle/kernel/k_address_arbiter.h"
 #include "core/hle/kernel/k_process.h"
 #include "core/hle/kernel/k_scheduler.h"
 #include "core/hle/kernel/k_scoped_scheduler_lock_and_sleep.h"
@@ -16,18 +17,21 @@
 
 namespace Kernel {
 
-KAddressArbiter::KAddressArbiter(Core::System& system)
-    : m_system{system}, m_kernel{system.Kernel()} {}
+KAddressArbiter::KAddressArbiter(Core::System& system) : m_system{system}, m_kernel{system.Kernel()}
+{
+}
 KAddressArbiter::~KAddressArbiter() = default;
 
 namespace {
 
-bool ReadFromUser(KernelCore& kernel, s32* out, KProcessAddress address) {
+bool ReadFromUser(KernelCore& kernel, s32* out, KProcessAddress address)
+{
     *out = GetCurrentMemory(kernel).Read32(GetInteger(address));
     return true;
 }
 
-bool DecrementIfLessThan(KernelCore& kernel, s32* out, KProcessAddress address, s32 value) {
+bool DecrementIfLessThan(KernelCore& kernel, s32* out, KProcessAddress address, s32 value)
+{
     auto& monitor = GetCurrentProcess(kernel).GetExclusiveMonitor();
     const auto current_core = kernel.CurrentPhysicalCoreIndex();
 
@@ -67,8 +71,8 @@ bool DecrementIfLessThan(KernelCore& kernel, s32* out, KProcessAddress address, 
     return true;
 }
 
-bool UpdateIfEqual(KernelCore& kernel, s32* out, KProcessAddress address, s32 value,
-                   s32 new_value) {
+bool UpdateIfEqual(KernelCore& kernel, s32* out, KProcessAddress address, s32 value, s32 new_value)
+{
     auto& monitor = GetCurrentProcess(kernel).GetExclusiveMonitor();
     const auto current_core = kernel.CurrentPhysicalCoreIndex();
 
@@ -110,9 +114,12 @@ bool UpdateIfEqual(KernelCore& kernel, s32* out, KProcessAddress address, s32 va
 class ThreadQueueImplForKAddressArbiter final : public KThreadQueue {
 public:
     explicit ThreadQueueImplForKAddressArbiter(KernelCore& kernel, KAddressArbiter::ThreadTree* t)
-        : KThreadQueue(kernel), m_tree(t) {}
+        : KThreadQueue(kernel), m_tree(t)
+    {
+    }
 
-    void CancelWait(KThread* waiting_thread, Result wait_result, bool cancel_timer_task) override {
+    void CancelWait(KThread* waiting_thread, Result wait_result, bool cancel_timer_task) override
+    {
         // If the thread is waiting on an address arbiter, remove it from the tree.
         if (waiting_thread->IsWaitingForAddressArbiter()) {
             m_tree->erase(m_tree->iterator_to(*waiting_thread));
@@ -129,7 +136,8 @@ private:
 
 } // namespace
 
-Result KAddressArbiter::Signal(uint64_t addr, s32 count) {
+Result KAddressArbiter::Signal(uint64_t addr, s32 count)
+{
     // Perform signaling.
     s32 num_waiters{};
     {
@@ -152,7 +160,8 @@ Result KAddressArbiter::Signal(uint64_t addr, s32 count) {
     R_SUCCEED();
 }
 
-Result KAddressArbiter::SignalAndIncrementIfEqual(uint64_t addr, s32 value, s32 count) {
+Result KAddressArbiter::SignalAndIncrementIfEqual(uint64_t addr, s32 value, s32 count)
+{
     // Perform signaling.
     s32 num_waiters{};
     {
@@ -181,7 +190,8 @@ Result KAddressArbiter::SignalAndIncrementIfEqual(uint64_t addr, s32 value, s32 
     R_SUCCEED();
 }
 
-Result KAddressArbiter::SignalAndModifyByWaitingCountIfEqual(uint64_t addr, s32 value, s32 count) {
+Result KAddressArbiter::SignalAndModifyByWaitingCountIfEqual(uint64_t addr, s32 value, s32 count)
+{
     // Perform signaling.
     s32 num_waiters{};
     {
@@ -244,7 +254,8 @@ Result KAddressArbiter::SignalAndModifyByWaitingCountIfEqual(uint64_t addr, s32 
     R_SUCCEED();
 }
 
-Result KAddressArbiter::WaitIfLessThan(uint64_t addr, s32 value, bool decrement, s64 timeout) {
+Result KAddressArbiter::WaitIfLessThan(uint64_t addr, s32 value, bool decrement, s64 timeout)
+{
     // Prepare to wait.
     KThread* cur_thread = GetCurrentThreadPointer(m_kernel);
     KHardwareTimer* timer{};
@@ -299,7 +310,8 @@ Result KAddressArbiter::WaitIfLessThan(uint64_t addr, s32 value, bool decrement,
     return cur_thread->GetWaitResult();
 }
 
-Result KAddressArbiter::WaitIfEqual(uint64_t addr, s32 value, s64 timeout) {
+Result KAddressArbiter::WaitIfEqual(uint64_t addr, s32 value, s64 timeout)
+{
     // Prepare to wait.
     KThread* cur_thread = GetCurrentThreadPointer(m_kernel);
     KHardwareTimer* timer{};

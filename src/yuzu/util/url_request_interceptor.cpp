@@ -5,11 +5,14 @@
 
 #include "yuzu/util/url_request_interceptor.h"
 
-UrlRequestInterceptor::UrlRequestInterceptor(QObject* p) : QWebEngineUrlRequestInterceptor(p) {}
+UrlRequestInterceptor::UrlRequestInterceptor(QObject* p) : QWebEngineUrlRequestInterceptor(p)
+{
+}
 
 UrlRequestInterceptor::~UrlRequestInterceptor() = default;
 
-void UrlRequestInterceptor::interceptRequest(QWebEngineUrlRequestInfo& info) {
+void UrlRequestInterceptor::interceptRequest(QWebEngineUrlRequestInfo& info)
+{
     const auto resource_type = info.resourceType();
 
     switch (resource_type) {
@@ -26,7 +29,8 @@ void UrlRequestInterceptor::interceptRequest(QWebEngineUrlRequestInfo& info) {
     }
 }
 
-QUrl UrlRequestInterceptor::GetRequestedURL() const {
+QUrl UrlRequestInterceptor::GetRequestedURL() const
+{
     return requested_url;
 }
 

@@ -16,7 +16,8 @@
 namespace Common::FeralGamemode {
 
 /// @brief Start the gamemode client
-void Start() noexcept {
+void Start() noexcept
+{
     if (UISettings::values.enable_gamemode) {
 #ifdef __unix__
         if (gamemode_request_start() < 0) {
@@ -33,7 +34,8 @@ void Start() noexcept {
 }
 
 /// @brief Stop the gmemode client
-void Stop() noexcept {
+void Stop() noexcept
+{
     if (UISettings::values.enable_gamemode) {
 #ifdef __unix__
         if (gamemode_request_end() < 0) {

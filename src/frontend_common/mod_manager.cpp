@@ -1,28 +1,29 @@
 // SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+#include "mod_manager.h"
+
+#include <fmt/format.h>
+
 #include <algorithm>
 #include <filesystem>
-#include <fmt/format.h>
+
 #include "common/fs/fs.h"
 #include "common/fs/fs_types.h"
 #include "common/logging.h"
 #include "frontend_common/data_manager.h"
-#include "mod_manager.h"
 
 namespace FrontendCommon {
 
 // TODO: Handle cases where the folder appears to contain multiple mods.
-std::vector<std::filesystem::path> GetModFolder(const std::string& root) {
+std::vector<std::filesystem::path> GetModFolder(const std::string& root)
+{
     std::vector<std::filesystem::path> paths;
 
     auto callback = [&paths](const std::filesystem::directory_entry& entry) -> bool {
         const auto name = entry.path().filename().string();
-        static const std::array<std::string, 5> valid_names = {"exefs",
-                                                               "romfs",
-                                                               "romfs_ext",
-                                                               "cheats",
-                                                               "romfslite"};
+        static const std::array<std::string, 5> valid_names = {"exefs", "romfs", "romfs_ext",
+                                                               "cheats", "romfslite"};
 
         if (std::ranges::find(valid_names, name) != valid_names.end()) {
             const auto parent = entry.path().parent_path();
@@ -39,7 +40,9 @@ std::vector<std::filesystem::path> GetModFolder(const std::string& root) {
     return paths;
 }
 
-ModInstallResult InstallMod(const std::filesystem::path& path, const u64 program_id, const bool copy) {
+ModInstallResult InstallMod(const std::filesystem::path& path, const u64 program_id,
+                            const bool copy)
+{
     const auto program_id_string = fmt::format("{:016X}", program_id);
     const auto mod_name = path.filename();
     const auto mod_dir =

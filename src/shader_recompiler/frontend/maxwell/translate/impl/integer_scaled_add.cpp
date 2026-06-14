@@ -8,7 +8,8 @@
 namespace Shader::Maxwell {
 namespace {
 void ISCADD(TranslatorVisitor& v, u64 insn, IR::U32 op_b, bool cc, bool neg_a, bool neg_b,
-            u64 scale_imm) {
+            u64 scale_imm)
+{
     union {
         u64 raw;
         BitField<0, 8, IR::Reg> dest_reg;
@@ -46,7 +47,8 @@ void ISCADD(TranslatorVisitor& v, u64 insn, IR::U32 op_b, bool cc, bool neg_a, b
     }
 }
 
-void ISCADD(TranslatorVisitor& v, u64 insn, IR::U32 op_b) {
+void ISCADD(TranslatorVisitor& v, u64 insn, IR::U32 op_b)
+{
     union {
         u64 raw;
         BitField<47, 1, u64> cc;
@@ -60,19 +62,23 @@ void ISCADD(TranslatorVisitor& v, u64 insn, IR::U32 op_b) {
 
 } // Anonymous namespace
 
-void TranslatorVisitor::ISCADD_reg(u64 insn) {
+void TranslatorVisitor::ISCADD_reg(u64 insn)
+{
     ISCADD(*this, insn, GetReg20(insn));
 }
 
-void TranslatorVisitor::ISCADD_cbuf(u64 insn) {
+void TranslatorVisitor::ISCADD_cbuf(u64 insn)
+{
     ISCADD(*this, insn, GetCbuf(insn));
 }
 
-void TranslatorVisitor::ISCADD_imm(u64 insn) {
+void TranslatorVisitor::ISCADD_imm(u64 insn)
+{
     ISCADD(*this, insn, GetImm20(insn));
 }
 
-void TranslatorVisitor::ISCADD32I(u64 insn) {
+void TranslatorVisitor::ISCADD32I(u64 insn)
+{
     union {
         u64 raw;
         BitField<52, 1, u64> cc;

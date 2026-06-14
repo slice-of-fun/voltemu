@@ -17,16 +17,15 @@ public:
     explicit KLightClientSession(KernelCore& kernel);
     ~KLightClientSession();
 
-    void Initialize(KLightSession* parent) {
+    void Initialize(KLightSession* parent)
+    {
         // Set member variables.
         m_parent = parent;
     }
 
     virtual void Destroy() override;
 
-    const KLightSession* GetParent() const {
-        return m_parent;
-    }
+    const KLightSession* GetParent() const { return m_parent; }
 
     Result SendSyncRequest(u32* data);
 

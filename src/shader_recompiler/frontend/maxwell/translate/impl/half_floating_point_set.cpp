@@ -7,7 +7,8 @@
 namespace Shader::Maxwell {
 namespace {
 void HSET2(TranslatorVisitor& v, u64 insn, const IR::U32& src_b, bool bf, bool ftz, bool neg_b,
-           bool abs_b, FPCompareOp compare_op, Swizzle swizzle_b) {
+           bool abs_b, FPCompareOp compare_op, Swizzle swizzle_b)
+{
     union {
         u64 insn;
         BitField<0, 8, IR::Reg> dest_reg;
@@ -66,7 +67,8 @@ void HSET2(TranslatorVisitor& v, u64 insn, const IR::U32& src_b, bool bf, bool f
 }
 } // Anonymous namespace
 
-void TranslatorVisitor::HSET2_reg(u64 insn) {
+void TranslatorVisitor::HSET2_reg(u64 insn)
+{
     union {
         u64 insn;
         BitField<30, 1, u64> abs_b;
@@ -81,7 +83,8 @@ void TranslatorVisitor::HSET2_reg(u64 insn) {
           hset2.abs_b != 0, hset2.compare_op, hset2.swizzle_b);
 }
 
-void TranslatorVisitor::HSET2_cbuf(u64 insn) {
+void TranslatorVisitor::HSET2_cbuf(u64 insn)
+{
     union {
         u64 insn;
         BitField<53, 1, u64> bf;
@@ -94,7 +97,8 @@ void TranslatorVisitor::HSET2_cbuf(u64 insn) {
           hset2.compare_op, Swizzle::F32);
 }
 
-void TranslatorVisitor::HSET2_imm(u64 insn) {
+void TranslatorVisitor::HSET2_imm(u64 insn)
+{
     union {
         u64 insn;
         BitField<53, 1, u64> bf;

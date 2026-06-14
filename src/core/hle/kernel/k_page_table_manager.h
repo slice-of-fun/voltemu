@@ -19,32 +19,23 @@ public:
 public:
     KPageTableManager() = default;
 
-    void Initialize(KDynamicPageManager* page_allocator, KPageTableSlabHeap* pt_heap) {
+    void Initialize(KDynamicPageManager* page_allocator, KPageTableSlabHeap* pt_heap)
+    {
         m_pt_heap = pt_heap;
 
         static_assert(std::derived_from<KPageTableSlabHeap, DynamicSlabType>);
         BaseHeap::Initialize(page_allocator, pt_heap);
     }
 
-    KVirtualAddress Allocate() {
-        return KVirtualAddress(BaseHeap::Allocate());
-    }
+    KVirtualAddress Allocate() { return KVirtualAddress(BaseHeap::Allocate()); }
 
-    RefCount GetRefCount(KVirtualAddress addr) const {
-        return m_pt_heap->GetRefCount(addr);
-    }
+    RefCount GetRefCount(KVirtualAddress addr) const { return m_pt_heap->GetRefCount(addr); }
 
-    void Open(KVirtualAddress addr, int count) {
-        return m_pt_heap->Open(addr, count);
-    }
+    void Open(KVirtualAddress addr, int count) { return m_pt_heap->Open(addr, count); }
 
-    bool Close(KVirtualAddress addr, int count) {
-        return m_pt_heap->Close(addr, count);
-    }
+    bool Close(KVirtualAddress addr, int count) { return m_pt_heap->Close(addr, count); }
 
-    bool IsInPageTableHeap(KVirtualAddress addr) const {
-        return m_pt_heap->IsInRange(addr);
-    }
+    bool IsInPageTableHeap(KVirtualAddress addr) const { return m_pt_heap->IsInRange(addr); }
 
 private:
     using BaseHeap = KDynamicResourceManager<impl::PageTablePage, true>;

@@ -3,6 +3,8 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/internal_network/socket_proxy.h"
+
 #include <chrono>
 #include <thread>
 
@@ -11,7 +13,6 @@
 #include "common/zstd_compression.h"
 #include "core/internal_network/network.h"
 #include "core/internal_network/network_interface.h"
-#include "core/internal_network/socket_proxy.h"
 #include "network/network.h"
 
 #ifdef __unix__
@@ -20,16 +21,20 @@
 
 namespace Network {
 
-ProxySocket::ProxySocket() noexcept {}
+ProxySocket::ProxySocket() noexcept
+{
+}
 
-ProxySocket::~ProxySocket() {
+ProxySocket::~ProxySocket()
+{
     if (fd == INVALID_SOCKET) {
         return;
     }
     fd = INVALID_SOCKET;
 }
 
-void ProxySocket::HandleProxyPacket(const ProxyPacket& packet) {
+void ProxySocket::HandleProxyPacket(const ProxyPacket& packet)
+{
     if (protocol != packet.protocol || local_endpoint.portno != packet.remote_endpoint.portno ||
         closed) {
         return;
@@ -47,40 +52,46 @@ void ProxySocket::HandleProxyPacket(const ProxyPacket& packet) {
     received_packets.push(decompressed);
 }
 
-template <typename T>
-Errno ProxySocket::SetSockOpt(SOCKET fd_, int option, T value) {
+template<typename T> Errno ProxySocket::SetSockOpt(SOCKET fd_, int option, T value)
+{
     LOG_DEBUG(Network, "(STUBBED) called");
     return Errno::SUCCESS;
 }
 
-Errno ProxySocket::Initialize(Domain domain, Type type, Protocol socket_protocol) {
+Errno ProxySocket::Initialize(Domain domain, Type type, Protocol socket_protocol)
+{
     protocol = socket_protocol;
     SetSockOpt(fd, SO_TYPE, type);
 
     return Errno::SUCCESS;
 }
 
-std::pair<ProxySocket::AcceptResult, Errno> ProxySocket::Accept() {
+std::pair<ProxySocket::AcceptResult, Errno> ProxySocket::Accept()
+{
     LOG_WARNING(Network, "(STUBBED) called");
     return {AcceptResult{}, Errno::SUCCESS};
 }
 
-Errno ProxySocket::Connect(SockAddrIn addr_in) {
+Errno ProxySocket::Connect(SockAddrIn addr_in)
+{
     LOG_WARNING(Network, "(STUBBED) called");
     return Errno::SUCCESS;
 }
 
-std::pair<SockAddrIn, Errno> ProxySocket::GetPeerName() {
+std::pair<SockAddrIn, Errno> ProxySocket::GetPeerName()
+{
     LOG_WARNING(Network, "(STUBBED) called");
     return {SockAddrIn{}, Errno::SUCCESS};
 }
 
-std::pair<SockAddrIn, Errno> ProxySocket::GetSockName() {
+std::pair<SockAddrIn, Errno> ProxySocket::GetSockName()
+{
     LOG_WARNING(Network, "(STUBBED) called");
     return {SockAddrIn{}, Errno::SUCCESS};
 }
 
-Errno ProxySocket::Bind(SockAddrIn addr) {
+Errno ProxySocket::Bind(SockAddrIn addr)
+{
     if (is_bound) {
         LOG_WARNING(Network, "Rebinding Socket is unimplemented!");
         return Errno::SUCCESS;
@@ -91,17 +102,20 @@ Errno ProxySocket::Bind(SockAddrIn addr) {
     return Errno::SUCCESS;
 }
 
-Errno ProxySocket::Listen(s32 backlog) {
+Errno ProxySocket::Listen(s32 backlog)
+{
     LOG_WARNING(Network, "(STUBBED) called");
     return Errno::SUCCESS;
 }
 
-Errno ProxySocket::Shutdown(ShutdownHow how) {
+Errno ProxySocket::Shutdown(ShutdownHow how)
+{
     LOG_WARNING(Network, "(STUBBED) called");
     return Errno::SUCCESS;
 }
 
-std::pair<s32, Errno> ProxySocket::Recv(int flags, std::span<u8> message) {
+std::pair<s32, Errno> ProxySocket::Recv(int flags, std::span<u8> message)
+{
     LOG_WARNING(Network, "(STUBBED) called");
     ASSERT(flags == 0);
     ASSERT(message.size() < static_cast<size_t>((std::numeric_limits<int>::max)()));
@@ -109,7 +123,8 @@ std::pair<s32, Errno> ProxySocket::Recv(int flags, std::span<u8> message) {
     return {static_cast<s32>(0), Errno::SUCCESS};
 }
 
-std::pair<s32, Errno> ProxySocket::RecvFrom(int flags, std::span<u8> message, SockAddrIn* addr) {
+std::pair<s32, Errno> ProxySocket::RecvFrom(int flags, std::span<u8> message, SockAddrIn* addr)
+{
     ASSERT(flags == 0);
     ASSERT(message.size() < static_cast<size_t>((std::numeric_limits<int>::max)()));
 
@@ -144,7 +159,8 @@ std::pair<s32, Errno> ProxySocket::RecvFrom(int flags, std::span<u8> message, So
 }
 
 std::pair<s32, Errno> ProxySocket::ReceivePacket(int flags, std::span<u8> message, SockAddrIn* addr,
-                                                 std::size_t max_length) {
+                                                 std::size_t max_length)
+{
     ProxyPacket& packet = received_packets.front();
     if (addr) {
         addr->family = Domain::INET;
@@ -180,7 +196,8 @@ std::pair<s32, Errno> ProxySocket::ReceivePacket(int flags, std::span<u8> messag
     return {static_cast<u32>(read_bytes), Errno::SUCCESS};
 }
 
-std::pair<s32, Errno> ProxySocket::Send(std::span<const u8> message, int flags) {
+std::pair<s32, Errno> ProxySocket::Send(std::span<const u8> message, int flags)
+{
     LOG_WARNING(Network, "(STUBBED) called");
     ASSERT(message.size() < static_cast<size_t>((std::numeric_limits<int>::max)()));
     ASSERT(flags == 0);
@@ -188,7 +205,8 @@ std::pair<s32, Errno> ProxySocket::Send(std::span<const u8> message, int flags) 
     return {static_cast<s32>(0), Errno::SUCCESS};
 }
 
-void ProxySocket::SendPacket(ProxyPacket& packet) {
+void ProxySocket::SendPacket(ProxyPacket& packet)
+{
     if (auto room_member = Network::GetRoomMember().lock()) {
         if (room_member->IsConnected()) {
             packet.data = Common::Compression::CompressDataZSTDDefault(packet.data.data(),
@@ -199,7 +217,8 @@ void ProxySocket::SendPacket(ProxyPacket& packet) {
 }
 
 std::pair<s32, Errno> ProxySocket::SendTo(u32 flags, std::span<const u8> message,
-                                          const SockAddrIn* addr) {
+                                          const SockAddrIn* addr)
+{
     ASSERT(flags == 0);
 
     if (!is_bound) {
@@ -237,14 +256,16 @@ std::pair<s32, Errno> ProxySocket::SendTo(u32 flags, std::span<const u8> message
     return {static_cast<s32>(message.size()), Errno::SUCCESS};
 }
 
-Errno ProxySocket::Close() {
+Errno ProxySocket::Close()
+{
     fd = INVALID_SOCKET;
     closed = true;
 
     return Errno::SUCCESS;
 }
 
-Errno ProxySocket::SetLinger(bool enable, u32 linger) {
+Errno ProxySocket::SetLinger(bool enable, u32 linger)
+{
     struct Linger {
         u16 linger_enable;
         u16 linger_time;
@@ -255,48 +276,58 @@ Errno ProxySocket::SetLinger(bool enable, u32 linger) {
     return SetSockOpt(fd, SO_LINGER, values);
 }
 
-Errno ProxySocket::SetReuseAddr(bool enable) {
+Errno ProxySocket::SetReuseAddr(bool enable)
+{
     return SetSockOpt<u32>(fd, SO_REUSEADDR, enable ? 1 : 0);
 }
 
-Errno ProxySocket::SetBroadcast(bool enable) {
+Errno ProxySocket::SetBroadcast(bool enable)
+{
     broadcast = enable;
     return SetSockOpt<u32>(fd, SO_BROADCAST, enable ? 1 : 0);
 }
 
-Errno ProxySocket::SetSndBuf(u32 value) {
+Errno ProxySocket::SetSndBuf(u32 value)
+{
     return SetSockOpt(fd, SO_SNDBUF, value);
 }
 
-Errno ProxySocket::SetKeepAlive(bool enable) {
+Errno ProxySocket::SetKeepAlive(bool enable)
+{
     return Errno::SUCCESS;
 }
 
-Errno ProxySocket::SetRcvBuf(u32 value) {
+Errno ProxySocket::SetRcvBuf(u32 value)
+{
     return SetSockOpt(fd, SO_RCVBUF, value);
 }
 
-Errno ProxySocket::SetSndTimeo(u32 value) {
+Errno ProxySocket::SetSndTimeo(u32 value)
+{
     send_timeout = value;
     return SetSockOpt(fd, SO_SNDTIMEO, static_cast<int>(value));
 }
 
-Errno ProxySocket::SetRcvTimeo(u32 value) {
+Errno ProxySocket::SetRcvTimeo(u32 value)
+{
     receive_timeout = value;
     return SetSockOpt(fd, SO_RCVTIMEO, static_cast<int>(value));
 }
 
-Errno ProxySocket::SetNonBlock(bool enable) {
+Errno ProxySocket::SetNonBlock(bool enable)
+{
     blocking = !enable;
     return Errno::SUCCESS;
 }
 
-std::pair<Errno, Errno> ProxySocket::GetPendingError() {
+std::pair<Errno, Errno> ProxySocket::GetPendingError()
+{
     LOG_DEBUG(Network, "(STUBBED) called");
     return {Errno::SUCCESS, Errno::SUCCESS};
 }
 
-bool ProxySocket::IsOpened() const {
+bool ProxySocket::IsOpened() const
+{
     return fd != INVALID_SOCKET;
 }
 

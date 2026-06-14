@@ -4,9 +4,10 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/ldn/ldn.h"
+
 #include "core/core.h"
 #include "core/hle/service/cmif_serialization.h"
-#include "core/hle/service/ldn/ldn.h"
 #include "core/hle/service/ldn/client_process_monitor.h"
 #include "core/hle/service/ldn/monitor_service.h"
 #include "core/hle/service/ldn/sf_monitor_service.h"
@@ -19,7 +20,8 @@ namespace Service::LDN {
 
 class IMonitorServiceCreator final : public ServiceFramework<IMonitorServiceCreator> {
 public:
-    explicit IMonitorServiceCreator(Core::System& system_) : ServiceFramework{system_, "ldn:m"} {
+    explicit IMonitorServiceCreator(Core::System& system_) : ServiceFramework{system_, "ldn:m"}
+    {
         // clang-format off
         static const FunctionInfo functions[] = {
             {0, C<&IMonitorServiceCreator::CreateMonitorService>, "CreateMonitorService"}
@@ -30,7 +32,8 @@ public:
     }
 
 private:
-    Result CreateMonitorService(OutInterface<IMonitorService> out_interface) {
+    Result CreateMonitorService(OutInterface<IMonitorService> out_interface)
+    {
         LOG_DEBUG(Service_LDN, "called");
 
         *out_interface = std::make_shared<IMonitorService>(system);
@@ -40,7 +43,8 @@ private:
 
 class ISystemServiceCreator final : public ServiceFramework<ISystemServiceCreator> {
 public:
-    explicit ISystemServiceCreator(Core::System& system_) : ServiceFramework{system_, "ldn:s"} {
+    explicit ISystemServiceCreator(Core::System& system_) : ServiceFramework{system_, "ldn:s"}
+    {
         // clang-format off
         static const FunctionInfo functions[] = {
             {0, C<&ISystemServiceCreator::CreateSystemLocalCommunicationService>, "CreateSystemLocalCommunicationService"},
@@ -53,15 +57,16 @@ public:
 
 private:
     Result CreateSystemLocalCommunicationService(
-        OutInterface<ISystemLocalCommunicationService> out_interface) {
+        OutInterface<ISystemLocalCommunicationService> out_interface)
+    {
         LOG_DEBUG(Service_LDN, "called");
 
         *out_interface = std::make_shared<ISystemLocalCommunicationService>(system);
         R_SUCCEED();
     }
 
-    Result CreateClientProcessMonitor(
-        OutInterface<IClientProcessMonitor> out_interface) {
+    Result CreateClientProcessMonitor(OutInterface<IClientProcessMonitor> out_interface)
+    {
         LOG_DEBUG(Service_LDN, "called");
 
         *out_interface = std::make_shared<IClientProcessMonitor>(system);
@@ -71,7 +76,8 @@ private:
 
 class IUserServiceCreator final : public ServiceFramework<IUserServiceCreator> {
 public:
-    explicit IUserServiceCreator(Core::System& system_) : ServiceFramework{system_, "ldn:u"} {
+    explicit IUserServiceCreator(Core::System& system_) : ServiceFramework{system_, "ldn:u"}
+    {
         // clang-format off
         static const FunctionInfo functions[] = {
             {0, D<&IUserServiceCreator::CreateUserLocalCommunicationService>, "CreateUserLocalCommunicationService"},
@@ -83,16 +89,17 @@ public:
     }
 
 private:
-    Result CreateUserLocalCommunicationService(
-        OutInterface<IUserLocalCommunicationService> out_interface) {
+    Result
+    CreateUserLocalCommunicationService(OutInterface<IUserLocalCommunicationService> out_interface)
+    {
         LOG_DEBUG(Service_LDN, "called");
 
         *out_interface = std::make_shared<IUserLocalCommunicationService>(system);
         R_SUCCEED();
     }
 
-    Result CreateClientProcessMonitor(
-        OutInterface<IClientProcessMonitor> out_interface) {
+    Result CreateClientProcessMonitor(OutInterface<IClientProcessMonitor> out_interface)
+    {
         LOG_DEBUG(Service_LDN, "called");
 
         *out_interface = std::make_shared<IClientProcessMonitor>(system);
@@ -103,7 +110,8 @@ private:
 class ISfServiceCreator final : public ServiceFramework<ISfServiceCreator> {
 public:
     explicit ISfServiceCreator(Core::System& system_, bool is_system_, const char* name_)
-        : ServiceFramework{system_, name_}, is_system{is_system_} {
+        : ServiceFramework{system_, name_}, is_system{is_system_}
+    {
         // clang-format off
         static const FunctionInfo functions[] = {
             {0, C<&ISfServiceCreator::CreateNetworkService>, "CreateNetworkService"},
@@ -116,7 +124,8 @@ public:
 
 private:
     Result CreateNetworkService(OutInterface<ISfService> out_interface, u32 input,
-                                u64 reserved_input) {
+                                u64 reserved_input)
+    {
         LOG_WARNING(Service_LDN, "(STUBBED) called reserved_input={} input={}", reserved_input,
                     input);
 
@@ -125,7 +134,8 @@ private:
     }
 
     Result CreateNetworkServiceMonitor(OutInterface<ISfServiceMonitor> out_interface,
-                                       u64 reserved_input) {
+                                       u64 reserved_input)
+    {
         LOG_WARNING(Service_LDN, "(STUBBED) called reserved_input={}", reserved_input);
 
         *out_interface = std::make_shared<ISfServiceMonitor>(system);
@@ -137,7 +147,8 @@ private:
 
 class ISfMonitorServiceCreator final : public ServiceFramework<ISfMonitorServiceCreator> {
 public:
-    explicit ISfMonitorServiceCreator(Core::System& system_) : ServiceFramework{system_, "lp2p:m"} {
+    explicit ISfMonitorServiceCreator(Core::System& system_) : ServiceFramework{system_, "lp2p:m"}
+    {
         // clang-format off
         static const FunctionInfo functions[] = {
             {0, C<&ISfMonitorServiceCreator::CreateMonitorService>, "CreateMonitorService"},
@@ -148,7 +159,8 @@ public:
     }
 
 private:
-    Result CreateMonitorService(OutInterface<ISfMonitorService> out_interface, u64 reserved_input) {
+    Result CreateMonitorService(OutInterface<ISfMonitorService> out_interface, u64 reserved_input)
+    {
         LOG_INFO(Service_LDN, "called, reserved_input={}", reserved_input);
 
         *out_interface = std::make_shared<ISfMonitorService>(system);
@@ -156,7 +168,8 @@ private:
     }
 };
 
-void LoopProcess(Core::System& system) {
+void LoopProcess(Core::System& system)
+{
     auto server_manager = std::make_unique<ServerManager>(system);
 
     server_manager->RegisterNamedService("ldn:m", std::make_shared<IMonitorServiceCreator>(system));

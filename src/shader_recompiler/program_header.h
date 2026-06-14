@@ -130,7 +130,8 @@ struct ProgramHeader {
             INSERT_PADDING_BYTES_NOINIT(5); // OmapFixedFncTexture[10]
             INSERT_PADDING_BYTES_NOINIT(1); // OmapReserved
 
-            [[nodiscard]] std::array<bool, 4> InputGeneric(size_t index) const noexcept {
+            [[nodiscard]] std::array<bool, 4> InputGeneric(size_t index) const noexcept
+            {
                 const int data{imap_generic_vector[index >> 1] >> ((index % 2) * 4)};
                 return {
                     (data & 1) != 0,
@@ -140,7 +141,8 @@ struct ProgramHeader {
                 };
             }
 
-            [[nodiscard]] std::array<bool, 4> OutputGeneric(size_t index) const noexcept {
+            [[nodiscard]] std::array<bool, 4> OutputGeneric(size_t index) const noexcept
+            {
                 const int data{omap_generic_vector[index >> 1] >> ((index % 2) * 4)};
                 return {
                     (data & 1) != 0,
@@ -190,22 +192,26 @@ struct ProgramHeader {
                 };
             } omap;
 
-            [[nodiscard]] std::array<bool, 4> EnabledOutputComponents(u32 rt) const noexcept {
+            [[nodiscard]] std::array<bool, 4> EnabledOutputComponents(u32 rt) const noexcept
+            {
                 const u32 bits{omap.target >> (rt * 4)};
                 return {(bits & 1) != 0, (bits & 2) != 0, (bits & 4) != 0, (bits & 8) != 0};
             }
 
-            [[nodiscard]] bool HasOutputComponents(u32 rt) const noexcept {
+            [[nodiscard]] bool HasOutputComponents(u32 rt) const noexcept
+            {
                 const u32 bits{omap.target >> (rt * 4)};
                 return (bits & 0xf) != 0;
             }
 
-            [[nodiscard]] std::array<PixelImap, 4> GenericInputMap(u32 attribute) const {
+            [[nodiscard]] std::array<PixelImap, 4> GenericInputMap(u32 attribute) const
+            {
                 const auto& vector{imap_generic_vector[attribute]};
                 return {vector.x, vector.y, vector.z, vector.w};
             }
 
-            [[nodiscard]] bool IsGenericVectorActive(size_t index) const {
+            [[nodiscard]] bool IsGenericVectorActive(size_t index) const
+            {
                 return imap_generic_vector[index].raw != 0;
             }
         } ps;
@@ -213,7 +219,8 @@ struct ProgramHeader {
         std::array<u32, 0xf> raw;
     };
 
-    [[nodiscard]] u64 LocalMemorySize() const noexcept {
+    [[nodiscard]] u64 LocalMemorySize() const noexcept
+    {
         return static_cast<u64>(common1.shader_local_memory_low_size) |
                (static_cast<u64>(common2.shader_local_memory_high_size) << 24);
     }

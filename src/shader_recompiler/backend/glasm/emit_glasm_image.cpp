@@ -14,13 +14,15 @@ struct ScopedRegister {
     ScopedRegister() = default;
     ScopedRegister(RegAlloc& reg_alloc_) : reg_alloc{&reg_alloc_}, reg{reg_alloc->AllocReg()} {}
 
-    ~ScopedRegister() {
+    ~ScopedRegister()
+    {
         if (reg_alloc) {
             reg_alloc->FreeReg(reg);
         }
     }
 
-    ScopedRegister& operator=(ScopedRegister&& rhs) noexcept {
+    ScopedRegister& operator=(ScopedRegister&& rhs) noexcept
+    {
         if (reg_alloc) {
             reg_alloc->FreeReg(reg);
         }
@@ -30,7 +32,9 @@ struct ScopedRegister {
     }
 
     ScopedRegister(ScopedRegister&& rhs) noexcept
-        : reg_alloc{std::exchange(rhs.reg_alloc, nullptr)}, reg{rhs.reg} {}
+        : reg_alloc{std::exchange(rhs.reg_alloc, nullptr)}, reg{rhs.reg}
+    {
+    }
 
     ScopedRegister& operator=(const ScopedRegister&) = delete;
     ScopedRegister(const ScopedRegister&) = delete;
@@ -40,7 +44,8 @@ struct ScopedRegister {
 };
 
 std::string Texture(EmitContext& ctx, IR::TextureInstInfo info,
-                    [[maybe_unused]] const IR::Value& index) {
+                    [[maybe_unused]] const IR::Value& index)
+{
     // FIXME: indexed reads
     if (info.type == TextureType::Buffer) {
         return fmt::format("texture[{}]", ctx.texture_buffer_bindings.at(info.descriptor_index));
@@ -50,7 +55,8 @@ std::string Texture(EmitContext& ctx, IR::TextureInstInfo info,
 }
 
 std::string Image(EmitContext& ctx, IR::TextureInstInfo info,
-                  [[maybe_unused]] const IR::Value& index) {
+                  [[maybe_unused]] const IR::Value& index)
+{
     // FIXME: indexed reads
     if (info.type == TextureType::Buffer) {
         return fmt::format("image[{}]", ctx.image_buffer_bindings.at(info.descriptor_index));
@@ -59,14 +65,16 @@ std::string Image(EmitContext& ctx, IR::TextureInstInfo info,
     }
 }
 
-bool IsTextureMsaa(EmitContext& ctx, const IR::TextureInstInfo& info) {
+bool IsTextureMsaa(EmitContext& ctx, const IR::TextureInstInfo& info)
+{
     if (info.type == TextureType::Buffer) {
         return false;
     }
     return ctx.info.texture_descriptors.at(info.descriptor_index).is_multisample;
 }
 
-std::string_view TextureType(IR::TextureInstInfo info, bool is_ms = false) {
+std::string_view TextureType(IR::TextureInstInfo info, bool is_ms = false)
+{
     if (info.is_depth) {
         switch (info.type) {
         case TextureType::Color1D:
@@ -111,7 +119,8 @@ std::string_view TextureType(IR::TextureInstInfo info, bool is_ms = false) {
     throw InvalidArgument("Invalid texture type {}", info.type.Value());
 }
 
-std::string Offset(EmitContext& ctx, const IR::Value& offset) {
+std::string Offset(EmitContext& ctx, const IR::Value& offset)
+{
     if (offset.IsEmpty()) {
         return "";
     }
@@ -119,7 +128,8 @@ std::string Offset(EmitContext& ctx, const IR::Value& offset) {
 }
 
 std::pair<ScopedRegister, ScopedRegister> AllocOffsetsRegs(EmitContext& ctx,
-                                                           const IR::Value& offset2) {
+                                                           const IR::Value& offset2)
+{
     if (offset2.IsEmpty()) {
         return {};
     } else {
@@ -128,7 +138,8 @@ std::pair<ScopedRegister, ScopedRegister> AllocOffsetsRegs(EmitContext& ctx,
 }
 
 void SwizzleOffsets(EmitContext& ctx, Register off_x, Register off_y, const IR::Value& offset1,
-                    const IR::Value& offset2) {
+                    const IR::Value& offset2)
+{
     const Register offsets_a{ctx.reg_alloc.Consume(offset1)};
     const Register offsets_b{ctx.reg_alloc.Consume(offset2)};
     // Input swizzle:  [XYXY] [XYXY]
@@ -145,7 +156,8 @@ void SwizzleOffsets(EmitContext& ctx, Register off_x, Register off_y, const IR::
             offsets_a, off_y, offsets_a, off_y, offsets_b, off_y, offsets_b);
 }
 
-std::string GradOffset(const IR::Value& offset) {
+std::string GradOffset(const IR::Value& offset)
+{
     if (offset.IsImmediate()) {
         LOG_WARNING(Shader_GLASM, "Gradient offset is a scalar immediate");
         return "";
@@ -166,7 +178,8 @@ std::string GradOffset(const IR::Value& offset) {
     }
 }
 
-std::pair<std::string, ScopedRegister> Coord(EmitContext& ctx, const IR::Value& coord) {
+std::pair<std::string, ScopedRegister> Coord(EmitContext& ctx, const IR::Value& coord)
+{
     if (coord.IsImmediate()) {
         ScopedRegister scoped_reg(ctx.reg_alloc);
         ctx.Add("MOV.U {}.x,{};", scoped_reg.reg, ScalarU32{ctx.reg_alloc.Consume(coord)});
@@ -182,7 +195,8 @@ std::pair<std::string, ScopedRegister> Coord(EmitContext& ctx, const IR::Value& 
     return {std::move(coord_vec), ScopedRegister{}};
 }
 
-void StoreSparse(EmitContext& ctx, IR::Inst* sparse_inst) {
+void StoreSparse(EmitContext& ctx, IR::Inst* sparse_inst)
+{
     if (!sparse_inst) {
         return;
     }
@@ -192,7 +206,8 @@ void StoreSparse(EmitContext& ctx, IR::Inst* sparse_inst) {
             sparse_ret, sparse_ret);
 }
 
-std::string_view FormatStorage(ImageFormat format) {
+std::string_view FormatStorage(ImageFormat format)
+{
     switch (format) {
     case ImageFormat::Typeless:
         return "U";
@@ -214,9 +229,10 @@ std::string_view FormatStorage(ImageFormat format) {
     throw InvalidArgument("Invalid image format {}", format);
 }
 
-template <typename T>
+template<typename T>
 void ImageAtomic(EmitContext& ctx, IR::Inst& inst, const IR::Value& index, Register coord, T value,
-                 std::string_view op) {
+                 std::string_view op)
+{
     const auto info{inst.Flags<IR::TextureInstInfo>()};
     const std::string_view type{TextureType(info)};
     const std::string image{Image(ctx, info, index)};
@@ -224,7 +240,8 @@ void ImageAtomic(EmitContext& ctx, IR::Inst& inst, const IR::Value& index, Regis
     ctx.Add("ATOMIM.{} {},{},{},{},{};", op, ret, value, coord, image, type);
 }
 
-IR::Inst* PrepareSparse(IR::Inst& inst) {
+IR::Inst* PrepareSparse(IR::Inst& inst)
+{
     const auto sparse_inst{inst.GetAssociatedPseudoOperation(IR::Opcode::GetSparseFromOp)};
     if (sparse_inst) {
         sparse_inst->Invalidate();
@@ -234,7 +251,8 @@ IR::Inst* PrepareSparse(IR::Inst& inst) {
 } // Anonymous namespace
 
 void EmitImageSampleImplicitLod(EmitContext& ctx, IR::Inst& inst, const IR::Value& index,
-                                const IR::Value& coord, Register bias_lc, const IR::Value& offset) {
+                                const IR::Value& coord, Register bias_lc, const IR::Value& offset)
+{
     const auto info{inst.Flags<IR::TextureInstInfo>()};
     const auto sparse_inst{PrepareSparse(inst)};
     const std::string_view sparse_mod{sparse_inst ? ".SPARSE" : ""};
@@ -273,7 +291,8 @@ void EmitImageSampleImplicitLod(EmitContext& ctx, IR::Inst& inst, const IR::Valu
 }
 
 void EmitImageSampleExplicitLod(EmitContext& ctx, IR::Inst& inst, const IR::Value& index,
-                                const IR::Value& coord, ScalarF32 lod, const IR::Value& offset) {
+                                const IR::Value& coord, ScalarF32 lod, const IR::Value& offset)
+{
     const auto info{inst.Flags<IR::TextureInstInfo>()};
     const auto sparse_inst{PrepareSparse(inst)};
     const std::string_view sparse_mod{sparse_inst ? ".SPARSE" : ""};
@@ -295,7 +314,8 @@ void EmitImageSampleExplicitLod(EmitContext& ctx, IR::Inst& inst, const IR::Valu
 
 void EmitImageSampleDrefImplicitLod(EmitContext& ctx, IR::Inst& inst, const IR::Value& index,
                                     const IR::Value& coord, const IR::Value& dref,
-                                    const IR::Value& bias_lc, const IR::Value& offset) {
+                                    const IR::Value& bias_lc, const IR::Value& offset)
+{
     // Allocate early to avoid aliases
     const auto info{inst.Flags<IR::TextureInstInfo>()};
     ScopedRegister staging;
@@ -400,7 +420,8 @@ void EmitImageSampleDrefImplicitLod(EmitContext& ctx, IR::Inst& inst, const IR::
 
 void EmitImageSampleDrefExplicitLod(EmitContext& ctx, IR::Inst& inst, const IR::Value& index,
                                     const IR::Value& coord, const IR::Value& dref,
-                                    const IR::Value& lod, const IR::Value& offset) {
+                                    const IR::Value& lod, const IR::Value& offset)
+{
     // Allocate early to avoid aliases
     const auto info{inst.Flags<IR::TextureInstInfo>()};
     ScopedRegister staging;
@@ -447,7 +468,8 @@ void EmitImageSampleDrefExplicitLod(EmitContext& ctx, IR::Inst& inst, const IR::
 }
 
 void EmitImageGather(EmitContext& ctx, IR::Inst& inst, const IR::Value& index,
-                     const IR::Value& coord, const IR::Value& offset, const IR::Value& offset2) {
+                     const IR::Value& coord, const IR::Value& offset, const IR::Value& offset2)
+{
     // Allocate offsets early so they don't overwrite any consumed register
     const auto [off_x, off_y]{AllocOffsetsRegs(ctx, offset2)};
     const auto info{inst.Flags<IR::TextureInstInfo>()};
@@ -472,7 +494,8 @@ void EmitImageGather(EmitContext& ctx, IR::Inst& inst, const IR::Value& index,
 
 void EmitImageGatherDref(EmitContext& ctx, IR::Inst& inst, const IR::Value& index,
                          const IR::Value& coord, const IR::Value& offset, const IR::Value& offset2,
-                         const IR::Value& dref) {
+                         const IR::Value& dref)
+{
     // FIXME: This instruction is not working as expected
 
     // Allocate offsets early so they don't overwrite any consumed register
@@ -514,7 +537,8 @@ void EmitImageGatherDref(EmitContext& ctx, IR::Inst& inst, const IR::Value& inde
 }
 
 void EmitImageFetch(EmitContext& ctx, IR::Inst& inst, const IR::Value& index,
-                    const IR::Value& coord, const IR::Value& offset, ScalarS32 lod, ScalarS32 ms) {
+                    const IR::Value& coord, const IR::Value& offset, ScalarS32 lod, ScalarS32 ms)
+{
     const auto info{inst.Flags<IR::TextureInstInfo>()};
     const auto sparse_inst{PrepareSparse(inst)};
     const bool is_multisample{ms.type != Type::Void};
@@ -539,7 +563,8 @@ void EmitImageFetch(EmitContext& ctx, IR::Inst& inst, const IR::Value& index,
 }
 
 void EmitImageQueryDimensions(EmitContext& ctx, IR::Inst& inst, const IR::Value& index,
-                              ScalarS32 lod, [[maybe_unused]] const IR::Value& skip_mips) {
+                              ScalarS32 lod, [[maybe_unused]] const IR::Value& skip_mips)
+{
     const auto info{inst.Flags<IR::TextureInstInfo>()};
     const std::string texture{Texture(ctx, info, index)};
     const bool is_msaa{IsTextureMsaa(ctx, info)};
@@ -547,7 +572,8 @@ void EmitImageQueryDimensions(EmitContext& ctx, IR::Inst& inst, const IR::Value&
     ctx.Add("TXQ {},{},{},{};", inst, lod, texture, type);
 }
 
-void EmitImageQueryLod(EmitContext& ctx, IR::Inst& inst, const IR::Value& index, Register coord) {
+void EmitImageQueryLod(EmitContext& ctx, IR::Inst& inst, const IR::Value& index, Register coord)
+{
     const auto info{inst.Flags<IR::TextureInstInfo>()};
     const std::string texture{Texture(ctx, info, index)};
     const std::string_view type{TextureType(info)};
@@ -556,7 +582,8 @@ void EmitImageQueryLod(EmitContext& ctx, IR::Inst& inst, const IR::Value& index,
 
 void EmitImageGradient(EmitContext& ctx, IR::Inst& inst, const IR::Value& index,
                        const IR::Value& coord, const IR::Value& derivatives,
-                       const IR::Value& offset, const IR::Value& lod_clamp) {
+                       const IR::Value& offset, const IR::Value& lod_clamp)
+{
     const auto info{inst.Flags<IR::TextureInstInfo>()};
     ScopedRegister dpdx, dpdy, coords;
     const bool multi_component{info.num_derivatives > 1 || info.has_lod_clamp};
@@ -612,7 +639,8 @@ void EmitImageGradient(EmitContext& ctx, IR::Inst& inst, const IR::Value& index,
     StoreSparse(ctx, sparse_inst);
 }
 
-void EmitImageRead(EmitContext& ctx, IR::Inst& inst, const IR::Value& index, Register coord) {
+void EmitImageRead(EmitContext& ctx, IR::Inst& inst, const IR::Value& index, Register coord)
+{
     const auto info{inst.Flags<IR::TextureInstInfo>()};
     const auto sparse_inst{PrepareSparse(inst)};
     const std::string_view format{FormatStorage(info.image_format)};
@@ -625,7 +653,8 @@ void EmitImageRead(EmitContext& ctx, IR::Inst& inst, const IR::Value& index, Reg
 }
 
 void EmitImageWrite(EmitContext& ctx, IR::Inst& inst, const IR::Value& index, Register coord,
-                    Register color) {
+                    Register color)
+{
     const auto info{inst.Flags<IR::TextureInstInfo>()};
     const std::string_view format{FormatStorage(info.image_format)};
     const std::string_view type{TextureType(info)};
@@ -633,7 +662,8 @@ void EmitImageWrite(EmitContext& ctx, IR::Inst& inst, const IR::Value& index, Re
     ctx.Add("STOREIM.{} {},{},{},{};", format, image, color, coord, type);
 }
 
-void EmitIsTextureScaled(EmitContext& ctx, IR::Inst& inst, const IR::Value& index) {
+void EmitIsTextureScaled(EmitContext& ctx, IR::Inst& inst, const IR::Value& index)
+{
     if (!index.IsImmediate()) {
         throw NotImplementedException("Non-constant texture rescaling");
     }
@@ -642,7 +672,8 @@ void EmitIsTextureScaled(EmitContext& ctx, IR::Inst& inst, const IR::Value& inde
             1u << index.U32(), ctx.reg_alloc.Define(inst));
 }
 
-void EmitIsImageScaled(EmitContext& ctx, IR::Inst& inst, const IR::Value& index) {
+void EmitIsImageScaled(EmitContext& ctx, IR::Inst& inst, const IR::Value& index)
+{
     if (!index.IsImmediate()) {
         throw NotImplementedException("Non-constant texture rescaling");
     }
@@ -652,241 +683,298 @@ void EmitIsImageScaled(EmitContext& ctx, IR::Inst& inst, const IR::Value& index)
 }
 
 void EmitImageAtomicIAdd32(EmitContext& ctx, IR::Inst& inst, const IR::Value& index, Register coord,
-                           ScalarU32 value) {
+                           ScalarU32 value)
+{
     ImageAtomic(ctx, inst, index, coord, value, "ADD.U32");
 }
 
 void EmitImageAtomicSMin32(EmitContext& ctx, IR::Inst& inst, const IR::Value& index, Register coord,
-                           ScalarS32 value) {
+                           ScalarS32 value)
+{
     ImageAtomic(ctx, inst, index, coord, value, "MIN.S32");
 }
 
 void EmitImageAtomicUMin32(EmitContext& ctx, IR::Inst& inst, const IR::Value& index, Register coord,
-                           ScalarU32 value) {
+                           ScalarU32 value)
+{
     ImageAtomic(ctx, inst, index, coord, value, "MIN.U32");
 }
 
 void EmitImageAtomicSMax32(EmitContext& ctx, IR::Inst& inst, const IR::Value& index, Register coord,
-                           ScalarS32 value) {
+                           ScalarS32 value)
+{
     ImageAtomic(ctx, inst, index, coord, value, "MAX.S32");
 }
 
 void EmitImageAtomicUMax32(EmitContext& ctx, IR::Inst& inst, const IR::Value& index, Register coord,
-                           ScalarU32 value) {
+                           ScalarU32 value)
+{
     ImageAtomic(ctx, inst, index, coord, value, "MAX.U32");
 }
 
 void EmitImageAtomicInc32(EmitContext& ctx, IR::Inst& inst, const IR::Value& index, Register coord,
-                          ScalarU32 value) {
+                          ScalarU32 value)
+{
     ImageAtomic(ctx, inst, index, coord, value, "IWRAP.U32");
 }
 
 void EmitImageAtomicDec32(EmitContext& ctx, IR::Inst& inst, const IR::Value& index, Register coord,
-                          ScalarU32 value) {
+                          ScalarU32 value)
+{
     ImageAtomic(ctx, inst, index, coord, value, "DWRAP.U32");
 }
 
 void EmitImageAtomicAnd32(EmitContext& ctx, IR::Inst& inst, const IR::Value& index, Register coord,
-                          ScalarU32 value) {
+                          ScalarU32 value)
+{
     ImageAtomic(ctx, inst, index, coord, value, "AND.U32");
 }
 
 void EmitImageAtomicOr32(EmitContext& ctx, IR::Inst& inst, const IR::Value& index, Register coord,
-                         ScalarU32 value) {
+                         ScalarU32 value)
+{
     ImageAtomic(ctx, inst, index, coord, value, "OR.U32");
 }
 
 void EmitImageAtomicXor32(EmitContext& ctx, IR::Inst& inst, const IR::Value& index, Register coord,
-                          ScalarU32 value) {
+                          ScalarU32 value)
+{
     ImageAtomic(ctx, inst, index, coord, value, "XOR.U32");
 }
 
 void EmitImageAtomicExchange32(EmitContext& ctx, IR::Inst& inst, const IR::Value& index,
-                               Register coord, ScalarU32 value) {
+                               Register coord, ScalarU32 value)
+{
     ImageAtomic(ctx, inst, index, coord, value, "EXCH.U32");
 }
 
-void EmitBindlessImageSampleImplicitLod(EmitContext&) {
+void EmitBindlessImageSampleImplicitLod(EmitContext&)
+{
     throw LogicError("Unreachable instruction");
 }
 
-void EmitBindlessImageSampleExplicitLod(EmitContext&) {
+void EmitBindlessImageSampleExplicitLod(EmitContext&)
+{
     throw LogicError("Unreachable instruction");
 }
 
-void EmitBindlessImageSampleDrefImplicitLod(EmitContext&) {
+void EmitBindlessImageSampleDrefImplicitLod(EmitContext&)
+{
     throw LogicError("Unreachable instruction");
 }
 
-void EmitBindlessImageSampleDrefExplicitLod(EmitContext&) {
+void EmitBindlessImageSampleDrefExplicitLod(EmitContext&)
+{
     throw LogicError("Unreachable instruction");
 }
 
-void EmitBindlessImageGather(EmitContext&) {
+void EmitBindlessImageGather(EmitContext&)
+{
     throw LogicError("Unreachable instruction");
 }
 
-void EmitBindlessImageGatherDref(EmitContext&) {
+void EmitBindlessImageGatherDref(EmitContext&)
+{
     throw LogicError("Unreachable instruction");
 }
 
-void EmitBindlessImageFetch(EmitContext&) {
+void EmitBindlessImageFetch(EmitContext&)
+{
     throw LogicError("Unreachable instruction");
 }
 
-void EmitBindlessImageQueryDimensions(EmitContext&) {
+void EmitBindlessImageQueryDimensions(EmitContext&)
+{
     throw LogicError("Unreachable instruction");
 }
 
-void EmitBindlessImageQueryLod(EmitContext&) {
+void EmitBindlessImageQueryLod(EmitContext&)
+{
     throw LogicError("Unreachable instruction");
 }
 
-void EmitBindlessImageGradient(EmitContext&) {
+void EmitBindlessImageGradient(EmitContext&)
+{
     throw LogicError("Unreachable instruction");
 }
 
-void EmitBindlessImageRead(EmitContext&) {
+void EmitBindlessImageRead(EmitContext&)
+{
     throw LogicError("Unreachable instruction");
 }
 
-void EmitBindlessImageWrite(EmitContext&) {
+void EmitBindlessImageWrite(EmitContext&)
+{
     throw LogicError("Unreachable instruction");
 }
 
-void EmitBoundImageSampleImplicitLod(EmitContext&) {
+void EmitBoundImageSampleImplicitLod(EmitContext&)
+{
     throw LogicError("Unreachable instruction");
 }
 
-void EmitBoundImageSampleExplicitLod(EmitContext&) {
+void EmitBoundImageSampleExplicitLod(EmitContext&)
+{
     throw LogicError("Unreachable instruction");
 }
 
-void EmitBoundImageSampleDrefImplicitLod(EmitContext&) {
+void EmitBoundImageSampleDrefImplicitLod(EmitContext&)
+{
     throw LogicError("Unreachable instruction");
 }
 
-void EmitBoundImageSampleDrefExplicitLod(EmitContext&) {
+void EmitBoundImageSampleDrefExplicitLod(EmitContext&)
+{
     throw LogicError("Unreachable instruction");
 }
 
-void EmitBoundImageGather(EmitContext&) {
+void EmitBoundImageGather(EmitContext&)
+{
     throw LogicError("Unreachable instruction");
 }
 
-void EmitBoundImageGatherDref(EmitContext&) {
+void EmitBoundImageGatherDref(EmitContext&)
+{
     throw LogicError("Unreachable instruction");
 }
 
-void EmitBoundImageFetch(EmitContext&) {
+void EmitBoundImageFetch(EmitContext&)
+{
     throw LogicError("Unreachable instruction");
 }
 
-void EmitBoundImageQueryDimensions(EmitContext&) {
+void EmitBoundImageQueryDimensions(EmitContext&)
+{
     throw LogicError("Unreachable instruction");
 }
 
-void EmitBoundImageQueryLod(EmitContext&) {
+void EmitBoundImageQueryLod(EmitContext&)
+{
     throw LogicError("Unreachable instruction");
 }
 
-void EmitBoundImageGradient(EmitContext&) {
+void EmitBoundImageGradient(EmitContext&)
+{
     throw LogicError("Unreachable instruction");
 }
 
-void EmitBoundImageRead(EmitContext&) {
+void EmitBoundImageRead(EmitContext&)
+{
     throw LogicError("Unreachable instruction");
 }
 
-void EmitBoundImageWrite(EmitContext&) {
+void EmitBoundImageWrite(EmitContext&)
+{
     throw LogicError("Unreachable instruction");
 }
 
-void EmitBindlessImageAtomicIAdd32(EmitContext&) {
+void EmitBindlessImageAtomicIAdd32(EmitContext&)
+{
     throw LogicError("Unreachable instruction");
 }
 
-void EmitBindlessImageAtomicSMin32(EmitContext&) {
+void EmitBindlessImageAtomicSMin32(EmitContext&)
+{
     throw LogicError("Unreachable instruction");
 }
 
-void EmitBindlessImageAtomicUMin32(EmitContext&) {
+void EmitBindlessImageAtomicUMin32(EmitContext&)
+{
     throw LogicError("Unreachable instruction");
 }
 
-void EmitBindlessImageAtomicSMax32(EmitContext&) {
+void EmitBindlessImageAtomicSMax32(EmitContext&)
+{
     throw LogicError("Unreachable instruction");
 }
 
-void EmitBindlessImageAtomicUMax32(EmitContext&) {
+void EmitBindlessImageAtomicUMax32(EmitContext&)
+{
     throw LogicError("Unreachable instruction");
 }
 
-void EmitBindlessImageAtomicInc32(EmitContext&) {
+void EmitBindlessImageAtomicInc32(EmitContext&)
+{
     throw LogicError("Unreachable instruction");
 }
 
-void EmitBindlessImageAtomicDec32(EmitContext&) {
+void EmitBindlessImageAtomicDec32(EmitContext&)
+{
     throw LogicError("Unreachable instruction");
 }
 
-void EmitBindlessImageAtomicAnd32(EmitContext&) {
+void EmitBindlessImageAtomicAnd32(EmitContext&)
+{
     throw LogicError("Unreachable instruction");
 }
 
-void EmitBindlessImageAtomicOr32(EmitContext&) {
+void EmitBindlessImageAtomicOr32(EmitContext&)
+{
     throw LogicError("Unreachable instruction");
 }
 
-void EmitBindlessImageAtomicXor32(EmitContext&) {
+void EmitBindlessImageAtomicXor32(EmitContext&)
+{
     throw LogicError("Unreachable instruction");
 }
 
-void EmitBindlessImageAtomicExchange32(EmitContext&) {
+void EmitBindlessImageAtomicExchange32(EmitContext&)
+{
     throw LogicError("Unreachable instruction");
 }
 
-void EmitBoundImageAtomicIAdd32(EmitContext&) {
+void EmitBoundImageAtomicIAdd32(EmitContext&)
+{
     throw LogicError("Unreachable instruction");
 }
 
-void EmitBoundImageAtomicSMin32(EmitContext&) {
+void EmitBoundImageAtomicSMin32(EmitContext&)
+{
     throw LogicError("Unreachable instruction");
 }
 
-void EmitBoundImageAtomicUMin32(EmitContext&) {
+void EmitBoundImageAtomicUMin32(EmitContext&)
+{
     throw LogicError("Unreachable instruction");
 }
 
-void EmitBoundImageAtomicSMax32(EmitContext&) {
+void EmitBoundImageAtomicSMax32(EmitContext&)
+{
     throw LogicError("Unreachable instruction");
 }
 
-void EmitBoundImageAtomicUMax32(EmitContext&) {
+void EmitBoundImageAtomicUMax32(EmitContext&)
+{
     throw LogicError("Unreachable instruction");
 }
 
-void EmitBoundImageAtomicInc32(EmitContext&) {
+void EmitBoundImageAtomicInc32(EmitContext&)
+{
     throw LogicError("Unreachable instruction");
 }
 
-void EmitBoundImageAtomicDec32(EmitContext&) {
+void EmitBoundImageAtomicDec32(EmitContext&)
+{
     throw LogicError("Unreachable instruction");
 }
 
-void EmitBoundImageAtomicAnd32(EmitContext&) {
+void EmitBoundImageAtomicAnd32(EmitContext&)
+{
     throw LogicError("Unreachable instruction");
 }
 
-void EmitBoundImageAtomicOr32(EmitContext&) {
+void EmitBoundImageAtomicOr32(EmitContext&)
+{
     throw LogicError("Unreachable instruction");
 }
 
-void EmitBoundImageAtomicXor32(EmitContext&) {
+void EmitBoundImageAtomicXor32(EmitContext&)
+{
     throw LogicError("Unreachable instruction");
 }
 
-void EmitBoundImageAtomicExchange32(EmitContext&) {
+void EmitBoundImageAtomicExchange32(EmitContext&)
+{
     throw LogicError("Unreachable instruction");
 }
 

@@ -35,24 +35,22 @@ private:
 class ScopedRangeLock : public Common::IntrusiveListBaseNode<ScopedRangeLock> {
 public:
     explicit ScopedRangeLock(RangeMutex& mutex, u64 address, u64 size)
-        : m_mutex(mutex), m_address(address), m_size(size) {
+        : m_mutex(mutex), m_address(address), m_size(size)
+    {
         if (m_size > 0) {
             m_mutex.Lock(*this);
         }
     }
-    ~ScopedRangeLock() {
+    ~ScopedRangeLock()
+    {
         if (m_size > 0) {
             m_mutex.Unlock(*this);
         }
     }
 
-    u64 GetAddress() const {
-        return m_address;
-    }
+    u64 GetAddress() const { return m_address; }
 
-    u64 GetSize() const {
-        return m_size;
-    }
+    u64 GetSize() const { return m_size; }
 
 private:
     RangeMutex& m_mutex;
@@ -60,13 +58,15 @@ private:
     const u64 m_size{};
 };
 
-inline void RangeMutex::Lock(ScopedRangeLock& l) {
+inline void RangeMutex::Lock(ScopedRangeLock& l)
+{
     std::unique_lock lk{m_mutex};
     m_cv.wait(lk, [&] { return !HasIntersectionLocked(l); });
     m_list.push_back(l);
 }
 
-inline void RangeMutex::Unlock(ScopedRangeLock& l) {
+inline void RangeMutex::Unlock(ScopedRangeLock& l)
+{
     {
         std::scoped_lock lk{m_mutex};
         m_list.erase(m_list.iterator_to(l));
@@ -74,7 +74,8 @@ inline void RangeMutex::Unlock(ScopedRangeLock& l) {
     m_cv.notify_all();
 }
 
-inline bool RangeMutex::HasIntersectionLocked(ScopedRangeLock& l) {
+inline bool RangeMutex::HasIntersectionLocked(ScopedRangeLock& l)
+{
     const auto cur_begin = l.GetAddress();
     const auto cur_last = l.GetAddress() + l.GetSize() - 1;
 

@@ -5,6 +5,7 @@
 
 #include <QObject>
 #include <QString>
+
 #include "frozen/map.h"
 #include "frozen/string.h"
 
@@ -134,7 +135,8 @@ static const constexpr frozen::map<StringKey, frozen::string, 29> strings = {
     {RyujinxNoSaveId, QT_TR_NOOP("Title %1 not found in Ryujinx title database.")},
 };
 
-static inline const QString Lookup(StringKey key) {
+static inline const QString Lookup(StringKey key)
+{
     return QObject::tr(strings.at(key).data());
 }
 

@@ -34,7 +34,9 @@ public:
     };
 
     SocketBase() = default;
-    explicit SocketBase(SOCKET fd_) : fd{fd_} {}
+    explicit SocketBase(SOCKET fd_) : fd{fd_}
+    {
+    }
     virtual ~SocketBase() = default;
 
     YUZU_NON_COPYABLE(SocketBase);
@@ -91,7 +93,8 @@ public:
 
     virtual void HandleProxyPacket(const ProxyPacket& packet) = 0;
 
-    [[nodiscard]] SOCKET GetFD() const {
+    [[nodiscard]] SOCKET GetFD() const
+    {
         return fd;
     }
 
@@ -153,13 +156,11 @@ public:
 
     Errno SetNonBlock(bool enable) override;
 
-    template <typename T>
-    Errno SetSockOpt(SOCKET fd, int option, T value);
+    template<typename T> Errno SetSockOpt(SOCKET fd, int option, T value);
 
     std::pair<Errno, Errno> GetPendingError() override;
 
-    template <typename T>
-    std::pair<T, Errno> GetSockOpt(SOCKET fd, int option);
+    template<typename T> std::pair<T, Errno> GetSockOpt(SOCKET fd, int option);
 
     bool IsOpened() const override;
 

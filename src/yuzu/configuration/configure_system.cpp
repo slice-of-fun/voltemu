@@ -4,9 +4,7 @@
 // SPDX-FileCopyrightText: 2016 Citra Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include <chrono>
-#include <optional>
-#include <vector>
+#include "yuzu/configuration/configure_system.h"
 
 #include <QCheckBox>
 #include <QComboBox>
@@ -16,13 +14,15 @@
 #include <QLineEdit>
 #include <QMessageBox>
 #include <QSpinBox>
+#include <chrono>
+#include <optional>
+#include <vector>
 
 #include "common/settings.h"
 #include "core/core.h"
 #include "qt_common/qt_compat.h"
 #include "ui_configure_system.h"
 #include "yuzu/configuration/configuration_shared.h"
-#include "yuzu/configuration/configure_system.h"
 #include "yuzu/configuration/shared_widget.h"
 
 constexpr std::array<u32, 7> LOCALE_BLOCKLIST{
@@ -41,7 +41,8 @@ constexpr std::array<u32, 7> LOCALE_BLOCKLIST{
     0b0100111100001000000, // Taiwan
 };
 
-static bool IsValidLocale(u32 region_index, u32 language_index) {
+static bool IsValidLocale(u32 region_index, u32 language_index)
+{
     if (region_index >= LOCALE_BLOCKLIST.size()) {
         return false;
     }
@@ -51,7 +52,8 @@ static bool IsValidLocale(u32 region_index, u32 language_index) {
 ConfigureSystem::ConfigureSystem(Core::System& system_,
                                  std::shared_ptr<std::vector<ConfigurationShared::Tab*>> group_,
                                  const ConfigurationShared::Builder& builder, QWidget* parent)
-    : Tab(group_, parent), ui{std::make_unique<Ui::ConfigureSystem>()}, system{system_} {
+    : Tab(group_, parent), ui{std::make_unique<Ui::ConfigureSystem>()}, system{system_}
+{
     ui->setupUi(this);
 
     const auto posix_time = std::chrono::system_clock::now().time_since_epoch();
@@ -101,7 +103,8 @@ ConfigureSystem::ConfigureSystem(Core::System& system_,
 
 ConfigureSystem::~ConfigureSystem() = default;
 
-void ConfigureSystem::changeEvent(QEvent* event) {
+void ConfigureSystem::changeEvent(QEvent* event)
+{
     if (event->type() == QEvent::LanguageChange) {
         RetranslateUI();
     }
@@ -109,11 +112,13 @@ void ConfigureSystem::changeEvent(QEvent* event) {
     QWidget::changeEvent(event);
 }
 
-void ConfigureSystem::RetranslateUI() {
+void ConfigureSystem::RetranslateUI()
+{
     ui->retranslateUi(this);
 }
 
-void ConfigureSystem::Setup(const ConfigurationShared::Builder& builder) {
+void ConfigureSystem::Setup(const ConfigurationShared::Builder& builder)
+{
     auto& core_layout = *ui->core_widget->layout();
     auto& system_layout = *ui->system_widget->layout();
 
@@ -187,7 +192,8 @@ void ConfigureSystem::Setup(const ConfigurationShared::Builder& builder) {
     }
 }
 
-void ConfigureSystem::UpdateRtcTime() {
+void ConfigureSystem::UpdateRtcTime()
+{
     const auto posix_time = std::chrono::system_clock::now().time_since_epoch();
     previous_time = std::chrono::duration_cast<std::chrono::seconds>(posix_time).count();
     date_rtc_offset->setEnabled(checkbox_rtc->isChecked());
@@ -200,9 +206,12 @@ void ConfigureSystem::UpdateRtcTime() {
     date_rtc->setDateTime(date);
 }
 
-void ConfigureSystem::SetConfiguration() {}
+void ConfigureSystem::SetConfiguration()
+{
+}
 
-void ConfigureSystem::ApplyConfiguration() {
+void ConfigureSystem::ApplyConfiguration()
+{
     const bool powered_on = system.IsPoweredOn();
     for (const auto& func : apply_funcs) {
         func(powered_on);

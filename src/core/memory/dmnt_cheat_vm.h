@@ -6,11 +6,12 @@
 
 #pragma once
 
+#include <fmt/printf.h>
+
+#include <memory>
 #include <variant>
 #include <vector>
-#include <memory>
 
-#include <fmt/printf.h>
 #include "common/common_types.h"
 #include "core/memory/dmnt_cheat_types.h"
 
@@ -293,9 +294,7 @@ public:
     explicit DmntCheatVm(std::unique_ptr<Callbacks> callbacks_);
     ~DmntCheatVm();
 
-    std::size_t GetProgramSize() const {
-        return this->num_opcodes;
-    }
+    std::size_t GetProgramSize() const { return this->num_opcodes; }
 
     bool LoadProgram(const std::vector<CheatEntry>& cheats);
     void Execute(const CheatProcessMetadata& metadata);

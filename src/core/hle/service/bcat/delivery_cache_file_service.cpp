@@ -1,17 +1,19 @@
 // SPDX-FileCopyrightText: Copyright 2024 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+#include "core/hle/service/bcat/delivery_cache_file_service.h"
+
 #include "common/string_util.h"
 #include "core/hle/service/bcat/bcat_result.h"
 #include "core/hle/service/bcat/bcat_util.h"
-#include "core/hle/service/bcat/delivery_cache_file_service.h"
 #include "core/hle/service/cmif_serialization.h"
 
 namespace Service::BCAT {
 
 IDeliveryCacheFileService::IDeliveryCacheFileService(Core::System& system_,
                                                      FileSys::VirtualDir root_)
-    : ServiceFramework{system_, "IDeliveryCacheFileService"}, root(std::move(root_)) {
+    : ServiceFramework{system_, "IDeliveryCacheFileService"}, root(std::move(root_))
+{
     // clang-format off
     static const FunctionInfo functions[] = {
         {0, D<&IDeliveryCacheFileService::Open>, "Open"},
@@ -27,7 +29,8 @@ IDeliveryCacheFileService::IDeliveryCacheFileService(Core::System& system_,
 IDeliveryCacheFileService::~IDeliveryCacheFileService() = default;
 
 Result IDeliveryCacheFileService::Open(const DirectoryName& dir_name_raw,
-                                       const FileName& file_name_raw) {
+                                       const FileName& file_name_raw)
+{
     const auto dir_name =
         Common::StringFromFixedZeroTerminatedBuffer(dir_name_raw.data(), dir_name_raw.size());
     const auto file_name =
@@ -49,7 +52,8 @@ Result IDeliveryCacheFileService::Open(const DirectoryName& dir_name_raw,
 }
 
 Result IDeliveryCacheFileService::Read(Out<u64> out_buffer_size, u64 offset,
-                                       OutBuffer<BufferAttr_HipcMapAlias> out_buffer) {
+                                       OutBuffer<BufferAttr_HipcMapAlias> out_buffer)
+{
     LOG_DEBUG(Service_BCAT, "called, offset={:016X}, size={:016X}", offset, out_buffer.size());
 
     R_UNLESS(current_file != nullptr, ResultNoOpenEntry);
@@ -61,7 +65,8 @@ Result IDeliveryCacheFileService::Read(Out<u64> out_buffer_size, u64 offset,
     R_SUCCEED();
 }
 
-Result IDeliveryCacheFileService::GetSize(Out<u64> out_size) {
+Result IDeliveryCacheFileService::GetSize(Out<u64> out_size)
+{
     LOG_DEBUG(Service_BCAT, "called");
 
     R_UNLESS(current_file != nullptr, ResultNoOpenEntry);
@@ -70,7 +75,8 @@ Result IDeliveryCacheFileService::GetSize(Out<u64> out_size) {
     R_SUCCEED();
 }
 
-Result IDeliveryCacheFileService::GetDigest(Out<BcatDigest> out_digest) {
+Result IDeliveryCacheFileService::GetDigest(Out<BcatDigest> out_digest)
+{
     LOG_DEBUG(Service_BCAT, "called");
 
     R_UNLESS(current_file != nullptr, ResultNoOpenEntry);

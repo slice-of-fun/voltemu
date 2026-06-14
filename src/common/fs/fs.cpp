@@ -4,8 +4,9 @@
 // SPDX-FileCopyrightText: Copyright 2021 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include "common/fs/file.h"
 #include "common/fs/fs.h"
+
+#include "common/fs/file.h"
 #ifdef __ANDROID__
 #include "common/fs/fs_android.h"
 #endif
@@ -18,7 +19,8 @@ namespace fs = std::filesystem;
 
 // File Operations
 
-bool NewFile(const fs::path& path, u64 size) {
+bool NewFile(const fs::path& path, u64 size)
+{
     if (!ValidatePath(path)) {
         LOG_ERROR(Common_Filesystem, "Input path is not valid, path={}", PathToUTF8String(path));
         return false;
@@ -56,7 +58,8 @@ bool NewFile(const fs::path& path, u64 size) {
     return true;
 }
 
-bool RemoveFile(const fs::path& path) {
+bool RemoveFile(const fs::path& path)
+{
     if (!ValidatePath(path)) {
         LOG_ERROR(Common_Filesystem, "Input path is not valid, path={}", PathToUTF8String(path));
         return false;
@@ -90,7 +93,8 @@ bool RemoveFile(const fs::path& path) {
     return true;
 }
 
-bool RenameFile(const fs::path& old_path, const fs::path& new_path) {
+bool RenameFile(const fs::path& old_path, const fs::path& new_path)
+{
     if (!ValidatePath(old_path) || !ValidatePath(new_path)) {
         LOG_ERROR(Common_Filesystem,
                   "One or both input path(s) is not valid, old_path={}, new_path={}",
@@ -134,7 +138,8 @@ bool RenameFile(const fs::path& old_path, const fs::path& new_path) {
 }
 
 std::shared_ptr<IOFile> FileOpen(const fs::path& path, FileAccessMode mode, FileType type,
-                                 FileShareFlag flag) {
+                                 FileShareFlag flag)
+{
     if (!ValidatePath(path)) {
         LOG_ERROR(Common_Filesystem, "Input path is not valid, path={}", PathToUTF8String(path));
         return nullptr;
@@ -168,7 +173,8 @@ std::shared_ptr<IOFile> FileOpen(const fs::path& path, FileAccessMode mode, File
 
 // Directory Operations
 
-bool CreateDir(const fs::path& path) {
+bool CreateDir(const fs::path& path)
+{
     if (!ValidatePath(path)) {
         LOG_ERROR(Common_Filesystem, "Input path is not valid, path={}", PathToUTF8String(path));
         return false;
@@ -202,7 +208,8 @@ bool CreateDir(const fs::path& path) {
     return true;
 }
 
-bool CreateDirs(const fs::path& path) {
+bool CreateDirs(const fs::path& path)
+{
     if (!ValidatePath(path)) {
         LOG_ERROR(Common_Filesystem, "Input path is not valid, path={}", PathToUTF8String(path));
         return false;
@@ -230,15 +237,18 @@ bool CreateDirs(const fs::path& path) {
     return true;
 }
 
-bool CreateParentDir(const fs::path& path) {
+bool CreateParentDir(const fs::path& path)
+{
     return CreateDir(path.parent_path());
 }
 
-bool CreateParentDirs(const fs::path& path) {
+bool CreateParentDirs(const fs::path& path)
+{
     return CreateDirs(path.parent_path());
 }
 
-bool RemoveDir(const fs::path& path) {
+bool RemoveDir(const fs::path& path)
+{
     if (!ValidatePath(path)) {
         LOG_ERROR(Common_Filesystem, "Input path is not valid, path={}", PathToUTF8String(path));
         return false;
@@ -272,7 +282,8 @@ bool RemoveDir(const fs::path& path) {
     return true;
 }
 
-bool RemoveDirRecursively(const fs::path& path) {
+bool RemoveDirRecursively(const fs::path& path)
+{
     if (!ValidatePath(path)) {
         LOG_ERROR(Common_Filesystem, "Input path is not valid, path={}", PathToUTF8String(path));
         return false;
@@ -307,7 +318,8 @@ bool RemoveDirRecursively(const fs::path& path) {
     return true;
 }
 
-bool RemoveDirContentsRecursively(const fs::path& path) {
+bool RemoveDirContentsRecursively(const fs::path& path)
+{
     if (!ValidatePath(path)) {
         LOG_ERROR(Common_Filesystem, "Input path is not valid, path={}", PathToUTF8String(path));
         return false;
@@ -366,7 +378,8 @@ bool RemoveDirContentsRecursively(const fs::path& path) {
     return true;
 }
 
-bool RenameDir(const fs::path& old_path, const fs::path& new_path) {
+bool RenameDir(const fs::path& old_path, const fs::path& new_path)
+{
     if (!ValidatePath(old_path) || !ValidatePath(new_path)) {
         LOG_ERROR(Common_Filesystem,
                   "One or both input path(s) is not valid, old_path={}, new_path={}",
@@ -410,7 +423,8 @@ bool RenameDir(const fs::path& old_path, const fs::path& new_path) {
 }
 
 void IterateDirEntries(const std::filesystem::path& path, const DirEntryCallable& callback,
-                       DirEntryFilter filter) {
+                       DirEntryFilter filter)
+{
     if (!ValidatePath(path)) {
         LOG_ERROR(Common_Filesystem, "Input path is not valid, path={}", PathToUTF8String(path));
         return;
@@ -466,7 +480,8 @@ void IterateDirEntries(const std::filesystem::path& path, const DirEntryCallable
 }
 
 void IterateDirEntriesRecursively(const std::filesystem::path& path,
-                                  const DirEntryCallable& callback, DirEntryFilter filter) {
+                                  const DirEntryCallable& callback, DirEntryFilter filter)
+{
     if (!ValidatePath(path)) {
         LOG_ERROR(Common_Filesystem, "Input path is not valid, path={}", PathToUTF8String(path));
         return;
@@ -530,7 +545,8 @@ void IterateDirEntriesRecursively(const std::filesystem::path& path,
 
 // Generic Filesystem Operations
 
-bool Exists(const fs::path& path) {
+bool Exists(const fs::path& path)
+{
     std::error_code ec;
 #ifdef __ANDROID__
     if (Android::IsContentUri(path)) {
@@ -543,7 +559,8 @@ bool Exists(const fs::path& path) {
 #endif
 }
 
-bool IsFile(const fs::path& path) {
+bool IsFile(const fs::path& path)
+{
     std::error_code ec;
 #ifdef __ANDROID__
     if (Android::IsContentUri(path)) {
@@ -556,7 +573,8 @@ bool IsFile(const fs::path& path) {
 #endif
 }
 
-bool IsDir(const fs::path& path) {
+bool IsDir(const fs::path& path)
+{
     std::error_code ec;
 #ifdef __ANDROID__
     if (Android::IsContentUri(path)) {
@@ -569,7 +587,8 @@ bool IsDir(const fs::path& path) {
 #endif
 }
 
-fs::path GetCurrentDir() {
+fs::path GetCurrentDir()
+{
     std::error_code ec;
 
     const auto current_path = fs::current_path(ec);
@@ -582,7 +601,8 @@ fs::path GetCurrentDir() {
     return current_path;
 }
 
-bool SetCurrentDir(const fs::path& path) {
+bool SetCurrentDir(const fs::path& path)
+{
     std::error_code ec;
 
     fs::current_path(path, ec);
@@ -596,7 +616,8 @@ bool SetCurrentDir(const fs::path& path) {
     return true;
 }
 
-fs::file_type GetEntryType(const fs::path& path) {
+fs::file_type GetEntryType(const fs::path& path)
+{
     std::error_code ec;
 
     const auto file_status = fs::status(path, ec);
@@ -610,7 +631,8 @@ fs::file_type GetEntryType(const fs::path& path) {
     return file_status.type();
 }
 
-u64 GetSize(const fs::path& path) {
+u64 GetSize(const fs::path& path)
+{
 #ifdef __ANDROID__
     if (Android::IsContentUri(path)) {
         return Android::GetSize(path);
@@ -630,7 +652,8 @@ u64 GetSize(const fs::path& path) {
     return file_size;
 }
 
-u64 GetFreeSpaceSize(const fs::path& path) {
+u64 GetFreeSpaceSize(const fs::path& path)
+{
     std::error_code ec;
 
     const auto space_info = fs::space(path, ec);
@@ -645,7 +668,8 @@ u64 GetFreeSpaceSize(const fs::path& path) {
     return space_info.free;
 }
 
-u64 GetTotalSpaceSize(const fs::path& path) {
+u64 GetTotalSpaceSize(const fs::path& path)
+{
     std::error_code ec;
 
     const auto space_info = fs::space(path, ec);

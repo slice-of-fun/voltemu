@@ -11,7 +11,8 @@
 namespace Kernel::Svc {
 namespace {
 
-constexpr bool IsValidTransferMemoryPermission(MemoryPermission perm) {
+constexpr bool IsValidTransferMemoryPermission(MemoryPermission perm)
+{
     switch (perm) {
     case MemoryPermission::None:
     case MemoryPermission::Read:
@@ -26,7 +27,8 @@ constexpr bool IsValidTransferMemoryPermission(MemoryPermission perm) {
 
 /// Creates a TransferMemory object
 Result CreateTransferMemory(Core::System& system, Handle* out, u64 address, u64 size,
-                            MemoryPermission map_perm) {
+                            MemoryPermission map_perm)
+{
     auto& kernel = system.Kernel();
 
     // Validate the size.
@@ -52,7 +54,8 @@ Result CreateTransferMemory(Core::System& system, Handle* out, u64 address, u64 
     R_UNLESS(trmem != nullptr, ResultOutOfResource);
 
     // Ensure the only reference is in the handle table when we're done.
-    SCOPE_EXIT {
+    SCOPE_EXIT
+    {
         trmem->Close();
     };
 
@@ -73,7 +76,8 @@ Result CreateTransferMemory(Core::System& system, Handle* out, u64 address, u64 
 }
 
 Result MapTransferMemory(Core::System& system, Handle trmem_handle, uint64_t address, uint64_t size,
-                         MemoryPermission map_perm) {
+                         MemoryPermission map_perm)
+{
     // Validate the address/size.
     R_UNLESS(Common::IsAligned(address, PageSize), ResultInvalidAddress);
     R_UNLESS(Common::IsAligned(size, PageSize), ResultInvalidSize);
@@ -103,7 +107,8 @@ Result MapTransferMemory(Core::System& system, Handle trmem_handle, uint64_t add
 }
 
 Result UnmapTransferMemory(Core::System& system, Handle trmem_handle, uint64_t address,
-                           uint64_t size) {
+                           uint64_t size)
+{
     // Validate the address/size.
     R_UNLESS(Common::IsAligned(address, PageSize), ResultInvalidAddress);
     R_UNLESS(Common::IsAligned(size, PageSize), ResultInvalidSize);
@@ -129,32 +134,38 @@ Result UnmapTransferMemory(Core::System& system, Handle trmem_handle, uint64_t a
 }
 
 Result MapTransferMemory64(Core::System& system, Handle trmem_handle, uint64_t address,
-                           uint64_t size, MemoryPermission owner_perm) {
+                           uint64_t size, MemoryPermission owner_perm)
+{
     R_RETURN(MapTransferMemory(system, trmem_handle, address, size, owner_perm));
 }
 
 Result UnmapTransferMemory64(Core::System& system, Handle trmem_handle, uint64_t address,
-                             uint64_t size) {
+                             uint64_t size)
+{
     R_RETURN(UnmapTransferMemory(system, trmem_handle, address, size));
 }
 
 Result CreateTransferMemory64(Core::System& system, Handle* out_handle, uint64_t address,
-                              uint64_t size, MemoryPermission map_perm) {
+                              uint64_t size, MemoryPermission map_perm)
+{
     R_RETURN(CreateTransferMemory(system, out_handle, address, size, map_perm));
 }
 
 Result MapTransferMemory64From32(Core::System& system, Handle trmem_handle, uint32_t address,
-                                 uint32_t size, MemoryPermission owner_perm) {
+                                 uint32_t size, MemoryPermission owner_perm)
+{
     R_RETURN(MapTransferMemory(system, trmem_handle, address, size, owner_perm));
 }
 
 Result UnmapTransferMemory64From32(Core::System& system, Handle trmem_handle, uint32_t address,
-                                   uint32_t size) {
+                                   uint32_t size)
+{
     R_RETURN(UnmapTransferMemory(system, trmem_handle, address, size));
 }
 
 Result CreateTransferMemory64From32(Core::System& system, Handle* out_handle, uint32_t address,
-                                    uint32_t size, MemoryPermission map_perm) {
+                                    uint32_t size, MemoryPermission map_perm)
+{
     R_RETURN(CreateTransferMemory(system, out_handle, address, size, map_perm));
 }
 

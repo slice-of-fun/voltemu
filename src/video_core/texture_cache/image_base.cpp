@@ -4,6 +4,8 @@
 // SPDX-FileCopyrightText: Copyright 2020 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "video_core/texture_cache/image_base.h"
+
 #include <algorithm>
 #include <optional>
 #include <utility>
@@ -13,7 +15,6 @@
 #include "common/div_ceil.h"
 #include "video_core/surface.h"
 #include "video_core/texture_cache/formatter.h"
-#include "video_core/texture_cache/image_base.h"
 #include "video_core/texture_cache/image_view_info.h"
 #include "video_core/texture_cache/util.h"
 
@@ -24,7 +25,8 @@ using VideoCore::Surface::DefaultBlockWidth;
 
 namespace {
 /// Returns the base layer and mip level offset
-[[nodiscard]] std::pair<s32, s32> LayerMipOffset(s32 diff, u32 layer_stride) {
+[[nodiscard]] std::pair<s32, s32> LayerMipOffset(s32 diff, u32 layer_stride)
+{
     if (layer_stride == 0) {
         return {0, diff};
     } else {
@@ -32,12 +34,14 @@ namespace {
     }
 }
 
-[[nodiscard]] bool ValidateLayers(const SubresourceLayers& layers, const ImageInfo& info) {
+[[nodiscard]] bool ValidateLayers(const SubresourceLayers& layers, const ImageInfo& info)
+{
     return layers.base_level < info.resources.levels &&
            layers.base_layer + layers.num_layers <= info.resources.layers;
 }
 
-[[nodiscard]] bool ValidateCopy(const ImageCopy& copy, const ImageInfo& dst, const ImageInfo& src) {
+[[nodiscard]] bool ValidateCopy(const ImageCopy& copy, const ImageInfo& dst, const ImageInfo& src)
+{
     const Extent3D src_size = MipSize(src.size, copy.src_subresource.base_level);
     const Extent3D dst_size = MipSize(dst.size, copy.dst_subresource.base_level);
     if (!ValidateLayers(copy.src_subresource, src)) {
@@ -65,19 +69,25 @@ ImageBase::ImageBase(const ImageInfo& info_, GPUVAddr gpu_addr_, VAddr cpu_addr_
       unswizzled_size_bytes{CalculateUnswizzledSizeBytes(info)},
       converted_size_bytes{CalculateConvertedSizeBytes(info)}, scale_rating{}, scale_tick{},
       has_scaled{}, gpu_addr{gpu_addr_}, cpu_addr{cpu_addr_},
-      cpu_addr_end{cpu_addr + guest_size_bytes}, mip_level_offsets{CalculateMipLevelOffsets(info)} {
+      cpu_addr_end{cpu_addr + guest_size_bytes}, mip_level_offsets{CalculateMipLevelOffsets(info)}
+{
     if (info.type == ImageType::e3D) {
         slice_offsets = CalculateSliceOffsets(info);
         slice_subresources = CalculateSliceSubresources(info);
     }
 }
 
-ImageBase::ImageBase(const NullImageParams&) {}
+ImageBase::ImageBase(const NullImageParams&)
+{
+}
 
 ImageMapView::ImageMapView(GPUVAddr gpu_addr_, VAddr cpu_addr_, size_t size_, ImageId image_id_)
-    : gpu_addr{gpu_addr_}, cpu_addr{cpu_addr_}, size{size_}, image_id{image_id_} {}
+    : gpu_addr{gpu_addr_}, cpu_addr{cpu_addr_}, size{size_}, image_id{image_id_}
+{
+}
 
-std::optional<SubresourceBase> ImageBase::TryFindBase(GPUVAddr other_addr) const noexcept {
+std::optional<SubresourceBase> ImageBase::TryFindBase(GPUVAddr other_addr) const noexcept
+{
     if (other_addr < gpu_addr) {
         // Subresource address can't be lower than the base
         return std::nullopt;
@@ -108,7 +118,8 @@ std::optional<SubresourceBase> ImageBase::TryFindBase(GPUVAddr other_addr) const
     }
 }
 
-ImageViewId ImageBase::FindView(const ImageViewInfo& view_info) const noexcept {
+ImageViewId ImageBase::FindView(const ImageViewInfo& view_info) const noexcept
+{
     const auto it = std::ranges::find(image_view_infos, view_info);
     if (it == image_view_infos.end()) {
         return ImageViewId{};
@@ -116,12 +127,14 @@ ImageViewId ImageBase::FindView(const ImageViewInfo& view_info) const noexcept {
     return image_view_ids[std::distance(image_view_infos.begin(), it)];
 }
 
-void ImageBase::InsertView(const ImageViewInfo& view_info, ImageViewId image_view_id) {
+void ImageBase::InsertView(const ImageViewInfo& view_info, ImageViewId image_view_id)
+{
     image_view_infos.push_back(view_info);
     image_view_ids.push_back(image_view_id);
 }
 
-bool ImageBase::IsSafeDownload() const noexcept {
+bool ImageBase::IsSafeDownload() const noexcept
+{
     // Skip images that were not modified from the GPU
     if (False(flags & ImageFlagBits::GpuModified)) {
         return false;
@@ -138,7 +151,8 @@ bool ImageBase::IsSafeDownload() const noexcept {
     return true;
 }
 
-void ImageBase::CheckBadOverlapState() {
+void ImageBase::CheckBadOverlapState()
+{
     if (False(flags & ImageFlagBits::BadOverlap)) {
         return;
     }
@@ -148,7 +162,8 @@ void ImageBase::CheckBadOverlapState() {
     flags &= ~ImageFlagBits::BadOverlap;
 }
 
-void ImageBase::CheckAliasState() {
+void ImageBase::CheckAliasState()
+{
     if (False(flags & ImageFlagBits::Alias)) {
         return;
     }
@@ -158,7 +173,8 @@ void ImageBase::CheckAliasState() {
     flags &= ~ImageFlagBits::Alias;
 }
 
-bool AddImageAlias(ImageBase& lhs, ImageBase& rhs, ImageId lhs_id, ImageId rhs_id) {
+bool AddImageAlias(ImageBase& lhs, ImageBase& rhs, ImageId lhs_id, ImageId rhs_id)
+{
     static constexpr auto OPTIONS = RelaxedOptions::Size | RelaxedOptions::Format;
     ASSERT(lhs.info.type == rhs.info.type);
     std::optional<SubresourceBase> base;

@@ -11,34 +11,39 @@
 
 namespace Shader::IR {
 namespace {
-void CheckPseudoInstruction(IR::Inst* inst, IR::Opcode opcode) {
+void CheckPseudoInstruction(IR::Inst* inst, IR::Opcode opcode)
+{
     if (inst && inst->GetOpcode() != opcode) {
         throw LogicError("Invalid pseudo-instruction");
     }
 }
 
-void SetPseudoInstruction(IR::Inst*& dest_inst, IR::Inst* pseudo_inst) {
+void SetPseudoInstruction(IR::Inst*& dest_inst, IR::Inst* pseudo_inst)
+{
     if (dest_inst) {
         throw LogicError("Only one of each type of pseudo-op allowed");
     }
     dest_inst = pseudo_inst;
 }
 
-void RemovePseudoInstruction(IR::Inst*& inst, IR::Opcode expected_opcode) {
+void RemovePseudoInstruction(IR::Inst*& inst, IR::Opcode expected_opcode)
+{
     if (inst->GetOpcode() != expected_opcode) {
         throw LogicError("Undoing use of invalid pseudo-op");
     }
     inst = nullptr;
 }
 
-void AllocAssociatedInsts(std::unique_ptr<AssociatedInsts>& associated_insts) {
+void AllocAssociatedInsts(std::unique_ptr<AssociatedInsts>& associated_insts)
+{
     if (!associated_insts) {
         associated_insts = std::make_unique<AssociatedInsts>();
     }
 }
 } // Anonymous namespace
 
-Inst::Inst(IR::Opcode op_, u32 flags_) noexcept : op{op_}, flags{flags_} {
+Inst::Inst(IR::Opcode op_, u32 flags_) noexcept : op{op_}, flags{flags_}
+{
     if (op == Opcode::Phi) {
         std::construct_at(&phi_args);
     } else {
@@ -46,7 +51,8 @@ Inst::Inst(IR::Opcode op_, u32 flags_) noexcept : op{op_}, flags{flags_} {
     }
 }
 
-Inst::Inst(const Inst& base) : op{base.op}, flags{base.flags} {
+Inst::Inst(const Inst& base) : op{base.op}, flags{base.flags}
+{
     if (base.op == Opcode::Phi) {
         throw NotImplementedException("Copying phi node");
     }
@@ -57,7 +63,8 @@ Inst::Inst(const Inst& base) : op{base.op}, flags{base.flags} {
     }
 }
 
-Inst::~Inst() {
+Inst::~Inst()
+{
     if (op == Opcode::Phi) {
         std::destroy_at(&phi_args);
     } else {
@@ -65,7 +72,8 @@ Inst::~Inst() {
     }
 }
 
-bool Inst::MayHaveSideEffects() const noexcept {
+bool Inst::MayHaveSideEffects() const noexcept
+{
     switch (op) {
     case Opcode::ConditionRef:
     case Opcode::Reference:
@@ -232,7 +240,8 @@ bool Inst::MayHaveSideEffects() const noexcept {
     }
 }
 
-bool Inst::IsPseudoInstruction() const noexcept {
+bool Inst::IsPseudoInstruction() const noexcept
+{
     switch (op) {
     case Opcode::GetZeroFromOp:
     case Opcode::GetSignFromOp:
@@ -246,7 +255,8 @@ bool Inst::IsPseudoInstruction() const noexcept {
     }
 }
 
-bool Inst::AreAllArgsImmediates() const {
+bool Inst::AreAllArgsImmediates() const
+{
     if (op == Opcode::Phi) {
         throw LogicError("Testing for all arguments are immediates on phi instruction");
     }
@@ -254,7 +264,8 @@ bool Inst::AreAllArgsImmediates() const {
                        [](const IR::Value& value) { return value.IsImmediate(); });
 }
 
-Inst* Inst::GetAssociatedPseudoOperation(IR::Opcode opcode) {
+Inst* Inst::GetAssociatedPseudoOperation(IR::Opcode opcode)
+{
     if (!associated_insts) {
         return nullptr;
     }
@@ -282,7 +293,8 @@ Inst* Inst::GetAssociatedPseudoOperation(IR::Opcode opcode) {
     }
 }
 
-IR::Type Inst::Type() const {
+IR::Type Inst::Type() const
+{
     if (op == IR::Opcode::Phi) {
         // The type of a phi node is stored in its flags
         return Flags<IR::Type>();
@@ -290,7 +302,8 @@ IR::Type Inst::Type() const {
     return TypeOf(op);
 }
 
-void Inst::SetArg(size_t index, Value value) {
+void Inst::SetArg(size_t index, Value value)
+{
     if (index >= NumArgs()) {
         throw InvalidArgument("Out of bounds argument index {} in opcode {}", index, op);
     }
@@ -308,7 +321,8 @@ void Inst::SetArg(size_t index, Value value) {
     }
 }
 
-Block* Inst::PhiBlock(size_t index) const {
+Block* Inst::PhiBlock(size_t index) const
+{
     if (op != Opcode::Phi) {
         throw LogicError("{} is not a Phi instruction", op);
     }
@@ -318,14 +332,16 @@ Block* Inst::PhiBlock(size_t index) const {
     return phi_args[index].first;
 }
 
-void Inst::AddPhiOperand(Block* predecessor, const Value& value) {
+void Inst::AddPhiOperand(Block* predecessor, const Value& value)
+{
     if (!value.IsImmediate()) {
         Use(value);
     }
     phi_args.emplace_back(predecessor, value);
 }
 
-void Inst::OrderPhiArgs() {
+void Inst::OrderPhiArgs()
+{
     if (op != Opcode::Phi) {
         throw LogicError("{} is not a Phi instruction", op);
     }
@@ -335,12 +351,14 @@ void Inst::OrderPhiArgs() {
               });
 }
 
-void Inst::Invalidate() {
+void Inst::Invalidate()
+{
     ClearArgs();
     ReplaceOpcode(Opcode::Void);
 }
 
-void Inst::ClearArgs() {
+void Inst::ClearArgs()
+{
     if (op == Opcode::Phi) {
         for (auto& pair : phi_args) {
             IR::Value& value{pair.second};
@@ -361,7 +379,8 @@ void Inst::ClearArgs() {
     }
 }
 
-void Inst::ReplaceUsesWith(Value replacement) {
+void Inst::ReplaceUsesWith(Value replacement)
+{
     Invalidate();
     ReplaceOpcode(Opcode::Identity);
     if (!replacement.IsImmediate()) {
@@ -370,7 +389,8 @@ void Inst::ReplaceUsesWith(Value replacement) {
     args[0] = replacement;
 }
 
-void Inst::ReplaceOpcode(IR::Opcode opcode) {
+void Inst::ReplaceOpcode(IR::Opcode opcode)
+{
     if (opcode == IR::Opcode::Phi) {
         throw LogicError("Cannot transition into Phi");
     }
@@ -382,7 +402,8 @@ void Inst::ReplaceOpcode(IR::Opcode opcode) {
     op = opcode;
 }
 
-void Inst::Use(const Value& value) {
+void Inst::Use(const Value& value)
+{
     Inst* const inst{value.Inst()};
     ++inst->use_count;
 
@@ -417,7 +438,8 @@ void Inst::Use(const Value& value) {
     }
 }
 
-void Inst::UndoUse(const Value& value) {
+void Inst::UndoUse(const Value& value)
+{
     Inst* const inst{value.Inst()};
     --inst->use_count;
 

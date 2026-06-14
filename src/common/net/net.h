@@ -3,10 +3,11 @@
 
 #pragma once
 
+#include <nlohmann/json.hpp>
 #include <optional>
 #include <string>
 #include <vector>
-#include <nlohmann/json.hpp>
+
 #include "common/common_types.h"
 
 namespace Common::Net {
@@ -35,14 +36,18 @@ typedef struct Release {
     // Get the relevant list of assets for the current platform.
     std::vector<Asset> GetPlatformAssets() const;
 
-    static std::optional<Release> FromJson(const nlohmann::json& json, const std::string &host, const std::string& repo);
-    static std::optional<Release> FromJson(const std::string_view& json, const std::string &host, const std::string& repo);
-    static std::vector<Release> ListFromJson(const nlohmann::json &json, const std::string &host, const std::string &repo);
-    static std::vector<Release> ListFromJson(const std::string_view &json, const std::string &host, const std::string &repo);
+    static std::optional<Release> FromJson(const nlohmann::json& json, const std::string& host,
+                                           const std::string& repo);
+    static std::optional<Release> FromJson(const std::string_view& json, const std::string& host,
+                                           const std::string& repo);
+    static std::vector<Release> ListFromJson(const nlohmann::json& json, const std::string& host,
+                                             const std::string& repo);
+    static std::vector<Release> ListFromJson(const std::string_view& json, const std::string& host,
+                                             const std::string& repo);
 } Release;
 
 // Make a request via httplib, and return the response body if applicable.
-std::optional<std::string> MakeRequest(const std::string &url, const std::string &path);
+std::optional<std::string> MakeRequest(const std::string& url, const std::string& path);
 
 // Get all of the latest stable releases.
 std::vector<Release> GetReleases();
@@ -53,4 +58,4 @@ std::optional<std::string> GetReleasesBody();
 // Get the latest release of the current channel.
 std::optional<Release> GetLatestRelease();
 
-}
+} // namespace Common::Net

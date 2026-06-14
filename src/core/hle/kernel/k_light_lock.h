@@ -23,9 +23,7 @@ public:
 
     void UnlockSlowPath(uintptr_t cur_thread);
 
-    bool IsLocked() const {
-        return m_tag.load() != 0;
-    }
+    bool IsLocked() const { return m_tag.load() != 0; }
 
     bool IsLockedByCurrentThread() const;
 

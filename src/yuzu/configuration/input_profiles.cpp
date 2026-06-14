@@ -4,34 +4,39 @@
 // SPDX-FileCopyrightText: Copyright 2020 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "yuzu/configuration/input_profiles.h"
+
 #include <fmt/ranges.h>
 
 #include "common/fs/fs.h"
 #include "common/fs/path_util.h"
 #include "common/logging.h"
 #include "frontend_common/config.h"
-#include "yuzu/configuration/input_profiles.h"
 
 namespace FS = Common::FS;
 
 namespace {
 
-bool ProfileExistsInFilesystem(std::string_view profile_name) {
+bool ProfileExistsInFilesystem(std::string_view profile_name)
+{
     return FS::Exists(FS::GetVoltPath(FS::VoltPath::ConfigDir) / "input" /
                       fmt::format("{}.ini", profile_name));
 }
 
-bool IsINI(const std::filesystem::path& filename) {
+bool IsINI(const std::filesystem::path& filename)
+{
     return filename.extension() == ".ini";
 }
 
-std::filesystem::path GetNameWithoutExtension(std::filesystem::path filename) {
+std::filesystem::path GetNameWithoutExtension(std::filesystem::path filename)
+{
     return filename.replace_extension();
 }
 
 } // namespace
 
-InputProfiles::InputProfiles() {
+InputProfiles::InputProfiles()
+{
     const auto input_profile_loc = FS::GetVoltPath(FS::VoltPath::ConfigDir) / "input";
 
     if (!FS::IsDir(input_profile_loc)) {
@@ -58,7 +63,8 @@ InputProfiles::InputProfiles() {
 
 InputProfiles::~InputProfiles() = default;
 
-std::vector<std::string> InputProfiles::GetInputProfileNames() {
+std::vector<std::string> InputProfiles::GetInputProfileNames()
+{
     std::vector<std::string> profile_names;
     profile_names.reserve(map_profiles.size());
 
@@ -79,11 +85,13 @@ std::vector<std::string> InputProfiles::GetInputProfileNames() {
     return profile_names;
 }
 
-bool InputProfiles::IsProfileNameValid(std::string_view profile_name) {
+bool InputProfiles::IsProfileNameValid(std::string_view profile_name)
+{
     return profile_name.find_first_of("<>:;\"/\\|,.!?*") == std::string::npos;
 }
 
-bool InputProfiles::CreateProfile(const std::string& profile_name, std::size_t player_index) {
+bool InputProfiles::CreateProfile(const std::string& profile_name, std::size_t player_index)
+{
     if (ProfileExistsInMap(profile_name)) {
         return false;
     }
@@ -94,7 +102,8 @@ bool InputProfiles::CreateProfile(const std::string& profile_name, std::size_t p
     return SaveProfile(profile_name, player_index);
 }
 
-bool InputProfiles::DeleteProfile(const std::string& profile_name) {
+bool InputProfiles::DeleteProfile(const std::string& profile_name)
+{
     if (!ProfileExistsInMap(profile_name)) {
         return false;
     }
@@ -107,7 +116,8 @@ bool InputProfiles::DeleteProfile(const std::string& profile_name) {
     return !ProfileExistsInMap(profile_name) && !ProfileExistsInFilesystem(profile_name);
 }
 
-bool InputProfiles::LoadProfile(const std::string& profile_name, std::size_t player_index) {
+bool InputProfiles::LoadProfile(const std::string& profile_name, std::size_t player_index)
+{
     if (!ProfileExistsInMap(profile_name)) {
         return false;
     }
@@ -123,7 +133,8 @@ bool InputProfiles::LoadProfile(const std::string& profile_name, std::size_t pla
     return true;
 }
 
-bool InputProfiles::SaveProfile(const std::string& profile_name, std::size_t player_index) {
+bool InputProfiles::SaveProfile(const std::string& profile_name, std::size_t player_index)
+{
     if (!ProfileExistsInMap(profile_name)) {
         return false;
     }
@@ -132,6 +143,7 @@ bool InputProfiles::SaveProfile(const std::string& profile_name, std::size_t pla
     return true;
 }
 
-bool InputProfiles::ProfileExistsInMap(const std::string& profile_name) const {
+bool InputProfiles::ProfileExistsInMap(const std::string& profile_name) const
+{
     return map_profiles.find(profile_name) != map_profiles.end();
 }

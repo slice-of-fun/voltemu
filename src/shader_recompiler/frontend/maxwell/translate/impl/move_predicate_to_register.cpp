@@ -13,15 +13,18 @@ enum class Mode : u64 {
 };
 } // Anonymous namespace
 
-void TranslatorVisitor::P2R_reg(u64) {
+void TranslatorVisitor::P2R_reg(u64)
+{
     throw NotImplementedException("P2R (reg)");
 }
 
-void TranslatorVisitor::P2R_cbuf(u64) {
+void TranslatorVisitor::P2R_cbuf(u64)
+{
     throw NotImplementedException("P2R (cbuf)");
 }
 
-void TranslatorVisitor::P2R_imm(u64 insn) {
+void TranslatorVisitor::P2R_imm(u64 insn)
+{
     union {
         u64 raw;
         BitField<0, 8, IR::Reg> dest_reg;

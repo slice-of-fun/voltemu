@@ -4,14 +4,17 @@
 // SPDX-FileCopyrightText: 2018 Citra Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "input_common/helpers/udp_protocol.h"
+
 #include <cstddef>
 #include <cstring>
+
 #include "common/logging.h"
-#include "input_common/helpers/udp_protocol.h"
 
 namespace InputCommon::CemuhookUDP {
 
-static constexpr std::size_t GetSizeOfResponseType(Type t) {
+static constexpr std::size_t GetSizeOfResponseType(Type t)
+{
     switch (t) {
     case Type::Version:
         return sizeof(Response::Version);
@@ -31,7 +34,8 @@ namespace Response {
  * Note: Modifies the buffer to zero out the crc (since that's the easiest way to check without
  * copying the buffer)
  */
-std::optional<Type> Validate(u8* data, std::size_t size) {
+std::optional<Type> Validate(u8* data, std::size_t size)
+{
     if (size < sizeof(Header)) {
         return std::nullopt;
     }

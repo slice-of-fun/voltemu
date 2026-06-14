@@ -11,7 +11,8 @@
 namespace Kernel::Svc {
 
 /// Set the process heap to a given Size. It can both extend and shrink the heap.
-Result SetHeapSize(Core::System& system, u64* out_address, u64 size) {
+Result SetHeapSize(Core::System& system, u64* out_address, u64 size)
+{
     LOG_TRACE(Kernel_SVC, "called, heap_size={:#X}", size);
 
     // Validate size.
@@ -30,7 +31,8 @@ Result SetHeapSize(Core::System& system, u64* out_address, u64 size) {
 }
 
 /// Maps memory at a desired address
-Result MapPhysicalMemory(Core::System& system, u64 addr, u64 size) {
+Result MapPhysicalMemory(Core::System& system, u64 addr, u64 size)
+{
     LOG_DEBUG(Kernel_SVC, "called, addr=0x{:016X}, size={:#X}", addr, size);
 
     if (!Common::Is4KBAligned(addr)) {
@@ -79,7 +81,8 @@ Result MapPhysicalMemory(Core::System& system, u64 addr, u64 size) {
 }
 
 /// Unmaps memory previously mapped via MapPhysicalMemory
-Result UnmapPhysicalMemory(Core::System& system, u64 addr, u64 size) {
+Result UnmapPhysicalMemory(Core::System& system, u64 addr, u64 size)
+{
     LOG_DEBUG(Kernel_SVC, "called, addr=0x{:016X}, size={:#X}", addr, size);
 
     if (!Common::Is4KBAligned(addr)) {
@@ -127,66 +130,81 @@ Result UnmapPhysicalMemory(Core::System& system, u64 addr, u64 size) {
     R_RETURN(page_table.UnmapPhysicalMemory(addr, size));
 }
 
-Result MapPhysicalMemoryUnsafe(Core::System& system, uint64_t address, uint64_t size) {
+Result MapPhysicalMemoryUnsafe(Core::System& system, uint64_t address, uint64_t size)
+{
     UNIMPLEMENTED();
     R_THROW(ResultNotImplemented);
 }
 
-Result UnmapPhysicalMemoryUnsafe(Core::System& system, uint64_t address, uint64_t size) {
+Result UnmapPhysicalMemoryUnsafe(Core::System& system, uint64_t address, uint64_t size)
+{
     UNIMPLEMENTED();
     R_THROW(ResultNotImplemented);
 }
 
-Result SetUnsafeLimit(Core::System& system, uint64_t limit) {
+Result SetUnsafeLimit(Core::System& system, uint64_t limit)
+{
     UNIMPLEMENTED();
     R_THROW(ResultNotImplemented);
 }
 
-Result SetHeapSize64(Core::System& system, uint64_t* out_address, uint64_t size) {
+Result SetHeapSize64(Core::System& system, uint64_t* out_address, uint64_t size)
+{
     R_RETURN(SetHeapSize(system, out_address, size));
 }
 
-Result MapPhysicalMemory64(Core::System& system, uint64_t address, uint64_t size) {
+Result MapPhysicalMemory64(Core::System& system, uint64_t address, uint64_t size)
+{
     R_RETURN(MapPhysicalMemory(system, address, size));
 }
 
-Result UnmapPhysicalMemory64(Core::System& system, uint64_t address, uint64_t size) {
+Result UnmapPhysicalMemory64(Core::System& system, uint64_t address, uint64_t size)
+{
     R_RETURN(UnmapPhysicalMemory(system, address, size));
 }
 
-Result MapPhysicalMemoryUnsafe64(Core::System& system, uint64_t address, uint64_t size) {
+Result MapPhysicalMemoryUnsafe64(Core::System& system, uint64_t address, uint64_t size)
+{
     R_RETURN(MapPhysicalMemoryUnsafe(system, address, size));
 }
 
-Result UnmapPhysicalMemoryUnsafe64(Core::System& system, uint64_t address, uint64_t size) {
+Result UnmapPhysicalMemoryUnsafe64(Core::System& system, uint64_t address, uint64_t size)
+{
     R_RETURN(UnmapPhysicalMemoryUnsafe(system, address, size));
 }
 
-Result SetUnsafeLimit64(Core::System& system, uint64_t limit) {
+Result SetUnsafeLimit64(Core::System& system, uint64_t limit)
+{
     R_RETURN(SetUnsafeLimit(system, limit));
 }
 
-Result SetHeapSize64From32(Core::System& system, uint64_t* out_address, uint32_t size) {
+Result SetHeapSize64From32(Core::System& system, uint64_t* out_address, uint32_t size)
+{
     R_RETURN(SetHeapSize(system, out_address, size));
 }
 
-Result MapPhysicalMemory64From32(Core::System& system, uint32_t address, uint32_t size) {
+Result MapPhysicalMemory64From32(Core::System& system, uint32_t address, uint32_t size)
+{
     R_RETURN(MapPhysicalMemory(system, address, size));
 }
 
-Result UnmapPhysicalMemory64From32(Core::System& system, uint32_t address, uint32_t size) {
+Result UnmapPhysicalMemory64From32(Core::System& system, uint32_t address, uint32_t size)
+{
     R_RETURN(UnmapPhysicalMemory(system, address, size));
 }
 
-Result MapPhysicalMemoryUnsafe64From32(Core::System& system, uint32_t address, uint32_t size) {
+Result MapPhysicalMemoryUnsafe64From32(Core::System& system, uint32_t address, uint32_t size)
+{
     R_RETURN(MapPhysicalMemoryUnsafe(system, address, size));
 }
 
-Result UnmapPhysicalMemoryUnsafe64From32(Core::System& system, uint32_t address, uint32_t size) {
+Result UnmapPhysicalMemoryUnsafe64From32(Core::System& system, uint32_t address, uint32_t size)
+{
     R_RETURN(UnmapPhysicalMemoryUnsafe(system, address, size));
 }
 
-Result SetUnsafeLimit64From32(Core::System& system, uint32_t limit) {
+Result SetUnsafeLimit64From32(Core::System& system, uint32_t limit)
+{
     R_RETURN(SetUnsafeLimit(system, limit));
 }
 

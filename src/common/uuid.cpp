@@ -4,16 +4,17 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "common/uuid.h"
+
+#include <fmt/ranges.h>
+
 #include <bit>
 #include <optional>
 #include <random>
 
-#include <fmt/ranges.h>
-
 #include "common/assert.h"
-#include "common/tiny_mt.h"
-#include "common/uuid.h"
 #include "common/random.h"
+#include "common/tiny_mt.h"
 
 namespace Common {
 
@@ -22,7 +23,8 @@ namespace {
 constexpr size_t RawStringSize = sizeof(UUID) * 2;
 constexpr size_t FormattedStringSize = RawStringSize + 4;
 
-std::optional<u8> HexCharToByte(char c) {
+std::optional<u8> HexCharToByte(char c)
+{
     if (c >= '0' && c <= '9') {
         return static_cast<u8>(c - '0');
     }
@@ -36,7 +38,8 @@ std::optional<u8> HexCharToByte(char c) {
     return std::nullopt;
 }
 
-std::array<u8, 0x10> ConstructFromRawString(std::string_view raw_string) {
+std::array<u8, 0x10> ConstructFromRawString(std::string_view raw_string)
+{
     std::array<u8, 0x10> uuid;
 
     for (size_t i = 0; i < RawStringSize; i += 2) {
@@ -51,7 +54,8 @@ std::array<u8, 0x10> ConstructFromRawString(std::string_view raw_string) {
     return uuid;
 }
 
-std::array<u8, 0x10> ConstructFromFormattedString(std::string_view formatted_string) {
+std::array<u8, 0x10> ConstructFromFormattedString(std::string_view formatted_string)
+{
     std::array<u8, 0x10> uuid{};
 
     size_t i = 0;
@@ -119,7 +123,8 @@ std::array<u8, 0x10> ConstructFromFormattedString(std::string_view formatted_str
     return uuid;
 }
 
-std::array<u8, 0x10> ConstructUUID(std::string_view uuid_string) {
+std::array<u8, 0x10> ConstructUUID(std::string_view uuid_string)
+{
     const auto length = uuid_string.length();
 
     if (length == 0) {
@@ -143,9 +148,12 @@ std::array<u8, 0x10> ConstructUUID(std::string_view uuid_string) {
 
 } // Anonymous namespace
 
-UUID::UUID(std::string_view uuid_string) : uuid{ConstructUUID(uuid_string)} {}
+UUID::UUID(std::string_view uuid_string) : uuid{ConstructUUID(uuid_string)}
+{
+}
 
-std::string UUID::RawString() const {
+std::string UUID::RawString() const
+{
     return fmt::format("{:02x}{:02x}{:02x}{:02x}{:02x}{:02x}{:02x}{:02x}"
                        "{:02x}{:02x}{:02x}{:02x}{:02x}{:02x}{:02x}{:02x}",
                        uuid[0], uuid[1], uuid[2], uuid[3], uuid[4], uuid[5], uuid[6], uuid[7],
@@ -153,7 +161,8 @@ std::string UUID::RawString() const {
                        uuid[15]);
 }
 
-std::string UUID::FormattedString() const {
+std::string UUID::FormattedString() const
+{
     return fmt::format("{:02x}{:02x}{:02x}{:02x}"
                        "-{:02x}{:02x}-{:02x}{:02x}-{:02x}{:02x}-"
                        "{:02x}{:02x}{:02x}{:02x}{:02x}{:02x}",
@@ -162,7 +171,8 @@ std::string UUID::FormattedString() const {
                        uuid[15]);
 }
 
-size_t UUID::Hash() const noexcept {
+size_t UUID::Hash() const noexcept
+{
     u64 upper_hash;
     u64 lower_hash;
 
@@ -172,17 +182,20 @@ size_t UUID::Hash() const noexcept {
     return upper_hash ^ std::rotl(lower_hash, 1);
 }
 
-u128 UUID::AsU128() const {
+u128 UUID::AsU128() const
+{
     u128 uuid_old;
     std::memcpy(&uuid_old, uuid.data(), sizeof(UUID));
     return uuid_old;
 }
 
-UUID UUID::MakeRandom() {
+UUID UUID::MakeRandom()
+{
     return MakeRandomWithSeed(Common::Random::Random32(0));
 }
 
-UUID UUID::MakeRandomWithSeed(u32 seed) {
+UUID UUID::MakeRandomWithSeed(u32 seed)
+{
     // Create and initialize our RNG.
     TinyMT rng;
     rng.Initialize(seed);
@@ -192,7 +205,8 @@ UUID UUID::MakeRandomWithSeed(u32 seed) {
     return uuid;
 }
 
-UUID UUID::MakeRandomRFC4122V4() {
+UUID UUID::MakeRandomRFC4122V4()
+{
     auto uuid = MakeRandom();
 
     // According to Proposed Standard RFC 4122 Section 4.4, we must:

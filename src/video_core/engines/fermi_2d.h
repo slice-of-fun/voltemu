@@ -6,6 +6,7 @@
 #include <array>
 #include <cstddef>
 #include <memory>
+
 #include "common/bit_field.h"
 #include "common/common_funcs.h"
 #include "common/common_types.h"
@@ -96,7 +97,8 @@ public:
         u32 addr_upper;
         u32 addr_lower;
 
-        [[nodiscard]] constexpr GPUVAddr Address() const noexcept {
+        [[nodiscard]] constexpr GPUVAddr Address() const noexcept
+        {
             return (GPUVAddr{addr_upper} << 32) | GPUVAddr{addr_lower};
         }
     };

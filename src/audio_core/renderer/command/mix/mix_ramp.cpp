@@ -4,16 +4,18 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include "audio_core/adsp/apps/audio_renderer/command_list_processor.h"
 #include "audio_core/renderer/command/mix/mix_ramp.h"
+
+#include "audio_core/adsp/apps/audio_renderer/command_list_processor.h"
 #include "common/fixed_point.h"
 #include "common/logging.h"
 
 namespace AudioCore::Renderer {
 
-template <size_t Q>
+template<size_t Q>
 s32 ApplyMixRamp(std::span<s32> output, std::span<const s32> input, const f32 volume_,
-                 const f32 ramp_, const u32 sample_count) {
+                 const f32 ramp_, const u32 sample_count)
+{
     Common::FixedPoint<64 - Q, Q> volume{volume_};
     Common::FixedPoint<64 - Q, Q> sample{0};
 
@@ -36,8 +38,8 @@ s32 ApplyMixRamp(std::span<s32> output, std::span<const s32> input, const f32 vo
 template s32 ApplyMixRamp<15>(std::span<s32>, std::span<const s32>, f32, f32, u32);
 template s32 ApplyMixRamp<23>(std::span<s32>, std::span<const s32>, f32, f32, u32);
 
-void MixRampCommand::Dump(const AudioRenderer::CommandListProcessor& processor,
-                          std::string& string) {
+void MixRampCommand::Dump(const AudioRenderer::CommandListProcessor& processor, std::string& string)
+{
     const auto ramp{(volume - prev_volume) / static_cast<f32>(processor.sample_count)};
     string += fmt::format("MixRampCommand");
     string += fmt::format("\n\tinput {:02X}", input_index);
@@ -48,7 +50,8 @@ void MixRampCommand::Dump(const AudioRenderer::CommandListProcessor& processor,
     string += "\n";
 }
 
-void MixRampCommand::Process(const AudioRenderer::CommandListProcessor& processor) {
+void MixRampCommand::Process(const AudioRenderer::CommandListProcessor& processor)
+{
     auto output{processor.mix_buffers.subspan(output_index * processor.sample_count,
                                               processor.sample_count)};
     auto input{processor.mix_buffers.subspan(input_index * processor.sample_count,
@@ -79,7 +82,8 @@ void MixRampCommand::Process(const AudioRenderer::CommandListProcessor& processo
     }
 }
 
-bool MixRampCommand::Verify(const AudioRenderer::CommandListProcessor& processor) {
+bool MixRampCommand::Verify(const AudioRenderer::CommandListProcessor& processor)
+{
     return true;
 }
 

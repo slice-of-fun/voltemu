@@ -25,11 +25,13 @@ DECLARE_ENUM_FLAG_OPERATORS(KMemoryRegionType);
 
 namespace impl {
 
-constexpr size_t BitsForDeriveSparse(size_t n) {
+constexpr size_t BitsForDeriveSparse(size_t n)
+{
     return n + 1;
 }
 
-constexpr size_t BitsForDeriveDense(size_t n) {
+constexpr size_t BitsForDeriveDense(size_t n)
+{
     size_t low = 0, high = 1;
     for (size_t i = 0; i < n - 1; ++i) {
         if ((++low) == high) {
@@ -46,56 +48,60 @@ public:
 
     constexpr KMemoryRegionTypeValue() = default;
 
-    constexpr operator KMemoryRegionType() const {
-        return static_cast<KMemoryRegionType>(m_value);
-    }
+    constexpr operator KMemoryRegionType() const { return static_cast<KMemoryRegionType>(m_value); }
 
-    constexpr ValueType GetValue() const {
-        return m_value;
-    }
+    constexpr ValueType GetValue() const { return m_value; }
 
-    constexpr const KMemoryRegionTypeValue& Finalize() {
+    constexpr const KMemoryRegionTypeValue& Finalize()
+    {
         m_finalized = true;
         return *this;
     }
 
-    constexpr const KMemoryRegionTypeValue& SetSparseOnly() {
+    constexpr const KMemoryRegionTypeValue& SetSparseOnly()
+    {
         m_sparse_only = true;
         return *this;
     }
 
-    constexpr const KMemoryRegionTypeValue& SetDenseOnly() {
+    constexpr const KMemoryRegionTypeValue& SetDenseOnly()
+    {
         m_dense_only = true;
         return *this;
     }
 
-    constexpr KMemoryRegionTypeValue& SetAttribute(u32 attr) {
+    constexpr KMemoryRegionTypeValue& SetAttribute(u32 attr)
+    {
         m_value |= attr;
         return *this;
     }
 
-    constexpr KMemoryRegionTypeValue DeriveInitial(
-        size_t i, size_t next = Common::BitSize<ValueType>()) const {
+    constexpr KMemoryRegionTypeValue DeriveInitial(size_t i,
+                                                   size_t next = Common::BitSize<ValueType>()) const
+    {
         KMemoryRegionTypeValue new_type = *this;
         new_type.m_value = (ValueType{1} << i);
         new_type.m_next_bit = next;
         return new_type;
     }
 
-    constexpr KMemoryRegionTypeValue DeriveAttribute(u32 attr) const {
+    constexpr KMemoryRegionTypeValue DeriveAttribute(u32 attr) const
+    {
         KMemoryRegionTypeValue new_type = *this;
         new_type.m_value |= attr;
         return new_type;
     }
 
-    constexpr KMemoryRegionTypeValue DeriveTransition(size_t ofs = 0, size_t adv = 1) const {
+    constexpr KMemoryRegionTypeValue DeriveTransition(size_t ofs = 0, size_t adv = 1) const
+    {
         KMemoryRegionTypeValue new_type = *this;
         new_type.m_value |= (ValueType{1} << (m_next_bit + ofs));
         new_type.m_next_bit += adv;
         return new_type;
     }
 
-    constexpr KMemoryRegionTypeValue DeriveSparse(size_t ofs, size_t n, size_t i) const {
+    constexpr KMemoryRegionTypeValue DeriveSparse(size_t ofs, size_t n, size_t i) const
+    {
         KMemoryRegionTypeValue new_type = *this;
         new_type.m_value |= (ValueType{1} << (m_next_bit + ofs));
         new_type.m_value |= (ValueType{1} << (m_next_bit + ofs + 1 + i));
@@ -103,7 +109,8 @@ public:
         return new_type;
     }
 
-    constexpr KMemoryRegionTypeValue Derive(size_t n, size_t i) const {
+    constexpr KMemoryRegionTypeValue Derive(size_t n, size_t i) const
+    {
         size_t low = 0, high = 1;
         for (size_t j = 0; j < i; ++j) {
             if ((++low) == high) {
@@ -119,15 +126,14 @@ public:
         return new_type;
     }
 
-    constexpr KMemoryRegionTypeValue Advance(size_t n) const {
+    constexpr KMemoryRegionTypeValue Advance(size_t n) const
+    {
         KMemoryRegionTypeValue new_type = *this;
         new_type.m_next_bit += n;
         return new_type;
     }
 
-    constexpr bool IsAncestorOf(ValueType v) const {
-        return (m_value | v) == v;
-    }
+    constexpr bool IsAncestorOf(ValueType v) const { return (m_value | v) == v; }
 
 private:
     constexpr KMemoryRegionTypeValue(ValueType v) : m_value(v) {}
@@ -364,7 +370,8 @@ constexpr inline auto KMemoryRegionType_KernelTemp =
     KMemoryRegionType_Kernel.Advance(2).Derive(2, 0);
 static_assert(KMemoryRegionType_KernelTemp.GetValue() == 0x31);
 
-constexpr KMemoryRegionType GetTypeForVirtualLinearMapping(u32 type_id) {
+constexpr KMemoryRegionType GetTypeForVirtualLinearMapping(u32 type_id)
+{
     if (KMemoryRegionType_DramKernelPtHeap.IsAncestorOf(type_id)) {
         return KMemoryRegionType_VirtualDramKernelPtHeap;
     } else if (KMemoryRegionType_DramKernelSecureAppletMemory.IsAncestorOf(type_id)) {

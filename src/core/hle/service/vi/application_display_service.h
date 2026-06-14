@@ -34,14 +34,12 @@ public:
     IApplicationDisplayService(Core::System& system_, std::shared_ptr<Container> container);
     ~IApplicationDisplayService() override;
 
-    std::shared_ptr<Container> GetContainer() const {
-        return m_container;
-    }
+    std::shared_ptr<Container> GetContainer() const { return m_container; }
 
 public:
     Result GetRelayService(Out<SharedPointer<Nvnflinger::IHOSBinderDriver>> out_relay_service);
-    Result GetSystemDisplayService(
-        Out<SharedPointer<ISystemDisplayService>> out_system_display_service);
+    Result
+    GetSystemDisplayService(Out<SharedPointer<ISystemDisplayService>> out_system_display_service);
     Result GetManagerDisplayService(
         Out<SharedPointer<IManagerDisplayService>> out_manager_display_service);
     Result GetIndirectDisplayTransactionService(

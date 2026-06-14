@@ -81,9 +81,7 @@ public:
     u32 GetSystemResourceSize() const;
     PoolPartition GetPoolPartition() const;
     const KernelCapabilityDescriptors& GetKernelCapabilities() const;
-    const std::array<u8, 0x10>& GetName() const {
-        return npdm_header.application_name;
-    }
+    const std::array<u8, 0x10>& GetName() const { return npdm_header.application_name; }
 
     void Print() const;
 

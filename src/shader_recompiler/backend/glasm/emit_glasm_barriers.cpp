@@ -6,15 +6,18 @@
 
 namespace Shader::Backend::GLASM {
 
-void EmitBarrier(EmitContext& ctx) {
+void EmitBarrier(EmitContext& ctx)
+{
     ctx.Add("BAR;");
 }
 
-void EmitWorkgroupMemoryBarrier(EmitContext& ctx) {
+void EmitWorkgroupMemoryBarrier(EmitContext& ctx)
+{
     ctx.Add("MEMBAR.CTA;");
 }
 
-void EmitDeviceMemoryBarrier(EmitContext& ctx) {
+void EmitDeviceMemoryBarrier(EmitContext& ctx)
+{
     ctx.Add("MEMBAR;");
 }
 

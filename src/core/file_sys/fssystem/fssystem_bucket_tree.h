@@ -9,7 +9,6 @@
 #include "common/common_funcs.h"
 #include "common/common_types.h"
 #include "common/literals.h"
-
 #include "core/file_sys/vfs/vfs.h"
 #include "core/hle/result.h"
 
@@ -57,11 +56,13 @@ public:
         s64 start_offset;
         s64 end_offset;
 
-        constexpr bool IsInclude(s64 offset) const {
+        constexpr bool IsInclude(s64 offset) const
+        {
             return this->start_offset <= offset && offset < this->end_offset;
         }
 
-        constexpr bool IsInclude(s64 offset, s64 size) const {
+        constexpr bool IsInclude(s64 offset, s64 size) const
+        {
             return size > 0 && this->start_offset <= offset && size <= (this->end_offset - offset);
         }
     };
@@ -80,40 +81,31 @@ public:
     public:
         constexpr ContinuousReadingInfo() : m_read_size(), m_skip_count(), m_done() {}
 
-        constexpr void Reset() {
+        constexpr void Reset()
+        {
             m_read_size = 0;
             m_skip_count = 0;
             m_done = false;
         }
 
-        constexpr void SetSkipCount(s32 count) {
+        constexpr void SetSkipCount(s32 count)
+        {
             ASSERT(count >= 0);
             m_skip_count = count;
         }
-        constexpr s32 GetSkipCount() const {
-            return m_skip_count;
-        }
-        constexpr bool CheckNeedScan() {
-            return (--m_skip_count) <= 0;
-        }
+        constexpr s32 GetSkipCount() const { return m_skip_count; }
+        constexpr bool CheckNeedScan() { return (--m_skip_count) <= 0; }
 
-        constexpr void Done() {
+        constexpr void Done()
+        {
             m_read_size = 0;
             m_done = true;
         }
-        constexpr bool IsDone() const {
-            return m_done;
-        }
+        constexpr bool IsDone() const { return m_done; }
 
-        constexpr void SetReadSize(size_t size) {
-            m_read_size = size;
-        }
-        constexpr size_t GetReadSize() const {
-            return m_read_size;
-        }
-        constexpr bool CanDo() const {
-            return m_read_size > 0;
-        }
+        constexpr void SetReadSize(size_t size) { m_read_size = size; }
+        constexpr size_t GetReadSize() const { return m_read_size; }
+        constexpr bool CanDo() const { return m_read_size > 0; }
 
     private:
         size_t m_read_size;
@@ -128,15 +120,12 @@ private:
     public:
         NodeBuffer() : m_header() {}
 
-        ~NodeBuffer() {
-            ASSERT(m_header == nullptr);
-        }
+        ~NodeBuffer() { ASSERT(m_header == nullptr); }
 
-        NodeBuffer(NodeBuffer&& rhs) : m_header(rhs.m_header) {
-            rhs.m_header = nullptr;
-        }
+        NodeBuffer(NodeBuffer&& rhs) : m_header(rhs.m_header) { rhs.m_header = nullptr; }
 
-        NodeBuffer& operator=(NodeBuffer&& rhs) {
+        NodeBuffer& operator=(NodeBuffer&& rhs)
+        {
             if (this != std::addressof(rhs)) {
                 ASSERT(m_header == nullptr);
 
@@ -147,39 +136,38 @@ private:
             return *this;
         }
 
-        bool Allocate(size_t node_size) {
+        bool Allocate(size_t node_size)
+        {
             ASSERT(m_header == nullptr);
 
-            m_header = ::operator new(node_size, std::align_val_t{sizeof(s64)});
+            m_header = ::operator new (node_size, std::align_val_t{sizeof(s64)});
 
             // ASSERT(Common::IsAligned(m_header, sizeof(s64)));
 
             return m_header != nullptr;
         }
 
-        void Free(size_t node_size) {
+        void Free(size_t node_size)
+        {
             if (m_header) {
-                ::operator delete(m_header, std::align_val_t{sizeof(s64)});
+                ::operator delete (m_header, std::align_val_t{sizeof(s64)});
                 m_header = nullptr;
             }
         }
 
-        void FillZero(size_t node_size) const {
+        void FillZero(size_t node_size) const
+        {
             if (m_header) {
                 std::memset(m_header, 0, node_size);
             }
         }
 
-        NodeHeader* Get() const {
-            return reinterpret_cast<NodeHeader*>(m_header);
-        }
+        NodeHeader* Get() const { return reinterpret_cast<NodeHeader*>(m_header); }
 
-        NodeHeader* operator->() const {
-            return this->Get();
-        }
+        NodeHeader* operator->() const { return this->Get(); }
 
-        template <typename T>
-        T* Get() const {
+        template<typename T> T* Get() const
+        {
             static_assert(std::is_trivial_v<T>);
             static_assert(sizeof(T) == sizeof(NodeHeader));
             return reinterpret_cast<T*>(m_header);
@@ -190,20 +178,24 @@ private:
     };
 
 private:
-    static constexpr s32 GetEntryCount(size_t node_size, size_t entry_size) {
+    static constexpr s32 GetEntryCount(size_t node_size, size_t entry_size)
+    {
         return static_cast<s32>((node_size - sizeof(NodeHeader)) / entry_size);
     }
 
-    static constexpr s32 GetOffsetCount(size_t node_size) {
+    static constexpr s32 GetOffsetCount(size_t node_size)
+    {
         return static_cast<s32>((node_size - sizeof(NodeHeader)) / sizeof(s64));
     }
 
-    static constexpr s32 GetEntrySetCount(size_t node_size, size_t entry_size, s32 entry_count) {
+    static constexpr s32 GetEntrySetCount(size_t node_size, size_t entry_size, s32 entry_count)
+    {
         const s32 entry_count_per_node = GetEntryCount(node_size, entry_size);
         return Common::DivideUp(entry_count, entry_count_per_node);
     }
 
-    static constexpr s32 GetNodeL2Count(size_t node_size, size_t entry_size, s32 entry_count) {
+    static constexpr s32 GetNodeL2Count(size_t node_size, size_t entry_size, s32 entry_count)
+    {
         const s32 offset_count_per_node = GetOffsetCount(node_size);
         const s32 entry_set_count = GetEntrySetCount(node_size, entry_size, entry_count);
 
@@ -221,31 +213,26 @@ private:
 public:
     BucketTree()
         : m_node_storage(), m_entry_storage(), m_node_l1(), m_node_size(), m_entry_size(),
-          m_entry_count(), m_offset_count(), m_entry_set_count(), m_offset_cache() {}
-    ~BucketTree() {
-        this->Finalize();
+          m_entry_count(), m_offset_count(), m_entry_set_count(), m_offset_cache()
+    {
     }
+    ~BucketTree() { this->Finalize(); }
 
     Result Initialize(VirtualFile node_storage, VirtualFile entry_storage, size_t node_size,
                       size_t entry_size, s32 entry_count);
     void Initialize(size_t node_size, s64 end_offset);
     void Finalize();
 
-    bool IsInitialized() const {
-        return m_node_size > 0;
-    }
-    bool IsEmpty() const {
-        return m_entry_size == 0;
-    }
+    bool IsInitialized() const { return m_node_size > 0; }
+    bool IsEmpty() const { return m_entry_size == 0; }
 
     Result Find(Visitor* visitor, s64 virtual_address);
     Result InvalidateCache();
 
-    s32 GetEntryCount() const {
-        return m_entry_count;
-    }
+    s32 GetEntryCount() const { return m_entry_count; }
 
-    Result GetOffsets(Offsets* out) {
+    Result GetOffsets(Offsets* out)
+    {
         // Ensure we have an offset cache.
         R_TRY(this->EnsureOffsetCache());
 
@@ -255,12 +242,10 @@ public:
     }
 
 public:
-    static constexpr s64 QueryHeaderStorageSize() {
-        return sizeof(Header);
-    }
+    static constexpr s64 QueryHeaderStorageSize() { return sizeof(Header); }
 
-    static constexpr s64 QueryNodeStorageSize(size_t node_size, size_t entry_size,
-                                              s32 entry_count) {
+    static constexpr s64 QueryNodeStorageSize(size_t node_size, size_t entry_size, s32 entry_count)
+    {
         ASSERT(entry_size >= sizeof(s64));
         ASSERT(node_size >= entry_size + sizeof(NodeHeader));
         ASSERT(NodeSizeMin <= node_size && node_size <= NodeSizeMax);
@@ -274,8 +259,8 @@ public:
                static_cast<s64>(node_size);
     }
 
-    static constexpr s64 QueryEntryStorageSize(size_t node_size, size_t entry_size,
-                                               s32 entry_count) {
+    static constexpr s64 QueryEntryStorageSize(size_t node_size, size_t entry_size, s32 entry_count)
+    {
         ASSERT(entry_size >= sizeof(s64));
         ASSERT(node_size >= entry_size + sizeof(NodeHeader));
         ASSERT(NodeSizeMin <= node_size && node_size <= NodeSizeMax);
@@ -289,8 +274,7 @@ public:
     }
 
 private:
-    template <typename EntryType>
-    struct ContinuousReadingParam {
+    template<typename EntryType> struct ContinuousReadingParam {
         s64 offset;
         size_t size;
         NodeHeader entry_set;
@@ -300,18 +284,18 @@ private:
     };
 
 private:
-    template <typename EntryType>
+    template<typename EntryType>
     Result ScanContinuousReading(ContinuousReadingInfo* out_info,
                                  const ContinuousReadingParam<EntryType>& param) const;
 
-    bool IsExistL2() const {
-        return m_offset_count < m_entry_set_count;
-    }
-    bool IsExistOffsetL2OnL1() const {
+    bool IsExistL2() const { return m_offset_count < m_entry_set_count; }
+    bool IsExistOffsetL2OnL1() const
+    {
         return this->IsExistL2() && m_node_l1->count < m_offset_count;
     }
 
-    s64 GetEntrySetIndex(s32 node_index, s32 offset_index) const {
+    s64 GetEntrySetIndex(s32 node_index, s32 offset_index) const
+    {
         return (m_offset_count - m_node_l1->count) + (m_offset_count * node_index) + offset_index;
     }
 
@@ -334,9 +318,11 @@ class BucketTree::Visitor {
     YUZU_NON_MOVEABLE(Visitor);
 
 public:
-    constexpr Visitor()
-        : m_tree(), m_entry(), m_entry_index(-1), m_entry_set_count(), m_entry_set{} {}
-    ~Visitor() {
+    constexpr Visitor() : m_tree(), m_entry(), m_entry_index(-1), m_entry_set_count(), m_entry_set{}
+    {
+    }
+    ~Visitor()
+    {
         if (m_entry != nullptr) {
             ::operator delete(m_entry, m_tree->m_entry_size);
             m_tree = nullptr;
@@ -344,37 +330,36 @@ public:
         }
     }
 
-    bool IsValid() const {
-        return m_entry_index >= 0;
-    }
-    bool CanMoveNext() const {
+    bool IsValid() const { return m_entry_index >= 0; }
+    bool CanMoveNext() const
+    {
         return this->IsValid() && (m_entry_index + 1 < m_entry_set.info.count ||
                                    m_entry_set.info.index + 1 < m_entry_set_count);
     }
-    bool CanMovePrevious() const {
+    bool CanMovePrevious() const
+    {
         return this->IsValid() && (m_entry_index > 0 || m_entry_set.info.index > 0);
     }
 
     Result MoveNext();
     Result MovePrevious();
 
-    template <typename EntryType>
+    template<typename EntryType>
     Result ScanContinuousReading(ContinuousReadingInfo* out_info, s64 offset, size_t size) const;
 
-    const void* Get() const {
+    const void* Get() const
+    {
         ASSERT(this->IsValid());
         return m_entry;
     }
 
-    template <typename T>
-    const T* Get() const {
+    template<typename T> const T* Get() const
+    {
         ASSERT(this->IsValid());
         return reinterpret_cast<const T*>(m_entry);
     }
 
-    const BucketTree* GetTree() const {
-        return m_tree;
-    }
+    const BucketTree* GetTree() const { return m_tree; }
 
 private:
     Result Initialize(const BucketTree* tree, const BucketTree::Offsets& offsets);

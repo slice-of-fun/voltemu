@@ -13,18 +13,19 @@
 #include <span>
 #include <type_traits>
 // TODO: find out which don't require stable iters
-#include <unordered_map>
 #include <ankerl/unordered_dense.h>
-#include <vector>
+
 #include <boost/container/small_vector.hpp>
 #include <boost/container/static_vector.hpp>
 #include <queue>
+#include <ranges>
+#include <unordered_map>
+#include <vector>
 
 #include "common/common_types.h"
 #include "common/hash.h"
 #include "common/literals.h"
 #include "common/lru_cache.h"
-#include <ranges>
 #include "common/scratch_buffer.h"
 #include "common/slot_vector.h"
 #include "common/thread_worker.h"
@@ -68,7 +69,8 @@ struct AsyncDecodeContext {
     std::atomic_bool complete;
 };
 
-using TextureCacheGPUMap = ankerl::unordered_dense::map<u64, std::vector<ImageId>, Common::IdentityHash<u64>>;
+using TextureCacheGPUMap =
+    ankerl::unordered_dense::map<u64, std::vector<ImageId>, Common::IdentityHash<u64>>;
 
 class TextureCacheChannelInfo : public ChannelInfo {
 public:
@@ -93,7 +95,7 @@ public:
     TextureCacheGPUMap* sparse_page_table = nullptr;
 };
 
-template <class P>
+template<class P>
 class TextureCache : public VideoCommon::ChannelSetupCaches<TextureCacheChannelInfo> {
     /// Address shift for caching images into a hash table
     static constexpr u64 YUZU_PAGEBITS = 20;
@@ -219,8 +221,8 @@ public:
                    const Tegra::Engines::Fermi2D::Config& copy);
 
     /// Try to find a cached image view in the given CPU address
-    [[nodiscard]] std::pair<ImageView*, bool> TryFindFramebufferImageView(
-        const Tegra::FramebufferConfig& config, DAddr cpu_addr);
+    [[nodiscard]] std::pair<ImageView*, bool>
+    TryFindFramebufferImageView(const Tegra::FramebufferConfig& config, DAddr cpu_addr);
 
     /// Return true when there are uncommitted images to be downloaded
     [[nodiscard]] bool HasUncommittedFlushes() const noexcept;
@@ -261,8 +263,8 @@ public:
 
 private:
     /// Iterate over all page indices in a range
-    template <typename Func>
-    static void ForEachCPUPage(DAddr addr, size_t size, Func&& func) {
+    template<typename Func> static void ForEachCPUPage(DAddr addr, size_t size, Func&& func)
+    {
         static constexpr bool RETURNS_BOOL = std::is_same_v<std::invoke_result<Func, u64>, bool>;
         const u64 page_end = (addr + size - 1) >> YUZU_PAGEBITS;
         for (u64 page = addr >> YUZU_PAGEBITS; page <= page_end; ++page) {
@@ -276,8 +278,8 @@ private:
         }
     }
 
-    template <typename Func>
-    static void ForEachGPUPage(GPUVAddr addr, size_t size, Func&& func) {
+    template<typename Func> static void ForEachGPUPage(GPUVAddr addr, size_t size, Func&& func)
+    {
         static constexpr bool RETURNS_BOOL = std::is_same_v<std::invoke_result<Func, u64>, bool>;
         const u64 page_end = (addr + size - 1) >> YUZU_PAGEBITS;
         for (u64 page = addr >> YUZU_PAGEBITS; page <= page_end; ++page) {
@@ -306,7 +308,7 @@ private:
     void RefreshContents(Image& image, ImageId image_id);
 
     /// Upload data from guest to an image
-    template <typename StagingBuffer>
+    template<typename StagingBuffer>
     void UploadImageContents(Image& image, StagingBuffer& staging_buffer);
 
     /// Create a new image view from a guest descriptor
@@ -331,9 +333,10 @@ private:
     [[nodiscard]] ImageId FindDMAImage(const ImageInfo& info, GPUVAddr gpu_addr);
 
     /// Return a blit image pair from the given guest blit parameters
-    [[nodiscard]] std::optional<BlitImages> GetBlitImages(
-        const Tegra::Engines::Fermi2D::Surface& dst, const Tegra::Engines::Fermi2D::Surface& src,
-        const Tegra::Engines::Fermi2D::Config& copy);
+    [[nodiscard]] std::optional<BlitImages>
+    GetBlitImages(const Tegra::Engines::Fermi2D::Surface& dst,
+                  const Tegra::Engines::Fermi2D::Surface& src,
+                  const Tegra::Engines::Fermi2D::Config& copy);
 
     /// Find or create a sampler from a guest descriptor sampler
     [[nodiscard]] SamplerId FindSampler(const TSCEntry& config, bool compute);
@@ -348,18 +351,16 @@ private:
     [[nodiscard]] ImageViewId FindRenderTargetView(const ImageInfo& info, GPUVAddr gpu_addr);
 
     /// Iterates over all the images in a region calling func
-    template <typename Func>
-    void ForEachImageInRegion(DAddr cpu_addr, size_t size, Func&& func);
+    template<typename Func> void ForEachImageInRegion(DAddr cpu_addr, size_t size, Func&& func);
 
-    template <typename Func>
+    template<typename Func>
     void ForEachImageInRegionGPU(size_t as_id, GPUVAddr gpu_addr, size_t size, Func&& func);
 
-    template <typename Func>
+    template<typename Func>
     void ForEachSparseImageInRegion(size_t as_id, GPUVAddr gpu_addr, size_t size, Func&& func);
 
     /// Iterates over all the images in a region calling func
-    template <typename Func>
-    void ForEachSparseSegment(ImageBase& image, Func&& func);
+    template<typename Func> void ForEachSparseSegment(ImageBase& image, Func&& func);
 
     /// Find or create an image view in the given image with the passed parameters
     [[nodiscard]] ImageViewId FindOrEmplaceImageView(ImageId image_id, const ImageViewInfo& info);
@@ -401,8 +402,8 @@ private:
     void BindRenderTarget(ImageViewId* old_id, ImageViewId new_id);
 
     /// Create a render target from a given image and image view parameters
-    [[nodiscard]] std::pair<FramebufferId, ImageViewId> RenderTargetFromImage(
-        ImageId, const ImageViewInfo& view_info);
+    [[nodiscard]] std::pair<FramebufferId, ImageViewId>
+    RenderTargetFromImage(ImageId, const ImageViewInfo& view_info);
 
     /// Returns true if the current clear parameters clear the whole image of a given image view
     [[nodiscard]] bool IsFullClear(ImageViewId id);
@@ -443,8 +444,10 @@ private:
     u64 last_framebuffer_serial = 0;
 
     ankerl::unordered_dense::map<RenderTargets, FramebufferId> framebuffers;
-    ankerl::unordered_dense::map<u64, std::vector<ImageMapId>, Common::IdentityHash<u64>> page_table;
-    ankerl::unordered_dense::map<ImageId, boost::container::small_vector<ImageViewId, 16>> sparse_views;
+    ankerl::unordered_dense::map<u64, std::vector<ImageMapId>, Common::IdentityHash<u64>>
+        page_table;
+    ankerl::unordered_dense::map<ImageId, boost::container::small_vector<ImageViewId, 16>>
+        sparse_views;
 
     DAddr virtual_invalid_space{};
 
@@ -491,9 +494,9 @@ private:
     };
     Common::LeastRecentlyUsedCache<LRUItemParams> lru_cache;
 
- #ifdef YUZU_LEGACY
+#ifdef YUZU_LEGACY
     static constexpr size_t TICKS_TO_DESTROY = 6;
- #else
+#else
     static constexpr size_t TICKS_TO_DESTROY = 8;
 #endif
     DelayedDestructionRing<Image, TICKS_TO_DESTROY> sentenced_images;

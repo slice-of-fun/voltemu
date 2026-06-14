@@ -10,7 +10,7 @@
 
 namespace Vulkan {
 
-std::shared_ptr<Common::DynamicLibrary> OpenLibrary(
-    [[maybe_unused]] Core::Frontend::GraphicsContext* context = nullptr);
+std::shared_ptr<Common::DynamicLibrary>
+OpenLibrary([[maybe_unused]] Core::Frontend::GraphicsContext* context = nullptr);
 
 } // namespace Vulkan

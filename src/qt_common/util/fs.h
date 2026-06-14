@@ -5,6 +5,7 @@
 
 #include <filesystem>
 #include <optional>
+
 #include "common/common_types.h"
 
 namespace QtCommon::FS {

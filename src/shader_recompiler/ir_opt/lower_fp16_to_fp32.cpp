@@ -6,7 +6,8 @@
 
 namespace Shader::Optimization {
 namespace {
-IR::Opcode Replace(IR::Opcode op) {
+IR::Opcode Replace(IR::Opcode op)
+{
     switch (op) {
     case IR::Opcode::FPAbs16:
         return IR::Opcode::FPAbs32;
@@ -128,7 +129,8 @@ IR::Opcode Replace(IR::Opcode op) {
 }
 } // Anonymous namespace
 
-void LowerFp16ToFp32(IR::Program& program) {
+void LowerFp16ToFp32(IR::Program& program)
+{
     for (IR::Block* const block : program.blocks) {
         for (IR::Inst& inst : block->Instructions()) {
             inst.ReplaceOpcode(Replace(inst.GetOpcode()));

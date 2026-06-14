@@ -2,11 +2,13 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include "core/hle/service/mii/types/char_info.h"
+
 #include "core/hle/service/mii/types/store_data.h"
 
 namespace Service::Mii {
 
-void CharInfo::SetFromStoreData(const StoreData& store_data) {
+void CharInfo::SetFromStoreData(const StoreData& store_data)
+{
     name = store_data.GetNickname();
     null_terminator = '\0';
     create_id = store_data.GetCreateId();
@@ -62,7 +64,8 @@ void CharInfo::SetFromStoreData(const StoreData& store_data) {
     padding = '\0';
 }
 
-ValidationResult CharInfo::Verify() const {
+ValidationResult CharInfo::Verify() const
+{
     if (!create_id.IsValid()) {
         return ValidationResult::InvalidCreateId;
     }
@@ -219,211 +222,263 @@ ValidationResult CharInfo::Verify() const {
     return ValidationResult::NoErrors;
 }
 
-Common::UUID CharInfo::GetCreateId() const {
+Common::UUID CharInfo::GetCreateId() const
+{
     return create_id;
 }
 
-Nickname CharInfo::GetNickname() const {
+Nickname CharInfo::GetNickname() const
+{
     return name;
 }
 
-FontRegion CharInfo::GetFontRegion() const {
+FontRegion CharInfo::GetFontRegion() const
+{
     return font_region;
 }
 
-FavoriteColor CharInfo::GetFavoriteColor() const {
+FavoriteColor CharInfo::GetFavoriteColor() const
+{
     return favorite_color;
 }
 
-Gender CharInfo::GetGender() const {
+Gender CharInfo::GetGender() const
+{
     return gender;
 }
 
-u8 CharInfo::GetHeight() const {
+u8 CharInfo::GetHeight() const
+{
     return height;
 }
 
-u8 CharInfo::GetBuild() const {
+u8 CharInfo::GetBuild() const
+{
     return build;
 }
 
-u8 CharInfo::GetType() const {
+u8 CharInfo::GetType() const
+{
     return type;
 }
 
-u8 CharInfo::GetRegionMove() const {
+u8 CharInfo::GetRegionMove() const
+{
     return region_move;
 }
 
-FacelineType CharInfo::GetFacelineType() const {
+FacelineType CharInfo::GetFacelineType() const
+{
     return faceline_type;
 }
 
-FacelineColor CharInfo::GetFacelineColor() const {
+FacelineColor CharInfo::GetFacelineColor() const
+{
     return faceline_color;
 }
 
-FacelineWrinkle CharInfo::GetFacelineWrinkle() const {
+FacelineWrinkle CharInfo::GetFacelineWrinkle() const
+{
     return faceline_wrinkle;
 }
 
-FacelineMake CharInfo::GetFacelineMake() const {
+FacelineMake CharInfo::GetFacelineMake() const
+{
     return faceline_make;
 }
 
-HairType CharInfo::GetHairType() const {
+HairType CharInfo::GetHairType() const
+{
     return hair_type;
 }
 
-CommonColor CharInfo::GetHairColor() const {
+CommonColor CharInfo::GetHairColor() const
+{
     return hair_color;
 }
 
-HairFlip CharInfo::GetHairFlip() const {
+HairFlip CharInfo::GetHairFlip() const
+{
     return hair_flip;
 }
 
-EyeType CharInfo::GetEyeType() const {
+EyeType CharInfo::GetEyeType() const
+{
     return eye_type;
 }
 
-CommonColor CharInfo::GetEyeColor() const {
+CommonColor CharInfo::GetEyeColor() const
+{
     return eye_color;
 }
 
-u8 CharInfo::GetEyeScale() const {
+u8 CharInfo::GetEyeScale() const
+{
     return eye_scale;
 }
 
-u8 CharInfo::GetEyeAspect() const {
+u8 CharInfo::GetEyeAspect() const
+{
     return eye_aspect;
 }
 
-u8 CharInfo::GetEyeRotate() const {
+u8 CharInfo::GetEyeRotate() const
+{
     return eye_rotate;
 }
 
-u8 CharInfo::GetEyeX() const {
+u8 CharInfo::GetEyeX() const
+{
     return eye_x;
 }
 
-u8 CharInfo::GetEyeY() const {
+u8 CharInfo::GetEyeY() const
+{
     return eye_y;
 }
 
-EyebrowType CharInfo::GetEyebrowType() const {
+EyebrowType CharInfo::GetEyebrowType() const
+{
     return eyebrow_type;
 }
 
-CommonColor CharInfo::GetEyebrowColor() const {
+CommonColor CharInfo::GetEyebrowColor() const
+{
     return eyebrow_color;
 }
 
-u8 CharInfo::GetEyebrowScale() const {
+u8 CharInfo::GetEyebrowScale() const
+{
     return eyebrow_scale;
 }
 
-u8 CharInfo::GetEyebrowAspect() const {
+u8 CharInfo::GetEyebrowAspect() const
+{
     return eyebrow_aspect;
 }
 
-u8 CharInfo::GetEyebrowRotate() const {
+u8 CharInfo::GetEyebrowRotate() const
+{
     return eyebrow_rotate;
 }
 
-u8 CharInfo::GetEyebrowX() const {
+u8 CharInfo::GetEyebrowX() const
+{
     return eyebrow_x;
 }
 
-u8 CharInfo::GetEyebrowY() const {
+u8 CharInfo::GetEyebrowY() const
+{
     return eyebrow_y;
 }
 
-NoseType CharInfo::GetNoseType() const {
+NoseType CharInfo::GetNoseType() const
+{
     return nose_type;
 }
 
-u8 CharInfo::GetNoseScale() const {
+u8 CharInfo::GetNoseScale() const
+{
     return nose_scale;
 }
 
-u8 CharInfo::GetNoseY() const {
+u8 CharInfo::GetNoseY() const
+{
     return nose_y;
 }
 
-MouthType CharInfo::GetMouthType() const {
+MouthType CharInfo::GetMouthType() const
+{
     return mouth_type;
 }
 
-CommonColor CharInfo::GetMouthColor() const {
+CommonColor CharInfo::GetMouthColor() const
+{
     return mouth_color;
 }
 
-u8 CharInfo::GetMouthScale() const {
+u8 CharInfo::GetMouthScale() const
+{
     return mouth_scale;
 }
 
-u8 CharInfo::GetMouthAspect() const {
+u8 CharInfo::GetMouthAspect() const
+{
     return mouth_aspect;
 }
 
-u8 CharInfo::GetMouthY() const {
+u8 CharInfo::GetMouthY() const
+{
     return mouth_y;
 }
 
-CommonColor CharInfo::GetBeardColor() const {
+CommonColor CharInfo::GetBeardColor() const
+{
     return beard_color;
 }
 
-BeardType CharInfo::GetBeardType() const {
+BeardType CharInfo::GetBeardType() const
+{
     return beard_type;
 }
 
-MustacheType CharInfo::GetMustacheType() const {
+MustacheType CharInfo::GetMustacheType() const
+{
     return mustache_type;
 }
 
-u8 CharInfo::GetMustacheScale() const {
+u8 CharInfo::GetMustacheScale() const
+{
     return mustache_scale;
 }
 
-u8 CharInfo::GetMustacheY() const {
+u8 CharInfo::GetMustacheY() const
+{
     return mustache_y;
 }
 
-GlassType CharInfo::GetGlassType() const {
+GlassType CharInfo::GetGlassType() const
+{
     return glass_type;
 }
 
-CommonColor CharInfo::GetGlassColor() const {
+CommonColor CharInfo::GetGlassColor() const
+{
     return glass_color;
 }
 
-u8 CharInfo::GetGlassScale() const {
+u8 CharInfo::GetGlassScale() const
+{
     return glass_scale;
 }
 
-u8 CharInfo::GetGlassY() const {
+u8 CharInfo::GetGlassY() const
+{
     return glass_y;
 }
 
-MoleType CharInfo::GetMoleType() const {
+MoleType CharInfo::GetMoleType() const
+{
     return mole_type;
 }
 
-u8 CharInfo::GetMoleScale() const {
+u8 CharInfo::GetMoleScale() const
+{
     return mole_scale;
 }
 
-u8 CharInfo::GetMoleX() const {
+u8 CharInfo::GetMoleX() const
+{
     return mole_x;
 }
 
-u8 CharInfo::GetMoleY() const {
+u8 CharInfo::GetMoleY() const
+{
     return mole_y;
 }
 
-bool CharInfo::operator==(const CharInfo& info) {
+bool CharInfo::operator==(const CharInfo& info)
+{
     bool is_identical = info.Verify() == ValidationResult::NoErrors;
     is_identical &= name.data == info.GetNickname().data;
     is_identical &= create_id == info.GetCreateId();

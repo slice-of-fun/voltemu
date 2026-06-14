@@ -1,8 +1,9 @@
 // SPDX-FileCopyrightText: Copyright 2021 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include "core/hle/kernel/k_auto_object.h"
 #include "core/hle/kernel/k_class_token.h"
+
+#include "core/hle/kernel/k_auto_object.h"
 #include "core/hle/kernel/k_client_port.h"
 #include "core/hle/kernel/k_client_session.h"
 #include "core/hle/kernel/k_code_memory.h"

@@ -5,26 +5,28 @@
 // SPDX-FileCopyrightText: Copyright 2023 merryhime <https://mary.rs>
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include <numeric>
 #include "core/arm/nce/interpreter_visitor.h"
+
+#include <numeric>
 
 namespace Core {
 
 namespace {
 // Prefetch tuning parameters
 [[maybe_unused]] constexpr size_t CACHE_LINE_SIZE = 64;
-[[maybe_unused]] constexpr size_t PREFETCH_STRIDE = 128; // 2 cache lines ahead
+[[maybe_unused]] constexpr size_t PREFETCH_STRIDE = 128;        // 2 cache lines ahead
 [[maybe_unused]] constexpr size_t SIMD_PREFETCH_THRESHOLD = 32; // Bytes
 } // namespace
 
-template <u32 BitSize>
-u64 SignExtendToLong(u64 value) {
+template<u32 BitSize> u64 SignExtendToLong(u64 value)
+{
     u64 mask = 1ULL << (BitSize - 1);
     value &= (1ULL << BitSize) - 1;
     return (value ^ mask) - mask;
 }
 
-static u64 SignExtendToLong(u64 value, u64 bitsize) {
+static u64 SignExtendToLong(u64 value, u64 bitsize)
+{
     switch (bitsize) {
     case 8:
         return SignExtendToLong<8>(value);
@@ -37,14 +39,15 @@ static u64 SignExtendToLong(u64 value, u64 bitsize) {
     }
 }
 
-template <u64 BitSize>
-u32 SignExtendToWord(u32 value) {
+template<u64 BitSize> u32 SignExtendToWord(u32 value)
+{
     u32 mask = 1ULL << (BitSize - 1);
     value &= (1ULL << BitSize) - 1;
     return (value ^ mask) - mask;
 }
 
-static u32 SignExtendToWord(u32 value, u64 bitsize) {
+static u32 SignExtendToWord(u32 value, u64 bitsize)
+{
     switch (bitsize) {
     case 8:
         return SignExtendToWord<8>(value);
@@ -55,7 +58,8 @@ static u32 SignExtendToWord(u32 value, u64 bitsize) {
     }
 }
 
-static u64 SignExtend(u64 value, u64 bitsize, u64 regsize) {
+static u64 SignExtend(u64 value, u64 bitsize, u64 regsize)
+{
     if (regsize == 64) {
         return SignExtendToLong(value, bitsize);
     } else {
@@ -63,7 +67,8 @@ static u64 SignExtend(u64 value, u64 bitsize, u64 regsize) {
     }
 }
 
-static u128 VectorGetElement(u128 value, u64 bitsize) {
+static u128 VectorGetElement(u128 value, u64 bitsize)
+{
     switch (bitsize) {
     case 8:
         return {value[0] & ((1ULL << 8) - 1), 0};
@@ -78,7 +83,8 @@ static u128 VectorGetElement(u128 value, u64 bitsize) {
     }
 }
 
-u64 InterpreterVisitor::ExtendReg(size_t bitsize, Reg reg, Imm<3> option, u8 shift) {
+u64 InterpreterVisitor::ExtendReg(size_t bitsize, Reg reg, Imm<3> option, u8 shift)
+{
     ASSERT(shift <= 4);
     ASSERT(bitsize == 32 || bitsize == 64);
     u64 val = this->GetReg(reg);
@@ -146,35 +152,43 @@ u64 InterpreterVisitor::ExtendReg(size_t bitsize, Reg reg, Imm<3> option, u8 shi
     return extended << shift;
 }
 
-u128 InterpreterVisitor::GetVec(Vec v) {
+u128 InterpreterVisitor::GetVec(Vec v)
+{
     return m_fpsimd_regs[static_cast<u32>(v)];
 }
 
-u64 InterpreterVisitor::GetReg(Reg r) {
+u64 InterpreterVisitor::GetReg(Reg r)
+{
     return m_regs[static_cast<u32>(r)];
 }
 
-u64 InterpreterVisitor::GetSp() {
+u64 InterpreterVisitor::GetSp()
+{
     return m_sp;
 }
 
-u64 InterpreterVisitor::GetPc() {
+u64 InterpreterVisitor::GetPc()
+{
     return m_pc;
 }
 
-void InterpreterVisitor::SetVec(Vec v, u128 value) {
+void InterpreterVisitor::SetVec(Vec v, u128 value)
+{
     m_fpsimd_regs[static_cast<u32>(v)] = value;
 }
 
-void InterpreterVisitor::SetReg(Reg r, u64 value) {
+void InterpreterVisitor::SetReg(Reg r, u64 value)
+{
     m_regs[static_cast<u32>(r)] = value;
 }
 
-void InterpreterVisitor::SetSp(u64 value) {
+void InterpreterVisitor::SetSp(u64 value)
+{
     m_sp = value;
 }
 
-bool InterpreterVisitor::Ordered(size_t size, bool L, bool o0, Reg Rn, Reg Rt) {
+bool InterpreterVisitor::Ordered(size_t size, bool L, bool o0, Reg Rn, Reg Rt)
+{
     const auto memop = L ? MemOp::Load : MemOp::Store;
     const size_t elsize = 8 << size;
     const size_t datasize = elsize;
@@ -202,35 +216,40 @@ bool InterpreterVisitor::Ordered(size_t size, bool L, bool o0, Reg Rn, Reg Rt) {
     return true;
 }
 
-bool InterpreterVisitor::STLLR(Imm<2> sz, Reg Rn, Reg Rt) {
+bool InterpreterVisitor::STLLR(Imm<2> sz, Reg Rn, Reg Rt)
+{
     const size_t size = sz.ZeroExtend<size_t>();
     const bool L = 0;
     const bool o0 = 0;
     return this->Ordered(size, L, o0, Rn, Rt);
 }
 
-bool InterpreterVisitor::STLR(Imm<2> sz, Reg Rn, Reg Rt) {
+bool InterpreterVisitor::STLR(Imm<2> sz, Reg Rn, Reg Rt)
+{
     const size_t size = sz.ZeroExtend<size_t>();
     const bool L = 0;
     const bool o0 = 1;
     return this->Ordered(size, L, o0, Rn, Rt);
 }
 
-bool InterpreterVisitor::LDLAR(Imm<2> sz, Reg Rn, Reg Rt) {
+bool InterpreterVisitor::LDLAR(Imm<2> sz, Reg Rn, Reg Rt)
+{
     const size_t size = sz.ZeroExtend<size_t>();
     const bool L = 1;
     const bool o0 = 0;
     return this->Ordered(size, L, o0, Rn, Rt);
 }
 
-bool InterpreterVisitor::LDAR(Imm<2> sz, Reg Rn, Reg Rt) {
+bool InterpreterVisitor::LDAR(Imm<2> sz, Reg Rn, Reg Rt)
+{
     const size_t size = sz.ZeroExtend<size_t>();
     const bool L = 1;
     const bool o0 = 1;
     return this->Ordered(size, L, o0, Rn, Rt);
 }
 
-bool InterpreterVisitor::LDR_lit_gen(bool opc_0, Imm<19> imm19, Reg Rt) {
+bool InterpreterVisitor::LDR_lit_gen(bool opc_0, Imm<19> imm19, Reg Rt)
+{
     const size_t size = opc_0 == 0 ? 4 : 8;
     const s64 offset = Dynarmic::concatenate(imm19, Imm<2>{0}).SignExtend<s64>();
     const u64 address = this->GetPc() + offset;
@@ -242,7 +261,8 @@ bool InterpreterVisitor::LDR_lit_gen(bool opc_0, Imm<19> imm19, Reg Rt) {
     return true;
 }
 
-bool InterpreterVisitor::LDR_lit_fpsimd(Imm<2> opc, Imm<19> imm19, Vec Vt) {
+bool InterpreterVisitor::LDR_lit_fpsimd(Imm<2> opc, Imm<19> imm19, Vec Vt)
+{
     if (opc == 0b11) {
         // Unallocated encoding
         return false;
@@ -260,7 +280,8 @@ bool InterpreterVisitor::LDR_lit_fpsimd(Imm<2> opc, Imm<19> imm19, Vec Vt) {
 }
 
 bool InterpreterVisitor::STP_LDP_gen(Imm<2> opc, bool not_postindex, bool wback, Imm<1> L,
-                                     Imm<7> imm7, Reg Rt2, Reg Rn, Reg Rt) {
+                                     Imm<7> imm7, Reg Rt2, Reg Rn, Reg Rt)
+{
     if ((L == 0 && opc.Bit<0>() == 1) || opc == 0b11) {
         // Unallocated encoding
         return false;
@@ -339,7 +360,8 @@ bool InterpreterVisitor::STP_LDP_gen(Imm<2> opc, bool not_postindex, bool wback,
 }
 
 bool InterpreterVisitor::STP_LDP_fpsimd(Imm<2> opc, bool not_postindex, bool wback, Imm<1> L,
-                                        Imm<7> imm7, Vec Vt2, Reg Rn, Vec Vt) {
+                                        Imm<7> imm7, Vec Vt2, Reg Rn, Vec Vt)
+{
     if (opc == 0b11) {
         // Unallocated encoding
         return false;
@@ -404,7 +426,8 @@ bool InterpreterVisitor::STP_LDP_fpsimd(Imm<2> opc, bool not_postindex, bool wba
 }
 
 bool InterpreterVisitor::RegisterImmediate(bool wback, bool postindex, size_t scale, u64 offset,
-                                           Imm<2> size, Imm<2> opc, Reg Rn, Reg Rt) {
+                                           Imm<2> size, Imm<2> opc, Reg Rn, Reg Rt)
+{
     MemOp memop;
     bool signed_ = false;
     size_t regsize = 0;
@@ -459,7 +482,8 @@ bool InterpreterVisitor::RegisterImmediate(bool wback, bool postindex, size_t sc
 }
 
 bool InterpreterVisitor::STRx_LDRx_imm_1(Imm<2> size, Imm<2> opc, Imm<9> imm9, bool not_postindex,
-                                         Reg Rn, Reg Rt) {
+                                         Reg Rn, Reg Rt)
+{
     const bool wback = true;
     const bool postindex = !not_postindex;
     const size_t scale = size.ZeroExtend<size_t>();
@@ -468,7 +492,8 @@ bool InterpreterVisitor::STRx_LDRx_imm_1(Imm<2> size, Imm<2> opc, Imm<9> imm9, b
     return this->RegisterImmediate(wback, postindex, scale, offset, size, opc, Rn, Rt);
 }
 
-bool InterpreterVisitor::STRx_LDRx_imm_2(Imm<2> size, Imm<2> opc, Imm<12> imm12, Reg Rn, Reg Rt) {
+bool InterpreterVisitor::STRx_LDRx_imm_2(Imm<2> size, Imm<2> opc, Imm<12> imm12, Reg Rn, Reg Rt)
+{
     const bool wback = false;
     const bool postindex = false;
     const size_t scale = size.ZeroExtend<size_t>();
@@ -477,7 +502,8 @@ bool InterpreterVisitor::STRx_LDRx_imm_2(Imm<2> size, Imm<2> opc, Imm<12> imm12,
     return this->RegisterImmediate(wback, postindex, scale, offset, size, opc, Rn, Rt);
 }
 
-bool InterpreterVisitor::STURx_LDURx(Imm<2> size, Imm<2> opc, Imm<9> imm9, Reg Rn, Reg Rt) {
+bool InterpreterVisitor::STURx_LDURx(Imm<2> size, Imm<2> opc, Imm<9> imm9, Reg Rn, Reg Rt)
+{
     const bool wback = false;
     const bool postindex = false;
     const size_t scale = size.ZeroExtend<size_t>();
@@ -487,7 +513,8 @@ bool InterpreterVisitor::STURx_LDURx(Imm<2> size, Imm<2> opc, Imm<9> imm9, Reg R
 }
 
 bool InterpreterVisitor::SIMDImmediate(bool wback, bool postindex, size_t scale, u64 offset,
-                                       MemOp memop, Reg Rn, Vec Vt) {
+                                       MemOp memop, Reg Rn, Vec Vt)
+{
     const size_t datasize = 8 << scale;
     u64 address = (Rn == Reg::SP) ? this->GetSp() : this->GetReg(Rn);
     if (!postindex)
@@ -521,7 +548,8 @@ bool InterpreterVisitor::SIMDImmediate(bool wback, bool postindex, size_t scale,
 }
 
 bool InterpreterVisitor::STR_imm_fpsimd_1(Imm<2> size, Imm<1> opc_1, Imm<9> imm9,
-                                          bool not_postindex, Reg Rn, Vec Vt) {
+                                          bool not_postindex, Reg Rn, Vec Vt)
+{
     const size_t scale = Dynarmic::concatenate(opc_1, size).ZeroExtend<size_t>();
     if (scale > 4) {
         // Unallocated encoding
@@ -535,8 +563,8 @@ bool InterpreterVisitor::STR_imm_fpsimd_1(Imm<2> size, Imm<1> opc_1, Imm<9> imm9
     return this->SIMDImmediate(wback, postindex, scale, offset, MemOp::Store, Rn, Vt);
 }
 
-bool InterpreterVisitor::STR_imm_fpsimd_2(Imm<2> size, Imm<1> opc_1, Imm<12> imm12, Reg Rn,
-                                          Vec Vt) {
+bool InterpreterVisitor::STR_imm_fpsimd_2(Imm<2> size, Imm<1> opc_1, Imm<12> imm12, Reg Rn, Vec Vt)
+{
     const size_t scale = Dynarmic::concatenate(opc_1, size).ZeroExtend<size_t>();
     if (scale > 4) {
         // Unallocated encoding
@@ -551,7 +579,8 @@ bool InterpreterVisitor::STR_imm_fpsimd_2(Imm<2> size, Imm<1> opc_1, Imm<12> imm
 }
 
 bool InterpreterVisitor::LDR_imm_fpsimd_1(Imm<2> size, Imm<1> opc_1, Imm<9> imm9,
-                                          bool not_postindex, Reg Rn, Vec Vt) {
+                                          bool not_postindex, Reg Rn, Vec Vt)
+{
     const size_t scale = Dynarmic::concatenate(opc_1, size).ZeroExtend<size_t>();
     if (scale > 4) {
         // Unallocated encoding
@@ -565,8 +594,8 @@ bool InterpreterVisitor::LDR_imm_fpsimd_1(Imm<2> size, Imm<1> opc_1, Imm<9> imm9
     return this->SIMDImmediate(wback, postindex, scale, offset, MemOp::Load, Rn, Vt);
 }
 
-bool InterpreterVisitor::LDR_imm_fpsimd_2(Imm<2> size, Imm<1> opc_1, Imm<12> imm12, Reg Rn,
-                                          Vec Vt) {
+bool InterpreterVisitor::LDR_imm_fpsimd_2(Imm<2> size, Imm<1> opc_1, Imm<12> imm12, Reg Rn, Vec Vt)
+{
     const size_t scale = Dynarmic::concatenate(opc_1, size).ZeroExtend<size_t>();
     if (scale > 4) {
         // Unallocated encoding
@@ -580,7 +609,8 @@ bool InterpreterVisitor::LDR_imm_fpsimd_2(Imm<2> size, Imm<1> opc_1, Imm<12> imm
     return this->SIMDImmediate(wback, postindex, scale, offset, MemOp::Load, Rn, Vt);
 }
 
-bool InterpreterVisitor::STUR_fpsimd(Imm<2> size, Imm<1> opc_1, Imm<9> imm9, Reg Rn, Vec Vt) {
+bool InterpreterVisitor::STUR_fpsimd(Imm<2> size, Imm<1> opc_1, Imm<9> imm9, Reg Rn, Vec Vt)
+{
     const size_t scale = Dynarmic::concatenate(opc_1, size).ZeroExtend<size_t>();
     if (scale > 4) {
         // Unallocated encoding
@@ -594,7 +624,8 @@ bool InterpreterVisitor::STUR_fpsimd(Imm<2> size, Imm<1> opc_1, Imm<9> imm9, Reg
     return this->SIMDImmediate(wback, postindex, scale, offset, MemOp::Store, Rn, Vt);
 }
 
-bool InterpreterVisitor::LDUR_fpsimd(Imm<2> size, Imm<1> opc_1, Imm<9> imm9, Reg Rn, Vec Vt) {
+bool InterpreterVisitor::LDUR_fpsimd(Imm<2> size, Imm<1> opc_1, Imm<9> imm9, Reg Rn, Vec Vt)
+{
     const size_t scale = Dynarmic::concatenate(opc_1, size).ZeroExtend<size_t>();
     if (scale > 4) {
         // Unallocated encoding
@@ -609,7 +640,8 @@ bool InterpreterVisitor::LDUR_fpsimd(Imm<2> size, Imm<1> opc_1, Imm<9> imm9, Reg
 }
 
 bool InterpreterVisitor::RegisterOffset(size_t scale, u8 shift, Imm<2> size, Imm<1> opc_1,
-                                        Imm<1> opc_0, Reg Rm, Imm<3> option, Reg Rn, Reg Rt) {
+                                        Imm<1> opc_0, Reg Rm, Imm<3> option, Reg Rn, Reg Rt)
+{
     MemOp memop;
     size_t regsize = 64;
     bool signed_ = false;
@@ -671,7 +703,8 @@ bool InterpreterVisitor::RegisterOffset(size_t scale, u8 shift, Imm<2> size, Imm
 }
 
 bool InterpreterVisitor::STRx_reg(Imm<2> size, Imm<1> opc_1, Reg Rm, Imm<3> option, bool S, Reg Rn,
-                                  Reg Rt) {
+                                  Reg Rt)
+{
     const Imm<1> opc_0{0};
     const size_t scale = size.ZeroExtend<size_t>();
     const u8 shift = S ? static_cast<u8>(scale) : 0;
@@ -683,7 +716,8 @@ bool InterpreterVisitor::STRx_reg(Imm<2> size, Imm<1> opc_1, Reg Rm, Imm<3> opti
 }
 
 bool InterpreterVisitor::LDRx_reg(Imm<2> size, Imm<1> opc_1, Reg Rm, Imm<3> option, bool S, Reg Rn,
-                                  Reg Rt) {
+                                  Reg Rt)
+{
     const Imm<1> opc_0{1};
     const size_t scale = size.ZeroExtend<size_t>();
     const u8 shift = S ? static_cast<u8>(scale) : 0;
@@ -695,7 +729,8 @@ bool InterpreterVisitor::LDRx_reg(Imm<2> size, Imm<1> opc_1, Reg Rm, Imm<3> opti
 }
 
 bool InterpreterVisitor::SIMDOffset(size_t scale, u8 shift, Imm<1> opc_0, Reg Rm, Imm<3> option,
-                                    Reg Rn, Vec Vt) {
+                                    Reg Rn, Vec Vt)
+{
     const auto memop = opc_0 == 1 ? MemOp::Load : MemOp::Store;
     const size_t datasize = 8 << scale;
 
@@ -730,7 +765,8 @@ bool InterpreterVisitor::SIMDOffset(size_t scale, u8 shift, Imm<1> opc_0, Reg Rm
 }
 
 bool InterpreterVisitor::STR_reg_fpsimd(Imm<2> size, Imm<1> opc_1, Reg Rm, Imm<3> option, bool S,
-                                        Reg Rn, Vec Vt) {
+                                        Reg Rn, Vec Vt)
+{
     const Imm<1> opc_0{0};
     const size_t scale = Dynarmic::concatenate(opc_1, size).ZeroExtend<size_t>();
     if (scale > 4) {
@@ -746,7 +782,8 @@ bool InterpreterVisitor::STR_reg_fpsimd(Imm<2> size, Imm<1> opc_1, Reg Rm, Imm<3
 }
 
 bool InterpreterVisitor::LDR_reg_fpsimd(Imm<2> size, Imm<1> opc_1, Reg Rm, Imm<3> option, bool S,
-                                        Reg Rn, Vec Vt) {
+                                        Reg Rn, Vec Vt)
+{
     const Imm<1> opc_0{1};
     const size_t scale = Dynarmic::concatenate(opc_1, size).ZeroExtend<size_t>();
     if (scale > 4) {
@@ -761,7 +798,9 @@ bool InterpreterVisitor::LDR_reg_fpsimd(Imm<2> size, Imm<1> opc_1, Reg Rm, Imm<3
     return this->SIMDOffset(scale, shift, opc_0, Rm, option, Rn, Vt);
 }
 
-std::optional<u64> MatchAndExecuteOneInstruction(Core::Memory::Memory& memory, mcontext_t* context, fpsimd_context* fpsimd_context) {
+std::optional<u64> MatchAndExecuteOneInstruction(Core::Memory::Memory& memory, mcontext_t* context,
+                                                 fpsimd_context* fpsimd_context)
+{
     std::span<u64, 31> regs(reinterpret_cast<u64*>(context->regs), 31);
     std::span<u128, 32> vregs(reinterpret_cast<u128*>(fpsimd_context->vregs), 32);
     u64& sp = *reinterpret_cast<u64*>(&context->sp);

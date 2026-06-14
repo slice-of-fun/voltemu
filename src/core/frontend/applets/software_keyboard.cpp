@@ -4,11 +4,12 @@
 // SPDX-FileCopyrightText: Copyright 2021 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/frontend/applets/software_keyboard.h"
+
 #include <thread>
 
 #include "common/logging.h"
 #include "common/string_util.h"
-#include "core/frontend/applets/software_keyboard.h"
 
 namespace Core::Frontend {
 
@@ -16,11 +17,14 @@ SoftwareKeyboardApplet::~SoftwareKeyboardApplet() = default;
 
 DefaultSoftwareKeyboardApplet::~DefaultSoftwareKeyboardApplet() = default;
 
-void DefaultSoftwareKeyboardApplet::Close() const {}
+void DefaultSoftwareKeyboardApplet::Close() const
+{
+}
 
 void DefaultSoftwareKeyboardApplet::InitializeKeyboard(
     bool is_inline, KeyboardInitializeParameters initialize_parameters,
-    SubmitNormalCallback submit_normal_callback_, SubmitInlineCallback submit_inline_callback_) {
+    SubmitNormalCallback submit_normal_callback_, SubmitInlineCallback submit_inline_callback_)
+{
     if (is_inline) {
         LOG_WARNING(
             Service_AM,
@@ -64,7 +68,8 @@ void DefaultSoftwareKeyboardApplet::InitializeKeyboard(
              parameters.enable_return_button, parameters.disable_cancel_button);
 }
 
-void DefaultSoftwareKeyboardApplet::ShowNormalKeyboard() const {
+void DefaultSoftwareKeyboardApplet::ShowNormalKeyboard() const
+{
     LOG_WARNING(Service_AM,
                 "(STUBBED) called, backend requested to show the normal software keyboard.");
 
@@ -73,12 +78,14 @@ void DefaultSoftwareKeyboardApplet::ShowNormalKeyboard() const {
 
 void DefaultSoftwareKeyboardApplet::ShowTextCheckDialog(
     Service::AM::Frontend::SwkbdTextCheckResult text_check_result,
-    std::u16string text_check_message) const {
+    std::u16string text_check_message) const
+{
     LOG_WARNING(Service_AM, "(STUBBED) called, backend requested to show the text check dialog.");
 }
 
 void DefaultSoftwareKeyboardApplet::ShowInlineKeyboard(
-    InlineAppearParameters appear_parameters) const {
+    InlineAppearParameters appear_parameters) const
+{
     LOG_WARNING(Service_AM,
                 "(STUBBED) called, backend requested to show the inline software keyboard.");
 
@@ -106,12 +113,14 @@ void DefaultSoftwareKeyboardApplet::ShowInlineKeyboard(
     std::thread([this] { SubmitInlineText(u"Eden"); }).detach();
 }
 
-void DefaultSoftwareKeyboardApplet::HideInlineKeyboard() const {
+void DefaultSoftwareKeyboardApplet::HideInlineKeyboard() const
+{
     LOG_WARNING(Service_AM,
                 "(STUBBED) called, backend requested to hide the inline software keyboard.");
 }
 
-void DefaultSoftwareKeyboardApplet::InlineTextChanged(InlineTextParameters text_parameters) const {
+void DefaultSoftwareKeyboardApplet::InlineTextChanged(InlineTextParameters text_parameters) const
+{
     LOG_WARNING(Service_AM,
                 "(STUBBED) called, backend requested to change the inline keyboard text.");
 
@@ -125,15 +134,18 @@ void DefaultSoftwareKeyboardApplet::InlineTextChanged(InlineTextParameters text_
                            text_parameters.input_text, text_parameters.cursor_position);
 }
 
-void DefaultSoftwareKeyboardApplet::ExitKeyboard() const {
+void DefaultSoftwareKeyboardApplet::ExitKeyboard() const
+{
     LOG_WARNING(Service_AM, "(STUBBED) called, backend requested to exit the software keyboard.");
 }
 
-void DefaultSoftwareKeyboardApplet::SubmitNormalText(std::u16string text) const {
+void DefaultSoftwareKeyboardApplet::SubmitNormalText(std::u16string text) const
+{
     submit_normal_callback(Service::AM::Frontend::SwkbdResult::Ok, text, true);
 }
 
-void DefaultSoftwareKeyboardApplet::SubmitInlineText(std::u16string_view text) const {
+void DefaultSoftwareKeyboardApplet::SubmitInlineText(std::u16string_view text) const
+{
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
     for (std::size_t index = 0; index < text.size(); ++index) {

@@ -7,8 +7,8 @@
 
 namespace FileSys {
 
-template <typename T>
-constexpr int Strlen(const T* str) {
+template<typename T> constexpr int Strlen(const T* str)
+{
     ASSERT(str != nullptr);
 
     int length = 0;
@@ -19,13 +19,13 @@ constexpr int Strlen(const T* str) {
     return length;
 }
 
-template <typename T>
-constexpr int Strnlen(const T* str, std::size_t count) {
+template<typename T> constexpr int Strnlen(const T* str, std::size_t count)
+{
     return Strnlen(str, static_cast<int>(count));
 }
 
-template <typename T>
-constexpr int Strnlen(const T* str, int count) {
+template<typename T> constexpr int Strnlen(const T* str, int count)
+{
     ASSERT(str != nullptr);
     ASSERT(count >= 0);
 
@@ -37,13 +37,13 @@ constexpr int Strnlen(const T* str, int count) {
     return length;
 }
 
-template <typename T>
-constexpr int Strncmp(const T* lhs, const T* rhs, std::size_t count) {
+template<typename T> constexpr int Strncmp(const T* lhs, const T* rhs, std::size_t count)
+{
     return Strncmp(lhs, rhs, static_cast<int>(count));
 }
 
-template <typename T>
-constexpr int Strncmp(const T* lhs, const T* rhs, int count) {
+template<typename T> constexpr int Strncmp(const T* lhs, const T* rhs, int count)
+{
     ASSERT(lhs != nullptr);
     ASSERT(rhs != nullptr);
     ASSERT(count >= 0);
@@ -61,13 +61,13 @@ constexpr int Strncmp(const T* lhs, const T* rhs, int count) {
     return l - r;
 }
 
-template <typename T>
-static constexpr int Strlcpy(T* dst, const T* src, std::size_t count) {
+template<typename T> static constexpr int Strlcpy(T* dst, const T* src, std::size_t count)
+{
     return Strlcpy<T>(dst, src, static_cast<int>(count));
 }
 
-template <typename T>
-static constexpr int Strlcpy(T* dst, const T* src, int count) {
+template<typename T> static constexpr int Strlcpy(T* dst, const T* src, int count)
+{
     ASSERT(dst != nullptr);
     ASSERT(src != nullptr);
 
@@ -108,14 +108,16 @@ public:
         3,  3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 7, 8,
     };
 
-    static constexpr char GetUtf8NBytes(size_t i) {
+    static constexpr char GetUtf8NBytes(size_t i)
+    {
         return static_cast<char>(Utf8NBytesInnerTable[1 + i]);
     }
 };
 
 } // namespace impl
 
-constexpr inline CharacterEncodingResult ConvertCharacterUtf8ToUtf32(u32* dst, const char* src) {
+constexpr inline CharacterEncodingResult ConvertCharacterUtf8ToUtf32(u32* dst, const char* src)
+{
     // Check pre-conditions
     ASSERT(dst != nullptr);
     ASSERT(src != nullptr);
@@ -168,8 +170,8 @@ constexpr inline CharacterEncodingResult ConvertCharacterUtf8ToUtf32(u32* dst, c
     return CharacterEncodingResult_InvalidFormat;
 }
 
-constexpr inline CharacterEncodingResult PickOutCharacterFromUtf8String(char* dst,
-                                                                        const char** str) {
+constexpr inline CharacterEncodingResult PickOutCharacterFromUtf8String(char* dst, const char** str)
+{
     // Check pre-conditions
     ASSERT(dst != nullptr);
     ASSERT(str != nullptr);

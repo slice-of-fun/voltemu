@@ -7,7 +7,8 @@ namespace AudioCore::Renderer {
 
 static void ResampleLowQuality(std::span<s32> output, std::span<const s16> input,
                                const Common::FixedPoint<49, 15>& sample_rate_ratio,
-                               Common::FixedPoint<49, 15>& fraction, const u32 samples_to_write) {
+                               Common::FixedPoint<49, 15>& fraction, const u32 samples_to_write)
+{
     if (sample_rate_ratio == 1.0f) {
         for (u32 i = 0; i < samples_to_write; i++) {
             output[i] = input[i];
@@ -25,8 +26,8 @@ static void ResampleLowQuality(std::span<s32> output, std::span<const s16> input
 
 static void ResampleNormalQuality(std::span<s32> output, std::span<const s16> input,
                                   const Common::FixedPoint<49, 15>& sample_rate_ratio,
-                                  Common::FixedPoint<49, 15>& fraction,
-                                  const u32 samples_to_write) {
+                                  Common::FixedPoint<49, 15>& fraction, const u32 samples_to_write)
+{
     static constexpr std::array<f32, 512> lut0 = {
         0.20141602f, 0.59283447f, 0.20513916f, 0.00009155f, 0.19772339f, 0.59277344f, 0.20889282f,
         0.00027466f, 0.19406128f, 0.59262085f, 0.21264648f, 0.00045776f, 0.19039917f, 0.59240723f,
@@ -309,7 +310,8 @@ static void ResampleNormalQuality(std::span<s32> output, std::span<const s16> in
 
 static void ResampleHighQuality(std::span<s32> output, std::span<const s16> input,
                                 const Common::FixedPoint<49, 15>& sample_rate_ratio,
-                                Common::FixedPoint<49, 15>& fraction, const u32 samples_to_write) {
+                                Common::FixedPoint<49, 15>& fraction, const u32 samples_to_write)
+{
     static constexpr std::array<f32, 1024> lut0 = {
         -0.01776123f, -0.00070190f, 0.26672363f,  0.50006104f,  0.26956177f,  0.00024414f,
         -0.01800537f, 0.00000000f,  -0.01748657f, -0.00164795f, 0.26388550f,  0.50003052f,
@@ -865,7 +867,8 @@ static void ResampleHighQuality(std::span<s32> output, std::span<const s16> inpu
 void Resample(std::span<s32> output, std::span<const s16> input,
               const Common::FixedPoint<49, 15>& sample_rate_ratio,
               Common::FixedPoint<49, 15>& fraction, const u32 samples_to_write,
-              const SrcQuality src_quality) {
+              const SrcQuality src_quality)
+{
 
     switch (src_quality) {
     case SrcQuality::Low:

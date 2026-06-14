@@ -4,19 +4,21 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/usb/usb.h"
+
 #include <memory>
 
 #include "common/logging.h"
 #include "core/hle/service/ipc_helpers.h"
 #include "core/hle/service/server_manager.h"
 #include "core/hle/service/service.h"
-#include "core/hle/service/usb/usb.h"
 
 namespace Service::USB {
 
 class IDsInterface final : public ServiceFramework<IDsInterface> {
 public:
-    explicit IDsInterface(Core::System& system_) : ServiceFramework{system_, "IDsInterface"} {
+    explicit IDsInterface(Core::System& system_) : ServiceFramework{system_, "IDsInterface"}
+    {
         // clang-format off
         static const FunctionInfo functions[] = {
             {0, nullptr, "AddEndpoint"},
@@ -41,7 +43,8 @@ public:
 
 class IDsRootSession final : public ServiceFramework<IDsRootSession> {
 public:
-    explicit IDsRootSession(Core::System& system_) : ServiceFramework{system_, "usb:ds"} {
+    explicit IDsRootSession(Core::System& system_) : ServiceFramework{system_, "usb:ds"}
+    {
         // clang-format off
         static const FunctionInfo functions[] = {
             {0, nullptr, "OpenDsService"},
@@ -54,8 +57,8 @@ public:
 
 class IClientEpSession final : public ServiceFramework<IClientEpSession> {
 public:
-    explicit IClientEpSession(Core::System& system_)
-        : ServiceFramework{system_, "IClientEpSession"} {
+    explicit IClientEpSession(Core::System& system_) : ServiceFramework{system_, "IClientEpSession"}
+    {
         // clang-format off
         static const FunctionInfo functions[] = {
             {0, nullptr, "ReOpen"},
@@ -76,8 +79,8 @@ public:
 
 class IClientIfSession final : public ServiceFramework<IClientIfSession> {
 public:
-    explicit IClientIfSession(Core::System& system_)
-        : ServiceFramework{system_, "IClientIfSession"} {
+    explicit IClientIfSession(Core::System& system_) : ServiceFramework{system_, "IClientIfSession"}
+    {
         // clang-format off
         static const FunctionInfo functions[] = {
             {0, nullptr, "GetStateChangeEvent"},
@@ -99,7 +102,8 @@ public:
 
 class IClientRootSession final : public ServiceFramework<IClientRootSession> {
 public:
-    explicit IClientRootSession(Core::System& system_) : ServiceFramework{system_, "usb:hs"} {
+    explicit IClientRootSession(Core::System& system_) : ServiceFramework{system_, "usb:hs"}
+    {
         // clang-format off
         static const FunctionInfo functions[] = {
             {0, nullptr, "BindClientProcess"},
@@ -120,7 +124,8 @@ public:
 
 class IPdSession final : public ServiceFramework<IPdSession> {
 public:
-    explicit IPdSession(Core::System& system_) : ServiceFramework{system_, "IPdSession"} {
+    explicit IPdSession(Core::System& system_) : ServiceFramework{system_, "IPdSession"}
+    {
         // clang-format off
         static const FunctionInfo functions[] = {
             {0, nullptr, "BindNoticeEvent"},
@@ -139,7 +144,8 @@ public:
 
 class IPdManager final : public ServiceFramework<IPdManager> {
 public:
-    explicit IPdManager(Core::System& system_) : ServiceFramework{system_, "usb:pd"} {
+    explicit IPdManager(Core::System& system_) : ServiceFramework{system_, "usb:pd"}
+    {
         // clang-format off
         static const FunctionInfo functions[] = {
             {0, &IPdManager::OpenSession, "OpenSession"},
@@ -150,7 +156,8 @@ public:
     }
 
 private:
-    void OpenSession(HLERequestContext& ctx) {
+    void OpenSession(HLERequestContext& ctx)
+    {
         LOG_DEBUG(Service_USB, "called");
 
         IPC::ResponseBuilder rb{ctx, 2, 0, 1};
@@ -161,8 +168,8 @@ private:
 
 class IPdCradleSession final : public ServiceFramework<IPdCradleSession> {
 public:
-    explicit IPdCradleSession(Core::System& system_)
-        : ServiceFramework{system_, "IPdCradleSession"} {
+    explicit IPdCradleSession(Core::System& system_) : ServiceFramework{system_, "IPdCradleSession"}
+    {
         // clang-format off
         static const FunctionInfo functions[] = {
             {0, nullptr, "SetCradleVdo"},
@@ -183,7 +190,8 @@ public:
 
 class IPdCradleManager final : public ServiceFramework<IPdCradleManager> {
 public:
-    explicit IPdCradleManager(Core::System& system_) : ServiceFramework{system_, "usb:pd:c"} {
+    explicit IPdCradleManager(Core::System& system_) : ServiceFramework{system_, "usb:pd:c"}
+    {
         // clang-format off
         static const FunctionInfo functions[] = {
             {0, &IPdCradleManager::OpenCradleSession, "OpenCradleSession"},
@@ -194,7 +202,8 @@ public:
     }
 
 private:
-    void OpenCradleSession(HLERequestContext& ctx) {
+    void OpenCradleSession(HLERequestContext& ctx)
+    {
         LOG_DEBUG(Service_USB, "called");
 
         IPC::ResponseBuilder rb{ctx, 2, 0, 1};
@@ -205,7 +214,8 @@ private:
 
 class IPmMainService final : public ServiceFramework<IPmMainService> {
 public:
-    explicit IPmMainService(Core::System& system_) : ServiceFramework{system_, "usb:pm"} {
+    explicit IPmMainService(Core::System& system_) : ServiceFramework{system_, "usb:pm"}
+    {
         // clang-format off
         static const FunctionInfo functions[] = {
             {0, nullptr, "GetPowerEvent"},
@@ -221,7 +231,8 @@ public:
     }
 };
 
-void LoopProcess(Core::System& system) {
+void LoopProcess(Core::System& system)
+{
     auto server_manager = std::make_unique<ServerManager>(system);
 
     server_manager->RegisterNamedService("usb:ds", std::make_shared<IDsRootSession>(system));

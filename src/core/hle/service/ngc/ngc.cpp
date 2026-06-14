@@ -4,10 +4,11 @@
 // SPDX-FileCopyrightText: Copyright 2021 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/ngc/ngc.h"
+
 #include "common/string_util.h"
 #include "core/core.h"
 #include "core/hle/service/ipc_helpers.h"
-#include "core/hle/service/ngc/ngc.h"
 #include "core/hle/service/server_manager.h"
 #include "core/hle/service/service.h"
 
@@ -15,7 +16,8 @@ namespace Service::NGC {
 
 class NgctServiceImpl final : public ServiceFramework<NgctServiceImpl> {
 public:
-    explicit NgctServiceImpl(Core::System& system_) : ServiceFramework{system_, "ngct:u"} {
+    explicit NgctServiceImpl(Core::System& system_) : ServiceFramework{system_, "ngct:u"}
+    {
         // clang-format off
         static const FunctionInfo functions[] = {
             {0, &NgctServiceImpl::Match, "Match"},
@@ -27,7 +29,8 @@ public:
     }
 
 private:
-    void Match(HLERequestContext& ctx) {
+    void Match(HLERequestContext& ctx)
+    {
         const auto buffer = ctx.ReadBuffer();
         const auto text = Common::StringFromFixedZeroTerminatedBuffer(
             reinterpret_cast<const char*>(buffer.data()), buffer.size());
@@ -40,7 +43,8 @@ private:
         rb.Push(false);
     }
 
-    void Filter(HLERequestContext& ctx) {
+    void Filter(HLERequestContext& ctx)
+    {
         const auto buffer = ctx.ReadBuffer();
         const auto text = Common::StringFromFixedZeroTerminatedBuffer(
             reinterpret_cast<const char*>(buffer.data()), buffer.size());
@@ -57,7 +61,8 @@ private:
 
 class NgcServiceImpl final : public ServiceFramework<NgcServiceImpl> {
 public:
-    explicit NgcServiceImpl(Core::System& system_) : ServiceFramework(system_, "ngc:u") {
+    explicit NgcServiceImpl(Core::System& system_) : ServiceFramework(system_, "ngc:u")
+    {
         // clang-format off
         static const FunctionInfo functions[] = {
             {0, &NgcServiceImpl::GetContentVersion, "GetContentVersion"},
@@ -82,7 +87,8 @@ private:
     static_assert(sizeof(ProfanityFilterOption) == 0x20,
                   "ProfanityFilterOption has incorrect size");
 
-    void GetContentVersion(HLERequestContext& ctx) {
+    void GetContentVersion(HLERequestContext& ctx)
+    {
         LOG_INFO(Service_NGC, "(STUBBED) called");
 
         // This calls nn::ngc::ProfanityFilter::GetContentVersion
@@ -93,7 +99,8 @@ private:
         rb.Push(version);
     }
 
-    void Check(HLERequestContext& ctx) {
+    void Check(HLERequestContext& ctx)
+    {
         LOG_INFO(Service_NGC, "(STUBBED) called");
 
         struct InputParameters {
@@ -113,7 +120,8 @@ private:
         rb.Push(out_flags);
     }
 
-    void Mask(HLERequestContext& ctx) {
+    void Mask(HLERequestContext& ctx)
+    {
         LOG_INFO(Service_NGC, "(STUBBED) called");
 
         struct InputParameters {
@@ -134,7 +142,8 @@ private:
         rb.Push(out_flags);
     }
 
-    void Reload(HLERequestContext& ctx) {
+    void Reload(HLERequestContext& ctx)
+    {
         LOG_INFO(Service_NGC, "(STUBBED) called");
 
         // This reloads the database.
@@ -144,7 +153,8 @@ private:
     }
 };
 
-void LoopProcess(Core::System& system) {
+void LoopProcess(Core::System& system)
+{
     auto server_manager = std::make_unique<ServerManager>(system);
 
     server_manager->RegisterNamedService("ngct:u", std::make_shared<NgctServiceImpl>(system));

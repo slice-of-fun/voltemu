@@ -42,7 +42,8 @@ public:
      * A wavebuffer contains information on the data source buffers.
      */
     struct WaveBuffer {
-        void Copy(WaveBufferVersion1& other) {
+        void Copy(WaveBufferVersion1& other)
+        {
             other.buffer = buffer_address.GetReference(true);
             other.buffer_size = buffer_address.GetSize();
             other.start_offset = start_offset;
@@ -59,7 +60,8 @@ public:
             }
         }
 
-        void Copy(WaveBufferVersion2& other) {
+        void Copy(WaveBufferVersion2& other)
+        {
             other.buffer = buffer_address.GetReference(true);
             other.buffer_size = buffer_address.GetSize();
             other.start_offset = start_offset;
@@ -79,7 +81,8 @@ public:
             }
         }
 
-        void Initialize() {
+        void Initialize()
+        {
             buffer_address.Setup(0, 0);
             context_address.Setup(0, 0);
             start_offset = 0;

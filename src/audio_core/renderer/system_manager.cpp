@@ -4,11 +4,12 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "audio_core/renderer/system_manager.h"
+
 #include <chrono>
 
 #include "audio_core/adsp/adsp.h"
 #include "audio_core/audio_core.h"
-#include "audio_core/renderer/system_manager.h"
 #include "common/thread.h"
 #include "core/core.h"
 #include "core/core_timing.h"
@@ -16,13 +17,17 @@
 namespace AudioCore::Renderer {
 
 SystemManager::SystemManager(Core::System& core_)
-    : core{core_}, audio_renderer{core.AudioCore().ADSP().AudioRenderer()} {}
+    : core{core_}, audio_renderer{core.AudioCore().ADSP().AudioRenderer()}
+{
+}
 
-SystemManager::~SystemManager() {
+SystemManager::~SystemManager()
+{
     Stop();
 }
 
-void SystemManager::InitializeUnsafe() {
+void SystemManager::InitializeUnsafe()
+{
     if (!active) {
         active = true;
         audio_renderer.Start();
@@ -42,7 +47,8 @@ void SystemManager::InitializeUnsafe() {
     }
 }
 
-void SystemManager::Stop() {
+void SystemManager::Stop()
+{
     if (active) {
         active = false;
         thread.request_stop();
@@ -51,7 +57,8 @@ void SystemManager::Stop() {
     }
 }
 
-bool SystemManager::Add(System& system_) {
+bool SystemManager::Add(System& system_)
+{
     std::scoped_lock l2{mutex2};
     if (systems.size() + 1 > MaxRendererSessions) {
         LOG_ERROR(Service_Audio, "Maximum AudioRenderer Systems active, cannot add more!");
@@ -66,12 +73,14 @@ bool SystemManager::Add(System& system_) {
     return true;
 }
 
-bool SystemManager::Remove(System& system_) {
+bool SystemManager::Remove(System& system_)
+{
     std::scoped_lock l2{mutex2};
     {
         std::scoped_lock l{mutex1};
         if (systems.remove(&system_) == 0) {
-            LOG_ERROR(Service_Audio, "Failed to remove a render system, it was not found in the list!");
+            LOG_ERROR(Service_Audio,
+                      "Failed to remove a render system, it was not found in the list!");
             return false;
         }
     }

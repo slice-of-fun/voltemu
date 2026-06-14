@@ -4,19 +4,23 @@
 // SPDX-FileCopyrightText: Copyright 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+#include "hid_core/resources/applet_resource.h"
+
 #include "core/core.h"
 #include "core/hle/kernel/k_shared_memory.h"
 #include "hid_core/hid_result.h"
-#include "hid_core/resources/applet_resource.h"
 #include "hid_core/resources/shared_memory_format.h"
 
 namespace Service::HID {
 
-AppletResource::AppletResource(Core::System& system_) : system{system_} {}
+AppletResource::AppletResource(Core::System& system_) : system{system_}
+{
+}
 
 AppletResource::~AppletResource() = default;
 
-Result AppletResource::CreateAppletResource(u64 aruid) {
+Result AppletResource::CreateAppletResource(u64 aruid)
+{
     const u64 index = GetIndexFromAruid(aruid);
 
     if (index >= AruidIndexMax) {
@@ -51,7 +55,8 @@ Result AppletResource::CreateAppletResource(u64 aruid) {
     return ResultSuccess;
 }
 
-Result AppletResource::RegisterAppletResourceUserId(u64 aruid, bool enable_input) {
+Result AppletResource::RegisterAppletResourceUserId(u64 aruid, bool enable_input)
+{
     const u64 index = GetIndexFromAruid(aruid);
 
     if (index < AruidIndexMax) {
@@ -108,7 +113,8 @@ Result AppletResource::RegisterAppletResourceUserId(u64 aruid, bool enable_input
     return ResultSuccess;
 }
 
-void AppletResource::UnregisterAppletResourceUserId(u64 aruid) {
+void AppletResource::UnregisterAppletResourceUserId(u64 aruid)
+{
     const u64 index = GetIndexFromAruid(aruid);
 
     if (index >= AruidIndexMax) {
@@ -129,7 +135,8 @@ void AppletResource::UnregisterAppletResourceUserId(u64 aruid) {
     }
 }
 
-void AppletResource::FreeAppletResourceId(u64 aruid) {
+void AppletResource::FreeAppletResourceId(u64 aruid)
+{
     const u64 index = GetIndexFromAruid(aruid);
     if (index >= AruidIndexMax) {
         return;
@@ -143,11 +150,13 @@ void AppletResource::FreeAppletResourceId(u64 aruid) {
     }
 }
 
-u64 AppletResource::GetActiveAruid() {
+u64 AppletResource::GetActiveAruid()
+{
     return active_aruid;
 }
 
-Result AppletResource::GetSharedMemoryHandle(Kernel::KSharedMemory** out_handle, u64 aruid) {
+Result AppletResource::GetSharedMemoryHandle(Kernel::KSharedMemory** out_handle, u64 aruid)
+{
     const u64 index = GetIndexFromAruid(aruid);
     if (index >= AruidIndexMax) {
         return ResultAruidNotRegistered;
@@ -158,7 +167,8 @@ Result AppletResource::GetSharedMemoryHandle(Kernel::KSharedMemory** out_handle,
 }
 
 Result AppletResource::GetSharedMemoryFormat(SharedMemoryFormat** out_shared_memory_format,
-                                             u64 aruid) {
+                                             u64 aruid)
+{
     const u64 index = GetIndexFromAruid(aruid);
     if (index >= AruidIndexMax) {
         return ResultAruidNotRegistered;
@@ -168,7 +178,8 @@ Result AppletResource::GetSharedMemoryFormat(SharedMemoryFormat** out_shared_mem
     return ResultSuccess;
 }
 
-AruidData* AppletResource::GetAruidData(u64 aruid) {
+AruidData* AppletResource::GetAruidData(u64 aruid)
+{
     const u64 aruid_index = GetIndexFromAruid(aruid);
     if (aruid_index == AruidIndexMax) {
         return nullptr;
@@ -176,15 +187,18 @@ AruidData* AppletResource::GetAruidData(u64 aruid) {
     return &data[aruid_index];
 }
 
-AruidData* AppletResource::GetAruidDataByIndex(std::size_t aruid_index) {
+AruidData* AppletResource::GetAruidDataByIndex(std::size_t aruid_index)
+{
     return &data[aruid_index];
 }
 
-bool AppletResource::IsVibrationAruidActive(u64 aruid) const {
+bool AppletResource::IsVibrationAruidActive(u64 aruid) const
+{
     return aruid == 0 || aruid == active_vibration_aruid;
 }
 
-u64 AppletResource::GetIndexFromAruid(u64 aruid) {
+u64 AppletResource::GetIndexFromAruid(u64 aruid)
+{
     for (std::size_t i = 0; i < AruidIndexMax; i++) {
         if (registration_list.flag[i] == RegistrationStatus::Initialized &&
             registration_list.aruid[i] == aruid) {
@@ -194,12 +208,14 @@ u64 AppletResource::GetIndexFromAruid(u64 aruid) {
     return AruidIndexMax;
 }
 
-Result AppletResource::DestroySevenSixAxisTransferMemory() {
+Result AppletResource::DestroySevenSixAxisTransferMemory()
+{
     // TODO
     return ResultSuccess;
 }
 
-void AppletResource::EnableInput(u64 aruid, bool is_enabled) {
+void AppletResource::EnableInput(u64 aruid, bool is_enabled)
+{
     const u64 index = GetIndexFromAruid(aruid);
     if (index >= AruidIndexMax) {
         return;
@@ -209,7 +225,8 @@ void AppletResource::EnableInput(u64 aruid, bool is_enabled) {
     data[index].flag.enable_touchscreen.Assign(is_enabled);
 }
 
-bool AppletResource::SetAruidValidForVibration(u64 aruid, bool is_enabled) {
+bool AppletResource::SetAruidValidForVibration(u64 aruid, bool is_enabled)
+{
     const u64 index = GetIndexFromAruid(aruid);
     if (index >= AruidIndexMax) {
         return false;
@@ -228,7 +245,8 @@ bool AppletResource::SetAruidValidForVibration(u64 aruid, bool is_enabled) {
     return false;
 }
 
-void AppletResource::EnableSixAxisSensor(u64 aruid, bool is_enabled) {
+void AppletResource::EnableSixAxisSensor(u64 aruid, bool is_enabled)
+{
     const u64 index = GetIndexFromAruid(aruid);
     if (index >= AruidIndexMax) {
         return;
@@ -237,7 +255,8 @@ void AppletResource::EnableSixAxisSensor(u64 aruid, bool is_enabled) {
     data[index].flag.enable_six_axis_sensor.Assign(is_enabled);
 }
 
-void AppletResource::EnablePadInput(u64 aruid, bool is_enabled) {
+void AppletResource::EnablePadInput(u64 aruid, bool is_enabled)
+{
     const u64 index = GetIndexFromAruid(aruid);
     if (index >= AruidIndexMax) {
         return;
@@ -246,7 +265,8 @@ void AppletResource::EnablePadInput(u64 aruid, bool is_enabled) {
     data[index].flag.enable_pad_input.Assign(is_enabled);
 }
 
-void AppletResource::EnableTouchScreen(u64 aruid, bool is_enabled) {
+void AppletResource::EnableTouchScreen(u64 aruid, bool is_enabled)
+{
     const u64 index = GetIndexFromAruid(aruid);
     if (index >= AruidIndexMax) {
         return;
@@ -255,7 +275,8 @@ void AppletResource::EnableTouchScreen(u64 aruid, bool is_enabled) {
     data[index].flag.enable_touchscreen.Assign(is_enabled);
 }
 
-void AppletResource::SetIsPalmaConnectable(u64 aruid, bool is_connectable) {
+void AppletResource::SetIsPalmaConnectable(u64 aruid, bool is_connectable)
+{
     const u64 index = GetIndexFromAruid(aruid);
     if (index >= AruidIndexMax) {
         return;
@@ -264,7 +285,8 @@ void AppletResource::SetIsPalmaConnectable(u64 aruid, bool is_connectable) {
     data[index].flag.is_palma_connectable.Assign(is_connectable);
 }
 
-void AppletResource::EnablePalmaBoostMode(u64 aruid, bool is_enabled) {
+void AppletResource::EnablePalmaBoostMode(u64 aruid, bool is_enabled)
+{
     const u64 index = GetIndexFromAruid(aruid);
     if (index >= AruidIndexMax) {
         return;
@@ -273,7 +295,8 @@ void AppletResource::EnablePalmaBoostMode(u64 aruid, bool is_enabled) {
     data[index].flag.enable_palma_boost_mode.Assign(is_enabled);
 }
 
-Result AppletResource::RegisterCoreAppletResource() {
+Result AppletResource::RegisterCoreAppletResource()
+{
     if (ref_counter == (std::numeric_limits<s32>::max)() - 1) {
         return ResultAppletResourceOverflow;
     }
@@ -337,7 +360,8 @@ Result AppletResource::RegisterCoreAppletResource() {
     return ResultSuccess;
 }
 
-Result AppletResource::UnregisterCoreAppletResource() {
+Result AppletResource::UnregisterCoreAppletResource()
+{
     if (ref_counter == 0) {
         return ResultAppletResourceNotInitialized;
     }

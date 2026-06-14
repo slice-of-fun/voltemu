@@ -22,21 +22,13 @@ enum SystemRegister : u32 {
 union SVC {
     constexpr explicit SVC(u32 raw_) : raw{raw_} {}
 
-    constexpr bool Verify() {
-        return (this->GetSig0() == 0x1 && this->GetSig1() == 0x6A0);
-    }
+    constexpr bool Verify() { return (this->GetSig0() == 0x1 && this->GetSig1() == 0x6A0); }
 
-    constexpr u32 GetSig0() {
-        return decltype(sig0)::ExtractValue(raw);
-    }
+    constexpr u32 GetSig0() { return decltype(sig0)::ExtractValue(raw); }
 
-    constexpr u32 GetValue() {
-        return decltype(value)::ExtractValue(raw);
-    }
+    constexpr u32 GetValue() { return decltype(value)::ExtractValue(raw); }
 
-    constexpr u32 GetSig1() {
-        return decltype(sig1)::ExtractValue(raw);
-    }
+    constexpr u32 GetSig1() { return decltype(sig1)::ExtractValue(raw); }
 
     u32 raw;
 
@@ -53,21 +45,13 @@ static_assert(SVC(0xD40000C1).GetValue() == 0x6);
 union MRS {
     constexpr explicit MRS(u32 raw_) : raw{raw_} {}
 
-    constexpr bool Verify() {
-        return (this->GetSig() == 0xD53);
-    }
+    constexpr bool Verify() { return (this->GetSig() == 0xD53); }
 
-    constexpr u32 GetRt() {
-        return decltype(rt)::ExtractValue(raw);
-    }
+    constexpr u32 GetRt() { return decltype(rt)::ExtractValue(raw); }
 
-    constexpr u32 GetSystemReg() {
-        return decltype(system_reg)::ExtractValue(raw);
-    }
+    constexpr u32 GetSystemReg() { return decltype(system_reg)::ExtractValue(raw); }
 
-    constexpr u32 GetSig() {
-        return decltype(sig)::ExtractValue(raw);
-    }
+    constexpr u32 GetSig() { return decltype(sig)::ExtractValue(raw); }
 
     u32 raw;
 
@@ -85,21 +69,13 @@ static_assert(MRS(0xD53BE020).GetRt() == 0x0);
 union MSR {
     constexpr explicit MSR(u32 raw_) : raw{raw_} {}
 
-    constexpr bool Verify() {
-        return this->GetSig() == 0xD51;
-    }
+    constexpr bool Verify() { return this->GetSig() == 0xD51; }
 
-    constexpr u32 GetRt() {
-        return decltype(rt)::ExtractValue(raw);
-    }
+    constexpr u32 GetRt() { return decltype(rt)::ExtractValue(raw); }
 
-    constexpr u32 GetSystemReg() {
-        return decltype(system_reg)::ExtractValue(raw);
-    }
+    constexpr u32 GetSystemReg() { return decltype(system_reg)::ExtractValue(raw); }
 
-    constexpr u32 GetSig() {
-        return decltype(sig)::ExtractValue(raw);
-    }
+    constexpr u32 GetSig() { return decltype(sig)::ExtractValue(raw); }
 
     u32 raw;
 
@@ -120,17 +96,11 @@ static_assert(MSR(0xD51BD040).GetRt() == 0x0);
 union Exclusive {
     constexpr explicit Exclusive(u32 raw_) : raw{raw_} {}
 
-    constexpr bool Verify() {
-        return this->GetSig() == 0x10;
-    }
+    constexpr bool Verify() { return this->GetSig() == 0x10; }
 
-    constexpr u32 GetSig() {
-        return decltype(sig)::ExtractValue(raw);
-    }
+    constexpr u32 GetSig() { return decltype(sig)::ExtractValue(raw); }
 
-    constexpr u32 AsOrdered() {
-        return raw | decltype(o0)::FormatValue(1);
-    }
+    constexpr u32 AsOrdered() { return raw | decltype(o0)::FormatValue(1); }
 
     u32 raw;
 

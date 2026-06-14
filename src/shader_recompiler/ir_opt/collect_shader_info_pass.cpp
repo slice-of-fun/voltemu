@@ -14,7 +14,8 @@
 
 namespace Shader::Optimization {
 namespace {
-void AddConstantBufferDescriptor(Info& info, u32 index, u32 count) {
+void AddConstantBufferDescriptor(Info& info, u32 index, u32 count)
+{
     if (count != 1) {
         throw NotImplementedException("Constant buffer descriptor indexing");
     }
@@ -31,7 +32,8 @@ void AddConstantBufferDescriptor(Info& info, u32 index, u32 count) {
                  });
 }
 
-void AddRegisterIndexedLdc(Info& info) {
+void AddRegisterIndexedLdc(Info& info)
+{
     info.uses_cbuf_indirect = true;
 
     for (u32 i = 0; i < Info::MAX_INDIRECT_CBUFS; i++) {
@@ -42,7 +44,8 @@ void AddRegisterIndexedLdc(Info& info) {
     }
 }
 
-u32 GetElementSize(IR::Type& used_type, Shader::IR::Opcode opcode) {
+u32 GetElementSize(IR::Type& used_type, Shader::IR::Opcode opcode)
+{
     switch (opcode) {
     case IR::Opcode::GetCbufU8:
     case IR::Opcode::GetCbufS8:
@@ -66,14 +69,16 @@ u32 GetElementSize(IR::Type& used_type, Shader::IR::Opcode opcode) {
     }
 }
 
-void GetPatch(Info& info, IR::Patch patch) {
+void GetPatch(Info& info, IR::Patch patch)
+{
     if (!IR::IsGeneric(patch)) {
         throw NotImplementedException("Reading non-generic patch {}", patch);
     }
     info.uses_patches.at(IR::GenericPatchIndex(patch)) = true;
 }
 
-void SetPatch(Info& info, IR::Patch patch) {
+void SetPatch(Info& info, IR::Patch patch)
+{
     if (IR::IsGeneric(patch)) {
         info.uses_patches.at(IR::GenericPatchIndex(patch)) = true;
         return;
@@ -94,7 +99,8 @@ void SetPatch(Info& info, IR::Patch patch) {
     }
 }
 
-void CheckCBufNVN(Info& info, IR::Inst& inst) {
+void CheckCBufNVN(Info& info, IR::Inst& inst)
+{
     const IR::Value cbuf_index{inst.Arg(0)};
     if (!cbuf_index.IsImmediate()) {
         info.nvn_buffer_used.set();
@@ -118,7 +124,8 @@ void CheckCBufNVN(Info& info, IR::Inst& inst) {
     }
 }
 
-void VisitUsages(Info& info, IR::Inst& inst) {
+void VisitUsages(Info& info, IR::Inst& inst)
+{
     switch (inst.GetOpcode()) {
     case IR::Opcode::CompositeConstructF16x2:
     case IR::Opcode::CompositeConstructF16x3:
@@ -769,7 +776,8 @@ void VisitUsages(Info& info, IR::Inst& inst) {
     }
 }
 
-void VisitFpModifiers(Info& info, IR::Inst& inst) {
+void VisitFpModifiers(Info& info, IR::Inst& inst)
+{
     switch (inst.GetOpcode()) {
     case IR::Opcode::FPAdd16:
     case IR::Opcode::FPFma16:
@@ -832,7 +840,8 @@ void VisitFpModifiers(Info& info, IR::Inst& inst) {
     }
 }
 
-void VisitCbufs(Info& info, IR::Inst& inst) {
+void VisitCbufs(Info& info, IR::Inst& inst)
+{
     switch (inst.GetOpcode()) {
     case IR::Opcode::GetCbufU8:
     case IR::Opcode::GetCbufS8:
@@ -849,13 +858,15 @@ void VisitCbufs(Info& info, IR::Inst& inst) {
     }
 }
 
-void Visit(Info& info, IR::Inst& inst) {
+void Visit(Info& info, IR::Inst& inst)
+{
     VisitUsages(info, inst);
     VisitFpModifiers(info, inst);
     VisitCbufs(info, inst);
 }
 
-void GatherInfoFromHeader(Environment& env, Info& info) {
+void GatherInfoFromHeader(Environment& env, Info& info)
+{
     Stage stage{env.ShaderStage()};
     if (stage == Stage::Compute) {
         return;
@@ -945,7 +956,8 @@ void GatherInfoFromHeader(Environment& env, Info& info) {
 }
 } // Anonymous namespace
 
-void CollectShaderInfoPass(Environment& env, IR::Program& program) {
+void CollectShaderInfoPass(Environment& env, IR::Program& program)
+{
     Info& info{program.info};
     const u32 base{[&] {
         switch (program.stage) {

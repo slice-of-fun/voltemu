@@ -26,13 +26,9 @@ public:
                                          StandardNetworkSystemClockCore& network_clock);
     ~StandardUserSystemClockCore() override;
 
-    Kernel::KEvent& GetEvent() {
-        return *m_event;
-    }
+    Kernel::KEvent& GetEvent() { return *m_event; }
 
-    bool GetAutomaticCorrection() const {
-        return m_automatic_correction;
-    }
+    bool GetAutomaticCorrection() const { return m_automatic_correction; }
     Result SetAutomaticCorrection(bool automatic_correction);
 
     Result GetContext(SystemClockContext& out_context) const override;

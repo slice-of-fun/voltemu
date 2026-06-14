@@ -4,15 +4,18 @@
 // SPDX-FileCopyrightText: Copyright 2024 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+#include "hid_core/resources/abstracted_pad/abstract_pad.h"
+
 #include "hid_core/hid_core.h"
 #include "hid_core/hid_result.h"
-#include "hid_core/resources/abstracted_pad/abstract_pad.h"
 #include "hid_core/resources/applet_resource.h"
 #include "hid_core/resources/npad/npad_types.h"
 
 namespace Service::HID {
 
-AbstractPad::AbstractPad() {}
+AbstractPad::AbstractPad()
+{
+}
 
 AbstractPad::~AbstractPad() = default;
 
@@ -20,7 +23,8 @@ void AbstractPad::SetExternals(AppletResourceHolder* applet_resource,
                                CaptureButtonResource* capture_button_resource,
                                HomeButtonResource* home_button_resource,
                                SixAxisResource* sixaxis_resource, PalmaResource* palma_resource,
-                               NpadVibration* vibration, Core::HID::HIDCore* core) {
+                               NpadVibration* vibration, Core::HID::HIDCore* core)
+{
     applet_resource_holder = applet_resource;
 
     properties_handler.SetAppletResource(applet_resource_holder);
@@ -66,11 +70,13 @@ void AbstractPad::SetExternals(AppletResourceHolder* applet_resource,
     palma_handler.SetPalmaResource(palma_resource);
 }
 
-void AbstractPad::SetNpadId(Core::HID::NpadIdType npad_id) {
+void AbstractPad::SetNpadId(Core::HID::NpadIdType npad_id)
+{
     properties_handler.SetNpadId(npad_id);
 }
 
-Result AbstractPad::Activate() {
+Result AbstractPad::Activate()
+{
     if (ref_counter == (std::numeric_limits<s32>::max)() - 1) {
         return ResultNpadHandlerOverflow;
     }
@@ -159,7 +165,8 @@ Result AbstractPad::Activate() {
     return result;
 }
 
-Result AbstractPad::Deactivate() {
+Result AbstractPad::Deactivate()
+{
     if (ref_counter == 0) {
         return ResultNpadResourceNotInitialized;
     }
@@ -179,7 +186,8 @@ Result AbstractPad::Deactivate() {
     return ResultSuccess;
 }
 
-Result AbstractPad::ActivateNpad(u64 aruid) {
+Result AbstractPad::ActivateNpad(u64 aruid)
+{
     Result result = ResultSuccess;
     if (result.IsSuccess()) {
         result = properties_handler.ActivateNpadUnknown0x88(aruid);
@@ -193,73 +201,89 @@ Result AbstractPad::ActivateNpad(u64 aruid) {
     return result;
 }
 
-NpadAbstractedPadHolder* AbstractPad::GetAbstractedPadHolder() {
+NpadAbstractedPadHolder* AbstractPad::GetAbstractedPadHolder()
+{
     return &abstract_pad_holder;
 }
 
-NpadAbstractPropertiesHandler* AbstractPad::GetAbstractPropertiesHandler() {
+NpadAbstractPropertiesHandler* AbstractPad::GetAbstractPropertiesHandler()
+{
     return &properties_handler;
 }
 
-NpadAbstractLedHandler* AbstractPad::GetAbstractLedHandler() {
+NpadAbstractLedHandler* AbstractPad::GetAbstractLedHandler()
+{
     return &led_handler;
 }
 
-NpadAbstractIrSensorHandler* AbstractPad::GetAbstractIrSensorHandler() {
+NpadAbstractIrSensorHandler* AbstractPad::GetAbstractIrSensorHandler()
+{
     return &ir_sensor_handler;
 }
 
-NpadAbstractMcuHandler* AbstractPad::GetAbstractMcuHandler() {
+NpadAbstractMcuHandler* AbstractPad::GetAbstractMcuHandler()
+{
     return &mcu_handler;
 }
 
-NpadAbstractNfcHandler* AbstractPad::GetAbstractNfcHandler() {
+NpadAbstractNfcHandler* AbstractPad::GetAbstractNfcHandler()
+{
     return &nfc_handler;
 }
 
-NpadAbstractVibrationHandler* AbstractPad::GetAbstractVibrationHandler() {
+NpadAbstractVibrationHandler* AbstractPad::GetAbstractVibrationHandler()
+{
     return &vibration_handler;
 }
 
-NpadAbstractSixAxisHandler* AbstractPad::GetAbstractSixAxisHandler() {
+NpadAbstractSixAxisHandler* AbstractPad::GetAbstractSixAxisHandler()
+{
     return &sixaxis_handler;
 }
 
-NpadAbstractButtonHandler* AbstractPad::GetAbstractButtonHandler() {
+NpadAbstractButtonHandler* AbstractPad::GetAbstractButtonHandler()
+{
     return &button_handler;
 }
 
-NpadAbstractBatteryHandler* AbstractPad::GetAbstractBatteryHandler() {
+NpadAbstractBatteryHandler* AbstractPad::GetAbstractBatteryHandler()
+{
     return &battery_handler;
 }
 
-NpadN64VibrationDevice* AbstractPad::GetN64VibrationDevice() {
+NpadN64VibrationDevice* AbstractPad::GetN64VibrationDevice()
+{
     return &vibration_n64;
 }
 
-NpadVibrationDevice* AbstractPad::GetVibrationDevice(Core::HID::DeviceIndex device_index) {
+NpadVibrationDevice* AbstractPad::GetVibrationDevice(Core::HID::DeviceIndex device_index)
+{
     if (device_index == Core::HID::DeviceIndex::Right) {
         return &vibration_right;
     }
     return &vibration_left;
 }
 
-NpadGcVibrationDevice* AbstractPad::GetGCVibrationDevice() {
+NpadGcVibrationDevice* AbstractPad::GetGCVibrationDevice()
+{
     return &vibration_gc;
 }
 
-Core::HID::NpadIdType AbstractPad::GetLastActiveNpad() {
+Core::HID::NpadIdType AbstractPad::GetLastActiveNpad()
+{
     return properties_handler.GetNpadId();
 }
 
-void AbstractPad::UpdateInterfaceType() {
+void AbstractPad::UpdateInterfaceType()
+{
     if (interface_type != properties_handler.GetInterfaceType()) {
         Update();
     }
     battery_handler.UpdateBatteryState();
 }
 
-void AbstractPad::Update() {
+void AbstractPad::Update()
+{
     properties_handler.UpdateDeviceType();
     led_handler.SetNpadLedHandlerLedPattern();
     vibration_handler.UpdateVibrationState();
@@ -279,13 +303,15 @@ void AbstractPad::Update() {
     button_handler.UpdateCoreBatteryState();
 }
 
-void AbstractPad::UpdatePadState() {
+void AbstractPad::UpdatePadState()
+{
     button_handler.UpdateAllButtonLifo();
     sixaxis_handler.UpdateSixAxisState();
     battery_handler.UpdateCoreBatteryState();
 }
 
-void AbstractPad::EnableAppletToGetInput(u64 aruid) {
+void AbstractPad::EnableAppletToGetInput(u64 aruid)
+{
     button_handler.UpdateButtonState(aruid);
     sixaxis_handler.UpdateSixAxisState(aruid);
     battery_handler.UpdateBatteryState(aruid);

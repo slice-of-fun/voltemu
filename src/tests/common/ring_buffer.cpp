@@ -1,18 +1,20 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "common/ring_buffer.h"
+
 #include <algorithm>
 #include <array>
+#include <catch2/catch_test_macros.hpp>
 #include <cstddef>
 #include <numeric>
 #include <thread>
 #include <vector>
-#include <catch2/catch_test_macros.hpp>
-#include "common/ring_buffer.h"
 
 namespace Common {
 
-TEST_CASE("RingBuffer: Basic Tests", "[common]") {
+TEST_CASE("RingBuffer: Basic Tests", "[common]")
+{
     RingBuffer<char, 4> buf;
 
     // Pushing values into a ring buffer with space should succeed.
@@ -75,7 +77,8 @@ TEST_CASE("RingBuffer: Basic Tests", "[common]") {
     REQUIRE(buf.Size() == 0U);
 }
 
-TEST_CASE("RingBuffer: Threaded Test", "[common]") {
+TEST_CASE("RingBuffer: Threaded Test", "[common]")
+{
     RingBuffer<char, 8> buf;
     const char seed = 42;
     const std::size_t count = 1000000;

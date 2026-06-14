@@ -151,8 +151,7 @@ private:
     void DuplicateSocket(HLERequestContext& ctx);
     void EventFd(HLERequestContext& ctx);
 
-    template <typename Work>
-    void ExecuteWork(HLERequestContext& ctx, Work work);
+    template<typename Work> void ExecuteWork(HLERequestContext& ctx, Work work);
 
     std::pair<s32, Errno> SocketImpl(Domain domain, Type type, Protocol protocol);
     std::pair<s32, Errno> PollImpl(std::vector<u8>& write_buffer, std::span<const u8> read_buffer,

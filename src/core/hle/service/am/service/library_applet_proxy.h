@@ -38,8 +38,8 @@ private:
     Result GetWindowController(Out<SharedPointer<IWindowController>> out_window_controller);
     Result GetSelfController(Out<SharedPointer<ISelfController>> out_self_controller);
     Result GetCommonStateGetter(Out<SharedPointer<ICommonStateGetter>> out_common_state_getter);
-    Result GetLibraryAppletCreator(
-        Out<SharedPointer<ILibraryAppletCreator>> out_library_applet_creator);
+    Result
+    GetLibraryAppletCreator(Out<SharedPointer<ILibraryAppletCreator>> out_library_applet_creator);
     Result OpenLibraryAppletSelfAccessor(
         Out<SharedPointer<ILibraryAppletSelfAccessor>> out_library_applet_self_accessor);
     Result GetAppletCommonFunctions(

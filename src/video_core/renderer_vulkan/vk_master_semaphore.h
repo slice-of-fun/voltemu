@@ -10,8 +10,8 @@
 #include <condition_variable>
 #include <deque>
 #include <mutex>
-#include <thread>
 #include <queue>
+#include <thread>
 
 #include "common/common_types.h"
 #include "common/polyfill_thread.h"
@@ -29,22 +29,23 @@ public:
     ~MasterSemaphore();
 
     /// Returns the current logical tick.
-    [[nodiscard]] u64 CurrentTick() const noexcept {
+    [[nodiscard]] u64 CurrentTick() const noexcept
+    {
         return current_tick.load(std::memory_order_acquire);
     }
 
     /// Returns the last known GPU tick.
-    [[nodiscard]] u64 KnownGpuTick() const noexcept {
+    [[nodiscard]] u64 KnownGpuTick() const noexcept
+    {
         return gpu_tick.load(std::memory_order_acquire);
     }
 
     /// Returns true when a tick has been hit by the GPU.
-    [[nodiscard]] bool IsFree(u64 tick) const noexcept {
-        return KnownGpuTick() >= tick;
-    }
+    [[nodiscard]] bool IsFree(u64 tick) const noexcept { return KnownGpuTick() >= tick; }
 
     /// Advance to the logical tick and return the old one
-    [[nodiscard]] u64 NextTick() noexcept {
+    [[nodiscard]] u64 NextTick() noexcept
+    {
         return current_tick.fetch_add(1, std::memory_order_release);
     }
 

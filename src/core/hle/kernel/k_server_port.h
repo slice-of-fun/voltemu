@@ -8,7 +8,6 @@
 #include <utility>
 
 #include "common/intrusive_list.h"
-
 #include "core/hle/kernel/k_light_server_session.h"
 #include "core/hle/kernel/k_server_session.h"
 #include "core/hle/kernel/k_synchronization_object.h"
@@ -34,9 +33,7 @@ public:
     KServerSession* AcceptSession();
     KLightServerSession* AcceptLightSession();
 
-    const KPort* GetParent() const {
-        return m_parent;
-    }
+    const KPort* GetParent() const { return m_parent; }
 
     bool IsLight() const;
 

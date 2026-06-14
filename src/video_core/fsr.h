@@ -7,6 +7,7 @@
 #pragma once
 
 #include <numeric>
+
 #include "common/common_types.h"
 
 namespace FSR {

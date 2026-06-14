@@ -4,6 +4,8 @@
 // SPDX-FileCopyrightText: Copyright 2024 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/am/service/application_creator.h"
+
 #include "core/file_sys/nca_metadata.h"
 #include "core/file_sys/registered_cache.h"
 #include "core/hle/service/am/am_types.h"
@@ -11,18 +13,18 @@
 #include "core/hle/service/am/applet_manager.h"
 #include "core/hle/service/am/process_creation.h"
 #include "core/hle/service/am/service/application_accessor.h"
-#include "core/hle/service/am/service/application_creator.h"
 #include "core/hle/service/am/window_system.h"
 #include "core/hle/service/cmif_serialization.h"
-#include "core/loader/loader.h"
 #include "core/launch_timestamp_cache.h"
+#include "core/loader/loader.h"
 
 namespace Service::AM {
 
 namespace {
 
 Result CreateGuestApplication(SharedPointer<IApplicationAccessor>* out_application_accessor,
-                              Core::System& system, WindowSystem& window_system, u64 program_id) {
+                              Core::System& system, WindowSystem& window_system, u64 program_id)
+{
     FileSys::VirtualFile nca_raw{};
 
     // Get the program NCA from storage.
@@ -55,7 +57,8 @@ Result CreateGuestApplication(SharedPointer<IApplicationAccessor>* out_applicati
 } // namespace
 
 IApplicationCreator::IApplicationCreator(Core::System& system_, WindowSystem& window_system)
-    : ServiceFramework{system_, "IApplicationCreator"}, m_window_system{window_system} {
+    : ServiceFramework{system_, "IApplicationCreator"}, m_window_system{window_system}
+{
     // clang-format off
     static const FunctionInfo functions[] = {
         {0, D<&IApplicationCreator::CreateApplication>, "CreateApplication"},
@@ -71,7 +74,8 @@ IApplicationCreator::IApplicationCreator(Core::System& system_, WindowSystem& wi
 IApplicationCreator::~IApplicationCreator() = default;
 
 Result IApplicationCreator::CreateApplication(
-    Out<SharedPointer<IApplicationAccessor>> out_application_accessor, u64 application_id) {
+    Out<SharedPointer<IApplicationAccessor>> out_application_accessor, u64 application_id)
+{
     LOG_INFO(Service_NS, "called, application_id={:016X}", application_id);
     Core::LaunchTimestampCache::SaveLaunchTimestamp(application_id);
     R_RETURN(
@@ -79,7 +83,8 @@ Result IApplicationCreator::CreateApplication(
 }
 
 Result IApplicationCreator::CreateSystemApplication(
-    Out<SharedPointer<IApplicationAccessor>> out_application_accessor, u64 application_id) {
+    Out<SharedPointer<IApplicationAccessor>> out_application_accessor, u64 application_id)
+{
 
     FileSys::VirtualFile nca_raw{};
 
@@ -91,8 +96,7 @@ Result IApplicationCreator::CreateSystemApplication(
     std::vector<u8> control;
     std::unique_ptr<Loader::AppLoader> loader;
 
-    auto process =
-        CreateProcess(system, application_id, 1, 22);
+    auto process = CreateProcess(system, application_id, 1, 22);
     R_UNLESS(process != nullptr, ResultUnknown);
 
     const auto applet = std::make_shared<Applet>(system, std::move(process), true);

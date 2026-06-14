@@ -6,9 +6,10 @@
 
 #pragma once
 
+#include <ankerl/unordered_dense.h>
+
 #include <array>
 #include <span>
-#include <ankerl/unordered_dense.h>
 
 #include "common/common_types.h"
 #include "video_core/buffer_cache/buffer_cache_base.h"
@@ -36,13 +37,9 @@ public:
 
     [[nodiscard]] GLuint View(u32 offset, u32 size, VideoCore::Surface::PixelFormat format);
 
-    [[nodiscard]] GLuint64EXT HostGpuAddr() const noexcept {
-        return address;
-    }
+    [[nodiscard]] GLuint64EXT HostGpuAddr() const noexcept { return address; }
 
-    [[nodiscard]] GLuint Handle() const noexcept {
-        return buffer.handle;
-    }
+    [[nodiscard]] GLuint Handle() const noexcept { return buffer.handle; }
 
 private:
     struct BufferView {
@@ -72,9 +69,7 @@ public:
 
     void FreeDeferredStagingBuffer(StagingBufferMap& buffer);
 
-    bool CanReorderUpload(const Buffer&, std::span<const VideoCommon::BufferCopy>) {
-        return false;
-    }
+    bool CanReorderUpload(const Buffer&, std::span<const VideoCommon::BufferCopy>) { return false; }
 
     void CopyBuffer(GLuint dst_buffer, GLuint src_buffer,
                     std::span<const VideoCommon::BufferCopy> copies, bool barrier);
@@ -128,7 +123,8 @@ public:
 
     u64 GetDeviceMemoryUsage() const;
 
-    void BindFastUniformBuffer(size_t stage, u32 binding_index, u32 size) {
+    void BindFastUniformBuffer(size_t stage, u32 binding_index, u32 size)
+    {
         const GLuint handle = fast_uniforms[stage][binding_index].handle;
         const GLsizeiptr gl_size = static_cast<GLsizeiptr>(size);
         if (use_assembly_shaders) {
@@ -140,7 +136,8 @@ public:
         }
     }
 
-    void PushFastUniformBuffer(size_t stage, u32 binding_index, std::span<const u8> data) {
+    void PushFastUniformBuffer(size_t stage, u32 binding_index, std::span<const u8> data)
+    {
         if (use_assembly_shaders) {
             glProgramBufferParametersIuivNV(
                 PABO_LUT[stage], binding_index, 0,
@@ -152,7 +149,8 @@ public:
         }
     }
 
-    std::span<u8> BindMappedUniformBuffer(size_t stage, u32 binding_index, u32 size) noexcept {
+    std::span<u8> BindMappedUniformBuffer(size_t stage, u32 binding_index, u32 size) noexcept
+    {
         const auto [mapped_span, offset] = stream_buffer->Request(static_cast<size_t>(size));
         const GLuint base_binding = graphics_base_uniform_bindings[stage];
         const GLuint binding = base_binding + binding_index;
@@ -161,48 +159,50 @@ public:
         return mapped_span;
     }
 
-    [[nodiscard]] const GLvoid* IndexOffset() const noexcept {
+    [[nodiscard]] const GLvoid* IndexOffset() const noexcept
+    {
         return reinterpret_cast<const GLvoid*>(static_cast<uintptr_t>(index_buffer_offset));
     }
 
-    [[nodiscard]] bool HasFastBufferSubData() const noexcept {
-        return has_fast_buffer_sub_data;
-    }
+    [[nodiscard]] bool HasFastBufferSubData() const noexcept { return has_fast_buffer_sub_data; }
 
-    [[nodiscard]] bool SupportsNonZeroUniformOffset() const noexcept {
+    [[nodiscard]] bool SupportsNonZeroUniformOffset() const noexcept
+    {
         return !use_assembly_shaders;
     }
 
-    void SetBaseUniformBindings(const std::array<GLuint, 5>& bindings) {
+    void SetBaseUniformBindings(const std::array<GLuint, 5>& bindings)
+    {
         graphics_base_uniform_bindings = bindings;
     }
 
-    void SetBaseStorageBindings(const std::array<GLuint, 5>& bindings) {
+    void SetBaseStorageBindings(const std::array<GLuint, 5>& bindings)
+    {
         graphics_base_storage_bindings = bindings;
     }
 
-    void SetImagePointers(GLuint* texture_handles_, GLuint* image_handles_) {
+    void SetImagePointers(GLuint* texture_handles_, GLuint* image_handles_)
+    {
         texture_handles = texture_handles_;
         image_handles = image_handles_;
     }
 
-    void SetEnableStorageBuffers(bool use_storage_buffers_) {
+    void SetEnableStorageBuffers(bool use_storage_buffers_)
+    {
         use_storage_buffers = use_storage_buffers_;
     }
 
-    u64 GetDeviceLocalMemory() const {
-        return device_access_memory;
-    }
+    u64 GetDeviceLocalMemory() const { return device_access_memory; }
 
-    bool CanReportMemoryUsage() const {
-        return device.CanReportMemoryUsage();
-    }
+    bool CanReportMemoryUsage() const { return device.CanReportMemoryUsage(); }
 
-    u32 GetUniformBufferAlignment() const {
+    u32 GetUniformBufferAlignment() const
+    {
         return static_cast<u32>(device.GetUniformBufferAlignment());
     }
 
-    u32 GetStorageBufferAlignment() const {
+    u32 GetStorageBufferAlignment() const
+    {
         return static_cast<u32>(device.GetShaderStorageBufferAlignment());
     }
 

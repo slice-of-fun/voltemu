@@ -19,7 +19,8 @@ enum class VideoMinMaxOps : u64 {
 };
 
 [[nodiscard]] IR::U32 ApplyVideoMinMaxOp(IR::IREmitter& ir, const IR::U32& lhs, const IR::U32& rhs,
-                                         VideoMinMaxOps op, bool is_signed) {
+                                         VideoMinMaxOps op, bool is_signed)
+{
     switch (op) {
     case VideoMinMaxOps::MIN:
         return ir.IMin(lhs, rhs, is_signed);
@@ -31,7 +32,8 @@ enum class VideoMinMaxOps : u64 {
 }
 } // Anonymous namespace
 
-void TranslatorVisitor::VMNMX(u64 insn) {
+void TranslatorVisitor::VMNMX(u64 insn)
+{
     union {
         u64 raw;
         BitField<0, 8, IR::Reg> dest_reg;

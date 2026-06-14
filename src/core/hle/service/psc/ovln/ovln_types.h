@@ -24,9 +24,7 @@ static_assert(sizeof(MessageFlags) == 0x8, "MessageFlags has incorrect size");
 struct SourceName {
     char name[0x16];
 
-    const char* GetString() const {
-        return name;
-    }
+    const char* GetString() const { return name; }
 };
 ;
 

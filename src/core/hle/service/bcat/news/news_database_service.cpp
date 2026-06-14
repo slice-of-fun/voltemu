@@ -5,54 +5,67 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "core/hle/service/bcat/news/news_database_service.h"
-#include "core/hle/service/bcat/news/builtin_news.h"
-#include "core/hle/service/bcat/news/news_storage.h"
-#include "core/hle/service/cmif_serialization.h"
 
 #include <algorithm>
 #include <cstring>
 
+#include "core/hle/service/bcat/news/builtin_news.h"
+#include "core/hle/service/bcat/news/news_storage.h"
+#include "core/hle/service/cmif_serialization.h"
+
 namespace Service::News {
 namespace {
 
-std::string_view ToStringView(std::span<const u8> buf) {
-    if (buf.empty()) return {};
+std::string_view ToStringView(std::span<const u8> buf)
+{
+    if (buf.empty())
+        return {};
     auto data = reinterpret_cast<const char*>(buf.data());
     return {data, strnlen(data, buf.size())};
 }
 
-std::string_view ToStringView(std::span<const char> buf) {
-    if (buf.empty()) return {};
+std::string_view ToStringView(std::span<const char> buf)
+{
+    if (buf.empty())
+        return {};
     return {buf.data(), strnlen(buf.data(), buf.size())};
 }
 
-bool UpdateField(NewsRecord& rec, std::string_view column, s32 value, bool additive) {
+bool UpdateField(NewsRecord& rec, std::string_view column, s32 value, bool additive)
+{
     auto apply = [&](s32& field) {
         field = additive ? field + value : value;
         return true;
     };
 
-    if (column == "read") return apply(rec.read);
-    if (column == "newly") return apply(rec.newly);
-    if (column == "displayed") return apply(rec.displayed);
-    if (column == "extra1" || column == "extra_1") return apply(rec.extra1);
-    if (column == "extra2" || column == "extra_2") return apply(rec.extra2);
+    if (column == "read")
+        return apply(rec.read);
+    if (column == "newly")
+        return apply(rec.newly);
+    if (column == "displayed")
+        return apply(rec.displayed);
+    if (column == "extra1" || column == "extra_1")
+        return apply(rec.extra1);
+    if (column == "extra2" || column == "extra_2")
+        return apply(rec.extra2);
 
     // Accept but ignore fields that don't exist in our struct
-    return column == "priority" || column == "decoration_type" ||
-           column == "feedback" || column == "category";
+    return column == "priority" || column == "decoration_type" || column == "feedback" ||
+           column == "category";
 }
 
 } // namespace
 
 INewsDatabaseService::INewsDatabaseService(Core::System& system_)
-    : ServiceFramework{system_, "INewsDatabaseService"} {
+    : ServiceFramework{system_, "INewsDatabaseService"}
+{
     static const FunctionInfo functions[] = {
         {0, D<&INewsDatabaseService::GetListV1>, "GetListV1"},
         {1, D<&INewsDatabaseService::Count>, "Count"},
         {2, D<&INewsDatabaseService::CountWithKey>, "CountWithKey"},
         {3, D<&INewsDatabaseService::UpdateIntegerValue>, "UpdateIntegerValue"},
-        {4, D<&INewsDatabaseService::UpdateIntegerValueWithAddition>, "UpdateIntegerValueWithAddition"},
+        {4, D<&INewsDatabaseService::UpdateIntegerValueWithAddition>,
+         "UpdateIntegerValueWithAddition"},
         {5, D<&INewsDatabaseService::UpdateStringValue>, "UpdateStringValue"},
         {1000, D<&INewsDatabaseService::GetList>, "GetList"},
     };
@@ -61,45 +74,49 @@ INewsDatabaseService::INewsDatabaseService(Core::System& system_)
 
 INewsDatabaseService::~INewsDatabaseService() = default;
 
-Result INewsDatabaseService::Count(Out<s32> out_count, InBuffer<BufferAttr_HipcPointer> where) {
+Result INewsDatabaseService::Count(Out<s32> out_count, InBuffer<BufferAttr_HipcPointer> where)
+{
     EnsureBuiltinNewsLoaded();
     *out_count = static_cast<s32>(NewsStorage::Instance().ListAll().size());
     R_SUCCEED();
 }
 
-Result INewsDatabaseService::CountWithKey(Out<s32> out_count,
-                                          InBuffer<BufferAttr_HipcPointer> key,
-                                          InBuffer<BufferAttr_HipcPointer> where) {
+Result INewsDatabaseService::CountWithKey(Out<s32> out_count, InBuffer<BufferAttr_HipcPointer> key,
+                                          InBuffer<BufferAttr_HipcPointer> where)
+{
     EnsureBuiltinNewsLoaded();
     *out_count = static_cast<s32>(NewsStorage::Instance().ListAll().size());
     R_SUCCEED();
 }
 
-Result INewsDatabaseService::UpdateIntegerValue(u32 value,
-                                                InBuffer<BufferAttr_HipcPointer> key,
-                                                InBuffer<BufferAttr_HipcPointer> where) {
+Result INewsDatabaseService::UpdateIntegerValue(u32 value, InBuffer<BufferAttr_HipcPointer> key,
+                                                InBuffer<BufferAttr_HipcPointer> where)
+{
     const auto column = ToStringView(key);
     for (const auto& rec : NewsStorage::Instance().ListAll()) {
-        NewsStorage::Instance().UpdateRecord(
-            ToStringView(rec.news_id), {},
-            [&](NewsRecord& r) { UpdateField(r, column, static_cast<s32>(value), false); });
+        NewsStorage::Instance().UpdateRecord(ToStringView(rec.news_id), {}, [&](NewsRecord& r) {
+            UpdateField(r, column, static_cast<s32>(value), false);
+        });
     }
     R_SUCCEED();
 }
 
 Result INewsDatabaseService::UpdateIntegerValueWithAddition(u32 value,
                                                             InBuffer<BufferAttr_HipcPointer> key,
-                                                            InBuffer<BufferAttr_HipcPointer> where) {
+                                                            InBuffer<BufferAttr_HipcPointer> where)
+{
     const auto column = ToStringView(key);
     const auto where_str = ToStringView(where);
 
     // Extract news_id from where clause like "N_SWITCH(news_id,'LA00000000000123456',1,0)=1"
     auto extract_news_id = [](std::string_view w) -> std::string {
         auto pos = w.find("'LA");
-        if (pos == std::string_view::npos) return {};
+        if (pos == std::string_view::npos)
+            return {};
         pos++; // skip the '
         auto end = w.find("'", pos);
-        if (end == std::string_view::npos) return {};
+        if (end == std::string_view::npos)
+            return {};
         return std::string(w.substr(pos, end - pos));
     };
 
@@ -108,8 +125,9 @@ Result INewsDatabaseService::UpdateIntegerValueWithAddition(u32 value,
     if (column == "read" && value > 0 && !news_id.empty()) {
         NewsStorage::Instance().MarkAsRead(news_id);
     } else if (!news_id.empty()) {
-        NewsStorage::Instance().UpdateRecord(news_id, {},
-            [&](NewsRecord& r) { UpdateField(r, column, static_cast<s32>(value), true); });
+        NewsStorage::Instance().UpdateRecord(news_id, {}, [&](NewsRecord& r) {
+            UpdateField(r, column, static_cast<s32>(value), true);
+        });
     }
 
     R_SUCCEED();
@@ -117,7 +135,8 @@ Result INewsDatabaseService::UpdateIntegerValueWithAddition(u32 value,
 
 Result INewsDatabaseService::UpdateStringValue(InBuffer<BufferAttr_HipcPointer> key,
                                                InBuffer<BufferAttr_HipcPointer> value,
-                                               InBuffer<BufferAttr_HipcPointer> where) {
+                                               InBuffer<BufferAttr_HipcPointer> where)
+{
     LOG_WARNING(Service_BCAT, "(STUBBED) UpdateStringValue");
     R_SUCCEED();
 }
@@ -125,8 +144,8 @@ Result INewsDatabaseService::UpdateStringValue(InBuffer<BufferAttr_HipcPointer> 
 Result INewsDatabaseService::GetListV1(Out<s32> out_count,
                                        OutBuffer<BufferAttr_HipcMapAlias> out_buffer,
                                        InBuffer<BufferAttr_HipcPointer> where,
-                                       InBuffer<BufferAttr_HipcPointer> order,
-                                       s32 offset) {
+                                       InBuffer<BufferAttr_HipcPointer> order, s32 offset)
+{
     EnsureBuiltinNewsLoaded();
 
     auto record_size = sizeof(NewsRecordV1);
@@ -164,8 +183,8 @@ Result INewsDatabaseService::GetListV1(Out<s32> out_count,
 Result INewsDatabaseService::GetList(Out<s32> out_count,
                                      OutBuffer<BufferAttr_HipcMapAlias> out_buffer,
                                      InBuffer<BufferAttr_HipcPointer> where,
-                                     InBuffer<BufferAttr_HipcPointer> order,
-                                     s32 offset) {
+                                     InBuffer<BufferAttr_HipcPointer> order, s32 offset)
+{
     EnsureBuiltinNewsLoaded();
     NewsStorage::Instance().ResetOpenCounter();
 

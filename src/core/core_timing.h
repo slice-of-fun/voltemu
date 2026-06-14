@@ -7,6 +7,7 @@
 #pragma once
 
 #include <atomic>
+#include <boost/heap/fibonacci_heap.hpp>
 #include <chrono>
 #include <functional>
 #include <memory>
@@ -15,11 +16,9 @@
 #include <string>
 #include <thread>
 
-#include <boost/heap/fibonacci_heap.hpp>
-
 #include "common/common_types.h"
-#include "common/thread.h"
 #include "common/cpu_features.h"
+#include "common/thread.h"
 
 namespace Core::Timing {
 
@@ -30,7 +29,9 @@ using TimedCallback = std::function<std::optional<std::chrono::nanoseconds>(
 /// Contains the characteristics of a particular event.
 struct EventType {
     explicit EventType(TimedCallback&& callback_, std::string&& name_)
-        : callback{std::move(callback_)}, name{std::move(name_)}, sequence_number{0} {}
+        : callback{std::move(callback_)}, name{std::move(name_)}, sequence_number{0}
+    {
+    }
 
     /// The event's callback function.
     TimedCallback callback;
@@ -77,9 +78,7 @@ public:
     void ClearPendingEvents();
 
     /// Sets if emulation is multicore or single core, must be set before Initialize
-    void SetMulticore(bool is_multicore_) {
-        is_multicore = is_multicore_;
-    }
+    void SetMulticore(bool is_multicore_) { is_multicore = is_multicore_; }
 
     /// Pauses/Unpauses the execution of the timer thread.
     void Pause(bool is_paused);
@@ -91,9 +90,7 @@ public:
     bool IsRunning() const;
 
     /// Checks if the timer thread has started.
-    bool HasStarted() const {
-        return has_started;
-    }
+    bool HasStarted() const { return has_started; }
 
     /// Checks if there are any pending time events.
     bool HasPendingEvents() const;
@@ -118,9 +115,7 @@ public:
 
     void Idle();
 
-    s64 GetDowncount() const noexcept {
-        return downcount;
-    }
+    s64 GetDowncount() const noexcept { return downcount; }
 
     /// Returns the current CNTPCT tick value.
     u64 GetClockTicks() const;
@@ -142,7 +137,8 @@ public:
 
     void Reset();
 
-    using heap_t = boost::heap::fibonacci_heap<CoreTiming::Event, boost::heap::compare<std::greater<>>>;
+    using heap_t =
+        boost::heap::fibonacci_heap<CoreTiming::Event, boost::heap::compare<std::greater<>>>;
     heap_t event_queue;
     s64 global_timer = 0;
 #ifdef _WIN32

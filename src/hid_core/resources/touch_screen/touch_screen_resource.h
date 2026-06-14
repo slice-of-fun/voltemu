@@ -68,10 +68,12 @@ public:
     void SetTouchScreenMagnification(f32 point1_x, f32 point1_y, f32 point2_x, f32 point2_y);
     Result SetTouchScreenResolution(u32 width, u32 height, u64 aruid);
 
-    Result SetTouchScreenConfiguration(
-        const Core::HID::TouchScreenConfigurationForNx& touch_configuration, u64 aruid);
-    Result GetTouchScreenConfiguration(
-        Core::HID::TouchScreenConfigurationForNx& out_touch_configuration, u64 aruid) const;
+    Result
+    SetTouchScreenConfiguration(const Core::HID::TouchScreenConfigurationForNx& touch_configuration,
+                                u64 aruid);
+    Result
+    GetTouchScreenConfiguration(Core::HID::TouchScreenConfigurationForNx& out_touch_configuration,
+                                u64 aruid) const;
 
     Result SetTouchScreenDefaultConfiguration(
         const Core::HID::TouchScreenConfigurationForNx& touch_configuration);

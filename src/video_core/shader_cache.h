@@ -6,16 +6,17 @@
 
 #pragma once
 
+#include <ankerl/unordered_dense.h>
+
 #include <array>
 #include <memory>
 #include <mutex>
+#include <ranges>
 #include <span>
-#include <ankerl/unordered_dense.h>
 #include <utility>
 #include <vector>
 
 #include "common/common_types.h"
-#include <ranges>
 #include "video_core/control/channel_state_cache.h"
 #include "video_core/host1x/gpu_device_memory_manager.h"
 #include "video_core/rasterizer_interface.h"
@@ -51,7 +52,8 @@ class ShaderCache : public VideoCommon::ChannelSetupCaches<VideoCommon::ChannelI
 
         bool is_memory_marked = true;
 
-        bool Overlaps(VAddr start, VAddr end) const noexcept {
+        bool Overlaps(VAddr start, VAddr end) const noexcept
+        {
             return start < addr_end && addr_start < end;
         }
     };
@@ -76,7 +78,8 @@ protected:
         std::array<GraphicsEnvironment, NUM_PROGRAMS> envs;
         std::array<Shader::Environment*, NUM_PROGRAMS> env_ptrs{};
 
-        std::span<Shader::Environment* const> Span() const noexcept {
+        std::span<Shader::Environment* const> Span() const noexcept
+        {
             return std::span(env_ptrs.begin(), std::ranges::find(env_ptrs, nullptr));
         }
     };

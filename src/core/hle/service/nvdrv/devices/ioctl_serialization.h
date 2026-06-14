@@ -15,15 +15,15 @@
 namespace Service::Nvidia::Devices {
 
 struct IoctlOneArgTraits {
-    template <typename T, typename R, typename A, typename... B>
+    template<typename T, typename R, typename A, typename... B>
     static A GetFirstArgImpl(R (T::*)(A, B...));
 };
 
 struct IoctlTwoArgTraits {
-    template <typename T, typename R, typename A, typename B, typename... C>
+    template<typename T, typename R, typename A, typename B, typename... C>
     static A GetFirstArgImpl(R (T::*)(A, B, C...));
 
-    template <typename T, typename R, typename A, typename B, typename... C>
+    template<typename T, typename R, typename A, typename B, typename... C>
     static B GetSecondArgImpl(R (T::*)(A, B, C...));
 };
 

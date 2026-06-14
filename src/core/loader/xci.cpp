@@ -4,6 +4,8 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/loader/xci.h"
+
 #include <vector>
 
 #include "common/common_types.h"
@@ -17,7 +19,6 @@
 #include "core/hle/kernel/k_process.h"
 #include "core/hle/service/filesystem/filesystem.h"
 #include "core/loader/nca.h"
-#include "core/loader/xci.h"
 
 namespace Loader {
 
@@ -26,7 +27,8 @@ AppLoader_XCI::AppLoader_XCI(FileSys::VirtualFile file_,
                              const FileSys::ContentProvider& content_provider, u64 program_id,
                              std::size_t program_index)
     : AppLoader(file_), xci(std::make_unique<FileSys::XCI>(file_, program_id, program_index)),
-      nca_loader(std::make_unique<AppLoader_NCA>(xci->GetProgramNCAFile())) {
+      nca_loader(std::make_unique<AppLoader_NCA>(xci->GetProgramNCAFile()))
+{
     if (xci->GetStatus() != ResultStatus::Success) {
         return;
     }
@@ -44,7 +46,8 @@ AppLoader_XCI::AppLoader_XCI(FileSys::VirtualFile file_,
 
 AppLoader_XCI::~AppLoader_XCI() = default;
 
-FileType AppLoader_XCI::IdentifyType(const FileSys::VirtualFile& xci_file) {
+FileType AppLoader_XCI::IdentifyType(const FileSys::VirtualFile& xci_file)
+{
     const FileSys::XCI xci(xci_file);
 
     if (xci.GetStatus() != ResultStatus::Success) {
@@ -60,7 +63,8 @@ FileType AppLoader_XCI::IdentifyType(const FileSys::VirtualFile& xci_file) {
     return FileType::Error;
 }
 
-AppLoader_XCI::LoadResult AppLoader_XCI::Load(Kernel::KProcess& process, Core::System& system) {
+AppLoader_XCI::LoadResult AppLoader_XCI::Load(Kernel::KProcess& process, Core::System& system)
+{
     if (is_loaded) {
         return {ResultStatus::ErrorAlreadyLoaded, {}};
     }
@@ -92,7 +96,8 @@ AppLoader_XCI::LoadResult AppLoader_XCI::Load(Kernel::KProcess& process, Core::S
     return result;
 }
 
-ResultStatus AppLoader_XCI::VerifyIntegrity(std::function<bool(size_t, size_t)> progress_callback) {
+ResultStatus AppLoader_XCI::VerifyIntegrity(std::function<bool(size_t, size_t)> progress_callback)
+{
     // Verify secure partition, as it is the only thing we can process.
     auto secure_partition = xci->GetSecurePartitionNSP();
 
@@ -126,11 +131,13 @@ ResultStatus AppLoader_XCI::VerifyIntegrity(std::function<bool(size_t, size_t)> 
     return ResultStatus::Success;
 }
 
-ResultStatus AppLoader_XCI::ReadRomFS(FileSys::VirtualFile& out_file) {
+ResultStatus AppLoader_XCI::ReadRomFS(FileSys::VirtualFile& out_file)
+{
     return nca_loader->ReadRomFS(out_file);
 }
 
-ResultStatus AppLoader_XCI::ReadUpdateRaw(FileSys::VirtualFile& out_file) {
+ResultStatus AppLoader_XCI::ReadUpdateRaw(FileSys::VirtualFile& out_file)
+{
     u64 program_id{};
     nca_loader->ReadProgramId(program_id);
     if (program_id == 0) {
@@ -152,16 +159,19 @@ ResultStatus AppLoader_XCI::ReadUpdateRaw(FileSys::VirtualFile& out_file) {
     return ResultStatus::Success;
 }
 
-ResultStatus AppLoader_XCI::ReadProgramId(u64& out_program_id) {
+ResultStatus AppLoader_XCI::ReadProgramId(u64& out_program_id)
+{
     return nca_loader->ReadProgramId(out_program_id);
 }
 
-ResultStatus AppLoader_XCI::ReadProgramIds(std::vector<u64>& out_program_ids) {
+ResultStatus AppLoader_XCI::ReadProgramIds(std::vector<u64>& out_program_ids)
+{
     out_program_ids = xci->GetProgramTitleIDs();
     return ResultStatus::Success;
 }
 
-ResultStatus AppLoader_XCI::ReadIcon(std::vector<u8>& buffer) {
+ResultStatus AppLoader_XCI::ReadIcon(std::vector<u8>& buffer)
+{
     if (icon_file == nullptr) {
         return ResultStatus::ErrorNoControl;
     }
@@ -170,7 +180,8 @@ ResultStatus AppLoader_XCI::ReadIcon(std::vector<u8>& buffer) {
     return ResultStatus::Success;
 }
 
-ResultStatus AppLoader_XCI::ReadTitle(std::string& title) {
+ResultStatus AppLoader_XCI::ReadTitle(std::string& title)
+{
     if (nacp_file == nullptr) {
         return ResultStatus::ErrorNoControl;
     }
@@ -179,7 +190,8 @@ ResultStatus AppLoader_XCI::ReadTitle(std::string& title) {
     return ResultStatus::Success;
 }
 
-ResultStatus AppLoader_XCI::ReadControlData(FileSys::NACP& control) {
+ResultStatus AppLoader_XCI::ReadControlData(FileSys::NACP& control)
+{
     if (nacp_file == nullptr) {
         return ResultStatus::ErrorNoControl;
     }
@@ -188,7 +200,8 @@ ResultStatus AppLoader_XCI::ReadControlData(FileSys::NACP& control) {
     return ResultStatus::Success;
 }
 
-ResultStatus AppLoader_XCI::ReadManualRomFS(FileSys::VirtualFile& out_file) {
+ResultStatus AppLoader_XCI::ReadManualRomFS(FileSys::VirtualFile& out_file)
+{
     const auto nca =
         xci->GetSecurePartitionNSP()->GetNCA(xci->GetSecurePartitionNSP()->GetProgramTitleID(),
                                              FileSys::ContentRecordType::HtmlDocument);
@@ -200,15 +213,18 @@ ResultStatus AppLoader_XCI::ReadManualRomFS(FileSys::VirtualFile& out_file) {
     return out_file == nullptr ? ResultStatus::ErrorNoRomFS : ResultStatus::Success;
 }
 
-ResultStatus AppLoader_XCI::ReadBanner(std::vector<u8>& buffer) {
+ResultStatus AppLoader_XCI::ReadBanner(std::vector<u8>& buffer)
+{
     return nca_loader->ReadBanner(buffer);
 }
 
-ResultStatus AppLoader_XCI::ReadLogo(std::vector<u8>& buffer) {
+ResultStatus AppLoader_XCI::ReadLogo(std::vector<u8>& buffer)
+{
     return nca_loader->ReadLogo(buffer);
 }
 
-ResultStatus AppLoader_XCI::ReadNSOModules(Modules& modules) {
+ResultStatus AppLoader_XCI::ReadNSOModules(Modules& modules)
+{
     return nca_loader->ReadNSOModules(modules);
 }
 

@@ -4,6 +4,8 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/sm/sm_controller.h"
+
 #include "common/assert.h"
 #include "common/logging.h"
 #include "core/core.h"
@@ -14,11 +16,11 @@
 #include "core/hle/kernel/k_session.h"
 #include "core/hle/service/ipc_helpers.h"
 #include "core/hle/service/server_manager.h"
-#include "core/hle/service/sm/sm_controller.h"
 
 namespace Service::SM {
 
-void Controller::ConvertCurrentObjectToDomain(HLERequestContext& ctx) {
+void Controller::ConvertCurrentObjectToDomain(HLERequestContext& ctx)
+{
     ASSERT_MSG(!ctx.GetManager()->IsDomain(), "Session is already a domain");
     LOG_DEBUG(Service, "called, server_session={}", ctx.Session()->GetId());
     ctx.GetManager()->ConvertToDomainOnRequestEnd();
@@ -28,7 +30,8 @@ void Controller::ConvertCurrentObjectToDomain(HLERequestContext& ctx) {
     rb.Push<u32>(1); // Converted sessions start with 1 request handler
 }
 
-void Controller::CloneCurrentObject(HLERequestContext& ctx) {
+void Controller::CloneCurrentObject(HLERequestContext& ctx)
+{
     LOG_DEBUG(Service, "called");
 
     auto session_manager = ctx.GetManager();
@@ -64,13 +67,15 @@ void Controller::CloneCurrentObject(HLERequestContext& ctx) {
     rb.PushMoveObjects(session->GetClientSession());
 }
 
-void Controller::CloneCurrentObjectEx(HLERequestContext& ctx) {
+void Controller::CloneCurrentObjectEx(HLERequestContext& ctx)
+{
     LOG_DEBUG(Service, "called");
 
     CloneCurrentObject(ctx);
 }
 
-void Controller::QueryPointerBufferSize(HLERequestContext& ctx) {
+void Controller::QueryPointerBufferSize(HLERequestContext& ctx)
+{
     LOG_DEBUG(Service, "called");
 
     auto* process = Kernel::GetCurrentProcessPointer(kernel);
@@ -87,7 +92,8 @@ void Controller::QueryPointerBufferSize(HLERequestContext& ctx) {
     rb.Push<u16>(static_cast<u16>(buffer_size));
 }
 
-void Controller::SetPointerBufferSize(HLERequestContext& ctx) {
+void Controller::SetPointerBufferSize(HLERequestContext& ctx)
+{
     LOG_DEBUG(Service, "called");
 
     auto* process = Kernel::GetCurrentProcessPointer(kernel);
@@ -104,22 +110,24 @@ void Controller::SetPointerBufferSize(HLERequestContext& ctx) {
 
     process->SetPointerBufferSize(requested_size);
 
-    LOG_INFO(Service, "Pointer buffer size dynamically updated to {:#x} bytes by process", requested_size);
+    LOG_INFO(Service, "Pointer buffer size dynamically updated to {:#x} bytes by process",
+             requested_size);
 
     IPC::ResponseBuilder rb{ctx, 2};
     rb.Push(ResultSuccess);
 }
 
-
 // https://switchbrew.org/wiki/IPC_Marshalling
-Controller::Controller(Core::System& system_) : ServiceFramework{system_, "IpcController"} {
+Controller::Controller(Core::System& system_) : ServiceFramework{system_, "IpcController"}
+{
     static const FunctionInfo functions[] = {
         {0, &Controller::ConvertCurrentObjectToDomain, "ConvertCurrentObjectToDomain"},
         {1, nullptr, "CopyFromCurrentDomain"},
         {2, &Controller::CloneCurrentObject, "CloneCurrentObject"},
         {3, &Controller::QueryPointerBufferSize, "QueryPointerBufferSize"},
         {4, &Controller::CloneCurrentObjectEx, "CloneCurrentObjectEx"},
-        {5, &Controller::SetPointerBufferSize, "SetPointerBufferSize"}, //TODO: where does this come from
+        {5, &Controller::SetPointerBufferSize,
+         "SetPointerBufferSize"}, // TODO: where does this come from
     };
     RegisterHandlers(functions);
 }

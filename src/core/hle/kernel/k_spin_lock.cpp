@@ -5,15 +5,18 @@
 
 namespace Kernel {
 
-void KSpinLock::Lock() {
+void KSpinLock::Lock()
+{
     m_lock.lock();
 }
 
-void KSpinLock::Unlock() {
+void KSpinLock::Unlock()
+{
     m_lock.unlock();
 }
 
-bool KSpinLock::TryLock() {
+bool KSpinLock::TryLock()
+{
     return m_lock.try_lock();
 }
 

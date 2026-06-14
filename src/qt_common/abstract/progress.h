@@ -3,8 +3,8 @@
 
 #pragma once
 
-#include <memory>
 #include <QObject>
+#include <memory>
 
 namespace QtCommon::Frontend {
 

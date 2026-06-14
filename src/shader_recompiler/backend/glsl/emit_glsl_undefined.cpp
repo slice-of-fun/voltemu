@@ -6,23 +6,28 @@
 
 namespace Shader::Backend::GLSL {
 
-void EmitUndefU1(EmitContext& ctx, IR::Inst& inst) {
+void EmitUndefU1(EmitContext& ctx, IR::Inst& inst)
+{
     ctx.AddU1("{}=false;", inst);
 }
 
-void EmitUndefU8(EmitContext& ctx, IR::Inst& inst) {
+void EmitUndefU8(EmitContext& ctx, IR::Inst& inst)
+{
     ctx.AddU32("{}=0u;", inst);
 }
 
-void EmitUndefU16(EmitContext& ctx, IR::Inst& inst) {
+void EmitUndefU16(EmitContext& ctx, IR::Inst& inst)
+{
     ctx.AddU32("{}=0u;", inst);
 }
 
-void EmitUndefU32(EmitContext& ctx, IR::Inst& inst) {
+void EmitUndefU32(EmitContext& ctx, IR::Inst& inst)
+{
     ctx.AddU32("{}=0u;", inst);
 }
 
-void EmitUndefU64(EmitContext& ctx, IR::Inst& inst) {
+void EmitUndefU64(EmitContext& ctx, IR::Inst& inst)
+{
     ctx.AddU64("{}=0u;", inst);
 }
 

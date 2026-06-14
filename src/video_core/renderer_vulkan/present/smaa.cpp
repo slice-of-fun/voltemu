@@ -4,12 +4,18 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include <list>
+#include "video_core/renderer_vulkan/present/smaa.h"
 
-#include "common/assert.h"
+#include <list>
 #include <ranges>
 
-#include "video_core/renderer_vulkan/present/smaa.h"
+#include "common/assert.h"
+#include "video_core/host_shaders/smaa_blending_weight_calculation_frag_spv.h"
+#include "video_core/host_shaders/smaa_blending_weight_calculation_vert_spv.h"
+#include "video_core/host_shaders/smaa_edge_detection_frag_spv.h"
+#include "video_core/host_shaders/smaa_edge_detection_vert_spv.h"
+#include "video_core/host_shaders/smaa_neighborhood_blending_frag_spv.h"
+#include "video_core/host_shaders/smaa_neighborhood_blending_vert_spv.h"
 #include "video_core/renderer_vulkan/present/util.h"
 #include "video_core/renderer_vulkan/vk_scheduler.h"
 #include "video_core/renderer_vulkan/vk_shader_util.h"
@@ -17,18 +23,12 @@
 #include "video_core/smaa_search_tex.h"
 #include "video_core/vulkan_common/vulkan_device.h"
 
-#include "video_core/host_shaders/smaa_blending_weight_calculation_frag_spv.h"
-#include "video_core/host_shaders/smaa_blending_weight_calculation_vert_spv.h"
-#include "video_core/host_shaders/smaa_edge_detection_frag_spv.h"
-#include "video_core/host_shaders/smaa_edge_detection_vert_spv.h"
-#include "video_core/host_shaders/smaa_neighborhood_blending_frag_spv.h"
-#include "video_core/host_shaders/smaa_neighborhood_blending_vert_spv.h"
-
 namespace Vulkan {
 
 SMAA::SMAA(const Device& device, MemoryAllocator& allocator, size_t image_count, VkExtent2D extent)
     : m_device(device), m_allocator(allocator), m_extent(extent),
-      m_image_count(static_cast<u32>(image_count)) {
+      m_image_count(static_cast<u32>(image_count))
+{
     CreateImages();
     CreateRenderPasses();
     CreateSampler();
@@ -42,7 +42,8 @@ SMAA::SMAA(const Device& device, MemoryAllocator& allocator, size_t image_count,
 
 SMAA::~SMAA() = default;
 
-void SMAA::CreateImages() {
+void SMAA::CreateImages()
+{
     static constexpr VkExtent2D area_extent{AREATEX_WIDTH, AREATEX_HEIGHT};
     static constexpr VkExtent2D search_extent{SEARCHTEX_WIDTH, SEARCHTEX_HEIGHT};
 
@@ -72,7 +73,8 @@ void SMAA::CreateImages() {
     }
 }
 
-void SMAA::CreateRenderPasses() {
+void SMAA::CreateRenderPasses()
+{
     m_renderpasses[EdgeDetection] = CreateWrappedRenderPass(m_device, VK_FORMAT_R16G16_SFLOAT);
     m_renderpasses[BlendingWeightCalculation] =
         CreateWrappedRenderPass(m_device, VK_FORMAT_R16G16B16A16_SFLOAT);
@@ -92,11 +94,13 @@ void SMAA::CreateRenderPasses() {
     }
 }
 
-void SMAA::CreateSampler() {
+void SMAA::CreateSampler()
+{
     m_sampler = CreateWrappedSampler(m_device);
 }
 
-void SMAA::CreateShaders() {
+void SMAA::CreateShaders()
+{
     // These match the order of the SMAAStage enum
     static constexpr std::array vert_shader_sources{
         ARRAY_TO_SPAN(SMAA_EDGE_DETECTION_VERT_SPV),
@@ -115,7 +119,8 @@ void SMAA::CreateShaders() {
     }
 }
 
-void SMAA::CreateDescriptorPool() {
+void SMAA::CreateDescriptorPool()
+{
     // Edge detection: 1 descriptor
     // Blending weight calculation: 3 descriptors
     // Neighborhood blending: 2 descriptors
@@ -124,7 +129,8 @@ void SMAA::CreateDescriptorPool() {
     m_descriptor_pool = CreateWrappedDescriptorPool(m_device, 6 * m_image_count, 3 * m_image_count);
 }
 
-void SMAA::CreateDescriptorSetLayouts() {
+void SMAA::CreateDescriptorSetLayouts()
+{
     m_descriptor_set_layouts[EdgeDetection] =
         CreateWrappedDescriptorSetLayout(m_device, {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER});
     m_descriptor_set_layouts[BlendingWeightCalculation] =
@@ -136,7 +142,8 @@ void SMAA::CreateDescriptorSetLayouts() {
                                                     VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER});
 }
 
-void SMAA::CreateDescriptorSets() {
+void SMAA::CreateDescriptorSets()
+{
     std::vector<VkDescriptorSetLayout> layouts(m_descriptor_set_layouts.size());
     std::ranges::transform(m_descriptor_set_layouts, layouts.begin(),
                            [](auto& layout) { return *layout; });
@@ -146,13 +153,15 @@ void SMAA::CreateDescriptorSets() {
     }
 }
 
-void SMAA::CreatePipelineLayouts() {
+void SMAA::CreatePipelineLayouts()
+{
     for (size_t i = 0; i < MaxSMAAStage; i++) {
         m_pipeline_layouts[i] = CreateWrappedPipelineLayout(m_device, m_descriptor_set_layouts[i]);
     }
 }
 
-void SMAA::CreatePipelines() {
+void SMAA::CreatePipelines()
+{
     for (size_t i = 0; i < MaxSMAAStage; i++) {
         m_pipelines[i] =
             CreateWrappedPipeline(m_device, m_renderpasses[i], m_pipeline_layouts[i],
@@ -160,7 +169,8 @@ void SMAA::CreatePipelines() {
     }
 }
 
-void SMAA::UpdateDescriptorSets(VkImageView image_view, size_t image_index) {
+void SMAA::UpdateDescriptorSets(VkImageView image_view, size_t image_index)
+{
     Images& images = m_dynamic_images[image_index];
     std::vector<VkDescriptorImageInfo> image_infos;
     std::vector<VkWriteDescriptorSet> updates;
@@ -187,7 +197,8 @@ void SMAA::UpdateDescriptorSets(VkImageView image_view, size_t image_index) {
     m_device.GetLogical().UpdateDescriptorSets(updates, {});
 }
 
-void SMAA::UploadImages(Scheduler& scheduler) {
+void SMAA::UploadImages(Scheduler& scheduler)
+{
     if (m_images_ready) {
         return;
     }
@@ -213,7 +224,8 @@ void SMAA::UploadImages(Scheduler& scheduler) {
 }
 
 void SMAA::Draw(Scheduler& scheduler, size_t image_index, VkImage* inout_image,
-                VkImageView* inout_image_view) {
+                VkImageView* inout_image_view)
+{
     Images& images = m_dynamic_images[image_index];
 
     VkImage input_image = *inout_image;

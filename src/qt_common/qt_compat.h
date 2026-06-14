@@ -6,9 +6,9 @@
 #include <QtGlobal>
 
 #if QT_VERSION < QT_VERSION_CHECK(6, 9, 0)
-#define STATE_CHANGED stateChanged
+#define STATE_CHANGED   stateChanged
 #define CHECKSTATE_TYPE int
 #else
-#define STATE_CHANGED checkStateChanged
+#define STATE_CHANGED   checkStateChanged
 #define CHECKSTATE_TYPE Qt::CheckState
 #endif

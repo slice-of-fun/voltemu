@@ -4,33 +4,36 @@
 // SPDX-FileCopyrightText: Copyright 2021 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "video_core/renderer_opengl/gl_staging_buffer_pool.h"
+
+#include <glad/glad.h>
+
 #include <array>
 #include <memory>
 #include <span>
 
-#include <glad/glad.h>
-
 #include "common/alignment.h"
 #include "common/assert.h"
 #include "common/bit_util.h"
-#include "video_core/renderer_opengl/gl_staging_buffer_pool.h"
-
 
 namespace OpenGL {
 
-StagingBufferMap::~StagingBufferMap() {
+StagingBufferMap::~StagingBufferMap()
+{
     if (sync) {
         sync->Create();
     }
 }
 
 StagingBuffers::StagingBuffers(GLenum storage_flags_, GLenum map_flags_)
-    : storage_flags{storage_flags_}, map_flags{map_flags_} {}
+    : storage_flags{storage_flags_}, map_flags{map_flags_}
+{
+}
 
 StagingBuffers::~StagingBuffers() = default;
 
-StagingBufferMap StagingBuffers::RequestMap(size_t requested_size, bool insert_fence,
-                                            bool deferred) {
+StagingBufferMap StagingBuffers::RequestMap(size_t requested_size, bool insert_fence, bool deferred)
+{
 
     const size_t index = RequestBuffer(requested_size);
     OGLSync* const sync = insert_fence ? &allocs[index].sync : nullptr;
@@ -44,12 +47,14 @@ StagingBufferMap StagingBuffers::RequestMap(size_t requested_size, bool insert_f
     };
 }
 
-void StagingBuffers::FreeDeferredStagingBuffer(size_t index) {
+void StagingBuffers::FreeDeferredStagingBuffer(size_t index)
+{
     ASSERT(allocs[index].deferred);
     allocs[index].deferred = false;
 }
 
-size_t StagingBuffers::RequestBuffer(size_t requested_size) {
+size_t StagingBuffers::RequestBuffer(size_t requested_size)
+{
     if (const std::optional<size_t> index = FindBuffer(requested_size); index) {
         return *index;
     }
@@ -66,7 +71,8 @@ size_t StagingBuffers::RequestBuffer(size_t requested_size) {
     return allocs.size() - 1;
 }
 
-std::optional<size_t> StagingBuffers::FindBuffer(size_t requested_size) {
+std::optional<size_t> StagingBuffers::FindBuffer(size_t requested_size)
+{
     size_t known_unsignaled_index = current_sync_index + 1;
     size_t smallest_buffer = (std::numeric_limits<size_t>::max)();
     std::optional<size_t> found;
@@ -99,7 +105,8 @@ std::optional<size_t> StagingBuffers::FindBuffer(size_t requested_size) {
     return found;
 }
 
-StreamBuffer::StreamBuffer() {
+StreamBuffer::StreamBuffer()
+{
     static constexpr GLenum flags = GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT;
     buffer.Create();
     glObjectLabel(GL_BUFFER, buffer.handle, -1, "Stream Buffer");
@@ -111,7 +118,8 @@ StreamBuffer::StreamBuffer() {
     }
 }
 
-std::pair<std::span<u8>, size_t> StreamBuffer::Request(size_t size) noexcept {
+std::pair<std::span<u8>, size_t> StreamBuffer::Request(size_t size) noexcept
+{
     ASSERT(size < REGION_SIZE);
     for (size_t region = Region(used_iterator), region_end = Region(iterator); region < region_end;
          ++region) {
@@ -146,15 +154,18 @@ std::pair<std::span<u8>, size_t> StreamBuffer::Request(size_t size) noexcept {
     return {std::span(mapped_pointer + offset, size), offset};
 }
 
-StagingBufferMap StagingBufferPool::RequestUploadBuffer(size_t size) {
+StagingBufferMap StagingBufferPool::RequestUploadBuffer(size_t size)
+{
     return upload_buffers.RequestMap(size, true);
 }
 
-StagingBufferMap StagingBufferPool::RequestDownloadBuffer(size_t size, bool deferred) {
+StagingBufferMap StagingBufferPool::RequestDownloadBuffer(size_t size, bool deferred)
+{
     return download_buffers.RequestMap(size, false, deferred);
 }
 
-void StagingBufferPool::FreeDeferredStagingBuffer(StagingBufferMap& buffer) {
+void StagingBufferPool::FreeDeferredStagingBuffer(StagingBufferMap& buffer)
+{
     download_buffers.FreeDeferredStagingBuffer(buffer.index);
 }
 

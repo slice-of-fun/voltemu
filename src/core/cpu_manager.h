@@ -35,40 +35,36 @@ public:
     CpuManager& operator=(CpuManager&&) = delete;
 
     /// Sets if emulation is multicore or single core, must be set before Initialize
-    void SetMulticore(bool is_multi) {
-        is_multicore = is_multi;
-    }
+    void SetMulticore(bool is_multi) { is_multicore = is_multi; }
 
     /// Sets if emulation is using an asynchronous GPU.
-    void SetAsyncGpu(bool is_async) {
-        is_async_gpu = is_async;
-    }
+    void SetAsyncGpu(bool is_async) { is_async_gpu = is_async; }
 
-    void OnGpuReady() {
-        gpu_barrier->Sync();
-    }
+    void OnGpuReady() { gpu_barrier->Sync(); }
 
     void Initialize();
     void Shutdown();
 
-    std::function<void()> GetGuestActivateFunc() {
+    std::function<void()> GetGuestActivateFunc()
+    {
         return [this] { GuestActivate(); };
     }
-    std::function<void()> GetGuestThreadFunc() {
+    std::function<void()> GetGuestThreadFunc()
+    {
         return [this] { GuestThreadFunction(); };
     }
-    std::function<void()> GetIdleThreadStartFunc() {
+    std::function<void()> GetIdleThreadStartFunc()
+    {
         return [this] { IdleThreadFunction(); };
     }
-    std::function<void()> GetShutdownThreadStartFunc() {
+    std::function<void()> GetShutdownThreadStartFunc()
+    {
         return [this] { ShutdownThreadFunction(); };
     }
 
     void PreemptSingleCore(bool from_running_environment = true);
 
-    std::size_t CurrentCore() const {
-        return current_core.load();
-    }
+    std::size_t CurrentCore() const { return current_core.load(); }
 
 private:
     void GuestThreadFunction();

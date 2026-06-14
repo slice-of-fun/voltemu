@@ -34,7 +34,8 @@ enum class InputTopology {
 };
 
 struct InputTopologyVertices {
-    static u32 vertices(InputTopology input_topology) {
+    static u32 vertices(InputTopology input_topology)
+    {
         switch (input_topology) {
         case InputTopology::Lines:
             return 2;

@@ -5,7 +5,8 @@
 
 namespace Service::PSC::Time {
 namespace {
-constexpr Result ValidateRule(const Tz::Rule& rule) {
+constexpr Result ValidateRule(const Tz::Rule& rule)
+{
     if (rule.typecnt > static_cast<s32>(Tz::TZ_MAX_TYPES) ||
         rule.timecnt > static_cast<s32>(Tz::TZ_MAX_TIMES) ||
         rule.charcnt > static_cast<s32>(Tz::TZ_MAX_CHARS)) {
@@ -27,7 +28,8 @@ constexpr Result ValidateRule(const Tz::Rule& rule) {
 }
 
 constexpr bool GetTimeZoneTime(s64& out_time, const Tz::Rule& rule, s64 time, s32 index,
-                               s32 index_offset) {
+                               s32 index_offset)
+{
     s32 found_idx{};
     s32 expected_index{index + index_offset};
     s64 time_to_find{time + rule.ttis[rule.types[index]].tt_utoff -
@@ -55,29 +57,34 @@ constexpr bool GetTimeZoneTime(s64& out_time, const Tz::Rule& rule, s64 time, s3
 }
 } // namespace
 
-void TimeZone::SetTimePoint(const SteadyClockTimePoint& time_point) {
+void TimeZone::SetTimePoint(const SteadyClockTimePoint& time_point)
+{
     std::scoped_lock l{m_mutex};
     m_steady_clock_time_point = time_point;
 }
 
-void TimeZone::SetTotalLocationNameCount(u32 count) {
+void TimeZone::SetTotalLocationNameCount(u32 count)
+{
     std::scoped_lock l{m_mutex};
     m_total_location_name_count = count;
 }
 
-void TimeZone::SetRuleVersion(const RuleVersion& rule_version) {
+void TimeZone::SetRuleVersion(const RuleVersion& rule_version)
+{
     std::scoped_lock l{m_mutex};
     m_rule_version = rule_version;
 }
 
-Result TimeZone::GetLocationName(LocationName& out_name) {
+Result TimeZone::GetLocationName(LocationName& out_name)
+{
     std::scoped_lock l{m_mutex};
     R_UNLESS(m_initialized, ResultClockUninitialized);
     out_name = m_location;
     R_SUCCEED();
 }
 
-Result TimeZone::GetTotalLocationCount(u32& out_count) {
+Result TimeZone::GetTotalLocationCount(u32& out_count)
+{
     std::scoped_lock l{m_mutex};
     if (!m_initialized) {
         return ResultClockUninitialized;
@@ -87,7 +94,8 @@ Result TimeZone::GetTotalLocationCount(u32& out_count) {
     R_SUCCEED();
 }
 
-Result TimeZone::GetRuleVersion(RuleVersion& out_rule_version) {
+Result TimeZone::GetRuleVersion(RuleVersion& out_rule_version)
+{
     std::scoped_lock l{m_mutex};
     if (!m_initialized) {
         return ResultClockUninitialized;
@@ -96,7 +104,8 @@ Result TimeZone::GetRuleVersion(RuleVersion& out_rule_version) {
     R_SUCCEED();
 }
 
-Result TimeZone::GetTimePoint(SteadyClockTimePoint& out_time_point) {
+Result TimeZone::GetTimePoint(SteadyClockTimePoint& out_time_point)
+{
     std::scoped_lock l{m_mutex};
     if (!m_initialized) {
         return ResultClockUninitialized;
@@ -107,13 +116,15 @@ Result TimeZone::GetTimePoint(SteadyClockTimePoint& out_time_point) {
 
 Result TimeZone::ToCalendarTime(CalendarTime& out_calendar_time,
                                 CalendarAdditionalInfo& out_additional_info, s64 time,
-                                const Tz::Rule& rule) {
+                                const Tz::Rule& rule)
+{
     std::scoped_lock l{m_mutex};
     R_RETURN(ToCalendarTimeImpl(out_calendar_time, out_additional_info, time, rule));
 }
 
 Result TimeZone::ToCalendarTimeWithMyRule(CalendarTime& calendar_time,
-                                          CalendarAdditionalInfo& calendar_additional, s64 time) {
+                                          CalendarAdditionalInfo& calendar_additional, s64 time)
+{
     // This is checked outside the mutex. Bug?
     if (!m_initialized) {
         return ResultClockUninitialized;
@@ -123,7 +134,8 @@ Result TimeZone::ToCalendarTimeWithMyRule(CalendarTime& calendar_time,
     R_RETURN(ToCalendarTimeImpl(calendar_time, calendar_additional, time, m_my_rule));
 }
 
-Result TimeZone::ParseBinary(const LocationName& name, std::span<const u8> binary) {
+Result TimeZone::ParseBinary(const LocationName& name, std::span<const u8> binary)
+{
     std::scoped_lock l{m_mutex};
 
     Tz::Rule tmp_rule{};
@@ -135,13 +147,15 @@ Result TimeZone::ParseBinary(const LocationName& name, std::span<const u8> binar
     R_SUCCEED();
 }
 
-Result TimeZone::ParseBinaryInto(Tz::Rule& out_rule, std::span<const u8> binary) {
+Result TimeZone::ParseBinaryInto(Tz::Rule& out_rule, std::span<const u8> binary)
+{
     std::scoped_lock l{m_mutex};
     R_RETURN(ParseBinaryImpl(out_rule, binary));
 }
 
 Result TimeZone::ToPosixTime(u32& out_count, std::span<s64> out_times, size_t out_times_max_count,
-                             const CalendarTime& calendar, const Tz::Rule& rule) {
+                             const CalendarTime& calendar, const Tz::Rule& rule)
+{
     std::scoped_lock l{m_mutex};
 
     auto res = ToPosixTimeImpl(out_count, out_times, out_times_max_count, calendar, rule, -1);
@@ -158,7 +172,8 @@ Result TimeZone::ToPosixTime(u32& out_count, std::span<s64> out_times, size_t ou
 }
 
 Result TimeZone::ToPosixTimeWithMyRule(u32& out_count, std::span<s64> out_times,
-                                       size_t out_times_max_count, const CalendarTime& calendar) {
+                                       size_t out_times_max_count, const CalendarTime& calendar)
+{
     std::scoped_lock l{m_mutex};
 
     auto res = ToPosixTimeImpl(out_count, out_times, out_times_max_count, calendar, m_my_rule, -1);
@@ -174,7 +189,8 @@ Result TimeZone::ToPosixTimeWithMyRule(u32& out_count, std::span<s64> out_times,
     R_RETURN(res);
 }
 
-Result TimeZone::ParseBinaryImpl(Tz::Rule& out_rule, std::span<const u8> binary) {
+Result TimeZone::ParseBinaryImpl(Tz::Rule& out_rule, std::span<const u8> binary)
+{
     if (Tz::ParseTimeZoneBinary(out_rule, binary)) {
         R_RETURN(ResultTimeZoneParseFailed);
     }
@@ -183,7 +199,8 @@ Result TimeZone::ParseBinaryImpl(Tz::Rule& out_rule, std::span<const u8> binary)
 
 Result TimeZone::ToCalendarTimeImpl(CalendarTime& out_calendar_time,
                                     CalendarAdditionalInfo& out_additional_info, s64 time,
-                                    const Tz::Rule& rule) {
+                                    const Tz::Rule& rule)
+{
     R_TRY(ValidateRule(rule));
 
     Tz::CalendarTimeInternal calendar_internal{};
@@ -214,7 +231,8 @@ Result TimeZone::ToCalendarTimeImpl(CalendarTime& out_calendar_time,
 
 Result TimeZone::ToPosixTimeImpl(u32& out_count, std::span<s64> out_times,
                                  size_t out_times_max_count, const CalendarTime& calendar,
-                                 const Tz::Rule& rule, s32 is_dst) {
+                                 const Tz::Rule& rule, s32 is_dst)
+{
     R_TRY(ValidateRule(rule));
 
     CalendarTime local_calendar{calendar};

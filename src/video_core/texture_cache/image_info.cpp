@@ -4,13 +4,14 @@
 // SPDX-FileCopyrightText: Copyright 2020 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "video_core/texture_cache/image_info.h"
+
 #include <fmt/ranges.h>
 
 #include "common/assert.h"
 #include "common/settings.h"
 #include "video_core/surface.h"
 #include "video_core/texture_cache/format_lookup_table.h"
-#include "video_core/texture_cache/image_info.h"
 #include "video_core/texture_cache/samples_helper.h"
 #include "video_core/texture_cache/types.h"
 #include "video_core/texture_cache/util.h"
@@ -28,7 +29,8 @@ using VideoCore::Surface::SurfaceType;
 constexpr u32 RescaleHeightThreshold = 288;
 constexpr u32 DownscaleHeightThreshold = 512;
 
-ImageInfo::ImageInfo(const TICEntry& config) noexcept {
+ImageInfo::ImageInfo(const TICEntry& config) noexcept
+{
     forced_flushed = config.IsPitchLinear() && !Settings::values.use_reactive_flushing.GetValue();
     dma_downloaded = forced_flushed;
     format = PixelFormatFromTextureInfo(config.format, config.r_type, config.g_type, config.b_type,
@@ -127,7 +129,7 @@ ImageInfo::ImageInfo(const TICEntry& config) noexcept {
         break;
     }
     if (num_samples > 1) {
-        size.width  *= NumSamplesX(config.msaa_mode);
+        size.width *= NumSamplesX(config.msaa_mode);
         size.height *= NumSamplesY(config.msaa_mode);
     }
     if (type != ImageType::Linear) {
@@ -136,13 +138,14 @@ ImageInfo::ImageInfo(const TICEntry& config) noexcept {
         maybe_unaligned_layer_stride = CalculateLayerSize(*this);
         rescaleable &= (block.depth == 0) && resources.levels == 1;
         rescaleable &= size.height > RescaleHeightThreshold ||
-                           GetFormatType(format) != SurfaceType::ColorTexture;
+                       GetFormatType(format) != SurfaceType::ColorTexture;
         downscaleable = size.height > DownscaleHeightThreshold;
     }
 }
 
 ImageInfo::ImageInfo(const Maxwell3D::Regs::RenderTargetConfig& ct,
-                     Tegra::Texture::MsaaMode msaa_mode) noexcept {
+                     Tegra::Texture::MsaaMode msaa_mode) noexcept
+{
     forced_flushed =
         ct.tile_mode.is_pitch_linear && !Settings::values.use_reactive_flushing.GetValue();
     dma_downloaded = forced_flushed;
@@ -183,7 +186,8 @@ ImageInfo::ImageInfo(const Maxwell3D::Regs::RenderTargetConfig& ct,
 }
 
 ImageInfo::ImageInfo(const Maxwell3D::Regs::Zeta& zt, const Maxwell3D::Regs::ZetaSize& zt_size,
-                     Tegra::Texture::MsaaMode msaa_mode) noexcept {
+                     Tegra::Texture::MsaaMode msaa_mode) noexcept
+{
     forced_flushed =
         zt.tile_mode.is_pitch_linear && !Settings::values.use_reactive_flushing.GetValue();
     dma_downloaded = forced_flushed;
@@ -225,7 +229,8 @@ ImageInfo::ImageInfo(const Maxwell3D::Regs::Zeta& zt, const Maxwell3D::Regs::Zet
     }
 }
 
-ImageInfo::ImageInfo(const Fermi2D::Surface& config) noexcept {
+ImageInfo::ImageInfo(const Fermi2D::Surface& config) noexcept
+{
     UNIMPLEMENTED_IF_MSG(config.layer != 0, "Surface layer is not zero");
     forced_flushed = config.linear == Fermi2D::MemoryLayout::Pitch &&
                      !Settings::values.use_reactive_flushing.GetValue();
@@ -260,7 +265,8 @@ ImageInfo::ImageInfo(const Fermi2D::Surface& config) noexcept {
     }
 }
 
-static PixelFormat ByteSizeToFormat(u32 bytes_per_pixel) {
+static PixelFormat ByteSizeToFormat(u32 bytes_per_pixel)
+{
     switch (bytes_per_pixel) {
     case 1:
         return PixelFormat::R8_UINT;
@@ -278,7 +284,8 @@ static PixelFormat ByteSizeToFormat(u32 bytes_per_pixel) {
     }
 }
 
-ImageInfo::ImageInfo(const Tegra::DMA::ImageOperand& config) noexcept {
+ImageInfo::ImageInfo(const Tegra::DMA::ImageOperand& config) noexcept
+{
     const u32 bytes_per_pixel = config.bytes_per_pixel;
     format = ByteSizeToFormat(bytes_per_pixel);
     type = config.params.block_size.depth > 0 ? ImageType::e3D : ImageType::e2D;

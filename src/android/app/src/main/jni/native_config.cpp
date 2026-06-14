@@ -1,9 +1,9 @@
 // SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#include <string>
-
 #include <jni.h>
+
+#include <string>
 
 #include "android_config.h"
 #include "android_settings.h"
@@ -19,8 +19,8 @@
 std::unique_ptr<AndroidConfig> global_config;
 std::unique_ptr<AndroidConfig> per_game_config;
 
-template <typename T>
-Settings::Setting<T>* getSetting(JNIEnv* env, jstring jkey) {
+template<typename T> Settings::Setting<T>* getSetting(JNIEnv* env, jstring jkey)
+{
     auto key = Common::Android::GetJString(env, jkey);
     auto basic_setting = Settings::values.linkage.by_key[key];
     if (basic_setting != 0) {
@@ -36,26 +36,31 @@ Settings::Setting<T>* getSetting(JNIEnv* env, jstring jkey) {
 
 extern "C" {
 
-void Java_org_yuzu_yuzu_1emu_utils_NativeConfig_initializeGlobalConfig(JNIEnv* env, jobject obj) {
+void Java_org_yuzu_yuzu_1emu_utils_NativeConfig_initializeGlobalConfig(JNIEnv* env, jobject obj)
+{
     global_config = std::make_unique<AndroidConfig>();
     FrontendCommon::GenerateSettings();
 }
 
-void Java_org_yuzu_yuzu_1emu_utils_NativeConfig_unloadGlobalConfig(JNIEnv* env, jobject obj) {
+void Java_org_yuzu_yuzu_1emu_utils_NativeConfig_unloadGlobalConfig(JNIEnv* env, jobject obj)
+{
     global_config.reset();
 }
 
-void Java_org_yuzu_yuzu_1emu_utils_NativeConfig_reloadGlobalConfig(JNIEnv* env, jobject obj) {
+void Java_org_yuzu_yuzu_1emu_utils_NativeConfig_reloadGlobalConfig(JNIEnv* env, jobject obj)
+{
     global_config->AndroidConfig::ReloadAllValues();
 }
 
-void Java_org_yuzu_yuzu_1emu_utils_NativeConfig_saveGlobalConfig(JNIEnv* env, jobject obj) {
+void Java_org_yuzu_yuzu_1emu_utils_NativeConfig_saveGlobalConfig(JNIEnv* env, jobject obj)
+{
     global_config->AndroidConfig::SaveAllValues();
 }
 
 void Java_org_yuzu_yuzu_1emu_utils_NativeConfig_initializePerGameConfig(JNIEnv* env, jobject obj,
                                                                         jstring jprogramId,
-                                                                        jstring jfileName) {
+                                                                        jstring jfileName)
+{
     auto program_id = EmulationSession::GetProgramId(env, jprogramId);
     auto file_name = Common::Android::GetJString(env, jfileName);
     const auto config_file_name = program_id == 0 ? file_name : fmt::format("{:016X}", program_id);
@@ -63,21 +68,24 @@ void Java_org_yuzu_yuzu_1emu_utils_NativeConfig_initializePerGameConfig(JNIEnv* 
         std::make_unique<AndroidConfig>(config_file_name, Config::ConfigType::PerGameConfig);
 }
 
-jboolean Java_org_yuzu_yuzu_1emu_utils_NativeConfig_isPerGameConfigLoaded(JNIEnv* env,
-                                                                          jobject obj) {
+jboolean Java_org_yuzu_yuzu_1emu_utils_NativeConfig_isPerGameConfigLoaded(JNIEnv* env, jobject obj)
+{
     return per_game_config != nullptr;
 }
 
-void Java_org_yuzu_yuzu_1emu_utils_NativeConfig_savePerGameConfig(JNIEnv* env, jobject obj) {
+void Java_org_yuzu_yuzu_1emu_utils_NativeConfig_savePerGameConfig(JNIEnv* env, jobject obj)
+{
     per_game_config->AndroidConfig::SaveAllValues();
 }
 
-void Java_org_yuzu_yuzu_1emu_utils_NativeConfig_unloadPerGameConfig(JNIEnv* env, jobject obj) {
+void Java_org_yuzu_yuzu_1emu_utils_NativeConfig_unloadPerGameConfig(JNIEnv* env, jobject obj)
+{
     per_game_config.reset();
 }
 
 jboolean Java_org_yuzu_yuzu_1emu_utils_NativeConfig_getBoolean(JNIEnv* env, jobject obj,
-                                                               jstring jkey, jboolean needGlobal) {
+                                                               jstring jkey, jboolean needGlobal)
+{
     auto setting = getSetting<bool>(env, jkey);
     if (setting == nullptr) {
         return false;
@@ -86,7 +94,8 @@ jboolean Java_org_yuzu_yuzu_1emu_utils_NativeConfig_getBoolean(JNIEnv* env, jobj
 }
 
 void Java_org_yuzu_yuzu_1emu_utils_NativeConfig_setBoolean(JNIEnv* env, jobject obj, jstring jkey,
-                                                           jboolean value) {
+                                                           jboolean value)
+{
     auto setting = getSetting<bool>(env, jkey);
     if (setting == nullptr) {
         return;
@@ -95,7 +104,8 @@ void Java_org_yuzu_yuzu_1emu_utils_NativeConfig_setBoolean(JNIEnv* env, jobject 
 }
 
 jbyte Java_org_yuzu_yuzu_1emu_utils_NativeConfig_getByte(JNIEnv* env, jobject obj, jstring jkey,
-                                                         jboolean needGlobal) {
+                                                         jboolean needGlobal)
+{
     auto setting = getSetting<u8>(env, jkey);
     if (setting == nullptr) {
         return -1;
@@ -104,7 +114,8 @@ jbyte Java_org_yuzu_yuzu_1emu_utils_NativeConfig_getByte(JNIEnv* env, jobject ob
 }
 
 void Java_org_yuzu_yuzu_1emu_utils_NativeConfig_setByte(JNIEnv* env, jobject obj, jstring jkey,
-                                                        jbyte value) {
+                                                        jbyte value)
+{
     auto setting = getSetting<u8>(env, jkey);
     if (setting == nullptr) {
         return;
@@ -113,7 +124,8 @@ void Java_org_yuzu_yuzu_1emu_utils_NativeConfig_setByte(JNIEnv* env, jobject obj
 }
 
 jshort Java_org_yuzu_yuzu_1emu_utils_NativeConfig_getShort(JNIEnv* env, jobject obj, jstring jkey,
-                                                           jboolean needGlobal) {
+                                                           jboolean needGlobal)
+{
     auto setting = getSetting<u16>(env, jkey);
     if (setting == nullptr) {
         return -1;
@@ -122,7 +134,8 @@ jshort Java_org_yuzu_yuzu_1emu_utils_NativeConfig_getShort(JNIEnv* env, jobject 
 }
 
 void Java_org_yuzu_yuzu_1emu_utils_NativeConfig_setShort(JNIEnv* env, jobject obj, jstring jkey,
-                                                         jshort value) {
+                                                         jshort value)
+{
     auto setting = getSetting<u16>(env, jkey);
     if (setting == nullptr) {
         return;
@@ -131,7 +144,8 @@ void Java_org_yuzu_yuzu_1emu_utils_NativeConfig_setShort(JNIEnv* env, jobject ob
 }
 
 jint Java_org_yuzu_yuzu_1emu_utils_NativeConfig_getInt(JNIEnv* env, jobject obj, jstring jkey,
-                                                       jboolean needGlobal) {
+                                                       jboolean needGlobal)
+{
     auto setting = getSetting<int>(env, jkey);
     if (setting == nullptr) {
         return -1;
@@ -140,7 +154,8 @@ jint Java_org_yuzu_yuzu_1emu_utils_NativeConfig_getInt(JNIEnv* env, jobject obj,
 }
 
 void Java_org_yuzu_yuzu_1emu_utils_NativeConfig_setInt(JNIEnv* env, jobject obj, jstring jkey,
-                                                       jint value) {
+                                                       jint value)
+{
     auto setting = getSetting<int>(env, jkey);
     if (setting == nullptr) {
         return;
@@ -149,7 +164,8 @@ void Java_org_yuzu_yuzu_1emu_utils_NativeConfig_setInt(JNIEnv* env, jobject obj,
 }
 
 jfloat Java_org_yuzu_yuzu_1emu_utils_NativeConfig_getFloat(JNIEnv* env, jobject obj, jstring jkey,
-                                                           jboolean needGlobal) {
+                                                           jboolean needGlobal)
+{
     auto setting = getSetting<float>(env, jkey);
     if (setting == nullptr) {
         return -1;
@@ -158,7 +174,8 @@ jfloat Java_org_yuzu_yuzu_1emu_utils_NativeConfig_getFloat(JNIEnv* env, jobject 
 }
 
 void Java_org_yuzu_yuzu_1emu_utils_NativeConfig_setFloat(JNIEnv* env, jobject obj, jstring jkey,
-                                                         jfloat value) {
+                                                         jfloat value)
+{
     auto setting = getSetting<float>(env, jkey);
     if (setting == nullptr) {
         return;
@@ -167,7 +184,8 @@ void Java_org_yuzu_yuzu_1emu_utils_NativeConfig_setFloat(JNIEnv* env, jobject ob
 }
 
 jlong Java_org_yuzu_yuzu_1emu_utils_NativeConfig_getLong(JNIEnv* env, jobject obj, jstring jkey,
-                                                         jboolean needGlobal) {
+                                                         jboolean needGlobal)
+{
     auto setting = getSetting<s64>(env, jkey);
     if (setting == nullptr) {
         return -1;
@@ -176,7 +194,8 @@ jlong Java_org_yuzu_yuzu_1emu_utils_NativeConfig_getLong(JNIEnv* env, jobject ob
 }
 
 void Java_org_yuzu_yuzu_1emu_utils_NativeConfig_setLong(JNIEnv* env, jobject obj, jstring jkey,
-                                                        jlong value) {
+                                                        jlong value)
+{
     auto setting = getSetting<long>(env, jkey);
     if (setting == nullptr) {
         return;
@@ -185,7 +204,8 @@ void Java_org_yuzu_yuzu_1emu_utils_NativeConfig_setLong(JNIEnv* env, jobject obj
 }
 
 jstring Java_org_yuzu_yuzu_1emu_utils_NativeConfig_getString(JNIEnv* env, jobject obj, jstring jkey,
-                                                             jboolean needGlobal) {
+                                                             jboolean needGlobal)
+{
     auto setting = getSetting<std::string>(env, jkey);
     if (setting == nullptr) {
         return Common::Android::ToJString(env, "");
@@ -194,7 +214,8 @@ jstring Java_org_yuzu_yuzu_1emu_utils_NativeConfig_getString(JNIEnv* env, jobjec
 }
 
 void Java_org_yuzu_yuzu_1emu_utils_NativeConfig_setString(JNIEnv* env, jobject obj, jstring jkey,
-                                                          jstring value) {
+                                                          jstring value)
+{
     auto setting = getSetting<std::string>(env, jkey);
     if (setting == nullptr) {
         return;
@@ -204,7 +225,8 @@ void Java_org_yuzu_yuzu_1emu_utils_NativeConfig_setString(JNIEnv* env, jobject o
 }
 
 jboolean Java_org_yuzu_yuzu_1emu_utils_NativeConfig_getIsRuntimeModifiable(JNIEnv* env, jobject obj,
-                                                                           jstring jkey) {
+                                                                           jstring jkey)
+{
     auto setting = getSetting<std::string>(env, jkey);
     if (setting != nullptr) {
         return setting->RuntimeModifiable();
@@ -213,7 +235,8 @@ jboolean Java_org_yuzu_yuzu_1emu_utils_NativeConfig_getIsRuntimeModifiable(JNIEn
 }
 
 jstring Java_org_yuzu_yuzu_1emu_utils_NativeConfig_getPairedSettingKey(JNIEnv* env, jobject obj,
-                                                                       jstring jkey) {
+                                                                       jstring jkey)
+{
     auto setting = getSetting<std::string>(env, jkey);
     if (setting == nullptr) {
         return Common::Android::ToJString(env, "");
@@ -226,7 +249,8 @@ jstring Java_org_yuzu_yuzu_1emu_utils_NativeConfig_getPairedSettingKey(JNIEnv* e
 }
 
 jboolean Java_org_yuzu_yuzu_1emu_utils_NativeConfig_getIsSwitchable(JNIEnv* env, jobject obj,
-                                                                    jstring jkey) {
+                                                                    jstring jkey)
+{
     auto setting = getSetting<std::string>(env, jkey);
     if (setting != nullptr) {
         return setting->Switchable();
@@ -235,7 +259,8 @@ jboolean Java_org_yuzu_yuzu_1emu_utils_NativeConfig_getIsSwitchable(JNIEnv* env,
 }
 
 jboolean Java_org_yuzu_yuzu_1emu_utils_NativeConfig_usingGlobal(JNIEnv* env, jobject obj,
-                                                                jstring jkey) {
+                                                                jstring jkey)
+{
     auto setting = getSetting<std::string>(env, jkey);
     if (setting != nullptr) {
         return setting->UsingGlobal();
@@ -244,7 +269,8 @@ jboolean Java_org_yuzu_yuzu_1emu_utils_NativeConfig_usingGlobal(JNIEnv* env, job
 }
 
 void Java_org_yuzu_yuzu_1emu_utils_NativeConfig_setGlobal(JNIEnv* env, jobject obj, jstring jkey,
-                                                          jboolean global) {
+                                                          jboolean global)
+{
     auto setting = getSetting<std::string>(env, jkey);
     if (setting != nullptr) {
         setting->SetGlobal(static_cast<bool>(global));
@@ -252,7 +278,8 @@ void Java_org_yuzu_yuzu_1emu_utils_NativeConfig_setGlobal(JNIEnv* env, jobject o
 }
 
 jboolean Java_org_yuzu_yuzu_1emu_utils_NativeConfig_getIsSaveable(JNIEnv* env, jobject obj,
-                                                                  jstring jkey) {
+                                                                  jstring jkey)
+{
     auto setting = getSetting<std::string>(env, jkey);
     if (setting != nullptr) {
         return setting->Save();
@@ -261,7 +288,8 @@ jboolean Java_org_yuzu_yuzu_1emu_utils_NativeConfig_getIsSaveable(JNIEnv* env, j
 }
 
 jstring Java_org_yuzu_yuzu_1emu_utils_NativeConfig_getDefaultToString(JNIEnv* env, jobject obj,
-                                                                      jstring jkey) {
+                                                                      jstring jkey)
+{
     auto setting = getSetting<std::string>(env, jkey);
     if (setting != nullptr) {
         return Common::Android::ToJString(env, setting->DefaultToString());
@@ -269,7 +297,8 @@ jstring Java_org_yuzu_yuzu_1emu_utils_NativeConfig_getDefaultToString(JNIEnv* en
     return Common::Android::ToJString(env, "");
 }
 
-jobjectArray Java_org_yuzu_yuzu_1emu_utils_NativeConfig_getGameDirs(JNIEnv* env, jobject obj) {
+jobjectArray Java_org_yuzu_yuzu_1emu_utils_NativeConfig_getGameDirs(JNIEnv* env, jobject obj)
+{
     jclass gameDirClass = Common::Android::GetGameDirClass();
     jmethodID gameDirConstructor = Common::Android::GetGameDirConstructor();
     jobjectArray jgameDirArray =
@@ -285,7 +314,8 @@ jobjectArray Java_org_yuzu_yuzu_1emu_utils_NativeConfig_getGameDirs(JNIEnv* env,
 }
 
 void Java_org_yuzu_yuzu_1emu_utils_NativeConfig_setGameDirs(JNIEnv* env, jobject obj,
-                                                            jobjectArray gameDirs) {
+                                                            jobjectArray gameDirs)
+{
     AndroidSettings::values.game_dirs.clear();
     int size = env->GetArrayLength(gameDirs);
 
@@ -308,7 +338,8 @@ void Java_org_yuzu_yuzu_1emu_utils_NativeConfig_setGameDirs(JNIEnv* env, jobject
 }
 
 void Java_org_yuzu_yuzu_1emu_utils_NativeConfig_addGameDir(JNIEnv* env, jobject obj,
-                                                           jobject gameDir) {
+                                                           jobject gameDir)
+{
     jclass gameDirClass = Common::Android::GetGameDirClass();
     jfieldID uriStringField = env->GetFieldID(gameDirClass, "uriString", "Ljava/lang/String;");
     jfieldID deepScanBooleanField = env->GetFieldID(gameDirClass, "deepScan", "Z");
@@ -321,7 +352,8 @@ void Java_org_yuzu_yuzu_1emu_utils_NativeConfig_addGameDir(JNIEnv* env, jobject 
 }
 
 jobjectArray Java_org_yuzu_yuzu_1emu_utils_NativeConfig_getDisabledAddons(JNIEnv* env, jobject obj,
-                                                                          jstring jprogramId) {
+                                                                          jstring jprogramId)
+{
     auto program_id = EmulationSession::GetProgramId(env, jprogramId);
     auto& disabledAddons = Settings::values.disabled_addons[program_id];
     jobjectArray jdisabledAddonsArray =
@@ -336,7 +368,8 @@ jobjectArray Java_org_yuzu_yuzu_1emu_utils_NativeConfig_getDisabledAddons(JNIEnv
 
 void Java_org_yuzu_yuzu_1emu_utils_NativeConfig_setDisabledAddons(JNIEnv* env, jobject obj,
                                                                   jstring jprogramId,
-                                                                  jobjectArray jdisabledAddons) {
+                                                                  jobjectArray jdisabledAddons)
+{
     auto program_id = EmulationSession::GetProgramId(env, jprogramId);
     Settings::values.disabled_addons[program_id].clear();
     std::vector<std::string> disabled_addons;
@@ -349,7 +382,8 @@ void Java_org_yuzu_yuzu_1emu_utils_NativeConfig_setDisabledAddons(JNIEnv* env, j
 }
 
 jobjectArray Java_org_yuzu_yuzu_1emu_utils_NativeConfig_getOverlayControlData(JNIEnv* env,
-                                                                              jobject obj) {
+                                                                              jobject obj)
+{
     jobjectArray joverlayControlDataArray =
         env->NewObjectArray(AndroidSettings::values.overlay_control_data.size(),
                             Common::Android::GetOverlayControlDataClass(), nullptr);
@@ -381,7 +415,8 @@ jobjectArray Java_org_yuzu_yuzu_1emu_utils_NativeConfig_getOverlayControlData(JN
 }
 
 void Java_org_yuzu_yuzu_1emu_utils_NativeConfig_setOverlayControlData(
-    JNIEnv* env, jobject obj, jobjectArray joverlayControlDataArray) {
+    JNIEnv* env, jobject obj, jobjectArray joverlayControlDataArray)
+{
     AndroidSettings::values.overlay_control_data.clear();
     int size = env->GetArrayLength(joverlayControlDataArray);
 
@@ -433,7 +468,8 @@ void Java_org_yuzu_yuzu_1emu_utils_NativeConfig_setOverlayControlData(
 }
 
 jobjectArray Java_org_yuzu_yuzu_1emu_utils_NativeConfig_getInputSettings(JNIEnv* env, jobject obj,
-                                                                         jboolean j_global) {
+                                                                         jboolean j_global)
+{
     Settings::values.players.SetGlobal(static_cast<bool>(j_global));
     auto& players = Settings::values.players.GetValue();
     jobjectArray j_input_settings =
@@ -484,7 +520,8 @@ jobjectArray Java_org_yuzu_yuzu_1emu_utils_NativeConfig_getInputSettings(JNIEnv*
 
 void Java_org_yuzu_yuzu_1emu_utils_NativeConfig_setInputSettings(JNIEnv* env, jobject obj,
                                                                  jobjectArray j_value,
-                                                                 jboolean j_global) {
+                                                                 jboolean j_global)
+{
     auto& players = Settings::values.players.GetValue(static_cast<bool>(j_global));
     int playersSize = env->GetArrayLength(j_value);
     for (int i = 0; i < playersSize; ++i) {
@@ -538,7 +575,8 @@ void Java_org_yuzu_yuzu_1emu_utils_NativeConfig_setInputSettings(JNIEnv* env, jo
     }
 }
 
-void Java_org_yuzu_yuzu_1emu_utils_NativeConfig_saveControlPlayerValues(JNIEnv* env, jobject obj) {
+void Java_org_yuzu_yuzu_1emu_utils_NativeConfig_saveControlPlayerValues(JNIEnv* env, jobject obj)
+{
     Settings::values.players.SetGlobal(false);
 
     // Clear all controls from the config in case the user reverted back to globals
@@ -548,47 +586,54 @@ void Java_org_yuzu_yuzu_1emu_utils_NativeConfig_saveControlPlayerValues(JNIEnv* 
     }
 }
 
-jstring Java_org_yuzu_yuzu_1emu_utils_NativeConfig_getSaveDir(JNIEnv* env, jobject obj) {
+jstring Java_org_yuzu_yuzu_1emu_utils_NativeConfig_getSaveDir(JNIEnv* env, jobject obj)
+{
     return Common::Android::ToJString(env,
-        Common::FS::GetVoltPathString(Common::FS::VoltPath::SaveDir));
+                                      Common::FS::GetVoltPathString(Common::FS::VoltPath::SaveDir));
 }
 
-jstring Java_org_yuzu_yuzu_1emu_utils_NativeConfig_getDefaultSaveDir(JNIEnv* env, jobject obj) {
+jstring Java_org_yuzu_yuzu_1emu_utils_NativeConfig_getDefaultSaveDir(JNIEnv* env, jobject obj)
+{
     return Common::Android::ToJString(env,
-        Common::FS::GetVoltPathString(Common::FS::VoltPath::NANDDir));
+                                      Common::FS::GetVoltPathString(Common::FS::VoltPath::NANDDir));
 }
 
-void Java_org_yuzu_yuzu_1emu_utils_NativeConfig_setSaveDir(JNIEnv* env, jobject obj, jstring jpath) {
+void Java_org_yuzu_yuzu_1emu_utils_NativeConfig_setSaveDir(JNIEnv* env, jobject obj, jstring jpath)
+{
     auto path = Common::Android::GetJString(env, jpath);
     Common::FS::SetVoltPath(Common::FS::VoltPath::SaveDir, path);
 }
 
-jstring Java_org_yuzu_yuzu_1emu_utils_NativeConfig_getNandDir(JNIEnv* env, jobject obj) {
+jstring Java_org_yuzu_yuzu_1emu_utils_NativeConfig_getNandDir(JNIEnv* env, jobject obj)
+{
     return Common::Android::ToJString(env,
-        Common::FS::GetVoltPathString(Common::FS::VoltPath::NANDDir));
+                                      Common::FS::GetVoltPathString(Common::FS::VoltPath::NANDDir));
 }
 
-void Java_org_yuzu_yuzu_1emu_utils_NativeConfig_setNandDir(JNIEnv* env, jobject obj, jstring jpath) {
+void Java_org_yuzu_yuzu_1emu_utils_NativeConfig_setNandDir(JNIEnv* env, jobject obj, jstring jpath)
+{
     auto path = Common::Android::GetJString(env, jpath);
     Common::FS::SetVoltPath(Common::FS::VoltPath::NANDDir, path);
 }
 
-jstring Java_org_yuzu_yuzu_1emu_utils_NativeConfig_getSdmcDir(JNIEnv* env, jobject obj) {
+jstring Java_org_yuzu_yuzu_1emu_utils_NativeConfig_getSdmcDir(JNIEnv* env, jobject obj)
+{
     return Common::Android::ToJString(env,
-        Common::FS::GetVoltPathString(Common::FS::VoltPath::SDMCDir));
+                                      Common::FS::GetVoltPathString(Common::FS::VoltPath::SDMCDir));
 }
 
-void Java_org_yuzu_yuzu_1emu_utils_NativeConfig_setSdmcDir(JNIEnv* env, jobject obj, jstring jpath) {
+void Java_org_yuzu_yuzu_1emu_utils_NativeConfig_setSdmcDir(JNIEnv* env, jobject obj, jstring jpath)
+{
     auto path = Common::Android::GetJString(env, jpath);
     Common::FS::SetVoltPath(Common::FS::VoltPath::SDMCDir, path);
 }
 
 jobjectArray Java_org_yuzu_yuzu_1emu_utils_NativeConfig_getExternalContentDirs(JNIEnv* env,
-                                                                               jobject obj) {
+                                                                               jobject obj)
+{
     const auto& dirs = Settings::values.external_content_dirs;
-    jobjectArray jdirsArray =
-        env->NewObjectArray(dirs.size(), Common::Android::GetStringClass(),
-                            Common::Android::ToJString(env, ""));
+    jobjectArray jdirsArray = env->NewObjectArray(dirs.size(), Common::Android::GetStringClass(),
+                                                  Common::Android::ToJString(env, ""));
     for (size_t i = 0; i < dirs.size(); ++i) {
         env->SetObjectArrayElement(jdirsArray, i, Common::Android::ToJString(env, dirs[i]));
     }
@@ -596,7 +641,8 @@ jobjectArray Java_org_yuzu_yuzu_1emu_utils_NativeConfig_getExternalContentDirs(J
 }
 
 void Java_org_yuzu_yuzu_1emu_utils_NativeConfig_setExternalContentDirs(JNIEnv* env, jobject obj,
-                                                                       jobjectArray jdirs) {
+                                                                       jobjectArray jdirs)
+{
     Settings::values.external_content_dirs.clear();
     const int size = env->GetArrayLength(jdirs);
     for (int i = 0; i < size; ++i) {

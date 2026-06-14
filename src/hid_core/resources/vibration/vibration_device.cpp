@@ -1,17 +1,21 @@
 // SPDX-FileCopyrightText: Copyright 2024 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+#include "hid_core/resources/vibration/vibration_device.h"
+
 #include "hid_core/frontend/emulated_controller.h"
 #include "hid_core/hid_result.h"
 #include "hid_core/resources/npad/npad_types.h"
 #include "hid_core/resources/npad/npad_vibration.h"
-#include "hid_core/resources/vibration/vibration_device.h"
 
 namespace Service::HID {
 
-NpadVibrationDevice::NpadVibrationDevice() {}
+NpadVibrationDevice::NpadVibrationDevice()
+{
+}
 
-Result NpadVibrationDevice::Activate() {
+Result NpadVibrationDevice::Activate()
+{
     if (ref_counter == 0 && is_mounted) {
         f32 volume = 1.0f;
         const auto result = vibration_handler->GetVibrationVolume(volume);
@@ -25,7 +29,8 @@ Result NpadVibrationDevice::Activate() {
     return ResultSuccess;
 }
 
-Result NpadVibrationDevice::Deactivate() {
+Result NpadVibrationDevice::Deactivate()
+{
     if (ref_counter == 1 && is_mounted) {
         f32 volume = 1.0f;
         const auto result = vibration_handler->GetVibrationVolume(volume);
@@ -43,7 +48,8 @@ Result NpadVibrationDevice::Deactivate() {
 }
 
 Result NpadVibrationDevice::Mount(IAbstractedPad& abstracted_pad, Core::HID::DeviceIndex index,
-                                  NpadVibration* handler) {
+                                  NpadVibration* handler)
+{
     if (!abstracted_pad.internal_flags.is_connected) {
         return ResultSuccess;
     }
@@ -65,7 +71,8 @@ Result NpadVibrationDevice::Mount(IAbstractedPad& abstracted_pad, Core::HID::Dev
     return ResultSuccess;
 }
 
-Result NpadVibrationDevice::Unmount() {
+Result NpadVibrationDevice::Unmount()
+{
     if (ref_counter == 0 || !is_mounted) {
         is_mounted = false;
         return ResultSuccess;
@@ -81,7 +88,8 @@ Result NpadVibrationDevice::Unmount() {
     return ResultSuccess;
 }
 
-Result NpadVibrationDevice::SendVibrationValue(const Core::HID::VibrationValue& value) {
+Result NpadVibrationDevice::SendVibrationValue(const Core::HID::VibrationValue& value)
+{
     if (ref_counter == 0) {
         return ResultVibrationNotInitialized;
     }
@@ -107,7 +115,8 @@ Result NpadVibrationDevice::SendVibrationValue(const Core::HID::VibrationValue& 
     return ResultSuccess;
 }
 
-Result NpadVibrationDevice::SendVibrationNotificationPattern([[maybe_unused]] u32 pattern) {
+Result NpadVibrationDevice::SendVibrationNotificationPattern([[maybe_unused]] u32 pattern)
+{
     if (!is_mounted) {
         return ResultSuccess;
     }
@@ -125,7 +134,8 @@ Result NpadVibrationDevice::SendVibrationNotificationPattern([[maybe_unused]] u3
     return ResultSuccess;
 }
 
-Result NpadVibrationDevice::GetActualVibrationValue(Core::HID::VibrationValue& out_value) const {
+Result NpadVibrationDevice::GetActualVibrationValue(Core::HID::VibrationValue& out_value) const
+{
     if (ref_counter < 1) {
         return ResultVibrationNotInitialized;
     }

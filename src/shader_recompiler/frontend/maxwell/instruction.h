@@ -19,11 +19,13 @@ struct Predicate {
     bool negated;
 };
 
-inline bool operator==(const Predicate& lhs, const Predicate& rhs) noexcept {
+inline bool operator==(const Predicate& lhs, const Predicate& rhs) noexcept
+{
     return lhs.index == rhs.index && lhs.negated == rhs.negated;
 }
 
-inline bool operator!=(const Predicate& lhs, const Predicate& rhs) noexcept {
+inline bool operator!=(const Predicate& lhs, const Predicate& rhs) noexcept
+{
     return !(lhs == rhs);
 }
 
@@ -36,22 +38,16 @@ union Instruction {
         BitField<5, 1, u64> is_cbuf;
         BitField<0, 5, IR::FlowTest> flow_test;
 
-        [[nodiscard]] u32 Absolute() const noexcept {
-            return static_cast<u32>(absolute);
-        }
+        [[nodiscard]] u32 Absolute() const noexcept { return static_cast<u32>(absolute); }
 
-        [[nodiscard]] s32 Offset() const noexcept {
-            return static_cast<s32>(offset);
-        }
+        [[nodiscard]] s32 Offset() const noexcept { return static_cast<s32>(offset); }
 
     private:
         BitField<20, 24, s64> offset;
         BitField<20, 32, u64> absolute;
     } branch;
 
-    [[nodiscard]] Predicate Pred() const noexcept {
-        return Predicate{pred};
-    }
+    [[nodiscard]] Predicate Pred() const noexcept { return Predicate{pred}; }
 
 private:
     BitField<16, 4, u64> pred;

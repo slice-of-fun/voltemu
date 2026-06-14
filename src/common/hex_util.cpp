@@ -6,7 +6,8 @@
 
 namespace Common {
 
-std::vector<u8> HexStringToVector(std::string_view str, bool little_endian) {
+std::vector<u8> HexStringToVector(std::string_view str, bool little_endian)
+{
     std::vector<u8> out(str.size() / 2);
     if (little_endian) {
         for (std::size_t i = str.size() - 2; i <= str.size(); i -= 2)

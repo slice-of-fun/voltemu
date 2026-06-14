@@ -5,12 +5,15 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include "audio_core/audio_event.h"
-#include "common/assert.h"
+
 #include <ranges>
+
+#include "common/assert.h"
 
 namespace AudioCore {
 
-size_t Event::GetManagerIndex(const Type type) const {
+size_t Event::GetManagerIndex(const Type type) const
+{
     switch (type) {
     case Type::AudioInManager:
         return 0;
@@ -25,26 +28,31 @@ size_t Event::GetManagerIndex(const Type type) const {
     }
 }
 
-void Event::SetAudioEvent(const Type type, const bool signalled) {
+void Event::SetAudioEvent(const Type type, const bool signalled)
+{
     events_signalled[GetManagerIndex(type)] = signalled;
     if (signalled) {
         manager_event.notify_one();
     }
 }
 
-bool Event::CheckAudioEventSet(const Type type) const {
+bool Event::CheckAudioEventSet(const Type type) const
+{
     return events_signalled[GetManagerIndex(type)];
 }
 
-std::mutex& Event::GetAudioEventLock() {
+std::mutex& Event::GetAudioEventLock()
+{
     return event_lock;
 }
 
-std::condition_variable_any& Event::GetAudioEvent() {
+std::condition_variable_any& Event::GetAudioEvent()
+{
     return manager_event;
 }
 
-bool Event::Wait(std::unique_lock<std::mutex>& l, const std::chrono::seconds timeout) {
+bool Event::Wait(std::unique_lock<std::mutex>& l, const std::chrono::seconds timeout)
+{
     bool timed_out{false};
     if (!manager_event.wait_for(l, timeout, [&]() {
             return std::ranges::any_of(events_signalled, [](bool x) { return x; });
@@ -54,7 +62,8 @@ bool Event::Wait(std::unique_lock<std::mutex>& l, const std::chrono::seconds tim
     return timed_out;
 }
 
-void Event::ClearEvents() {
+void Event::ClearEvents()
+{
     events_signalled[0] = false;
     events_signalled[1] = false;
     events_signalled[2] = false;

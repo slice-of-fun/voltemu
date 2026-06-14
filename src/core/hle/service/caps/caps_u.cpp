@@ -4,10 +4,11 @@
 // SPDX-FileCopyrightText: Copyright 2020 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/caps/caps_u.h"
+
 #include "common/logging.h"
 #include "core/hle/service/caps/caps_manager.h"
 #include "core/hle/service/caps/caps_types.h"
-#include "core/hle/service/caps/caps_u.h"
 #include "core/hle/service/cmif_serialization.h"
 #include "core/hle/service/ipc_helpers.h"
 
@@ -15,7 +16,8 @@ namespace Service::Capture {
 
 IAlbumApplicationService::IAlbumApplicationService(Core::System& system_,
                                                    std::shared_ptr<AlbumManager> album_manager)
-    : ServiceFramework{system_, "caps:u"}, manager{album_manager} {
+    : ServiceFramework{system_, "caps:u"}, manager{album_manager}
+{
     // clang-format off
     static const FunctionInfo functions[] = {
         {32, C<&IAlbumApplicationService::SetShimLibraryVersion>, "SetShimLibraryVersion"},
@@ -41,7 +43,8 @@ IAlbumApplicationService::IAlbumApplicationService(Core::System& system_,
 IAlbumApplicationService::~IAlbumApplicationService() = default;
 
 Result IAlbumApplicationService::SetShimLibraryVersion(ShimLibraryVersion library_version,
-                                                       ClientAppletResourceUserId aruid) {
+                                                       ClientAppletResourceUserId aruid)
+{
     LOG_WARNING(Service_Capture, "(STUBBED) called. library_version={}, applet_resource_user_id={}",
                 library_version, aruid.pid);
     R_SUCCEED();
@@ -50,7 +53,8 @@ Result IAlbumApplicationService::SetShimLibraryVersion(ShimLibraryVersion librar
 Result IAlbumApplicationService::GetAlbumFileList0AafeAruidDeprecated(
     Out<u64> out_entries_count, ContentType content_type, s64 start_posix_time, s64 end_posix_time,
     ClientAppletResourceUserId aruid,
-    OutArray<ApplicationAlbumFileEntry, BufferAttr_HipcMapAlias> out_entries) {
+    OutArray<ApplicationAlbumFileEntry, BufferAttr_HipcMapAlias> out_entries)
+{
     LOG_WARNING(Service_Capture,
                 "(STUBBED) called. content_type={}, start_posix_time={}, end_posix_time={}, "
                 "applet_resource_user_id={}",
@@ -64,7 +68,8 @@ Result IAlbumApplicationService::GetAlbumFileList0AafeAruidDeprecated(
 Result IAlbumApplicationService::GetAlbumFileList3AaeAruid(
     Out<u64> out_entries_count, ContentType content_type, AlbumFileDateTime start_date_time,
     AlbumFileDateTime end_date_time, ClientAppletResourceUserId aruid,
-    OutArray<ApplicationAlbumEntry, BufferAttr_HipcMapAlias> out_entries) {
+    OutArray<ApplicationAlbumEntry, BufferAttr_HipcMapAlias> out_entries)
+{
     LOG_WARNING(Service_Capture,
                 "(STUBBED) called. content_type={}, start_date={}/{}/{}, "
                 "end_date={}/{}/{}, applet_resource_user_id={}",

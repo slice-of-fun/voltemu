@@ -3,9 +3,9 @@
 
 #pragma once
 
+#include <QWidget>
 #include <array>
 #include <memory>
-#include <QWidget>
 
 class QColor;
 class QPushButton;

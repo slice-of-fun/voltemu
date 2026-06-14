@@ -1,8 +1,9 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include "core/hle/service/audio/hardware_opus_decoder.h"
 #include "core/hle/service/audio/hardware_opus_decoder_manager.h"
+
+#include "core/hle/service/audio/hardware_opus_decoder.h"
 #include "core/hle/service/cmif_serialization.h"
 
 namespace Service::Audio {
@@ -10,7 +11,8 @@ namespace Service::Audio {
 using namespace AudioCore::OpusDecoder;
 
 IHardwareOpusDecoderManager::IHardwareOpusDecoderManager(Core::System& system_)
-    : ServiceFramework{system_, "hwopus"}, system{system_}, impl{system} {
+    : ServiceFramework{system_, "hwopus"}, system{system_}, impl{system}
+{
     // clang-format off
     static const FunctionInfo functions[] = {
         {0, D<&IHardwareOpusDecoderManager::OpenHardwareOpusDecoder>, "OpenHardwareOpusDecoder"},
@@ -32,7 +34,8 @@ IHardwareOpusDecoderManager::~IHardwareOpusDecoderManager() = default;
 
 Result IHardwareOpusDecoderManager::OpenHardwareOpusDecoder(
     Out<SharedPointer<IHardwareOpusDecoder>> out_decoder, OpusParameters params, u32 tmem_size,
-    InCopyHandle<Kernel::KTransferMemory> tmem_handle) {
+    InCopyHandle<Kernel::KTransferMemory> tmem_handle)
+{
     LOG_DEBUG(Service_Audio, "sample_rate {} channel_count {} transfer_memory_size {:#x}",
               params.sample_rate, params.channel_count, tmem_size);
 
@@ -48,7 +51,8 @@ Result IHardwareOpusDecoderManager::OpenHardwareOpusDecoder(
     R_SUCCEED();
 }
 
-Result IHardwareOpusDecoderManager::GetWorkBufferSize(Out<u32> out_size, OpusParameters params) {
+Result IHardwareOpusDecoderManager::GetWorkBufferSize(Out<u32> out_size, OpusParameters params)
+{
     R_TRY(impl.GetWorkBufferSize(params, *out_size));
     LOG_DEBUG(Service_Audio, "sample_rate {} channel_count {} -- returned size {:#x}",
               params.sample_rate, params.channel_count, *out_size);
@@ -58,7 +62,8 @@ Result IHardwareOpusDecoderManager::GetWorkBufferSize(Out<u32> out_size, OpusPar
 Result IHardwareOpusDecoderManager::OpenHardwareOpusDecoderForMultiStream(
     Out<SharedPointer<IHardwareOpusDecoder>> out_decoder,
     InLargeData<OpusMultiStreamParameters, BufferAttr_HipcPointer> params, u32 tmem_size,
-    InCopyHandle<Kernel::KTransferMemory> tmem_handle) {
+    InCopyHandle<Kernel::KTransferMemory> tmem_handle)
+{
     LOG_DEBUG(Service_Audio,
               "sample_rate {} channel_count {} total_stream_count {} stereo_stream_count {} "
               "transfer_memory_size {:#x}",
@@ -83,7 +88,8 @@ Result IHardwareOpusDecoderManager::OpenHardwareOpusDecoderForMultiStream(
 }
 
 Result IHardwareOpusDecoderManager::GetWorkBufferSizeForMultiStream(
-    Out<u32> out_size, InLargeData<OpusMultiStreamParameters, BufferAttr_HipcPointer> params) {
+    Out<u32> out_size, InLargeData<OpusMultiStreamParameters, BufferAttr_HipcPointer> params)
+{
     R_TRY(impl.GetWorkBufferSizeForMultiStream(*params, *out_size));
     LOG_DEBUG(Service_Audio, "size {:#x}", *out_size);
     R_SUCCEED();
@@ -91,7 +97,8 @@ Result IHardwareOpusDecoderManager::GetWorkBufferSizeForMultiStream(
 
 Result IHardwareOpusDecoderManager::OpenHardwareOpusDecoderEx(
     Out<SharedPointer<IHardwareOpusDecoder>> out_decoder, OpusParametersEx params, u32 tmem_size,
-    InCopyHandle<Kernel::KTransferMemory> tmem_handle) {
+    InCopyHandle<Kernel::KTransferMemory> tmem_handle)
+{
     LOG_DEBUG(Service_Audio, "sample_rate {} channel_count {} transfer_memory_size {:#x}",
               params.sample_rate, params.channel_count, tmem_size);
 
@@ -102,8 +109,8 @@ Result IHardwareOpusDecoderManager::OpenHardwareOpusDecoderEx(
     R_SUCCEED();
 }
 
-Result IHardwareOpusDecoderManager::GetWorkBufferSizeEx(Out<u32> out_size,
-                                                        OpusParametersEx params) {
+Result IHardwareOpusDecoderManager::GetWorkBufferSizeEx(Out<u32> out_size, OpusParametersEx params)
+{
     R_TRY(impl.GetWorkBufferSizeEx(params, *out_size));
     LOG_DEBUG(Service_Audio, "size {:#x}", *out_size);
     R_SUCCEED();
@@ -112,7 +119,8 @@ Result IHardwareOpusDecoderManager::GetWorkBufferSizeEx(Out<u32> out_size,
 Result IHardwareOpusDecoderManager::OpenHardwareOpusDecoderForMultiStreamEx(
     Out<SharedPointer<IHardwareOpusDecoder>> out_decoder,
     InLargeData<OpusMultiStreamParametersEx, BufferAttr_HipcPointer> params, u32 tmem_size,
-    InCopyHandle<Kernel::KTransferMemory> tmem_handle) {
+    InCopyHandle<Kernel::KTransferMemory> tmem_handle)
+{
     LOG_DEBUG(Service_Audio,
               "sample_rate {} channel_count {} total_stream_count {} stereo_stream_count {} "
               "use_large_frame_size {}"
@@ -129,7 +137,8 @@ Result IHardwareOpusDecoderManager::OpenHardwareOpusDecoderForMultiStreamEx(
 }
 
 Result IHardwareOpusDecoderManager::GetWorkBufferSizeForMultiStreamEx(
-    Out<u32> out_size, InLargeData<OpusMultiStreamParametersEx, BufferAttr_HipcPointer> params) {
+    Out<u32> out_size, InLargeData<OpusMultiStreamParametersEx, BufferAttr_HipcPointer> params)
+{
     R_TRY(impl.GetWorkBufferSizeForMultiStreamEx(*params, *out_size));
     LOG_DEBUG(Service_Audio,
               "sample_rate {} channel_count {} total_stream_count {} stereo_stream_count {} "
@@ -140,14 +149,16 @@ Result IHardwareOpusDecoderManager::GetWorkBufferSizeForMultiStreamEx(
 }
 
 Result IHardwareOpusDecoderManager::GetWorkBufferSizeExEx(Out<u32> out_size,
-                                                          OpusParametersEx params) {
+                                                          OpusParametersEx params)
+{
     R_TRY(impl.GetWorkBufferSizeExEx(params, *out_size));
     LOG_DEBUG(Service_Audio, "size {:#x}", *out_size);
     R_SUCCEED();
 }
 
 Result IHardwareOpusDecoderManager::GetWorkBufferSizeForMultiStreamExEx(
-    Out<u32> out_size, InLargeData<OpusMultiStreamParametersEx, BufferAttr_HipcPointer> params) {
+    Out<u32> out_size, InLargeData<OpusMultiStreamParametersEx, BufferAttr_HipcPointer> params)
+{
     R_TRY(impl.GetWorkBufferSizeForMultiStreamExEx(*params, *out_size));
     LOG_DEBUG(Service_Audio, "size {:#x}", *out_size);
     R_SUCCEED();

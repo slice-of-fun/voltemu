@@ -1,16 +1,18 @@
 // SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+#include "yuzu/game/game_grid.h"
+
 #include <QScroller>
 #include <QScrollerProperties>
 
 #include "qt_common/config/uisettings.h"
-#include "yuzu/game/game_card.h"
-#include "yuzu/game/game_grid.h"
 #include "qt_common/game_list/game_list_p.h"
 #include "qt_common/game_list/model.h"
+#include "yuzu/game/game_card.h"
 
-GameGrid::GameGrid(QWidget* parent) : QListView{parent} {
+GameGrid::GameGrid(QWidget* parent) : QListView{parent}
+{
     m_gameCard = new GameCard(this);
     setItemDelegate(m_gameCard);
 
@@ -35,17 +37,18 @@ GameGrid::GameGrid(QWidget* parent) : QListView{parent} {
     setWrapping(true);
 }
 
-void GameGrid::SetModel(GameListModel* model) {
+void GameGrid::SetModel(GameListModel* model)
+{
     QListView::setModel(model);
     UpdateIconSize();
 }
 
-void GameGrid::ApplyFilter(const QString& edit_filter_text, GameListModel* model) {
+void GameGrid::ApplyFilter(const QString& edit_filter_text, GameListModel* model)
+{
     int row_count = model->rowCount();
 
     auto ContainsAllWords = [](const QString& haystack, const QString& userinput) {
-        const QStringList userinput_split =
-            userinput.split(QLatin1Char{' '}, Qt::SkipEmptyParts);
+        const QStringList userinput_split = userinput.split(QLatin1Char{' '}, Qt::SkipEmptyParts);
         return std::all_of(userinput_split.begin(), userinput_split.end(),
                            [&haystack](const QString& s) { return haystack.contains(s); });
     };
@@ -55,10 +58,8 @@ void GameGrid::ApplyFilter(const QString& edit_filter_text, GameListModel* model
         if (!item)
             continue;
 
-        const QString file_path =
-            item->data(GameListItemPath::FullPathRole).toString().toLower();
-        const QString file_title =
-            item->data(GameListItemPath::TitleRole).toString().toLower();
+        const QString file_path = item->data(GameListItemPath::FullPathRole).toString().toLower();
+        const QString file_title = item->data(GameListItemPath::TitleRole).toString().toLower();
         const QString file_name = file_path.mid(file_path.lastIndexOf(QLatin1Char{'/'}) + 1) +
                                   QLatin1Char{' '} + file_title;
 
@@ -70,7 +71,8 @@ void GameGrid::ApplyFilter(const QString& edit_filter_text, GameListModel* model
     }
 }
 
-void GameGrid::UpdateIconSize() {
+void GameGrid::UpdateIconSize()
+{
     const u32 icon_size = UISettings::values.game_icon_size.GetValue();
 
     int heightMargin = 0;

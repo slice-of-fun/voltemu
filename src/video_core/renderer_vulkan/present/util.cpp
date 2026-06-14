@@ -4,14 +4,18 @@
 // SPDX-FileCopyrightText: Copyright 2024 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include "common/assert.h"
-#include <ranges>
-#include <vulkan/vulkan_core.h>
 #include "video_core/renderer_vulkan/present/util.h"
+
+#include <vulkan/vulkan_core.h>
+
+#include <ranges>
+
+#include "common/assert.h"
 
 namespace Vulkan {
 
-vk::Buffer CreateWrappedBuffer(MemoryAllocator& allocator, VkDeviceSize size, MemoryUsage usage) {
+vk::Buffer CreateWrappedBuffer(MemoryAllocator& allocator, VkDeviceSize size, MemoryUsage usage)
+{
     const VkBufferCreateInfo dst_buffer_info{
         .sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
         .pNext = nullptr,
@@ -25,7 +29,8 @@ vk::Buffer CreateWrappedBuffer(MemoryAllocator& allocator, VkDeviceSize size, Me
     return allocator.CreateBuffer(dst_buffer_info, usage);
 }
 
-vk::Image CreateWrappedImage(MemoryAllocator& allocator, VkExtent2D dimensions, VkFormat format) {
+vk::Image CreateWrappedImage(MemoryAllocator& allocator, VkExtent2D dimensions, VkFormat format)
+{
     const VkImageCreateInfo image_ci{
         .sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
         .pNext = nullptr,
@@ -48,7 +53,8 @@ vk::Image CreateWrappedImage(MemoryAllocator& allocator, VkExtent2D dimensions, 
 }
 
 void TransitionImageLayout(vk::CommandBuffer& cmdbuf, VkImage image, VkImageLayout target_layout,
-                           VkImageLayout source_layout) {
+                           VkImageLayout source_layout)
+{
     constexpr VkFlags flags{VK_ACCESS_COLOR_ATTACHMENT_READ_BIT |
                             VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_SHADER_READ_BIT};
     const VkImageMemoryBarrier barrier{
@@ -75,7 +81,8 @@ void TransitionImageLayout(vk::CommandBuffer& cmdbuf, VkImage image, VkImageLayo
 
 void UploadImage(const Device& device, MemoryAllocator& allocator, Scheduler& scheduler,
                  vk::Image& image, VkExtent2D dimensions, VkFormat format,
-                 std::span<const u8> initial_contents) {
+                 std::span<const u8> initial_contents)
+{
     const VkBufferCreateInfo upload_ci = {
         .sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
         .pNext = nullptr,
@@ -115,7 +122,8 @@ void UploadImage(const Device& device, MemoryAllocator& allocator, Scheduler& sc
 }
 
 void DownloadColorImage(vk::CommandBuffer& cmdbuf, VkImage image, VkBuffer buffer,
-                        VkExtent3D extent) {
+                        VkExtent3D extent)
+{
     const VkImageMemoryBarrier read_barrier{
         .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
         .pNext = nullptr,
@@ -171,14 +179,15 @@ void DownloadColorImage(vk::CommandBuffer& cmdbuf, VkImage image, VkBuffer buffe
         .imageOffset{.x = 0, .y = 0, .z = 0},
         .imageExtent{extent},
     };
-    cmdbuf.PipelineBarrier(vk::PIPELINE_STAGE_GRAPHICS_COMPUTE_TRANSFER, VK_PIPELINE_STAGE_TRANSFER_BIT, 0,
-                           read_barrier);
+    cmdbuf.PipelineBarrier(vk::PIPELINE_STAGE_GRAPHICS_COMPUTE_TRANSFER,
+                           VK_PIPELINE_STAGE_TRANSFER_BIT, 0, read_barrier);
     cmdbuf.CopyImageToBuffer(image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, buffer, copy);
     cmdbuf.PipelineBarrier(VK_PIPELINE_STAGE_TRANSFER_BIT, vk::PIPELINE_STAGE_GRAPHICS_COMPUTE, 0,
                            memory_write_barrier, nullptr, image_write_barrier);
 }
 
-vk::ImageView CreateWrappedImageView(const Device& device, vk::Image& image, VkFormat format) {
+vk::ImageView CreateWrappedImageView(const Device& device, vk::Image& image, VkFormat format)
+{
     return device.GetLogical().CreateImageView(VkImageViewCreateInfo{
         .sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
         .pNext = nullptr,
@@ -196,7 +205,8 @@ vk::ImageView CreateWrappedImageView(const Device& device, vk::Image& image, VkF
 }
 
 vk::RenderPass CreateWrappedRenderPass(const Device& device, VkFormat format,
-                                       VkImageLayout initial_layout) {
+                                       VkImageLayout initial_layout)
+{
     const VkAttachmentDescription attachment{
         .flags = VK_ATTACHMENT_DESCRIPTION_MAY_ALIAS_BIT,
         .format = format,
@@ -252,7 +262,8 @@ vk::RenderPass CreateWrappedRenderPass(const Device& device, VkFormat format,
 }
 
 vk::Framebuffer CreateWrappedFramebuffer(const Device& device, vk::RenderPass& render_pass,
-                                         vk::ImageView& dest_image, VkExtent2D extent) {
+                                         vk::ImageView& dest_image, VkExtent2D extent)
+{
     return device.GetLogical().CreateFramebuffer(VkFramebufferCreateInfo{
         .sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO,
         .pNext = nullptr,
@@ -266,7 +277,8 @@ vk::Framebuffer CreateWrappedFramebuffer(const Device& device, vk::RenderPass& r
     });
 }
 
-vk::Sampler CreateWrappedSampler(const Device& device, VkFilter filter) {
+vk::Sampler CreateWrappedSampler(const Device& device, VkFilter filter)
+{
     return device.GetLogical().CreateSampler(VkSamplerCreateInfo{
         .sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
         .pNext = nullptr,
@@ -289,7 +301,8 @@ vk::Sampler CreateWrappedSampler(const Device& device, VkFilter filter) {
     });
 }
 
-vk::ShaderModule CreateWrappedShaderModule(const Device& device, std::span<const u32> code) {
+vk::ShaderModule CreateWrappedShaderModule(const Device& device, std::span<const u32> code)
+{
     return device.GetLogical().CreateShaderModule(VkShaderModuleCreateInfo{
         .sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
         .pNext = nullptr,
@@ -301,7 +314,8 @@ vk::ShaderModule CreateWrappedShaderModule(const Device& device, std::span<const
 
 vk::DescriptorPool CreateWrappedDescriptorPool(const Device& device, size_t max_descriptors,
                                                size_t max_sets,
-                                               std::initializer_list<VkDescriptorType> types) {
+                                               std::initializer_list<VkDescriptorType> types)
+{
     std::vector<VkDescriptorPoolSize> pool_sizes(types.size());
     for (u32 i = 0; i < types.size(); i++) {
         pool_sizes[i] = VkDescriptorPoolSize{
@@ -320,8 +334,10 @@ vk::DescriptorPool CreateWrappedDescriptorPool(const Device& device, size_t max_
     });
 }
 
-vk::DescriptorSetLayout CreateWrappedDescriptorSetLayout(
-    const Device& device, std::initializer_list<VkDescriptorType> types) {
+vk::DescriptorSetLayout
+CreateWrappedDescriptorSetLayout(const Device& device,
+                                 std::initializer_list<VkDescriptorType> types)
+{
     std::vector<VkDescriptorSetLayoutBinding> bindings(types.size());
     for (size_t i = 0; i < types.size(); i++) {
         bindings[i] = {
@@ -343,7 +359,8 @@ vk::DescriptorSetLayout CreateWrappedDescriptorSetLayout(
 }
 
 vk::DescriptorSets CreateWrappedDescriptorSets(vk::DescriptorPool& pool,
-                                               vk::Span<VkDescriptorSetLayout> layouts) {
+                                               vk::Span<VkDescriptorSetLayout> layouts)
+{
     return pool.Allocate(VkDescriptorSetAllocateInfo{
         .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
         .pNext = nullptr,
@@ -354,7 +371,8 @@ vk::DescriptorSets CreateWrappedDescriptorSets(vk::DescriptorPool& pool,
 }
 
 vk::PipelineLayout CreateWrappedPipelineLayout(const Device& device,
-                                               vk::DescriptorSetLayout& layout) {
+                                               vk::DescriptorSetLayout& layout)
+{
     return device.GetLogical().CreatePipelineLayout(VkPipelineLayoutCreateInfo{
         .sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
         .pNext = nullptr,
@@ -366,10 +384,12 @@ vk::PipelineLayout CreateWrappedPipelineLayout(const Device& device,
     });
 }
 
-static vk::Pipeline CreateWrappedPipelineImpl(
-    const Device& device, vk::RenderPass& renderpass, vk::PipelineLayout& layout,
-    std::tuple<vk::ShaderModule&, vk::ShaderModule&> shaders,
-    VkPipelineColorBlendAttachmentState blending) {
+static vk::Pipeline
+CreateWrappedPipelineImpl(const Device& device, vk::RenderPass& renderpass,
+                          vk::PipelineLayout& layout,
+                          std::tuple<vk::ShaderModule&, vk::ShaderModule&> shaders,
+                          VkPipelineColorBlendAttachmentState blending)
+{
     const std::array<VkPipelineShaderStageCreateInfo, 2> shader_stages{{
         {
             .sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
@@ -496,7 +516,8 @@ static vk::Pipeline CreateWrappedPipelineImpl(
 
 vk::Pipeline CreateWrappedPipeline(const Device& device, vk::RenderPass& renderpass,
                                    vk::PipelineLayout& layout,
-                                   std::tuple<vk::ShaderModule&, vk::ShaderModule&> shaders) {
+                                   std::tuple<vk::ShaderModule&, vk::ShaderModule&> shaders)
+{
     constexpr VkPipelineColorBlendAttachmentState color_blend_attachment_disabled{
         .blendEnable = VK_FALSE,
         .srcColorBlendFactor = VK_BLEND_FACTOR_ZERO,
@@ -513,9 +534,11 @@ vk::Pipeline CreateWrappedPipeline(const Device& device, vk::RenderPass& renderp
                                      color_blend_attachment_disabled);
 }
 
-vk::Pipeline CreateWrappedPremultipliedBlendingPipeline(
-    const Device& device, vk::RenderPass& renderpass, vk::PipelineLayout& layout,
-    std::tuple<vk::ShaderModule&, vk::ShaderModule&> shaders) {
+vk::Pipeline
+CreateWrappedPremultipliedBlendingPipeline(const Device& device, vk::RenderPass& renderpass,
+                                           vk::PipelineLayout& layout,
+                                           std::tuple<vk::ShaderModule&, vk::ShaderModule&> shaders)
+{
     constexpr VkPipelineColorBlendAttachmentState color_blend_attachment_premultiplied{
         .blendEnable = VK_TRUE,
         .srcColorBlendFactor = VK_BLEND_FACTOR_ONE,
@@ -532,9 +555,11 @@ vk::Pipeline CreateWrappedPremultipliedBlendingPipeline(
                                      color_blend_attachment_premultiplied);
 }
 
-vk::Pipeline CreateWrappedCoverageBlendingPipeline(
-    const Device& device, vk::RenderPass& renderpass, vk::PipelineLayout& layout,
-    std::tuple<vk::ShaderModule&, vk::ShaderModule&> shaders) {
+vk::Pipeline
+CreateWrappedCoverageBlendingPipeline(const Device& device, vk::RenderPass& renderpass,
+                                      vk::PipelineLayout& layout,
+                                      std::tuple<vk::ShaderModule&, vk::ShaderModule&> shaders)
+{
     constexpr VkPipelineColorBlendAttachmentState color_blend_attachment_coverage{
         .blendEnable = VK_TRUE,
         .srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA,
@@ -553,7 +578,8 @@ vk::Pipeline CreateWrappedCoverageBlendingPipeline(
 
 VkWriteDescriptorSet CreateWriteDescriptorSet(std::vector<VkDescriptorImageInfo>& images,
                                               VkSampler sampler, VkImageView view,
-                                              VkDescriptorSet set, u32 binding) {
+                                              VkDescriptorSet set, u32 binding)
+{
     ASSERT(images.capacity() > images.size());
     auto& image_info = images.emplace_back(VkDescriptorImageInfo{
         .sampler = sampler,
@@ -575,7 +601,8 @@ VkWriteDescriptorSet CreateWriteDescriptorSet(std::vector<VkDescriptorImageInfo>
     };
 }
 
-vk::Sampler CreateBilinearSampler(const Device& device) {
+vk::Sampler CreateBilinearSampler(const Device& device)
+{
     const VkSamplerCreateInfo ci{
         .sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
         .pNext = nullptr,
@@ -600,7 +627,8 @@ vk::Sampler CreateBilinearSampler(const Device& device) {
     return device.GetLogical().CreateSampler(ci);
 }
 
-vk::Sampler CreateNearestNeighborSampler(const Device& device) {
+vk::Sampler CreateNearestNeighborSampler(const Device& device)
+{
     const VkSamplerCreateInfo ci_nn{
         .sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
         .pNext = nullptr,
@@ -625,7 +653,8 @@ vk::Sampler CreateNearestNeighborSampler(const Device& device) {
     return device.GetLogical().CreateSampler(ci_nn);
 }
 
-vk::Sampler CreateCubicSampler(const Device& device, VkCubicFilterWeightsQCOM qcom_weights) {
+vk::Sampler CreateCubicSampler(const Device& device, VkCubicFilterWeightsQCOM qcom_weights)
+{
     VkSamplerCreateInfo ci_nn{
         .sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
         .pNext = nullptr,
@@ -649,15 +678,15 @@ vk::Sampler CreateCubicSampler(const Device& device, VkCubicFilterWeightsQCOM qc
     const VkSamplerCubicWeightsCreateInfoQCOM ci_qcom_nn{
         .sType = VK_STRUCTURE_TYPE_SAMPLER_CUBIC_WEIGHTS_CREATE_INFO_QCOM,
         .pNext = nullptr,
-        .cubicWeights = qcom_weights
-    };
+        .cubicWeights = qcom_weights};
     // If not specified, assume Catmull-Rom
     if (qcom_weights != VK_CUBIC_FILTER_WEIGHTS_CATMULL_ROM_QCOM)
         ci_nn.pNext = &ci_qcom_nn;
     return device.GetLogical().CreateSampler(ci_nn);
 }
 
-void ClearColorImage(vk::CommandBuffer& cmdbuf, VkImage image) {
+void ClearColorImage(vk::CommandBuffer& cmdbuf, VkImage image)
+{
     static constexpr std::array<VkImageSubresourceRange, 1> subresources{{{
         .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
         .baseMipLevel = 0,
@@ -670,7 +699,8 @@ void ClearColorImage(vk::CommandBuffer& cmdbuf, VkImage image) {
 }
 
 void BeginRenderPass(vk::CommandBuffer& cmdbuf, VkRenderPass render_pass, VkFramebuffer framebuffer,
-                     VkExtent2D extent) {
+                     VkExtent2D extent)
+{
     const VkRenderPassBeginInfo renderpass_bi{
         .sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
         .pNext = nullptr,

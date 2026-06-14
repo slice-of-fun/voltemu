@@ -37,17 +37,20 @@ private:
     Result DisableRadio();
     Result IsRadioEnabled(Out<bool> out_is_enabled);
 
-    Result AcquireRadioEvent(Out<bool> out_is_valid, OutCopyHandle<Kernel::KReadableEvent> out_event);
-    Result GetDiscoveredAudioDevice(OutArray<std::array<u8, 0xFF>, BufferAttr_HipcPointer> out_audio_devices, s32 count, Out<s32> out_total);
+    Result AcquireRadioEvent(Out<bool> out_is_valid,
+                             OutCopyHandle<Kernel::KReadableEvent> out_event);
+    Result GetDiscoveredAudioDevice(
+        OutArray<std::array<u8, 0xFF>, BufferAttr_HipcPointer> out_audio_devices, s32 count,
+        Out<s32> out_total);
     Result AcquireAudioDeviceConnectionEvent(OutCopyHandle<Kernel::KReadableEvent> out_event);
 
     Result GetConnectedAudioDevices(
         Out<s32> out_count,
         OutArray<std::array<u8, 0xFF>, BufferAttr_HipcPointer> out_audio_devices);
 
-    Result GetPairedAudioDevices(
-        Out<s32> out_count,
-        OutArray<std::array<u8, 0xFF>, BufferAttr_HipcPointer> out_audio_devices);
+    Result
+    GetPairedAudioDevices(Out<s32> out_count,
+                          OutArray<std::array<u8, 0xFF>, BufferAttr_HipcPointer> out_audio_devices);
 
     Result RequestAudioDeviceConnectionRejection(ClientAppletResourceUserId aruid);
     Result CancelAudioDeviceConnectionRejection(ClientAppletResourceUserId aruid);

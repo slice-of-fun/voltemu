@@ -4,13 +4,15 @@
 // SPDX-FileCopyrightText: Copyright 2024 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#include "hid_core/hid_result.h"
 #include "hid_core/resources/abstracted_pad/abstract_pad_holder.h"
+
+#include "hid_core/hid_result.h"
 #include "hid_core/resources/npad/npad_types.h"
 
 namespace Service::HID {
 
-Result NpadAbstractedPadHolder::RegisterAbstractPad(IAbstractedPad* abstracted_pad) {
+Result NpadAbstractedPadHolder::RegisterAbstractPad(IAbstractedPad* abstracted_pad)
+{
     if (list_size >= assignment_list.size()) {
         return ResultNpadIsNotProController;
     }
@@ -32,7 +34,8 @@ Result NpadAbstractedPadHolder::RegisterAbstractPad(IAbstractedPad* abstracted_p
     return ResultSuccess;
 }
 
-void NpadAbstractedPadHolder::RemoveAbstractPadByControllerId(u64 controller_id) {
+void NpadAbstractedPadHolder::RemoveAbstractPadByControllerId(u64 controller_id)
+{
     if (list_size == 0) {
         return;
     }
@@ -51,7 +54,8 @@ void NpadAbstractedPadHolder::RemoveAbstractPadByControllerId(u64 controller_id)
     }
 }
 
-void NpadAbstractedPadHolder::DetachAbstractedPad() {
+void NpadAbstractedPadHolder::DetachAbstractedPad()
+{
     while (list_size > 0) {
         for (std::size_t i = 1; i < list_size; i++) {
             assignment_list[i - 1] = assignment_list[i];
@@ -61,7 +65,8 @@ void NpadAbstractedPadHolder::DetachAbstractedPad() {
 }
 
 u64 NpadAbstractedPadHolder::RemoveAbstractPadByAssignmentStyle(
-    Service::HID::AssignmentStyle assignment_style) {
+    Service::HID::AssignmentStyle assignment_style)
+{
     for (std::size_t i = 0; i < list_size; i++) {
         if ((assignment_style.raw & assignment_list[i].abstracted_pad->assignment_style.raw) == 0) {
             continue;
@@ -75,7 +80,8 @@ u64 NpadAbstractedPadHolder::RemoveAbstractPadByAssignmentStyle(
     return list_size;
 }
 
-u32 NpadAbstractedPadHolder::GetAbstractedPads(std::span<IAbstractedPad*> list) const {
+u32 NpadAbstractedPadHolder::GetAbstractedPads(std::span<IAbstractedPad*> list) const
+{
     u32 num_elements = (std::min)(static_cast<u32>(list.size()), list_size);
     for (std::size_t i = 0; i < num_elements; i++) {
         list[i] = assignment_list[i].abstracted_pad;
@@ -83,16 +89,19 @@ u32 NpadAbstractedPadHolder::GetAbstractedPads(std::span<IAbstractedPad*> list) 
     return num_elements;
 }
 
-void NpadAbstractedPadHolder::SetAssignmentMode(const NpadJoyAssignmentMode& mode) {
+void NpadAbstractedPadHolder::SetAssignmentMode(const NpadJoyAssignmentMode& mode)
+{
     assignment_mode = mode;
 }
 
-NpadJoyAssignmentMode NpadAbstractedPadHolder::GetAssignmentMode() const {
+NpadJoyAssignmentMode NpadAbstractedPadHolder::GetAssignmentMode() const
+{
     return assignment_mode;
 }
 
-std::size_t NpadAbstractedPadHolder::GetStyleIndexList(
-    std::span<Core::HID::NpadStyleIndex> list) const {
+std::size_t
+NpadAbstractedPadHolder::GetStyleIndexList(std::span<Core::HID::NpadStyleIndex> list) const
+{
     for (std::size_t i = 0; i < list_size; i++) {
         list[i] = assignment_list[i].device_type;
     }

@@ -74,11 +74,13 @@ enum class KeyType : s32 {
     SaveDataTransferMac = KeyAreaEncryptionKeyCount + 5,
 };
 
-constexpr inline bool IsInvalidKeyTypeValue(s32 key_type) {
+constexpr inline bool IsInvalidKeyTypeValue(s32 key_type)
+{
     return key_type < 0;
 }
 
-constexpr inline s32 GetKeyTypeValue(u8 key_index, u8 key_generation) {
+constexpr inline s32 GetKeyTypeValue(u8 key_index, u8 key_generation)
+{
     if (key_index == NcaCryptoConfiguration::KeyAreaEncryptionKeyIndexZeroKey) {
         return static_cast<s32>(KeyType::ZeroKey);
     }
@@ -161,14 +163,10 @@ class NcaFsHeaderReader {
     YUZU_NON_MOVEABLE(NcaFsHeaderReader);
 
 public:
-    NcaFsHeaderReader() : m_fs_index(-1) {
-        std::memset(std::addressof(m_data), 0, sizeof(m_data));
-    }
+    NcaFsHeaderReader() : m_fs_index(-1) { std::memset(std::addressof(m_data), 0, sizeof(m_data)); }
 
     Result Initialize(const NcaReader& reader, s32 index);
-    bool IsInitialized() const {
-        return m_fs_index >= 0;
-    }
+    bool IsInitialized() const { return m_fs_index >= 0; }
 
     void GetRawData(void* dst, size_t dst_size) const;
 
@@ -248,20 +246,23 @@ public:
                                       s32 fs_index);
 
 public:
-    NcaFileSystemDriver(std::shared_ptr<NcaReader> reader) : m_original_reader(), m_reader(reader) {
+    NcaFileSystemDriver(std::shared_ptr<NcaReader> reader) : m_original_reader(), m_reader(reader)
+    {
         ASSERT(m_reader != nullptr);
     }
 
     NcaFileSystemDriver(std::shared_ptr<NcaReader> original_reader,
                         std::shared_ptr<NcaReader> reader)
-        : m_original_reader(original_reader), m_reader(reader) {
+        : m_original_reader(original_reader), m_reader(reader)
+    {
         ASSERT(m_reader != nullptr);
     }
 
     Result OpenStorageWithContext(VirtualFile* out, NcaFsHeaderReader* out_header_reader,
                                   s32 fs_index, StorageContext* ctx);
 
-    Result OpenStorage(VirtualFile* out, NcaFsHeaderReader* out_header_reader, s32 fs_index) {
+    Result OpenStorage(VirtualFile* out, NcaFsHeaderReader* out_header_reader, s32 fs_index)
+    {
         // Create a storage context.
         StorageContext ctx{};
 
@@ -332,16 +333,15 @@ private:
                                   const NcaPatchInfo& patch_info,
                                   const NcaMetaDataHashDataInfo& meta_data_hash_data_info);
 
-
     Result CreateSha3Storage(VirtualFile* out, VirtualFile base_storage,
                              const NcaFsHeader::HashData::HierarchicalSha256Data& hash_data);
 
     Result CreateSha256Storage(VirtualFile* out, VirtualFile base_storage,
                                const NcaFsHeader::HashData::HierarchicalSha256Data& sha256_data);
 
-    Result CreateIntegrityVerificationStorage(
-        VirtualFile* out, VirtualFile base_storage,
-        const NcaFsHeader::HashData::IntegrityMetaInfo& meta_info);
+    Result
+    CreateIntegrityVerificationStorage(VirtualFile* out, VirtualFile base_storage,
+                                       const NcaFsHeader::HashData::IntegrityMetaInfo& meta_info);
     Result CreateIntegrityVerificationStorageForMeta(
         VirtualFile* out, VirtualFile* out_verification, VirtualFile base_storage, s64 offset,
         const NcaMetaDataHashDataInfo& meta_data_hash_data_info);

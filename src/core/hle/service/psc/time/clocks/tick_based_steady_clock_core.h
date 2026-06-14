@@ -25,13 +25,9 @@ public:
     s64 GetInternalOffsetImpl() const override;
     void SetInternalOffsetImpl(s64 offset) override;
 
-    Result GetRtcValueImpl(s64& out_value) override {
-        R_RETURN(ResultNotImplemented);
-    }
+    Result GetRtcValueImpl(s64& out_value) override { R_RETURN(ResultNotImplemented); }
 
-    Result GetSetupResultValueImpl() override {
-        R_SUCCEED();
-    }
+    Result GetSetupResultValueImpl() override { R_SUCCEED(); }
 
 private:
     Core::System& m_system;

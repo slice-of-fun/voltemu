@@ -3,26 +3,24 @@
 
 #pragma once
 
+#include <boost/functional/hash.hpp>
 #include <cstddef>
 #include <utility>
-#include <boost/functional/hash.hpp>
 
 namespace Common {
 
 struct PairHash {
-    template <class T1, class T2>
-    std::size_t operator()(const std::pair<T1, T2>& pair) const noexcept {
+    template<class T1, class T2>
+    std::size_t operator()(const std::pair<T1, T2>& pair) const noexcept
+    {
         std::size_t seed = std::hash<T1>()(pair.first);
         boost::hash_combine(seed, std::hash<T2>()(pair.second));
         return seed;
     }
 };
 
-template <typename T>
-struct IdentityHash {
-    [[nodiscard]] size_t operator()(T value) const noexcept {
-        return static_cast<size_t>(value);
-    }
+template<typename T> struct IdentityHash {
+    [[nodiscard]] size_t operator()(T value) const noexcept { return static_cast<size_t>(value); }
 };
 
 } // namespace Common

@@ -5,7 +5,8 @@
 
 namespace Service::Set {
 
-PrivateSettings DefaultPrivateSettings() {
+PrivateSettings DefaultPrivateSettings()
+{
     return {};
 }
 

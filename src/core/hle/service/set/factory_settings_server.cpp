@@ -6,7 +6,8 @@
 namespace Service::Set {
 
 IFactorySettingsServer::IFactorySettingsServer(Core::System& system_)
-    : ServiceFramework{system_, "set:cal"} {
+    : ServiceFramework{system_, "set:cal"}
+{
     // clang-format off
     static const FunctionInfo functions[] = {
         {0, nullptr, "GetBluetoothBdAddress"},

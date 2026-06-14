@@ -5,6 +5,7 @@
 
 #include <array>
 #include <vector>
+
 #include "common/common_types.h"
 
 namespace Network {
@@ -77,10 +78,8 @@ public:
     Packet& Read(double& out_data);
     Packet& Read(char* out_data);
     Packet& Read(std::string& out_data);
-    template <typename T>
-    Packet& Read(std::vector<T>& out_data);
-    template <typename T, std::size_t S>
-    Packet& Read(std::array<T, S>& out_data);
+    template<typename T> Packet& Read(std::vector<T>& out_data);
+    template<typename T, std::size_t S> Packet& Read(std::array<T, S>& out_data);
 
     /// Overloads of write function to write data into the packet
     Packet& Write(bool in_data);
@@ -96,10 +95,8 @@ public:
     Packet& Write(double in_data);
     Packet& Write(const char* in_data);
     Packet& Write(const std::string& in_data);
-    template <typename T>
-    Packet& Write(const std::vector<T>& in_data);
-    template <typename T, std::size_t S>
-    Packet& Write(const std::array<T, S>& data);
+    template<typename T> Packet& Write(const std::vector<T>& in_data);
+    template<typename T, std::size_t S> Packet& Write(const std::array<T, S>& data);
 
 private:
     /**
@@ -116,8 +113,8 @@ private:
     bool is_valid = true;     ///< Reading state of the packet
 };
 
-template <typename T>
-Packet& Packet::Read(std::vector<T>& out_data) {
+template<typename T> Packet& Packet::Read(std::vector<T>& out_data)
+{
     // First extract the size
     u32 size = 0;
     Read(size);
@@ -132,8 +129,8 @@ Packet& Packet::Read(std::vector<T>& out_data) {
     return *this;
 }
 
-template <typename T, std::size_t S>
-Packet& Packet::Read(std::array<T, S>& out_data) {
+template<typename T, std::size_t S> Packet& Packet::Read(std::array<T, S>& out_data)
+{
     for (std::size_t i = 0; i < out_data.size(); ++i) {
         T character;
         Read(character);
@@ -142,8 +139,8 @@ Packet& Packet::Read(std::array<T, S>& out_data) {
     return *this;
 }
 
-template <typename T>
-Packet& Packet::Write(const std::vector<T>& in_data) {
+template<typename T> Packet& Packet::Write(const std::vector<T>& in_data)
+{
     // First insert the size
     Write(static_cast<u32>(in_data.size()));
 
@@ -154,8 +151,8 @@ Packet& Packet::Write(const std::vector<T>& in_data) {
     return *this;
 }
 
-template <typename T, std::size_t S>
-Packet& Packet::Write(const std::array<T, S>& in_data) {
+template<typename T, std::size_t S> Packet& Packet::Write(const std::array<T, S>& in_data)
+{
     for (std::size_t i = 0; i < in_data.size(); ++i) {
         Write(in_data[i]);
     }

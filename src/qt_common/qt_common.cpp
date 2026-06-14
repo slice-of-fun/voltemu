@@ -1,34 +1,31 @@
 // SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#include "common/literals.h"
+#include "qt_common.h"
 
+#include <JlCompress.h>
+
+#include <QFile>
+#include <QGuiApplication>
+#include <QMessageBox>
+#include <QPainter>
+#include <QStringLiteral>
+#include <thread>
+
+#include "common/cpu_features.h"
+#include "common/fs/fs.h"
+#include "common/fs/path_util.h"
+#include "common/literals.h"
+#include "common/logging.h"
 #include "common/memory_detect.h"
+#include "common/scm_rev.h"
+#include "core/frontend/emu_window.h"
 #include "core/hle/service/filesystem/filesystem.h"
+#include "core/memory.h"
 #include "frontend_common/data_manager.h"
 #include "hid_core/hid_core.h"
 #include "network/network.h"
-#include "qt_common.h"
-
-#include "common/fs/fs.h"
-#include "common/fs/path_util.h"
-#include "common/logging.h"
-#include "common/scm_rev.h"
-#include "common/cpu_features.h"
-#include "core/memory.h"
-
-#include <QGuiApplication>
-#include <QStringLiteral>
-#include "core/frontend/emu_window.h"
 #include "qt_common/util/meta.h"
-
-#include <QFile>
-
-#include <QMessageBox>
-
-#include <thread>
-#include <JlCompress.h>
-#include <QPainter>
 
 #if !defined(WIN32) && !defined(__APPLE__)
 #include <qpa/qplatformnativeinterface.h>
@@ -37,9 +34,11 @@
 #endif
 
 #ifdef _WIN32
+#include <windows.h>
+
 #include <QApplication>
 #include <QSettings>
-#include <windows.h>
+
 #include "common/windows/timer_resolution.h"
 #include "core/core_timing.h"
 #endif
@@ -59,7 +58,8 @@ const QStringList supported_file_extensions = {QStringLiteral("nro"), QStringLit
                                                QStringLiteral("nca"), QStringLiteral("xci"),
                                                QStringLiteral("nsp"), QStringLiteral("kip")};
 
-Core::Frontend::WindowSystemType GetWindowSystemType() {
+Core::Frontend::WindowSystemType GetWindowSystemType()
+{
     // Determine WSI type based on Qt platform.
     QString platform_name = QGuiApplication::platformName();
     if (platform_name == QStringLiteral("windows"))
@@ -81,7 +81,8 @@ Core::Frontend::WindowSystemType GetWindowSystemType() {
     return Core::Frontend::WindowSystemType::Windows;
 } // namespace Core::Frontend::WindowSystemType
 
-Core::Frontend::EmuWindow::WindowSystemInfo GetWindowSystemInfo(QWindow* window) {
+Core::Frontend::EmuWindow::WindowSystemInfo GetWindowSystemInfo(QWindow* window)
+{
     Core::Frontend::EmuWindow::WindowSystemInfo wsi;
     wsi.type = GetWindowSystemType();
 
@@ -133,15 +134,18 @@ Core::Frontend::EmuWindow::WindowSystemInfo GetWindowSystemInfo(QWindow* window)
     return wsi;
 }
 
-const QString tr(const char* str) {
+const QString tr(const char* str)
+{
     return rootObject->tr(str);
 }
 
-const QString tr(const std::string& str) {
+const QString tr(const std::string& str)
+{
     return rootObject->tr(str.c_str());
 }
 
-static void LogRuntimes() {
+static void LogRuntimes()
+{
 #ifdef _MSC_VER
     // It is possible that the name of the dll will change.
     // vcruntime140.dll is for 2015 and onwards
@@ -170,7 +174,8 @@ static void LogRuntimes() {
     LOG_INFO(Frontend, "Qt Compile: {} Runtime: {}", QT_VERSION_STR, qVersion());
 }
 
-static QString PrettyProductName() {
+static QString PrettyProductName()
+{
 #ifdef _WIN32
     // After Windows 10 Version 2004, Microsoft decided to switch to a different notation: 20H2
     // With that notation change they changed the registry key used to denote the current version
@@ -195,7 +200,8 @@ static QString PrettyProductName() {
     return QSysInfo::prettyProductName();
 }
 
-static void RemoveCachedContents() {
+static void RemoveCachedContents()
+{
     const auto cache_dir = Common::FS::GetVoltPath(Common::FS::VoltPath::CacheDir);
     const auto offline_fonts = cache_dir / "fonts";
     const auto offline_manual = cache_dir / "offline_web_applet_manual";
@@ -208,7 +214,8 @@ static void RemoveCachedContents() {
     Common::FS::RemoveDirRecursively(offline_system_data);
 }
 
-void Init(QWidget* root) {
+void Init(QWidget* root)
+{
     rootObject = root;
 
     system = std::make_unique<Core::System>();
@@ -232,7 +239,8 @@ void Init(QWidget* root) {
     const auto description = std::string(Common::g_scm_desc);
     const auto build_id = std::string(Common::g_build_id);
 
-    const auto yuzu_build = fmt::format("Volt Emulator Development Build | {}-{}", branch_name, description);
+    const auto yuzu_build =
+        fmt::format("Volt Emulator Development Build | {}-{}", branch_name, description);
     const auto override_build =
         fmt::format(fmt::runtime(std::string(Common::g_title_bar_format_idle)), build_id);
     const auto yuzu_build_version = override_build.empty() ? yuzu_build : override_build;
@@ -278,7 +286,8 @@ void Init(QWidget* root) {
     RemoveCachedContents();
 }
 
-std::filesystem::path GetEdenCommand() {
+std::filesystem::path GetEdenCommand()
+{
     std::filesystem::path command;
 
     // TODO: flatpak?
@@ -298,22 +307,26 @@ std::filesystem::path GetEdenCommand() {
     return command;
 }
 
-void SetupContentProviders() {
+void SetupContentProviders()
+{
     system->SetContentProvider(std::make_unique<FileSys::ContentProviderUnion>());
     system->RegisterContentProvider(FileSys::ContentProviderUnionSlot::FrontendManual,
                                     provider.get());
     system->GetFileSystemController().CreateFactories(*vfs);
 }
 
-void SetupHID() {
+void SetupHID()
+{
     system->HIDCore().ReloadInputDevices();
 }
 
-QString ReadableByteSize(qulonglong size) {
+QString ReadableByteSize(qulonglong size)
+{
     return QString::fromStdString(FrontendCommon::DataManager::ReadableBytesSize(size));
 }
 
-QPixmap CreateCirclePixmapFromColor(const QColor& color) {
+QPixmap CreateCirclePixmapFromColor(const QColor& color)
+{
     QPixmap circle_pixmap(16, 16);
     circle_pixmap.fill(Qt::transparent);
     QPainter painter(&circle_pixmap);

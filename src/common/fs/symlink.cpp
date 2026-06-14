@@ -38,9 +38,8 @@ bool CreateSymlink(fs::path from, fs::path to)
     fs::create_directory_symlink(from, to, ec);
 #ifdef _WIN32
     if (ec) {
-        const std::string command = fmt::format("mklink /J \"{}\" \"{}\"",
-                                                to.string(),
-                                                from.string());
+        const std::string command =
+            fmt::format("mklink /J \"{}\" \"{}\"", to.string(), from.string());
         return system(command.c_str()) == 0;
     }
 #endif
@@ -48,7 +47,7 @@ bool CreateSymlink(fs::path from, fs::path to)
     return !ec;
 }
 
-bool IsSymlink(const fs::path &path)
+bool IsSymlink(const fs::path& path)
 {
     return boost::filesystem::is_symlink(boost::filesystem::path{path});
 }

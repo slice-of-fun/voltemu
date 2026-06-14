@@ -5,6 +5,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include "core/hle/kernel/k_light_server_session.h"
+
 #include "core/hle/kernel/k_light_session.h"
 #include "core/hle/kernel/k_thread.h"
 #include "core/hle/kernel/k_thread_queue.h"
@@ -22,9 +23,12 @@ private:
 
 public:
     ThreadQueueImplForKLightServerSessionRequest(KernelCore& kernel, KThread::WaiterList* wl)
-        : KThreadQueue(kernel), m_wait_list(wl) {}
+        : KThreadQueue(kernel), m_wait_list(wl)
+    {
+    }
 
-    virtual void EndWait(KThread* waiting_thread, Result wait_result) override {
+    virtual void EndWait(KThread* waiting_thread, Result wait_result) override
+    {
         // Remove the thread from our wait list.
         m_wait_list->erase(m_wait_list->iterator_to(*waiting_thread));
 
@@ -33,7 +37,8 @@ public:
     }
 
     virtual void CancelWait(KThread* waiting_thread, Result wait_result,
-                            bool cancel_timer_task) override {
+                            bool cancel_timer_task) override
+    {
         // Remove the thread from our wait list.
         m_wait_list->erase(m_wait_list->iterator_to(*waiting_thread));
 
@@ -48,9 +53,12 @@ private:
 
 public:
     ThreadQueueImplForKLightServerSessionReceive(KernelCore& kernel, KThread** st)
-        : KThreadQueue(kernel), m_server_thread(st) {}
+        : KThreadQueue(kernel), m_server_thread(st)
+    {
+    }
 
-    virtual void EndWait(KThread* waiting_thread, Result wait_result) override {
+    virtual void EndWait(KThread* waiting_thread, Result wait_result) override
+    {
         // Clear the server thread.
         *m_server_thread = nullptr;
 
@@ -62,7 +70,8 @@ public:
     }
 
     virtual void CancelWait(KThread* waiting_thread, Result wait_result,
-                            bool cancel_timer_task) override {
+                            bool cancel_timer_task) override
+    {
         // Clear the server thread.
         *m_server_thread = nullptr;
 
@@ -76,20 +85,25 @@ public:
 
 } // namespace
 
-KLightServerSession::KLightServerSession(KernelCore& kernel) : KAutoObject(kernel) {}
+KLightServerSession::KLightServerSession(KernelCore& kernel) : KAutoObject(kernel)
+{
+}
 KLightServerSession::~KLightServerSession() = default;
 
-void KLightServerSession::Destroy() {
+void KLightServerSession::Destroy()
+{
     this->CleanupRequests();
 
     m_parent->OnServerClosed();
 }
 
-void KLightServerSession::OnClientClosed() {
+void KLightServerSession::OnClientClosed()
+{
     this->CleanupRequests();
 }
 
-Result KLightServerSession::OnRequest(KThread* request_thread) {
+Result KLightServerSession::OnRequest(KThread* request_thread)
+{
     ThreadQueueImplForKLightServerSessionRequest wait_queue(m_kernel,
                                                             std::addressof(m_request_list));
 
@@ -123,7 +137,8 @@ Result KLightServerSession::OnRequest(KThread* request_thread) {
     R_RETURN(request_thread->GetWaitResult());
 }
 
-Result KLightServerSession::ReplyAndReceive(u32* data) {
+Result KLightServerSession::ReplyAndReceive(u32* data)
+{
     // Set the server context.
     GetCurrentThread(m_kernel).SetLightSessionData(data);
 
@@ -217,7 +232,8 @@ Result KLightServerSession::ReplyAndReceive(u32* data) {
     }
 }
 
-void KLightServerSession::CleanupRequests() {
+void KLightServerSession::CleanupRequests()
+{
     // Cleanup all pending requests.
     {
         KScopedSchedulerLock sl(m_kernel);

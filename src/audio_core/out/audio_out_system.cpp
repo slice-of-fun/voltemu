@@ -4,11 +4,12 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "audio_core/out/audio_out_system.h"
+
 #include <mutex>
 
 #include "audio_core/audio_event.h"
 #include "audio_core/audio_manager.h"
-#include "audio_core/out/audio_out_system.h"
 #include "common/logging.h"
 #include "core/core.h"
 #include "core/core_timing.h"
@@ -17,11 +18,14 @@
 // See texture_cache/util.h
 template<typename T, size_t N>
 #if BOOST_VERSION >= 108100 || __GNUC__ > 12
-[[nodiscard]] boost::container::static_vector<T, N> FixStaticVectorADL(const boost::container::static_vector<T, N>& v) {
+[[nodiscard]] boost::container::static_vector<T, N>
+FixStaticVectorADL(const boost::container::static_vector<T, N>& v)
+{
     return v;
 }
 #else
-[[nodiscard]] std::vector<T> FixStaticVectorADL(const boost::container::static_vector<T, N>& v) {
+[[nodiscard]] std::vector<T> FixStaticVectorADL(const boost::container::static_vector<T, N>& v)
+{
     std::vector<T> u;
     for (auto const& e : v)
         u.push_back(e);
@@ -33,23 +37,28 @@ namespace AudioCore::AudioOut {
 
 System::System(Core::System& system_, Kernel::KEvent* event_, size_t session_id_)
     : system{system_}, buffer_event{event_},
-      session_id{session_id_}, session{std::make_unique<DeviceSession>(system_)} {}
+      session_id{session_id_}, session{std::make_unique<DeviceSession>(system_)}
+{
+}
 
-System::~System() {
+System::~System()
+{
     Finalize();
 }
 
-void System::Finalize() {
+void System::Finalize()
+{
     Stop();
     session->Finalize();
 }
 
-std::string_view System::GetDefaultOutputDeviceName() const {
+std::string_view System::GetDefaultOutputDeviceName() const
+{
     return "DeviceOut";
 }
 
-Result System::IsConfigValid(std::string_view device_name,
-                             const AudioOutParameter& in_params) const {
+Result System::IsConfigValid(std::string_view device_name, const AudioOutParameter& in_params) const
+{
     if ((device_name.size() > 0) && (device_name != GetDefaultOutputDeviceName())) {
         return Service::Audio::ResultNotFound;
     }
@@ -67,7 +76,8 @@ Result System::IsConfigValid(std::string_view device_name,
 }
 
 Result System::Initialize(std::string device_name, const AudioOutParameter& in_params,
-                          Kernel::KProcess* handle_, u64 applet_resource_user_id_) {
+                          Kernel::KProcess* handle_, u64 applet_resource_user_id_)
+{
     auto result = IsConfigValid(device_name, in_params);
     if (result.IsError()) {
         return result;
@@ -88,15 +98,18 @@ Result System::Initialize(std::string device_name, const AudioOutParameter& in_p
     return ResultSuccess;
 }
 
-void System::StartSession() {
+void System::StartSession()
+{
     session->Start();
 }
 
-size_t System::GetSessionId() const {
+size_t System::GetSessionId() const
+{
     return session_id;
 }
 
-Result System::Start() {
+Result System::Start()
+{
     if (state != State::Stopped) {
         return Service::Audio::ResultOperationFailed;
     }
@@ -115,7 +128,8 @@ Result System::Start() {
     return ResultSuccess;
 }
 
-Result System::Stop() {
+Result System::Stop()
+{
     if (state == State::Started) {
         session->Stop();
         session->SetVolume(0.0f);
@@ -129,7 +143,8 @@ Result System::Stop() {
     return ResultSuccess;
 }
 
-bool System::AppendBuffer(const AudioOutBuffer& buffer, u64 tag) {
+bool System::AppendBuffer(const AudioOutBuffer& buffer, u64 tag)
+{
     if (buffers.GetTotalBufferCount() == BufferCount) {
         return false;
     }
@@ -150,7 +165,8 @@ bool System::AppendBuffer(const AudioOutBuffer& buffer, u64 tag) {
     return true;
 }
 
-void System::RegisterBuffers() {
+void System::RegisterBuffers()
+{
     if (state == State::Started) {
         boost::container::static_vector<AudioBuffer, BufferCount> registered_buffers{};
         buffers.RegisterBuffers(registered_buffers);
@@ -158,7 +174,8 @@ void System::RegisterBuffers() {
     }
 }
 
-void System::ReleaseBuffers() {
+void System::ReleaseBuffers()
+{
     bool signal{buffers.ReleaseBuffers(system.CoreTiming(), *session, false)};
     if (signal) {
         // Signal if any buffer was released, or if none are registered, we need more.
@@ -166,11 +183,13 @@ void System::ReleaseBuffers() {
     }
 }
 
-u32 System::GetReleasedBuffers(std::span<u64> tags) {
+u32 System::GetReleasedBuffers(std::span<u64> tags)
+{
     return buffers.GetReleasedBuffers(tags);
 }
 
-bool System::FlushAudioOutBuffers() {
+bool System::FlushAudioOutBuffers()
+{
     if (state != State::Started) {
         return false;
     }
@@ -184,19 +203,23 @@ bool System::FlushAudioOutBuffers() {
     return true;
 }
 
-u16 System::GetChannelCount() const {
+u16 System::GetChannelCount() const
+{
     return channel_count;
 }
 
-u32 System::GetSampleRate() const {
+u32 System::GetSampleRate() const
+{
     return sample_rate;
 }
 
-SampleFormat System::GetSampleFormat() const {
+SampleFormat System::GetSampleFormat() const
+{
     return sample_format;
 }
 
-State System::GetState() {
+State System::GetState()
+{
     switch (state) {
     case State::Started:
     case State::Stopped:
@@ -209,28 +232,34 @@ State System::GetState() {
     return state;
 }
 
-std::string System::GetName() const {
+std::string System::GetName() const
+{
     return name;
 }
 
-f32 System::GetVolume() const {
+f32 System::GetVolume() const
+{
     return volume;
 }
 
-void System::SetVolume(const f32 volume_) {
+void System::SetVolume(const f32 volume_)
+{
     volume = volume_;
     session->SetVolume(volume_);
 }
 
-bool System::ContainsAudioBuffer(const u64 tag) const {
+bool System::ContainsAudioBuffer(const u64 tag) const
+{
     return buffers.ContainsBuffer(tag);
 }
 
-u32 System::GetBufferCount() const {
+u32 System::GetBufferCount() const
+{
     return buffers.GetAppendedRegisteredCount();
 }
 
-u64 System::GetPlayedSampleCount() const {
+u64 System::GetPlayedSampleCount() const
+{
     return session->GetPlayedSampleCount();
 }
 

@@ -4,13 +4,15 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include <algorithm>
-#include <cstring>
-#include <filesystem>
+#include "core/hle/service/acc/profile_manager.h"
 
+#include <fmt/ranges.h>
+
+#include <algorithm>
 #include <boost/algorithm/string/case_conv.hpp>
 #include <boost/algorithm/string/find.hpp>
-#include <fmt/ranges.h>
+#include <cstring>
+#include <filesystem>
 
 #include "common/fs/file.h"
 #include "common/fs/fs.h"
@@ -20,7 +22,6 @@
 #include "common/settings.h"
 #include "common/string_util.h"
 #include "core/file_sys/savedata_factory.h"
-#include "core/hle/service/acc/profile_manager.h"
 
 namespace Service::Account {
 
@@ -50,7 +51,8 @@ constexpr Result ERROR_ARGUMENT_IS_NULL(ErrorModule::Account, 20);
 
 constexpr char ACC_SAVE_AVATORS_BASE_PATH[] = "system/save/8000000000000010/su/avators";
 
-ProfileManager::ProfileManager() {
+ProfileManager::ProfileManager()
+{
     ParseUserSaveFile();
 
     // Create an user if none are present
@@ -75,7 +77,8 @@ ProfileManager::~ProfileManager() = default;
 
 /// After a users creation it needs to be "registered" to the system. AddToProfiles handles the
 /// internal management of the users profiles
-std::optional<std::size_t> ProfileManager::AddToProfiles(const ProfileInfo& profile) {
+std::optional<std::size_t> ProfileManager::AddToProfiles(const ProfileInfo& profile)
+{
     if (user_count >= MAX_USERS) {
         return std::nullopt;
     }
@@ -84,7 +87,8 @@ std::optional<std::size_t> ProfileManager::AddToProfiles(const ProfileInfo& prof
 }
 
 /// Deletes a specific profile based on it's profile index
-bool ProfileManager::RemoveProfileAtIndex(std::size_t index) {
+bool ProfileManager::RemoveProfileAtIndex(std::size_t index)
+{
     if (index >= MAX_USERS || index >= user_count) {
         return false;
     }
@@ -106,7 +110,8 @@ void ProfileManager::RemoveAllProfiles()
 }
 
 /// Helper function to register a user to the system
-Result ProfileManager::AddUser(const ProfileInfo& user) {
+Result ProfileManager::AddUser(const ProfileInfo& user)
+{
     if (!AddToProfiles(user)) {
         return ERROR_TOO_MANY_USERS;
     }
@@ -115,7 +120,8 @@ Result ProfileManager::AddUser(const ProfileInfo& user) {
 
 /// Create a new user on the system. If the uuid of the user already exists, the user is not
 /// created.
-Result ProfileManager::CreateNewUser(UUID uuid, const ProfileUsername& username) {
+Result ProfileManager::CreateNewUser(UUID uuid, const ProfileUsername& username)
+{
     if (user_count == MAX_USERS) {
         return ERROR_TOO_MANY_USERS;
     }
@@ -144,7 +150,8 @@ Result ProfileManager::CreateNewUser(UUID uuid, const ProfileUsername& username)
 /// Creates a new user on the system. This function allows a much simpler method of registration
 /// specifically by allowing an std::string for the username. This is required specifically since
 /// we're loading a string straight from the config
-Result ProfileManager::CreateNewUser(UUID uuid, const std::string& username) {
+Result ProfileManager::CreateNewUser(UUID uuid, const std::string& username)
+{
     ProfileUsername username_output{};
 
     if (username.size() > username_output.size()) {
@@ -155,7 +162,8 @@ Result ProfileManager::CreateNewUser(UUID uuid, const std::string& username) {
     return CreateNewUser(uuid, username_output);
 }
 
-std::optional<UUID> ProfileManager::GetUser(std::size_t index) const {
+std::optional<UUID> ProfileManager::GetUser(std::size_t index) const
+{
     if (index >= MAX_USERS) {
         return std::nullopt;
     }
@@ -164,7 +172,8 @@ std::optional<UUID> ProfileManager::GetUser(std::size_t index) const {
 }
 
 /// Returns a users profile index based on their user id.
-std::optional<std::size_t> ProfileManager::GetUserIndex(const UUID& uuid) const {
+std::optional<std::size_t> ProfileManager::GetUserIndex(const UUID& uuid) const
+{
     if (uuid.IsInvalid()) {
         return std::nullopt;
     }
@@ -179,12 +188,14 @@ std::optional<std::size_t> ProfileManager::GetUserIndex(const UUID& uuid) const 
 }
 
 /// Returns a users profile index based on their profile
-std::optional<std::size_t> ProfileManager::GetUserIndex(const ProfileInfo& user) const {
+std::optional<std::size_t> ProfileManager::GetUserIndex(const ProfileInfo& user) const
+{
     return GetUserIndex(user.user_uuid);
 }
 
 /// Returns the first user profile seen based on username (which does not enforce uniqueness)
-std::optional<std::size_t> ProfileManager::GetUserIndex(const std::string& username) const {
+std::optional<std::size_t> ProfileManager::GetUserIndex(const std::string& username) const
+{
     const auto iter =
         std::find_if(profiles.begin(), profiles.end(), [&username](const ProfileInfo& p) {
             const std::string profile_username = Common::StringFromFixedZeroTerminatedBuffer(
@@ -200,7 +211,8 @@ std::optional<std::size_t> ProfileManager::GetUserIndex(const std::string& usern
 }
 
 /// Returns the data structure used by the switch when GetProfileBase is called on acc:*
-bool ProfileManager::GetProfileBase(std::optional<std::size_t> index, ProfileBase& profile) const {
+bool ProfileManager::GetProfileBase(std::optional<std::size_t> index, ProfileBase& profile) const
+{
     if (!index || index >= MAX_USERS) {
         return false;
     }
@@ -212,20 +224,23 @@ bool ProfileManager::GetProfileBase(std::optional<std::size_t> index, ProfileBas
 }
 
 /// Returns the data structure used by the switch when GetProfileBase is called on acc:*
-bool ProfileManager::GetProfileBase(UUID uuid, ProfileBase& profile) const {
+bool ProfileManager::GetProfileBase(UUID uuid, ProfileBase& profile) const
+{
     const auto idx = GetUserIndex(uuid);
     return GetProfileBase(idx, profile);
 }
 
 /// Returns the data structure used by the switch when GetProfileBase is called on acc:*
-bool ProfileManager::GetProfileBase(const ProfileInfo& user, ProfileBase& profile) const {
+bool ProfileManager::GetProfileBase(const ProfileInfo& user, ProfileBase& profile) const
+{
     return GetProfileBase(user.user_uuid, profile);
 }
 
 /// Returns the current user count on the system. We keep a variable which tracks the count so we
 /// don't have to loop the internal profile array every call.
 
-std::size_t ProfileManager::GetUserCount() const {
+std::size_t ProfileManager::GetUserCount() const
+{
     return user_count;
 }
 
@@ -233,17 +248,20 @@ std::size_t ProfileManager::GetUserCount() const {
 /// into something or pick a profile. As of right now users should all be open until qlaunch is
 /// booting
 
-std::size_t ProfileManager::GetOpenUserCount() const {
+std::size_t ProfileManager::GetOpenUserCount() const
+{
     return std::count_if(profiles.begin(), profiles.end(),
                          [](const ProfileInfo& p) { return p.is_open; });
 }
 
 /// Checks if a user id exists in our profile manager
-bool ProfileManager::UserExists(UUID uuid) const {
+bool ProfileManager::UserExists(UUID uuid) const
+{
     return GetUserIndex(uuid).has_value();
 }
 
-bool ProfileManager::UserExistsIndex(std::size_t index) const {
+bool ProfileManager::UserExistsIndex(std::size_t index) const
+{
     if (index >= MAX_USERS) {
         return false;
     }
@@ -251,7 +269,8 @@ bool ProfileManager::UserExistsIndex(std::size_t index) const {
 }
 
 /// Opens a specific user
-void ProfileManager::OpenUser(UUID uuid) {
+void ProfileManager::OpenUser(UUID uuid)
+{
     const auto idx = GetUserIndex(uuid);
     if (!idx) {
         return;
@@ -262,7 +281,8 @@ void ProfileManager::OpenUser(UUID uuid) {
 }
 
 /// Closes a specific user
-void ProfileManager::CloseUser(UUID uuid) {
+void ProfileManager::CloseUser(UUID uuid)
+{
     const auto idx = GetUserIndex(uuid);
     if (!idx) {
         return;
@@ -272,17 +292,18 @@ void ProfileManager::CloseUser(UUID uuid) {
 }
 
 /// Gets all valid user ids on the system
-UserIDArray ProfileManager::GetAllUsers() const {
+UserIDArray ProfileManager::GetAllUsers() const
+{
     UserIDArray output{};
-    std::ranges::transform(profiles, output.begin(), [](const ProfileInfo& p) {
-        return p.user_uuid;
-    });
+    std::ranges::transform(profiles, output.begin(),
+                           [](const ProfileInfo& p) { return p.user_uuid; });
     return output;
 }
 
 /// Get all the open users on the system and zero out the rest of the data. This is specifically
 /// needed for GetOpenUsers and we need to ensure the rest of the output buffer is zero'd out
-UserIDArray ProfileManager::GetOpenUsers() const {
+UserIDArray ProfileManager::GetOpenUsers() const
+{
     UserIDArray output{};
     std::ranges::transform(profiles, output.begin(), [](const ProfileInfo& p) {
         if (p.is_open)
@@ -295,12 +316,14 @@ UserIDArray ProfileManager::GetOpenUsers() const {
 }
 
 /// Returns the last user which was opened
-UUID ProfileManager::GetLastOpenedUser() const {
+UUID ProfileManager::GetLastOpenedUser() const
+{
     return last_opened_user;
 }
 
 /// Gets the list of stored opened users.
-UserIDArray ProfileManager::GetStoredOpenedUsers() const {
+UserIDArray ProfileManager::GetStoredOpenedUsers() const
+{
     UserIDArray output{};
     std::ranges::transform(stored_opened_profiles, output.begin(), [](const ProfileInfo& p) {
         if (p.is_open)
@@ -314,7 +337,8 @@ UserIDArray ProfileManager::GetStoredOpenedUsers() const {
 
 /// Captures the opened users, which can be queried across process launches with
 /// ListOpenContextStoredUsers.
-void ProfileManager::StoreOpenedUsers() {
+void ProfileManager::StoreOpenedUsers()
+{
     size_t profile_index{};
     stored_opened_profiles = {};
     std::for_each(profiles.begin(), profiles.end(), [&](const auto& profile) {
@@ -326,7 +350,8 @@ void ProfileManager::StoreOpenedUsers() {
 
 /// Return the users profile base and the unknown arbitrary data.
 bool ProfileManager::GetProfileBaseAndData(std::optional<std::size_t> index, ProfileBase& profile,
-                                           UserData& data) const {
+                                           UserData& data) const
+{
     if (GetProfileBase(index, profile)) {
         data = profiles[*index].data;
         return true;
@@ -335,24 +360,28 @@ bool ProfileManager::GetProfileBaseAndData(std::optional<std::size_t> index, Pro
 }
 
 /// Return the users profile base and the unknown arbitrary data.
-bool ProfileManager::GetProfileBaseAndData(UUID uuid, ProfileBase& profile, UserData& data) const {
+bool ProfileManager::GetProfileBaseAndData(UUID uuid, ProfileBase& profile, UserData& data) const
+{
     const auto idx = GetUserIndex(uuid);
     return GetProfileBaseAndData(idx, profile, data);
 }
 
 /// Return the users profile base and the unknown arbitrary data.
 bool ProfileManager::GetProfileBaseAndData(const ProfileInfo& user, ProfileBase& profile,
-                                           UserData& data) const {
+                                           UserData& data) const
+{
     return GetProfileBaseAndData(user.user_uuid, profile, data);
 }
 
 /// Returns if the system is allowing user registrations or not
-bool ProfileManager::CanSystemRegisterUser() const {
+bool ProfileManager::CanSystemRegisterUser() const
+{
     // TODO: Both games and applets can register users. Determine when this condition is not meet.
     return true;
 }
 
-bool ProfileManager::RemoveUser(UUID uuid) {
+bool ProfileManager::RemoveUser(UUID uuid)
+{
     const auto index = GetUserIndex(uuid);
     if (!index) {
         return false;
@@ -361,7 +390,8 @@ bool ProfileManager::RemoveUser(UUID uuid) {
     return RemoveProfileAtIndex(*index);
 }
 
-bool ProfileManager::SetProfileBase(UUID uuid, const ProfileBase& profile_new) {
+bool ProfileManager::SetProfileBase(UUID uuid, const ProfileBase& profile_new)
+{
     const auto index = GetUserIndex(uuid);
     if (!index || profile_new.user_uuid.IsInvalid()) {
         return false;
@@ -379,7 +409,8 @@ bool ProfileManager::SetProfileBase(UUID uuid, const ProfileBase& profile_new) {
 }
 
 bool ProfileManager::SetProfileBaseAndData(Common::UUID uuid, const ProfileBase& profile_new,
-                                           const UserData& data_new) {
+                                           const UserData& data_new)
+{
     const auto index = GetUserIndex(uuid);
     if (index.has_value() && SetProfileBase(uuid, profile_new)) {
         profiles[*index].data = data_new;
@@ -393,7 +424,8 @@ bool ProfileManager::SetProfileBaseAndData(Common::UUID uuid, const ProfileBase&
     return false;
 }
 
-void ProfileManager::ParseUserSaveFile() {
+void ProfileManager::ParseUserSaveFile()
+{
     const auto save_path(FS::GetVoltPath(FS::VoltPath::NANDDir) / ACC_SAVE_AVATORS_BASE_PATH /
                          "profiles.dat");
 
@@ -430,7 +462,8 @@ void ProfileManager::ParseUserSaveFile() {
                           [](const ProfileInfo& profile) { return profile.user_uuid.IsValid(); });
 }
 
-void ProfileManager::WriteUserSaveFile() {
+void ProfileManager::WriteUserSaveFile()
+{
     if (!is_save_needed) {
         return;
     }
@@ -505,7 +538,7 @@ std::vector<std::string> ProfileManager::FindExistingProfileStrings()
     std::vector<UUID> uuids = FindExistingProfileUUIDs();
     std::vector<std::string> uuid_strings;
 
-    for (const UUID &uuid : uuids) {
+    for (const UUID& uuid : uuids) {
         auto user_id = uuid.AsU128();
         uuid_strings.emplace_back(fmt::format("{:016X}{:016X}", user_id[1], user_id[0]));
     }
@@ -519,14 +552,14 @@ std::vector<std::string> ProfileManager::FindGoodProfiles()
 
     std::vector<std::string> good_uuids;
 
-    const auto path = Common::FS::GetVoltPath(Common::FS::VoltPath::NANDDir)
-                      / "user/save/0000000000000000";
+    const auto path =
+        Common::FS::GetVoltPath(Common::FS::VoltPath::NANDDir) / "user/save/0000000000000000";
 
     // some exceptions, e.g. the "system" profile
-    static constexpr const std::array<const char* const, 1> EXCEPTION_UUIDS
-        = {"00000000000000000000000000000000"};
+    static constexpr const std::array<const char* const, 1> EXCEPTION_UUIDS = {
+        "00000000000000000000000000000000"};
 
-    for (const char *const uuid : EXCEPTION_UUIDS) {
+    for (const char* const uuid : EXCEPTION_UUIDS) {
         if (fs::exists(path / uuid))
             good_uuids.emplace_back(uuid);
     }
@@ -544,8 +577,8 @@ std::vector<std::string> ProfileManager::FindOrphanedProfiles()
     namespace fs = std::filesystem;
 
     // TODO: fetch save_id programmatically
-    const auto path = Common::FS::GetVoltPath(Common::FS::VoltPath::NANDDir)
-                      / "user/save/0000000000000000";
+    const auto path =
+        Common::FS::GetVoltPath(Common::FS::VoltPath::NANDDir) / "user/save/0000000000000000";
 
     std::vector<std::string> orphaned_profiles;
 
@@ -562,14 +595,14 @@ std::vector<std::string> ProfileManager::FindOrphanedProfiles()
                 try {
                     for (const auto& file : fs::recursive_directory_iterator(entry.path())) {
                         // TODO: .yuzu_save_size is a weird file that gets created by certain games
-                        // I have no idea what its purpose is, but TEMPORARY SOLUTION: just mark the profile as valid if
-                        // this file exists (???) e.g. for SSBU
-                        // In short: if .yuzu_save_size is the ONLY file in a profile it's probably fine to keep
+                        // I have no idea what its purpose is, but TEMPORARY SOLUTION: just mark the
+                        // profile as valid if this file exists (???) e.g. for SSBU In short: if
+                        // .yuzu_save_size is the ONLY file in a profile it's probably fine to keep
                         if (file.path().filename().string() == FileSys::GetSaveDataSizeFileName())
                             override = true;
 
-                        // if there are any regular files (NOT directories) there, do NOT delete it :p
-                        // Also: check for symlinks
+                        // if there are any regular files (NOT directories) there, do NOT delete it
+                        // :p Also: check for symlinks
                         if (file.is_regular_file() || Common::FS::IsSymlink(file.path()))
                             return false;
                     }
@@ -594,8 +627,8 @@ std::vector<std::string> ProfileManager::FindOrphanedProfiles()
 
             // if profiles.dat contains the UUID--all good
             // if not--it's an orphaned profile and should be resolved by the user
-            if (!override
-                && std::find(good_uuids.begin(), good_uuids.end(), upper_uuid) == good_uuids.end()) {
+            if (!override &&
+                std::find(good_uuids.begin(), good_uuids.end(), upper_uuid) == good_uuids.end()) {
                 orphaned_profiles.emplace_back(uuid);
             }
             return true;
@@ -605,7 +638,8 @@ std::vector<std::string> ProfileManager::FindOrphanedProfiles()
     return orphaned_profiles;
 }
 
-void ProfileManager::SetUserPosition(u64 position, Common::UUID uuid) {
+void ProfileManager::SetUserPosition(u64 position, Common::UUID uuid)
+{
     auto idxOpt = GetUserIndex(uuid);
     if (!idxOpt)
         return;
@@ -629,6 +663,5 @@ void ProfileManager::SetUserPosition(u64 position, Common::UUID uuid) {
     is_save_needed = true;
     WriteUserSaveFile();
 }
-
 
 }; // namespace Service::Account

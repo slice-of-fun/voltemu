@@ -4,31 +4,37 @@
 // SPDX-FileCopyrightText: Copyright 2021 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/kernel/k_memory_layout.h"
+
 #include <array>
 
 #include "common/alignment.h"
-#include "core/hle/kernel/k_memory_layout.h"
 #include "core/hle/kernel/k_system_control.h"
 
 namespace Kernel {
 
 namespace {
 
-template <typename... Args>
-KMemoryRegion* AllocateRegion(KMemoryRegionAllocator& memory_region_allocator, Args&&... args) {
+template<typename... Args>
+KMemoryRegion* AllocateRegion(KMemoryRegionAllocator& memory_region_allocator, Args&&... args)
+{
     return memory_region_allocator.Allocate(std::forward<Args>(args)...);
 }
 
 } // namespace
 
 KMemoryRegionTree::KMemoryRegionTree(KMemoryRegionAllocator& memory_region_allocator)
-    : m_memory_region_allocator{memory_region_allocator} {}
+    : m_memory_region_allocator{memory_region_allocator}
+{
+}
 
-void KMemoryRegionTree::InsertDirectly(u64 address, u64 last_address, u32 attr, u32 type_id) {
+void KMemoryRegionTree::InsertDirectly(u64 address, u64 last_address, u32 attr, u32 type_id)
+{
     this->insert(*AllocateRegion(m_memory_region_allocator, address, last_address, attr, type_id));
 }
 
-bool KMemoryRegionTree::Insert(u64 address, size_t size, u32 type_id, u32 new_attr, u32 old_attr) {
+bool KMemoryRegionTree::Insert(u64 address, size_t size, u32 type_id, u32 new_attr, u32 old_attr)
+{
     // Locate the memory region that contains the address.
     KMemoryRegion* found = this->FindModifiable(address);
 
@@ -89,7 +95,8 @@ bool KMemoryRegionTree::Insert(u64 address, size_t size, u32 type_id, u32 new_at
 }
 
 KVirtualAddress KMemoryRegionTree::GetRandomAlignedRegion(size_t size, size_t alignment,
-                                                          u32 type_id) {
+                                                          u32 type_id)
+{
     // We want to find the total extents of the type id.
     const auto extents = this->GetDerivedRegionExtents(static_cast<KMemoryRegionType>(type_id));
 
@@ -132,10 +139,13 @@ KVirtualAddress KMemoryRegionTree::GetRandomAlignedRegion(size_t size, size_t al
 KMemoryLayout::KMemoryLayout()
     : m_virtual_tree{m_memory_region_allocator}, m_physical_tree{m_memory_region_allocator},
       m_virtual_linear_tree{m_memory_region_allocator}, m_physical_linear_tree{
-                                                            m_memory_region_allocator} {}
+                                                            m_memory_region_allocator}
+{
+}
 
 void KMemoryLayout::InitializeLinearMemoryRegionTrees(KPhysicalAddress aligned_linear_phys_start,
-                                                      KVirtualAddress linear_virtual_start) {
+                                                      KVirtualAddress linear_virtual_start)
+{
     // Set static differences.
     m_linear_phys_to_virt_diff =
         GetInteger(linear_virtual_start) - GetInteger(aligned_linear_phys_start);
@@ -160,7 +170,8 @@ void KMemoryLayout::InitializeLinearMemoryRegionTrees(KPhysicalAddress aligned_l
     }
 }
 
-size_t KMemoryLayout::GetResourceRegionSizeForInit(bool use_extra_resource) {
+size_t KMemoryLayout::GetResourceRegionSizeForInit(bool use_extra_resource)
+{
     return KernelResourceSize + KSystemControl::SecureAppletMemorySize +
            (use_extra_resource ? KernelSlabHeapAdditionalSize + KernelPageBufferAdditionalSize : 0);
 }

@@ -8,6 +8,7 @@
 #pragma once
 
 #include <QMainWindow>
+
 #include "yuzu/migration_worker.h"
 
 // TODO(crueter): Quick implementation

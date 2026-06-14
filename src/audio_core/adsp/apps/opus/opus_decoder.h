@@ -56,16 +56,12 @@ public:
     explicit OpusDecoder(Core::System& system);
     ~OpusDecoder();
 
-    bool IsRunning() const noexcept {
-        return running;
-    }
+    bool IsRunning() const noexcept { return running; }
 
     void Send(Direction dir, u32 message);
     u32 Receive(Direction dir, std::stop_token stop_token = {});
 
-    void SetSharedMemory(SharedMemory& shared_memory_) {
-        shared_memory = &shared_memory_;
-    }
+    void SetSharedMemory(SharedMemory& shared_memory_) { shared_memory = &shared_memory_; }
 
 private:
     /**

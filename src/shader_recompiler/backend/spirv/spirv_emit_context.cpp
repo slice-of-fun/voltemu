@@ -4,19 +4,19 @@
 // SPDX-FileCopyrightText: Copyright 2021 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "shader_recompiler/backend/spirv/spirv_emit_context.h"
+
+#include <fmt/ranges.h>
+
 #include <algorithm>
 #include <array>
 #include <bit>
-#include <climits>
-
 #include <boost/container/static_vector.hpp>
-
-#include <fmt/ranges.h>
+#include <climits>
 
 #include "common/common_types.h"
 #include "common/div_ceil.h"
 #include "shader_recompiler/backend/spirv/emit_spirv.h"
-#include "shader_recompiler/backend/spirv/spirv_emit_context.h"
 
 namespace Shader::Backend::SPIRV {
 namespace {
@@ -28,7 +28,8 @@ enum class Operation {
     FPMax,
 };
 
-Id ImageType(EmitContext& ctx, const TextureDescriptor& desc) {
+Id ImageType(EmitContext& ctx, const TextureDescriptor& desc)
+{
     const spv::ImageFormat format{spv::ImageFormat::Unknown};
     const Id type{ctx.F32[1]};
     const bool depth{desc.is_depth};
@@ -55,7 +56,8 @@ Id ImageType(EmitContext& ctx, const TextureDescriptor& desc) {
     throw InvalidArgument("Invalid texture type {}", desc.type);
 }
 
-spv::ImageFormat GetImageFormat(ImageFormat format) {
+spv::ImageFormat GetImageFormat(ImageFormat format)
+{
     switch (format) {
     case ImageFormat::Typeless:
         return spv::ImageFormat::Unknown;
@@ -77,7 +79,8 @@ spv::ImageFormat GetImageFormat(ImageFormat format) {
     throw InvalidArgument("Invalid image format {}", format);
 }
 
-Id ImageType(EmitContext& ctx, const ImageDescriptor& desc, Id sampled_type) {
+Id ImageType(EmitContext& ctx, const ImageDescriptor& desc, Id sampled_type)
+{
     const spv::ImageFormat format{GetImageFormat(desc.format)};
     switch (desc.type) {
     case TextureType::Color1D:
@@ -99,7 +102,8 @@ Id ImageType(EmitContext& ctx, const ImageDescriptor& desc, Id sampled_type) {
 }
 
 Id DefineVariable(EmitContext& ctx, Id type, std::optional<spv::BuiltIn> builtin,
-                  spv::StorageClass storage_class, std::optional<Id> initializer = std::nullopt) {
+                  spv::StorageClass storage_class, std::optional<Id> initializer = std::nullopt)
+{
     const Id pointer_type{ctx.TypePointer(storage_class, type)};
     const Id id{ctx.AddGlobalVariable(pointer_type, storage_class, initializer)};
     if (builtin) {
@@ -109,7 +113,8 @@ Id DefineVariable(EmitContext& ctx, Id type, std::optional<spv::BuiltIn> builtin
     return id;
 }
 
-u32 NumVertices(InputTopology input_topology) {
+u32 NumVertices(InputTopology input_topology)
+{
     switch (input_topology) {
     case InputTopology::Points:
         return 1;
@@ -126,7 +131,8 @@ u32 NumVertices(InputTopology input_topology) {
 }
 
 Id DefineInput(EmitContext& ctx, Id type, bool per_invocation,
-               std::optional<spv::BuiltIn> builtin = std::nullopt) {
+               std::optional<spv::BuiltIn> builtin = std::nullopt)
+{
     switch (ctx.stage) {
     case Stage::TessellationControl:
     case Stage::TessellationEval:
@@ -148,14 +154,16 @@ Id DefineInput(EmitContext& ctx, Id type, bool per_invocation,
 
 Id DefineOutput(EmitContext& ctx, Id type, std::optional<u32> invocations,
                 std::optional<spv::BuiltIn> builtin = std::nullopt,
-                std::optional<Id> initializer = std::nullopt) {
+                std::optional<Id> initializer = std::nullopt)
+{
     if (invocations && ctx.stage == Stage::TessellationControl) {
         type = ctx.TypeArray(type, ctx.Const(*invocations));
     }
     return DefineVariable(ctx, type, builtin, spv::StorageClass::Output, initializer);
 }
 
-void DefineGenericOutput(EmitContext& ctx, size_t index, std::optional<u32> invocations) {
+void DefineGenericOutput(EmitContext& ctx, size_t index, std::optional<u32> invocations)
+{
     static constexpr std::string_view swizzle{"xyzw"};
     const size_t base_attr_index{static_cast<size_t>(IR::Attribute::Generic0X) + index * 4};
     u32 element{0};
@@ -198,7 +206,8 @@ void DefineGenericOutput(EmitContext& ctx, size_t index, std::optional<u32> invo
     }
 }
 
-Id GetAttributeType(EmitContext& ctx, AttributeType type) {
+Id GetAttributeType(EmitContext& ctx, AttributeType type)
+{
     switch (type) {
     case AttributeType::Float:
         return ctx.F32[4];
@@ -217,7 +226,8 @@ Id GetAttributeType(EmitContext& ctx, AttributeType type) {
     throw InvalidArgument("Invalid attribute type {}", type);
 }
 
-InputGenericInfo GetAttributeInfo(EmitContext& ctx, AttributeType type, Id id) {
+InputGenericInfo GetAttributeInfo(EmitContext& ctx, AttributeType type, Id id)
+{
     switch (type) {
     case AttributeType::Float:
         return InputGenericInfo{id, ctx.input_f32, ctx.F32[1], InputGenericLoadOp::None};
@@ -241,7 +251,8 @@ InputGenericInfo GetAttributeInfo(EmitContext& ctx, AttributeType type, Id id) {
     throw InvalidArgument("Invalid attribute type {}", type);
 }
 
-std::string_view StageName(Stage stage) {
+std::string_view StageName(Stage stage)
+{
     switch (stage) {
     case Stage::VertexA:
         return "vs_a";
@@ -261,15 +272,17 @@ std::string_view StageName(Stage stage) {
     throw InvalidArgument("Invalid stage {}", stage);
 }
 
-template <typename... Args>
-void Name(EmitContext& ctx, Id object, std::string_view format_str, Args&&... args) {
+template<typename... Args>
+void Name(EmitContext& ctx, Id object, std::string_view format_str, Args&&... args)
+{
     ctx.Name(object, fmt::format(fmt::runtime(format_str), StageName(ctx.stage),
                                  std::forward<Args>(args)...)
                          .c_str());
 }
 
 void DefineConstBuffers(EmitContext& ctx, const Info& info, Id UniformDefinitions::*member_type,
-                        u32 binding, Id type, char type_char, u32 element_size) {
+                        u32 binding, Id type, char type_char, u32 element_size)
+{
     const Id array_type{ctx.TypeArray(type, ctx.Const(65536U / element_size))};
     ctx.Decorate(array_type, spv::Decoration::ArrayStride, element_size);
 
@@ -300,7 +313,8 @@ void DefineConstBuffers(EmitContext& ctx, const Info& info, Id UniformDefinition
 
 void DefineSsbos(EmitContext& ctx, StorageTypeDefinition& type_def,
                  Id StorageDefinitions::*member_type, const Info& info, u32 binding, Id type,
-                 u32 stride) {
+                 u32 stride)
+{
     const Id array_type{ctx.TypeRuntimeArray(type)};
     ctx.Decorate(array_type, spv::Decoration::ArrayStride, stride);
 
@@ -329,7 +343,8 @@ void DefineSsbos(EmitContext& ctx, StorageTypeDefinition& type_def,
     }
 }
 
-Id CasFunction(EmitContext& ctx, Operation operation, Id value_type) {
+Id CasFunction(EmitContext& ctx, Operation operation, Id value_type)
+{
     const Id func_type{ctx.TypeFunction(value_type, value_type, value_type)};
     const Id func{ctx.OpFunction(value_type, spv::FunctionControlMask::MaskNone, func_type)};
     const Id op_a{ctx.OpFunctionParameter(value_type)};
@@ -369,7 +384,8 @@ Id CasFunction(EmitContext& ctx, Operation operation, Id value_type) {
 }
 
 Id CasLoop(EmitContext& ctx, Operation operation, Id array_pointer, Id element_pointer,
-           Id value_type, Id memory_type, spv::Scope scope) {
+           Id value_type, Id memory_type, spv::Scope scope)
+{
     const bool is_shared{scope == spv::Scope::Workgroup};
     const bool is_struct{!is_shared || ctx.profile.support_explicit_workgroup_layout};
     const Id cas_func{CasFunction(ctx, operation, value_type)};
@@ -427,8 +443,8 @@ Id CasLoop(EmitContext& ctx, Operation operation, Id array_pointer, Id element_p
     return func;
 }
 
-template <typename Desc>
-std::string NameOf(Stage stage, const Desc& desc, std::string_view prefix) {
+template<typename Desc> std::string NameOf(Stage stage, const Desc& desc, std::string_view prefix)
+{
     if (desc.count > 1) {
         return fmt::format("{}_{}{}_{:02x}x{}", StageName(stage), prefix, desc.cbuf_index,
                            desc.cbuf_offset, desc.count);
@@ -438,7 +454,8 @@ std::string NameOf(Stage stage, const Desc& desc, std::string_view prefix) {
     }
 }
 
-Id DescType(EmitContext& ctx, Id sampled_type, Id pointer_type, u32 count) {
+Id DescType(EmitContext& ctx, Id sampled_type, Id pointer_type, u32 count)
+{
     if (count > 1) {
         const Id array_type{ctx.TypeArray(sampled_type, ctx.Const(count))};
         return ctx.TypePointer(spv::StorageClass::UniformConstant, array_type);
@@ -448,7 +465,8 @@ Id DescType(EmitContext& ctx, Id sampled_type, Id pointer_type, u32 count) {
 }
 } // Anonymous namespace
 
-void VectorTypes::Define(Sirit::Module& sirit_ctx, Id base_type, std::string_view name) {
+void VectorTypes::Define(Sirit::Module& sirit_ctx, Id base_type, std::string_view name)
+{
     defs[0] = sirit_ctx.Name(base_type, name);
 
     std::array<char, 6> def_name;
@@ -465,7 +483,8 @@ EmitContext::EmitContext(const Profile& profile_, const RuntimeInfo& runtime_inf
                          IR::Program& program, Bindings& bindings)
     : Sirit::Module(profile_.supported_spirv), profile{profile_}, runtime_info{runtime_info_},
       stage{program.stage}, texture_rescaling_index{bindings.texture_scaling_index},
-      image_rescaling_index{bindings.image_scaling_index} {
+      image_rescaling_index{bindings.image_scaling_index}
+{
     const bool is_unified{profile.unified_descriptor_binding};
     u32& uniform_binding{is_unified ? bindings.unified : bindings.uniform_buffer};
     u32& storage_binding{is_unified ? bindings.unified : bindings.storage_buffer};
@@ -494,7 +513,8 @@ EmitContext::EmitContext(const Profile& profile_, const RuntimeInfo& runtime_inf
 
 EmitContext::~EmitContext() = default;
 
-Id EmitContext::Def(const IR::Value& value) {
+Id EmitContext::Def(const IR::Value& value)
+{
     if (!value.IsImmediate()) {
         return value.InstRecursive()->Definition<Id>();
     }
@@ -518,21 +538,24 @@ Id EmitContext::Def(const IR::Value& value) {
     }
 }
 
-Id EmitContext::BitOffset8(const IR::Value& offset) {
+Id EmitContext::BitOffset8(const IR::Value& offset)
+{
     if (offset.IsImmediate()) {
         return Const((offset.U32() % 4) * 8);
     }
     return OpBitwiseAnd(U32[1], OpShiftLeftLogical(U32[1], Def(offset), Const(3u)), Const(24u));
 }
 
-Id EmitContext::BitOffset16(const IR::Value& offset) {
+Id EmitContext::BitOffset16(const IR::Value& offset)
+{
     if (offset.IsImmediate()) {
         return Const(((offset.U32() / 2) % 2) * 16);
     }
     return OpBitwiseAnd(U32[1], OpShiftLeftLogical(U32[1], Def(offset), Const(3u)), Const(16u));
 }
 
-void EmitContext::DefineCommonTypes(const Info& info) {
+void EmitContext::DefineCommonTypes(const Info& info)
+{
     void_id = TypeVoid();
 
     U1 = Name(TypeBool(), "u1");
@@ -574,19 +597,22 @@ void EmitContext::DefineCommonTypes(const Info& info) {
     }
 }
 
-void EmitContext::DefineCommonConstants() {
+void EmitContext::DefineCommonConstants()
+{
     true_value = ConstantTrue(U1);
     false_value = ConstantFalse(U1);
     u32_zero_value = Const(0U);
     f32_zero_value = Const(0.0f);
 }
 
-void EmitContext::DefineInterfaces(const IR::Program& program) {
+void EmitContext::DefineInterfaces(const IR::Program& program)
+{
     DefineInputs(program);
     DefineOutputs(program);
 }
 
-void EmitContext::DefineLocalMemory(const IR::Program& program) {
+void EmitContext::DefineLocalMemory(const IR::Program& program)
+{
     if (program.local_memory_size == 0) {
         return;
     }
@@ -599,7 +625,8 @@ void EmitContext::DefineLocalMemory(const IR::Program& program) {
     }
 }
 
-void EmitContext::DefineSharedMemory(const IR::Program& program) {
+void EmitContext::DefineSharedMemory(const IR::Program& program)
+{
     if (program.shared_memory_size == 0) {
         return;
     }
@@ -689,7 +716,8 @@ void EmitContext::DefineSharedMemory(const IR::Program& program) {
     }
 }
 
-void EmitContext::DefineSharedMemoryFunctions(const IR::Program& program) {
+void EmitContext::DefineSharedMemoryFunctions(const IR::Program& program)
+{
     if (program.info.uses_shared_increment) {
         increment_cas_shared = CasLoop(*this, Operation::Increment, shared_memory_u32_type,
                                        shared_u32, U32[1], U32[1], spv::Scope::Workgroup);
@@ -700,7 +728,8 @@ void EmitContext::DefineSharedMemoryFunctions(const IR::Program& program) {
     }
 }
 
-void EmitContext::DefineAttributeMemAccess(const Info& info) {
+void EmitContext::DefineAttributeMemAccess(const Info& info)
+{
     const auto make_load{[&] {
         const bool is_array{stage == Stage::Geometry};
         const Id end_block{OpLabel()};
@@ -884,7 +913,8 @@ void EmitContext::DefineAttributeMemAccess(const Info& info) {
     }
 }
 
-void EmitContext::DefineWriteStorageCasLoopFunction(const Info& info) {
+void EmitContext::DefineWriteStorageCasLoopFunction(const Info& info)
+{
     if (profile.support_int8 && profile.support_int16) {
         return;
     }
@@ -934,7 +964,8 @@ void EmitContext::DefineWriteStorageCasLoopFunction(const Info& info) {
     write_storage_cas_loop_func = func;
 }
 
-void EmitContext::DefineGlobalMemoryFunctions(const Info& info) {
+void EmitContext::DefineGlobalMemoryFunctions(const Info& info)
+{
     if (!info.uses_global_memory || !profile.support_int64) {
         return;
     }
@@ -1015,7 +1046,8 @@ void EmitContext::DefineGlobalMemoryFunctions(const Info& info) {
         define(&StorageDefinitions::U32x4, storage_types.U32x4, U32[4], sizeof(u32[4]));
 }
 
-void EmitContext::DefineRescalingInput(const Info& info) {
+void EmitContext::DefineRescalingInput(const Info& info)
+{
     if (!info.uses_rescaling_uniform) {
         return;
     }
@@ -1026,7 +1058,8 @@ void EmitContext::DefineRescalingInput(const Info& info) {
     }
 }
 
-void EmitContext::DefineRescalingInputPushConstant() {
+void EmitContext::DefineRescalingInputPushConstant()
+{
     boost::container::static_vector<Id, 3> members{};
     u32 member_index{0};
 
@@ -1071,7 +1104,8 @@ void EmitContext::DefineRescalingInputPushConstant() {
     }
 }
 
-void EmitContext::DefineRescalingInputUniformConstant() {
+void EmitContext::DefineRescalingInputUniformConstant()
+{
     const Id pointer_type{TypePointer(spv::StorageClass::UniformConstant, F32[4])};
     rescaling_uniform_constant =
         AddGlobalVariable(pointer_type, spv::StorageClass::UniformConstant);
@@ -1082,7 +1116,8 @@ void EmitContext::DefineRescalingInputUniformConstant() {
     }
 }
 
-void EmitContext::DefineRenderArea(const Info& info) {
+void EmitContext::DefineRenderArea(const Info& info)
+{
     if (!info.uses_render_area) {
         return;
     }
@@ -1112,7 +1147,8 @@ void EmitContext::DefineRenderArea(const Info& info) {
     }
 }
 
-void EmitContext::DefineConstantBuffers(const Info& info, u32& binding) {
+void EmitContext::DefineConstantBuffers(const Info& info, u32& binding)
+{
     if (info.constant_buffer_descriptors.empty()) {
         return;
     }
@@ -1158,7 +1194,8 @@ void EmitContext::DefineConstantBuffers(const Info& info, u32& binding) {
     binding += static_cast<u32>(info.constant_buffer_descriptors.size());
 }
 
-void EmitContext::DefineConstantBufferIndirectFunctions(const Info& info) {
+void EmitContext::DefineConstantBufferIndirectFunctions(const Info& info)
+{
     if (!info.uses_cbuf_indirect) {
         return;
     }
@@ -1215,7 +1252,8 @@ void EmitContext::DefineConstantBufferIndirectFunctions(const Info& info) {
     }
 }
 
-void EmitContext::DefineStorageBuffers(const Info& info, u32& binding) {
+void EmitContext::DefineStorageBuffers(const Info& info, u32& binding)
+{
     if (info.storage_buffers_descriptors.empty()) {
         return;
     }
@@ -1303,7 +1341,8 @@ void EmitContext::DefineStorageBuffers(const Info& info, u32& binding) {
     }
 }
 
-void EmitContext::DefineTextureBuffers(const Info& info, u32& binding) {
+void EmitContext::DefineTextureBuffers(const Info& info, u32& binding)
+{
     if (info.texture_buffer_descriptors.empty()) {
         return;
     }
@@ -1331,7 +1370,8 @@ void EmitContext::DefineTextureBuffers(const Info& info, u32& binding) {
     }
 }
 
-void EmitContext::DefineImageBuffers(const Info& info, u32& binding) {
+void EmitContext::DefineImageBuffers(const Info& info, u32& binding)
+{
     image_buffers.reserve(info.image_buffer_descriptors.size());
     for (const ImageBufferDescriptor& desc : info.image_buffer_descriptors) {
         const spv::ImageFormat format{GetImageFormat(desc.format)};
@@ -1357,7 +1397,8 @@ void EmitContext::DefineImageBuffers(const Info& info, u32& binding) {
     }
 }
 
-void EmitContext::DefineTextures(const Info& info, u32& binding, u32& scaling_index) {
+void EmitContext::DefineTextures(const Info& info, u32& binding, u32& scaling_index)
+{
     textures.reserve(info.texture_descriptors.size());
     for (const TextureDescriptor& desc : info.texture_descriptors) {
         const Id image_type{ImageType(*this, desc)};
@@ -1387,7 +1428,8 @@ void EmitContext::DefineTextures(const Info& info, u32& binding, u32& scaling_in
     }
 }
 
-void EmitContext::DefineImages(const Info& info, u32& binding, u32& scaling_index) {
+void EmitContext::DefineImages(const Info& info, u32& binding, u32& scaling_index)
+{
     images.reserve(info.image_descriptors.size());
     for (const ImageDescriptor& desc : info.image_descriptors) {
         const Id sampled_type{desc.is_integer ? U32[1] : F32[1]};
@@ -1412,7 +1454,8 @@ void EmitContext::DefineImages(const Info& info, u32& binding, u32& scaling_inde
     }
 }
 
-void EmitContext::DefineInputs(const IR::Program& program) {
+void EmitContext::DefineInputs(const IR::Program& program)
+{
     const Info& info{program.info};
     const VaryingState loads{info.loads.mask | info.passthrough.mask};
 
@@ -1566,8 +1609,8 @@ void EmitContext::DefineInputs(const IR::Program& program) {
         if (stage != Stage::Fragment) {
             continue;
         }
-        const bool is_integer = input_type == AttributeType::SignedInt ||
-                                input_type == AttributeType::UnsignedInt;
+        const bool is_integer =
+            input_type == AttributeType::SignedInt || input_type == AttributeType::UnsignedInt;
         if (is_integer) {
             Decorate(id, spv::Decoration::Flat);
         } else {
@@ -1596,7 +1639,8 @@ void EmitContext::DefineInputs(const IR::Program& program) {
     }
 }
 
-void EmitContext::DefineOutputs(const IR::Program& program) {
+void EmitContext::DefineOutputs(const IR::Program& program)
+{
     const Info& info{program.info};
     const std::optional<u32> invocations{program.invocations};
     if (runtime_info.convert_depth_mode || info.stores.AnyComponent(IR::Attribute::PositionX) ||

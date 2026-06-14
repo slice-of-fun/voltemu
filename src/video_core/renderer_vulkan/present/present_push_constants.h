@@ -15,7 +15,8 @@ struct ScreenRectVertex {
     std::array<f32, 2> tex_coord;
 };
 
-static inline std::array<f32, 4 * 4> MakeOrthographicMatrix(f32 width, f32 height) {
+static inline std::array<f32, 4 * 4> MakeOrthographicMatrix(f32 width, f32 height)
+{
     // clang-format off
     return { 2.f / width, 0.f,          0.f, 0.f,
              0.f,         2.f / height, 0.f, 0.f,

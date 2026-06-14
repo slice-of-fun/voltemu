@@ -4,12 +4,13 @@
 // SPDX-FileCopyrightText: Copyright 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/psc/time/time_zone_service.h"
+
 #include <tz/tz.h>
 
 #include "common/scope_exit.h"
 #include "core/core.h"
 #include "core/hle/service/cmif_serialization.h"
-#include "core/hle/service/psc/time/time_zone_service.h"
 
 namespace Service::PSC::Time {
 
@@ -17,7 +18,8 @@ TimeZoneService::TimeZoneService(Core::System& system_, StandardSteadyClockCore&
                                  TimeZone& time_zone, bool can_write_timezone_device_location)
     : ServiceFramework{system_, "ITimeZoneService"}, m_system{system}, m_clock_core{clock_core},
       m_time_zone{time_zone}, m_can_write_timezone_device_location{
-                                  can_write_timezone_device_location} {
+                                  can_write_timezone_device_location}
+{
     // clang-format off
     static const FunctionInfo functions[] = {
         {0,   D<&TimeZoneService::GetDeviceLocationName>, "GetDeviceLocationName"},
@@ -39,23 +41,28 @@ TimeZoneService::TimeZoneService(Core::System& system_, StandardSteadyClockCore&
     RegisterHandlers(functions);
 }
 
-Result TimeZoneService::GetDeviceLocationName(Out<LocationName> out_location_name) {
-    SCOPE_EXIT {
+Result TimeZoneService::GetDeviceLocationName(Out<LocationName> out_location_name)
+{
+    SCOPE_EXIT
+    {
         LOG_DEBUG(Service_Time, "called. out_location_name={}", *out_location_name);
     };
 
     R_RETURN(m_time_zone.GetLocationName(*out_location_name));
 }
 
-Result TimeZoneService::SetDeviceLocationName(const LocationName& location_name) {
+Result TimeZoneService::SetDeviceLocationName(const LocationName& location_name)
+{
     LOG_DEBUG(Service_Time, "called. This function is not implemented!");
 
     R_UNLESS(m_can_write_timezone_device_location, ResultPermissionDenied);
     R_RETURN(ResultNotImplemented);
 }
 
-Result TimeZoneService::GetTotalLocationNameCount(Out<u32> out_count) {
-    SCOPE_EXIT {
+Result TimeZoneService::GetTotalLocationNameCount(Out<u32> out_count)
+{
+    SCOPE_EXIT
+    {
         LOG_DEBUG(Service_Time, "called. out_count={}", *out_count);
     };
 
@@ -63,29 +70,36 @@ Result TimeZoneService::GetTotalLocationNameCount(Out<u32> out_count) {
 }
 
 Result TimeZoneService::LoadLocationNameList(
-    Out<u32> out_count, OutArray<LocationName, BufferAttr_HipcMapAlias> out_names, u32 index) {
+    Out<u32> out_count, OutArray<LocationName, BufferAttr_HipcMapAlias> out_names, u32 index)
+{
     LOG_DEBUG(Service_Time, "called. This function is not implemented!");
 
     R_RETURN(ResultNotImplemented);
 }
 
-Result TimeZoneService::LoadTimeZoneRule(OutRule out_rule, const LocationName& location_name) {
+Result TimeZoneService::LoadTimeZoneRule(OutRule out_rule, const LocationName& location_name)
+{
     LOG_DEBUG(Service_Time, "called. This function is not implemented!");
 
     R_RETURN(ResultNotImplemented);
 }
 
-Result TimeZoneService::GetTimeZoneRuleVersion(Out<RuleVersion> out_rule_version) {
-    SCOPE_EXIT {
+Result TimeZoneService::GetTimeZoneRuleVersion(Out<RuleVersion> out_rule_version)
+{
+    SCOPE_EXIT
+    {
         LOG_DEBUG(Service_Time, "called. out_rule_version={}", *out_rule_version);
     };
 
     R_RETURN(m_time_zone.GetRuleVersion(*out_rule_version));
 }
 
-Result TimeZoneService::GetDeviceLocationNameAndUpdatedTime(
-    Out<LocationName> out_location_name, Out<SteadyClockTimePoint> out_time_point) {
-    SCOPE_EXIT {
+Result
+TimeZoneService::GetDeviceLocationNameAndUpdatedTime(Out<LocationName> out_location_name,
+                                                     Out<SteadyClockTimePoint> out_time_point)
+{
+    SCOPE_EXIT
+    {
         LOG_DEBUG(Service_Time, "called. out_location_name={} out_time_point={}",
                   *out_location_name, *out_time_point);
     };
@@ -94,8 +108,10 @@ Result TimeZoneService::GetDeviceLocationNameAndUpdatedTime(
     R_RETURN(m_time_zone.GetTimePoint(*out_time_point));
 }
 
-Result TimeZoneService::SetDeviceLocationNameWithTimeZoneRule(
-    const LocationName& location_name, InBuffer<BufferAttr_HipcAutoSelect> binary) {
+Result
+TimeZoneService::SetDeviceLocationNameWithTimeZoneRule(const LocationName& location_name,
+                                                       InBuffer<BufferAttr_HipcAutoSelect> binary)
+{
     LOG_DEBUG(Service_Time, "called. location_name={}", location_name);
 
     R_UNLESS(m_can_write_timezone_device_location, ResultPermissionDenied);
@@ -109,14 +125,16 @@ Result TimeZoneService::SetDeviceLocationNameWithTimeZoneRule(
 }
 
 Result TimeZoneService::ParseTimeZoneBinary(OutRule out_rule,
-                                            InBuffer<BufferAttr_HipcAutoSelect> binary) {
+                                            InBuffer<BufferAttr_HipcAutoSelect> binary)
+{
     LOG_DEBUG(Service_Time, "called.");
 
     R_RETURN(m_time_zone.ParseBinaryInto(*out_rule, binary));
 }
 
 Result TimeZoneService::GetDeviceLocationNameOperationEventReadableHandle(
-    OutCopyHandle<Kernel::KReadableEvent> out_event) {
+    OutCopyHandle<Kernel::KReadableEvent> out_event)
+{
     LOG_DEBUG(Service_Time, "called. This function is not implemented!");
 
     R_RETURN(ResultNotImplemented);
@@ -124,8 +142,10 @@ Result TimeZoneService::GetDeviceLocationNameOperationEventReadableHandle(
 
 Result TimeZoneService::ToCalendarTime(Out<CalendarTime> out_calendar_time,
                                        Out<CalendarAdditionalInfo> out_additional_info, s64 time,
-                                       InRule rule) {
-    SCOPE_EXIT {
+                                       InRule rule)
+{
+    SCOPE_EXIT
+    {
         LOG_DEBUG(Service_Time, "called. time={} out_calendar_time={} out_additional_info={}", time,
                   *out_calendar_time, *out_additional_info);
     };
@@ -136,8 +156,10 @@ Result TimeZoneService::ToCalendarTime(Out<CalendarTime> out_calendar_time,
 
 Result TimeZoneService::ToCalendarTimeWithMyRule(Out<CalendarTime> out_calendar_time,
                                                  Out<CalendarAdditionalInfo> out_additional_info,
-                                                 s64 time) {
-    SCOPE_EXIT {
+                                                 s64 time)
+{
+    SCOPE_EXIT
+    {
         LOG_DEBUG(Service_Time, "called. time={} out_calendar_time={} out_additional_info={}", time,
                   *out_calendar_time, *out_additional_info);
     };
@@ -147,8 +169,10 @@ Result TimeZoneService::ToCalendarTimeWithMyRule(Out<CalendarTime> out_calendar_
 
 Result TimeZoneService::ToPosixTime(Out<u32> out_count,
                                     OutArray<s64, BufferAttr_HipcPointer> out_times,
-                                    const CalendarTime& calendar_time, InRule rule) {
-    SCOPE_EXIT {
+                                    const CalendarTime& calendar_time, InRule rule)
+{
+    SCOPE_EXIT
+    {
         LOG_DEBUG(Service_Time,
                   "called. calendar_time={} out_count={} out_times[0]={} out_times[1]={} ",
                   calendar_time, *out_count, out_times.size() > 0 ? out_times[0] : s64{0},
@@ -161,8 +185,10 @@ Result TimeZoneService::ToPosixTime(Out<u32> out_count,
 
 Result TimeZoneService::ToPosixTimeWithMyRule(Out<u32> out_count,
                                               OutArray<s64, BufferAttr_HipcPointer> out_times,
-                                              const CalendarTime& calendar_time) {
-    SCOPE_EXIT {
+                                              const CalendarTime& calendar_time)
+{
+    SCOPE_EXIT
+    {
         LOG_DEBUG(Service_Time,
                   "called. calendar_time={} out_count={} out_times[0]={} out_times[1]={} ",
                   calendar_time, *out_count, out_times.size() > 0 ? out_times[0] : s64{0},

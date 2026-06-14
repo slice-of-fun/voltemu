@@ -1,30 +1,35 @@
 // SPDX-FileCopyrightText: Copyright 2024 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/os/multi_wait.h"
+
 #include "core/hle/kernel/k_hardware_timer.h"
 #include "core/hle/kernel/k_synchronization_object.h"
 #include "core/hle/kernel/kernel.h"
 #include "core/hle/kernel/svc_common.h"
-#include "core/hle/service/os/multi_wait.h"
 
 namespace Service {
 
 MultiWait::MultiWait() = default;
 MultiWait::~MultiWait() = default;
 
-MultiWaitHolder* MultiWait::WaitAny(Kernel::KernelCore& kernel) {
+MultiWaitHolder* MultiWait::WaitAny(Kernel::KernelCore& kernel)
+{
     return this->TimedWaitImpl(kernel, -1);
 }
 
-MultiWaitHolder* MultiWait::TryWaitAny(Kernel::KernelCore& kernel) {
+MultiWaitHolder* MultiWait::TryWaitAny(Kernel::KernelCore& kernel)
+{
     return this->TimedWaitImpl(kernel, 0);
 }
 
-MultiWaitHolder* MultiWait::TimedWaitAny(Kernel::KernelCore& kernel, s64 timeout_ns) {
+MultiWaitHolder* MultiWait::TimedWaitAny(Kernel::KernelCore& kernel, s64 timeout_ns)
+{
     return this->TimedWaitImpl(kernel, kernel.HardwareTimer().GetTick() + timeout_ns);
 }
 
-MultiWaitHolder* MultiWait::TimedWaitImpl(Kernel::KernelCore& kernel, s64 timeout_tick) {
+MultiWaitHolder* MultiWait::TimedWaitImpl(Kernel::KernelCore& kernel, s64 timeout_tick)
+{
     std::array<MultiWaitHolder*, Kernel::Svc::ArgumentHandleCountMax> holders{};
     std::array<Kernel::KSynchronizationObject*, Kernel::Svc::ArgumentHandleCountMax> objects{};
 
@@ -48,7 +53,8 @@ MultiWaitHolder* MultiWait::TimedWaitImpl(Kernel::KernelCore& kernel, s64 timeou
     }
 }
 
-void MultiWait::MoveAll(MultiWait* other) {
+void MultiWait::MoveAll(MultiWait* other)
+{
     while (!other->m_wait_list.empty()) {
         MultiWaitHolder& holder = other->m_wait_list.front();
         holder.UnlinkFromMultiWait();

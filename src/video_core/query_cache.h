@@ -6,6 +6,8 @@
 
 #pragma once
 
+#include <ankerl/unordered_dense.h>
+
 #include <algorithm>
 #include <array>
 #include <cstring>
@@ -15,7 +17,6 @@
 #include <memory>
 #include <mutex>
 #include <optional>
-#include <ankerl/unordered_dense.h>
 #include <vector>
 
 #include "common/assert.h"
@@ -43,14 +44,16 @@ using AsyncJobId = Common::SlotId;
 
 static constexpr AsyncJobId NULL_ASYNC_JOB_ID{0};
 
-template <class QueryCache, class HostCounter>
-class CounterStreamBase {
+template<class QueryCache, class HostCounter> class CounterStreamBase {
 public:
     explicit CounterStreamBase(QueryCache& cache_, VideoCore::QueryType type_)
-        : cache{cache_}, type{type_} {}
+        : cache{cache_}, type{type_}
+    {
+    }
 
     /// Resets the stream to zero. It doesn't disable the query after resetting.
-    void Reset() {
+    void Reset()
+    {
         if (current) {
             current->EndQuery();
 
@@ -61,7 +64,8 @@ public:
     }
 
     /// Returns the current counter slicing as needed.
-    std::shared_ptr<HostCounter> Current() {
+    std::shared_ptr<HostCounter> Current()
+    {
         if (!current) {
             return nullptr;
         }
@@ -72,12 +76,11 @@ public:
     }
 
     /// Returns true when the counter stream is enabled.
-    bool IsEnabled() const {
-        return current != nullptr;
-    }
+    bool IsEnabled() const { return current != nullptr; }
 
     /// Enables the stream.
-    void Enable() {
+    void Enable()
+    {
         if (current) {
             return;
         }
@@ -85,7 +88,8 @@ public:
     }
 
     // Disables the stream.
-    void Disable() {
+    void Disable()
+    {
         if (current) {
             current->EndQuery();
         }
@@ -100,7 +104,7 @@ private:
     std::shared_ptr<HostCounter> last;
 };
 
-template <class QueryCache, class CachedQuery, class CounterStream, class HostCounter>
+template<class QueryCache, class CachedQuery, class CounterStream, class HostCounter>
 class QueryCacheLegacy : public VideoCommon::ChannelSetupCaches<VideoCommon::ChannelInfo> {
 public:
     explicit QueryCacheLegacy(VideoCore::RasterizerInterface& rasterizer_,
@@ -116,16 +120,19 @@ public:
                              VideoCore::QueryType::PrimitivesGenerated}},
               {CounterStream{reinterpret_cast<QueryCache&>(*this),
                              VideoCore::QueryType::TfbPrimitivesWritten}},
-          }} {
+          }}
+    {
         (void)slot_async_jobs.insert(); // Null value
     }
 
-    void InvalidateRegion(VAddr addr, std::size_t size) {
+    void InvalidateRegion(VAddr addr, std::size_t size)
+    {
         std::unique_lock lock{mutex};
         FlushAndRemoveRegion(addr, size);
     }
 
-    void FlushRegion(VAddr addr, std::size_t size) {
+    void FlushRegion(VAddr addr, std::size_t size)
+    {
         std::unique_lock lock{mutex};
         FlushAndRemoveRegion(addr, size);
     }
@@ -136,7 +143,8 @@ public:
      * @param type      Query type, e.g. SamplesPassed.
      * @param timestamp Timestamp, when empty the flushed query is assumed to be short.
      */
-    void Query(GPUVAddr gpu_addr, VideoCore::QueryType type, std::optional<u64> timestamp) {
+    void Query(GPUVAddr gpu_addr, VideoCore::QueryType type, std::optional<u64> timestamp)
+    {
         std::unique_lock lock{mutex};
         const std::optional<VAddr> cpu_addr = gpu_memory->GpuToCpuAddress(gpu_addr);
         ASSERT(cpu_addr);
@@ -161,7 +169,8 @@ public:
     }
 
     /// Enables all available GPU counters
-    void EnableCounters() {
+    void EnableCounters()
+    {
         std::unique_lock lock{mutex};
         for (auto& stream : streams) {
             stream.Enable();
@@ -169,13 +178,15 @@ public:
     }
 
     /// Resets a counter to zero. It doesn't disable the query after resetting.
-    void ResetCounter(VideoCore::QueryType type) {
+    void ResetCounter(VideoCore::QueryType type)
+    {
         std::unique_lock lock{mutex};
         Stream(type).Reset();
     }
 
     /// Disable all active streams. Expected to be called at the end of a command buffer.
-    void DisableStreams() {
+    void DisableStreams()
+    {
         std::unique_lock lock{mutex};
         for (auto& stream : streams) {
             stream.Disable();
@@ -184,33 +195,39 @@ public:
 
     /// Returns a new host counter.
     std::shared_ptr<HostCounter> Counter(std::shared_ptr<HostCounter> dependency,
-                                         VideoCore::QueryType type) {
+                                         VideoCore::QueryType type)
+    {
         return std::make_shared<HostCounter>(static_cast<QueryCache&>(*this), std::move(dependency),
                                              type);
     }
 
     /// Returns the counter stream of the specified type.
-    CounterStream& Stream(VideoCore::QueryType type) {
+    CounterStream& Stream(VideoCore::QueryType type)
+    {
         return streams[static_cast<std::size_t>(type)];
     }
 
     /// Returns the counter stream of the specified type.
-    const CounterStream& Stream(VideoCore::QueryType type) const {
+    const CounterStream& Stream(VideoCore::QueryType type) const
+    {
         return streams[static_cast<std::size_t>(type)];
     }
 
-    void CommitAsyncFlushes() {
+    void CommitAsyncFlushes()
+    {
         std::unique_lock lock{mutex};
         committed_flushes.push_back(uncommitted_flushes);
         uncommitted_flushes.reset();
     }
 
-    bool HasUncommittedFlushes() const {
+    bool HasUncommittedFlushes() const
+    {
         std::unique_lock lock{mutex};
         return uncommitted_flushes != nullptr;
     }
 
-    bool ShouldWaitAsyncFlushes() const {
+    bool ShouldWaitAsyncFlushes() const
+    {
         std::unique_lock lock{mutex};
         if (committed_flushes.empty()) {
             return false;
@@ -218,7 +235,8 @@ public:
         return committed_flushes.front() != nullptr;
     }
 
-    void PopAsyncFlushes() {
+    void PopAsyncFlushes()
+    {
         std::unique_lock lock{mutex};
         if (committed_flushes.empty()) {
             return;
@@ -246,7 +264,8 @@ private:
     };
 
     /// Flushes a memory range to guest memory and removes it from the cache.
-    void FlushAndRemoveRegion(VAddr addr, std::size_t size, bool async = false) {
+    void FlushAndRemoveRegion(VAddr addr, std::size_t size, bool async = false)
+    {
         const u64 addr_begin = addr;
         const u64 addr_end = addr_begin + size;
         const auto in_range = [addr_begin, addr_end](const CachedQuery& query) {
@@ -282,14 +301,16 @@ private:
     }
 
     /// Registers the passed parameters as cached and returns a pointer to the stored cached query.
-    CachedQuery* Register(VideoCore::QueryType type, VAddr cpu_addr, u8* host_ptr, bool timestamp) {
+    CachedQuery* Register(VideoCore::QueryType type, VAddr cpu_addr, u8* host_ptr, bool timestamp)
+    {
         const u64 page = static_cast<u64>(cpu_addr) >> YUZU_PAGEBITS;
         return &cached_queries[page].emplace_back(static_cast<QueryCache&>(*this), type, cpu_addr,
                                                   host_ptr);
     }
 
     /// Tries to a get a cached query. Returns nullptr on failure.
-    CachedQuery* TryGet(VAddr addr) {
+    CachedQuery* TryGet(VAddr addr)
+    {
         const u64 page = static_cast<u64>(addr) >> YUZU_PAGEBITS;
         const auto it = cached_queries.find(page);
         if (it == std::end(cached_queries)) {
@@ -302,7 +323,8 @@ private:
     }
 
     void AsyncFlushQuery(CachedQuery* query, std::optional<u64> timestamp,
-                         std::unique_lock<std::recursive_mutex>& lock) {
+                         std::unique_lock<std::recursive_mutex>& lock)
+    {
         const AsyncJobId new_async_job_id = slot_async_jobs.insert();
         {
             AsyncJob& async_job = slot_async_jobs[new_async_job_id];
@@ -358,11 +380,11 @@ private:
     std::list<std::shared_ptr<std::vector<AsyncJobId>>> committed_flushes;
 }; // namespace VideoCommon
 
-template <class QueryCache, class HostCounter>
-class HostCounterBase {
+template<class QueryCache, class HostCounter> class HostCounterBase {
 public:
     explicit HostCounterBase(std::shared_ptr<HostCounter> dependency_)
-        : dependency{std::move(dependency_)}, depth{dependency ? (dependency->Depth() + 1) : 0} {
+        : dependency{std::move(dependency_)}, depth{dependency ? (dependency->Depth() + 1) : 0}
+    {
         // Avoid nesting too many dependencies to avoid a stack overflow when these are deleted.
         constexpr u64 depth_threshold = 96;
         if (depth > depth_threshold) {
@@ -374,7 +396,8 @@ public:
     virtual ~HostCounterBase() = default;
 
     /// Returns the current value of the query.
-    u64 Query(bool async = false) {
+    u64 Query(bool async = false)
+    {
         if (result) {
             return *result;
         }
@@ -390,13 +413,9 @@ public:
     }
 
     /// Returns true when flushing this query will potentially wait.
-    bool WaitPending() const noexcept {
-        return result.has_value();
-    }
+    bool WaitPending() const noexcept { return result.has_value(); }
 
-    u64 Depth() const noexcept {
-        return depth;
-    }
+    u64 Depth() const noexcept { return depth; }
 
 protected:
     /// Returns the value of query from the backend API blocking as needed.
@@ -409,11 +428,12 @@ private:
     u64 base_result = 0;                     ///< Equivalent to nested dependencies value.
 };
 
-template <class HostCounter>
-class CachedQueryBase {
+template<class HostCounter> class CachedQueryBase {
 public:
     explicit CachedQueryBase(VAddr cpu_addr_, u8* host_ptr_)
-        : cpu_addr{cpu_addr_}, host_ptr{host_ptr_} {}
+        : cpu_addr{cpu_addr_}, host_ptr{host_ptr_}
+    {
+    }
     virtual ~CachedQueryBase() = default;
 
     CachedQueryBase(CachedQueryBase&&) noexcept = default;
@@ -423,7 +443,8 @@ public:
     CachedQueryBase& operator=(const CachedQueryBase&) = delete;
 
     /// Flushes the query to guest memory.
-    virtual u64 Flush(bool async = false) {
+    virtual u64 Flush(bool async = false)
+    {
         // When counter is nullptr it means that it's just been reset. We are supposed to write a
         // zero in these cases.
         const u64 value = counter ? counter->Query(async) : 0;
@@ -440,7 +461,8 @@ public:
 
     /// Binds a counter to this query.
     std::optional<u64> BindCounter(std::shared_ptr<HostCounter> counter_,
-                                   std::optional<u64> timestamp_) {
+                                   std::optional<u64> timestamp_)
+    {
         std::optional<u64> result{};
         if (counter) {
             // If there's an old counter set it means the query is being rewritten by the game.
@@ -452,31 +474,22 @@ public:
         return result;
     }
 
-    VAddr GetCpuAddr() const noexcept {
-        return cpu_addr;
-    }
+    VAddr GetCpuAddr() const noexcept { return cpu_addr; }
 
-    u64 SizeInBytes() const noexcept {
-        return SizeInBytes(timestamp.has_value());
-    }
+    u64 SizeInBytes() const noexcept { return SizeInBytes(timestamp.has_value()); }
 
-    static constexpr u64 SizeInBytes(bool with_timestamp) noexcept {
+    static constexpr u64 SizeInBytes(bool with_timestamp) noexcept
+    {
         return with_timestamp ? LARGE_QUERY_SIZE : SMALL_QUERY_SIZE;
     }
 
-    void SetAsyncJob(AsyncJobId assigned_async_job_) {
-        assigned_async_job = assigned_async_job_;
-    }
+    void SetAsyncJob(AsyncJobId assigned_async_job_) { assigned_async_job = assigned_async_job_; }
 
-    AsyncJobId GetAsyncJob() const {
-        return assigned_async_job;
-    }
+    AsyncJobId GetAsyncJob() const { return assigned_async_job; }
 
 protected:
     /// Returns true when querying the counter may potentially block.
-    bool WaitPending() const noexcept {
-        return counter && counter->WaitPending();
-    }
+    bool WaitPending() const noexcept { return counter && counter->WaitPending(); }
 
 private:
     static constexpr std::size_t SMALL_QUERY_SIZE = 8;   // Query size without timestamp.

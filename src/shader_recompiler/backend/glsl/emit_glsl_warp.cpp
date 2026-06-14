@@ -12,7 +12,8 @@ namespace Shader::Backend::GLSL {
 namespace {
 constexpr char THREAD_ID[]{"gl_SubGroupInvocationARB"};
 
-void SetInBoundsFlag(EmitContext& ctx, IR::Inst& inst) {
+void SetInBoundsFlag(EmitContext& ctx, IR::Inst& inst)
+{
     IR::Inst* const in_bounds{inst.GetAssociatedPseudoOperation(IR::Opcode::GetInBoundsFromOp)};
     if (!in_bounds) {
         return;
@@ -21,17 +22,20 @@ void SetInBoundsFlag(EmitContext& ctx, IR::Inst& inst) {
     in_bounds->Invalidate();
 }
 
-std::string ComputeMinThreadId(std::string_view thread_id, std::string_view segmentation_mask) {
+std::string ComputeMinThreadId(std::string_view thread_id, std::string_view segmentation_mask)
+{
     return fmt::format("({}&{})", thread_id, segmentation_mask);
 }
 
 std::string ComputeMaxThreadId(std::string_view min_thread_id, std::string_view clamp,
-                               std::string_view not_seg_mask) {
+                               std::string_view not_seg_mask)
+{
     return fmt::format("({})|({}&{})", min_thread_id, clamp, not_seg_mask);
 }
 
 std::string GetMaxThreadId(std::string_view thread_id, std::string_view clamp,
-                           std::string_view segmentation_mask) {
+                           std::string_view segmentation_mask)
+{
     const auto not_seg_mask{fmt::format("(~{})", segmentation_mask)};
     const auto min_thread_id{ComputeMinThreadId(thread_id, segmentation_mask)};
     return ComputeMaxThreadId(min_thread_id, clamp, not_seg_mask);
@@ -39,30 +43,35 @@ std::string GetMaxThreadId(std::string_view thread_id, std::string_view clamp,
 
 void UseShuffleNv(EmitContext& ctx, IR::Inst& inst, std::string_view shfl_op,
                   std::string_view value, std::string_view index,
-                  [[maybe_unused]] std::string_view clamp, std::string_view segmentation_mask) {
+                  [[maybe_unused]] std::string_view clamp, std::string_view segmentation_mask)
+{
     const auto width{fmt::format("32u>>(bitCount({}&31u))", segmentation_mask)};
     ctx.AddU32("{}={}({},{},{},shfl_in_bounds);", inst, shfl_op, value, index, width);
     SetInBoundsFlag(ctx, inst);
 }
 
-std::string_view BallotIndex(EmitContext& ctx) {
+std::string_view BallotIndex(EmitContext& ctx)
+{
     if (!ctx.profile.warp_size_potentially_larger_than_guest) {
         return ".x";
     }
     return "[gl_SubGroupInvocationARB>>5]";
 }
 
-std::string GetMask(EmitContext& ctx, std::string_view mask) {
+std::string GetMask(EmitContext& ctx, std::string_view mask)
+{
     const auto ballot_index{BallotIndex(ctx)};
     return fmt::format("uint(uvec2({}){})", mask, ballot_index);
 }
 } // Anonymous namespace
 
-void EmitLaneId(EmitContext& ctx, IR::Inst& inst) {
+void EmitLaneId(EmitContext& ctx, IR::Inst& inst)
+{
     ctx.AddU32("{}={}&31u;", inst, THREAD_ID);
 }
 
-void EmitVoteAll(EmitContext& ctx, IR::Inst& inst, std::string_view pred) {
+void EmitVoteAll(EmitContext& ctx, IR::Inst& inst, std::string_view pred)
+{
     if (!ctx.profile.warp_size_potentially_larger_than_guest) {
         ctx.AddU1("{}=allInvocationsEqualARB({});", inst, pred);
         return;
@@ -73,7 +82,8 @@ void EmitVoteAll(EmitContext& ctx, IR::Inst& inst, std::string_view pred) {
     ctx.AddU1("{}=({}&{})=={};", inst, ballot, active_mask, active_mask);
 }
 
-void EmitVoteAny(EmitContext& ctx, IR::Inst& inst, std::string_view pred) {
+void EmitVoteAny(EmitContext& ctx, IR::Inst& inst, std::string_view pred)
+{
     if (!ctx.profile.warp_size_potentially_larger_than_guest) {
         ctx.AddU1("{}=anyInvocationARB({});", inst, pred);
         return;
@@ -84,7 +94,8 @@ void EmitVoteAny(EmitContext& ctx, IR::Inst& inst, std::string_view pred) {
     ctx.AddU1("{}=({}&{})!=0u;", inst, ballot, active_mask, active_mask);
 }
 
-void EmitVoteEqual(EmitContext& ctx, IR::Inst& inst, std::string_view pred) {
+void EmitVoteEqual(EmitContext& ctx, IR::Inst& inst, std::string_view pred)
+{
     if (!ctx.profile.warp_size_potentially_larger_than_guest) {
         ctx.AddU1("{}=allInvocationsEqualARB({});", inst, pred);
         return;
@@ -96,33 +107,40 @@ void EmitVoteEqual(EmitContext& ctx, IR::Inst& inst, std::string_view pred) {
     ctx.AddU1("{}=({}==0)||({}=={});", inst, value, value, active_mask);
 }
 
-void EmitSubgroupBallot(EmitContext& ctx, IR::Inst& inst, std::string_view pred) {
+void EmitSubgroupBallot(EmitContext& ctx, IR::Inst& inst, std::string_view pred)
+{
     const auto ballot_index{BallotIndex(ctx)};
     ctx.AddU32("{}=uvec2(ballotARB({})){};", inst, pred, ballot_index);
 }
 
-void EmitSubgroupEqMask(EmitContext& ctx, IR::Inst& inst) {
+void EmitSubgroupEqMask(EmitContext& ctx, IR::Inst& inst)
+{
     ctx.AddU32("{}={};", inst, GetMask(ctx, "gl_SubGroupEqMaskARB"));
 }
 
-void EmitSubgroupLtMask(EmitContext& ctx, IR::Inst& inst) {
+void EmitSubgroupLtMask(EmitContext& ctx, IR::Inst& inst)
+{
     ctx.AddU32("{}={};", inst, GetMask(ctx, "gl_SubGroupLtMaskARB"));
 }
 
-void EmitSubgroupLeMask(EmitContext& ctx, IR::Inst& inst) {
+void EmitSubgroupLeMask(EmitContext& ctx, IR::Inst& inst)
+{
     ctx.AddU32("{}={};", inst, GetMask(ctx, "gl_SubGroupLeMaskARB"));
 }
 
-void EmitSubgroupGtMask(EmitContext& ctx, IR::Inst& inst) {
+void EmitSubgroupGtMask(EmitContext& ctx, IR::Inst& inst)
+{
     ctx.AddU32("{}={};", inst, GetMask(ctx, "gl_SubGroupGtMaskARB"));
 }
 
-void EmitSubgroupGeMask(EmitContext& ctx, IR::Inst& inst) {
+void EmitSubgroupGeMask(EmitContext& ctx, IR::Inst& inst)
+{
     ctx.AddU32("{}={};", inst, GetMask(ctx, "gl_SubGroupGeMaskARB"));
 }
 
 void EmitShuffleIndex(EmitContext& ctx, IR::Inst& inst, std::string_view value,
-                      std::string_view index, std::string_view clamp, std::string_view seg_mask) {
+                      std::string_view index, std::string_view clamp, std::string_view seg_mask)
+{
     if (ctx.profile.support_gl_warp_intrinsics) {
         UseShuffleNv(ctx, inst, "shuffleNV", value, index, clamp, seg_mask);
         return;
@@ -146,7 +164,8 @@ void EmitShuffleIndex(EmitContext& ctx, IR::Inst& inst, std::string_view value,
 }
 
 void EmitShuffleUp(EmitContext& ctx, IR::Inst& inst, std::string_view value, std::string_view index,
-                   std::string_view clamp, std::string_view seg_mask) {
+                   std::string_view clamp, std::string_view seg_mask)
+{
     if (ctx.profile.support_gl_warp_intrinsics) {
         UseShuffleNv(ctx, inst, "shuffleUpNV", value, index, clamp, seg_mask);
         return;
@@ -164,7 +183,8 @@ void EmitShuffleUp(EmitContext& ctx, IR::Inst& inst, std::string_view value, std
 }
 
 void EmitShuffleDown(EmitContext& ctx, IR::Inst& inst, std::string_view value,
-                     std::string_view index, std::string_view clamp, std::string_view seg_mask) {
+                     std::string_view index, std::string_view clamp, std::string_view seg_mask)
+{
     if (ctx.profile.support_gl_warp_intrinsics) {
         UseShuffleNv(ctx, inst, "shuffleDownNV", value, index, clamp, seg_mask);
         return;
@@ -182,8 +202,8 @@ void EmitShuffleDown(EmitContext& ctx, IR::Inst& inst, std::string_view value,
 }
 
 void EmitShuffleButterfly(EmitContext& ctx, IR::Inst& inst, std::string_view value,
-                          std::string_view index, std::string_view clamp,
-                          std::string_view seg_mask) {
+                          std::string_view index, std::string_view clamp, std::string_view seg_mask)
+{
     if (ctx.profile.support_gl_warp_intrinsics) {
         UseShuffleNv(ctx, inst, "shuffleXorNV", value, index, clamp, seg_mask);
         return;
@@ -201,14 +221,16 @@ void EmitShuffleButterfly(EmitContext& ctx, IR::Inst& inst, std::string_view val
 }
 
 void EmitFSwizzleAdd(EmitContext& ctx, IR::Inst& inst, std::string_view op_a, std::string_view op_b,
-                     std::string_view swizzle) {
+                     std::string_view swizzle)
+{
     const auto mask{fmt::format("({}>>((gl_SubGroupInvocationARB&3)<<1))&3", swizzle)};
     const std::string modifier_a = fmt::format("FSWZ_A[{}]", mask);
     const std::string modifier_b = fmt::format("FSWZ_B[{}]", mask);
     ctx.AddF32("{}=({}*{})+({}*{});", inst, op_a, modifier_a, op_b, modifier_b);
 }
 
-void EmitDPdxFine(EmitContext& ctx, IR::Inst& inst, std::string_view op_a) {
+void EmitDPdxFine(EmitContext& ctx, IR::Inst& inst, std::string_view op_a)
+{
     if (ctx.profile.support_gl_derivative_control) {
         ctx.AddF32("{}=dFdxFine({});", inst, op_a);
     } else {
@@ -217,7 +239,8 @@ void EmitDPdxFine(EmitContext& ctx, IR::Inst& inst, std::string_view op_a) {
     }
 }
 
-void EmitDPdyFine(EmitContext& ctx, IR::Inst& inst, std::string_view op_a) {
+void EmitDPdyFine(EmitContext& ctx, IR::Inst& inst, std::string_view op_a)
+{
     if (ctx.profile.support_gl_derivative_control) {
         ctx.AddF32("{}=dFdyFine({});", inst, op_a);
     } else {
@@ -226,7 +249,8 @@ void EmitDPdyFine(EmitContext& ctx, IR::Inst& inst, std::string_view op_a) {
     }
 }
 
-void EmitDPdxCoarse(EmitContext& ctx, IR::Inst& inst, std::string_view op_a) {
+void EmitDPdxCoarse(EmitContext& ctx, IR::Inst& inst, std::string_view op_a)
+{
     if (ctx.profile.support_gl_derivative_control) {
         ctx.AddF32("{}=dFdxCoarse({});", inst, op_a);
     } else {
@@ -235,7 +259,8 @@ void EmitDPdxCoarse(EmitContext& ctx, IR::Inst& inst, std::string_view op_a) {
     }
 }
 
-void EmitDPdyCoarse(EmitContext& ctx, IR::Inst& inst, std::string_view op_a) {
+void EmitDPdyCoarse(EmitContext& ctx, IR::Inst& inst, std::string_view op_a)
+{
     if (ctx.profile.support_gl_derivative_control) {
         ctx.AddF32("{}=dFdyCoarse({});", inst, op_a);
     } else {

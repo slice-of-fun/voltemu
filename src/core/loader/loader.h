@@ -195,7 +195,8 @@ public:
     /**
      * Try to verify the integrity of the file.
      */
-    virtual ResultStatus VerifyIntegrity(std::function<bool(size_t, size_t)> progress_callback) {
+    virtual ResultStatus VerifyIntegrity(std::function<bool(size_t, size_t)> progress_callback)
+    {
         return ResultStatus::ErrorIntegrityVerificationNotImplemented;
     }
 
@@ -206,7 +207,8 @@ public:
      *
      * @return ResultStatus result of function
      */
-    virtual ResultStatus ReadCode(std::vector<u8>& buffer) {
+    virtual ResultStatus ReadCode(std::vector<u8>& buffer)
+    {
         return ResultStatus::ErrorNotImplemented;
     }
 
@@ -217,7 +219,8 @@ public:
      *
      * @return ResultStatus result of function
      */
-    virtual ResultStatus ReadIcon(std::vector<u8>& buffer) {
+    virtual ResultStatus ReadIcon(std::vector<u8>& buffer)
+    {
         return ResultStatus::ErrorNotImplemented;
     }
 
@@ -230,7 +233,8 @@ public:
      *
      * @return ResultStatus result of function
      */
-    virtual ResultStatus ReadBanner(std::vector<u8>& buffer) {
+    virtual ResultStatus ReadBanner(std::vector<u8>& buffer)
+    {
         return ResultStatus::ErrorNotImplemented;
     }
 
@@ -243,7 +247,8 @@ public:
      *
      * @return ResultStatus result of function
      */
-    virtual ResultStatus ReadLogo(std::vector<u8>& buffer) {
+    virtual ResultStatus ReadLogo(std::vector<u8>& buffer)
+    {
         return ResultStatus::ErrorNotImplemented;
     }
 
@@ -254,7 +259,8 @@ public:
      *
      * @return ResultStatus result of function
      */
-    virtual ResultStatus ReadProgramId(u64& out_program_id) {
+    virtual ResultStatus ReadProgramId(u64& out_program_id)
+    {
         return ResultStatus::ErrorNotImplemented;
     }
 
@@ -265,7 +271,8 @@ public:
      *
      * @return ResultStatus result of function
      */
-    virtual ResultStatus ReadProgramIds(std::vector<u64>& out_program_ids) {
+    virtual ResultStatus ReadProgramIds(std::vector<u64>& out_program_ids)
+    {
         return ResultStatus::ErrorNotImplemented;
     }
 
@@ -277,7 +284,8 @@ public:
      *
      * @return ResultStatus result of function
      */
-    virtual ResultStatus ReadRomFS(FileSys::VirtualFile& out_file) {
+    virtual ResultStatus ReadRomFS(FileSys::VirtualFile& out_file)
+    {
         return ResultStatus::ErrorNotImplemented;
     }
 
@@ -288,7 +296,8 @@ public:
      *
      * @return ResultStatus result of function
      */
-    virtual ResultStatus ReadUpdateRaw(FileSys::VirtualFile& out_file) {
+    virtual ResultStatus ReadUpdateRaw(FileSys::VirtualFile& out_file)
+    {
         return ResultStatus::ErrorNotImplemented;
     }
 
@@ -299,9 +308,7 @@ public:
      *
      * @return bool indicating whether or not the RomFS is updatable.
      */
-    virtual bool IsRomFSUpdatable() const {
-        return true;
-    }
+    virtual bool IsRomFSUpdatable() const { return true; }
 
     /**
      * Get the title of the application
@@ -310,9 +317,7 @@ public:
      *
      * @return ResultStatus result of function
      */
-    virtual ResultStatus ReadTitle(std::string& title) {
-        return ResultStatus::ErrorNotImplemented;
-    }
+    virtual ResultStatus ReadTitle(std::string& title) { return ResultStatus::ErrorNotImplemented; }
 
     /**
      * Get the control data (CNMT) of the application
@@ -321,7 +326,8 @@ public:
      *
      * @return ResultStatus result of function
      */
-    virtual ResultStatus ReadControlData(FileSys::NACP& control) {
+    virtual ResultStatus ReadControlData(FileSys::NACP& control)
+    {
         return ResultStatus::ErrorNotImplemented;
     }
 
@@ -332,13 +338,15 @@ public:
      *
      * @return ResultStatus result of function
      */
-    virtual ResultStatus ReadManualRomFS(FileSys::VirtualFile& out_file) {
+    virtual ResultStatus ReadManualRomFS(FileSys::VirtualFile& out_file)
+    {
         return ResultStatus::ErrorNotImplemented;
     }
 
     using Modules = std::map<VAddr, std::string>;
 
-    virtual ResultStatus ReadNSOModules(Modules& modules) {
+    virtual ResultStatus ReadNSOModules(Modules& modules)
+    {
         return ResultStatus::ErrorNotImplemented;
     }
 

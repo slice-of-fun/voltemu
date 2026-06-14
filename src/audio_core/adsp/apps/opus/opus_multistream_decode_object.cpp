@@ -2,23 +2,26 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include "audio_core/adsp/apps/opus/opus_multistream_decode_object.h"
+
 #include "common/assert.h"
 
 namespace AudioCore::ADSP::OpusDecoder {
 
 namespace {
-bool IsValidChannelCount(u32 channel_count) {
+bool IsValidChannelCount(u32 channel_count)
+{
     return channel_count == 1 || channel_count == 2;
 }
 
-bool IsValidStreamCounts(u32 total_stream_count, u32 stereo_stream_count) {
+bool IsValidStreamCounts(u32 total_stream_count, u32 stereo_stream_count)
+{
     return total_stream_count > 0 && static_cast<s32>(stereo_stream_count) >= 0 &&
            stereo_stream_count <= total_stream_count && IsValidChannelCount(total_stream_count);
 }
 } // namespace
 
-u32 OpusMultiStreamDecodeObject::GetWorkBufferSize(u32 total_stream_count,
-                                                   u32 stereo_stream_count) {
+u32 OpusMultiStreamDecodeObject::GetWorkBufferSize(u32 total_stream_count, u32 stereo_stream_count)
+{
     if (IsValidStreamCounts(total_stream_count, stereo_stream_count)) {
         return static_cast<u32>(sizeof(OpusMultiStreamDecodeObject)) +
                opus_multistream_decoder_get_size(total_stream_count, stereo_stream_count);
@@ -26,7 +29,8 @@ u32 OpusMultiStreamDecodeObject::GetWorkBufferSize(u32 total_stream_count,
     return 0;
 }
 
-OpusMultiStreamDecodeObject& OpusMultiStreamDecodeObject::Initialize(u64 buffer, u64 buffer2) {
+OpusMultiStreamDecodeObject& OpusMultiStreamDecodeObject::Initialize(u64 buffer, u64 buffer2)
+{
     auto* new_decoder = reinterpret_cast<OpusMultiStreamDecodeObject*>(buffer);
     auto* comparison = reinterpret_cast<OpusMultiStreamDecodeObject*>(buffer2);
 
@@ -44,7 +48,8 @@ OpusMultiStreamDecodeObject& OpusMultiStreamDecodeObject::Initialize(u64 buffer,
 
 s32 OpusMultiStreamDecodeObject::InitializeDecoder(u32 sample_rate, u32 total_stream_count,
                                                    u32 channel_count, u32 stereo_stream_count,
-                                                   u8* mappings) {
+                                                   u8* mappings)
+{
     if (!state_valid) {
         return OPUS_INVALID_STATE;
     }
@@ -67,7 +72,8 @@ s32 OpusMultiStreamDecodeObject::InitializeDecoder(u32 sample_rate, u32 total_st
     return ret;
 }
 
-s32 OpusMultiStreamDecodeObject::Shutdown() {
+s32 OpusMultiStreamDecodeObject::Shutdown()
+{
     if (!state_valid) {
         return OPUS_INVALID_STATE;
     }
@@ -83,12 +89,14 @@ s32 OpusMultiStreamDecodeObject::Shutdown() {
     return OPUS_OK;
 }
 
-s32 OpusMultiStreamDecodeObject::ResetDecoder() {
+s32 OpusMultiStreamDecodeObject::ResetDecoder()
+{
     return opus_multistream_decoder_ctl(decoder, OPUS_RESET_STATE);
 }
 
 s32 OpusMultiStreamDecodeObject::Decode(u32& out_sample_count, u64 output_data,
-                                        u64 output_data_size, u64 input_data, u64 input_data_size) {
+                                        u64 output_data_size, u64 input_data, u64 input_data_size)
+{
     ASSERT(initialized);
     out_sample_count = 0;
 

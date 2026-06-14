@@ -4,6 +4,7 @@
 #pragma once
 
 #include <map>
+
 #include "common/common_types.h"
 
 namespace Core::Timing {

@@ -6,7 +6,8 @@
 
 namespace Shader::Optimization {
 
-void ConditionalBarrierPass(IR::Program& program) {
+void ConditionalBarrierPass(IR::Program& program)
+{
     s32 conditional_control_flow_count{0};
     s32 conditional_return_count{0};
     for (IR::AbstractSyntaxNode& node : program.syntax_list) {

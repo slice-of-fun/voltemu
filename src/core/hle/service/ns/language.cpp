@@ -5,6 +5,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include "core/hle/service/ns/language.h"
+
 #include "core/hle/service/set/settings_server.h"
 
 namespace Service::NS {
@@ -365,8 +366,9 @@ constexpr ApplicationLanguagePriorityList priority_list_polish = {{
     ApplicationLanguage::TraditionalChinese,
 }};
 
-const ApplicationLanguagePriorityList* GetApplicationLanguagePriorityList(
-    const ApplicationLanguage lang) {
+const ApplicationLanguagePriorityList*
+GetApplicationLanguagePriorityList(const ApplicationLanguage lang)
+{
     switch (lang) {
     case ApplicationLanguage::AmericanEnglish:
         return &priority_list_american_english;
@@ -409,8 +411,9 @@ const ApplicationLanguagePriorityList* GetApplicationLanguagePriorityList(
     }
 }
 
-std::optional<ApplicationLanguage> ConvertToApplicationLanguage(
-    const Set::LanguageCode language_code) {
+std::optional<ApplicationLanguage>
+ConvertToApplicationLanguage(const Set::LanguageCode language_code)
+{
     switch (language_code) {
     case Set::LanguageCode::EN_US:
         return ApplicationLanguage::AmericanEnglish;
@@ -455,7 +458,8 @@ std::optional<ApplicationLanguage> ConvertToApplicationLanguage(
     }
 }
 
-std::optional<Set::LanguageCode> ConvertToLanguageCode(const ApplicationLanguage lang) {
+std::optional<Set::LanguageCode> ConvertToLanguageCode(const ApplicationLanguage lang)
+{
     switch (lang) {
     case ApplicationLanguage::AmericanEnglish:
         return Set::LanguageCode::EN_US;

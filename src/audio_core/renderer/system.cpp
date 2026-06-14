@@ -4,6 +4,8 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "audio_core/renderer/system.h"
+
 #include <chrono>
 #include <span>
 
@@ -26,7 +28,6 @@
 #include "audio_core/renderer/nodes/edge_matrix.h"
 #include "audio_core/renderer/nodes/node_states.h"
 #include "audio_core/renderer/sink/sink_info_base.h"
-#include "audio_core/renderer/system.h"
 #include "audio_core/renderer/upsampler/upsampler_info.h"
 #include "audio_core/renderer/voice/voice_channel_resource.h"
 #include "audio_core/renderer/voice/voice_info.h"
@@ -41,7 +42,8 @@
 
 namespace AudioCore::Renderer {
 
-u64 System::GetWorkBufferSize(const AudioRendererParameterInternal& params) {
+u64 System::GetWorkBufferSize(const AudioRendererParameterInternal& params)
+{
     BehaviorInfo behavior;
     behavior.SetUserLibRevision(params.revision);
 
@@ -101,12 +103,15 @@ u64 System::GetWorkBufferSize(const AudioRendererParameterInternal& params) {
 
 System::System(Core::System& core_, Kernel::KEvent* adsp_rendered_event_)
     : core{core_}, audio_renderer{core.AudioCore().ADSP().AudioRenderer()},
-      adsp_rendered_event{adsp_rendered_event_} {}
+      adsp_rendered_event{adsp_rendered_event_}
+{
+}
 
 Result System::Initialize(const AudioRendererParameterInternal& params,
                           Kernel::KTransferMemory* transfer_memory, u64 transfer_memory_size,
                           Kernel::KProcess* process_handle_, u64 applet_resource_user_id_,
-                          s32 session_id_) {
+                          s32 session_id_)
+{
     if (!CheckValidRevision(params.revision)) {
         return Service::Audio::ResultInvalidRevision;
     }
@@ -401,7 +406,8 @@ Result System::Initialize(const AudioRendererParameterInternal& params,
     return ResultSuccess;
 }
 
-void System::Finalize() {
+void System::Finalize()
+{
     if (!initialized) {
         return;
     }
@@ -429,14 +435,16 @@ void System::Finalize() {
     initialized = false;
 }
 
-void System::Start() {
+void System::Start()
+{
     std::scoped_lock l{lock};
     frames_elapsed = 0;
     state = State::Started;
     active = true;
 }
 
-void System::Stop() {
+void System::Stop()
+{
     {
         std::scoped_lock l{lock};
         state = State::Stopped;
@@ -448,7 +456,8 @@ void System::Stop() {
     }
 }
 
-Result System::Update(std::span<const u8> input, std::span<u8> performance, std::span<u8> output) {
+Result System::Update(std::span<const u8> input, std::span<u8> performance, std::span<u8> output)
+{
     std::scoped_lock l{lock};
 
     const auto start_time{core.CoreTiming().GetGlobalTimeNs().count()};
@@ -549,43 +558,53 @@ Result System::Update(std::span<const u8> input, std::span<u8> performance, std:
     return ResultSuccess;
 }
 
-u32 System::GetRenderingTimeLimit() const {
+u32 System::GetRenderingTimeLimit() const
+{
     return render_time_limit_percent;
 }
 
-void System::SetRenderingTimeLimit(u32 limit) {
+void System::SetRenderingTimeLimit(u32 limit)
+{
     render_time_limit_percent = limit;
 }
 
-u32 System::GetSessionId() const {
+u32 System::GetSessionId() const
+{
     return session_id;
 }
 
-u32 System::GetSampleRate() const {
+u32 System::GetSampleRate() const
+{
     return sample_rate;
 }
 
-u32 System::GetSampleCount() const {
+u32 System::GetSampleCount() const
+{
     return sample_count;
 }
 
-u32 System::GetMixBufferCount() const {
+u32 System::GetMixBufferCount() const
+{
     return mix_buffer_count;
 }
 
-ExecutionMode System::GetExecutionMode() const {
+ExecutionMode System::GetExecutionMode() const
+{
     return execution_mode;
 }
 
-u32 System::GetRenderingDevice() const {
+u32 System::GetRenderingDevice() const
+{
     return render_device;
 }
 
-bool System::IsActive() const {
+bool System::IsActive() const
+{
     return active;
 }
 
-void System::SendCommandToDsp() {
+void System::SendCommandToDsp()
+{
     std::scoped_lock l{lock};
 
     if (initialized) {
@@ -634,7 +653,8 @@ void System::SendCommandToDsp() {
 }
 
 u64 System::GenerateCommand(std::span<u8> in_command_buffer,
-                            [[maybe_unused]] u64 command_buffer_size_) {
+                            [[maybe_unused]] u64 command_buffer_size_)
+{
     PoolMapper::ClearUseState(memory_pool_workbuffer, memory_pool_count);
     const auto start_time{core.CoreTiming().GetGlobalTimeNs().count()};
 
@@ -744,15 +764,18 @@ u64 System::GenerateCommand(std::span<u8> in_command_buffer,
     return command_buffer.size;
 }
 
-f32 System::GetVoiceDropParameter() const {
+f32 System::GetVoiceDropParameter() const
+{
     return drop_voice_param;
 }
 
-void System::SetVoiceDropParameter(f32 voice_drop_) {
+void System::SetVoiceDropParameter(f32 voice_drop_)
+{
     drop_voice_param = voice_drop_;
 }
 
-u32 System::DropVoices(CommandBuffer& command_buffer, u32 estimated_process_time, u32 time_limit) {
+u32 System::DropVoices(CommandBuffer& command_buffer, u32 estimated_process_time, u32 time_limit)
+{
     u32 i{0};
     auto command_list{command_buffer.command_list.data() + sizeof(CommandListHeader)};
     ICommand* cmd{nullptr};

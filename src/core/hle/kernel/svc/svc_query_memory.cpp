@@ -8,7 +8,8 @@
 namespace Kernel::Svc {
 
 Result QueryMemory(Core::System& system, uint64_t out_memory_info, PageInfo* out_page_info,
-                   u64 query_address) {
+                   u64 query_address)
+{
     LOG_TRACE(Kernel_SVC,
               "called, out_memory_info=0x{:016X}, "
               "query_address=0x{:016X}",
@@ -20,7 +21,8 @@ Result QueryMemory(Core::System& system, uint64_t out_memory_info, PageInfo* out
 }
 
 Result QueryProcessMemory(Core::System& system, uint64_t out_memory_info, PageInfo* out_page_info,
-                          Handle process_handle, uint64_t address) {
+                          Handle process_handle, uint64_t address)
+{
     LOG_TRACE(Kernel_SVC, "called process=0x{:08X} address={:X}", process_handle, address);
     const auto& handle_table = GetCurrentProcess(system.Kernel()).GetHandleTable();
     KScopedAutoObject process = handle_table.GetObject<KProcess>(process_handle);
@@ -42,23 +44,26 @@ Result QueryProcessMemory(Core::System& system, uint64_t out_memory_info, PageIn
 }
 
 Result QueryMemory64(Core::System& system, uint64_t out_memory_info, PageInfo* out_page_info,
-                     uint64_t address) {
+                     uint64_t address)
+{
     R_RETURN(QueryMemory(system, out_memory_info, out_page_info, address));
 }
 
 Result QueryProcessMemory64(Core::System& system, uint64_t out_memory_info, PageInfo* out_page_info,
-                            Handle process_handle, uint64_t address) {
+                            Handle process_handle, uint64_t address)
+{
     R_RETURN(QueryProcessMemory(system, out_memory_info, out_page_info, process_handle, address));
 }
 
 Result QueryMemory64From32(Core::System& system, uint32_t out_memory_info, PageInfo* out_page_info,
-                           uint32_t address) {
+                           uint32_t address)
+{
     R_RETURN(QueryMemory(system, out_memory_info, out_page_info, address));
 }
 
 Result QueryProcessMemory64From32(Core::System& system, uint32_t out_memory_info,
-                                  PageInfo* out_page_info, Handle process_handle,
-                                  uint64_t address) {
+                                  PageInfo* out_page_info, Handle process_handle, uint64_t address)
+{
     R_RETURN(QueryProcessMemory(system, out_memory_info, out_page_info, process_handle, address));
 }
 

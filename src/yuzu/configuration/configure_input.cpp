@@ -4,6 +4,8 @@
 // SPDX-FileCopyrightText: 2016 Citra Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "yuzu/configuration/configure_input.h"
+
 #include <memory>
 #include <thread>
 
@@ -21,7 +23,6 @@
 #include "ui_configure_input_player.h"
 #include "yuzu/configuration/configure_camera.h"
 #include "yuzu/configuration/configure_debug_controller.h"
-#include "yuzu/configuration/configure_input.h"
 #include "yuzu/configuration/configure_input_advanced.h"
 #include "yuzu/configuration/configure_input_player.h"
 #include "yuzu/configuration/configure_motion_touch.h"
@@ -31,8 +32,9 @@
 #include "yuzu/configuration/input_profiles.h"
 
 namespace {
-template <typename Dialog, typename... Args>
-void CallConfigureDialog(ConfigureInput& parent, Args&&... args) {
+template<typename Dialog, typename... Args>
+void CallConfigureDialog(ConfigureInput& parent, Args&&... args)
+{
     Dialog dialog(&parent, std::forward<Args>(args)...);
 
     const auto res = dialog.exec();
@@ -42,7 +44,8 @@ void CallConfigureDialog(ConfigureInput& parent, Args&&... args) {
 }
 } // Anonymous namespace
 
-void OnDockedModeChanged(bool last_state, bool new_state, Core::System& system) {
+void OnDockedModeChanged(bool last_state, bool new_state, Core::System& system)
+{
     if (last_state == new_state) {
         return;
     }
@@ -56,14 +59,16 @@ void OnDockedModeChanged(bool last_state, bool new_state, Core::System& system) 
 
 ConfigureInput::ConfigureInput(Core::System& system_, QWidget* parent)
     : QWidget(parent), ui(std::make_unique<Ui::ConfigureInput>()),
-      profiles(std::make_unique<InputProfiles>()), system{system_} {
+      profiles(std::make_unique<InputProfiles>()), system{system_}
+{
     ui->setupUi(this);
 }
 
 ConfigureInput::~ConfigureInput() = default;
 
 void ConfigureInput::Initialize(InputCommon::InputSubsystem* input_subsystem,
-                                std::size_t max_players) {
+                                std::size_t max_players)
+{
     const bool is_powered_on = system.IsPoweredOn();
     auto& hid_core = system.HIDCore();
     player_controllers = {
@@ -181,7 +186,8 @@ void ConfigureInput::Initialize(InputCommon::InputSubsystem* input_subsystem,
 }
 
 void ConfigureInput::PropagatePlayerNumberChanged(size_t player_index, bool checked,
-                                                  bool reconnect_current) {
+                                                  bool reconnect_current)
+{
     connected_controller_checkboxes[player_index]->setChecked(checked);
 
     if (checked) {
@@ -201,14 +207,16 @@ void ConfigureInput::PropagatePlayerNumberChanged(size_t player_index, bool chec
     }
 }
 
-QList<QWidget*> ConfigureInput::GetSubTabs() const {
+QList<QWidget*> ConfigureInput::GetSubTabs() const
+{
     return {
         ui->tabPlayer1, ui->tabPlayer2, ui->tabPlayer3, ui->tabPlayer4,  ui->tabPlayer5,
         ui->tabPlayer6, ui->tabPlayer7, ui->tabPlayer8, ui->tabAdvanced,
     };
 }
 
-void ConfigureInput::ApplyConfiguration() {
+void ConfigureInput::ApplyConfiguration()
+{
     const bool was_global = Settings::values.players.UsingGlobal();
     Settings::values.players.SetGlobal(true);
     for (auto* controller : player_controllers) {
@@ -228,7 +236,8 @@ void ConfigureInput::ApplyConfiguration() {
     Settings::values.players.SetGlobal(was_global);
 }
 
-void ConfigureInput::changeEvent(QEvent* event) {
+void ConfigureInput::changeEvent(QEvent* event)
+{
     if (event->type() == QEvent::LanguageChange) {
         RetranslateUI();
     }
@@ -236,11 +245,13 @@ void ConfigureInput::changeEvent(QEvent* event) {
     QWidget::changeEvent(event);
 }
 
-void ConfigureInput::RetranslateUI() {
+void ConfigureInput::RetranslateUI()
+{
     ui->retranslateUi(this);
 }
 
-void ConfigureInput::LoadConfiguration() {
+void ConfigureInput::LoadConfiguration()
+{
     const auto* handheld = system.HIDCore().GetEmulatedController(Core::HID::NpadIdType::Handheld);
 
     LoadPlayerControllerIndices();
@@ -250,7 +261,8 @@ void ConfigureInput::LoadConfiguration() {
     ui->motionGroup->setChecked(Settings::values.motion_enabled.GetValue());
 }
 
-void ConfigureInput::LoadPlayerControllerIndices() {
+void ConfigureInput::LoadPlayerControllerIndices()
+{
     for (std::size_t i = 0; i < connected_controller_checkboxes.size(); ++i) {
         if (i == 0) {
             auto* handheld =
@@ -265,14 +277,16 @@ void ConfigureInput::LoadPlayerControllerIndices() {
     }
 }
 
-void ConfigureInput::ClearAll() {
+void ConfigureInput::ClearAll()
+{
     // We don't have a good way to know what tab is active, but we can find out by getting the
     // parent of the consoleInputSettings
     auto* player_tab = static_cast<ConfigureInputPlayer*>(ui->consoleInputSettings->parent());
     player_tab->ClearAll();
 }
 
-void ConfigureInput::RestoreDefaults() {
+void ConfigureInput::RestoreDefaults()
+{
     // We don't have a good way to know what tab is active, but we can find out by getting the
     // parent of the consoleInputSettings
     auto* player_tab = static_cast<ConfigureInputPlayer*>(ui->consoleInputSettings->parent());
@@ -284,7 +298,8 @@ void ConfigureInput::RestoreDefaults() {
     ui->motionGroup->setChecked(true);
 }
 
-void ConfigureInput::UpdateDockedState(bool is_handheld) {
+void ConfigureInput::UpdateDockedState(bool is_handheld)
+{
     // Disallow changing the console mode if the controller type is handheld.
     ui->radioDocked->setEnabled(!is_handheld);
     ui->radioUndocked->setEnabled(!is_handheld);
@@ -298,13 +313,15 @@ void ConfigureInput::UpdateDockedState(bool is_handheld) {
     }
 }
 
-void ConfigureInput::UpdateAllInputDevices() {
+void ConfigureInput::UpdateAllInputDevices()
+{
     for (const auto& player : player_controllers) {
         player->UpdateInputDeviceCombobox();
     }
 }
 
-void ConfigureInput::UpdateAllInputProfiles(std::size_t player_index) {
+void ConfigureInput::UpdateAllInputProfiles(std::size_t player_index)
+{
     for (std::size_t i = 0; i < player_controllers.size(); ++i) {
         if (i == player_index) {
             continue;

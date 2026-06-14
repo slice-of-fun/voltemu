@@ -1,12 +1,14 @@
 // SPDX-FileCopyrightText: Copyright 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include "core/hle/service/psc/time/clocks/context_writers.h"
 #include "core/hle/service/psc/time/clocks/system_clock_core.h"
+
+#include "core/hle/service/psc/time/clocks/context_writers.h"
 
 namespace Service::PSC::Time {
 
-bool SystemClockCore::CheckClockSourceMatches() {
+bool SystemClockCore::CheckClockSourceMatches()
+{
     SystemClockContext context{};
     if (GetContext(context) != ResultSuccess) {
         return false;
@@ -20,7 +22,8 @@ bool SystemClockCore::CheckClockSourceMatches() {
     return context.steady_time_point.IdMatches(time_point);
 }
 
-Result SystemClockCore::GetCurrentTime(s64* out_time) const {
+Result SystemClockCore::GetCurrentTime(s64* out_time) const
+{
     R_UNLESS(out_time != nullptr, ResultInvalidArgument);
 
     SystemClockContext context{};
@@ -35,7 +38,8 @@ Result SystemClockCore::GetCurrentTime(s64* out_time) const {
     R_SUCCEED();
 }
 
-Result SystemClockCore::SetCurrentTime(s64 time) {
+Result SystemClockCore::SetCurrentTime(s64 time)
+{
     SteadyClockTimePoint time_point{};
     R_TRY(m_steady_clock.GetCurrentTimePoint(time_point));
 
@@ -46,17 +50,20 @@ Result SystemClockCore::SetCurrentTime(s64 time) {
     R_RETURN(SetContextAndWrite(context));
 }
 
-Result SystemClockCore::GetContext(SystemClockContext& out_context) const {
+Result SystemClockCore::GetContext(SystemClockContext& out_context) const
+{
     out_context = m_context;
     R_SUCCEED();
 }
 
-Result SystemClockCore::SetContext(const SystemClockContext& context) {
+Result SystemClockCore::SetContext(const SystemClockContext& context)
+{
     m_context = context;
     R_SUCCEED();
 }
 
-Result SystemClockCore::SetContextAndWrite(const SystemClockContext& context) {
+Result SystemClockCore::SetContextAndWrite(const SystemClockContext& context)
+{
     R_TRY(SetContext(context));
 
     if (m_context_writer) {
@@ -66,7 +73,8 @@ Result SystemClockCore::SetContextAndWrite(const SystemClockContext& context) {
     R_SUCCEED();
 }
 
-void SystemClockCore::LinkOperationEvent(OperationEvent& operation_event) {
+void SystemClockCore::LinkOperationEvent(OperationEvent& operation_event)
+{
     if (m_context_writer) {
         m_context_writer->Link(operation_event);
     }

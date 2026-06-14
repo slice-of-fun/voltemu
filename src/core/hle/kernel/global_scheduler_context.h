@@ -42,12 +42,8 @@ public:
 
     /// @brief Returns a list of all threads managed by the scheduler
     /// This is only safe to iterate while holding the scheduler lock
-    ThreadList const& GetThreadList() const noexcept {
-        return m_thread_list;
-    }
-    LockType& SchedulerLock() noexcept {
-        return m_scheduler_lock;
-    }
+    ThreadList const& GetThreadList() const noexcept { return m_thread_list; }
+    LockType& SchedulerLock() noexcept { return m_scheduler_lock; }
     void AddThread(KThread* thread) noexcept;
     void RemoveThread(KThread* thread) noexcept;
     void PreemptThreads() noexcept;

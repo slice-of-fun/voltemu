@@ -1,16 +1,19 @@
 // SPDX-FileCopyrightText: Copyright 2020 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include <stdexcept>
-#include "common/common_types.h"
 #include "common/stream.h"
+
+#include <stdexcept>
+
+#include "common/common_types.h"
 
 namespace Common {
 
 Stream::Stream() = default;
 Stream::~Stream() = default;
 
-void Stream::Seek(s32 offset, SeekOrigin origin) {
+void Stream::Seek(s32 offset, SeekOrigin origin)
+{
     if (origin == SeekOrigin::SetOrigin) {
         if (offset < 0) {
             position = 0;
@@ -26,7 +29,8 @@ void Stream::Seek(s32 offset, SeekOrigin origin) {
     }
 }
 
-u8 Stream::ReadByte() {
+u8 Stream::ReadByte()
+{
     if (position < buffer.size()) {
         return buffer[position++];
     } else {
@@ -34,7 +38,8 @@ u8 Stream::ReadByte() {
     }
 }
 
-void Stream::WriteByte(u8 byte) {
+void Stream::WriteByte(u8 byte)
+{
     if (position == buffer.size()) {
         buffer.push_back(byte);
         position++;

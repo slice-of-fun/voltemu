@@ -11,7 +11,8 @@
 namespace Shader::Backend::GLASM {
 namespace {
 void StorageOp(EmitContext& ctx, const IR::Value& binding, ScalarU32 offset,
-               std::string_view then_expr, std::string_view else_expr = {}) {
+               std::string_view then_expr, std::string_view else_expr = {})
+{
     // Operate on bindless SSBO, call the expression with bounds checking
     // address = c[binding].xy
     // length  = c[binding].z
@@ -29,7 +30,8 @@ void StorageOp(EmitContext& ctx, const IR::Value& binding, ScalarU32 offset,
 }
 
 void GlobalStorageOp(EmitContext& ctx, Register address, bool pointer_based, std::string_view expr,
-                     std::string_view else_expr = {}) {
+                     std::string_view else_expr = {})
+{
     const size_t num_buffers{ctx.info.storage_buffers_descriptors.size()};
     for (size_t index = 0; index < num_buffers; ++index) {
         if (!ctx.info.nvn_buffer_used[index]) {
@@ -71,9 +73,10 @@ void GlobalStorageOp(EmitContext& ctx, Register address, bool pointer_based, std
     }
 }
 
-template <typename ValueType>
+template<typename ValueType>
 void Write(EmitContext& ctx, const IR::Value& binding, ScalarU32 offset, ValueType value,
-           std::string_view size) {
+           std::string_view size)
+{
     if (ctx.runtime_info.glasm_use_storage_buffers) {
         ctx.Add("STB.{} {},ssbo{}[{}];", size, value, binding.U32(), offset);
     } else {
@@ -82,7 +85,8 @@ void Write(EmitContext& ctx, const IR::Value& binding, ScalarU32 offset, ValueTy
 }
 
 void Load(EmitContext& ctx, IR::Inst& inst, const IR::Value& binding, ScalarU32 offset,
-          std::string_view size) {
+          std::string_view size)
+{
     const Register ret{ctx.reg_alloc.Define(inst)};
     if (ctx.runtime_info.glasm_use_storage_buffers) {
         ctx.Add("LDB.{} {},ssbo{}[{}];", size, ret, binding.U32(), offset);
@@ -92,8 +96,9 @@ void Load(EmitContext& ctx, IR::Inst& inst, const IR::Value& binding, ScalarU32 
     }
 }
 
-template <typename ValueType>
-void GlobalWrite(EmitContext& ctx, Register address, ValueType value, std::string_view size) {
+template<typename ValueType>
+void GlobalWrite(EmitContext& ctx, Register address, ValueType value, std::string_view size)
+{
     if (ctx.runtime_info.glasm_use_storage_buffers) {
         GlobalStorageOp(ctx, address, false, fmt::format("STB.{} {}", size, value));
     } else {
@@ -101,7 +106,8 @@ void GlobalWrite(EmitContext& ctx, Register address, ValueType value, std::strin
     }
 }
 
-void GlobalLoad(EmitContext& ctx, IR::Inst& inst, Register address, std::string_view size) {
+void GlobalLoad(EmitContext& ctx, IR::Inst& inst, Register address, std::string_view size)
+{
     const Register ret{ctx.reg_alloc.Define(inst)};
     if (ctx.runtime_info.glasm_use_storage_buffers) {
         GlobalStorageOp(ctx, address, false, fmt::format("LDB.{} {}", size, ret));
@@ -111,9 +117,10 @@ void GlobalLoad(EmitContext& ctx, IR::Inst& inst, Register address, std::string_
     }
 }
 
-template <typename ValueType>
+template<typename ValueType>
 void Atom(EmitContext& ctx, IR::Inst& inst, const IR::Value& binding, ScalarU32 offset,
-          ValueType value, std::string_view operation, std::string_view size) {
+          ValueType value, std::string_view operation, std::string_view size)
+{
     const Register ret{ctx.reg_alloc.Define(inst)};
     if (ctx.runtime_info.glasm_use_storage_buffers) {
         ctx.Add("ATOMB.{}.{} {},{},ssbo{}[{}];", operation, size, ret, value, binding.U32(),
@@ -125,344 +132,409 @@ void Atom(EmitContext& ctx, IR::Inst& inst, const IR::Value& binding, ScalarU32 
 }
 } // Anonymous namespace
 
-void EmitLoadGlobalU8(EmitContext& ctx, IR::Inst& inst, Register address) {
+void EmitLoadGlobalU8(EmitContext& ctx, IR::Inst& inst, Register address)
+{
     GlobalLoad(ctx, inst, address, "U8");
 }
 
-void EmitLoadGlobalS8(EmitContext& ctx, IR::Inst& inst, Register address) {
+void EmitLoadGlobalS8(EmitContext& ctx, IR::Inst& inst, Register address)
+{
     GlobalLoad(ctx, inst, address, "S8");
 }
 
-void EmitLoadGlobalU16(EmitContext& ctx, IR::Inst& inst, Register address) {
+void EmitLoadGlobalU16(EmitContext& ctx, IR::Inst& inst, Register address)
+{
     GlobalLoad(ctx, inst, address, "U16");
 }
 
-void EmitLoadGlobalS16(EmitContext& ctx, IR::Inst& inst, Register address) {
+void EmitLoadGlobalS16(EmitContext& ctx, IR::Inst& inst, Register address)
+{
     GlobalLoad(ctx, inst, address, "S16");
 }
 
-void EmitLoadGlobal32(EmitContext& ctx, IR::Inst& inst, Register address) {
+void EmitLoadGlobal32(EmitContext& ctx, IR::Inst& inst, Register address)
+{
     GlobalLoad(ctx, inst, address, "U32");
 }
 
-void EmitLoadGlobal64(EmitContext& ctx, IR::Inst& inst, Register address) {
+void EmitLoadGlobal64(EmitContext& ctx, IR::Inst& inst, Register address)
+{
     GlobalLoad(ctx, inst, address, "U32X2");
 }
 
-void EmitLoadGlobal128(EmitContext& ctx, IR::Inst& inst, Register address) {
+void EmitLoadGlobal128(EmitContext& ctx, IR::Inst& inst, Register address)
+{
     GlobalLoad(ctx, inst, address, "U32X4");
 }
 
-void EmitWriteGlobalU8(EmitContext& ctx, Register address, Register value) {
+void EmitWriteGlobalU8(EmitContext& ctx, Register address, Register value)
+{
     GlobalWrite(ctx, address, value, "U8");
 }
 
-void EmitWriteGlobalS8(EmitContext& ctx, Register address, Register value) {
+void EmitWriteGlobalS8(EmitContext& ctx, Register address, Register value)
+{
     GlobalWrite(ctx, address, value, "S8");
 }
 
-void EmitWriteGlobalU16(EmitContext& ctx, Register address, Register value) {
+void EmitWriteGlobalU16(EmitContext& ctx, Register address, Register value)
+{
     GlobalWrite(ctx, address, value, "U16");
 }
 
-void EmitWriteGlobalS16(EmitContext& ctx, Register address, Register value) {
+void EmitWriteGlobalS16(EmitContext& ctx, Register address, Register value)
+{
     GlobalWrite(ctx, address, value, "S16");
 }
 
-void EmitWriteGlobal32(EmitContext& ctx, Register address, ScalarU32 value) {
+void EmitWriteGlobal32(EmitContext& ctx, Register address, ScalarU32 value)
+{
     GlobalWrite(ctx, address, value, "U32");
 }
 
-void EmitWriteGlobal64(EmitContext& ctx, Register address, Register value) {
+void EmitWriteGlobal64(EmitContext& ctx, Register address, Register value)
+{
     GlobalWrite(ctx, address, value, "U32X2");
 }
 
-void EmitWriteGlobal128(EmitContext& ctx, Register address, Register value) {
+void EmitWriteGlobal128(EmitContext& ctx, Register address, Register value)
+{
     GlobalWrite(ctx, address, value, "U32X4");
 }
 
-void EmitLoadStorageU8(EmitContext& ctx, IR::Inst& inst, const IR::Value& binding,
-                       ScalarU32 offset) {
+void EmitLoadStorageU8(EmitContext& ctx, IR::Inst& inst, const IR::Value& binding, ScalarU32 offset)
+{
     Load(ctx, inst, binding, offset, "U8");
 }
 
-void EmitLoadStorageS8(EmitContext& ctx, IR::Inst& inst, const IR::Value& binding,
-                       ScalarU32 offset) {
+void EmitLoadStorageS8(EmitContext& ctx, IR::Inst& inst, const IR::Value& binding, ScalarU32 offset)
+{
     Load(ctx, inst, binding, offset, "S8");
 }
 
 void EmitLoadStorageU16(EmitContext& ctx, IR::Inst& inst, const IR::Value& binding,
-                        ScalarU32 offset) {
+                        ScalarU32 offset)
+{
     Load(ctx, inst, binding, offset, "U16");
 }
 
 void EmitLoadStorageS16(EmitContext& ctx, IR::Inst& inst, const IR::Value& binding,
-                        ScalarU32 offset) {
+                        ScalarU32 offset)
+{
     Load(ctx, inst, binding, offset, "S16");
 }
 
-void EmitLoadStorage32(EmitContext& ctx, IR::Inst& inst, const IR::Value& binding,
-                       ScalarU32 offset) {
+void EmitLoadStorage32(EmitContext& ctx, IR::Inst& inst, const IR::Value& binding, ScalarU32 offset)
+{
     Load(ctx, inst, binding, offset, "U32");
 }
 
-void EmitLoadStorage64(EmitContext& ctx, IR::Inst& inst, const IR::Value& binding,
-                       ScalarU32 offset) {
+void EmitLoadStorage64(EmitContext& ctx, IR::Inst& inst, const IR::Value& binding, ScalarU32 offset)
+{
     Load(ctx, inst, binding, offset, "U32X2");
 }
 
 void EmitLoadStorage128(EmitContext& ctx, IR::Inst& inst, const IR::Value& binding,
-                        ScalarU32 offset) {
+                        ScalarU32 offset)
+{
     Load(ctx, inst, binding, offset, "U32X4");
 }
 
 void EmitWriteStorageU8(EmitContext& ctx, const IR::Value& binding, ScalarU32 offset,
-                        ScalarU32 value) {
+                        ScalarU32 value)
+{
     Write(ctx, binding, offset, value, "U8");
 }
 
 void EmitWriteStorageS8(EmitContext& ctx, const IR::Value& binding, ScalarU32 offset,
-                        ScalarS32 value) {
+                        ScalarS32 value)
+{
     Write(ctx, binding, offset, value, "S8");
 }
 
 void EmitWriteStorageU16(EmitContext& ctx, const IR::Value& binding, ScalarU32 offset,
-                         ScalarU32 value) {
+                         ScalarU32 value)
+{
     Write(ctx, binding, offset, value, "U16");
 }
 
 void EmitWriteStorageS16(EmitContext& ctx, const IR::Value& binding, ScalarU32 offset,
-                         ScalarS32 value) {
+                         ScalarS32 value)
+{
     Write(ctx, binding, offset, value, "S16");
 }
 
 void EmitWriteStorage32(EmitContext& ctx, const IR::Value& binding, ScalarU32 offset,
-                        ScalarU32 value) {
+                        ScalarU32 value)
+{
     Write(ctx, binding, offset, value, "U32");
 }
 
 void EmitWriteStorage64(EmitContext& ctx, const IR::Value& binding, ScalarU32 offset,
-                        Register value) {
+                        Register value)
+{
     Write(ctx, binding, offset, value, "U32X2");
 }
 
 void EmitWriteStorage128(EmitContext& ctx, const IR::Value& binding, ScalarU32 offset,
-                         Register value) {
+                         Register value)
+{
     Write(ctx, binding, offset, value, "U32X4");
 }
 
 void EmitSharedAtomicIAdd32(EmitContext& ctx, IR::Inst& inst, ScalarU32 pointer_offset,
-                            ScalarU32 value) {
+                            ScalarU32 value)
+{
     ctx.Add("ATOMS.ADD.U32 {},{},shared_mem[{}];", inst, value, pointer_offset);
 }
 
 void EmitSharedAtomicSMin32(EmitContext& ctx, IR::Inst& inst, ScalarU32 pointer_offset,
-                            ScalarS32 value) {
+                            ScalarS32 value)
+{
     ctx.Add("ATOMS.MIN.S32 {},{},shared_mem[{}];", inst, value, pointer_offset);
 }
 
 void EmitSharedAtomicUMin32(EmitContext& ctx, IR::Inst& inst, ScalarU32 pointer_offset,
-                            ScalarU32 value) {
+                            ScalarU32 value)
+{
     ctx.Add("ATOMS.MIN.U32 {},{},shared_mem[{}];", inst, value, pointer_offset);
 }
 
 void EmitSharedAtomicSMax32(EmitContext& ctx, IR::Inst& inst, ScalarU32 pointer_offset,
-                            ScalarS32 value) {
+                            ScalarS32 value)
+{
     ctx.Add("ATOMS.MAX.S32 {},{},shared_mem[{}];", inst, value, pointer_offset);
 }
 
 void EmitSharedAtomicUMax32(EmitContext& ctx, IR::Inst& inst, ScalarU32 pointer_offset,
-                            ScalarU32 value) {
+                            ScalarU32 value)
+{
     ctx.Add("ATOMS.MAX.U32 {},{},shared_mem[{}];", inst, value, pointer_offset);
 }
 
 void EmitSharedAtomicInc32(EmitContext& ctx, IR::Inst& inst, ScalarU32 pointer_offset,
-                           ScalarU32 value) {
+                           ScalarU32 value)
+{
     ctx.Add("ATOMS.IWRAP.U32 {},{},shared_mem[{}];", inst, value, pointer_offset);
 }
 
 void EmitSharedAtomicDec32(EmitContext& ctx, IR::Inst& inst, ScalarU32 pointer_offset,
-                           ScalarU32 value) {
+                           ScalarU32 value)
+{
     ctx.Add("ATOMS.DWRAP.U32 {},{},shared_mem[{}];", inst, value, pointer_offset);
 }
 
 void EmitSharedAtomicAnd32(EmitContext& ctx, IR::Inst& inst, ScalarU32 pointer_offset,
-                           ScalarU32 value) {
+                           ScalarU32 value)
+{
     ctx.Add("ATOMS.AND.U32 {},{},shared_mem[{}];", inst, value, pointer_offset);
 }
 
 void EmitSharedAtomicOr32(EmitContext& ctx, IR::Inst& inst, ScalarU32 pointer_offset,
-                          ScalarU32 value) {
+                          ScalarU32 value)
+{
     ctx.Add("ATOMS.OR.U32 {},{},shared_mem[{}];", inst, value, pointer_offset);
 }
 
 void EmitSharedAtomicXor32(EmitContext& ctx, IR::Inst& inst, ScalarU32 pointer_offset,
-                           ScalarU32 value) {
+                           ScalarU32 value)
+{
     ctx.Add("ATOMS.XOR.U32 {},{},shared_mem[{}];", inst, value, pointer_offset);
 }
 
 void EmitSharedAtomicExchange32(EmitContext& ctx, IR::Inst& inst, ScalarU32 pointer_offset,
-                                ScalarU32 value) {
+                                ScalarU32 value)
+{
     ctx.Add("ATOMS.EXCH.U32 {},{},shared_mem[{}];", inst, value, pointer_offset);
 }
 
 void EmitSharedAtomicExchange64(EmitContext& ctx, IR::Inst& inst, ScalarU32 pointer_offset,
-                                Register value) {
+                                Register value)
+{
     ctx.LongAdd("ATOMS.EXCH.U64 {}.x,{},shared_mem[{}];", inst, value, pointer_offset);
 }
 
 void EmitSharedAtomicExchange32x2([[maybe_unused]] EmitContext& ctx,
                                   [[maybe_unused]] IR::Inst& inst,
                                   [[maybe_unused]] ScalarU32 pointer_offset,
-                                  [[maybe_unused]] Register value) {
+                                  [[maybe_unused]] Register value)
+{
     throw NotImplementedException("GLASM instruction");
 }
 
 void EmitStorageAtomicIAdd32(EmitContext& ctx, IR::Inst& inst, const IR::Value& binding,
-                             ScalarU32 offset, ScalarU32 value) {
+                             ScalarU32 offset, ScalarU32 value)
+{
     Atom(ctx, inst, binding, offset, value, "ADD", "U32");
 }
 
 void EmitStorageAtomicSMin32(EmitContext& ctx, IR::Inst& inst, const IR::Value& binding,
-                             ScalarU32 offset, ScalarS32 value) {
+                             ScalarU32 offset, ScalarS32 value)
+{
     Atom(ctx, inst, binding, offset, value, "MIN", "S32");
 }
 
 void EmitStorageAtomicUMin32(EmitContext& ctx, IR::Inst& inst, const IR::Value& binding,
-                             ScalarU32 offset, ScalarU32 value) {
+                             ScalarU32 offset, ScalarU32 value)
+{
     Atom(ctx, inst, binding, offset, value, "MIN", "U32");
 }
 
 void EmitStorageAtomicSMax32(EmitContext& ctx, IR::Inst& inst, const IR::Value& binding,
-                             ScalarU32 offset, ScalarS32 value) {
+                             ScalarU32 offset, ScalarS32 value)
+{
     Atom(ctx, inst, binding, offset, value, "MAX", "S32");
 }
 
 void EmitStorageAtomicUMax32(EmitContext& ctx, IR::Inst& inst, const IR::Value& binding,
-                             ScalarU32 offset, ScalarU32 value) {
+                             ScalarU32 offset, ScalarU32 value)
+{
     Atom(ctx, inst, binding, offset, value, "MAX", "U32");
 }
 
 void EmitStorageAtomicInc32(EmitContext& ctx, IR::Inst& inst, const IR::Value& binding,
-                            ScalarU32 offset, ScalarU32 value) {
+                            ScalarU32 offset, ScalarU32 value)
+{
     Atom(ctx, inst, binding, offset, value, "IWRAP", "U32");
 }
 
 void EmitStorageAtomicDec32(EmitContext& ctx, IR::Inst& inst, const IR::Value& binding,
-                            ScalarU32 offset, ScalarU32 value) {
+                            ScalarU32 offset, ScalarU32 value)
+{
     Atom(ctx, inst, binding, offset, value, "DWRAP", "U32");
 }
 
 void EmitStorageAtomicAnd32(EmitContext& ctx, IR::Inst& inst, const IR::Value& binding,
-                            ScalarU32 offset, ScalarU32 value) {
+                            ScalarU32 offset, ScalarU32 value)
+{
     Atom(ctx, inst, binding, offset, value, "AND", "U32");
 }
 
 void EmitStorageAtomicOr32(EmitContext& ctx, IR::Inst& inst, const IR::Value& binding,
-                           ScalarU32 offset, ScalarU32 value) {
+                           ScalarU32 offset, ScalarU32 value)
+{
     Atom(ctx, inst, binding, offset, value, "OR", "U32");
 }
 
 void EmitStorageAtomicXor32(EmitContext& ctx, IR::Inst& inst, const IR::Value& binding,
-                            ScalarU32 offset, ScalarU32 value) {
+                            ScalarU32 offset, ScalarU32 value)
+{
     Atom(ctx, inst, binding, offset, value, "XOR", "U32");
 }
 
 void EmitStorageAtomicExchange32(EmitContext& ctx, IR::Inst& inst, const IR::Value& binding,
-                                 ScalarU32 offset, ScalarU32 value) {
+                                 ScalarU32 offset, ScalarU32 value)
+{
     Atom(ctx, inst, binding, offset, value, "EXCH", "U32");
 }
 
 void EmitStorageAtomicIAdd64(EmitContext& ctx, IR::Inst& inst, const IR::Value& binding,
-                             ScalarU32 offset, Register value) {
+                             ScalarU32 offset, Register value)
+{
     Atom(ctx, inst, binding, offset, value, "ADD", "U64");
 }
 
 void EmitStorageAtomicSMin64(EmitContext& ctx, IR::Inst& inst, const IR::Value& binding,
-                             ScalarU32 offset, Register value) {
+                             ScalarU32 offset, Register value)
+{
     Atom(ctx, inst, binding, offset, value, "MIN", "S64");
 }
 
 void EmitStorageAtomicUMin64(EmitContext& ctx, IR::Inst& inst, const IR::Value& binding,
-                             ScalarU32 offset, Register value) {
+                             ScalarU32 offset, Register value)
+{
     Atom(ctx, inst, binding, offset, value, "MIN", "U64");
 }
 
 void EmitStorageAtomicSMax64(EmitContext& ctx, IR::Inst& inst, const IR::Value& binding,
-                             ScalarU32 offset, Register value) {
+                             ScalarU32 offset, Register value)
+{
     Atom(ctx, inst, binding, offset, value, "MAX", "S64");
 }
 
 void EmitStorageAtomicUMax64(EmitContext& ctx, IR::Inst& inst, const IR::Value& binding,
-                             ScalarU32 offset, Register value) {
+                             ScalarU32 offset, Register value)
+{
     Atom(ctx, inst, binding, offset, value, "MAX", "U64");
 }
 
 void EmitStorageAtomicAnd64(EmitContext& ctx, IR::Inst& inst, const IR::Value& binding,
-                            ScalarU32 offset, Register value) {
+                            ScalarU32 offset, Register value)
+{
     Atom(ctx, inst, binding, offset, value, "AND", "U64");
 }
 
 void EmitStorageAtomicOr64(EmitContext& ctx, IR::Inst& inst, const IR::Value& binding,
-                           ScalarU32 offset, Register value) {
+                           ScalarU32 offset, Register value)
+{
     Atom(ctx, inst, binding, offset, value, "OR", "U64");
 }
 
 void EmitStorageAtomicXor64(EmitContext& ctx, IR::Inst& inst, const IR::Value& binding,
-                            ScalarU32 offset, Register value) {
+                            ScalarU32 offset, Register value)
+{
     Atom(ctx, inst, binding, offset, value, "XOR", "U64");
 }
 
 void EmitStorageAtomicExchange64(EmitContext& ctx, IR::Inst& inst, const IR::Value& binding,
-                                 ScalarU32 offset, Register value) {
+                                 ScalarU32 offset, Register value)
+{
     Atom(ctx, inst, binding, offset, value, "EXCH", "U64");
 }
 
 void EmitStorageAtomicIAdd32x2([[maybe_unused]] EmitContext& ctx, [[maybe_unused]] IR::Inst& inst,
                                [[maybe_unused]] const IR::Value& binding,
-                               [[maybe_unused]] ScalarU32 offset, [[maybe_unused]] Register value) {
+                               [[maybe_unused]] ScalarU32 offset, [[maybe_unused]] Register value)
+{
     throw NotImplementedException("GLASM instruction");
 }
 
 void EmitStorageAtomicSMin32x2([[maybe_unused]] EmitContext& ctx, [[maybe_unused]] IR::Inst& inst,
                                [[maybe_unused]] const IR::Value& binding,
-                               [[maybe_unused]] ScalarU32 offset, [[maybe_unused]] Register value) {
+                               [[maybe_unused]] ScalarU32 offset, [[maybe_unused]] Register value)
+{
     throw NotImplementedException("GLASM instruction");
 }
 
 void EmitStorageAtomicUMin32x2([[maybe_unused]] EmitContext& ctx, [[maybe_unused]] IR::Inst& inst,
                                [[maybe_unused]] const IR::Value& binding,
-                               [[maybe_unused]] ScalarU32 offset, [[maybe_unused]] Register value) {
+                               [[maybe_unused]] ScalarU32 offset, [[maybe_unused]] Register value)
+{
     throw NotImplementedException("GLASM instruction");
 }
 
 void EmitStorageAtomicSMax32x2([[maybe_unused]] EmitContext& ctx, [[maybe_unused]] IR::Inst& inst,
                                [[maybe_unused]] const IR::Value& binding,
-                               [[maybe_unused]] ScalarU32 offset, [[maybe_unused]] Register value) {
+                               [[maybe_unused]] ScalarU32 offset, [[maybe_unused]] Register value)
+{
     throw NotImplementedException("GLASM instruction");
 }
 
 void EmitStorageAtomicUMax32x2([[maybe_unused]] EmitContext& ctx, [[maybe_unused]] IR::Inst& inst,
                                [[maybe_unused]] const IR::Value& binding,
-                               [[maybe_unused]] ScalarU32 offset, [[maybe_unused]] Register value) {
+                               [[maybe_unused]] ScalarU32 offset, [[maybe_unused]] Register value)
+{
     throw NotImplementedException("GLASM instruction");
 }
 
 void EmitStorageAtomicAnd32x2([[maybe_unused]] EmitContext& ctx, [[maybe_unused]] IR::Inst& inst,
                               [[maybe_unused]] const IR::Value& binding,
-                              [[maybe_unused]] ScalarU32 offset, [[maybe_unused]] Register value) {
+                              [[maybe_unused]] ScalarU32 offset, [[maybe_unused]] Register value)
+{
     throw NotImplementedException("GLASM instruction");
 }
 
 void EmitStorageAtomicOr32x2([[maybe_unused]] EmitContext& ctx, [[maybe_unused]] IR::Inst& inst,
                              [[maybe_unused]] const IR::Value& binding,
-                             [[maybe_unused]] ScalarU32 offset, [[maybe_unused]] Register value) {
+                             [[maybe_unused]] ScalarU32 offset, [[maybe_unused]] Register value)
+{
     throw NotImplementedException("GLASM instruction");
 }
 
 void EmitStorageAtomicXor32x2([[maybe_unused]] EmitContext& ctx, [[maybe_unused]] IR::Inst& inst,
                               [[maybe_unused]] const IR::Value& binding,
-                              [[maybe_unused]] ScalarU32 offset, [[maybe_unused]] Register value) {
+                              [[maybe_unused]] ScalarU32 offset, [[maybe_unused]] Register value)
+{
     throw NotImplementedException("GLASM instruction");
 }
 
@@ -470,205 +542,253 @@ void EmitStorageAtomicExchange32x2([[maybe_unused]] EmitContext& ctx,
                                    [[maybe_unused]] IR::Inst& inst,
                                    [[maybe_unused]] const IR::Value& binding,
                                    [[maybe_unused]] ScalarU32 offset,
-                                   [[maybe_unused]] Register value) {
+                                   [[maybe_unused]] Register value)
+{
     throw NotImplementedException("GLASM instruction");
 }
 
 void EmitStorageAtomicAddF32(EmitContext& ctx, IR::Inst& inst, const IR::Value& binding,
-                             ScalarU32 offset, ScalarF32 value) {
+                             ScalarU32 offset, ScalarF32 value)
+{
     Atom(ctx, inst, binding, offset, value, "ADD", "F32");
 }
 
 void EmitStorageAtomicAddF16x2(EmitContext& ctx, IR::Inst& inst, const IR::Value& binding,
-                               ScalarU32 offset, Register value) {
+                               ScalarU32 offset, Register value)
+{
     Atom(ctx, inst, binding, offset, value, "ADD", "F16x2");
 }
 
 void EmitStorageAtomicAddF32x2([[maybe_unused]] EmitContext& ctx, [[maybe_unused]] IR::Inst& inst,
                                [[maybe_unused]] const IR::Value& binding,
-                               [[maybe_unused]] ScalarU32 offset, [[maybe_unused]] Register value) {
+                               [[maybe_unused]] ScalarU32 offset, [[maybe_unused]] Register value)
+{
     throw NotImplementedException("GLASM instruction");
 }
 
 void EmitStorageAtomicMinF16x2(EmitContext& ctx, IR::Inst& inst, const IR::Value& binding,
-                               ScalarU32 offset, Register value) {
+                               ScalarU32 offset, Register value)
+{
     Atom(ctx, inst, binding, offset, value, "MIN", "F16x2");
 }
 
 void EmitStorageAtomicMinF32x2([[maybe_unused]] EmitContext& ctx, [[maybe_unused]] IR::Inst& inst,
                                [[maybe_unused]] const IR::Value& binding,
-                               [[maybe_unused]] ScalarU32 offset, [[maybe_unused]] Register value) {
+                               [[maybe_unused]] ScalarU32 offset, [[maybe_unused]] Register value)
+{
     throw NotImplementedException("GLASM instruction");
 }
 
 void EmitStorageAtomicMaxF16x2(EmitContext& ctx, IR::Inst& inst, const IR::Value& binding,
-                               ScalarU32 offset, Register value) {
+                               ScalarU32 offset, Register value)
+{
     Atom(ctx, inst, binding, offset, value, "MAX", "F16x2");
 }
 
 void EmitStorageAtomicMaxF32x2([[maybe_unused]] EmitContext& ctx, [[maybe_unused]] IR::Inst& inst,
                                [[maybe_unused]] const IR::Value& binding,
-                               [[maybe_unused]] ScalarU32 offset, [[maybe_unused]] Register value) {
+                               [[maybe_unused]] ScalarU32 offset, [[maybe_unused]] Register value)
+{
     throw NotImplementedException("GLASM instruction");
 }
 
-void EmitGlobalAtomicIAdd32(EmitContext&) {
+void EmitGlobalAtomicIAdd32(EmitContext&)
+{
     throw NotImplementedException("GLASM instruction");
 }
 
-void EmitGlobalAtomicSMin32(EmitContext&) {
+void EmitGlobalAtomicSMin32(EmitContext&)
+{
     throw NotImplementedException("GLASM instruction");
 }
 
-void EmitGlobalAtomicUMin32(EmitContext&) {
+void EmitGlobalAtomicUMin32(EmitContext&)
+{
     throw NotImplementedException("GLASM instruction");
 }
 
-void EmitGlobalAtomicSMax32(EmitContext&) {
+void EmitGlobalAtomicSMax32(EmitContext&)
+{
     throw NotImplementedException("GLASM instruction");
 }
 
-void EmitGlobalAtomicUMax32(EmitContext&) {
+void EmitGlobalAtomicUMax32(EmitContext&)
+{
     throw NotImplementedException("GLASM instruction");
 }
 
-void EmitGlobalAtomicInc32(EmitContext&) {
+void EmitGlobalAtomicInc32(EmitContext&)
+{
     throw NotImplementedException("GLASM instruction");
 }
 
-void EmitGlobalAtomicDec32(EmitContext&) {
+void EmitGlobalAtomicDec32(EmitContext&)
+{
     throw NotImplementedException("GLASM instruction");
 }
 
-void EmitGlobalAtomicAnd32(EmitContext&) {
+void EmitGlobalAtomicAnd32(EmitContext&)
+{
     throw NotImplementedException("GLASM instruction");
 }
 
-void EmitGlobalAtomicOr32(EmitContext&) {
+void EmitGlobalAtomicOr32(EmitContext&)
+{
     throw NotImplementedException("GLASM instruction");
 }
 
-void EmitGlobalAtomicXor32(EmitContext&) {
+void EmitGlobalAtomicXor32(EmitContext&)
+{
     throw NotImplementedException("GLASM instruction");
 }
 
-void EmitGlobalAtomicExchange32(EmitContext&) {
+void EmitGlobalAtomicExchange32(EmitContext&)
+{
     throw NotImplementedException("GLASM instruction");
 }
 
-void EmitGlobalAtomicIAdd64(EmitContext&) {
+void EmitGlobalAtomicIAdd64(EmitContext&)
+{
     throw NotImplementedException("GLASM instruction");
 }
 
-void EmitGlobalAtomicSMin64(EmitContext&) {
+void EmitGlobalAtomicSMin64(EmitContext&)
+{
     throw NotImplementedException("GLASM instruction");
 }
 
-void EmitGlobalAtomicUMin64(EmitContext&) {
+void EmitGlobalAtomicUMin64(EmitContext&)
+{
     throw NotImplementedException("GLASM instruction");
 }
 
-void EmitGlobalAtomicSMax64(EmitContext&) {
+void EmitGlobalAtomicSMax64(EmitContext&)
+{
     throw NotImplementedException("GLASM instruction");
 }
 
-void EmitGlobalAtomicUMax64(EmitContext&) {
+void EmitGlobalAtomicUMax64(EmitContext&)
+{
     throw NotImplementedException("GLASM instruction");
 }
 
-void EmitGlobalAtomicInc64(EmitContext&) {
+void EmitGlobalAtomicInc64(EmitContext&)
+{
     throw NotImplementedException("GLASM instruction");
 }
 
-void EmitGlobalAtomicDec64(EmitContext&) {
+void EmitGlobalAtomicDec64(EmitContext&)
+{
     throw NotImplementedException("GLASM instruction");
 }
 
-void EmitGlobalAtomicAnd64(EmitContext&) {
+void EmitGlobalAtomicAnd64(EmitContext&)
+{
     throw NotImplementedException("GLASM instruction");
 }
 
-void EmitGlobalAtomicOr64(EmitContext&) {
+void EmitGlobalAtomicOr64(EmitContext&)
+{
     throw NotImplementedException("GLASM instruction");
 }
 
-void EmitGlobalAtomicXor64(EmitContext&) {
+void EmitGlobalAtomicXor64(EmitContext&)
+{
     throw NotImplementedException("GLASM instruction");
 }
 
-void EmitGlobalAtomicExchange64(EmitContext&) {
+void EmitGlobalAtomicExchange64(EmitContext&)
+{
     throw NotImplementedException("GLASM instruction");
 }
 
-void EmitGlobalAtomicIAdd32x2(EmitContext&) {
+void EmitGlobalAtomicIAdd32x2(EmitContext&)
+{
     throw NotImplementedException("GLASM instruction");
 }
 
-void EmitGlobalAtomicSMin32x2(EmitContext&) {
+void EmitGlobalAtomicSMin32x2(EmitContext&)
+{
     throw NotImplementedException("GLASM instruction");
 }
 
-void EmitGlobalAtomicUMin32x2(EmitContext&) {
+void EmitGlobalAtomicUMin32x2(EmitContext&)
+{
     throw NotImplementedException("GLASM instruction");
 }
 
-void EmitGlobalAtomicSMax32x2(EmitContext&) {
+void EmitGlobalAtomicSMax32x2(EmitContext&)
+{
     throw NotImplementedException("GLASM instruction");
 }
 
-void EmitGlobalAtomicUMax32x2(EmitContext&) {
+void EmitGlobalAtomicUMax32x2(EmitContext&)
+{
     throw NotImplementedException("GLASM instruction");
 }
 
-void EmitGlobalAtomicInc32x2(EmitContext&) {
+void EmitGlobalAtomicInc32x2(EmitContext&)
+{
     throw NotImplementedException("GLASM instruction");
 }
 
-void EmitGlobalAtomicDec32x2(EmitContext&) {
+void EmitGlobalAtomicDec32x2(EmitContext&)
+{
     throw NotImplementedException("GLASM instruction");
 }
 
-void EmitGlobalAtomicAnd32x2(EmitContext&) {
+void EmitGlobalAtomicAnd32x2(EmitContext&)
+{
     throw NotImplementedException("GLASM instruction");
 }
 
-void EmitGlobalAtomicOr32x2(EmitContext&) {
+void EmitGlobalAtomicOr32x2(EmitContext&)
+{
     throw NotImplementedException("GLASM instruction");
 }
 
-void EmitGlobalAtomicXor32x2(EmitContext&) {
+void EmitGlobalAtomicXor32x2(EmitContext&)
+{
     throw NotImplementedException("GLASM instruction");
 }
 
-void EmitGlobalAtomicExchange32x2(EmitContext&) {
+void EmitGlobalAtomicExchange32x2(EmitContext&)
+{
     throw NotImplementedException("GLASM instruction");
 }
 
-void EmitGlobalAtomicAddF32(EmitContext&) {
+void EmitGlobalAtomicAddF32(EmitContext&)
+{
     throw NotImplementedException("GLASM instruction");
 }
 
-void EmitGlobalAtomicAddF16x2(EmitContext&) {
+void EmitGlobalAtomicAddF16x2(EmitContext&)
+{
     throw NotImplementedException("GLASM instruction");
 }
 
-void EmitGlobalAtomicAddF32x2(EmitContext&) {
+void EmitGlobalAtomicAddF32x2(EmitContext&)
+{
     throw NotImplementedException("GLASM instruction");
 }
 
-void EmitGlobalAtomicMinF16x2(EmitContext&) {
+void EmitGlobalAtomicMinF16x2(EmitContext&)
+{
     throw NotImplementedException("GLASM instruction");
 }
 
-void EmitGlobalAtomicMinF32x2(EmitContext&) {
+void EmitGlobalAtomicMinF32x2(EmitContext&)
+{
     throw NotImplementedException("GLASM instruction");
 }
 
-void EmitGlobalAtomicMaxF16x2(EmitContext&) {
+void EmitGlobalAtomicMaxF16x2(EmitContext&)
+{
     throw NotImplementedException("GLASM instruction");
 }
 
-void EmitGlobalAtomicMaxF32x2(EmitContext&) {
+void EmitGlobalAtomicMaxF32x2(EmitContext&)
+{
     throw NotImplementedException("GLASM instruction");
 }
 

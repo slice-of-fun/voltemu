@@ -6,17 +6,18 @@
 
 #include "android_common.h"
 
+#include <jni.h>
+
 #include <string>
 #include <string_view>
-
-#include <jni.h>
 
 #include "common/android/id_cache.h"
 #include "common/string_util.h"
 
 namespace Common::Android {
 
-std::string GetJString(JNIEnv* env, jstring jstr) {
+std::string GetJString(JNIEnv* env, jstring jstr)
+{
     if (!jstr) {
         return {};
     }
@@ -31,46 +32,55 @@ std::string GetJString(JNIEnv* env, jstring jstr) {
     return converted_string;
 }
 
-jstring ToJString(JNIEnv* env, std::string_view str) {
+jstring ToJString(JNIEnv* env, std::string_view str)
+{
     const std::u16string converted_string = Common::UTF8ToUTF16(str);
     return env->NewString(reinterpret_cast<const jchar*>(converted_string.data()),
                           static_cast<jint>(converted_string.size()));
 }
 
-jobjectArray ToJStringArray(JNIEnv* env, const std::vector<std::string>& strs) {
-    jobjectArray array =
-            env->NewObjectArray(static_cast<jsize>(strs.size()), env->FindClass("java/lang/String"), env->NewStringUTF(""));
+jobjectArray ToJStringArray(JNIEnv* env, const std::vector<std::string>& strs)
+{
+    jobjectArray array = env->NewObjectArray(
+        static_cast<jsize>(strs.size()), env->FindClass("java/lang/String"), env->NewStringUTF(""));
     for (std::size_t i = 0; i < strs.size(); ++i) {
         env->SetObjectArrayElement(array, static_cast<jsize>(i), ToJString(env, strs[i]));
     }
     return array;
 }
 
-jstring ToJString(JNIEnv* env, std::u16string_view str) {
+jstring ToJString(JNIEnv* env, std::u16string_view str)
+{
     return ToJString(env, Common::UTF16ToUTF8(str));
 }
 
-double GetJDouble(JNIEnv* env, jobject jdouble) {
+double GetJDouble(JNIEnv* env, jobject jdouble)
+{
     return env->GetDoubleField(jdouble, GetDoubleValueField());
 }
 
-jobject ToJDouble(JNIEnv* env, double value) {
+jobject ToJDouble(JNIEnv* env, double value)
+{
     return env->NewObject(GetDoubleClass(), GetDoubleConstructor(), value);
 }
 
-s32 GetJInteger(JNIEnv* env, jobject jinteger) {
+s32 GetJInteger(JNIEnv* env, jobject jinteger)
+{
     return env->GetIntField(jinteger, GetIntegerValueField());
 }
 
-jobject ToJInteger(JNIEnv* env, s32 value) {
+jobject ToJInteger(JNIEnv* env, s32 value)
+{
     return env->NewObject(GetIntegerClass(), GetIntegerConstructor(), value);
 }
 
-bool GetJBoolean(JNIEnv* env, jobject jboolean) {
+bool GetJBoolean(JNIEnv* env, jobject jboolean)
+{
     return env->GetBooleanField(jboolean, GetBooleanValueField());
 }
 
-jobject ToJBoolean(JNIEnv* env, bool value) {
+jobject ToJBoolean(JNIEnv* env, bool value)
+{
     return env->NewObject(GetBooleanClass(), GetBooleanConstructor(), value);
 }
 

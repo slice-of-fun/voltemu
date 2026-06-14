@@ -255,51 +255,34 @@ enum class PlatformRegion : s32 {
     Terra = 2,
 };
 
-constexpr std::array<LanguageCode, 20> available_language_codes = {{
-    LanguageCode::JA,
-    LanguageCode::EN_US,
-    LanguageCode::FR,
-    LanguageCode::DE,
-    LanguageCode::IT,
-    LanguageCode::ES,
-    LanguageCode::ZH_CN,
-    LanguageCode::KO,
-    LanguageCode::NL,
-    LanguageCode::PT,
-    LanguageCode::RU,
-    LanguageCode::ZH_TW,
-    LanguageCode::EN_GB,
-    LanguageCode::FR_CA,
-    LanguageCode::ES_419,
-    LanguageCode::ZH_HANS,
-    LanguageCode::ZH_HANT,
-    LanguageCode::PT_BR,
-    LanguageCode::PL,
-    LanguageCode::TH
-}};
+constexpr std::array<LanguageCode, 20> available_language_codes = {
+    {LanguageCode::JA,      LanguageCode::EN_US, LanguageCode::FR,     LanguageCode::DE,
+     LanguageCode::IT,      LanguageCode::ES,    LanguageCode::ZH_CN,  LanguageCode::KO,
+     LanguageCode::NL,      LanguageCode::PT,    LanguageCode::RU,     LanguageCode::ZH_TW,
+     LanguageCode::EN_GB,   LanguageCode::FR_CA, LanguageCode::ES_419, LanguageCode::ZH_HANS,
+     LanguageCode::ZH_HANT, LanguageCode::PT_BR, LanguageCode::PL,     LanguageCode::TH}};
 
-static constexpr std::array<std::pair<LanguageCode, KeyboardLayout>, 20> language_to_layout{{
-    {LanguageCode::JA, KeyboardLayout::Japanese},
-    {LanguageCode::EN_US, KeyboardLayout::EnglishUs},
-    {LanguageCode::FR, KeyboardLayout::French},
-    {LanguageCode::DE, KeyboardLayout::German},
-    {LanguageCode::IT, KeyboardLayout::Italian},
-    {LanguageCode::ES, KeyboardLayout::Spanish},
-    {LanguageCode::ZH_CN, KeyboardLayout::ChineseSimplified},
-    {LanguageCode::KO, KeyboardLayout::Korean},
-    {LanguageCode::NL, KeyboardLayout::EnglishUsInternational},
-    {LanguageCode::PT, KeyboardLayout::Portuguese},
-    {LanguageCode::RU, KeyboardLayout::Russian},
-    {LanguageCode::ZH_TW, KeyboardLayout::ChineseTraditional},
-    {LanguageCode::EN_GB, KeyboardLayout::EnglishUk},
-    {LanguageCode::FR_CA, KeyboardLayout::FrenchCa},
-    {LanguageCode::ES_419, KeyboardLayout::SpanishLatin},
-    {LanguageCode::ZH_HANS, KeyboardLayout::ChineseSimplified},
-    {LanguageCode::ZH_HANT, KeyboardLayout::ChineseTraditional},
-    {LanguageCode::PT_BR, KeyboardLayout::Portuguese},
-    {LanguageCode::PL, KeyboardLayout::EnglishUsInternational},
-    {LanguageCode::TH, KeyboardLayout::EnglishUsInternational}
-}};
+static constexpr std::array<std::pair<LanguageCode, KeyboardLayout>, 20> language_to_layout{
+    {{LanguageCode::JA, KeyboardLayout::Japanese},
+     {LanguageCode::EN_US, KeyboardLayout::EnglishUs},
+     {LanguageCode::FR, KeyboardLayout::French},
+     {LanguageCode::DE, KeyboardLayout::German},
+     {LanguageCode::IT, KeyboardLayout::Italian},
+     {LanguageCode::ES, KeyboardLayout::Spanish},
+     {LanguageCode::ZH_CN, KeyboardLayout::ChineseSimplified},
+     {LanguageCode::KO, KeyboardLayout::Korean},
+     {LanguageCode::NL, KeyboardLayout::EnglishUsInternational},
+     {LanguageCode::PT, KeyboardLayout::Portuguese},
+     {LanguageCode::RU, KeyboardLayout::Russian},
+     {LanguageCode::ZH_TW, KeyboardLayout::ChineseTraditional},
+     {LanguageCode::EN_GB, KeyboardLayout::EnglishUk},
+     {LanguageCode::FR_CA, KeyboardLayout::FrenchCa},
+     {LanguageCode::ES_419, KeyboardLayout::SpanishLatin},
+     {LanguageCode::ZH_HANS, KeyboardLayout::ChineseSimplified},
+     {LanguageCode::ZH_HANT, KeyboardLayout::ChineseTraditional},
+     {LanguageCode::PT_BR, KeyboardLayout::Portuguese},
+     {LanguageCode::PL, KeyboardLayout::EnglishUsInternational},
+     {LanguageCode::TH, KeyboardLayout::EnglishUsInternational}}};
 
 /// This is nn::settings::system::AccountNotificationFlag
 struct AccountNotificationFlag {
@@ -413,8 +396,7 @@ static_assert(sizeof(AccountNotificationSettings) == 0x18,
 struct AccountUserSettings {
     std::array<u8, 0x40> data;
 };
-static_assert(sizeof(AccountUserSettings) == 0x40,
-              "AccountUserSettings is an invalid size");
+static_assert(sizeof(AccountUserSettings) == 0x40, "AccountUserSettings is an invalid size");
 
 /// This is nn::settings::factory::BatteryLot
 struct BatteryLot {

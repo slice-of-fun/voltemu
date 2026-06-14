@@ -51,18 +51,16 @@ using MacAddress = std::array<u8, 6>;
 constexpr MacAddress EMPTY_MAC_ADDRESS = {0, 0, 0, 0, 0, 0};
 
 #pragma pack(push, 1)
-template <typename T>
-struct Message {
+template<typename T> struct Message {
     Header header{};
     T data;
 };
 #pragma pack(pop)
 
-template <typename T>
-constexpr Type GetMessageType();
+template<typename T> constexpr Type GetMessageType();
 
-template <typename T>
-Message<T> CreateMessage(const u32 magic, const T data, const u32 sender_id) {
+template<typename T> Message<T> CreateMessage(const u32 magic, const T data, const u32 sender_id)
+{
     boost::crc_32_type crc;
     Header header{
         magic, PROTOCOL_VERSION, sizeof(T) + sizeof(Type), 0, sender_id, GetMessageType<T>(),
@@ -118,8 +116,8 @@ static_assert(std::is_trivially_copyable_v<PadData>,
  * @param data Request body to send
  * @param client_id ID of the udp client (usually not checked on the server)
  */
-template <typename T>
-Message<T> Create(const T data, const u32 client_id = 0) {
+template<typename T> Message<T> Create(const T data, const u32 client_id = 0)
+{
     return CreateMessage(CLIENT_MAGIC, data, client_id);
 }
 } // namespace Request
@@ -275,28 +273,28 @@ std::optional<Type> Validate(u8* data, std::size_t size);
 
 } // namespace Response
 
-template <>
-constexpr Type GetMessageType<Request::Version>() {
+template<> constexpr Type GetMessageType<Request::Version>()
+{
     return Type::Version;
 }
-template <>
-constexpr Type GetMessageType<Request::PortInfo>() {
+template<> constexpr Type GetMessageType<Request::PortInfo>()
+{
     return Type::PortInfo;
 }
-template <>
-constexpr Type GetMessageType<Request::PadData>() {
+template<> constexpr Type GetMessageType<Request::PadData>()
+{
     return Type::PadData;
 }
-template <>
-constexpr Type GetMessageType<Response::Version>() {
+template<> constexpr Type GetMessageType<Response::Version>()
+{
     return Type::Version;
 }
-template <>
-constexpr Type GetMessageType<Response::PortInfo>() {
+template<> constexpr Type GetMessageType<Response::PortInfo>()
+{
     return Type::PortInfo;
 }
-template <>
-constexpr Type GetMessageType<Response::PadData>() {
+template<> constexpr Type GetMessageType<Response::PadData>()
+{
     return Type::PadData;
 }
 } // namespace InputCommon::CemuhookUDP

@@ -9,11 +9,13 @@
 
 namespace Shader::Backend::GLSL {
 namespace {
-std::string_view OutputVertexIndex(EmitContext& ctx) {
+std::string_view OutputVertexIndex(EmitContext& ctx)
+{
     return ctx.stage == Stage::TessellationControl ? "[gl_InvocationID]" : "";
 }
 
-void InitializeOutputVaryings(EmitContext& ctx) {
+void InitializeOutputVaryings(EmitContext& ctx)
+{
     if (ctx.uses_geometry_passthrough) {
         return;
     }
@@ -58,7 +60,8 @@ void InitializeOutputVaryings(EmitContext& ctx) {
 }
 } // Anonymous namespace
 
-void EmitPhi(EmitContext& ctx, IR::Inst& phi) {
+void EmitPhi(EmitContext& ctx, IR::Inst& phi)
+{
     const size_t num_args{phi.NumArgs()};
     for (size_t i = 0; i < num_args; ++i) {
         ctx.var_alloc.Consume(phi.Arg(i));
@@ -69,13 +72,17 @@ void EmitPhi(EmitContext& ctx, IR::Inst& phi) {
     }
 }
 
-void EmitVoid(EmitContext&) {}
+void EmitVoid(EmitContext&)
+{
+}
 
-void EmitReference(EmitContext& ctx, const IR::Value& value) {
+void EmitReference(EmitContext& ctx, const IR::Value& value)
+{
     ctx.var_alloc.Consume(value);
 }
 
-void EmitPhiMove(EmitContext& ctx, const IR::Value& phi_value, const IR::Value& value) {
+void EmitPhiMove(EmitContext& ctx, const IR::Value& phi_value, const IR::Value& value)
+{
     IR::Inst& phi{*phi_value.InstRecursive()};
     const auto phi_type{phi.Type()};
     if (!phi.Definition<Id>().is_valid) {
@@ -92,18 +99,23 @@ void EmitPhiMove(EmitContext& ctx, const IR::Value& phi_value, const IR::Value& 
     ctx.Add("{}={}{};", phi_reg, val_reg, suffix);
 }
 
-void EmitPrologue(EmitContext& ctx) {
+void EmitPrologue(EmitContext& ctx)
+{
     InitializeOutputVaryings(ctx);
 }
 
-void EmitEpilogue(EmitContext&) {}
+void EmitEpilogue(EmitContext&)
+{
+}
 
-void EmitEmitVertex(EmitContext& ctx, const IR::Value& stream) {
+void EmitEmitVertex(EmitContext& ctx, const IR::Value& stream)
+{
     ctx.Add("EmitStreamVertex(int({}));", ctx.var_alloc.Consume(stream));
     InitializeOutputVaryings(ctx);
 }
 
-void EmitEndPrimitive(EmitContext& ctx, const IR::Value& stream) {
+void EmitEndPrimitive(EmitContext& ctx, const IR::Value& stream)
+{
     ctx.Add("EndStreamPrimitive(int({}));", ctx.var_alloc.Consume(stream));
 }
 

@@ -54,7 +54,8 @@ enum class Clamp : u64 {
     TRAP,
 };
 
-TextureType GetType(Type type) {
+TextureType GetType(Type type)
+{
     switch (type) {
     case Type::_1D:
         return TextureType::Color1D;
@@ -73,7 +74,8 @@ TextureType GetType(Type type) {
     }
 }
 
-IR::Value MakeCoords(TranslatorVisitor& v, IR::Reg reg, Type type) {
+IR::Value MakeCoords(TranslatorVisitor& v, IR::Reg reg, Type type)
+{
     const auto array{[&](int index) {
         return v.ir.BitFieldExtract(v.X(reg + index), v.ir.Imm32(0), v.ir.Imm32(16));
     }};
@@ -96,7 +98,8 @@ IR::Value MakeCoords(TranslatorVisitor& v, IR::Reg reg, Type type) {
 
 IR::Value ApplyAtomicOp(IR::IREmitter& ir, const IR::U32& handle, const IR::Value& coords,
                         const IR::Value& op_b, IR::TextureInstInfo info, AtomicOp op,
-                        bool is_signed) {
+                        bool is_signed)
+{
     switch (op) {
     case AtomicOp::ADD:
         return ir.ImageAtomicIAdd(handle, coords, op_b, info);
@@ -121,7 +124,8 @@ IR::Value ApplyAtomicOp(IR::IREmitter& ir, const IR::U32& handle, const IR::Valu
     }
 }
 
-ImageFormat Format(Size size) {
+ImageFormat Format(Size size)
+{
     switch (size) {
     case Size::U32:
     case Size::S32:
@@ -133,7 +137,8 @@ ImageFormat Format(Size size) {
     throw NotImplementedException("Invalid size {}", size);
 }
 
-bool IsSizeInt32(Size size) {
+bool IsSizeInt32(Size size)
+{
     switch (size) {
     case Size::U32:
     case Size::S32:
@@ -145,8 +150,9 @@ bool IsSizeInt32(Size size) {
 }
 
 void ImageAtomOp(TranslatorVisitor& v, IR::Reg dest_reg, IR::Reg operand_reg, IR::Reg coord_reg,
-                 std::optional<IR::Reg> bindless_reg, AtomicOp op, Clamp clamp, Size size, Type type,
-                 u64 bound_offset, bool is_bindless, bool write_result) {
+                 std::optional<IR::Reg> bindless_reg, AtomicOp op, Clamp clamp, Size size,
+                 Type type, u64 bound_offset, bool is_bindless, bool write_result)
+{
     if (clamp != Clamp::IGN) {
         throw NotImplementedException("Clamp {}", clamp);
     }
@@ -173,7 +179,8 @@ void ImageAtomOp(TranslatorVisitor& v, IR::Reg dest_reg, IR::Reg operand_reg, IR
 }
 } // Anonymous namespace
 
-void TranslatorVisitor::SUATOM(u64 insn) {
+void TranslatorVisitor::SUATOM(u64 insn)
+{
     union {
         u64 raw;
         BitField<54, 1, u64> is_bindless;
@@ -184,7 +191,7 @@ void TranslatorVisitor::SUATOM(u64 insn) {
         BitField<0, 8, IR::Reg> dest_reg;
         BitField<8, 8, IR::Reg> coord_reg;
         BitField<20, 8, IR::Reg> operand_reg;
-        BitField<36, 13, u64> bound_offset; // !is_bindless
+        BitField<36, 13, u64> bound_offset;    // !is_bindless
         BitField<39, 8, IR::Reg> bindless_reg; // is_bindless
     } const suatom{insn};
 
@@ -193,18 +200,19 @@ void TranslatorVisitor::SUATOM(u64 insn) {
                 suatom.is_bindless != 0, true);
 }
 
-void TranslatorVisitor::SURED(u64 insn) {
+void TranslatorVisitor::SURED(u64 insn)
+{
     // TODO: confirm offsets
     union {
         u64 raw;
         BitField<51, 1, u64> is_bound;
-        BitField<24, 3, AtomicOp> op; //OK - 24 (SURedOp)
-        BitField<33, 3, Type> type; //OK? - 33 (Dim)
-        BitField<20, 3, Size> size; //?
-        BitField<49, 2, Clamp> clamp; //OK - 49 (Clamp4)
-        BitField<0, 8, IR::Reg> operand_reg; //RA?
-        BitField<8, 8, IR::Reg> coord_reg; //RB?
-        BitField<36, 13, u64> bound_offset; //OK 33 (TidB)
+        BitField<24, 3, AtomicOp> op;          // OK - 24 (SURedOp)
+        BitField<33, 3, Type> type;            // OK? - 33 (Dim)
+        BitField<20, 3, Size> size;            //?
+        BitField<49, 2, Clamp> clamp;          // OK - 49 (Clamp4)
+        BitField<0, 8, IR::Reg> operand_reg;   // RA?
+        BitField<8, 8, IR::Reg> coord_reg;     // RB?
+        BitField<36, 13, u64> bound_offset;    // OK 33 (TidB)
         BitField<39, 8, IR::Reg> bindless_reg; // !is_bound
     } const sured{insn};
     ImageAtomOp(*this, IR::Reg::RZ, sured.operand_reg, sured.coord_reg, sured.bindless_reg,

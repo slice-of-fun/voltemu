@@ -1,11 +1,12 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/psc/psc.h"
+
 #include "core/hle/service/psc/ovln/receiver_service.h"
 #include "core/hle/service/psc/ovln/sender_service.h"
 #include "core/hle/service/psc/pm_control.h"
 #include "core/hle/service/psc/pm_service.h"
-#include "core/hle/service/psc/psc.h"
 #include "core/hle/service/psc/time/manager.h"
 #include "core/hle/service/psc/time/power_state_service.h"
 #include "core/hle/service/psc/time/service_manager.h"
@@ -14,7 +15,8 @@
 
 namespace Service::PSC {
 
-void LoopProcess(Core::System& system) {
+void LoopProcess(Core::System& system)
+{
     auto server_manager = std::make_unique<ServerManager>(system);
 
     server_manager->RegisterNamedService("psc:c", std::make_shared<IPmControl>(system));

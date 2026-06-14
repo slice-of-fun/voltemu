@@ -14,23 +14,24 @@ struct Int64 {
     u32 low;
     u32 high;
 
-    constexpr void Set(s64 v) {
+    constexpr void Set(s64 v)
+    {
         this->low = static_cast<u32>((v & static_cast<u64>(0x00000000FFFFFFFFULL)) >> 0);
         this->high = static_cast<u32>((v & static_cast<u64>(0xFFFFFFFF00000000ULL)) >> 32);
     }
 
-    constexpr s64 Get() const {
+    constexpr s64 Get() const
+    {
         return (static_cast<s64>(this->high) << 32) | (static_cast<s64>(this->low));
     }
 
-    constexpr Int64& operator=(s64 v) {
+    constexpr Int64& operator=(s64 v)
+    {
         this->Set(v);
         return *this;
     }
 
-    constexpr operator s64() const {
-        return this->Get();
-    }
+    constexpr operator s64() const { return this->Get(); }
 };
 
 struct HashSalt {

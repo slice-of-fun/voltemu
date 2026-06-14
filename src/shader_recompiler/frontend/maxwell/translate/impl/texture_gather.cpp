@@ -34,7 +34,8 @@ enum class ComponentType : u64 {
     A = 3,
 };
 
-Shader::TextureType GetType(TextureType type) {
+Shader::TextureType GetType(TextureType type)
+{
     switch (type) {
     case TextureType::_1D:
         return Shader::TextureType::Color1D;
@@ -56,7 +57,8 @@ Shader::TextureType GetType(TextureType type) {
     throw NotImplementedException("Invalid texture type {}", type);
 }
 
-IR::Value MakeCoords(TranslatorVisitor& v, IR::Reg reg, TextureType type) {
+IR::Value MakeCoords(TranslatorVisitor& v, IR::Reg reg, TextureType type)
+{
     const auto read_array{[&]() -> IR::F32 { return v.ir.ConvertUToF(32, 16, v.X(reg)); }};
     switch (type) {
     case TextureType::_1D:
@@ -79,7 +81,8 @@ IR::Value MakeCoords(TranslatorVisitor& v, IR::Reg reg, TextureType type) {
     throw NotImplementedException("Invalid texture type {}", type);
 }
 
-IR::Value MakeOffset(TranslatorVisitor& v, IR::Reg& reg, TextureType type) {
+IR::Value MakeOffset(TranslatorVisitor& v, IR::Reg& reg, TextureType type)
+{
     const IR::U32 value{v.X(reg++)};
     switch (type) {
     case TextureType::_1D:
@@ -103,7 +106,8 @@ IR::Value MakeOffset(TranslatorVisitor& v, IR::Reg& reg, TextureType type) {
     throw NotImplementedException("Invalid texture type {}", type);
 }
 
-std::pair<IR::Value, IR::Value> MakeOffsetPTP(TranslatorVisitor& v, IR::Reg& reg) {
+std::pair<IR::Value, IR::Value> MakeOffsetPTP(TranslatorVisitor& v, IR::Reg& reg)
+{
     const IR::U32 value1{v.X(reg++)};
     const IR::U32 value2{v.X(reg++)};
     const IR::U32 bitsize{v.ir.Imm32(6)};
@@ -117,7 +121,8 @@ std::pair<IR::Value, IR::Value> MakeOffsetPTP(TranslatorVisitor& v, IR::Reg& reg
 }
 
 void Impl(TranslatorVisitor& v, u64 insn, ComponentType component_type, OffsetType offset_type,
-          bool is_bindless) {
+          bool is_bindless)
+{
     union {
         u64 raw;
         BitField<35, 1, u64> ndv;
@@ -184,7 +189,8 @@ void Impl(TranslatorVisitor& v, u64 insn, ComponentType component_type, OffsetTy
 }
 } // Anonymous namespace
 
-void TranslatorVisitor::TLD4(u64 insn) {
+void TranslatorVisitor::TLD4(u64 insn)
+{
     union {
         u64 raw;
         BitField<56, 2, ComponentType> component;
@@ -193,7 +199,8 @@ void TranslatorVisitor::TLD4(u64 insn) {
     Impl(*this, insn, tld4.component, tld4.offset, false);
 }
 
-void TranslatorVisitor::TLD4_b(u64 insn) {
+void TranslatorVisitor::TLD4_b(u64 insn)
+{
     union {
         u64 raw;
         BitField<38, 2, ComponentType> component;

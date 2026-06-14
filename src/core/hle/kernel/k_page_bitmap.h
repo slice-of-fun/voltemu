@@ -13,8 +13,8 @@
 #include "common/assert.h"
 #include "common/bit_util.h"
 #include "common/common_types.h"
-#include "common/tiny_mt.h"
 #include "common/random.h"
+#include "common/tiny_mt.h"
 #include "core/hle/kernel/k_system_control.h"
 
 namespace Kernel {
@@ -23,11 +23,10 @@ class KPageBitmap {
 public:
     class RandomBitGenerator {
     public:
-        RandomBitGenerator() {
-            m_rng.Initialize(u32(Common::Random::Random64(0)));
-        }
+        RandomBitGenerator() { m_rng.Initialize(u32(Common::Random::Random64(0))); }
 
-        u64 SelectRandomBit(u64 bitmap) {
+        u64 SelectRandomBit(u64 bitmap)
+        {
             u64 selected = 0;
 
             for (size_t cur_num_bits = Common::BitSize<decltype(bitmap)>() / 2; cur_num_bits != 0;
@@ -48,7 +47,8 @@ public:
             return selected;
         }
 
-        u64 GenerateRandom(u64 max) {
+        u64 GenerateRandom(u64 max)
+        {
             // Determine the number of bits we need.
             const u64 bits_needed = 1 + (Common::BitSize<decltype(max)>() - std::countl_zero(max));
 
@@ -60,12 +60,14 @@ public:
         }
 
     private:
-        void RefreshEntropy() {
+        void RefreshEntropy()
+        {
             m_entropy = m_rng.GenerateRandomU32();
             m_bits_available = static_cast<u32>(Common::BitSize<decltype(m_entropy)>());
         }
 
-        bool GenerateRandomBit() {
+        bool GenerateRandomBit()
+        {
             if (m_bits_available == 0) {
                 this->RefreshEntropy();
             }
@@ -76,7 +78,8 @@ public:
             return rnd_bit;
         }
 
-        u64 GenerateRandomBits(u32 num_bits) {
+        u64 GenerateRandomBits(u32 num_bits)
+        {
             u64 result = 0;
 
             // Iteratively add random bits to our result.
@@ -119,14 +122,11 @@ public:
 public:
     KPageBitmap() = default;
 
-    constexpr size_t GetNumBits() const {
-        return m_num_bits;
-    }
-    constexpr s32 GetHighestDepthIndex() const {
-        return static_cast<s32>(m_used_depths) - 1;
-    }
+    constexpr size_t GetNumBits() const { return m_num_bits; }
+    constexpr s32 GetHighestDepthIndex() const { return static_cast<s32>(m_used_depths) - 1; }
 
-    u64* Initialize(u64* storage, size_t size) {
+    u64* Initialize(u64* storage, size_t size)
+    {
         // Initially, everything is un-set.
         m_num_bits = 0;
 
@@ -145,7 +145,8 @@ public:
         return storage;
     }
 
-    s64 FindFreeBlock(bool random) {
+    s64 FindFreeBlock(bool random)
+    {
         uintptr_t offset = 0;
         s32 depth = 0;
 
@@ -178,7 +179,8 @@ public:
         return static_cast<s64>(offset);
     }
 
-    s64 FindFreeRange(size_t count) {
+    s64 FindFreeRange(size_t count)
+    {
         // Check that it is possible to find a range.
         const u64* const storage_start = m_bit_storages[m_used_depths - 1];
         const u64* const storage_end = m_end_storages[m_used_depths - 1];
@@ -219,17 +221,20 @@ public:
         return chosen_offset;
     }
 
-    void SetBit(size_t offset) {
+    void SetBit(size_t offset)
+    {
         this->SetBit(this->GetHighestDepthIndex(), offset);
         m_num_bits++;
     }
 
-    void ClearBit(size_t offset) {
+    void ClearBit(size_t offset)
+    {
         this->ClearBit(this->GetHighestDepthIndex(), offset);
         m_num_bits--;
     }
 
-    bool ClearRange(size_t offset, size_t count) {
+    bool ClearRange(size_t offset, size_t count)
+    {
         s32 depth = this->GetHighestDepthIndex();
         u64* bits = m_bit_storages[depth];
         size_t bit_ind = offset / Common::BitSize<u64>();
@@ -278,7 +283,8 @@ public:
     }
 
 private:
-    void SetBit(s32 depth, size_t offset) {
+    void SetBit(s32 depth, size_t offset)
+    {
         while (depth >= 0) {
             size_t ind = offset / Common::BitSize<u64>();
             size_t which = offset % Common::BitSize<u64>();
@@ -296,7 +302,8 @@ private:
         }
     }
 
-    void ClearBit(s32 depth, size_t offset) {
+    void ClearBit(s32 depth, size_t offset)
+    {
         while (depth >= 0) {
             size_t ind = offset / Common::BitSize<u64>();
             size_t which = offset % Common::BitSize<u64>();
@@ -316,7 +323,8 @@ private:
     }
 
 private:
-    static constexpr s32 GetRequiredDepth(size_t region_size) {
+    static constexpr s32 GetRequiredDepth(size_t region_size)
+    {
         s32 depth = 0;
         while (true) {
             region_size /= Common::BitSize<u64>();
@@ -328,7 +336,8 @@ private:
     }
 
 public:
-    static constexpr size_t CalculateManagementOverheadSize(size_t region_size) {
+    static constexpr size_t CalculateManagementOverheadSize(size_t region_size)
+    {
         size_t overhead_bits = 0;
         for (s32 depth = GetRequiredDepth(region_size) - 1; depth >= 0; depth--) {
             region_size =

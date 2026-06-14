@@ -4,6 +4,7 @@
 #pragma once
 
 #include <atomic>
+
 #include "common/assert.h"
 #include "core/hle/kernel/k_interrupt_manager.h"
 #include "core/hle/kernel/k_spin_lock.h"
@@ -16,16 +17,17 @@ namespace Kernel {
 class KernelCore;
 class GlobalSchedulerContext;
 
-template <typename SchedulerType>
-class KAbstractSchedulerLock {
+template<typename SchedulerType> class KAbstractSchedulerLock {
 public:
     explicit KAbstractSchedulerLock(KernelCore& kernel) : m_kernel{kernel} {}
 
-    bool IsLockedByCurrentThread() const {
+    bool IsLockedByCurrentThread() const
+    {
         return m_owner_thread == GetCurrentThreadPointer(m_kernel);
     }
 
-    void Lock() {
+    void Lock()
+    {
         if (this->IsLockedByCurrentThread()) {
             // If we already own the lock, the lock count should be > 0.
             // For debug, ensure this is true.
@@ -46,7 +48,8 @@ public:
         m_lock_count++;
     }
 
-    void Unlock() {
+    void Unlock()
+    {
         ASSERT(this->IsLockedByCurrentThread());
         ASSERT(m_lock_count > 0);
 

@@ -1,6 +1,8 @@
 // SPDX-FileCopyrightText: Copyright 2024 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "video_core/renderer_opengl/present/smaa.h"
+
 #include "video_core/host_shaders/opengl_smaa_glsl.h"
 #include "video_core/host_shaders/smaa_blending_weight_calculation_frag.h"
 #include "video_core/host_shaders/smaa_blending_weight_calculation_vert.h"
@@ -10,14 +12,14 @@
 #include "video_core/host_shaders/smaa_neighborhood_blending_vert.h"
 #include "video_core/renderer_opengl/gl_shader_manager.h"
 #include "video_core/renderer_opengl/gl_shader_util.h"
-#include "video_core/renderer_opengl/present/smaa.h"
 #include "video_core/renderer_opengl/present/util.h"
 #include "video_core/smaa_area_tex.h"
 #include "video_core/smaa_search_tex.h"
 
 namespace OpenGL {
 
-SMAA::SMAA(u32 width, u32 height) {
+SMAA::SMAA(u32 width, u32 height)
+{
     const auto SmaaShader = [&](std::string_view specialized_source, GLenum stage) {
         std::string shader_source{specialized_source};
         ReplaceInclude(shader_source, "opengl_smaa.glsl", HostShaders::OPENGL_SMAA_GLSL);
@@ -64,7 +66,8 @@ SMAA::SMAA(u32 width, u32 height) {
 
 SMAA::~SMAA() = default;
 
-GLuint SMAA::Draw(ProgramManager& program_manager, GLuint input_texture) {
+GLuint SMAA::Draw(ProgramManager& program_manager, GLuint input_texture)
+{
     glClearColor(0, 0, 0, 0);
     glFrontFace(GL_CCW);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffer.handle);

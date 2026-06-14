@@ -4,8 +4,8 @@
 #pragma once
 
 #include <functional>
-#include "common/common_types.h"
 
+#include "common/common_types.h"
 #include "core/frontend/applets/applet.h"
 
 namespace Core::Frontend {

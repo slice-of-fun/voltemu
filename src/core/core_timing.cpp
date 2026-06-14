@@ -8,7 +8,7 @@
 #include <mutex>
 #include <string>
 #include <tuple>
-#include "common/cpu_features.h"
+
 #include "common/cpu_features.h"
 
 #ifdef _WIN32
@@ -23,7 +23,8 @@ namespace Core::Timing {
 
 constexpr s64 MAX_SLICE_LENGTH = 10000;
 
-std::shared_ptr<EventType> CreateEvent(std::string name, TimedCallback&& callback) {
+std::shared_ptr<EventType> CreateEvent(std::string name, TimedCallback&& callback)
+{
     return std::make_shared<EventType>(std::move(callback), std::move(name));
 }
 
@@ -36,21 +37,25 @@ struct CoreTiming::Event {
 
     // Sort by time, unless the times are the same, in which case sort by
     // the order added to the queue
-    friend bool operator>(const Event& left, const Event& right) {
+    friend bool operator>(const Event& left, const Event& right)
+    {
         return std::tie(left.time, left.fifo_order) > std::tie(right.time, right.fifo_order);
     }
 
-    friend bool operator<(const Event& left, const Event& right) {
+    friend bool operator<(const Event& left, const Event& right)
+    {
         return std::tie(left.time, left.fifo_order) < std::tie(right.time, right.fifo_order);
     }
 };
 
 CoreTiming::CoreTiming() = default;
-CoreTiming::~CoreTiming() {
+CoreTiming::~CoreTiming()
+{
     Reset();
 }
 
-void CoreTiming::Initialize(std::function<void()>&& on_thread_init_) {
+void CoreTiming::Initialize(std::function<void()>&& on_thread_init_)
+{
     Reset();
     on_thread_init = std::move(on_thread_init_);
     event_fifo_id = 0;
@@ -87,13 +92,15 @@ void CoreTiming::Initialize(std::function<void()>&& on_thread_init_) {
     }
 }
 
-void CoreTiming::ClearPendingEvents() {
+void CoreTiming::ClearPendingEvents()
+{
     std::scoped_lock lock{advance_lock, basic_lock};
     event_queue.clear();
     event.Set();
 }
 
-void CoreTiming::Pause(bool is_paused) {
+void CoreTiming::Pause(bool is_paused)
+{
     paused = is_paused;
     pause_event.Set();
 
@@ -102,7 +109,8 @@ void CoreTiming::Pause(bool is_paused) {
     }
 }
 
-void CoreTiming::SyncPause(bool is_paused) {
+void CoreTiming::SyncPause(bool is_paused)
+{
     if (is_paused == paused && paused_set == paused) {
         return;
     }
@@ -122,17 +130,20 @@ void CoreTiming::SyncPause(bool is_paused) {
     }
 }
 
-bool CoreTiming::IsRunning() const {
+bool CoreTiming::IsRunning() const
+{
     return !paused_set;
 }
 
-bool CoreTiming::HasPendingEvents() const {
+bool CoreTiming::HasPendingEvents() const
+{
     std::scoped_lock lock{basic_lock};
     return !(wait_set && event_queue.empty());
 }
 
 void CoreTiming::ScheduleEvent(std::chrono::nanoseconds ns_into_future,
-                               const std::shared_ptr<EventType>& event_type, bool absolute_time) {
+                               const std::shared_ptr<EventType>& event_type, bool absolute_time)
+{
     {
         std::scoped_lock scope{basic_lock};
         const auto next_time{absolute_time ? ns_into_future : GetGlobalTimeNs() + ns_into_future};
@@ -147,7 +158,8 @@ void CoreTiming::ScheduleEvent(std::chrono::nanoseconds ns_into_future,
 void CoreTiming::ScheduleLoopingEvent(std::chrono::nanoseconds start_time,
                                       std::chrono::nanoseconds resched_time,
                                       const std::shared_ptr<EventType>& event_type,
-                                      bool absolute_time) {
+                                      bool absolute_time)
+{
     {
         std::scoped_lock scope{basic_lock};
         const auto next_time{absolute_time ? start_time : GetGlobalTimeNs() + start_time};
@@ -161,7 +173,8 @@ void CoreTiming::ScheduleLoopingEvent(std::chrono::nanoseconds start_time,
 }
 
 void CoreTiming::UnscheduleEvent(const std::shared_ptr<EventType>& event_type,
-                                 UnscheduleEventType type) {
+                                 UnscheduleEventType type)
+{
     {
         std::scoped_lock lk{basic_lock};
 
@@ -186,30 +199,37 @@ void CoreTiming::UnscheduleEvent(const std::shared_ptr<EventType>& event_type,
     }
 }
 
-static u64 GetNextTickCount(u64 next_ticks) {
+static u64 GetNextTickCount(u64 next_ticks)
+{
     if (Settings::values.use_custom_cpu_ticks.GetValue()) {
         return Settings::values.cpu_ticks.GetValue();
     }
     return next_ticks;
 }
 
-void CoreTiming::AddTicks(u64 ticks_to_add) {
+void CoreTiming::AddTicks(u64 ticks_to_add)
+{
     const u64 ticks = GetNextTickCount(ticks_to_add);
     cpu_ticks += ticks;
     downcount -= static_cast<s64>(ticks);
 }
 
-void CoreTiming::Idle() {
+void CoreTiming::Idle()
+{
     AddTicks(1000U);
 }
 
-void CoreTiming::ResetTicks() {
+void CoreTiming::ResetTicks()
+{
     downcount = MAX_SLICE_LENGTH;
 }
 
-u64 CoreTiming::GetClockTicks() const {
-    u64 fres = is_multicore ? Common::g_wall_clock.GetCNTPCT() : Common::WallClock::CPUTickToCNTPCT(cpu_ticks);
-    if (auto const overclock = Settings::values.fast_cpu_time.GetValue(); overclock != Settings::CpuClock::Off) {
+u64 CoreTiming::GetClockTicks() const
+{
+    u64 fres = is_multicore ? Common::g_wall_clock.GetCNTPCT()
+                            : Common::WallClock::CPUTickToCNTPCT(cpu_ticks);
+    if (auto const overclock = Settings::values.fast_cpu_time.GetValue();
+        overclock != Settings::CpuClock::Off) {
         fres = u64(f64(fres) * (1.7 + 0.3 * u32(overclock)));
     }
     if (::Settings::values.sync_core_speed.GetValue()) {
@@ -220,13 +240,14 @@ u64 CoreTiming::GetClockTicks() const {
     return fres;
 }
 
-u64 CoreTiming::GetGPUTicks() const {
-    return is_multicore
-        ? Common::g_wall_clock.GetGPUTick()
-        : Common::WallClock::CPUTickToGPUTick(cpu_ticks);
+u64 CoreTiming::GetGPUTicks() const
+{
+    return is_multicore ? Common::g_wall_clock.GetGPUTick()
+                        : Common::WallClock::CPUTickToGPUTick(cpu_ticks);
 }
 
-std::optional<s64> CoreTiming::Advance() {
+std::optional<s64> CoreTiming::Advance()
+{
     std::scoped_lock lock{advance_lock, basic_lock};
     global_timer = GetGlobalTimeNs().count();
 
@@ -285,7 +306,8 @@ std::optional<s64> CoreTiming::Advance() {
     }
 }
 
-void CoreTiming::Reset() {
+void CoreTiming::Reset()
+{
     paused = true;
     pause_event.Set();
     event.Set();
@@ -297,21 +319,22 @@ void CoreTiming::Reset() {
 }
 
 /// @brief Returns current time in nanoseconds.
-std::chrono::nanoseconds CoreTiming::GetGlobalTimeNs() const noexcept {
-    return is_multicore
-        ? Common::g_wall_clock.GetTimeNS()
-        : std::chrono::nanoseconds{Common::WallClock::CPUTickToNS(cpu_ticks)};
+std::chrono::nanoseconds CoreTiming::GetGlobalTimeNs() const noexcept
+{
+    return is_multicore ? Common::g_wall_clock.GetTimeNS()
+                        : std::chrono::nanoseconds{Common::WallClock::CPUTickToNS(cpu_ticks)};
 }
 
 /// @brief Returns current time in microseconds.
-std::chrono::microseconds CoreTiming::GetGlobalTimeUs() const noexcept {
-    return is_multicore
-        ? Common::g_wall_clock.GetTimeUS()
-        : std::chrono::microseconds{Common::WallClock::CPUTickToUS(cpu_ticks)};
+std::chrono::microseconds CoreTiming::GetGlobalTimeUs() const noexcept
+{
+    return is_multicore ? Common::g_wall_clock.GetTimeUS()
+                        : std::chrono::microseconds{Common::WallClock::CPUTickToUS(cpu_ticks)};
 }
 
 #ifdef _WIN32
-void CoreTiming::SetTimerResolutionNs(std::chrono::nanoseconds ns) {
+void CoreTiming::SetTimerResolutionNs(std::chrono::nanoseconds ns)
+{
     timer_resolution_ns = ns.count();
 }
 #endif

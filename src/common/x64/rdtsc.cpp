@@ -1,21 +1,23 @@
 // SPDX-FileCopyrightText: Copyright 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "common/x64/rdtsc.h"
+
 #include <thread>
 
 #include "common/steady_clock.h"
 #include "common/uint128.h"
-#include "common/x64/rdtsc.h"
 
 namespace Common::X64 {
 
-template <u64 Nearest>
-static u64 RoundToNearest(u64 value) {
+template<u64 Nearest> static u64 RoundToNearest(u64 value)
+{
     const auto mod = value % Nearest;
     return mod >= (Nearest / 2) ? (value - mod + Nearest) : (value - mod);
 }
 
-u64 EstimateRDTSCFrequency() {
+u64 EstimateRDTSCFrequency()
+{
     // Discard the first result measuring the rdtsc.
     FencedRDTSC();
     std::this_thread::sleep_for(std::chrono::milliseconds{1});

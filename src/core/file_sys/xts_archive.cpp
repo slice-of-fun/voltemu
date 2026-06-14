@@ -4,13 +4,15 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/file_sys/xts_archive.h"
+
+#include <openssl/err.h>
+#include <openssl/evp.h>
+
 #include <array>
 #include <cstring>
 #include <regex>
 #include <string>
-
-#include <openssl/err.h>
-#include <openssl/evp.h>
 
 #include "common/fs/path_util.h"
 #include "common/hex_util.h"
@@ -20,28 +22,28 @@
 #include "core/crypto/xts_encryption_layer.h"
 #include "core/file_sys/content_archive.h"
 #include "core/file_sys/vfs/vfs_offset.h"
-#include "core/file_sys/xts_archive.h"
 #include "core/loader/loader.h"
 
 namespace FileSys {
 
 constexpr u64 NAX_HEADER_PADDING_SIZE = 0x4000;
 
-template <typename SourceData, typename SourceKey, typename Destination>
+template<typename SourceData, typename SourceKey, typename Destination>
 static bool CalculateHMAC256(Destination* out, const SourceKey* key, std::size_t key_length,
-                             const SourceData* data, std::size_t data_length) {
+                             const SourceData* data, std::size_t data_length)
+{
     size_t out_len = 0;
 
     static EVP_MAC* mac = EVP_MAC_fetch(nullptr, "HMAC", nullptr);
-    if (!mac) return false;
+    if (!mac)
+        return false;
 
     static EVP_MAC_CTX* ctx = EVP_MAC_CTX_new(mac);
-    if (!ctx) return false;
+    if (!ctx)
+        return false;
 
-    static OSSL_PARAM params[] = {
-        OSSL_PARAM_construct_utf8_string("digest", (char*)"SHA256", 0),
-        OSSL_PARAM_construct_end()
-    };
+    static OSSL_PARAM params[] = {OSSL_PARAM_construct_utf8_string("digest", (char*)"SHA256", 0),
+                                  OSSL_PARAM_construct_end()};
 
     if (!EVP_MAC_init(ctx, reinterpret_cast<const unsigned char*>(key), key_length, params))
         return false;
@@ -52,7 +54,8 @@ static bool CalculateHMAC256(Destination* out, const SourceKey* key, std::size_t
 
 NAX::NAX(VirtualFile file_)
     : header(std::make_unique<NAXHeader>()),
-      file(std::move(file_)), keys{Core::Crypto::KeyManager::Instance()} {
+      file(std::move(file_)), keys{Core::Crypto::KeyManager::Instance()}
+{
     std::string path = Common::FS::SanitizePath(file->GetFullPath());
     static const std::regex nax_path_regex("/registered/(000000[0-9A-F]{2})/([0-9A-F]{32})\\.nca",
                                            std::regex_constants::ECMAScript |
@@ -70,7 +73,8 @@ NAX::NAX(VirtualFile file_)
 
 NAX::NAX(VirtualFile file_, std::array<u8, 0x10> nca_id)
     : header(std::make_unique<NAXHeader>()),
-      file(std::move(file_)), keys{Core::Crypto::KeyManager::Instance()} {
+      file(std::move(file_)), keys{Core::Crypto::KeyManager::Instance()}
+{
     Core::Crypto::SHA256Hash hash{};
 
     u32 hash_len = 0;
@@ -84,7 +88,8 @@ NAX::NAX(VirtualFile file_, std::array<u8, 0x10> nca_id)
 
 NAX::~NAX() = default;
 
-Loader::ResultStatus NAX::Parse(std::string_view path) {
+Loader::ResultStatus NAX::Parse(std::string_view path)
+{
     if (file == nullptr) {
         return Loader::ResultStatus::ErrorNullFile;
     }
@@ -145,37 +150,45 @@ Loader::ResultStatus NAX::Parse(std::string_view path) {
     return Loader::ResultStatus::Success;
 }
 
-Loader::ResultStatus NAX::GetStatus() const {
+Loader::ResultStatus NAX::GetStatus() const
+{
     return status;
 }
 
-VirtualFile NAX::GetDecrypted() const {
+VirtualFile NAX::GetDecrypted() const
+{
     return dec_file;
 }
 
-std::unique_ptr<NCA> NAX::AsNCA() const {
+std::unique_ptr<NCA> NAX::AsNCA() const
+{
     if (type == NAXContentType::NCA)
         return std::make_unique<NCA>(GetDecrypted());
     return nullptr;
 }
 
-NAXContentType NAX::GetContentType() const {
+NAXContentType NAX::GetContentType() const
+{
     return type;
 }
 
-std::vector<VirtualFile> NAX::GetFiles() const {
+std::vector<VirtualFile> NAX::GetFiles() const
+{
     return {dec_file};
 }
 
-std::vector<VirtualDir> NAX::GetSubdirectories() const {
+std::vector<VirtualDir> NAX::GetSubdirectories() const
+{
     return {};
 }
 
-std::string NAX::GetName() const {
+std::string NAX::GetName() const
+{
     return file->GetName();
 }
 
-VirtualDir NAX::GetParentDirectory() const {
+VirtualDir NAX::GetParentDirectory() const
+{
     return file->GetContainingDirectory();
 }
 

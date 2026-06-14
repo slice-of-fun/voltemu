@@ -14,7 +14,8 @@ enum class BitSize : u64 {
     B128,
 };
 
-void TranslatorVisitor::AL2P(u64 inst) {
+void TranslatorVisitor::AL2P(u64 inst)
+{
     union {
         u64 raw;
         BitField<0, 8, IR::Reg> result_register;

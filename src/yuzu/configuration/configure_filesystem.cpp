@@ -4,10 +4,13 @@
 // SPDX-FileCopyrightText: Copyright 2019 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include <filesystem>
+#include "yuzu/configuration/configure_filesystem.h"
+
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QProgressDialog>
+#include <filesystem>
+
 #include "common/fs/fs.h"
 #include "common/fs/path_util.h"
 #include "common/settings.h"
@@ -15,10 +18,10 @@
 #include "qt_common/qt_compat.h"
 #include "qt_common/util/game.h"
 #include "ui_configure_filesystem.h"
-#include "yuzu/configuration/configure_filesystem.h"
 
 ConfigureFilesystem::ConfigureFilesystem(QWidget* parent)
-    : QWidget(parent), ui(std::make_unique<Ui::ConfigureFilesystem>()) {
+    : QWidget(parent), ui(std::make_unique<Ui::ConfigureFilesystem>())
+{
     ui->setupUi(this);
     SetConfiguration();
 
@@ -45,7 +48,8 @@ ConfigureFilesystem::ConfigureFilesystem(QWidget* parent)
 
 ConfigureFilesystem::~ConfigureFilesystem() = default;
 
-void ConfigureFilesystem::changeEvent(QEvent* event) {
+void ConfigureFilesystem::changeEvent(QEvent* event)
+{
     if (event->type() == QEvent::LanguageChange) {
         RetranslateUI();
     }
@@ -53,7 +57,8 @@ void ConfigureFilesystem::changeEvent(QEvent* event) {
     QWidget::changeEvent(event);
 }
 
-void ConfigureFilesystem::SetConfiguration() {
+void ConfigureFilesystem::SetConfiguration()
+{
     ui->nand_directory_edit->setText(
         QString::fromStdString(Common::FS::GetVoltPathString(Common::FS::VoltPath::NANDDir)));
     ui->sdmc_directory_edit->setText(
@@ -77,7 +82,8 @@ void ConfigureFilesystem::SetConfiguration() {
     UpdateEnabledControls();
 }
 
-void ConfigureFilesystem::ApplyConfiguration() {
+void ConfigureFilesystem::ApplyConfiguration()
+{
     Common::FS::SetVoltPath(Common::FS::VoltPath::NANDDir,
                             ui->nand_directory_edit->text().toStdString());
     Common::FS::SetVoltPath(Common::FS::VoltPath::SDMCDir,
@@ -97,7 +103,8 @@ void ConfigureFilesystem::ApplyConfiguration() {
     UISettings::values.cache_game_list = ui->cache_game_list->isChecked();
 }
 
-void ConfigureFilesystem::SetDirectory(DirectoryTarget target, QLineEdit* edit) {
+void ConfigureFilesystem::SetDirectory(DirectoryTarget target, QLineEdit* edit)
+{
     QString caption;
 
     switch (target) {
@@ -140,7 +147,8 @@ void ConfigureFilesystem::SetDirectory(DirectoryTarget target, QLineEdit* edit) 
     edit->setText(str);
 }
 
-void ConfigureFilesystem::SetSaveDirectory() {
+void ConfigureFilesystem::SetSaveDirectory()
+{
     const QString current_path = ui->save_directory_edit->text();
     const QString nand_path = ui->nand_directory_edit->text();
 
@@ -178,7 +186,8 @@ void ConfigureFilesystem::SetSaveDirectory() {
     }
 }
 
-void ConfigureFilesystem::PromptSaveMigration(const QString& from_path, const QString& to_path) {
+void ConfigureFilesystem::PromptSaveMigration(const QString& from_path, const QString& to_path)
+{
     namespace fs = std::filesystem;
 
     const fs::path source_save_dir = fs::path(from_path.toStdString()) / "user" / "save";
@@ -265,11 +274,13 @@ void ConfigureFilesystem::PromptSaveMigration(const QString& from_path, const QS
     }
 }
 
-void ConfigureFilesystem::ResetMetadata() {
+void ConfigureFilesystem::ResetMetadata()
+{
     QtCommon::Game::ResetMetadata();
 }
 
-void ConfigureFilesystem::UpdateEnabledControls() {
+void ConfigureFilesystem::UpdateEnabledControls()
+{
     ui->gamecard_current_game->setEnabled(ui->gamecard_inserted->isChecked());
     ui->gamecard_path_edit->setEnabled(ui->gamecard_inserted->isChecked() &&
                                        !ui->gamecard_current_game->isChecked());
@@ -277,6 +288,7 @@ void ConfigureFilesystem::UpdateEnabledControls() {
                                          !ui->gamecard_current_game->isChecked());
 }
 
-void ConfigureFilesystem::RetranslateUI() {
+void ConfigureFilesystem::RetranslateUI()
+{
     ui->retranslateUi(this);
 }

@@ -4,6 +4,7 @@
 #pragma once
 
 #include <QDialog>
+
 #include "common/uuid.h"
 #include "core/file_sys/vfs/vfs_types.h"
 

@@ -6,6 +6,7 @@
 #pragma once
 
 #include <QWidget>
+
 #include "network/announce_multiplayer_session.h"
 #include "network/network.h"
 
@@ -44,13 +45,9 @@ public:
 
     void UpdateNotificationStatus();
 
-    ClickableLabel* GetStatusText() const {
-        return status_text;
-    }
+    ClickableLabel* GetStatusText() const { return status_text; }
 
-    ClickableLabel* GetStatusIcon() const {
-        return status_icon;
-    }
+    ClickableLabel* GetStatusIcon() const { return status_icon; }
 
     void retranslateUi();
 

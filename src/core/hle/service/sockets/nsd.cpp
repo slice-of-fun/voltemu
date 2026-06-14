@@ -4,10 +4,10 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include "core/hle/service/ipc_helpers.h"
 #include "core/hle/service/sockets/nsd.h"
 
 #include "common/string_util.h"
+#include "core/hle/service/ipc_helpers.h"
 
 namespace Service::Sockets {
 
@@ -28,7 +28,8 @@ struct EnvironmentIdentifier {
 };
 static_assert(sizeof(EnvironmentIdentifier) == 0x8);
 
-NSD::NSD(Core::System& system_, const char* name) : ServiceFramework{system_, name} {
+NSD::NSD(Core::System& system_, const char* name) : ServiceFramework{system_, name}
+{
     // clang-format off
     static const FunctionInfo functions[] = {
         {5, nullptr, "GetSettingUrl"},
@@ -63,7 +64,8 @@ NSD::NSD(Core::System& system_, const char* name) : ServiceFramework{system_, na
     RegisterHandlers(functions);
 }
 
-static std::string ResolveImpl(const std::string& fqdn_in) {
+static std::string ResolveImpl(const std::string& fqdn_in)
+{
     // The real implementation makes various substitutions.
     // For now we just return the string as-is, which is good enough when not
     // connecting to real Nintendo servers.
@@ -71,7 +73,8 @@ static std::string ResolveImpl(const std::string& fqdn_in) {
     return fqdn_in;
 }
 
-static Result ResolveCommon(const std::string& fqdn_in, std::array<char, 0x100>& fqdn_out) {
+static Result ResolveCommon(const std::string& fqdn_in, std::array<char, 0x100>& fqdn_out)
+{
     const auto res = ResolveImpl(fqdn_in);
     if (res.size() >= fqdn_out.size()) {
         return ResultOverflow;
@@ -80,7 +83,8 @@ static Result ResolveCommon(const std::string& fqdn_in, std::array<char, 0x100>&
     return ResultSuccess;
 }
 
-void NSD::SetChangeEnvironmentIdentifierDisabled(HLERequestContext& ctx) {
+void NSD::SetChangeEnvironmentIdentifierDisabled(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     const bool disabled = rp.Pop<bool>();
 
@@ -90,7 +94,8 @@ void NSD::SetChangeEnvironmentIdentifierDisabled(HLERequestContext& ctx) {
     rb.Push(ResultSuccess);
 }
 
-void NSD::Resolve(HLERequestContext& ctx) {
+void NSD::Resolve(HLERequestContext& ctx)
+{
     const std::string fqdn_in = Common::StringFromBuffer(ctx.ReadBuffer(0));
 
     std::array<char, 0x100> fqdn_out{};
@@ -101,7 +106,8 @@ void NSD::Resolve(HLERequestContext& ctx) {
     rb.Push(res);
 }
 
-void NSD::ResolveEx(HLERequestContext& ctx) {
+void NSD::ResolveEx(HLERequestContext& ctx)
+{
     const std::string fqdn_in = Common::StringFromBuffer(ctx.ReadBuffer(0));
 
     std::array<char, 0x100> fqdn_out;
@@ -119,7 +125,8 @@ void NSD::ResolveEx(HLERequestContext& ctx) {
     rb.Push(ResultSuccess);
 }
 
-void NSD::GetEnvironmentIdentifier(HLERequestContext& ctx) {
+void NSD::GetEnvironmentIdentifier(HLERequestContext& ctx)
+{
     constexpr EnvironmentIdentifier lp1 = {
         .identifier = {'l', 'p', '1', '\0', '\0', '\0', '\0', '\0'}};
     ctx.WriteBuffer(lp1);
@@ -128,7 +135,8 @@ void NSD::GetEnvironmentIdentifier(HLERequestContext& ctx) {
     rb.Push(ResultSuccess);
 }
 
-void NSD::GetApplicationServerEnvironmentType(HLERequestContext& ctx) {
+void NSD::GetApplicationServerEnvironmentType(HLERequestContext& ctx)
+{
     IPC::ResponseBuilder rb{ctx, 3};
     rb.Push(ResultSuccess);
     rb.Push(static_cast<u32>(ServerEnvironmentType::Lp));

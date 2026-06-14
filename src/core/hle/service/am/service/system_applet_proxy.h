@@ -41,8 +41,8 @@ private:
     Result GetProcessWindingController(
         Out<SharedPointer<IProcessWindingController>> out_process_winding_controller);
     Result GetDebugFunctions(Out<SharedPointer<IDebugFunctions>> out_debug_functions);
-    Result GetLibraryAppletCreator(
-        Out<SharedPointer<ILibraryAppletCreator>> out_library_applet_creator);
+    Result
+    GetLibraryAppletCreator(Out<SharedPointer<ILibraryAppletCreator>> out_library_applet_creator);
     Result GetApplicationCreator(Out<SharedPointer<IApplicationCreator>> out_application_creator);
     Result GetAppletCommonFunctions(
         Out<SharedPointer<IAppletCommonFunctions>> out_applet_common_functions);

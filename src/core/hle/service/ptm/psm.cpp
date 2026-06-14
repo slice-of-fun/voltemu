@@ -4,6 +4,8 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/ptm/psm.h"
+
 #include <memory>
 
 #include "common/common_funcs.h"
@@ -14,14 +16,14 @@
 #include "core/hle/result.h"
 #include "core/hle/service/ipc_helpers.h"
 #include "core/hle/service/kernel_helpers.h"
-#include "core/hle/service/ptm/psm.h"
 
 namespace Service::PTM {
 
 class IPsmSession final : public ServiceFramework<IPsmSession> {
 public:
     explicit IPsmSession(Core::System& system_)
-        : ServiceFramework{system_, "IPsmSession"}, service_context{system_, "IPsmSession"} {
+        : ServiceFramework{system_, "IPsmSession"}, service_context{system_, "IPsmSession"}
+    {
         // clang-format off
         static const FunctionInfo functions[] = {
             {0, &IPsmSession::BindStateChangeEvent, "BindStateChangeEvent"},
@@ -37,30 +39,32 @@ public:
         state_change_event = service_context.CreateEvent("IPsmSession::state_change_event");
     }
 
-    ~IPsmSession() override {
-        service_context.CloseEvent(state_change_event);
-    }
+    ~IPsmSession() override { service_context.CloseEvent(state_change_event); }
 
-    void SignalChargerTypeChanged() {
+    void SignalChargerTypeChanged()
+    {
         if (should_signal && should_signal_charger_type) {
             state_change_event->Signal();
         }
     }
 
-    void SignalPowerSupplyChanged() {
+    void SignalPowerSupplyChanged()
+    {
         if (should_signal && should_signal_power_supply) {
             state_change_event->Signal();
         }
     }
 
-    void SignalBatteryVoltageStateChanged() {
+    void SignalBatteryVoltageStateChanged()
+    {
         if (should_signal && should_signal_battery_voltage) {
             state_change_event->Signal();
         }
     }
 
 private:
-    void BindStateChangeEvent(HLERequestContext& ctx) {
+    void BindStateChangeEvent(HLERequestContext& ctx)
+    {
         LOG_DEBUG(Service_PTM, "called");
 
         should_signal = true;
@@ -70,7 +74,8 @@ private:
         rb.PushCopyObjects(state_change_event->GetReadableEvent());
     }
 
-    void UnbindStateChangeEvent(HLERequestContext& ctx) {
+    void UnbindStateChangeEvent(HLERequestContext& ctx)
+    {
         LOG_DEBUG(Service_PTM, "called");
 
         should_signal = false;
@@ -79,7 +84,8 @@ private:
         rb.Push(ResultSuccess);
     }
 
-    void SetChargerTypeChangeEventEnabled(HLERequestContext& ctx) {
+    void SetChargerTypeChangeEventEnabled(HLERequestContext& ctx)
+    {
         IPC::RequestParser rp{ctx};
         const auto state = rp.Pop<bool>();
         LOG_DEBUG(Service_PTM, "called, state={}", state);
@@ -90,7 +96,8 @@ private:
         rb.Push(ResultSuccess);
     }
 
-    void SetPowerSupplyChangeEventEnabled(HLERequestContext& ctx) {
+    void SetPowerSupplyChangeEventEnabled(HLERequestContext& ctx)
+    {
         IPC::RequestParser rp{ctx};
         const auto state = rp.Pop<bool>();
         LOG_DEBUG(Service_PTM, "called, state={}", state);
@@ -101,7 +108,8 @@ private:
         rb.Push(ResultSuccess);
     }
 
-    void SetBatteryVoltageStateChangeEventEnabled(HLERequestContext& ctx) {
+    void SetBatteryVoltageStateChangeEventEnabled(HLERequestContext& ctx)
+    {
         IPC::RequestParser rp{ctx};
         const auto state = rp.Pop<bool>();
         LOG_DEBUG(Service_PTM, "called, state={}", state);
@@ -121,7 +129,8 @@ private:
     Kernel::KEvent* state_change_event;
 };
 
-PSM::PSM(Core::System& system_) : ServiceFramework{system_, "psm"} {
+PSM::PSM(Core::System& system_) : ServiceFramework{system_, "psm"}
+{
     // clang-format off
     static const FunctionInfo functions[] = {
         {0, &PSM::GetBatteryChargePercentage, "GetBatteryChargePercentage"},
@@ -151,7 +160,8 @@ PSM::PSM(Core::System& system_) : ServiceFramework{system_, "psm"} {
 
 PSM::~PSM() = default;
 
-void PSM::GetBatteryChargePercentage(HLERequestContext& ctx) {
+void PSM::GetBatteryChargePercentage(HLERequestContext& ctx)
+{
     LOG_DEBUG(Service_PTM, "called");
 
     u32 percentage = 100;
@@ -167,7 +177,8 @@ void PSM::GetBatteryChargePercentage(HLERequestContext& ctx) {
     rb.Push<u32>(percentage);
 }
 
-void PSM::GetChargerType(HLERequestContext& ctx) {
+void PSM::GetChargerType(HLERequestContext& ctx)
+{
     LOG_DEBUG(Service_PTM, "called");
 
     ChargerType charger = ChargerType::Unplugged;
@@ -181,7 +192,8 @@ void PSM::GetChargerType(HLERequestContext& ctx) {
     rb.PushEnum(charger);
 }
 
-void PSM::OpenSession(HLERequestContext& ctx) {
+void PSM::OpenSession(HLERequestContext& ctx)
+{
     LOG_DEBUG(Service_PTM, "called");
 
     IPC::ResponseBuilder rb{ctx, 2, 0, 1};
@@ -189,14 +201,16 @@ void PSM::OpenSession(HLERequestContext& ctx) {
     rb.PushIpcInterface<IPsmSession>(system);
 }
 
-void PSM::GetBatteryVoltageState(HLERequestContext& ctx) {
+void PSM::GetBatteryVoltageState(HLERequestContext& ctx)
+{
     LOG_DEBUG(Service_PTM, "(stubbed)");
     IPC::ResponseBuilder rb{ctx, 3};
     rb.Push(ResultSuccess);
     rb.PushRaw<u32>(0); //
 }
 
-void PSM::GetBatteryAgePercentage(HLERequestContext& ctx) {
+void PSM::GetBatteryAgePercentage(HLERequestContext& ctx)
+{
     LOG_DEBUG(Service_PTM, "(stubbed)");
     IPC::ResponseBuilder rb{ctx, 3};
     rb.Push(ResultSuccess);
@@ -204,7 +218,7 @@ void PSM::GetBatteryAgePercentage(HLERequestContext& ctx) {
 }
 
 struct BatteryChargeInfoFields {
-    u32 input_current_limit; //mA
+    u32 input_current_limit; // mA
     u32 boost_mode_current_limit;
     u32 fast_charge_current_limit;
     u32 charge_voltage_limit;
@@ -228,16 +242,18 @@ struct BatteryChargeInfoFields {
     INSERT_PADDING_BYTES_NOINIT(0x14); //[+17.0.0]
 };
 static_assert(sizeof(struct BatteryChargeInfoFields) == 0x54);
-void PSM::GetBatteryChargeInfoFields(HLERequestContext& ctx) {
+void PSM::GetBatteryChargeInfoFields(HLERequestContext& ctx)
+{
     LOG_DEBUG(Service_PTM, "called");
     Common::PowerStatus power_status = Common::GetPowerStatus();
 
     BatteryChargeInfoFields r{};
-    r.battery_charge_percentage = f32(power_status.percentage); //100%
-    r.battery_age_percentage = f32(power_status.percentage); //100%
+    r.battery_charge_percentage = f32(power_status.percentage); // 100%
+    r.battery_age_percentage = f32(power_status.percentage);    // 100%
     r.battery_charging = power_status.charging ? 1 : 0;
-    r.charger_type = u32(power_status.has_battery && power_status.charging
-        ? ChargerType::RegularCharger : ChargerType::Unplugged);
+    r.charger_type =
+        u32(power_status.has_battery && power_status.charging ? ChargerType::RegularCharger
+                                                              : ChargerType::Unplugged);
     r.charger_input_voltage_limit = 100;
     r.charger_input_voltage_limit = 100;
     r.input_current_limit = 100;

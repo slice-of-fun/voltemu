@@ -6,11 +6,12 @@
 
 #pragma once
 
+#include <ankerl/unordered_dense.h>
+
 #include <deque>
 #include <limits>
 #include <mutex>
 #include <optional>
-#include <ankerl/unordered_dense.h>
 #include <vector>
 
 #include "common/common_types.h"
@@ -45,8 +46,7 @@ public:
     u64 program_id;
 };
 
-template <class P>
-class ChannelSetupCaches {
+template<class P> class ChannelSetupCaches {
 public:
     /// Operations for setting the channel of execution.
     virtual ~ChannelSetupCaches();
@@ -60,13 +60,15 @@ public:
     /// Erase channel's state.
     void EraseChannel(s32 id);
 
-    Tegra::MemoryManager* GetFromID(size_t id) const {
+    Tegra::MemoryManager* GetFromID(size_t id) const
+    {
         std::unique_lock<std::mutex> lk(config_mutex);
         const auto ref = address_spaces.find(id);
         return ref->second.gpu_memory;
     }
 
-    std::optional<size_t> getStorageID(size_t id) const {
+    std::optional<size_t> getStorageID(size_t id) const
+    {
         std::unique_lock<std::mutex> lk(config_mutex);
         const auto ref = address_spaces.find(id);
         if (ref == address_spaces.end()) {

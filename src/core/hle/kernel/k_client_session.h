@@ -21,16 +21,15 @@ public:
     explicit KClientSession(KernelCore& kernel);
     ~KClientSession() override;
 
-    void Initialize(KSession* parent) {
+    void Initialize(KSession* parent)
+    {
         // Set member variables.
         m_parent = parent;
     }
 
     void Destroy() override;
 
-    KSession* GetParent() const {
-        return m_parent;
-    }
+    KSession* GetParent() const { return m_parent; }
 
     Result SendSyncRequest(uintptr_t address, size_t size);
     Result SendAsyncRequest(KEvent* event, uintptr_t address, size_t size);

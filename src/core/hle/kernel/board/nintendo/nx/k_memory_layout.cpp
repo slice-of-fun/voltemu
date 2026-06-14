@@ -4,9 +4,10 @@
 // SPDX-FileCopyrightText: Copyright 2021 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/kernel/k_memory_layout.h"
+
 #include "common/alignment.h"
 #include "common/literals.h"
-#include "core/hle/kernel/k_memory_layout.h"
 #include "core/hle/kernel/k_memory_manager.h"
 #include "core/hle/kernel/k_system_control.h"
 #include "core/hle/kernel/k_trace.h"
@@ -20,7 +21,8 @@ using namespace Common::Literals;
 constexpr size_t CarveoutAlignment = 0x20000;
 constexpr size_t CarveoutSizeMax = (512_MiB) - CarveoutAlignment;
 
-bool SetupPowerManagementControllerMemoryRegion(KMemoryLayout& memory_layout) {
+bool SetupPowerManagementControllerMemoryRegion(KMemoryLayout& memory_layout)
+{
     // Above firmware 2.0.0, the PMC is not mappable.
     return memory_layout.GetPhysicalMemoryRegionTree().Insert(
                0x7000E000, 0x400, KMemoryRegionType_None | KMemoryRegionAttr_NoUserMap) &&
@@ -31,7 +33,8 @@ bool SetupPowerManagementControllerMemoryRegion(KMemoryLayout& memory_layout) {
 
 void InsertPoolPartitionRegionIntoBothTrees(KMemoryLayout& memory_layout, size_t start, size_t size,
                                             KMemoryRegionType phys_type,
-                                            KMemoryRegionType virt_type, u32& cur_attr) {
+                                            KMemoryRegionType virt_type, u32& cur_attr)
+{
     const u32 attr = cur_attr++;
     ASSERT(memory_layout.GetPhysicalMemoryRegionTree().Insert(start, size,
                                                               static_cast<u32>(phys_type), attr));
@@ -47,7 +50,8 @@ void InsertPoolPartitionRegionIntoBothTrees(KMemoryLayout& memory_layout, size_t
 
 namespace Init {
 
-void SetupDevicePhysicalMemoryRegions(KMemoryLayout& memory_layout) {
+void SetupDevicePhysicalMemoryRegions(KMemoryLayout& memory_layout)
+{
     ASSERT(SetupPowerManagementControllerMemoryRegion(memory_layout));
     ASSERT(memory_layout.GetPhysicalMemoryRegionTree().Insert(
         0x70019000, 0x1000, KMemoryRegionType_MemoryController | KMemoryRegionAttr_NoUserMap));
@@ -77,7 +81,8 @@ void SetupDevicePhysicalMemoryRegions(KMemoryLayout& memory_layout) {
         0x6001DC00, 0x400, KMemoryRegionType_None | KMemoryRegionAttr_NoUserMap));
 }
 
-void SetupDramPhysicalMemoryRegions(KMemoryLayout& memory_layout) {
+void SetupDramPhysicalMemoryRegions(KMemoryLayout& memory_layout)
+{
     const size_t intended_memory_size = KSystemControl::Init::GetIntendedMemorySize();
     const KPhysicalAddress physical_memory_base_address =
         KSystemControl::Init::GetKernelPhysicalBaseAddress(DramPhysicalAddress);
@@ -100,7 +105,8 @@ void SetupDramPhysicalMemoryRegions(KMemoryLayout& memory_layout) {
     }
 }
 
-void SetupPoolPartitionMemoryRegions(KMemoryLayout& memory_layout) {
+void SetupPoolPartitionMemoryRegions(KMemoryLayout& memory_layout)
+{
     // Start by identifying the extents of the DRAM memory region.
     const auto dram_extents = memory_layout.GetMainMemoryPhysicalExtents();
     ASSERT(dram_extents.GetEndAddress() != 0);

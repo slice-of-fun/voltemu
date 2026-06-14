@@ -7,7 +7,6 @@
 #include <vector>
 
 #include "common/common_types.h"
-
 #include "video_core/vulkan_common/vulkan_memory_allocator.h"
 #include "video_core/vulkan_common/vulkan_wrapper.h"
 
@@ -36,9 +35,7 @@ public:
     StagingBufferRef Request(size_t size, MemoryUsage usage, bool deferred = false);
     void FreeDeferred(StagingBufferRef& ref);
 
-    [[nodiscard]] VkBuffer StreamBuf() const noexcept {
-        return *stream_buffer;
-    }
+    [[nodiscard]] VkBuffer StreamBuf() const noexcept { return *stream_buffer; }
 
     void TickFrame();
 
@@ -57,7 +54,8 @@ private:
         u64 tick = 0;
         bool deferred{};
 
-        StagingBufferRef Ref() const noexcept {
+        StagingBufferRef Ref() const noexcept
+        {
             return {
                 .buffer = *buffer,
                 .offset = 0,
@@ -94,9 +92,7 @@ private:
     void ReleaseCache(MemoryUsage usage);
 
     void ReleaseLevel(StagingBuffersCache& cache, size_t log2);
-    size_t Region(size_t iter) const noexcept {
-        return iter / region_size;
-    }
+    size_t Region(size_t iter) const noexcept { return iter / region_size; }
 
     const Device& device;
     MemoryAllocator& memory_allocator;

@@ -4,17 +4,18 @@
 // SPDX-FileCopyrightText: Copyright 2021 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include <algorithm>
-#include <array>
-#include <optional>
-#include <string>
-#include <utility>
+#include "shader_recompiler/frontend/maxwell/control_flow.h"
 
 #include <fmt/ranges.h>
 
+#include <algorithm>
+#include <array>
+#include <optional>
 #include <ranges>
+#include <string>
+#include <utility>
+
 #include "shader_recompiler/exception.h"
-#include "shader_recompiler/frontend/maxwell/control_flow.h"
 #include "shader_recompiler/frontend/maxwell/decode.h"
 #include "shader_recompiler/frontend/maxwell/indirect_branch_table_track.h"
 #include "shader_recompiler/frontend/maxwell/location.h"
@@ -22,24 +23,23 @@
 namespace Shader::Maxwell::Flow {
 namespace {
 struct Compare {
-    bool operator()(const Block& lhs, Location rhs) const noexcept {
-        return lhs.begin < rhs;
-    }
+    bool operator()(const Block& lhs, Location rhs) const noexcept { return lhs.begin < rhs; }
 
-    bool operator()(Location lhs, const Block& rhs) const noexcept {
-        return lhs < rhs.begin;
-    }
+    bool operator()(Location lhs, const Block& rhs) const noexcept { return lhs < rhs.begin; }
 
-    bool operator()(const Block& lhs, const Block& rhs) const noexcept {
+    bool operator()(const Block& lhs, const Block& rhs) const noexcept
+    {
         return lhs.begin < rhs.begin;
     }
 };
 
-u32 BranchOffset(Location pc, Instruction inst) {
+u32 BranchOffset(Location pc, Instruction inst)
+{
     return pc.Offset() + static_cast<u32>(inst.branch.Offset()) + 8u;
 }
 
-void Split(Block* old_block, Block* new_block, Location pc) {
+void Split(Block* old_block, Block* new_block, Location pc)
+{
     if (pc <= old_block->begin || pc >= old_block->end) {
         throw InvalidArgument("Invalid address to split={}", pc);
     }
@@ -69,7 +69,8 @@ void Split(Block* old_block, Block* new_block, Location pc) {
     old_block->branch_false = nullptr;
 }
 
-Token OpcodeToken(Opcode opcode) {
+Token OpcodeToken(Opcode opcode)
+{
     switch (opcode) {
     case Opcode::PBK:
     case Opcode::BRK:
@@ -95,7 +96,8 @@ Token OpcodeToken(Opcode opcode) {
     }
 }
 
-bool IsAbsoluteJump(Opcode opcode) {
+bool IsAbsoluteJump(Opcode opcode)
+{
     switch (opcode) {
     case Opcode::JCAL:
     case Opcode::JMP:
@@ -106,7 +108,8 @@ bool IsAbsoluteJump(Opcode opcode) {
     }
 }
 
-bool HasFlowTest(Opcode opcode) {
+bool HasFlowTest(Opcode opcode)
+{
     switch (opcode) {
     case Opcode::BRA:
     case Opcode::BRX:
@@ -128,7 +131,8 @@ bool HasFlowTest(Opcode opcode) {
     }
 }
 
-std::string NameOf(const Block& block) {
+std::string NameOf(const Block& block)
+{
     if (block.begin.IsVirtual()) {
         return fmt::format("\"Virtual {}\"", block.begin);
     } else {
@@ -137,14 +141,16 @@ std::string NameOf(const Block& block) {
 }
 } // Anonymous namespace
 
-void Stack::Push(Token token, Location target) {
+void Stack::Push(Token token, Location target)
+{
     entries.push_back({
         .token = token,
         .target{target},
     });
 }
 
-std::pair<Location, Stack> Stack::Pop(Token token) const {
+std::pair<Location, Stack> Stack::Pop(Token token) const
+{
     const std::optional<Location> pc{Peek(token)};
     if (!pc) {
         throw LogicError("Token could not be found");
@@ -152,7 +158,8 @@ std::pair<Location, Stack> Stack::Pop(Token token) const {
     return {*pc, Remove(token)};
 }
 
-std::optional<Location> Stack::Peek(Token token) const {
+std::optional<Location> Stack::Peek(Token token) const
+{
     const auto it{std::find_if(entries.rbegin(), entries.rend(),
                                [token](const auto& entry) { return entry.token == token; })};
     if (it == entries.rend()) {
@@ -161,7 +168,8 @@ std::optional<Location> Stack::Peek(Token token) const {
     return it->target;
 }
 
-Stack Stack::Remove(Token token) const {
+Stack Stack::Remove(Token token) const
+{
     const auto it{std::find_if(entries.rbegin(), entries.rend(),
                                [token](const auto& entry) { return entry.token == token; })};
     const auto pos{std::distance(entries.rbegin(), it)};
@@ -170,12 +178,14 @@ Stack Stack::Remove(Token token) const {
     return result;
 }
 
-bool Block::Contains(Location pc) const noexcept {
+bool Block::Contains(Location pc) const noexcept
+{
     return pc >= begin && pc < end;
 }
 
 Function::Function(ObjectPool<Block>& block_pool, Location start_address)
-    : entrypoint{start_address} {
+    : entrypoint{start_address}
+{
     Label& label{labels.emplace_back()};
     label.address = start_address;
     label.block = block_pool.Create(Block{});
@@ -190,7 +200,8 @@ Function::Function(ObjectPool<Block>& block_pool, Location start_address)
 CFG::CFG(Environment& env_, ObjectPool<Block>& block_pool_, Location start_address,
          bool exits_to_dispatcher_)
     : env{env_}, block_pool{block_pool_}, program_start{start_address}, exits_to_dispatcher{
-                                                                            exits_to_dispatcher_} {
+                                                                            exits_to_dispatcher_}
+{
     if (exits_to_dispatcher) {
         dispatch_block = block_pool.Create(Block{});
         dispatch_block->begin = {};
@@ -218,7 +229,8 @@ CFG::CFG(Environment& env_, ObjectPool<Block>& block_pool_, Location start_addre
     }
 }
 
-void CFG::AnalyzeLabel(FunctionId function_id, Label& label) {
+void CFG::AnalyzeLabel(FunctionId function_id, Label& label)
+{
     if (InspectVisitedBlocks(function_id, label)) {
         // Label address has been visited
         return;
@@ -253,7 +265,8 @@ void CFG::AnalyzeLabel(FunctionId function_id, Label& label) {
     functions[function_id].blocks.insert(*block);
 }
 
-bool CFG::InspectVisitedBlocks(FunctionId function_id, const Label& label) {
+bool CFG::InspectVisitedBlocks(FunctionId function_id, const Label& label)
+{
     const Location pc{label.address};
     Function& function{functions[function_id]};
     const auto it{
@@ -272,7 +285,8 @@ bool CFG::InspectVisitedBlocks(FunctionId function_id, const Label& label) {
     return true;
 }
 
-CFG::AnalysisState CFG::AnalyzeInst(Block* block, FunctionId function_id, Location pc) {
+CFG::AnalysisState CFG::AnalyzeInst(Block* block, FunctionId function_id, Location pc)
+{
     const Instruction inst{env.ReadInstruction(pc.Offset())};
     const Opcode opcode{Decode(inst.raw)};
     switch (opcode) {
@@ -360,7 +374,8 @@ CFG::AnalysisState CFG::AnalyzeInst(Block* block, FunctionId function_id, Locati
 }
 
 void CFG::AnalyzeCondInst(Block* block, FunctionId function_id, Location pc,
-                          EndClass insn_end_class, IR::Condition cond) {
+                          EndClass insn_end_class, IR::Condition cond)
+{
     if (block->begin != pc) {
         // If the block doesn't start in the conditional instruction
         // mark it as a label to visit it later
@@ -404,7 +419,8 @@ void CFG::AnalyzeCondInst(Block* block, FunctionId function_id, Location pc,
 }
 
 bool CFG::AnalyzeBranch(Block* block, FunctionId function_id, Location pc, Instruction inst,
-                        Opcode opcode) {
+                        Opcode opcode)
+{
     if (inst.branch.is_cbuf) {
         throw NotImplementedException("Branch with constant buffer offset");
     }
@@ -424,13 +440,15 @@ bool CFG::AnalyzeBranch(Block* block, FunctionId function_id, Location pc, Instr
 }
 
 void CFG::AnalyzeBRA(Block* block, FunctionId function_id, Location pc, Instruction inst,
-                     bool is_absolute) {
+                     bool is_absolute)
+{
     const Location bra_pc{is_absolute ? inst.branch.Absolute() : BranchOffset(pc, inst)};
     block->branch_true = AddLabel(block, block->stack, bra_pc, function_id);
 }
 
 CFG::AnalysisState CFG::AnalyzeBRX(Block* block, Location pc, Instruction inst, bool is_absolute,
-                                   FunctionId function_id) {
+                                   FunctionId function_id)
+{
     const std::optional brx_table{TrackIndirectBranchTable(env, pc, program_start)};
     if (!brx_table) {
         TrackIndirectBranchTable(env, pc, program_start);
@@ -475,7 +493,8 @@ CFG::AnalysisState CFG::AnalyzeBRX(Block* block, Location pc, Instruction inst, 
 }
 
 CFG::AnalysisState CFG::AnalyzeEXIT(Block* block, FunctionId function_id, Location pc,
-                                    Instruction inst) {
+                                    Instruction inst)
+{
     const IR::FlowTest flow_test{inst.branch.flow_test};
     const Predicate pred{inst.Pred()};
     if (pred == Predicate{false} || flow_test == IR::FlowTest::F) {
@@ -521,7 +540,8 @@ CFG::AnalysisState CFG::AnalyzeEXIT(Block* block, FunctionId function_id, Locati
     return AnalysisState::Branch;
 }
 
-Block* CFG::AddLabel(Block* block, Stack stack, Location pc, FunctionId function_id) {
+Block* CFG::AddLabel(Block* block, Stack stack, Location pc, FunctionId function_id)
+{
     Function& function{functions[function_id]};
     if (block->begin == pc) {
         // Jumps to itself
@@ -562,7 +582,8 @@ Block* CFG::AddLabel(Block* block, Stack stack, Location pc, FunctionId function
     return new_block;
 }
 
-std::string CFG::Dot() const {
+std::string CFG::Dot() const
+{
     int node_uid{0};
 
     std::string dot{"digraph shader {\n"};

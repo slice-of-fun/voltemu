@@ -22,11 +22,13 @@ public:
     bool BufferCopy(GPUVAddr start_address, GPUVAddr end_address, u64 amount) override;
     bool BufferClear(GPUVAddr src_address, u64 amount, u32 value) override;
     bool ImageToBuffer(const Tegra::DMA::ImageCopy& copy_info, const Tegra::DMA::ImageOperand& src,
-                       const Tegra::DMA::BufferOperand& dst) override {
+                       const Tegra::DMA::BufferOperand& dst) override
+    {
         return false;
     }
     bool BufferToImage(const Tegra::DMA::ImageCopy& copy_info, const Tegra::DMA::BufferOperand& src,
-                       const Tegra::DMA::ImageOperand& dst) override {
+                       const Tegra::DMA::ImageOperand& dst) override
+    {
         return false;
     }
 };
@@ -64,8 +66,9 @@ public:
     void SignalSyncPoint(u32 value) override;
     void SignalReference() override;
     void ReleaseFences(bool force) override;
-    void FlushAndInvalidateRegion(
-        DAddr addr, u64 size, VideoCommon::CacheType which = VideoCommon::CacheType::All) override;
+    void
+    FlushAndInvalidateRegion(DAddr addr, u64 size,
+                             VideoCommon::CacheType which = VideoCommon::CacheType::All) override;
     void WaitForIdle() override;
     void FragmentBarrier() override;
     void TiledCacheBarrier() override;

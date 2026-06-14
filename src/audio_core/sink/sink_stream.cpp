@@ -4,6 +4,8 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "audio_core/sink/sink_stream.h"
+
 #include <array>
 #include <atomic>
 #include <memory>
@@ -12,7 +14,6 @@
 
 #include "audio_core/audio_core.h"
 #include "audio_core/common/common.h"
-#include "audio_core/sink/sink_stream.h"
 #include "common/common_types.h"
 #include "common/fixed_point.h"
 #include "common/scope_exit.h"
@@ -22,7 +23,8 @@
 
 namespace AudioCore::Sink {
 
-void SinkStream::AppendBuffer(SinkBuffer& buffer, std::span<s16> samples) {
+void SinkStream::AppendBuffer(SinkBuffer& buffer, std::span<s16> samples)
+{
     if (type == StreamType::In)
         return;
 
@@ -36,24 +38,24 @@ void SinkStream::AppendBuffer(SinkBuffer& buffer, std::span<s16> samples) {
 
     if (system_channels > device_channels) {
         static constexpr std::array<f32, 4> tcoeff{1.0f, 0.596f, 0.354f, 0.707f};
-        for (u32 r_offs = 0, w_offs = 0; r_offs < samples.size(); r_offs += system_channels, w_offs += device_channels) {
+        for (u32 r_offs = 0, w_offs = 0; r_offs < samples.size();
+             r_offs += system_channels, w_offs += device_channels) {
             std::array<f32, 6> ccoeff{0.f};
             for (u32 i = 0; i < system_channels; ++i)
                 ccoeff[i] = f32(samples[r_offs + i]);
 
             std::array<f32, 6> rcoeff{
-                ccoeff[u32(Channels::FrontLeft)],
-                ccoeff[u32(Channels::BackLeft)],
-                ccoeff[u32(Channels::Center)],
-                ccoeff[u32(Channels::LFE)],
-                ccoeff[u32(Channels::BackRight)],
-                ccoeff[u32(Channels::FrontRight)],
+                ccoeff[u32(Channels::FrontLeft)], ccoeff[u32(Channels::BackLeft)],
+                ccoeff[u32(Channels::Center)],    ccoeff[u32(Channels::LFE)],
+                ccoeff[u32(Channels::BackRight)], ccoeff[u32(Channels::FrontRight)],
             };
 
-            const f32 left  = rcoeff[0] * tcoeff[0] + rcoeff[2] * tcoeff[1] + rcoeff[3] * tcoeff[2] + rcoeff[1] * tcoeff[3];
-            const f32 right = rcoeff[5] * tcoeff[0] + rcoeff[2] * tcoeff[1] + rcoeff[3] * tcoeff[2] + rcoeff[4] * tcoeff[3];
+            const f32 left = rcoeff[0] * tcoeff[0] + rcoeff[2] * tcoeff[1] + rcoeff[3] * tcoeff[2] +
+                             rcoeff[1] * tcoeff[3];
+            const f32 right = rcoeff[5] * tcoeff[0] + rcoeff[2] * tcoeff[1] +
+                              rcoeff[3] * tcoeff[2] + rcoeff[4] * tcoeff[3];
 
-            samples[w_offs + 0] = s16(std::clamp(s32(left * volume),  min, max));
+            samples[w_offs + 0] = s16(std::clamp(s32(left * volume), min, max));
             samples[w_offs + 1] = s16(std::clamp(s32(right * volume), min, max));
         }
 
@@ -61,9 +63,11 @@ void SinkStream::AppendBuffer(SinkBuffer& buffer, std::span<s16> samples) {
         samples_buffer.Push(samples.subspan(0, samples.size() / system_channels * device_channels));
     } else if (system_channels < device_channels) {
         std::vector<s16> new_samples(samples.size() / system_channels * device_channels);
-        for (u32 r_offs = 0, w_offs = 0; r_offs < samples.size(); r_offs += system_channels, w_offs += device_channels)
+        for (u32 r_offs = 0, w_offs = 0; r_offs < samples.size();
+             r_offs += system_channels, w_offs += device_channels)
             for (u32 channel = 0; channel < system_channels; ++channel)
-                new_samples[w_offs + channel] = s16(std::clamp(s32(f32(samples[r_offs + channel]) * volume), min, max));
+                new_samples[w_offs + channel] =
+                    s16(std::clamp(s32(f32(samples[r_offs + channel]) * volume), min, max));
 
         queue.EmplaceWait(buffer);
         samples_buffer.Push(new_samples);
@@ -80,7 +84,8 @@ void SinkStream::AppendBuffer(SinkBuffer& buffer, std::span<s16> samples) {
     ++queued_buffers;
 }
 
-std::vector<s16> SinkStream::ReleaseBuffer(u64 num_samples) {
+std::vector<s16> SinkStream::ReleaseBuffer(u64 num_samples)
+{
     auto samples{samples_buffer.Pop(num_samples)};
 
     // TODO: Up-mix to 6 channels if the game expects it.
@@ -99,19 +104,22 @@ std::vector<s16> SinkStream::ReleaseBuffer(u64 num_samples) {
     return samples;
 }
 
-void SinkStream::ClearQueue() {
+void SinkStream::ClearQueue()
+{
     std::scoped_lock lk{release_mutex};
 
     samples_buffer.Pop();
     SinkBuffer tmp;
-    while (queue.TryPop(tmp));
+    while (queue.TryPop(tmp))
+        ;
 
     queued_buffers = 0;
     playing_buffer = {};
     playing_buffer.consumed = true;
 }
 
-void SinkStream::ProcessAudioIn(std::span<const s16> input_buffer, std::size_t num_frames) {
+void SinkStream::ProcessAudioIn(std::span<const s16> input_buffer, std::size_t num_frames)
+{
     const std::size_t num_channels = GetDeviceChannels();
     const std::size_t frame_size = num_channels;
     const std::size_t frame_size_bytes = frame_size * sizeof(s16);
@@ -128,7 +136,8 @@ void SinkStream::ProcessAudioIn(std::span<const s16> input_buffer, std::size_t n
             if (!queue.TryPop(playing_buffer)) {
                 // If no buffer was available we've underrun, just push the samples and
                 // continue.
-                samples_buffer.Push(&input_buffer[frames_written * frame_size], (num_frames - frames_written) * frame_size);
+                samples_buffer.Push(&input_buffer[frames_written * frame_size],
+                                    (num_frames - frames_written) * frame_size);
                 frames_written = num_frames;
                 continue;
             }
@@ -138,9 +147,11 @@ void SinkStream::ProcessAudioIn(std::span<const s16> input_buffer, std::size_t n
 
         // Get the minimum frames available between the currently playing buffer, and the
         // amount we have left to fill
-        size_t frames_available{std::min<u64>(playing_buffer.frames - playing_buffer.frames_played, num_frames - frames_written)};
+        size_t frames_available{std::min<u64>(playing_buffer.frames - playing_buffer.frames_played,
+                                              num_frames - frames_written)};
 
-        samples_buffer.Push(&input_buffer[frames_written * frame_size], frames_available * frame_size);
+        samples_buffer.Push(&input_buffer[frames_written * frame_size],
+                            frames_available * frame_size);
 
         frames_written += frames_available;
         playing_buffer.frames_played += frames_available;
@@ -152,7 +163,8 @@ void SinkStream::ProcessAudioIn(std::span<const s16> input_buffer, std::size_t n
     }
 
     if (frames_written > 0) {
-        std::memcpy(&last_frame[0], &input_buffer[(frames_written - 1) * frame_size], frame_size_bytes);
+        std::memcpy(&last_frame[0], &input_buffer[(frames_written - 1) * frame_size],
+                    frame_size_bytes);
     }
 
     // update sample counts für audio-ins
@@ -164,7 +176,8 @@ void SinkStream::ProcessAudioIn(std::span<const s16> input_buffer, std::size_t n
     }
 }
 
-void SinkStream::ProcessAudioOutAndRender(std::span<s16> output_buffer, std::size_t num_frames) {
+void SinkStream::ProcessAudioOutAndRender(std::span<s16> output_buffer, std::size_t num_frames)
+{
     const std::size_t num_channels = GetDeviceChannels();
     const std::size_t frame_size = num_channels;
     const std::size_t frame_size_bytes = frame_size * sizeof(s16);
@@ -189,7 +202,8 @@ void SinkStream::ProcessAudioOutAndRender(std::span<s16> output_buffer, std::siz
             if (!queue.TryPop(playing_buffer)) {
                 lk.unlock();
                 for (size_t i = frames_written; i < num_frames; i++)
-                    std::memcpy(&output_buffer[i * frame_size], last_frame.data(), frame_size_bytes);
+                    std::memcpy(&output_buffer[i * frame_size], last_frame.data(),
+                                frame_size_bytes);
                 frames_written = num_frames;
                 continue;
             }
@@ -199,9 +213,11 @@ void SinkStream::ProcessAudioOutAndRender(std::span<s16> output_buffer, std::siz
             release_cv.notify_one();
         }
 
-        const size_t frames_available = std::min<u64>(playing_buffer.frames - playing_buffer.frames_played, num_frames - frames_written);
+        const size_t frames_available = std::min<u64>(
+            playing_buffer.frames - playing_buffer.frames_played, num_frames - frames_written);
 
-        samples_buffer.Pop(&output_buffer[frames_written * frame_size], frames_available * frame_size);
+        samples_buffer.Pop(&output_buffer[frames_written * frame_size],
+                           frames_available * frame_size);
 
         frames_written += frames_available;
         actual_frames_written += frames_available;
@@ -211,7 +227,8 @@ void SinkStream::ProcessAudioOutAndRender(std::span<s16> output_buffer, std::siz
             playing_buffer.consumed = true;
     }
 
-    std::memcpy(last_frame.data(), &output_buffer[(frames_written - 1) * frame_size], frame_size_bytes);
+    std::memcpy(last_frame.data(), &output_buffer[(frames_written - 1) * frame_size],
+                frame_size_bytes);
 
     {
         std::scoped_lock lk{sample_count_lock};
@@ -221,22 +238,23 @@ void SinkStream::ProcessAudioOutAndRender(std::span<s16> output_buffer, std::siz
     }
 }
 
-u64 SinkStream::GetExpectedPlayedSampleCount() {
+u64 SinkStream::GetExpectedPlayedSampleCount()
+{
     std::scoped_lock lk{sample_count_lock};
     auto cur_time{system.CoreTiming().GetGlobalTimeNs()};
     auto time_delta{cur_time - last_sample_count_update_time};
-    auto exp_played_sample_count{min_played_sample_count + (TargetSampleRate * time_delta) / std::chrono::seconds{1}};
+    auto exp_played_sample_count{min_played_sample_count +
+                                 (TargetSampleRate * time_delta) / std::chrono::seconds{1}};
 
     // Add 25ms of latency in sample reporting to allow for some leeway in scheduler timings
     return std::min<u64>(exp_played_sample_count, max_played_sample_count) + TargetSampleCount * 5;
 }
 
-void SinkStream::WaitFreeSpace(std::stop_token stop_token) {
+void SinkStream::WaitFreeSpace(std::stop_token stop_token)
+{
     std::unique_lock lk{release_mutex};
 
-    auto can_continue = [this]() {
-        return paused || queued_buffers < max_queue_size;
-    };
+    auto can_continue = [this]() { return paused || queued_buffers < max_queue_size; };
 
     release_cv.wait_for(lk, std::chrono::milliseconds(7), can_continue);
 
@@ -245,7 +263,8 @@ void SinkStream::WaitFreeSpace(std::stop_token stop_token) {
     }
 }
 
-void SinkStream::SignalPause() {
+void SinkStream::SignalPause()
+{
     {
         std::scoped_lock lk{release_mutex};
         paused = true;

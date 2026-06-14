@@ -11,7 +11,8 @@
 namespace Kernel::Svc {
 
 /// Exits the current process
-void ExitProcess(Core::System& system) {
+void ExitProcess(Core::System& system)
+{
     auto* current_process = GetCurrentProcessPointer(system.Kernel());
 
     LOG_INFO(Kernel_SVC, "Process {} exiting", current_process->GetProcessId());
@@ -22,7 +23,8 @@ void ExitProcess(Core::System& system) {
 }
 
 /// Gets the ID of the specified process or a specified thread's owning process.
-Result GetProcessId(Core::System& system, u64* out_process_id, Handle handle) {
+Result GetProcessId(Core::System& system, u64* out_process_id, Handle handle)
+{
     LOG_DEBUG(Kernel_SVC, "called handle=0x{:08X}", handle);
 
     // Get the object from the handle table.
@@ -54,7 +56,8 @@ Result GetProcessId(Core::System& system, u64* out_process_id, Handle handle) {
 }
 
 Result GetProcessList(Core::System& system, s32* out_num_processes, u64 out_process_ids,
-                      int32_t out_process_ids_size) {
+                      int32_t out_process_ids_size)
+{
     LOG_DEBUG(Kernel_SVC, "called. out_process_ids=0x{:016X}, out_process_ids_size={}",
               out_process_ids, out_process_ids_size);
 
@@ -94,7 +97,8 @@ Result GetProcessList(Core::System& system, s32* out_num_processes, u64 out_proc
 }
 
 Result GetProcessInfo(Core::System& system, s64* out, Handle process_handle,
-                      ProcessInfoType info_type) {
+                      ProcessInfoType info_type)
+{
     LOG_DEBUG(Kernel_SVC, "called, handle=0x{:08X}, type={:#X}", process_handle, info_type);
 
     const auto& handle_table = GetCurrentProcess(system.Kernel()).GetHandleTable();
@@ -116,83 +120,100 @@ Result GetProcessInfo(Core::System& system, s64* out, Handle process_handle,
 }
 
 Result CreateProcess(Core::System& system, Handle* out_handle, uint64_t parameters, uint64_t caps,
-                     int32_t num_caps) {
+                     int32_t num_caps)
+{
     UNIMPLEMENTED();
     R_THROW(ResultNotImplemented);
 }
 
 Result StartProcess(Core::System& system, Handle process_handle, int32_t priority, int32_t core_id,
-                    uint64_t main_thread_stack_size) {
+                    uint64_t main_thread_stack_size)
+{
     UNIMPLEMENTED();
     R_THROW(ResultNotImplemented);
 }
 
-Result TerminateProcess(Core::System& system, Handle process_handle) {
+Result TerminateProcess(Core::System& system, Handle process_handle)
+{
     UNIMPLEMENTED();
     R_THROW(ResultNotImplemented);
 }
 
-void ExitProcess64(Core::System& system) {
+void ExitProcess64(Core::System& system)
+{
     ExitProcess(system);
 }
 
-Result GetProcessId64(Core::System& system, uint64_t* out_process_id, Handle process_handle) {
+Result GetProcessId64(Core::System& system, uint64_t* out_process_id, Handle process_handle)
+{
     R_RETURN(GetProcessId(system, out_process_id, process_handle));
 }
 
 Result GetProcessList64(Core::System& system, int32_t* out_num_processes, uint64_t out_process_ids,
-                        int32_t max_out_count) {
+                        int32_t max_out_count)
+{
     R_RETURN(GetProcessList(system, out_num_processes, out_process_ids, max_out_count));
 }
 
 Result CreateProcess64(Core::System& system, Handle* out_handle, uint64_t parameters, uint64_t caps,
-                       int32_t num_caps) {
+                       int32_t num_caps)
+{
     R_RETURN(CreateProcess(system, out_handle, parameters, caps, num_caps));
 }
 
 Result StartProcess64(Core::System& system, Handle process_handle, int32_t priority,
-                      int32_t core_id, uint64_t main_thread_stack_size) {
+                      int32_t core_id, uint64_t main_thread_stack_size)
+{
     R_RETURN(StartProcess(system, process_handle, priority, core_id, main_thread_stack_size));
 }
 
-Result TerminateProcess64(Core::System& system, Handle process_handle) {
+Result TerminateProcess64(Core::System& system, Handle process_handle)
+{
     R_RETURN(TerminateProcess(system, process_handle));
 }
 
 Result GetProcessInfo64(Core::System& system, int64_t* out_info, Handle process_handle,
-                        ProcessInfoType info_type) {
+                        ProcessInfoType info_type)
+{
     R_RETURN(GetProcessInfo(system, out_info, process_handle, info_type));
 }
 
-void ExitProcess64From32(Core::System& system) {
+void ExitProcess64From32(Core::System& system)
+{
     ExitProcess(system);
 }
 
-Result GetProcessId64From32(Core::System& system, uint64_t* out_process_id, Handle process_handle) {
+Result GetProcessId64From32(Core::System& system, uint64_t* out_process_id, Handle process_handle)
+{
     R_RETURN(GetProcessId(system, out_process_id, process_handle));
 }
 
 Result GetProcessList64From32(Core::System& system, int32_t* out_num_processes,
-                              uint32_t out_process_ids, int32_t max_out_count) {
+                              uint32_t out_process_ids, int32_t max_out_count)
+{
     R_RETURN(GetProcessList(system, out_num_processes, out_process_ids, max_out_count));
 }
 
 Result CreateProcess64From32(Core::System& system, Handle* out_handle, uint32_t parameters,
-                             uint32_t caps, int32_t num_caps) {
+                             uint32_t caps, int32_t num_caps)
+{
     R_RETURN(CreateProcess(system, out_handle, parameters, caps, num_caps));
 }
 
 Result StartProcess64From32(Core::System& system, Handle process_handle, int32_t priority,
-                            int32_t core_id, uint64_t main_thread_stack_size) {
+                            int32_t core_id, uint64_t main_thread_stack_size)
+{
     R_RETURN(StartProcess(system, process_handle, priority, core_id, main_thread_stack_size));
 }
 
-Result TerminateProcess64From32(Core::System& system, Handle process_handle) {
+Result TerminateProcess64From32(Core::System& system, Handle process_handle)
+{
     R_RETURN(TerminateProcess(system, process_handle));
 }
 
 Result GetProcessInfo64From32(Core::System& system, int64_t* out_info, Handle process_handle,
-                              ProcessInfoType info_type) {
+                              ProcessInfoType info_type)
+{
     R_RETURN(GetProcessInfo(system, out_info, process_handle, info_type));
 }
 

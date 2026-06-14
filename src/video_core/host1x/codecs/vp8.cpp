@@ -4,9 +4,10 @@
 // SPDX-FileCopyrightText: Copyright 2021 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "video_core/host1x/codecs/vp8.h"
+
 #include <vector>
 
-#include "video_core/host1x/codecs/vp8.h"
 #include "video_core/host1x/host1x.h"
 #include "video_core/memory_manager.h"
 
@@ -19,13 +20,15 @@ VP8::VP8(Host1x::Host1x& host1x_, const Host1x::NvdecCommon::NvdecRegisters& reg
 
 VP8::~VP8() = default;
 
-std::tuple<u64, u64> VP8::GetProgressiveOffsets() {
+std::tuple<u64, u64> VP8::GetProgressiveOffsets()
+{
     auto luma{regs.surface_luma_offsets[static_cast<u32>(Vp8SurfaceIndex::Current)].Address()};
     auto chroma{regs.surface_chroma_offsets[static_cast<u32>(Vp8SurfaceIndex::Current)].Address()};
     return {luma, chroma};
 }
 
-std::tuple<u64, u64, u64, u64> VP8::GetInterlacedOffsets() {
+std::tuple<u64, u64, u64, u64> VP8::GetInterlacedOffsets()
+{
     auto luma_top{regs.surface_luma_offsets[static_cast<u32>(Vp8SurfaceIndex::Current)].Address()};
     auto luma_bottom = regs.surface_luma_offsets[u32(Vp8SurfaceIndex::Current)].Address();
     auto chroma_top = regs.surface_chroma_offsets[u32(Vp8SurfaceIndex::Current)].Address();
@@ -33,8 +36,10 @@ std::tuple<u64, u64, u64, u64> VP8::GetInterlacedOffsets() {
     return {luma_top, luma_bottom, chroma_top, chroma_bottom};
 }
 
-std::span<const u8> VP8::ComposeFrame() {
-    host1x.gmmu_manager.ReadBlock(regs.picture_info_offset.Address(), &current_context, sizeof(VP8PictureInfo));
+std::span<const u8> VP8::ComposeFrame()
+{
+    host1x.gmmu_manager.ReadBlock(regs.picture_info_offset.Address(), &current_context,
+                                  sizeof(VP8PictureInfo));
 
     const bool is_key_frame = current_context.key_frame == 1u;
     const auto bitstream_size = size_t(current_context.vld_buffer_size);
@@ -45,7 +50,7 @@ std::span<const u8> VP8::ComposeFrame() {
     // https://datatracker.ietf.org/doc/rfc6386/
     frame_scratch[0] = is_key_frame ? 0u : 1u; // 1-bit frame type (0: keyframe, 1: interframes).
     frame_scratch[0] |= u8((current_context.version & 7u) << 1u); // 3-bit version number
-    frame_scratch[0] |= u8(1u << 4u);             // 1-bit show_frame flag
+    frame_scratch[0] |= u8(1u << 4u);                             // 1-bit show_frame flag
 
     // The next 19-bits are the first partition size
     frame_scratch[0] |= u8((current_context.first_part_size & 7u) << 5u);
@@ -66,7 +71,8 @@ std::span<const u8> VP8::ComposeFrame() {
     }
 
     const u64 bitstream_offset = regs.frame_bitstream_offset.Address();
-    host1x.gmmu_manager.ReadBlock(bitstream_offset, frame_scratch.data() + header_size, bitstream_size);
+    host1x.gmmu_manager.ReadBlock(bitstream_offset, frame_scratch.data() + header_size,
+                                  bitstream_size);
     return frame_scratch;
 }
 

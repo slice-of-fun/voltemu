@@ -26,13 +26,9 @@ public:
 
     void Initialize(std::shared_ptr<Service::PSC::Time::ServiceManager> time_m);
 
-    Kernel::KReadableEvent& GetEvent() {
-        return *m_event;
-    }
+    Kernel::KReadableEvent& GetEvent() { return *m_event; }
 
-    Kernel::KEvent& GetTimerEvent() {
-        return *m_timer_event;
-    }
+    Kernel::KEvent& GetTimerEvent() { return *m_timer_event; }
 
     void OnPowerStateChanged();
 

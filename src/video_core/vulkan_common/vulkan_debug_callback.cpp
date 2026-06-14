@@ -1,17 +1,20 @@
 // SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+#include "video_core/vulkan_common/vulkan_debug_callback.h"
+
 #include <string_view>
+
 #include "common/logging.h"
 #include "common/settings.h"
-#include "video_core/vulkan_common/vulkan_debug_callback.h"
 #include "video_core/gpu_logging/gpu_logging.h"
 
 namespace Vulkan {
 namespace {
 
 // Helper to get message type as string for GPU logging
-const char* GetMessageTypeName(VkDebugUtilsMessageTypeFlagsEXT type) {
+const char* GetMessageTypeName(VkDebugUtilsMessageTypeFlagsEXT type)
+{
     if (type & VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT) {
         return "Validation";
     } else if (type & VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT) {
@@ -24,7 +27,8 @@ const char* GetMessageTypeName(VkDebugUtilsMessageTypeFlagsEXT type) {
 VkBool32 DebugUtilCallback(VkDebugUtilsMessageSeverityFlagBitsEXT severity,
                            VkDebugUtilsMessageTypeFlagsEXT type,
                            const VkDebugUtilsMessengerCallbackDataEXT* data,
-                           [[maybe_unused]] void* user_data) {
+                           [[maybe_unused]] void* user_data)
+{
     // Skip logging known false-positive validation errors
     switch (static_cast<u32>(data->messageIdNumber)) {
 #ifdef __ANDROID__
@@ -90,10 +94,8 @@ VkBool32 DebugUtilCallback(VkDebugUtilsMessageSeverityFlagBitsEXT severity,
         const char* call_name = data->pMessageIdName ? data->pMessageIdName : "VulkanDebug";
 
         GPU::Logging::GPULogger::GetInstance().LogVulkanCall(
-            call_name,
-            std::string(GetMessageTypeName(type)) + ": " + std::string(message),
-            result_code
-        );
+            call_name, std::string(GetMessageTypeName(type)) + ": " + std::string(message),
+            result_code);
     }
 
     return VK_FALSE;
@@ -101,7 +103,8 @@ VkBool32 DebugUtilCallback(VkDebugUtilsMessageSeverityFlagBitsEXT severity,
 
 } // Anonymous namespace
 
-vk::DebugUtilsMessenger CreateDebugUtilsCallback(const vk::Instance& instance) {
+vk::DebugUtilsMessenger CreateDebugUtilsCallback(const vk::Instance& instance)
+{
     return instance.CreateDebugUtilsMessenger(VkDebugUtilsMessengerCreateInfoEXT{
         .sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT,
         .pNext = nullptr,

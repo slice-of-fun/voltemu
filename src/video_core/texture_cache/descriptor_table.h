@@ -10,18 +10,18 @@
 #include <vector>
 
 #include "common/alignment.h"
+#include "common/assert.h"
 #include "common/common_types.h"
 #include "common/div_ceil.h"
-#include "common/assert.h"
 #include "video_core/memory_manager.h"
 #include "video_core/rasterizer_interface.h"
 
 namespace VideoCommon {
 
-template <typename T>
-class DescriptorTable {
+template<typename T> class DescriptorTable {
 public:
-    [[nodiscard]] bool Synchronize(GPUVAddr gpu_addr, u32 limit) noexcept {
+    [[nodiscard]] bool Synchronize(GPUVAddr gpu_addr, u32 limit) noexcept
+    {
         bool ret = !(current_gpu_addr == gpu_addr && current_limit == limit);
         if (ret) {
             Refresh(gpu_addr, limit);
@@ -29,11 +29,11 @@ public:
         return ret;
     }
 
-    void Invalidate() noexcept {
-        std::ranges::fill(read_descriptors, 0);
-    }
+    void Invalidate() noexcept { std::ranges::fill(read_descriptors, 0); }
 
-    [[nodiscard]] std::pair<T, bool> Read(Tegra::MemoryManager const& gpu_memory, u32 index) noexcept {
+    [[nodiscard]] std::pair<T, bool> Read(Tegra::MemoryManager const& gpu_memory,
+                                          u32 index) noexcept
+    {
         DEBUG_ASSERT(index <= current_limit);
         const GPUVAddr gpu_addr = current_gpu_addr + index * sizeof(T);
         std::pair<T, bool> result;
@@ -50,11 +50,13 @@ public:
         return result;
     }
 
-    void Refresh(GPUVAddr gpu_addr, u32 limit) noexcept {
+    void Refresh(GPUVAddr gpu_addr, u32 limit) noexcept
+    {
         current_gpu_addr = gpu_addr;
         current_limit = limit;
         // Mario Brothership reallocates a lot of times, so use aggressive pre-alloc sizes
-        // std::vector<T> by default uses quadratic growth, but that isn't even enough to satisfy brothership
+        // std::vector<T> by default uses quadratic growth, but that isn't even enough to satisfy
+        // brothership
         const size_t num_descriptors = ((limit + 0x80000) & (~0x7ffff)) + 1;
         size_t old_size = read_descriptors.size();
         read_descriptors.resize(Common::DivCeil(num_descriptors, 64U));

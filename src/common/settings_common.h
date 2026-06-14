@@ -10,6 +10,7 @@
 #include <map>
 #include <string>
 #include <typeindex>
+
 #include "common/common_types.h"
 
 namespace Settings {
@@ -176,9 +177,7 @@ public:
      *
      * @returns If the setting is a SwitchableSetting
      */
-    [[nodiscard]] virtual constexpr bool Switchable() const {
-        return false;
-    }
+    [[nodiscard]] virtual constexpr bool Switchable() const { return false; }
 
     /**
      * Returns true to suggest that a frontend can read or write the setting to a configuration
@@ -196,9 +195,7 @@ public:
     /**
      * @returns A unique number corresponding to the setting.
      */
-    [[nodiscard]] constexpr u32 Id() const {
-        return id;
-    }
+    [[nodiscard]] constexpr u32 Id() const { return id; }
 
     /**
      * Returns the setting's category AKA INI group.

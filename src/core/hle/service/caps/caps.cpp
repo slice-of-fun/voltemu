@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include "core/hle/service/caps/caps.h"
+
 #include "core/hle/service/caps/caps_a.h"
 #include "core/hle/service/caps/caps_c.h"
 #include "core/hle/service/caps/caps_manager.h"
@@ -14,7 +15,8 @@
 
 namespace Service::Capture {
 
-void LoopProcess(Core::System& system) {
+void LoopProcess(Core::System& system)
+{
     auto server_manager = std::make_unique<ServerManager>(system);
     auto album_manager = std::make_shared<AlbumManager>(system);
 

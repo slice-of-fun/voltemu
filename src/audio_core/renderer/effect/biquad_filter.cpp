@@ -9,7 +9,8 @@
 namespace AudioCore::Renderer {
 
 void BiquadFilterInfo::Update(BehaviorInfo::ErrorInfo& error_info,
-                              const InParameterVersion1& in_params, const PoolMapper& pool_mapper) {
+                              const InParameterVersion1& in_params, const PoolMapper& pool_mapper)
+{
     auto in_specific{reinterpret_cast<const ParameterVersion1*>(in_params.specific.data())};
     auto params{reinterpret_cast<ParameterVersion1*>(parameter.data())};
 
@@ -23,7 +24,8 @@ void BiquadFilterInfo::Update(BehaviorInfo::ErrorInfo& error_info,
 }
 
 void BiquadFilterInfo::Update(BehaviorInfo::ErrorInfo& error_info,
-                              const InParameterVersion2& in_params, const PoolMapper& pool_mapper) {
+                              const InParameterVersion2& in_params, const PoolMapper& pool_mapper)
+{
     auto in_specific{reinterpret_cast<const ParameterVersion2*>(in_params.specific.data())};
     auto params{reinterpret_cast<ParameterVersion2*>(parameter.data())};
 
@@ -36,7 +38,8 @@ void BiquadFilterInfo::Update(BehaviorInfo::ErrorInfo& error_info,
     error_info.address = CpuAddr(0);
 }
 
-void BiquadFilterInfo::UpdateForCommandGeneration() {
+void BiquadFilterInfo::UpdateForCommandGeneration()
+{
     usage_state = enabled ? UsageState::Enabled : UsageState::Disabled;
 
     auto* params_v1 = reinterpret_cast<ParameterVersion1*>(parameter.data());
@@ -55,9 +58,12 @@ void BiquadFilterInfo::UpdateForCommandGeneration() {
     }
 }
 
-void BiquadFilterInfo::InitializeResultState(EffectResultState& result_state) {}
+void BiquadFilterInfo::InitializeResultState(EffectResultState& result_state)
+{
+}
 
-void BiquadFilterInfo::UpdateResultState(EffectResultState& cpu_state,
-                                         EffectResultState& dsp_state) {}
+void BiquadFilterInfo::UpdateResultState(EffectResultState& cpu_state, EffectResultState& dsp_state)
+{
+}
 
 } // namespace AudioCore::Renderer

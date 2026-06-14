@@ -1,6 +1,8 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/hid/irs.h"
+
 #include <algorithm>
 #include <random>
 
@@ -10,7 +12,6 @@
 #include "core/hle/kernel/k_transfer_memory.h"
 #include "core/hle/kernel/kernel.h"
 #include "core/hle/service/cmif_serialization.h"
-#include "core/hle/service/hid/irs.h"
 #include "core/hle/service/ipc_helpers.h"
 #include "core/memory.h"
 #include "hid_core/frontend/emulated_controller.h"
@@ -26,7 +27,8 @@
 
 namespace Service::IRS {
 
-IRS::IRS(Core::System& system_) : ServiceFramework{system_, "irs"} {
+IRS::IRS(Core::System& system_) : ServiceFramework{system_, "irs"}
+{
     // clang-format off
     static const FunctionInfo functions[] = {
         {302, C<&IRS::ActivateIrsensor>, "ActivateIrsensor"},
@@ -58,18 +60,21 @@ IRS::IRS(Core::System& system_) : ServiceFramework{system_, "irs"} {
 }
 IRS::~IRS() = default;
 
-Result IRS::ActivateIrsensor(ClientAppletResourceUserId aruid) {
+Result IRS::ActivateIrsensor(ClientAppletResourceUserId aruid)
+{
     LOG_WARNING(Service_IRS, "(STUBBED) called, applet_resource_user_id={}", aruid.pid);
     R_SUCCEED();
 }
 
-Result IRS::DeactivateIrsensor(ClientAppletResourceUserId aruid) {
+Result IRS::DeactivateIrsensor(ClientAppletResourceUserId aruid)
+{
     LOG_WARNING(Service_IRS, "(STUBBED) called, applet_resource_user_id={}", aruid.pid);
     R_SUCCEED();
 }
 
 Result IRS::GetIrsensorSharedMemoryHandle(OutCopyHandle<Kernel::KSharedMemory> out_shared_memory,
-                                          ClientAppletResourceUserId aruid) {
+                                          ClientAppletResourceUserId aruid)
+{
     LOG_DEBUG(Service_IRS, "called, applet_resource_user_id={}", aruid.pid);
 
     *out_shared_memory = &system.Kernel().GetIrsSharedMem();
@@ -77,7 +82,8 @@ Result IRS::GetIrsensorSharedMemoryHandle(OutCopyHandle<Kernel::KSharedMemory> o
 }
 
 Result IRS::StopImageProcessor(Core::IrSensor::IrCameraHandle camera_handle,
-                               ClientAppletResourceUserId aruid) {
+                               ClientAppletResourceUserId aruid)
+{
     LOG_WARNING(Service_IRS,
                 "(STUBBED) called, npad_type={}, npad_id={}, applet_resource_user_id={}",
                 camera_handle.npad_type, camera_handle.npad_id, aruid.pid);
@@ -90,9 +96,10 @@ Result IRS::StopImageProcessor(Core::IrSensor::IrCameraHandle camera_handle,
     R_SUCCEED();
 }
 
-Result IRS::RunMomentProcessor(
-    Core::IrSensor::IrCameraHandle camera_handle, ClientAppletResourceUserId aruid,
-    const Core::IrSensor::PackedMomentProcessorConfig& processor_config) {
+Result IRS::RunMomentProcessor(Core::IrSensor::IrCameraHandle camera_handle,
+                               ClientAppletResourceUserId aruid,
+                               const Core::IrSensor::PackedMomentProcessorConfig& processor_config)
+{
     LOG_WARNING(Service_IRS,
                 "(STUBBED) called, npad_type={}, npad_id={}, applet_resource_user_id={}",
                 camera_handle.npad_type, camera_handle.npad_id, aruid.pid);
@@ -109,9 +116,11 @@ Result IRS::RunMomentProcessor(
     R_SUCCEED();
 }
 
-Result IRS::RunClusteringProcessor(
-    Core::IrSensor::IrCameraHandle camera_handle, ClientAppletResourceUserId aruid,
-    const Core::IrSensor::PackedClusteringProcessorConfig& processor_config) {
+Result
+IRS::RunClusteringProcessor(Core::IrSensor::IrCameraHandle camera_handle,
+                            ClientAppletResourceUserId aruid,
+                            const Core::IrSensor::PackedClusteringProcessorConfig& processor_config)
+{
     LOG_WARNING(Service_IRS,
                 "(STUBBED) called, npad_type={}, npad_id={}, applet_resource_user_id={}",
                 camera_handle.npad_type, camera_handle.npad_id, aruid.pid);
@@ -131,7 +140,8 @@ Result IRS::RunClusteringProcessor(
 Result IRS::RunImageTransferProcessor(
     Core::IrSensor::IrCameraHandle camera_handle, ClientAppletResourceUserId aruid,
     const Core::IrSensor::PackedImageTransferProcessorConfig& processor_config,
-    u64 transfer_memory_size, InCopyHandle<Kernel::KTransferMemory> t_mem) {
+    u64 transfer_memory_size, InCopyHandle<Kernel::KTransferMemory> t_mem)
+{
 
     ASSERT_MSG(t_mem->GetSize() == transfer_memory_size, "t_mem has incorrect size");
 
@@ -154,10 +164,12 @@ Result IRS::RunImageTransferProcessor(
     R_SUCCEED();
 }
 
-Result IRS::GetImageTransferProcessorState(
-    Out<Core::IrSensor::ImageTransferProcessorState> out_state,
-    Core::IrSensor::IrCameraHandle camera_handle, ClientAppletResourceUserId aruid,
-    OutBuffer<BufferAttr_HipcMapAlias> out_buffer_data) {
+Result
+IRS::GetImageTransferProcessorState(Out<Core::IrSensor::ImageTransferProcessorState> out_state,
+                                    Core::IrSensor::IrCameraHandle camera_handle,
+                                    ClientAppletResourceUserId aruid,
+                                    OutBuffer<BufferAttr_HipcMapAlias> out_buffer_data)
+{
     LOG_DEBUG(Service_IRS, "(STUBBED) called, npad_type={}, npad_id={}, applet_resource_user_id={}",
               camera_handle.npad_type, camera_handle.npad_id, aruid.pid);
 
@@ -176,7 +188,8 @@ Result IRS::GetImageTransferProcessorState(
 
 Result IRS::RunTeraPluginProcessor(Core::IrSensor::IrCameraHandle camera_handle,
                                    Core::IrSensor::PackedTeraPluginProcessorConfig processor_config,
-                                   ClientAppletResourceUserId aruid) {
+                                   ClientAppletResourceUserId aruid)
+{
     LOG_WARNING(Service_IRS,
                 "(STUBBED) called, npad_type={}, npad_id={}, mode={}, mcu_version={}.{}, "
                 "applet_resource_user_id={}",
@@ -197,7 +210,8 @@ Result IRS::RunTeraPluginProcessor(Core::IrSensor::IrCameraHandle camera_handle,
 }
 
 Result IRS::GetNpadIrCameraHandle(Out<Core::IrSensor::IrCameraHandle> out_camera_handle,
-                                  Core::HID::NpadIdType npad_id) {
+                                  Core::HID::NpadIdType npad_id)
+{
     R_UNLESS(HID::IsNpadIdValid(npad_id), HID::ResultInvalidNpadId);
 
     *out_camera_handle = {
@@ -211,10 +225,11 @@ Result IRS::GetNpadIrCameraHandle(Out<Core::IrSensor::IrCameraHandle> out_camera
     R_SUCCEED();
 }
 
-Result IRS::RunPointingProcessor(
-    Core::IrSensor::IrCameraHandle camera_handle,
-    const Core::IrSensor::PackedPointingProcessorConfig& processor_config,
-    ClientAppletResourceUserId aruid) {
+Result
+IRS::RunPointingProcessor(Core::IrSensor::IrCameraHandle camera_handle,
+                          const Core::IrSensor::PackedPointingProcessorConfig& processor_config,
+                          ClientAppletResourceUserId aruid)
+{
     LOG_WARNING(
         Service_IRS,
         "(STUBBED) called, npad_type={}, npad_id={}, mcu_version={}.{}, applet_resource_user_id={}",
@@ -234,7 +249,8 @@ Result IRS::RunPointingProcessor(
 }
 
 Result IRS::SuspendImageProcessor(Core::IrSensor::IrCameraHandle camera_handle,
-                                  ClientAppletResourceUserId aruid) {
+                                  ClientAppletResourceUserId aruid)
+{
     LOG_WARNING(Service_IRS,
                 "(STUBBED) called, npad_type={}, npad_id={}, applet_resource_user_id={}",
                 camera_handle.npad_type, camera_handle.npad_id, aruid.pid);
@@ -248,7 +264,8 @@ Result IRS::SuspendImageProcessor(Core::IrSensor::IrCameraHandle camera_handle,
 
 Result IRS::CheckFirmwareVersion(Core::IrSensor::IrCameraHandle camera_handle,
                                  Core::IrSensor::PackedMcuVersion mcu_version,
-                                 ClientAppletResourceUserId aruid) {
+                                 ClientAppletResourceUserId aruid)
+{
     LOG_WARNING(
         Service_IRS,
         "(STUBBED) called, npad_type={}, npad_id={}, applet_resource_user_id={}, mcu_version={}.{}",
@@ -264,7 +281,8 @@ Result IRS::CheckFirmwareVersion(Core::IrSensor::IrCameraHandle camera_handle,
 
 Result IRS::SetFunctionLevel(Core::IrSensor::IrCameraHandle camera_handle,
                              Core::IrSensor::PackedFunctionLevel function_level,
-                             ClientAppletResourceUserId aruid) {
+                             ClientAppletResourceUserId aruid)
+{
     LOG_WARNING(
         Service_IRS,
         "(STUBBED) called, npad_type={}, npad_id={}, function_level={}, applet_resource_user_id={}",
@@ -280,7 +298,8 @@ Result IRS::SetFunctionLevel(Core::IrSensor::IrCameraHandle camera_handle,
 Result IRS::RunImageTransferExProcessor(
     Core::IrSensor::IrCameraHandle camera_handle, ClientAppletResourceUserId aruid,
     const Core::IrSensor::PackedImageTransferProcessorExConfig& processor_config,
-    u64 transfer_memory_size, InCopyHandle<Kernel::KTransferMemory> t_mem) {
+    u64 transfer_memory_size, InCopyHandle<Kernel::KTransferMemory> t_mem)
+{
 
     ASSERT_MSG(t_mem->GetSize() == transfer_memory_size, "t_mem has incorrect size");
 
@@ -304,7 +323,8 @@ Result IRS::RunImageTransferExProcessor(
 
 Result IRS::RunIrLedProcessor(Core::IrSensor::IrCameraHandle camera_handle,
                               Core::IrSensor::PackedIrLedProcessorConfig processor_config,
-                              ClientAppletResourceUserId aruid) {
+                              ClientAppletResourceUserId aruid)
+{
     LOG_WARNING(Service_IRS,
                 "(STUBBED) called, npad_type={}, npad_id={}, light_target={}, mcu_version={}.{} "
                 "applet_resource_user_id={}",
@@ -325,7 +345,8 @@ Result IRS::RunIrLedProcessor(Core::IrSensor::IrCameraHandle camera_handle,
 }
 
 Result IRS::StopImageProcessorAsync(Core::IrSensor::IrCameraHandle camera_handle,
-                                    ClientAppletResourceUserId aruid) {
+                                    ClientAppletResourceUserId aruid)
+{
     LOG_WARNING(Service_IRS,
                 "(STUBBED) called, npad_type={}, npad_id={}, applet_resource_user_id={}",
                 camera_handle.npad_type, camera_handle.npad_id, aruid.pid);
@@ -340,13 +361,15 @@ Result IRS::StopImageProcessorAsync(Core::IrSensor::IrCameraHandle camera_handle
 }
 
 Result IRS::ActivateIrsensorWithFunctionLevel(Core::IrSensor::PackedFunctionLevel function_level,
-                                              ClientAppletResourceUserId aruid) {
+                                              ClientAppletResourceUserId aruid)
+{
     LOG_WARNING(Service_IRS, "(STUBBED) called, function_level={}, applet_resource_user_id={}",
                 function_level.function_level, aruid.pid);
     R_SUCCEED();
 }
 
-Result IRS::IsIrCameraHandleValid(const Core::IrSensor::IrCameraHandle& camera_handle) const {
+Result IRS::IsIrCameraHandleValid(const Core::IrSensor::IrCameraHandle& camera_handle) const
+{
     if (camera_handle.npad_id >
         static_cast<u8>(HID::NpadIdTypeToIndex(Core::HID::NpadIdType::Handheld))) {
         return InvalidIrCameraHandle;
@@ -357,14 +380,16 @@ Result IRS::IsIrCameraHandleValid(const Core::IrSensor::IrCameraHandle& camera_h
     return ResultSuccess;
 }
 
-Core::IrSensor::DeviceFormat& IRS::GetIrCameraSharedMemoryDeviceEntry(
-    const Core::IrSensor::IrCameraHandle& camera_handle) {
+Core::IrSensor::DeviceFormat&
+IRS::GetIrCameraSharedMemoryDeviceEntry(const Core::IrSensor::IrCameraHandle& camera_handle)
+{
     const auto npad_id_max_index = static_cast<u8>(sizeof(StatusManager::device));
     ASSERT_MSG(camera_handle.npad_id < npad_id_max_index, "invalid npad_id");
     return shared_memory->device[camera_handle.npad_id];
 }
 
-IRS_SYS::IRS_SYS(Core::System& system_) : ServiceFramework{system_, "irs:sys"} {
+IRS_SYS::IRS_SYS(Core::System& system_) : ServiceFramework{system_, "irs:sys"}
+{
     // clang-format off
     static const FunctionInfo functions[] = {
         {500, nullptr, "SetAppletResourceUserId"},

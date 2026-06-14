@@ -4,8 +4,9 @@
 // SPDX-FileCopyrightText: Copyright 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include "core/hardware_properties.h"
 #include "core/hle/kernel/k_capabilities.h"
+
+#include "core/hardware_properties.h"
 #include "core/hle/kernel/k_memory_layout.h"
 #include "core/hle/kernel/k_process_page_table.h"
 #include "core/hle/kernel/k_trace.h"
@@ -16,7 +17,8 @@
 namespace Kernel {
 
 Result KCapabilities::InitializeForKip(std::span<const u32> kern_caps,
-                                       KProcessPageTable* page_table) {
+                                       KProcessPageTable* page_table)
+{
     // We're initializing an initial process.
     m_svc_access_flags.reset();
     m_irq_access_flags.reset();
@@ -47,7 +49,8 @@ Result KCapabilities::InitializeForKip(std::span<const u32> kern_caps,
 }
 
 Result KCapabilities::InitializeForUser(std::span<const u32> user_caps,
-                                        KProcessPageTable* page_table) {
+                                        KProcessPageTable* page_table)
+{
     // We're initializing a user process.
     m_svc_access_flags.reset();
     m_irq_access_flags.reset();
@@ -64,7 +67,8 @@ Result KCapabilities::InitializeForUser(std::span<const u32> user_caps,
     R_RETURN(this->SetCapabilities(user_caps, page_table));
 }
 
-Result KCapabilities::SetCorePriorityCapability(const u32 cap) {
+Result KCapabilities::SetCorePriorityCapability(const u32 cap)
+{
     // We can't set core/priority if we've already set them.
     R_UNLESS(m_core_mask == 0, ResultInvalidArgument);
     R_UNLESS(m_priority_mask == 0, ResultInvalidArgument);
@@ -106,7 +110,8 @@ Result KCapabilities::SetCorePriorityCapability(const u32 cap) {
     R_SUCCEED();
 }
 
-Result KCapabilities::SetSyscallMaskCapability(const u32 cap, u32& set_svc) {
+Result KCapabilities::SetSyscallMaskCapability(const u32 cap, u32& set_svc)
+{
     // Validate the index.
     SyscallMask pack{cap};
     const u32 mask = pack.mask;
@@ -127,7 +132,8 @@ Result KCapabilities::SetSyscallMaskCapability(const u32 cap, u32& set_svc) {
     R_SUCCEED();
 }
 
-Result KCapabilities::MapRange_(const u32 cap, const u32 size_cap, KProcessPageTable* page_table) {
+Result KCapabilities::MapRange_(const u32 cap, const u32 size_cap, KProcessPageTable* page_table)
+{
     const auto range_pack = MapRange{cap};
     const auto size_pack = MapRangeSize{size_cap};
 
@@ -154,7 +160,8 @@ Result KCapabilities::MapRange_(const u32 cap, const u32 size_cap, KProcessPageT
     }
 }
 
-Result KCapabilities::MapIoPage_(const u32 cap, KProcessPageTable* page_table) {
+Result KCapabilities::MapIoPage_(const u32 cap, KProcessPageTable* page_table)
+{
     // Get/validate address/size
     const u64 phys_addr = MapIoPage{cap}.address.Value() * PageSize;
     const size_t num_pages = 1;
@@ -166,8 +173,8 @@ Result KCapabilities::MapIoPage_(const u32 cap, KProcessPageTable* page_table) {
     R_RETURN(page_table->MapIo(phys_addr, size, KMemoryPermission::UserReadWrite));
 }
 
-template <typename F>
-Result KCapabilities::ProcessMapRegionCapability(const u32 cap, F f) {
+template<typename F> Result KCapabilities::ProcessMapRegionCapability(const u32 cap, F f)
+{
     // Define the allowed memory regions.
     constexpr std::array<KMemoryRegionType, 4> MemoryRegions{
         KMemoryRegionType_None,
@@ -204,7 +211,8 @@ Result KCapabilities::ProcessMapRegionCapability(const u32 cap, F f) {
     R_SUCCEED();
 }
 
-Result KCapabilities::MapRegion_(const u32 cap, KProcessPageTable* page_table) {
+Result KCapabilities::MapRegion_(const u32 cap, KProcessPageTable* page_table)
+{
     // Map each region into the process's page table.
     return ProcessMapRegionCapability(
         cap, [page_table](KMemoryRegionType region_type, KMemoryPermission perm) -> Result {
@@ -212,7 +220,8 @@ Result KCapabilities::MapRegion_(const u32 cap, KProcessPageTable* page_table) {
         });
 }
 
-Result KCapabilities::CheckMapRegion(KernelCore& kernel, const u32 cap) {
+Result KCapabilities::CheckMapRegion(KernelCore& kernel, const u32 cap)
+{
     // Check that each region has a physical backing store.
     return ProcessMapRegionCapability(
         cap, [&](KMemoryRegionType region_type, KMemoryPermission perm) -> Result {
@@ -223,7 +232,8 @@ Result KCapabilities::CheckMapRegion(KernelCore& kernel, const u32 cap) {
         });
 }
 
-Result KCapabilities::SetInterruptPairCapability(const u32 cap) {
+Result KCapabilities::SetInterruptPairCapability(const u32 cap)
+{
     // Extract interrupts.
     const InterruptPair pack{cap};
     const std::array<u32, 2> ids{pack.interrupt_id0, pack.interrupt_id1};
@@ -239,7 +249,8 @@ Result KCapabilities::SetInterruptPairCapability(const u32 cap) {
     R_SUCCEED();
 }
 
-Result KCapabilities::SetProgramTypeCapability(const u32 cap) {
+Result KCapabilities::SetProgramTypeCapability(const u32 cap)
+{
     // Validate.
     const ProgramType pack{cap};
     R_UNLESS(pack.reserved == 0, ResultReservedUsed);
@@ -248,7 +259,8 @@ Result KCapabilities::SetProgramTypeCapability(const u32 cap) {
     R_SUCCEED();
 }
 
-Result KCapabilities::SetKernelVersionCapability(const u32 cap) {
+Result KCapabilities::SetKernelVersionCapability(const u32 cap)
+{
     // Ensure we haven't set our version before.
     R_UNLESS(KernelVersion{m_intended_kernel_version}.major_version == 0, ResultInvalidArgument);
 
@@ -259,7 +271,8 @@ Result KCapabilities::SetKernelVersionCapability(const u32 cap) {
     R_SUCCEED();
 }
 
-Result KCapabilities::SetHandleTableCapability(const u32 cap) {
+Result KCapabilities::SetHandleTableCapability(const u32 cap)
+{
     // Validate.
     const HandleTable pack{cap};
     R_UNLESS(pack.reserved == 0, ResultReservedUsed);
@@ -268,11 +281,12 @@ Result KCapabilities::SetHandleTableCapability(const u32 cap) {
     R_SUCCEED();
 }
 
-Result KCapabilities::SetDebugFlagsCapability(const u32 cap) {
+Result KCapabilities::SetDebugFlagsCapability(const u32 cap)
+{
     // Validate.
     const DebugFlags pack{cap};
     // TODO: Enabling this breaks compatibility with HBloader and such
-    //R_UNLESS(pack.reserved == 0, ResultReservedUsed);
+    // R_UNLESS(pack.reserved == 0, ResultReservedUsed);
 
     DebugFlags debug_capabilities{m_debug_capabilities};
     debug_capabilities.allow_debug.Assign(pack.allow_debug);
@@ -283,7 +297,8 @@ Result KCapabilities::SetDebugFlagsCapability(const u32 cap) {
 }
 
 Result KCapabilities::SetCapability(const u32 cap, u32& set_flags, u32& set_svc,
-                                    KProcessPageTable* page_table) {
+                                    KProcessPageTable* page_table)
+{
     // Validate this is a capability we can act on.
     const auto type = GetCapabilityType(cap);
     R_UNLESS(type != CapabilityType::Invalid, ResultInvalidArgument);
@@ -321,7 +336,8 @@ Result KCapabilities::SetCapability(const u32 cap, u32& set_flags, u32& set_svc,
     }
 }
 
-Result KCapabilities::SetCapabilities(std::span<const u32> caps, KProcessPageTable* page_table) {
+Result KCapabilities::SetCapabilities(std::span<const u32> caps, KProcessPageTable* page_table)
+{
     u32 set_flags = 0, set_svc = 0;
 
     for (size_t i = 0; i < caps.size(); i++) {
@@ -346,7 +362,8 @@ Result KCapabilities::SetCapabilities(std::span<const u32> caps, KProcessPageTab
     R_SUCCEED();
 }
 
-Result KCapabilities::CheckCapabilities(KernelCore& kernel, std::span<const u32> caps) {
+Result KCapabilities::CheckCapabilities(KernelCore& kernel, std::span<const u32> caps)
+{
     for (auto cap : caps) {
         // Check the capability refers to a valid region.
         if (GetCapabilityType(cap) == CapabilityType::MapRegion) {

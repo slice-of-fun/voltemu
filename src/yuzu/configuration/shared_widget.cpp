@@ -6,12 +6,11 @@
 
 #include "yuzu/configuration/shared_widget.h"
 
-#include <functional>
-#include <limits>
-#include <typeindex>
-#include <typeinfo>
-#include <utility>
-#include <vector>
+#include <QtCore/qglobal.h>
+#include <QtCore/qobjectdefs.h>
+#include <fmt/core.h>
+#include <qglobal.h>
+#include <qnamespace.h>
 
 #include <QAbstractButton>
 #include <QAbstractSlider>
@@ -34,11 +33,12 @@
 #include <QStyle>
 #include <QValidator>
 #include <QVariant>
-#include <QtCore/qglobal.h>
-#include <QtCore/qobjectdefs.h>
-#include <fmt/core.h>
-#include <qglobal.h>
-#include <qnamespace.h>
+#include <functional>
+#include <limits>
+#include <typeindex>
+#include <typeinfo>
+#include <utility>
+#include <vector>
 
 #include "common/assert.h"
 #include "common/common_types.h"
@@ -52,11 +52,13 @@ namespace ConfigurationShared {
 
 static int restore_button_count = 0;
 
-static std::string RelevantDefault(const Settings::BasicSetting& setting) {
+static std::string RelevantDefault(const Settings::BasicSetting& setting)
+{
     return Settings::IsConfiguringGlobal() ? setting.DefaultToString() : setting.ToStringGlobal();
 }
 
-static QString DefaultSuffix(QWidget* parent, Settings::BasicSetting& setting) {
+static QString DefaultSuffix(QWidget* parent, Settings::BasicSetting& setting)
+{
     const auto tr = [parent](const char* text, const char* context) {
         return parent->tr(text, context);
     };
@@ -70,7 +72,8 @@ static QString DefaultSuffix(QWidget* parent, Settings::BasicSetting& setting) {
     return default_suffix;
 }
 
-QPushButton* Widget::CreateRestoreGlobalButton(bool using_global, QWidget* parent) {
+QPushButton* Widget::CreateRestoreGlobalButton(bool using_global, QWidget* parent)
+{
     restore_button_count++;
 
     QStyle* style = parent->style();
@@ -93,7 +96,8 @@ QPushButton* Widget::CreateRestoreGlobalButton(bool using_global, QWidget* paren
     return restore_button;
 }
 
-QLabel* Widget::CreateLabel(const QString& text) {
+QLabel* Widget::CreateLabel(const QString& text)
+{
     QLabel* qt_label = new QLabel(text, this->parent);
     qt_label->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     return qt_label;
@@ -102,7 +106,8 @@ QLabel* Widget::CreateLabel(const QString& text) {
 QWidget* Widget::CreateCheckBox(Settings::BasicSetting* bool_setting, const QString& label,
                                 std::function<std::string()>& serializer,
                                 std::function<void()>& restore_func,
-                                const std::function<void()>& touch) {
+                                const std::function<void()>& touch)
+{
     checkbox = new QCheckBox(label, this);
     checkbox->setCheckState(bool_setting->ToString() == "true" ? Qt::CheckState::Checked
                                                                : Qt::CheckState::Unchecked);
@@ -130,7 +135,8 @@ QWidget* Widget::CreateCheckBox(Settings::BasicSetting* bool_setting, const QStr
 
 QWidget* Widget::CreateCombobox(std::function<std::string()>& serializer,
                                 std::function<void()>& restore_func,
-                                const std::function<void()>& touch) {
+                                const std::function<void()>& touch)
+{
     const auto type = setting.EnumIndex();
 
     combobox = new QComboBox(this);
@@ -178,7 +184,8 @@ QWidget* Widget::CreateCombobox(std::function<std::string()>& serializer,
 
 QWidget* Widget::CreateRadioGroup(std::function<std::string()>& serializer,
                                   std::function<void()>& restore_func,
-                                  const std::function<void()>& touch) {
+                                  const std::function<void()>& touch)
+{
     const auto type = setting.EnumIndex();
 
     QWidget* group = new QWidget(this);
@@ -236,7 +243,8 @@ QWidget* Widget::CreateRadioGroup(std::function<std::string()>& serializer,
 
 QWidget* Widget::CreateLineEdit(std::function<std::string()>& serializer,
                                 std::function<void()>& restore_func,
-                                const std::function<void()>& touch, bool managed) {
+                                const std::function<void()>& touch, bool managed)
+{
     const QString text = QString::fromStdString(setting.ToString());
     line_edit = new QLineEdit(this);
     line_edit->setText(text);
@@ -261,7 +269,8 @@ QWidget* Widget::CreateLineEdit(std::function<std::string()>& serializer,
 static void CreateIntSlider(Settings::BasicSetting& setting, bool reversed, float multiplier,
                             QLabel* feedback, const QString& use_format, QSlider* slider,
                             std::function<std::string()>& serializer,
-                            std::function<void()>& restore_func) {
+                            std::function<void()>& restore_func)
+{
     const int max_val = std::strtol(setting.MaxVal().c_str(), nullptr, 0);
 
     const auto update_feedback = [=](int value) {
@@ -285,7 +294,8 @@ static void CreateIntSlider(Settings::BasicSetting& setting, bool reversed, floa
 static void CreateFloatSlider(Settings::BasicSetting& setting, bool reversed, float multiplier,
                               QLabel* feedback, const QString& use_format, QSlider* slider,
                               std::function<std::string()>& serializer,
-                              std::function<void()>& restore_func) {
+                              std::function<void()>& restore_func)
+{
     const float max_val = std::strtof(setting.MaxVal().c_str(), nullptr);
     const float min_val = std::strtof(setting.MinVal().c_str(), nullptr);
     const float use_multiplier =
@@ -314,7 +324,8 @@ static void CreateFloatSlider(Settings::BasicSetting& setting, bool reversed, fl
 QWidget* Widget::CreateSlider(bool reversed, float multiplier, const QString& given_suffix,
                               std::function<std::string()>& serializer,
                               std::function<void()>& restore_func,
-                              const std::function<void()>& touch) {
+                              const std::function<void()>& touch)
+{
     if (!setting.Ranged()) {
         LOG_ERROR(Frontend, "\"{}\" is not a ranged setting, but a slider was requested.",
                   setting.GetLabel());
@@ -358,7 +369,8 @@ QWidget* Widget::CreateSlider(bool reversed, float multiplier, const QString& gi
 QWidget* Widget::CreateSpinBox(const QString& given_suffix,
                                std::function<std::string()>& serializer,
                                std::function<void()>& restore_func,
-                               const std::function<void()>& touch) {
+                               const std::function<void()>& touch)
+{
     const auto min_val = std::strtol(setting.MinVal().c_str(), nullptr, 0);
     const auto max_val = std::strtol(setting.MaxVal().c_str(), nullptr, 0);
     const auto default_val = std::strtol(setting.ToString().c_str(), nullptr, 0);
@@ -392,7 +404,8 @@ QWidget* Widget::CreateSpinBox(const QString& given_suffix,
 QWidget* Widget::CreateDoubleSpinBox(const QString& given_suffix,
                                      std::function<std::string()>& serializer,
                                      std::function<void()>& restore_func,
-                                     const std::function<void()>& touch) {
+                                     const std::function<void()>& touch)
+{
     const auto min_val = std::strtod(setting.MinVal().c_str(), nullptr);
     const auto max_val = std::strtod(setting.MaxVal().c_str(), nullptr);
     const auto default_val = std::strtod(setting.ToString().c_str(), nullptr);
@@ -427,7 +440,8 @@ QWidget* Widget::CreateDoubleSpinBox(const QString& given_suffix,
 
 QWidget* Widget::CreateHexEdit(std::function<std::string()>& serializer,
                                std::function<void()>& restore_func,
-                               const std::function<void()>& touch) {
+                               const std::function<void()>& touch)
+{
     auto* data_component = CreateLineEdit(serializer, restore_func, touch, false);
     if (data_component == nullptr) {
         return nullptr;
@@ -465,7 +479,8 @@ QWidget* Widget::CreateHexEdit(std::function<std::string()>& serializer,
 QWidget* Widget::CreateDateTimeEdit(bool disabled, bool restrict,
                                     std::function<std::string()>& serializer,
                                     std::function<void()>& restore_func,
-                                    const std::function<void()>& touch) {
+                                    const std::function<void()>& touch)
+{
     const long long current_time = QDateTime::currentSecsSinceEpoch();
     const s64 the_time =
         disabled ? current_time : std::strtoll(setting.ToString().c_str(), nullptr, 0);
@@ -503,7 +518,8 @@ QWidget* Widget::CreateDateTimeEdit(bool disabled, bool restrict,
 
 void Widget::SetupComponent(const QString& label, std::function<void()>& load_func, bool managed,
                             RequestType request, float multiplier,
-                            Settings::BasicSetting* other_setting, const QString& suffix) {
+                            Settings::BasicSetting* other_setting, const QString& suffix)
+{
     created = true;
     const auto type_id = setting.TypeId();
 
@@ -704,7 +720,8 @@ void Widget::SetupComponent(const QString& label, std::function<void()>& load_fu
     }
 }
 
-bool Widget::Valid() const {
+bool Widget::Valid() const
+{
     return created;
 }
 
@@ -717,7 +734,8 @@ Widget::Widget(Settings::BasicSetting* setting_, const TranslationMap& translati
                Settings::BasicSetting* other_setting, const QString& suffix)
     : QWidget(parent_), parent{parent_}, translations{translations_},
       combobox_enumerations{combobox_translations_}, setting{*setting_}, apply_funcs{apply_funcs_},
-      runtime_lock{runtime_lock_} {
+      runtime_lock{runtime_lock_}
+{
     if (!Settings::IsConfiguringGlobal() && !setting.Switchable()) {
         LOG_DEBUG(Frontend, "\"{}\" is not switchable, skipping...", setting.GetLabel());
         return;
@@ -767,15 +785,18 @@ Widget::Widget(Settings::BasicSetting* setting_, const TranslationMap& translati
 
 Builder::Builder(QWidget* parent_, bool runtime_lock_)
     : translations{InitializeTranslations(parent_)},
-      combobox_translations{ComboboxEnumeration(parent_)}, parent{parent_},
-      runtime_lock{runtime_lock_} {}
+      combobox_translations{ComboboxEnumeration(parent_)}, parent{parent_}, runtime_lock{
+                                                                                runtime_lock_}
+{
+}
 
 Builder::~Builder() = default;
 
 Widget* Builder::BuildWidget(Settings::BasicSetting* setting,
                              std::vector<std::function<void(bool)>>& apply_funcs,
                              RequestType request, bool managed, float multiplier,
-                             Settings::BasicSetting* other_setting, const QString& suffix) const {
+                             Settings::BasicSetting* other_setting, const QString& suffix) const
+{
     if (!Settings::IsConfiguringGlobal() && !setting->Switchable()) {
         return nullptr;
     }
@@ -792,11 +813,13 @@ Widget* Builder::BuildWidget(Settings::BasicSetting* setting,
 Widget* Builder::BuildWidget(Settings::BasicSetting* setting,
                              std::vector<std::function<void(bool)>>& apply_funcs,
                              Settings::BasicSetting* other_setting, RequestType request,
-                             const QString& suffix) const {
+                             const QString& suffix) const
+{
     return BuildWidget(setting, apply_funcs, request, true, 1.0f, other_setting, suffix);
 }
 
-const ComboboxTranslationMap& Builder::ComboboxTranslations() const {
+const ComboboxTranslationMap& Builder::ComboboxTranslations() const
+{
     return *combobox_translations;
 }
 

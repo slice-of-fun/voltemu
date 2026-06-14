@@ -4,14 +4,18 @@
 // SPDX-FileCopyrightText: 2017 Citra Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include <catch2/catch_test_macros.hpp>
-#include <math.h>
-#include "common/logging.h"
 #include "common/param_package.h"
+
+#include <math.h>
+
+#include <catch2/catch_test_macros.hpp>
+
+#include "common/logging.h"
 
 namespace Common {
 
-TEST_CASE("ParamPackage", "[common]") {
+TEST_CASE("ParamPackage", "[common]")
+{
     ParamPackage original{
         {"abc", "xyz"},
         {"def", "42"},

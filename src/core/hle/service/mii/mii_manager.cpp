@@ -4,9 +4,10 @@
 // SPDX-FileCopyrightText: Copyright 2020 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/mii/mii_manager.h"
+
 #include "common/logging.h"
 #include "core/hle/service/mii/mii_database_manager.h"
-#include "core/hle/service/mii/mii_manager.h"
 #include "core/hle/service/mii/mii_result.h"
 #include "core/hle/service/mii/mii_util.h"
 #include "core/hle/service/mii/types/char_info.h"
@@ -18,41 +19,50 @@
 namespace Service::Mii {
 constexpr std::size_t DefaultMiiCount{RawData::DefaultMii.size()};
 
-MiiManager::MiiManager() {}
+MiiManager::MiiManager()
+{
+}
 
-Result MiiManager::Initialize(DatabaseSessionMetadata& metadata) {
+Result MiiManager::Initialize(DatabaseSessionMetadata& metadata)
+{
     database_manager.MountSaveData();
     database_manager.Initialize(metadata, is_broken_with_clear_flag);
     return ResultSuccess;
 }
 
-void MiiManager::BuildDefault(CharInfo& out_char_info, u32 index) const {
+void MiiManager::BuildDefault(CharInfo& out_char_info, u32 index) const
+{
     StoreData store_data{};
     store_data.BuildDefault(index);
     out_char_info.SetFromStoreData(store_data);
 }
 
-void MiiManager::BuildBase(CharInfo& out_char_info, Gender gender) const {
+void MiiManager::BuildBase(CharInfo& out_char_info, Gender gender) const
+{
     StoreData store_data{};
     store_data.BuildBase(gender);
     out_char_info.SetFromStoreData(store_data);
 }
 
-void MiiManager::BuildRandom(CharInfo& out_char_info, Age age, Gender gender, Race race) const {
+void MiiManager::BuildRandom(CharInfo& out_char_info, Age age, Gender gender, Race race) const
+{
     StoreData store_data{};
     store_data.BuildRandom(age, gender, race);
     out_char_info.SetFromStoreData(store_data);
 }
 
-bool MiiManager::IsFullDatabase() const {
+bool MiiManager::IsFullDatabase() const
+{
     return database_manager.IsFullDatabase();
 }
 
-void MiiManager::SetInterfaceVersion(DatabaseSessionMetadata& metadata, u32 version) const {
+void MiiManager::SetInterfaceVersion(DatabaseSessionMetadata& metadata, u32 version) const
+{
     metadata.interface_version = version;
 }
 
-bool MiiManager::IsUpdated(DatabaseSessionMetadata& metadata, SourceFlag source_flag) const {
+bool MiiManager::IsUpdated(DatabaseSessionMetadata& metadata, SourceFlag source_flag) const
+{
     if ((source_flag & SourceFlag::Database) == SourceFlag::None) {
         return false;
     }
@@ -63,7 +73,8 @@ bool MiiManager::IsUpdated(DatabaseSessionMetadata& metadata, SourceFlag source_
     return metadata_update_counter != database_update_counter;
 }
 
-u32 MiiManager::GetCount(const DatabaseSessionMetadata& metadata, SourceFlag source_flag) const {
+u32 MiiManager::GetCount(const DatabaseSessionMetadata& metadata, SourceFlag source_flag) const
+{
     u32 mii_count{};
     if ((source_flag & SourceFlag::Default) != SourceFlag::None) {
         mii_count += DefaultMiiCount;
@@ -74,8 +85,8 @@ u32 MiiManager::GetCount(const DatabaseSessionMetadata& metadata, SourceFlag sou
     return mii_count;
 }
 
-Result MiiManager::Move(DatabaseSessionMetadata& metadata, u32 index,
-                        const Common::UUID& create_id) {
+Result MiiManager::Move(DatabaseSessionMetadata& metadata, u32 index, const Common::UUID& create_id)
+{
     const auto result = database_manager.Move(metadata, index, create_id);
 
     if (result.IsFailure()) {
@@ -89,7 +100,8 @@ Result MiiManager::Move(DatabaseSessionMetadata& metadata, u32 index,
     return database_manager.SaveDatabase();
 }
 
-Result MiiManager::AddOrReplace(DatabaseSessionMetadata& metadata, const StoreData& store_data) {
+Result MiiManager::AddOrReplace(DatabaseSessionMetadata& metadata, const StoreData& store_data)
+{
     const auto result = database_manager.AddOrReplace(metadata, store_data);
 
     if (result.IsFailure()) {
@@ -103,7 +115,8 @@ Result MiiManager::AddOrReplace(DatabaseSessionMetadata& metadata, const StoreDa
     return database_manager.SaveDatabase();
 }
 
-Result MiiManager::Delete(DatabaseSessionMetadata& metadata, const Common::UUID& create_id) {
+Result MiiManager::Delete(DatabaseSessionMetadata& metadata, const Common::UUID& create_id)
+{
     const auto result = database_manager.Delete(metadata, create_id);
 
     if (result.IsFailure()) {
@@ -117,7 +130,8 @@ Result MiiManager::Delete(DatabaseSessionMetadata& metadata, const Common::UUID&
     return database_manager.SaveDatabase();
 }
 
-s32 MiiManager::FindIndex(const Common::UUID& create_id, bool is_special) const {
+s32 MiiManager::FindIndex(const Common::UUID& create_id, bool is_special) const
+{
     s32 index{};
     const auto result = database_manager.FindIndex(index, create_id, is_special);
     if (result.IsError()) {
@@ -127,7 +141,8 @@ s32 MiiManager::FindIndex(const Common::UUID& create_id, bool is_special) const 
 }
 
 Result MiiManager::GetIndex(const DatabaseSessionMetadata& metadata, const CharInfo& char_info,
-                            s32& out_index) const {
+                            s32& out_index) const
+{
     if (char_info.Verify() != ValidationResult::NoErrors) {
         return ResultInvalidCharInfo;
     }
@@ -148,7 +163,8 @@ Result MiiManager::GetIndex(const DatabaseSessionMetadata& metadata, const CharI
     return ResultSuccess;
 }
 
-Result MiiManager::Append(DatabaseSessionMetadata& metadata, const CharInfo& char_info) {
+Result MiiManager::Append(DatabaseSessionMetadata& metadata, const CharInfo& char_info)
+{
     const auto result = database_manager.Append(metadata, char_info);
 
     if (result.IsError()) {
@@ -162,7 +178,8 @@ Result MiiManager::Append(DatabaseSessionMetadata& metadata, const CharInfo& cha
     return database_manager.SaveDatabase();
 }
 
-bool MiiManager::IsBrokenWithClearFlag(DatabaseSessionMetadata& metadata) {
+bool MiiManager::IsBrokenWithClearFlag(DatabaseSessionMetadata& metadata)
+{
     const bool is_broken = is_broken_with_clear_flag;
     if (is_broken_with_clear_flag) {
         is_broken_with_clear_flag = false;
@@ -172,16 +189,19 @@ bool MiiManager::IsBrokenWithClearFlag(DatabaseSessionMetadata& metadata) {
     return is_broken;
 }
 
-Result MiiManager::DestroyFile(DatabaseSessionMetadata& metadata) {
+Result MiiManager::DestroyFile(DatabaseSessionMetadata& metadata)
+{
     is_broken_with_clear_flag = true;
     return database_manager.DestroyFile(metadata);
 }
 
-Result MiiManager::DeleteFile() {
+Result MiiManager::DeleteFile()
+{
     return database_manager.DeleteFile();
 }
 
-Result MiiManager::Format(DatabaseSessionMetadata& metadata) {
+Result MiiManager::Format(DatabaseSessionMetadata& metadata)
+{
     database_manager.Format(metadata);
 
     if (!database_manager.IsModified()) {
@@ -190,7 +210,8 @@ Result MiiManager::Format(DatabaseSessionMetadata& metadata) {
     return database_manager.SaveDatabase();
 }
 
-Result MiiManager::ConvertV3ToCharInfo(CharInfo& out_char_info, const Ver3StoreData& mii_v3) const {
+Result MiiManager::ConvertV3ToCharInfo(CharInfo& out_char_info, const Ver3StoreData& mii_v3) const
+{
     if (!mii_v3.IsValid()) {
         return ResultInvalidCharInfo;
     }
@@ -207,7 +228,8 @@ Result MiiManager::ConvertV3ToCharInfo(CharInfo& out_char_info, const Ver3StoreD
 }
 
 Result MiiManager::ConvertCoreDataToCharInfo(CharInfo& out_char_info,
-                                             const CoreData& core_data) const {
+                                             const CoreData& core_data) const
+{
     if (core_data.IsValid() != ValidationResult::NoErrors) {
         return ResultInvalidCharInfo;
     }
@@ -224,7 +246,8 @@ Result MiiManager::ConvertCoreDataToCharInfo(CharInfo& out_char_info,
 }
 
 Result MiiManager::ConvertCharInfoToCoreData(CoreData& out_core_data,
-                                             const CharInfo& char_info) const {
+                                             const CharInfo& char_info) const
+{
     if (char_info.Verify() != ValidationResult::NoErrors) {
         return ResultInvalidCharInfo;
     }
@@ -239,7 +262,8 @@ Result MiiManager::ConvertCharInfoToCoreData(CoreData& out_core_data,
 }
 
 Result MiiManager::UpdateLatest(const DatabaseSessionMetadata& metadata, CharInfo& out_char_info,
-                                const CharInfo& char_info, SourceFlag source_flag) const {
+                                const CharInfo& char_info, SourceFlag source_flag) const
+{
     if ((source_flag & SourceFlag::Database) == SourceFlag::None) {
         return ResultNotFound;
     }
@@ -274,7 +298,8 @@ Result MiiManager::UpdateLatest(const DatabaseSessionMetadata& metadata, CharInf
 }
 
 Result MiiManager::UpdateLatest(const DatabaseSessionMetadata& metadata, StoreData& out_store_data,
-                                const StoreData& store_data, SourceFlag source_flag) const {
+                                const StoreData& store_data, SourceFlag source_flag) const
+{
     if ((source_flag & SourceFlag::Database) == SourceFlag::None) {
         return ResultNotFound;
     }
@@ -307,7 +332,8 @@ Result MiiManager::UpdateLatest(const DatabaseSessionMetadata& metadata, StoreDa
 
 Result MiiManager::Get(const DatabaseSessionMetadata& metadata,
                        std::span<CharInfoElement> out_elements, u32& out_count,
-                       SourceFlag source_flag) const {
+                       SourceFlag source_flag) const
+{
     if ((source_flag & SourceFlag::Database) == SourceFlag::None) {
         return BuildDefault(out_elements, out_count, source_flag);
     }
@@ -332,7 +358,8 @@ Result MiiManager::Get(const DatabaseSessionMetadata& metadata,
 }
 
 Result MiiManager::Get(const DatabaseSessionMetadata& metadata, std::span<CharInfo> out_char_info,
-                       u32& out_count, SourceFlag source_flag) const {
+                       u32& out_count, SourceFlag source_flag) const
+{
     if ((source_flag & SourceFlag::Database) == SourceFlag::None) {
         return BuildDefault(out_char_info, out_count, source_flag);
     }
@@ -357,7 +384,8 @@ Result MiiManager::Get(const DatabaseSessionMetadata& metadata, std::span<CharIn
 
 Result MiiManager::Get(const DatabaseSessionMetadata& metadata,
                        std::span<StoreDataElement> out_elements, u32& out_count,
-                       SourceFlag source_flag) const {
+                       SourceFlag source_flag) const
+{
     if ((source_flag & SourceFlag::Database) == SourceFlag::None) {
         return BuildDefault(out_elements, out_count, source_flag);
     }
@@ -382,7 +410,8 @@ Result MiiManager::Get(const DatabaseSessionMetadata& metadata,
 }
 
 Result MiiManager::Get(const DatabaseSessionMetadata& metadata, std::span<StoreData> out_store_data,
-                       u32& out_count, SourceFlag source_flag) const {
+                       u32& out_count, SourceFlag source_flag) const
+{
     if ((source_flag & SourceFlag::Database) == SourceFlag::None) {
         return BuildDefault(out_store_data, out_count, source_flag);
     }
@@ -405,7 +434,8 @@ Result MiiManager::Get(const DatabaseSessionMetadata& metadata, std::span<StoreD
     return BuildDefault(out_store_data, out_count, source_flag);
 }
 Result MiiManager::BuildDefault(std::span<CharInfoElement> out_elements, u32& out_count,
-                                SourceFlag source_flag) const {
+                                SourceFlag source_flag) const
+{
     if ((source_flag & SourceFlag::Default) == SourceFlag::None) {
         return ResultSuccess;
     }
@@ -428,7 +458,8 @@ Result MiiManager::BuildDefault(std::span<CharInfoElement> out_elements, u32& ou
 }
 
 Result MiiManager::BuildDefault(std::span<CharInfo> out_char_info, u32& out_count,
-                                SourceFlag source_flag) const {
+                                SourceFlag source_flag) const
+{
     if ((source_flag & SourceFlag::Default) == SourceFlag::None) {
         return ResultSuccess;
     }
@@ -450,7 +481,8 @@ Result MiiManager::BuildDefault(std::span<CharInfo> out_char_info, u32& out_coun
 }
 
 Result MiiManager::BuildDefault(std::span<StoreDataElement> out_elements, u32& out_count,
-                                SourceFlag source_flag) const {
+                                SourceFlag source_flag) const
+{
     if ((source_flag & SourceFlag::Default) == SourceFlag::None) {
         return ResultSuccess;
     }
@@ -469,7 +501,8 @@ Result MiiManager::BuildDefault(std::span<StoreDataElement> out_elements, u32& o
 }
 
 Result MiiManager::BuildDefault(std::span<StoreData> out_char_info, u32& out_count,
-                                SourceFlag source_flag) const {
+                                SourceFlag source_flag) const
+{
     if ((source_flag & SourceFlag::Default) == SourceFlag::None) {
         return ResultSuccess;
     }

@@ -10,9 +10,11 @@ namespace Tegra {
 
 namespace Host1x {
 
-SyncpointManager::ActionHandle SyncpointManager::RegisterAction(
-    std::atomic<u32>& syncpoint, std::list<RegisteredAction>& action_storage, u32 expected_value,
-    std::function<void()>&& action) {
+SyncpointManager::ActionHandle
+SyncpointManager::RegisterAction(std::atomic<u32>& syncpoint,
+                                 std::list<RegisteredAction>& action_storage, u32 expected_value,
+                                 std::function<void()>&& action)
+{
     if (syncpoint.load(std::memory_order_acquire) >= expected_value) {
         action();
         return {};
@@ -34,7 +36,8 @@ SyncpointManager::ActionHandle SyncpointManager::RegisterAction(
 }
 
 void SyncpointManager::DeregisterAction(std::list<RegisteredAction>& action_storage,
-                                        const ActionHandle& handle) {
+                                        const ActionHandle& handle)
+{
     std::scoped_lock lk(guard);
 
     // We want to ensure the iterator still exists prior to erasing it
@@ -49,32 +52,39 @@ void SyncpointManager::DeregisterAction(std::list<RegisteredAction>& action_stor
     }
 }
 
-void SyncpointManager::DeregisterGuestAction(u32 syncpoint_id, const ActionHandle& handle) {
+void SyncpointManager::DeregisterGuestAction(u32 syncpoint_id, const ActionHandle& handle)
+{
     DeregisterAction(guest_action_storage[syncpoint_id], handle);
 }
 
-void SyncpointManager::DeregisterHostAction(u32 syncpoint_id, const ActionHandle& handle) {
+void SyncpointManager::DeregisterHostAction(u32 syncpoint_id, const ActionHandle& handle)
+{
     DeregisterAction(host_action_storage[syncpoint_id], handle);
 }
 
-void SyncpointManager::IncrementGuest(u32 syncpoint_id) {
+void SyncpointManager::IncrementGuest(u32 syncpoint_id)
+{
     Increment(syncpoints_guest[syncpoint_id], wait_guest_cv, guest_action_storage[syncpoint_id]);
 }
 
-void SyncpointManager::IncrementHost(u32 syncpoint_id) {
+void SyncpointManager::IncrementHost(u32 syncpoint_id)
+{
     Increment(syncpoints_host[syncpoint_id], wait_host_cv, host_action_storage[syncpoint_id]);
 }
 
-void SyncpointManager::WaitGuest(u32 syncpoint_id, u32 expected_value) {
+void SyncpointManager::WaitGuest(u32 syncpoint_id, u32 expected_value)
+{
     Wait(syncpoints_guest[syncpoint_id], wait_guest_cv, expected_value);
 }
 
-void SyncpointManager::WaitHost(u32 syncpoint_id, u32 expected_value) {
+void SyncpointManager::WaitHost(u32 syncpoint_id, u32 expected_value)
+{
     Wait(syncpoints_host[syncpoint_id], wait_host_cv, expected_value);
 }
 
 void SyncpointManager::Increment(std::atomic<u32>& syncpoint, std::condition_variable& wait_cv,
-                                 std::list<RegisteredAction>& action_storage) {
+                                 std::list<RegisteredAction>& action_storage)
+{
     auto new_value{syncpoint.fetch_add(1, std::memory_order_acq_rel) + 1};
 
     std::scoped_lock lk(guard);
@@ -90,7 +100,8 @@ void SyncpointManager::Increment(std::atomic<u32>& syncpoint, std::condition_var
 }
 
 void SyncpointManager::Wait(std::atomic<u32>& syncpoint, std::condition_variable& wait_cv,
-                            u32 expected_value) {
+                            u32 expected_value)
+{
     const auto pred = [&]() { return syncpoint.load(std::memory_order_acquire) >= expected_value; };
     if (pred()) {
         return;

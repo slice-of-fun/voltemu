@@ -7,6 +7,7 @@
 #include <cstddef>
 #include <limits>
 #include <type_traits>
+
 #include "common/swap.h"
 
 /*
@@ -82,7 +83,7 @@
  * symptoms.
  */
 #pragma pack(1)
-template <std::size_t Position, std::size_t Bits, typename T, typename EndianTag = LETag>
+template<std::size_t Position, std::size_t Bits, typename T, typename EndianTag = LETag>
 struct BitField {
 private:
     // UnderlyingType is T for non-enum types and the underlying type of T if
@@ -108,7 +109,8 @@ public:
      * containing several bitfields can be assembled by formatting each of their values and ORing
      * the results together.
      */
-    [[nodiscard]] static constexpr StorageType FormatValue(const T& value) {
+    [[nodiscard]] static constexpr StorageType FormatValue(const T& value)
+    {
         return (static_cast<StorageType>(value) << position) & mask;
     }
 
@@ -117,7 +119,8 @@ public:
      * (such as Value() or operator T), but this can be used to extract a value from a bitfield
      * union in a constexpr context.
      */
-    [[nodiscard]] static constexpr T ExtractValue(const StorageType& storage) {
+    [[nodiscard]] static constexpr T ExtractValue(const StorageType& storage)
+    {
         if constexpr (std::numeric_limits<UnderlyingType>::is_signed) {
             std::size_t shift = 8 * sizeof(T) - bits;
             return static_cast<T>(static_cast<UnderlyingType>(storage << (shift - position)) >>
@@ -141,7 +144,8 @@ public:
     constexpr BitField(BitField&&) noexcept = default;
     constexpr BitField& operator=(BitField&&) noexcept = default;
 
-    constexpr void Assign(const T& value) {
+    constexpr void Assign(const T& value)
+    {
 #ifdef _MSC_VER
         storage = static_cast<StorageType>((storage & ~mask) | FormatValue(value));
 #else
@@ -154,22 +158,25 @@ public:
 #endif
     }
 
-    [[nodiscard]] constexpr T Value() const {
+    [[nodiscard]] constexpr T Value() const
+    {
         return ExtractValue(storage);
     }
 
-    template <typename ConvertedToType>
-    [[nodiscard]] constexpr ConvertedToType As() const {
+    template<typename ConvertedToType> [[nodiscard]] constexpr ConvertedToType As() const
+    {
         static_assert(!std::is_same_v<T, ConvertedToType>,
                       "Unnecessary cast. Use Value() instead.");
         return static_cast<ConvertedToType>(Value());
     }
 
-    [[nodiscard]] constexpr operator T() const {
+    [[nodiscard]] constexpr operator T() const
+    {
         return Value();
     }
 
-    [[nodiscard]] constexpr explicit operator bool() const {
+    [[nodiscard]] constexpr explicit operator bool() const
+    {
         return Value() != 0;
     }
 
@@ -186,10 +193,11 @@ private:
 };
 #pragma pack()
 
-template <std::size_t Position, std::size_t Bits, typename T>
+template<std::size_t Position, std::size_t Bits, typename T>
 using BitFieldBE = BitField<Position, Bits, T, BETag>;
 
-template <std::size_t Position, std::size_t Bits, typename T, typename EndianTag = LETag>
-inline auto format_as(BitField<Position, Bits, T, EndianTag> bitfield) {
+template<std::size_t Position, std::size_t Bits, typename T, typename EndianTag = LETag>
+inline auto format_as(BitField<Position, Bits, T, EndianTag> bitfield)
+{
     return bitfield.Value();
 }

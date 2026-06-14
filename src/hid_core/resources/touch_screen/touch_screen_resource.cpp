@@ -4,6 +4,8 @@
 // SPDX-FileCopyrightText: Copyright 2024 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+#include "hid_core/resources/touch_screen/touch_screen_resource.h"
+
 #include "common/logging.h"
 #include "core/core_timing.h"
 #include "core/hle/kernel/k_event.h"
@@ -14,20 +16,22 @@
 #include "hid_core/resources/applet_resource.h"
 #include "hid_core/resources/shared_memory_format.h"
 #include "hid_core/resources/touch_screen/touch_screen_driver.h"
-#include "hid_core/resources/touch_screen/touch_screen_resource.h"
 
 namespace Service::HID {
 constexpr auto GestureUpdatePeriod = std::chrono::nanoseconds{4 * 1000 * 1000}; // (4ms, 1000Hz)
 
-TouchResource::TouchResource(Core::System& system_) : system{system_} {
+TouchResource::TouchResource(Core::System& system_) : system{system_}
+{
     m_set_sys = system.ServiceManager().GetService<Service::Set::ISystemSettingsServer>("set:sys");
 }
 
-TouchResource::~TouchResource() {
+TouchResource::~TouchResource()
+{
     Finalize();
 };
 
-Result TouchResource::ActivateTouch() {
+Result TouchResource::ActivateTouch()
+{
     if (global_ref_counter == (std::numeric_limits<s32>::max)() - 1 ||
         touch_ref_counter == (std::numeric_limits<s32>::max)() - 1) {
         return ResultTouchOverflow;
@@ -59,7 +63,8 @@ Result TouchResource::ActivateTouch() {
     return ResultSuccess;
 }
 
-Result TouchResource::ActivateTouch(u64 aruid) {
+Result TouchResource::ActivateTouch(u64 aruid)
+{
     std::scoped_lock lock{*shared_mutex};
 
     for (std::size_t aruid_index = 0; aruid_index < AruidIndexMax; aruid_index++) {
@@ -93,7 +98,8 @@ Result TouchResource::ActivateTouch(u64 aruid) {
     return ResultSuccess;
 }
 
-Result TouchResource::ActivateGesture() {
+Result TouchResource::ActivateGesture()
+{
     if (global_ref_counter == (std::numeric_limits<s32>::max)() - 1 ||
         gesture_ref_counter == (std::numeric_limits<s32>::max)() - 1) {
         return ResultGestureOverflow;
@@ -120,7 +126,8 @@ Result TouchResource::ActivateGesture() {
     return ResultSuccess;
 }
 
-Result TouchResource::ActivateGesture(u64 aruid, u32 basic_gesture_id) {
+Result TouchResource::ActivateGesture(u64 aruid, u32 basic_gesture_id)
+{
     std::scoped_lock lock{*shared_mutex};
 
     for (std::size_t aruid_index = 0; aruid_index < AruidIndexMax; aruid_index++) {
@@ -157,7 +164,8 @@ Result TouchResource::ActivateGesture(u64 aruid, u32 basic_gesture_id) {
     return ResultSuccess;
 }
 
-Result TouchResource::DeactivateTouch() {
+Result TouchResource::DeactivateTouch()
+{
     if (touch_ref_counter == 0 || global_ref_counter == 0) {
         return ResultTouchNotInitialized;
     }
@@ -172,7 +180,8 @@ Result TouchResource::DeactivateTouch() {
     return Finalize();
 }
 
-Result TouchResource::DeactivateGesture() {
+Result TouchResource::DeactivateGesture()
+{
     if (gesture_ref_counter == 0 || global_ref_counter == 0) {
         return ResultGestureNotInitialized;
     }
@@ -187,38 +196,46 @@ Result TouchResource::DeactivateGesture() {
     return Finalize();
 }
 
-bool TouchResource::IsTouchActive() const {
+bool TouchResource::IsTouchActive() const
+{
     return touch_ref_counter != 0;
 }
 
-bool TouchResource::IsGestureActive() const {
+bool TouchResource::IsGestureActive() const
+{
     return gesture_ref_counter != 0;
 }
 
-void TouchResource::SetTouchDriver(std::shared_ptr<TouchDriver> driver) {
+void TouchResource::SetTouchDriver(std::shared_ptr<TouchDriver> driver)
+{
     touch_driver = driver;
 }
 
 void TouchResource::SetAppletResource(std::shared_ptr<AppletResource> shared,
-                                      std::recursive_mutex* mutex) {
+                                      std::recursive_mutex* mutex)
+{
     applet_resource = shared;
     shared_mutex = mutex;
 }
 
-void TouchResource::SetInputEvent(Kernel::KEvent* event, std::mutex* mutex) {
+void TouchResource::SetInputEvent(Kernel::KEvent* event, std::mutex* mutex)
+{
     input_event = event;
     input_mutex = mutex;
 }
 
-void TouchResource::SetHandheldConfig(std::shared_ptr<HandheldConfig> config) {
+void TouchResource::SetHandheldConfig(std::shared_ptr<HandheldConfig> config)
+{
     handheld_config = config;
 }
 
-void TouchResource::SetTimerEvent(std::shared_ptr<Core::Timing::EventType> event) {
+void TouchResource::SetTimerEvent(std::shared_ptr<Core::Timing::EventType> event)
+{
     timer_event = event;
 }
 
-Result TouchResource::SetTouchScreenAutoPilotState(const AutoPilotState& auto_pilot_state) {
+Result TouchResource::SetTouchScreenAutoPilotState(const AutoPilotState& auto_pilot_state)
+{
     if (global_ref_counter == 0) {
         return ResultTouchNotInitialized;
     }
@@ -240,7 +257,8 @@ Result TouchResource::SetTouchScreenAutoPilotState(const AutoPilotState& auto_pi
     return ResultSuccess;
 }
 
-Result TouchResource::UnsetTouchScreenAutoPilotState() {
+Result TouchResource::UnsetTouchScreenAutoPilotState()
+{
     if (global_ref_counter == 0) {
         return ResultTouchNotInitialized;
     }
@@ -250,7 +268,8 @@ Result TouchResource::UnsetTouchScreenAutoPilotState() {
     return ResultSuccess;
 }
 
-Result TouchResource::RequestNextTouchInput() {
+Result TouchResource::RequestNextTouchInput()
+{
     if (global_ref_counter == 0) {
         return ResultTouchNotInitialized;
     }
@@ -266,7 +285,8 @@ Result TouchResource::RequestNextTouchInput() {
     return ResultSuccess;
 }
 
-Result TouchResource::RequestNextDummyInput() {
+Result TouchResource::RequestNextDummyInput()
+{
     if (global_ref_counter == 0) {
         return ResultTouchNotInitialized;
     }
@@ -282,13 +302,15 @@ Result TouchResource::RequestNextDummyInput() {
     return ResultSuccess;
 }
 
-Result TouchResource::ProcessTouchScreenAutoTune() {
+Result TouchResource::ProcessTouchScreenAutoTune()
+{
     touch_driver->ProcessTouchScreenAutoTune();
     return ResultSuccess;
 }
 
 void TouchResource::SetTouchScreenMagnification(f32 point1_x, f32 point1_y, f32 point2_x,
-                                                f32 point2_y) {
+                                                f32 point2_y)
+{
     offset = {
         .x = point1_x,
         .y = point1_y,
@@ -299,7 +321,8 @@ void TouchResource::SetTouchScreenMagnification(f32 point1_x, f32 point1_y, f32 
     };
 }
 
-Result TouchResource::SetTouchScreenResolution(u32 width, u32 height, u64 aruid) {
+Result TouchResource::SetTouchScreenResolution(u32 width, u32 height, u64 aruid)
+{
     std::scoped_lock lock{*shared_mutex};
 
     for (std::size_t aruid_index = 0; aruid_index < AruidIndexMax; aruid_index++) {
@@ -320,7 +343,8 @@ Result TouchResource::SetTouchScreenResolution(u32 width, u32 height, u64 aruid)
 }
 
 Result TouchResource::SetTouchScreenConfiguration(
-    const Core::HID::TouchScreenConfigurationForNx& touch_configuration, u64 aruid) {
+    const Core::HID::TouchScreenConfigurationForNx& touch_configuration, u64 aruid)
+{
     std::scoped_lock lock{*shared_mutex};
 
     for (std::size_t aruid_index = 0; aruid_index < AruidIndexMax; aruid_index++) {
@@ -340,7 +364,8 @@ Result TouchResource::SetTouchScreenConfiguration(
 }
 
 Result TouchResource::GetTouchScreenConfiguration(
-    Core::HID::TouchScreenConfigurationForNx& out_touch_configuration, u64 aruid) const {
+    Core::HID::TouchScreenConfigurationForNx& out_touch_configuration, u64 aruid) const
+{
     std::scoped_lock lock{*shared_mutex};
 
     for (std::size_t aruid_index = 0; aruid_index < AruidIndexMax; aruid_index++) {
@@ -360,18 +385,21 @@ Result TouchResource::GetTouchScreenConfiguration(
 }
 
 Result TouchResource::SetTouchScreenDefaultConfiguration(
-    const Core::HID::TouchScreenConfigurationForNx& touch_configuration) {
+    const Core::HID::TouchScreenConfigurationForNx& touch_configuration)
+{
     default_touch_screen_mode = touch_configuration.mode;
     return ResultSuccess;
 }
 
 Result TouchResource::GetTouchScreenDefaultConfiguration(
-    Core::HID::TouchScreenConfigurationForNx& out_touch_configuration) const {
+    Core::HID::TouchScreenConfigurationForNx& out_touch_configuration) const
+{
     out_touch_configuration.mode = default_touch_screen_mode;
     return ResultSuccess;
 }
 
-Result TouchResource::Finalize() {
+Result TouchResource::Finalize()
+{
     is_auto_pilot_initialized = false;
     auto_pilot = {};
     system.CoreTiming().UnscheduleEvent(timer_event);
@@ -388,7 +416,8 @@ Result TouchResource::Finalize() {
 void TouchResource::StorePreviousTouchState(TouchScreenState& out_previous_touch,
                                             TouchFingerMap& out_finger_map,
                                             const TouchScreenState& current_touch,
-                                            bool is_touch_enabled) const {
+                                            bool is_touch_enabled) const
+{
     s32 finger_count{};
 
     if (is_touch_enabled) {
@@ -423,7 +452,8 @@ void TouchResource::StorePreviousTouchState(TouchScreenState& out_previous_touch
     out_previous_touch.entry_count = finger_count;
 }
 
-void TouchResource::ReadTouchInput() {
+void TouchResource::ReadTouchInput()
+{
     previous_touch_state = current_touch_state;
 
     if (!is_initalized || !handheld_config->is_handheld_hid_enabled || !touch_driver->IsRunning()) {
@@ -486,11 +516,15 @@ void TouchResource::ReadTouchInput() {
     SanitizeInput(current_touch_state);
 
     std::scoped_lock lock{*input_mutex};
-    if (current_touch_state.entry_count == previous_touch_state.entry_count && current_touch_state.entry_count >= 1) {
+    if (current_touch_state.entry_count == previous_touch_state.entry_count &&
+        current_touch_state.entry_count >= 1) {
         bool has_moved = false;
-        for (std::size_t i = 0; !has_moved && i < std::size_t(current_touch_state.entry_count); i++) {
-            s32 delta_x = std::abs(s32(current_touch_state.states[i].position.x) - s32(previous_touch_state.states[i].position.x));
-            s32 delta_y = std::abs(s32(current_touch_state.states[i].position.y) - s32(previous_touch_state.states[i].position.y));
+        for (std::size_t i = 0; !has_moved && i < std::size_t(current_touch_state.entry_count);
+             i++) {
+            s32 delta_x = std::abs(s32(current_touch_state.states[i].position.x) -
+                                   s32(previous_touch_state.states[i].position.x));
+            s32 delta_y = std::abs(s32(current_touch_state.states[i].position.y) -
+                                   s32(previous_touch_state.states[i].position.y));
             has_moved |= (delta_x > 1 || delta_y > 1);
         }
         if (has_moved) {
@@ -499,7 +533,8 @@ void TouchResource::ReadTouchInput() {
     }
 }
 
-void TouchResource::OnTouchUpdate(s64 timestamp) {
+void TouchResource::OnTouchUpdate(s64 timestamp)
+{
     if (global_ref_counter == 0) {
         return;
     }
@@ -555,7 +590,8 @@ void TouchResource::OnTouchUpdate(s64 timestamp) {
     }
 }
 
-void TouchResource::SanitizeInput(TouchScreenState& state) const {
+void TouchResource::SanitizeInput(TouchScreenState& state) const
+{
     for (std::size_t i = 0; i < static_cast<std::size_t>(state.entry_count); i++) {
         auto& entry = state.states[i];
         entry.position.x =

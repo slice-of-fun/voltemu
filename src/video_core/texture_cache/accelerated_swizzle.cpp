@@ -1,6 +1,8 @@
 // SPDX-FileCopyrightText: Copyright 2020 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "video_core/texture_cache/accelerated_swizzle.h"
+
 #include <array>
 #include <bit>
 
@@ -8,7 +10,6 @@
 #include "common/common_types.h"
 #include "common/div_ceil.h"
 #include "video_core/surface.h"
-#include "video_core/texture_cache/accelerated_swizzle.h"
 #include "video_core/texture_cache/util.h"
 #include "video_core/textures/decoders.h"
 
@@ -21,7 +22,8 @@ using Tegra::Texture::GOB_SIZE_Y_SHIFT;
 using VideoCore::Surface::BytesPerBlock;
 
 BlockLinearSwizzle2DParams MakeBlockLinearSwizzle2DParams(const SwizzleParameters& swizzle,
-                                                          const ImageInfo& info) {
+                                                          const ImageInfo& info)
+{
     const Extent3D block = swizzle.block;
     const Extent3D num_tiles = swizzle.num_tiles;
     const u32 bytes_per_block = BytesPerBlock(info.format);
@@ -41,7 +43,8 @@ BlockLinearSwizzle2DParams MakeBlockLinearSwizzle2DParams(const SwizzleParameter
 }
 
 BlockLinearSwizzle3DParams MakeBlockLinearSwizzle3DParams(const SwizzleParameters& swizzle,
-                                                          const ImageInfo& info) {
+                                                          const ImageInfo& info)
+{
     const Extent3D block = swizzle.block;
     const Extent3D num_tiles = swizzle.num_tiles;
     const u32 bytes_per_block = BytesPerBlock(info.format);

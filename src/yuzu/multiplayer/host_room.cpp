@@ -4,7 +4,8 @@
 // SPDX-FileCopyrightText: Copyright 2017 Citra Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include <future>
+#include "yuzu/multiplayer/host_room.h"
+
 #include <QColor>
 #include <QImage>
 #include <QList>
@@ -13,16 +14,17 @@
 #include <QMetaType>
 #include <QTime>
 #include <QtConcurrentRun>
+#include <future>
+
 #include "common/logging.h"
 #include "common/settings.h"
 #include "core/core.h"
 #include "core/internal_network/network_interface.h"
 #include "network/announce_multiplayer_session.h"
 #include "qt_common/config/uisettings.h"
-#include "ui_host_room.h"
 #include "qt_common/game_list/game_list_p.h"
+#include "ui_host_room.h"
 #include "yuzu/main_window.h"
-#include "yuzu/multiplayer/host_room.h"
 #include "yuzu/multiplayer/message.h"
 #include "yuzu/multiplayer/state.h"
 #include "yuzu/multiplayer/validation.h"
@@ -34,7 +36,8 @@ HostRoomWindow::HostRoomWindow(QWidget* parent, QStandardItemModel* list,
                                std::shared_ptr<Core::AnnounceMultiplayerSession> session,
                                Core::System& system_)
     : QDialog(parent, Qt::WindowTitleHint | Qt::WindowCloseButtonHint | Qt::WindowSystemMenuHint),
-      ui(std::make_unique<Ui::HostRoom>()), announce_multiplayer_session(session), system{system_} {
+      ui(std::make_unique<Ui::HostRoom>()), announce_multiplayer_session(session), system{system_}
+{
     ui->setupUi(this);
 
     // set up validation for all of the fields
@@ -81,7 +84,8 @@ HostRoomWindow::HostRoomWindow(QWidget* parent, QStandardItemModel* list,
 
 HostRoomWindow::~HostRoomWindow() = default;
 
-void HostRoomWindow::UpdateGameList(QStandardItemModel* list) {
+void HostRoomWindow::UpdateGameList(QStandardItemModel* list)
+{
     game_list->clear();
     for (int i = 0; i < list->rowCount(); i++) {
         auto parent = list->item(i, 0);
@@ -91,12 +95,14 @@ void HostRoomWindow::UpdateGameList(QStandardItemModel* list) {
     }
 }
 
-void HostRoomWindow::RetranslateUi() {
+void HostRoomWindow::RetranslateUi()
+{
     ui->retranslateUi(this);
 }
 
-std::unique_ptr<Network::VerifyUser::Backend> HostRoomWindow::CreateVerifyBackend(
-    bool use_validation) const {
+std::unique_ptr<Network::VerifyUser::Backend>
+HostRoomWindow::CreateVerifyBackend(bool use_validation) const
+{
     std::unique_ptr<Network::VerifyUser::Backend> verify_backend;
     if (use_validation) {
 #ifdef ENABLE_WEB_SERVICE
@@ -111,7 +117,8 @@ std::unique_ptr<Network::VerifyUser::Backend> HostRoomWindow::CreateVerifyBacken
     return verify_backend;
 }
 
-void HostRoomWindow::Host() {
+void HostRoomWindow::Host()
+{
     if (!Network::GetSelectedNetworkInterface()) {
         NetworkMessage::ErrorManager::ShowError(
             NetworkMessage::ErrorManager::NO_INTERFACE_SELECTED);
@@ -242,7 +249,8 @@ void HostRoomWindow::Host() {
     }
 }
 
-QVariant ComboBoxProxyModel::data(const QModelIndex& idx, int role) const {
+QVariant ComboBoxProxyModel::data(const QModelIndex& idx, int role) const
+{
     if (role != Qt::DisplayRole) {
         auto val = QSortFilterProxyModel::data(idx, role);
         // If its the icon, shrink it to 16x16
@@ -258,7 +266,8 @@ QVariant ComboBoxProxyModel::data(const QModelIndex& idx, int role) const {
     return title.isEmpty() ? QString::fromStdString(filename) : title;
 }
 
-bool ComboBoxProxyModel::lessThan(const QModelIndex& left, const QModelIndex& right) const {
+bool ComboBoxProxyModel::lessThan(const QModelIndex& left, const QModelIndex& right) const
+{
     auto leftData = left.data(GameListItemPath::TitleRole).toString();
     auto rightData = right.data(GameListItemPath::TitleRole).toString();
     return leftData.compare(rightData) < 0;

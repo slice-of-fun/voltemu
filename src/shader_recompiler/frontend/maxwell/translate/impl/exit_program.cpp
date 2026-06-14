@@ -9,7 +9,8 @@
 
 namespace Shader::Maxwell {
 namespace {
-void ExitFragment(TranslatorVisitor& v) {
+void ExitFragment(TranslatorVisitor& v)
+{
     const ProgramHeader sph{v.env.SPH()};
     IR::Reg src_reg{IR::Reg::R0};
     for (u32 render_target = 0; render_target < 8; ++render_target) {
@@ -35,7 +36,8 @@ void ExitFragment(TranslatorVisitor& v) {
 }
 } // Anonymous namespace
 
-void TranslatorVisitor::EXIT(u64) {
+void TranslatorVisitor::EXIT(u64)
+{
     switch (env.ShaderStage()) {
     case Stage::Fragment:
         ExitFragment(*this);

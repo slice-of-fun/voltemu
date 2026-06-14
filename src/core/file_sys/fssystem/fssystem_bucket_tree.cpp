@@ -4,8 +4,9 @@
 // SPDX-FileCopyrightText: Copyright 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include "core/file_sys/errors.h"
 #include "core/file_sys/fssystem/fssystem_bucket_tree.h"
+
+#include "core/file_sys/errors.h"
 #include "core/file_sys/fssystem/fssystem_bucket_tree_utils.h"
 
 namespace FileSys {
@@ -31,56 +32,59 @@ private:
     public:
         constexpr Offset(s64 offset, s32 stride) : m_offset(offset), m_stride(stride) {}
 
-        constexpr Offset& operator++() {
+        constexpr Offset& operator++()
+        {
             m_offset += m_stride;
             return *this;
         }
-        constexpr Offset operator++(int) {
+        constexpr Offset operator++(int)
+        {
             Offset ret(*this);
             m_offset += m_stride;
             return ret;
         }
 
-        constexpr Offset& operator--() {
+        constexpr Offset& operator--()
+        {
             m_offset -= m_stride;
             return *this;
         }
-        constexpr Offset operator--(int) {
+        constexpr Offset operator--(int)
+        {
             Offset ret(*this);
             m_offset -= m_stride;
             return ret;
         }
 
-        constexpr difference_type operator-(const Offset& rhs) const {
+        constexpr difference_type operator-(const Offset& rhs) const
+        {
             return (m_offset - rhs.m_offset) / m_stride;
         }
 
-        constexpr Offset operator+(difference_type ofs) const {
+        constexpr Offset operator+(difference_type ofs) const
+        {
             return Offset(m_offset + ofs * m_stride, m_stride);
         }
-        constexpr Offset operator-(difference_type ofs) const {
+        constexpr Offset operator-(difference_type ofs) const
+        {
             return Offset(m_offset - ofs * m_stride, m_stride);
         }
 
-        constexpr Offset& operator+=(difference_type ofs) {
+        constexpr Offset& operator+=(difference_type ofs)
+        {
             m_offset += ofs * m_stride;
             return *this;
         }
-        constexpr Offset& operator-=(difference_type ofs) {
+        constexpr Offset& operator-=(difference_type ofs)
+        {
             m_offset -= ofs * m_stride;
             return *this;
         }
 
-        constexpr bool operator==(const Offset& rhs) const {
-            return m_offset == rhs.m_offset;
-        }
-        constexpr bool operator!=(const Offset& rhs) const {
-            return m_offset != rhs.m_offset;
-        }
+        constexpr bool operator==(const Offset& rhs) const { return m_offset == rhs.m_offset; }
+        constexpr bool operator!=(const Offset& rhs) const { return m_offset != rhs.m_offset; }
 
-        constexpr s64 Get() const {
-            return m_offset;
-        }
+        constexpr s64 Get() const { return m_offset; }
     };
 
 private:
@@ -90,15 +94,18 @@ private:
 
 public:
     StorageNode(size_t size, s32 count)
-        : m_start(NodeHeaderSize, static_cast<s32>(size)), m_count(count), m_index(-1) {}
+        : m_start(NodeHeaderSize, static_cast<s32>(size)), m_count(count), m_index(-1)
+    {
+    }
     StorageNode(s64 ofs, size_t size, s32 count)
-        : m_start(NodeHeaderSize + ofs, static_cast<s32>(size)), m_count(count), m_index(-1) {}
-
-    s32 GetIndex() const {
-        return m_index;
+        : m_start(NodeHeaderSize + ofs, static_cast<s32>(size)), m_count(count), m_index(-1)
+    {
     }
 
-    void Find(const char* buffer, s64 virtual_address) {
+    s32 GetIndex() const { return m_index; }
+
+    void Find(const char* buffer, s64 virtual_address)
+    {
         s32 end = m_count;
         auto pos = m_start;
 
@@ -120,7 +127,8 @@ public:
         m_index = static_cast<s32>(pos - m_start) - 1;
     }
 
-    Result Find(VirtualFile storage, s64 virtual_address) {
+    Result Find(VirtualFile storage, s64 virtual_address)
+    {
         s32 end = m_count;
         auto pos = m_start;
 
@@ -146,7 +154,8 @@ public:
 
 } // namespace
 
-void BucketTree::Header::Format(s32 entry_count_) {
+void BucketTree::Header::Format(s32 entry_count_)
+{
     ASSERT(entry_count_ >= 0);
 
     this->magic = Magic;
@@ -155,14 +164,16 @@ void BucketTree::Header::Format(s32 entry_count_) {
     this->reserved = 0;
 }
 
-Result BucketTree::Header::Verify() const {
+Result BucketTree::Header::Verify() const
+{
     R_UNLESS(this->magic == Magic, ResultInvalidBucketTreeSignature);
     R_UNLESS(this->entry_count >= 0, ResultInvalidBucketTreeEntryCount);
     R_UNLESS(this->version <= Version, ResultUnsupportedVersion);
     R_SUCCEED();
 }
 
-Result BucketTree::NodeHeader::Verify(s32 node_index, size_t node_size, size_t entry_size) const {
+Result BucketTree::NodeHeader::Verify(s32 node_index, size_t node_size, size_t entry_size) const
+{
     R_UNLESS(this->index == node_index, ResultInvalidBucketTreeNodeIndex);
     R_UNLESS(entry_size != 0 && node_size >= entry_size + NodeHeaderSize, ResultInvalidSize);
 
@@ -175,7 +186,8 @@ Result BucketTree::NodeHeader::Verify(s32 node_index, size_t node_size, size_t e
 }
 
 Result BucketTree::Initialize(VirtualFile node_storage, VirtualFile entry_storage, size_t node_size,
-                              size_t entry_size, s32 entry_count) {
+                              size_t entry_size, s32 entry_count)
+{
     // Validate preconditions.
     ASSERT(entry_size >= sizeof(s64));
     ASSERT(node_size >= entry_size + sizeof(NodeHeader));
@@ -188,7 +200,8 @@ Result BucketTree::Initialize(VirtualFile node_storage, VirtualFile entry_storag
 
     // Allocate node.
     R_UNLESS(m_node_l1.Allocate(node_size), ResultBufferAllocationFailed);
-    ON_RESULT_FAILURE {
+    ON_RESULT_FAILURE
+    {
         m_node_l1.Free(node_size);
     };
 
@@ -232,7 +245,8 @@ Result BucketTree::Initialize(VirtualFile node_storage, VirtualFile entry_storag
     R_SUCCEED();
 }
 
-void BucketTree::Initialize(size_t node_size, s64 end_offset) {
+void BucketTree::Initialize(size_t node_size, s64 end_offset)
+{
     ASSERT(NodeSizeMin <= node_size && node_size <= NodeSizeMax);
     ASSERT(Common::IsPowerOfTwo(node_size));
 
@@ -246,7 +260,8 @@ void BucketTree::Initialize(size_t node_size, s64 end_offset) {
     m_offset_cache.is_initialized = true;
 }
 
-void BucketTree::Finalize() {
+void BucketTree::Finalize()
+{
     if (this->IsInitialized()) {
         m_node_storage = VirtualFile();
         m_entry_storage = VirtualFile();
@@ -263,7 +278,8 @@ void BucketTree::Finalize() {
     }
 }
 
-Result BucketTree::Find(Visitor* visitor, s64 virtual_address) {
+Result BucketTree::Find(Visitor* visitor, s64 virtual_address)
+{
     ASSERT(visitor != nullptr);
     ASSERT(this->IsInitialized());
 
@@ -278,14 +294,16 @@ Result BucketTree::Find(Visitor* visitor, s64 virtual_address) {
     R_RETURN(visitor->Find(virtual_address));
 }
 
-Result BucketTree::InvalidateCache() {
+Result BucketTree::InvalidateCache()
+{
     // Reset our offsets.
     m_offset_cache.is_initialized = false;
 
     R_SUCCEED();
 }
 
-Result BucketTree::EnsureOffsetCache() {
+Result BucketTree::EnsureOffsetCache()
+{
     // If we already have an offset cache, we're good.
     R_SUCCEED_IF(m_offset_cache.is_initialized);
 
@@ -321,7 +339,8 @@ Result BucketTree::EnsureOffsetCache() {
     R_SUCCEED();
 }
 
-Result BucketTree::Visitor::Initialize(const BucketTree* tree, const BucketTree::Offsets& offsets) {
+Result BucketTree::Visitor::Initialize(const BucketTree* tree, const BucketTree::Offsets& offsets)
+{
     ASSERT(tree != nullptr);
     ASSERT(m_tree == nullptr || m_tree == tree);
 
@@ -336,7 +355,8 @@ Result BucketTree::Visitor::Initialize(const BucketTree* tree, const BucketTree:
     R_SUCCEED();
 }
 
-Result BucketTree::Visitor::MoveNext() {
+Result BucketTree::Visitor::MoveNext()
+{
     R_UNLESS(this->IsValid(), ResultOutOfRange);
 
     // Invalidate our index, and read the header for the next index.
@@ -374,7 +394,8 @@ Result BucketTree::Visitor::MoveNext() {
     R_SUCCEED();
 }
 
-Result BucketTree::Visitor::MovePrevious() {
+Result BucketTree::Visitor::MovePrevious()
+{
     R_UNLESS(this->IsValid(), ResultOutOfRange);
 
     // Invalidate our index, and read the header for the previous index.
@@ -414,7 +435,8 @@ Result BucketTree::Visitor::MovePrevious() {
     R_SUCCEED();
 }
 
-Result BucketTree::Visitor::Find(s64 virtual_address) {
+Result BucketTree::Visitor::Find(s64 virtual_address)
+{
     ASSERT(m_tree != nullptr);
 
     // Get the node.
@@ -463,13 +485,15 @@ Result BucketTree::Visitor::Find(s64 virtual_address) {
     R_SUCCEED();
 }
 
-Result BucketTree::Visitor::FindEntrySet(s32* out_index, s64 virtual_address, s32 node_index) {
+Result BucketTree::Visitor::FindEntrySet(s32* out_index, s64 virtual_address, s32 node_index)
+{
     std::vector<char> pool(m_tree->m_node_size);
     R_RETURN(FindEntrySetWithBuffer(out_index, virtual_address, node_index, pool.data()));
 }
 
 Result BucketTree::Visitor::FindEntrySetWithBuffer(s32* out_index, s64 virtual_address,
-                                                   s32 node_index, char* buffer) {
+                                                   s32 node_index, char* buffer)
+{
     // Calculate node extents.
     const auto node_size = m_tree->m_node_size;
     const auto node_offset = (node_index + 1) * static_cast<s64>(node_size);
@@ -494,7 +518,8 @@ Result BucketTree::Visitor::FindEntrySetWithBuffer(s32* out_index, s64 virtual_a
 }
 
 Result BucketTree::Visitor::FindEntrySetWithoutBuffer(s32* out_index, s64 virtual_address,
-                                                      s32 node_index) {
+                                                      s32 node_index)
+{
     // Calculate node extents.
     const auto node_size = m_tree->m_node_size;
     const auto node_offset = (node_index + 1) * static_cast<s64>(node_size);
@@ -515,13 +540,15 @@ Result BucketTree::Visitor::FindEntrySetWithoutBuffer(s32* out_index, s64 virtua
     R_SUCCEED();
 }
 
-Result BucketTree::Visitor::FindEntry(s64 virtual_address, s32 entry_set_index) {
+Result BucketTree::Visitor::FindEntry(s64 virtual_address, s32 entry_set_index)
+{
     std::vector<char> pool(m_tree->m_node_size);
     R_RETURN(FindEntryWithBuffer(virtual_address, entry_set_index, pool.data()));
 }
 
 Result BucketTree::Visitor::FindEntryWithBuffer(s64 virtual_address, s32 entry_set_index,
-                                                char* buffer) {
+                                                char* buffer)
+{
     // Calculate entry set extents.
     const auto entry_size = m_tree->m_entry_size;
     const auto entry_set_size = m_tree->m_node_size;
@@ -553,7 +580,8 @@ Result BucketTree::Visitor::FindEntryWithBuffer(s64 virtual_address, s32 entry_s
     R_SUCCEED();
 }
 
-Result BucketTree::Visitor::FindEntryWithoutBuffer(s64 virtual_address, s32 entry_set_index) {
+Result BucketTree::Visitor::FindEntryWithoutBuffer(s64 virtual_address, s32 entry_set_index)
+{
     // Calculate entry set extents.
     const auto entry_size = m_tree->m_entry_size;
     const auto entry_set_size = m_tree->m_node_size;

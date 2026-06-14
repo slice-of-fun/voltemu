@@ -12,7 +12,8 @@ namespace {
 constexpr s32 F64ToF32Exp = +1023 - 127;
 constexpr s32 F32ToF64Exp = +127 - 1023;
 
-IR::F32 PackedF64ToF32(IR::IREmitter& ir, const IR::Value& packed) {
+IR::F32 PackedF64ToF32(IR::IREmitter& ir, const IR::Value& packed)
+{
     const IR::U32 lo{ir.CompositeExtract(packed, 0)};
     const IR::U32 hi{ir.CompositeExtract(packed, 1)};
     const IR::U32 sign{ir.BitFieldExtract(hi, ir.Imm32(31), ir.Imm32(1))};
@@ -31,7 +32,8 @@ IR::F32 PackedF64ToF32(IR::IREmitter& ir, const IR::Value& packed) {
     return ir.BitCast<IR::F32>(result);
 }
 
-IR::Value F32ToPackedF64(IR::IREmitter& ir, const IR::Value& raw) {
+IR::Value F32ToPackedF64(IR::IREmitter& ir, const IR::Value& raw)
+{
     const IR::U32 value{ir.BitCast<IR::U32>(IR::F32(raw))};
     const IR::U32 sign{ir.BitFieldExtract(value, ir.Imm32(31), ir.Imm32(1))};
     const IR::U32 exp{ir.BitFieldExtract(value, ir.Imm32(23), ir.Imm32(8))};
@@ -49,7 +51,8 @@ IR::Value F32ToPackedF64(IR::IREmitter& ir, const IR::Value& raw) {
     return ir.CompositeConstruct(lo, hi);
 }
 
-IR::Opcode Replace(IR::Opcode op) {
+IR::Opcode Replace(IR::Opcode op)
+{
     switch (op) {
     case IR::Opcode::FPAbs64:
         return IR::Opcode::FPAbs32;
@@ -154,7 +157,8 @@ IR::Opcode Replace(IR::Opcode op) {
     }
 }
 
-void Lower(IR::Block& block, IR::Inst& inst) {
+void Lower(IR::Block& block, IR::Inst& inst)
+{
     switch (inst.GetOpcode()) {
     case IR::Opcode::PackDouble2x32: {
         IR::IREmitter ir(block, IR::Block::InstructionList::s_iterator_to(inst));
@@ -174,7 +178,8 @@ void Lower(IR::Block& block, IR::Inst& inst) {
 
 } // Anonymous namespace
 
-void LowerFp64ToFp32(IR::Program& program) {
+void LowerFp64ToFp32(IR::Program& program)
+{
     for (IR::Block* const block : program.blocks) {
         for (IR::Inst& inst : block->Instructions()) {
             Lower(*block, inst);

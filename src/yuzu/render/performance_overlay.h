@@ -3,8 +3,8 @@
 
 #pragma once
 
-#include <deque>
 #include <QWidget>
+#include <deque>
 
 namespace VideoCore {
 class ShaderNotify;

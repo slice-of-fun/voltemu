@@ -10,8 +10,8 @@ namespace Shader::Maxwell {
 namespace {
 // https://forums.developer.nvidia.com/t/reverse-lut-for-lop3-lut/110651
 // Emulate GPU's LOP3.LUT (three-input logic op with 8-bit truth table)
-IR::U32 ApplyLUT(IR::IREmitter& ir, const IR::U32& a, const IR::U32& b, const IR::U32& c,
-                 u64 ttbl) {
+IR::U32 ApplyLUT(IR::IREmitter& ir, const IR::U32& a, const IR::U32& b, const IR::U32& c, u64 ttbl)
+{
     switch (ttbl) {
         // generated code, do not edit manually
     case 0:
@@ -543,7 +543,8 @@ IR::U32 ApplyLUT(IR::IREmitter& ir, const IR::U32& a, const IR::U32& b, const IR
     throw NotImplementedException("LOP3 with out of range ttbl");
 }
 
-IR::U32 LOP3(TranslatorVisitor& v, u64 insn, const IR::U32& op_b, const IR::U32& op_c, u64 lut) {
+IR::U32 LOP3(TranslatorVisitor& v, u64 insn, const IR::U32& op_b, const IR::U32& op_c, u64 lut)
+{
     union {
         u64 insn;
         BitField<0, 8, IR::Reg> dest_reg;
@@ -561,7 +562,8 @@ IR::U32 LOP3(TranslatorVisitor& v, u64 insn, const IR::U32& op_b, const IR::U32&
     return result;
 }
 
-u64 GetLut48(u64 insn) {
+u64 GetLut48(u64 insn)
+{
     union {
         u64 raw;
         BitField<48, 8, u64> lut;
@@ -570,7 +572,8 @@ u64 GetLut48(u64 insn) {
 }
 } // Anonymous namespace
 
-void TranslatorVisitor::LOP3_reg(u64 insn) {
+void TranslatorVisitor::LOP3_reg(u64 insn)
+{
     union {
         u64 insn;
         BitField<28, 8, u64> lut;
@@ -587,11 +590,13 @@ void TranslatorVisitor::LOP3_reg(u64 insn) {
     ir.SetPred(lop3.pred, pred_result);
 }
 
-void TranslatorVisitor::LOP3_cbuf(u64 insn) {
+void TranslatorVisitor::LOP3_cbuf(u64 insn)
+{
     LOP3(*this, insn, GetCbuf(insn), GetReg39(insn), GetLut48(insn));
 }
 
-void TranslatorVisitor::LOP3_imm(u64 insn) {
+void TranslatorVisitor::LOP3_imm(u64 insn)
+{
     LOP3(*this, insn, GetImm20(insn), GetReg39(insn), GetLut48(insn));
 }
 } // namespace Shader::Maxwell

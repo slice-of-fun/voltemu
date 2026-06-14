@@ -4,7 +4,10 @@
 // SPDX-FileCopyrightText: 2017 Citra Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "input_common/main.h"
+
 #include <memory>
+
 #include "common/input.h"
 #include "common/param_package.h"
 #include "input_common/drivers/camera.h"
@@ -20,7 +23,6 @@
 #include "input_common/input_engine.h"
 #include "input_common/input_mapping.h"
 #include "input_common/input_poller.h"
-#include "input_common/main.h"
 
 #ifdef ENABLE_LIBUSB
 #include "input_common/drivers/gc_adapter.h"
@@ -39,11 +41,13 @@ namespace InputCommon {
 /// Dummy engine to get periodic updates
 class UpdateEngine final : public InputEngine {
 public:
-    explicit UpdateEngine(std::string input_engine_) : InputEngine(std::move(input_engine_)) {
+    explicit UpdateEngine(std::string input_engine_) : InputEngine(std::move(input_engine_))
+    {
         PreSetController(identifier);
     }
 
-    void PumpEvents() {
+    void PumpEvents()
+    {
         SetButton(identifier, 0, last_state);
         last_state = !last_state;
     }
@@ -59,8 +63,8 @@ private:
 };
 
 struct InputSubsystem::Impl {
-    template <typename Engine>
-    void RegisterEngine(std::string name, std::shared_ptr<Engine>& engine) {
+    template<typename Engine> void RegisterEngine(std::string name, std::shared_ptr<Engine>& engine)
+    {
         MappingCallback mapping_callback{[this](const MappingData& data) { RegisterInput(data); }};
 
         engine = std::make_shared<Engine>(name);
@@ -72,7 +76,8 @@ struct InputSubsystem::Impl {
         Common::Input::RegisterOutputFactory(engine->GetEngineName(), std::move(output_factory));
     }
 
-    void Initialize() {
+    void Initialize()
+    {
         mapping_factory = std::make_shared<MappingFactory>();
 
         RegisterEngine("updater", update_engine);
@@ -101,14 +106,15 @@ struct InputSubsystem::Impl {
                                             std::make_shared<StickFromButton>());
     }
 
-    template <typename Engine>
-    void UnregisterEngine(std::shared_ptr<Engine>& engine) {
+    template<typename Engine> void UnregisterEngine(std::shared_ptr<Engine>& engine)
+    {
         Common::Input::UnregisterInputFactory(engine->GetEngineName());
         Common::Input::UnregisterOutputFactory(engine->GetEngineName());
         engine.reset();
     }
 
-    void Shutdown() {
+    void Shutdown()
+    {
         UnregisterEngine(update_engine);
         UnregisterEngine(keyboard);
         UnregisterEngine(mouse);
@@ -133,7 +139,8 @@ struct InputSubsystem::Impl {
         Common::Input::UnregisterInputFactory("analog_from_button");
     }
 
-    [[nodiscard]] std::vector<Common::ParamPackage> GetInputDevices() const {
+    [[nodiscard]] std::vector<Common::ParamPackage> GetInputDevices() const
+    {
         std::vector<Common::ParamPackage> devices = {
             Common::ParamPackage{{"display", "Any"}, {"engine", "any"}},
         };
@@ -164,8 +171,9 @@ struct InputSubsystem::Impl {
         return devices;
     }
 
-    [[nodiscard]] std::shared_ptr<InputEngine> GetInputEngine(
-        const Common::ParamPackage& params) const {
+    [[nodiscard]] std::shared_ptr<InputEngine>
+    GetInputEngine(const Common::ParamPackage& params) const
+    {
         if (!params.Has("engine") || params.Get("engine", "") == "any") {
             return nullptr;
         }
@@ -200,8 +208,8 @@ struct InputSubsystem::Impl {
         return nullptr;
     }
 
-    [[nodiscard]] AnalogMapping GetAnalogMappingForDevice(
-        const Common::ParamPackage& params) const {
+    [[nodiscard]] AnalogMapping GetAnalogMappingForDevice(const Common::ParamPackage& params) const
+    {
         const auto input_engine = GetInputEngine(params);
 
         if (input_engine == nullptr) {
@@ -211,8 +219,8 @@ struct InputSubsystem::Impl {
         return input_engine->GetAnalogMappingForDevice(params);
     }
 
-    [[nodiscard]] ButtonMapping GetButtonMappingForDevice(
-        const Common::ParamPackage& params) const {
+    [[nodiscard]] ButtonMapping GetButtonMappingForDevice(const Common::ParamPackage& params) const
+    {
         const auto input_engine = GetInputEngine(params);
 
         if (input_engine == nullptr) {
@@ -222,8 +230,8 @@ struct InputSubsystem::Impl {
         return input_engine->GetButtonMappingForDevice(params);
     }
 
-    [[nodiscard]] MotionMapping GetMotionMappingForDevice(
-        const Common::ParamPackage& params) const {
+    [[nodiscard]] MotionMapping GetMotionMappingForDevice(const Common::ParamPackage& params) const
+    {
         const auto input_engine = GetInputEngine(params);
 
         if (input_engine == nullptr) {
@@ -233,7 +241,8 @@ struct InputSubsystem::Impl {
         return input_engine->GetMotionMappingForDevice(params);
     }
 
-    Common::Input::ButtonNames GetButtonName(const Common::ParamPackage& params) const {
+    Common::Input::ButtonNames GetButtonName(const Common::ParamPackage& params) const
+    {
         if (!params.Has("engine") || params.Get("engine", "") == "any") {
             return Common::Input::ButtonNames::Undefined;
         }
@@ -246,7 +255,8 @@ struct InputSubsystem::Impl {
         return input_engine->GetUIName(params);
     }
 
-    bool IsStickInverted(const Common::ParamPackage& params) {
+    bool IsStickInverted(const Common::ParamPackage& params)
+    {
         const auto input_engine = GetInputEngine(params);
 
         if (input_engine == nullptr) {
@@ -256,7 +266,8 @@ struct InputSubsystem::Impl {
         return input_engine->IsStickInverted(params);
     }
 
-    bool IsController(const Common::ParamPackage& params) {
+    bool IsController(const Common::ParamPackage& params)
+    {
         const std::string engine = params.Get("engine", "");
         if (engine == mouse->GetEngineName()) {
             return true;
@@ -291,7 +302,8 @@ struct InputSubsystem::Impl {
         return false;
     }
 
-    void BeginConfiguration() {
+    void BeginConfiguration()
+    {
         keyboard->BeginConfiguration();
         mouse->BeginConfiguration();
 #ifdef __ANDROID__
@@ -307,7 +319,8 @@ struct InputSubsystem::Impl {
 #endif
     }
 
-    void EndConfiguration() {
+    void EndConfiguration()
+    {
         keyboard->EndConfiguration();
         mouse->EndConfiguration();
 #ifdef __ANDROID__
@@ -323,14 +336,16 @@ struct InputSubsystem::Impl {
 #endif
     }
 
-    void PumpEvents() const {
+    void PumpEvents() const
+    {
         update_engine->PumpEvents();
 #ifdef HAVE_SDL3
         sdl->PumpEvents();
 #endif
     }
 
-    void RegisterInput(const MappingData& data) {
+    void RegisterInput(const MappingData& data)
+    {
         mapping_factory->RegisterInput(data);
     }
 
@@ -360,138 +375,171 @@ struct InputSubsystem::Impl {
 #endif
 };
 
-InputSubsystem::InputSubsystem() : impl{std::make_unique<Impl>()} {}
+InputSubsystem::InputSubsystem() : impl{std::make_unique<Impl>()}
+{
+}
 
 InputSubsystem::~InputSubsystem() = default;
 
-void InputSubsystem::Initialize() {
+void InputSubsystem::Initialize()
+{
     impl->Initialize();
 }
 
-void InputSubsystem::Shutdown() {
+void InputSubsystem::Shutdown()
+{
     impl->Shutdown();
 }
 
-Keyboard* InputSubsystem::GetKeyboard() {
+Keyboard* InputSubsystem::GetKeyboard()
+{
     return impl->keyboard.get();
 }
 
-const Keyboard* InputSubsystem::GetKeyboard() const {
+const Keyboard* InputSubsystem::GetKeyboard() const
+{
     return impl->keyboard.get();
 }
 
-Mouse* InputSubsystem::GetMouse() {
+Mouse* InputSubsystem::GetMouse()
+{
     return impl->mouse.get();
 }
 
-const Mouse* InputSubsystem::GetMouse() const {
+const Mouse* InputSubsystem::GetMouse() const
+{
     return impl->mouse.get();
 }
 
-TouchScreen* InputSubsystem::GetTouchScreen() {
+TouchScreen* InputSubsystem::GetTouchScreen()
+{
     return impl->touch_screen.get();
 }
 
-const TouchScreen* InputSubsystem::GetTouchScreen() const {
+const TouchScreen* InputSubsystem::GetTouchScreen() const
+{
     return impl->touch_screen.get();
 }
 
-TasInput::Tas* InputSubsystem::GetTas() {
+TasInput::Tas* InputSubsystem::GetTas()
+{
     return impl->tas_input.get();
 }
 
-const TasInput::Tas* InputSubsystem::GetTas() const {
+const TasInput::Tas* InputSubsystem::GetTas() const
+{
     return impl->tas_input.get();
 }
 
-Camera* InputSubsystem::GetCamera() {
+Camera* InputSubsystem::GetCamera()
+{
     return impl->camera.get();
 }
 
-const Camera* InputSubsystem::GetCamera() const {
+const Camera* InputSubsystem::GetCamera() const
+{
     return impl->camera.get();
 }
 
 #ifdef __ANDROID__
-Android* InputSubsystem::GetAndroid() {
+Android* InputSubsystem::GetAndroid()
+{
     return impl->android.get();
 }
 
-const Android* InputSubsystem::GetAndroid() const {
+const Android* InputSubsystem::GetAndroid() const
+{
     return impl->android.get();
 }
 #endif
 
-VirtualAmiibo* InputSubsystem::GetVirtualAmiibo() {
+VirtualAmiibo* InputSubsystem::GetVirtualAmiibo()
+{
     return impl->virtual_amiibo.get();
 }
 
-const VirtualAmiibo* InputSubsystem::GetVirtualAmiibo() const {
+const VirtualAmiibo* InputSubsystem::GetVirtualAmiibo() const
+{
     return impl->virtual_amiibo.get();
 }
 
-VirtualGamepad* InputSubsystem::GetVirtualGamepad() {
+VirtualGamepad* InputSubsystem::GetVirtualGamepad()
+{
     return impl->virtual_gamepad.get();
 }
 
-const VirtualGamepad* InputSubsystem::GetVirtualGamepad() const {
+const VirtualGamepad* InputSubsystem::GetVirtualGamepad() const
+{
     return impl->virtual_gamepad.get();
 }
 
-std::vector<Common::ParamPackage> InputSubsystem::GetInputDevices() const {
+std::vector<Common::ParamPackage> InputSubsystem::GetInputDevices() const
+{
     return impl->GetInputDevices();
 }
 
-AnalogMapping InputSubsystem::GetAnalogMappingForDevice(const Common::ParamPackage& device) const {
+AnalogMapping InputSubsystem::GetAnalogMappingForDevice(const Common::ParamPackage& device) const
+{
     return impl->GetAnalogMappingForDevice(device);
 }
 
-ButtonMapping InputSubsystem::GetButtonMappingForDevice(const Common::ParamPackage& device) const {
+ButtonMapping InputSubsystem::GetButtonMappingForDevice(const Common::ParamPackage& device) const
+{
     return impl->GetButtonMappingForDevice(device);
 }
 
-MotionMapping InputSubsystem::GetMotionMappingForDevice(const Common::ParamPackage& device) const {
+MotionMapping InputSubsystem::GetMotionMappingForDevice(const Common::ParamPackage& device) const
+{
     return impl->GetMotionMappingForDevice(device);
 }
 
-Common::Input::ButtonNames InputSubsystem::GetButtonName(const Common::ParamPackage& params) const {
+Common::Input::ButtonNames InputSubsystem::GetButtonName(const Common::ParamPackage& params) const
+{
     return impl->GetButtonName(params);
 }
 
-bool InputSubsystem::IsController(const Common::ParamPackage& params) const {
+bool InputSubsystem::IsController(const Common::ParamPackage& params) const
+{
     return impl->IsController(params);
 }
 
-bool InputSubsystem::IsStickInverted(const Common::ParamPackage& params) const {
+bool InputSubsystem::IsStickInverted(const Common::ParamPackage& params) const
+{
     if (params.Has("axis_x") && params.Has("axis_y")) {
         return impl->IsStickInverted(params);
     }
     return false;
 }
 
-void InputSubsystem::ReloadInputDevices() {
+void InputSubsystem::ReloadInputDevices()
+{
     impl->udp_client.get()->ReloadSockets();
 }
 
-void InputSubsystem::BeginMapping(Polling::InputType type) {
+void InputSubsystem::BeginMapping(Polling::InputType type)
+{
     impl->BeginConfiguration();
     impl->mapping_factory->BeginMapping(type);
 }
 
-Common::ParamPackage InputSubsystem::GetNextInput() const {
+Common::ParamPackage InputSubsystem::GetNextInput() const
+{
     return impl->mapping_factory->GetNextInput();
 }
 
-void InputSubsystem::StopMapping() const {
+void InputSubsystem::StopMapping() const
+{
     impl->EndConfiguration();
     impl->mapping_factory->StopMapping();
 }
 
-void InputSubsystem::PumpEvents() const {
+void InputSubsystem::PumpEvents() const
+{
     impl->PumpEvents();
 }
 
-std::string GenerateKeyboardParam(int key_code) {
+std::string GenerateKeyboardParam(int key_code)
+{
     Common::ParamPackage param;
     param.Set("engine", "keyboard");
     param.Set("code", key_code);
@@ -500,7 +548,8 @@ std::string GenerateKeyboardParam(int key_code) {
 }
 
 std::string GenerateAnalogParamFromKeys(int key_up, int key_down, int key_left, int key_right,
-                                        int key_modifier, float modifier_scale) {
+                                        int key_modifier, float modifier_scale)
+{
     Common::ParamPackage circle_pad_param{
         {"engine", "analog_from_button"},
         {"up", GenerateKeyboardParam(key_up)},

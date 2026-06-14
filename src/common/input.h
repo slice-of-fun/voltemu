@@ -6,12 +6,14 @@
 
 #pragma once
 
+#include <ankerl/unordered_dense.h>
+
 #include <functional>
 #include <memory>
 #include <string>
-#include <ankerl/unordered_dense.h>
 #include <utility>
 #include <vector>
+
 #include "common/logging.h"
 #include "common/param_package.h"
 #include "common/uuid.h"
@@ -331,12 +333,11 @@ public:
     virtual void ForceUpdate() {}
 
     // Sets the function to be triggered when input changes
-    void SetCallback(InputCallback callback_) {
-        callback = std::move(callback_);
-    }
+    void SetCallback(InputCallback callback_) { callback = std::move(callback_); }
 
     // Triggers the function set in the callback
-    void TriggerOnChange(const CallbackStatus& status) {
+    void TriggerOnChange(const CallbackStatus& status)
+    {
         if (callback.on_change) {
             callback.on_change(status);
         }
@@ -351,59 +352,58 @@ class OutputDevice {
 public:
     virtual ~OutputDevice() = default;
 
-    virtual DriverResult SetLED([[maybe_unused]] const LedStatus& led_status) {
+    virtual DriverResult SetLED([[maybe_unused]] const LedStatus& led_status)
+    {
         return DriverResult::NotSupported;
     }
 
-    virtual DriverResult SetVibration([[maybe_unused]] const VibrationStatus& vibration_status) {
+    virtual DriverResult SetVibration([[maybe_unused]] const VibrationStatus& vibration_status)
+    {
         return DriverResult::NotSupported;
     }
 
-    virtual bool IsVibrationEnabled() {
-        return false;
-    }
+    virtual bool IsVibrationEnabled() { return false; }
 
-    virtual DriverResult SetPollingMode([[maybe_unused]] PollingMode polling_mode) {
+    virtual DriverResult SetPollingMode([[maybe_unused]] PollingMode polling_mode)
+    {
         return DriverResult::NotSupported;
     }
 
-    virtual DriverResult SetCameraFormat([[maybe_unused]] CameraFormat camera_format) {
+    virtual DriverResult SetCameraFormat([[maybe_unused]] CameraFormat camera_format)
+    {
         return DriverResult::NotSupported;
     }
 
-    virtual NfcState SupportsNfc() const {
+    virtual NfcState SupportsNfc() const { return NfcState::NotSupported; }
+
+    virtual NfcState StartNfcPolling() { return NfcState::NotSupported; }
+
+    virtual NfcState StopNfcPolling() { return NfcState::NotSupported; }
+
+    virtual NfcState ReadAmiiboData([[maybe_unused]] std::vector<u8>& out_data)
+    {
         return NfcState::NotSupported;
     }
 
-    virtual NfcState StartNfcPolling() {
-        return NfcState::NotSupported;
-    }
-
-    virtual NfcState StopNfcPolling() {
-        return NfcState::NotSupported;
-    }
-
-    virtual NfcState ReadAmiiboData([[maybe_unused]] std::vector<u8>& out_data) {
-        return NfcState::NotSupported;
-    }
-
-    virtual NfcState WriteNfcData([[maybe_unused]] const std::vector<u8>& data) {
+    virtual NfcState WriteNfcData([[maybe_unused]] const std::vector<u8>& data)
+    {
         return NfcState::NotSupported;
     }
 
     virtual NfcState ReadMifareData([[maybe_unused]] const MifareRequest& request,
-                                    [[maybe_unused]] MifareRequest& out_data) {
+                                    [[maybe_unused]] MifareRequest& out_data)
+    {
         return NfcState::NotSupported;
     }
 
-    virtual NfcState WriteMifareData([[maybe_unused]] const MifareRequest& request) {
+    virtual NfcState WriteMifareData([[maybe_unused]] const MifareRequest& request)
+    {
         return NfcState::NotSupported;
     }
 };
 
 /// An abstract class template for a factory that can create input devices.
-template <typename InputDeviceType>
-class Factory {
+template<typename InputDeviceType> class Factory {
 public:
     virtual ~Factory() = default;
     virtual std::unique_ptr<InputDeviceType> Create(const Common::ParamPackage&) = 0;
@@ -411,15 +411,15 @@ public:
 
 namespace Impl {
 
-template <typename InputDeviceType>
-using FactoryListType = ankerl::unordered_dense::map<std::string, std::shared_ptr<Factory<InputDeviceType>>>;
+template<typename InputDeviceType>
+using FactoryListType =
+    ankerl::unordered_dense::map<std::string, std::shared_ptr<Factory<InputDeviceType>>>;
 
-template <typename InputDeviceType>
-struct FactoryList {
+template<typename InputDeviceType> struct FactoryList {
     static FactoryListType<InputDeviceType> list;
 };
 
-template <typename InputDeviceType>
+template<typename InputDeviceType>
 FactoryListType<InputDeviceType> FactoryList<InputDeviceType>::list;
 
 } // namespace Impl
@@ -431,8 +431,9 @@ FactoryListType<InputDeviceType> FactoryList<InputDeviceType>::list;
  *     a device
  * @param factory the factory object to register
  */
-template <typename InputDeviceType>
-void RegisterFactory(const std::string& name, std::shared_ptr<Factory<InputDeviceType>> factory) {
+template<typename InputDeviceType>
+void RegisterFactory(const std::string& name, std::shared_ptr<Factory<InputDeviceType>> factory)
+{
     auto pair = std::make_pair(name, std::move(factory));
     if (!Impl::FactoryList<InputDeviceType>::list.insert(std::move(pair)).second) {
         LOG_ERROR(Input, "Factory '{}' already registered", name);
@@ -440,12 +441,14 @@ void RegisterFactory(const std::string& name, std::shared_ptr<Factory<InputDevic
 }
 
 inline void RegisterInputFactory(const std::string& name,
-                                 std::shared_ptr<Factory<InputDevice>> factory) {
+                                 std::shared_ptr<Factory<InputDevice>> factory)
+{
     RegisterFactory<InputDevice>(name, std::move(factory));
 }
 
 inline void RegisterOutputFactory(const std::string& name,
-                                  std::shared_ptr<Factory<OutputDevice>> factory) {
+                                  std::shared_ptr<Factory<OutputDevice>> factory)
+{
     RegisterFactory<OutputDevice>(name, std::move(factory));
 }
 
@@ -454,18 +457,20 @@ inline void RegisterOutputFactory(const std::string& name,
  * @tparam InputDeviceType the type of input devices the factory can create
  * @param name the name of the factory to unregister
  */
-template <typename InputDeviceType>
-void UnregisterFactory(const std::string& name) {
+template<typename InputDeviceType> void UnregisterFactory(const std::string& name)
+{
     if (Impl::FactoryList<InputDeviceType>::list.erase(name) == 0) {
         LOG_ERROR(Input, "Factory '{}' not registered", name);
     }
 }
 
-inline void UnregisterInputFactory(const std::string& name) {
+inline void UnregisterInputFactory(const std::string& name)
+{
     UnregisterFactory<InputDevice>(name);
 }
 
-inline void UnregisterOutputFactory(const std::string& name) {
+inline void UnregisterOutputFactory(const std::string& name)
+{
     UnregisterFactory<OutputDevice>(name);
 }
 
@@ -475,8 +480,9 @@ inline void UnregisterOutputFactory(const std::string& name) {
  * @param params a serialized ParamPackage string that contains all parameters for creating the
  * device
  */
-template <typename InputDeviceType>
-std::unique_ptr<InputDeviceType> CreateDeviceFromString(const std::string& params) {
+template<typename InputDeviceType>
+std::unique_ptr<InputDeviceType> CreateDeviceFromString(const std::string& params)
+{
     const Common::ParamPackage package(params);
     const std::string engine = package.Get("engine", "null");
     const auto& factory_list = Impl::FactoryList<InputDeviceType>::list;
@@ -490,11 +496,13 @@ std::unique_ptr<InputDeviceType> CreateDeviceFromString(const std::string& param
     return pair->second->Create(package);
 }
 
-inline std::unique_ptr<InputDevice> CreateInputDeviceFromString(const std::string& params) {
+inline std::unique_ptr<InputDevice> CreateInputDeviceFromString(const std::string& params)
+{
     return CreateDeviceFromString<InputDevice>(params);
 }
 
-inline std::unique_ptr<OutputDevice> CreateOutputDeviceFromString(const std::string& params) {
+inline std::unique_ptr<OutputDevice> CreateOutputDeviceFromString(const std::string& params)
+{
     return CreateDeviceFromString<OutputDevice>(params);
 }
 
@@ -503,8 +511,9 @@ inline std::unique_ptr<OutputDevice> CreateOutputDeviceFromString(const std::str
  * @tparam InputDeviceType the type of input devices to create
  * @param package A ParamPackage that contains all parameters for creating the device
  */
-template <typename InputDeviceType>
-std::unique_ptr<InputDeviceType> CreateDevice(const ParamPackage& package) {
+template<typename InputDeviceType>
+std::unique_ptr<InputDeviceType> CreateDevice(const ParamPackage& package)
+{
     const std::string engine = package.Get("engine", "null");
     const auto& factory_list = Impl::FactoryList<InputDeviceType>::list;
     const auto pair = factory_list.find(engine);
@@ -517,11 +526,13 @@ std::unique_ptr<InputDeviceType> CreateDevice(const ParamPackage& package) {
     return pair->second->Create(package);
 }
 
-inline std::unique_ptr<InputDevice> CreateInputDevice(const ParamPackage& package) {
+inline std::unique_ptr<InputDevice> CreateInputDevice(const ParamPackage& package)
+{
     return CreateDevice<InputDevice>(package);
 }
 
-inline std::unique_ptr<OutputDevice> CreateOutputDevice(const ParamPackage& package) {
+inline std::unique_ptr<OutputDevice> CreateOutputDevice(const ParamPackage& package)
+{
     return CreateDevice<OutputDevice>(package);
 }
 

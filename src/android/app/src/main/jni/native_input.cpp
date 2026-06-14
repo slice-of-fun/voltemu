@@ -23,7 +23,8 @@
 
 ankerl::unordered_dense::map<std::string, std::unique_ptr<AndroidConfig>> map_profiles;
 
-bool IsHandheldOnly() {
+bool IsHandheldOnly()
+{
     const auto npad_style_set =
         EmulationSession::GetInstance().System().HIDCore().GetSupportedStyleTag();
 
@@ -38,24 +39,29 @@ bool IsHandheldOnly() {
     return !Settings::IsDockedMode();
 }
 
-std::filesystem::path GetNameWithoutExtension(std::filesystem::path filename) {
+std::filesystem::path GetNameWithoutExtension(std::filesystem::path filename)
+{
     return filename.replace_extension();
 }
 
-bool IsProfileNameValid(std::string_view profile_name) {
+bool IsProfileNameValid(std::string_view profile_name)
+{
     return profile_name.find_first_of("<>:;\"/\\|,.!?*") == std::string::npos;
 }
 
-bool ProfileExistsInFilesystem(std::string_view profile_name) {
+bool ProfileExistsInFilesystem(std::string_view profile_name)
+{
     return Common::FS::Exists(Common::FS::GetVoltPath(Common::FS::VoltPath::ConfigDir) / "input" /
                               fmt::format("{}.ini", profile_name));
 }
 
-bool ProfileExistsInMap(const std::string& profile_name) {
+bool ProfileExistsInMap(const std::string& profile_name)
+{
     return map_profiles.find(profile_name) != map_profiles.end();
 }
 
-bool SaveProfile(const std::string& profile_name, std::size_t player_index) {
+bool SaveProfile(const std::string& profile_name, std::size_t player_index)
+{
     if (!ProfileExistsInMap(profile_name)) {
         return false;
     }
@@ -65,7 +71,8 @@ bool SaveProfile(const std::string& profile_name, std::size_t player_index) {
     return true;
 }
 
-bool LoadProfile(std::string& profile_name, std::size_t player_index) {
+bool LoadProfile(std::string& profile_name, std::size_t player_index)
+{
     if (!ProfileExistsInMap(profile_name)) {
         return false;
     }
@@ -83,7 +90,8 @@ bool LoadProfile(std::string& profile_name, std::size_t player_index) {
 }
 
 void ApplyControllerConfig(size_t player_index,
-                           const std::function<void(Core::HID::EmulatedController*)>& apply) {
+                           const std::function<void(Core::HID::EmulatedController*)>& apply)
+{
     auto& hid_core = EmulationSession::GetInstance().System().HIDCore();
     if (player_index == 0) {
         auto* handheld = hid_core.GetEmulatedController(Core::HID::NpadIdType::Handheld);
@@ -105,7 +113,8 @@ void ApplyControllerConfig(size_t player_index,
     }
 }
 
-std::vector<s32> GetSupportedStyles(int player_index) {
+std::vector<s32> GetSupportedStyles(int player_index)
+{
     auto& hid_core = EmulationSession::GetInstance().System().HIDCore();
     const auto npad_style_set = hid_core.GetSupportedStyleTag();
     std::vector<s32> supported_indexes;
@@ -136,7 +145,8 @@ std::vector<s32> GetSupportedStyles(int player_index) {
     return supported_indexes;
 }
 
-void ConnectController(size_t player_index, bool connected) {
+void ConnectController(size_t player_index, bool connected)
+{
     auto& hid_core = EmulationSession::GetInstance().System().HIDCore();
     ApplyControllerConfig(player_index, [&](Core::HID::EmulatedController* controller) {
         auto supported_styles = GetSupportedStyles(player_index);
@@ -189,18 +199,21 @@ void ConnectController(size_t player_index, bool connected) {
 extern "C" {
 
 jboolean Java_org_yuzu_yuzu_1emu_features_input_NativeInput_isHandheldOnly(JNIEnv* env,
-                                                                           jobject j_obj) {
+                                                                           jobject j_obj)
+{
     return IsHandheldOnly();
 }
 
 void Java_org_yuzu_yuzu_1emu_features_input_NativeInput_onGamePadButtonEvent(
-    JNIEnv* env, jobject j_obj, jstring j_guid, jint j_port, jint j_button_id, jint j_action) {
+    JNIEnv* env, jobject j_obj, jstring j_guid, jint j_port, jint j_button_id, jint j_action)
+{
     EmulationSession::GetInstance().GetInputSubsystem().GetAndroid()->SetButtonState(
         Common::Android::GetJString(env, j_guid), j_port, j_button_id, j_action != 0);
 }
 
 void Java_org_yuzu_yuzu_1emu_features_input_NativeInput_onGamePadAxisEvent(
-    JNIEnv* env, jobject j_obj, jstring j_guid, jint j_port, jint j_stick_id, jfloat j_value) {
+    JNIEnv* env, jobject j_obj, jstring j_guid, jint j_port, jint j_stick_id, jfloat j_value)
+{
     EmulationSession::GetInstance().GetInputSubsystem().GetAndroid()->SetAxisPosition(
         Common::Android::GetJString(env, j_guid), j_port, j_stick_id, j_value);
 }
@@ -208,14 +221,16 @@ void Java_org_yuzu_yuzu_1emu_features_input_NativeInput_onGamePadAxisEvent(
 void Java_org_yuzu_yuzu_1emu_features_input_NativeInput_onGamePadMotionEvent(
     JNIEnv* env, jobject j_obj, jstring j_guid, jint j_port, jlong j_delta_timestamp,
     jfloat j_x_gyro, jfloat j_y_gyro, jfloat j_z_gyro, jfloat j_x_accel, jfloat j_y_accel,
-    jfloat j_z_accel) {
+    jfloat j_z_accel)
+{
     EmulationSession::GetInstance().GetInputSubsystem().GetAndroid()->SetMotionState(
         Common::Android::GetJString(env, j_guid), j_port, j_delta_timestamp, j_x_gyro, j_y_gyro,
         j_z_gyro, j_x_accel, j_y_accel, j_z_accel);
 }
 
 void Java_org_yuzu_yuzu_1emu_features_input_NativeInput_onReadNfcTag(JNIEnv* env, jobject j_obj,
-                                                                     jbyteArray j_data) {
+                                                                     jbyteArray j_data)
+{
     jboolean isCopy{false};
     std::span<u8> data(reinterpret_cast<u8*>(env->GetByteArrayElements(j_data, &isCopy)),
                        static_cast<size_t>(env->GetArrayLength(j_data)));
@@ -225,7 +240,8 @@ void Java_org_yuzu_yuzu_1emu_features_input_NativeInput_onReadNfcTag(JNIEnv* env
     }
 }
 
-void Java_org_yuzu_yuzu_1emu_features_input_NativeInput_onRemoveNfcTag(JNIEnv* env, jobject j_obj) {
+void Java_org_yuzu_yuzu_1emu_features_input_NativeInput_onRemoveNfcTag(JNIEnv* env, jobject j_obj)
+{
     if (EmulationSession::GetInstance().IsRunning()) {
         EmulationSession::GetInstance().GetInputSubsystem().GetVirtualAmiibo()->CloseAmiibo();
     }
@@ -233,7 +249,8 @@ void Java_org_yuzu_yuzu_1emu_features_input_NativeInput_onRemoveNfcTag(JNIEnv* e
 
 void Java_org_yuzu_yuzu_1emu_features_input_NativeInput_onTouchPressed(JNIEnv* env, jobject j_obj,
                                                                        jint j_id, jfloat j_x_axis,
-                                                                       jfloat j_y_axis) {
+                                                                       jfloat j_y_axis)
+{
     if (EmulationSession::GetInstance().IsRunning()) {
         EmulationSession::GetInstance().Window().OnTouchPressed(j_id, j_x_axis, j_y_axis);
     }
@@ -241,21 +258,24 @@ void Java_org_yuzu_yuzu_1emu_features_input_NativeInput_onTouchPressed(JNIEnv* e
 
 void Java_org_yuzu_yuzu_1emu_features_input_NativeInput_onTouchMoved(JNIEnv* env, jobject j_obj,
                                                                      jint j_id, jfloat j_x_axis,
-                                                                     jfloat j_y_axis) {
+                                                                     jfloat j_y_axis)
+{
     if (EmulationSession::GetInstance().IsRunning()) {
         EmulationSession::GetInstance().Window().OnTouchMoved(j_id, j_x_axis, j_y_axis);
     }
 }
 
 void Java_org_yuzu_yuzu_1emu_features_input_NativeInput_onTouchReleased(JNIEnv* env, jobject j_obj,
-                                                                        jint j_id) {
+                                                                        jint j_id)
+{
     if (EmulationSession::GetInstance().IsRunning()) {
         EmulationSession::GetInstance().Window().OnTouchReleased(j_id);
     }
 }
 
 void Java_org_yuzu_yuzu_1emu_features_input_NativeInput_onOverlayButtonEventImpl(
-    JNIEnv* env, jobject j_obj, jint j_port, jint j_button_id, jint j_action) {
+    JNIEnv* env, jobject j_obj, jint j_port, jint j_button_id, jint j_action)
+{
     if (EmulationSession::GetInstance().IsRunning()) {
         EmulationSession::GetInstance().GetInputSubsystem().GetVirtualGamepad()->SetButtonState(
             j_port, j_button_id, j_action == 1);
@@ -263,7 +283,8 @@ void Java_org_yuzu_yuzu_1emu_features_input_NativeInput_onOverlayButtonEventImpl
 }
 
 void Java_org_yuzu_yuzu_1emu_features_input_NativeInput_onOverlayJoystickEventImpl(
-    JNIEnv* env, jobject j_obj, jint j_port, jint j_stick_id, jfloat j_x_axis, jfloat j_y_axis) {
+    JNIEnv* env, jobject j_obj, jint j_port, jint j_stick_id, jfloat j_x_axis, jfloat j_y_axis)
+{
     if (EmulationSession::GetInstance().IsRunning()) {
         EmulationSession::GetInstance().GetInputSubsystem().GetVirtualGamepad()->SetStickPosition(
             j_port, j_stick_id, j_x_axis, j_y_axis);
@@ -272,7 +293,8 @@ void Java_org_yuzu_yuzu_1emu_features_input_NativeInput_onOverlayJoystickEventIm
 
 void Java_org_yuzu_yuzu_1emu_features_input_NativeInput_onDeviceMotionEvent(
     JNIEnv* env, jobject j_obj, jint j_port, jlong j_delta_timestamp, jfloat j_x_gyro,
-    jfloat j_y_gyro, jfloat j_z_gyro, jfloat j_x_accel, jfloat j_y_accel, jfloat j_z_accel) {
+    jfloat j_y_gyro, jfloat j_z_gyro, jfloat j_x_accel, jfloat j_y_accel, jfloat j_z_accel)
+{
     if (EmulationSession::GetInstance().IsRunning()) {
         EmulationSession::GetInstance().GetInputSubsystem().GetVirtualGamepad()->SetMotionState(
             j_port, j_delta_timestamp, j_x_gyro, j_y_gyro, j_z_gyro, j_x_accel, j_y_accel,
@@ -281,18 +303,21 @@ void Java_org_yuzu_yuzu_1emu_features_input_NativeInput_onDeviceMotionEvent(
 }
 
 void Java_org_yuzu_yuzu_1emu_features_input_NativeInput_reloadInputDevices(JNIEnv* env,
-                                                                           jobject j_obj) {
+                                                                           jobject j_obj)
+{
     EmulationSession::GetInstance().System().HIDCore().ReloadInputDevices();
 }
 
 void Java_org_yuzu_yuzu_1emu_features_input_NativeInput_registerController(JNIEnv* env,
                                                                            jobject j_obj,
-                                                                           jobject j_device) {
+                                                                           jobject j_device)
+{
     EmulationSession::GetInstance().GetInputSubsystem().GetAndroid()->RegisterController(j_device);
 }
 
 jobjectArray Java_org_yuzu_yuzu_1emu_features_input_NativeInput_getInputDevices(JNIEnv* env,
-                                                                                jobject j_obj) {
+                                                                                jobject j_obj)
+{
     auto devices = EmulationSession::GetInstance().GetInputSubsystem().GetInputDevices();
     jobjectArray jdevices = env->NewObjectArray(devices.size(), Common::Android::GetStringClass(),
                                                 Common::Android::ToJString(env, ""));
@@ -304,7 +329,8 @@ jobjectArray Java_org_yuzu_yuzu_1emu_features_input_NativeInput_getInputDevices(
 }
 
 void Java_org_yuzu_yuzu_1emu_features_input_NativeInput_loadInputProfiles(JNIEnv* env,
-                                                                          jobject j_obj) {
+                                                                          jobject j_obj)
+{
     map_profiles.clear();
     const auto input_profile_loc =
         Common::FS::GetVoltPath(Common::FS::VoltPath::ConfigDir) / "input";
@@ -329,8 +355,9 @@ void Java_org_yuzu_yuzu_1emu_features_input_NativeInput_loadInputProfiles(JNIEnv
     }
 }
 
-jobjectArray Java_org_yuzu_yuzu_1emu_features_input_NativeInput_getInputProfileNames(
-    JNIEnv* env, jobject j_obj) {
+jobjectArray Java_org_yuzu_yuzu_1emu_features_input_NativeInput_getInputProfileNames(JNIEnv* env,
+                                                                                     jobject j_obj)
+{
     std::vector<std::string> profile_names;
     profile_names.reserve(map_profiles.size());
 
@@ -361,7 +388,8 @@ jobjectArray Java_org_yuzu_yuzu_1emu_features_input_NativeInput_getInputProfileN
 
 jboolean Java_org_yuzu_yuzu_1emu_features_input_NativeInput_isProfileNameValid(JNIEnv* env,
                                                                                jobject j_obj,
-                                                                               jstring j_name) {
+                                                                               jstring j_name)
+{
     return Common::Android::GetJString(env, j_name).find_first_of("<>:;\"/\\|,.!?*") ==
            std::string::npos;
 }
@@ -369,7 +397,8 @@ jboolean Java_org_yuzu_yuzu_1emu_features_input_NativeInput_isProfileNameValid(J
 jboolean Java_org_yuzu_yuzu_1emu_features_input_NativeInput_createProfile(JNIEnv* env,
                                                                           jobject j_obj,
                                                                           jstring j_name,
-                                                                          jint j_player_index) {
+                                                                          jint j_player_index)
+{
     auto profile_name = Common::Android::GetJString(env, j_name);
     if (ProfileExistsInMap(profile_name)) {
         return false;
@@ -385,7 +414,8 @@ jboolean Java_org_yuzu_yuzu_1emu_features_input_NativeInput_createProfile(JNIEnv
 jboolean Java_org_yuzu_yuzu_1emu_features_input_NativeInput_deleteProfile(JNIEnv* env,
                                                                           jobject j_obj,
                                                                           jstring j_name,
-                                                                          jint j_player_index) {
+                                                                          jint j_player_index)
+{
     auto profile_name = Common::Android::GetJString(env, j_name);
     if (!ProfileExistsInMap(profile_name)) {
         return false;
@@ -402,21 +432,24 @@ jboolean Java_org_yuzu_yuzu_1emu_features_input_NativeInput_deleteProfile(JNIEnv
 
 jboolean Java_org_yuzu_yuzu_1emu_features_input_NativeInput_loadProfile(JNIEnv* env, jobject j_obj,
                                                                         jstring j_name,
-                                                                        jint j_player_index) {
+                                                                        jint j_player_index)
+{
     auto profile_name = Common::Android::GetJString(env, j_name);
     return LoadProfile(profile_name, j_player_index);
 }
 
 jboolean Java_org_yuzu_yuzu_1emu_features_input_NativeInput_saveProfile(JNIEnv* env, jobject j_obj,
                                                                         jstring j_name,
-                                                                        jint j_player_index) {
+                                                                        jint j_player_index)
+{
     auto profile_name = Common::Android::GetJString(env, j_name);
     return SaveProfile(profile_name, j_player_index);
 }
 
 void Java_org_yuzu_yuzu_1emu_features_input_NativeInput_loadPerGameConfiguration(
     JNIEnv* env, jobject j_obj, jint j_player_index, jint j_selected_index,
-    jstring j_selected_profile_name) {
+    jstring j_selected_profile_name)
+{
     static constexpr size_t HANDHELD_INDEX = 8;
 
     auto& hid_core = EmulationSession::GetInstance().System().HIDCore();
@@ -463,24 +496,27 @@ void Java_org_yuzu_yuzu_1emu_features_input_NativeInput_loadPerGameConfiguration
 }
 
 void Java_org_yuzu_yuzu_1emu_features_input_NativeInput_beginMapping(JNIEnv* env, jobject j_obj,
-                                                                     jint jtype) {
+                                                                     jint jtype)
+{
     EmulationSession::GetInstance().GetInputSubsystem().BeginMapping(
         static_cast<InputCommon::Polling::InputType>(jtype));
 }
 
-jstring Java_org_yuzu_yuzu_1emu_features_input_NativeInput_getNextInput(JNIEnv* env,
-                                                                        jobject j_obj) {
+jstring Java_org_yuzu_yuzu_1emu_features_input_NativeInput_getNextInput(JNIEnv* env, jobject j_obj)
+{
     return Common::Android::ToJString(
         env, EmulationSession::GetInstance().GetInputSubsystem().GetNextInput().Serialize());
 }
 
-void Java_org_yuzu_yuzu_1emu_features_input_NativeInput_stopMapping(JNIEnv* env, jobject j_obj) {
+void Java_org_yuzu_yuzu_1emu_features_input_NativeInput_stopMapping(JNIEnv* env, jobject j_obj)
+{
     EmulationSession::GetInstance().GetInputSubsystem().StopMapping();
 }
 
 void Java_org_yuzu_yuzu_1emu_features_input_NativeInput_updateMappingsWithDefaultImpl(
     JNIEnv* env, jobject j_obj, jint j_player_index, jstring j_device_params,
-    jstring j_display_name) {
+    jstring j_display_name)
+{
     auto& input_subsystem = EmulationSession::GetInstance().GetInputSubsystem();
 
     // Clear all previous mappings
@@ -521,7 +557,8 @@ void Java_org_yuzu_yuzu_1emu_features_input_NativeInput_updateMappingsWithDefaul
 jstring Java_org_yuzu_yuzu_1emu_features_input_NativeInput_getButtonParamImpl(JNIEnv* env,
                                                                               jobject j_obj,
                                                                               jint j_player_index,
-                                                                              jint j_button) {
+                                                                              jint j_button)
+{
     return Common::Android::ToJString(env, EmulationSession::GetInstance()
                                                .System()
                                                .HIDCore()
@@ -531,7 +568,8 @@ jstring Java_org_yuzu_yuzu_1emu_features_input_NativeInput_getButtonParamImpl(JN
 }
 
 void Java_org_yuzu_yuzu_1emu_features_input_NativeInput_setButtonParamImpl(
-    JNIEnv* env, jobject j_obj, jint j_player_index, jint j_button_id, jstring j_param) {
+    JNIEnv* env, jobject j_obj, jint j_player_index, jint j_button_id, jstring j_param)
+{
     ApplyControllerConfig(j_player_index, [&](Core::HID::EmulatedController* controller) {
         controller->SetButtonParam(j_button_id,
                                    Common::ParamPackage(Common::Android::GetJString(env, j_param)));
@@ -541,7 +579,8 @@ void Java_org_yuzu_yuzu_1emu_features_input_NativeInput_setButtonParamImpl(
 jstring Java_org_yuzu_yuzu_1emu_features_input_NativeInput_getStickParamImpl(JNIEnv* env,
                                                                              jobject j_obj,
                                                                              jint j_player_index,
-                                                                             jint j_stick) {
+                                                                             jint j_stick)
+{
     return Common::Android::ToJString(env, EmulationSession::GetInstance()
                                                .System()
                                                .HIDCore()
@@ -551,7 +590,8 @@ jstring Java_org_yuzu_yuzu_1emu_features_input_NativeInput_getStickParamImpl(JNI
 }
 
 void Java_org_yuzu_yuzu_1emu_features_input_NativeInput_setStickParamImpl(
-    JNIEnv* env, jobject j_obj, jint j_player_index, jint j_stick_id, jstring j_param) {
+    JNIEnv* env, jobject j_obj, jint j_player_index, jint j_stick_id, jstring j_param)
+{
     ApplyControllerConfig(j_player_index, [&](Core::HID::EmulatedController* controller) {
         controller->SetStickParam(j_stick_id,
                                   Common::ParamPackage(Common::Android::GetJString(env, j_param)));
@@ -560,13 +600,15 @@ void Java_org_yuzu_yuzu_1emu_features_input_NativeInput_setStickParamImpl(
 
 jint Java_org_yuzu_yuzu_1emu_features_input_NativeInput_getButtonNameImpl(JNIEnv* env,
                                                                           jobject j_obj,
-                                                                          jstring j_param) {
+                                                                          jstring j_param)
+{
     return static_cast<jint>(EmulationSession::GetInstance().GetInputSubsystem().GetButtonName(
         Common::ParamPackage(Common::Android::GetJString(env, j_param))));
 }
 
 jintArray Java_org_yuzu_yuzu_1emu_features_input_NativeInput_getSupportedStyleTagsImpl(
-    JNIEnv* env, jobject j_obj, jint j_player_index) {
+    JNIEnv* env, jobject j_obj, jint j_player_index)
+{
     auto supported_styles = GetSupportedStyles(j_player_index);
     jintArray j_supported_indexes = env->NewIntArray(supported_styles.size());
     env->SetIntArrayRegion(j_supported_indexes, 0, supported_styles.size(),
@@ -576,7 +618,8 @@ jintArray Java_org_yuzu_yuzu_1emu_features_input_NativeInput_getSupportedStyleTa
 
 jint Java_org_yuzu_yuzu_1emu_features_input_NativeInput_getStyleIndexImpl(JNIEnv* env,
                                                                           jobject j_obj,
-                                                                          jint j_player_index) {
+                                                                          jint j_player_index)
+{
     return static_cast<s32>(EmulationSession::GetInstance()
                                 .System()
                                 .HIDCore()
@@ -587,7 +630,8 @@ jint Java_org_yuzu_yuzu_1emu_features_input_NativeInput_getStyleIndexImpl(JNIEnv
 void Java_org_yuzu_yuzu_1emu_features_input_NativeInput_setStyleIndexImpl(JNIEnv* env,
                                                                           jobject j_obj,
                                                                           jint j_player_index,
-                                                                          jint j_style_index) {
+                                                                          jint j_style_index)
+{
     auto& hid_core = EmulationSession::GetInstance().System().HIDCore();
     auto type = static_cast<Core::HID::NpadStyleIndex>(j_style_index);
     ApplyControllerConfig(j_player_index, [&](Core::HID::EmulatedController* controller) {
@@ -603,14 +647,16 @@ void Java_org_yuzu_yuzu_1emu_features_input_NativeInput_setStyleIndexImpl(JNIEnv
 
 jboolean Java_org_yuzu_yuzu_1emu_features_input_NativeInput_isControllerImpl(JNIEnv* env,
                                                                              jobject j_obj,
-                                                                             jstring jparams) {
+                                                                             jstring jparams)
+{
     return static_cast<jint>(EmulationSession::GetInstance().GetInputSubsystem().IsController(
         Common::ParamPackage(Common::Android::GetJString(env, jparams))));
 }
 
 jboolean Java_org_yuzu_yuzu_1emu_features_input_NativeInput_getIsConnected(JNIEnv* env,
                                                                            jobject j_obj,
-                                                                           jint j_player_index) {
+                                                                           jint j_player_index)
+{
     auto& hid_core = EmulationSession::GetInstance().System().HIDCore();
     auto* controller = hid_core.GetEmulatedControllerByIndex(static_cast<size_t>(j_player_index));
     if (j_player_index == 0 &&
@@ -621,7 +667,8 @@ jboolean Java_org_yuzu_yuzu_1emu_features_input_NativeInput_getIsConnected(JNIEn
 }
 
 void Java_org_yuzu_yuzu_1emu_features_input_NativeInput_connectControllersImpl(
-    JNIEnv* env, jobject j_obj, jbooleanArray j_connected) {
+    JNIEnv* env, jobject j_obj, jbooleanArray j_connected)
+{
     jboolean isCopy = false;
     auto j_connected_array_size = env->GetArrayLength(j_connected);
     jboolean* j_connected_array = env->GetBooleanArrayElements(j_connected, &isCopy);
@@ -630,8 +677,10 @@ void Java_org_yuzu_yuzu_1emu_features_input_NativeInput_connectControllersImpl(
     }
 }
 
-void Java_org_yuzu_yuzu_1emu_features_input_NativeInput_resetControllerMappings(
-    JNIEnv* env, jobject j_obj, jint j_player_index) {
+void Java_org_yuzu_yuzu_1emu_features_input_NativeInput_resetControllerMappings(JNIEnv* env,
+                                                                                jobject j_obj,
+                                                                                jint j_player_index)
+{
     // Clear all previous mappings
     for (int button_id = 0; button_id < Settings::NativeButton::NumButtons; ++button_id) {
         ApplyControllerConfig(j_player_index, [&](Core::HID::EmulatedController* controller) {

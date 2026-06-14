@@ -1,13 +1,15 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include "audio_core/renderer/effect/aux_.h"
 #include "audio_core/renderer/effect/capture.h"
+
+#include "audio_core/renderer/effect/aux_.h"
 
 namespace AudioCore::Renderer {
 
 void CaptureInfo::Update(BehaviorInfo::ErrorInfo& error_info, const InParameterVersion1& in_params,
-                         const PoolMapper& pool_mapper) {
+                         const PoolMapper& pool_mapper)
+{
     auto in_specific{
         reinterpret_cast<const AuxInfo::ParameterVersion1*>(in_params.specific.data())};
     auto params{reinterpret_cast<AuxInfo::ParameterVersion1*>(parameter.data())};
@@ -35,7 +37,8 @@ void CaptureInfo::Update(BehaviorInfo::ErrorInfo& error_info, const InParameterV
 }
 
 void CaptureInfo::Update(BehaviorInfo::ErrorInfo& error_info, const InParameterVersion2& in_params,
-                         const PoolMapper& pool_mapper) {
+                         const PoolMapper& pool_mapper)
+{
     auto in_specific{
         reinterpret_cast<const AuxInfo::ParameterVersion2*>(in_params.specific.data())};
     auto params{reinterpret_cast<AuxInfo::ParameterVersion2*>(parameter.data())};
@@ -63,7 +66,8 @@ void CaptureInfo::Update(BehaviorInfo::ErrorInfo& error_info, const InParameterV
     }
 }
 
-void CaptureInfo::UpdateForCommandGeneration() {
+void CaptureInfo::UpdateForCommandGeneration()
+{
     if (enabled) {
         usage_state = UsageState::Enabled;
     } else {
@@ -71,11 +75,16 @@ void CaptureInfo::UpdateForCommandGeneration() {
     }
 }
 
-void CaptureInfo::InitializeResultState(EffectResultState& result_state) {}
+void CaptureInfo::InitializeResultState(EffectResultState& result_state)
+{
+}
 
-void CaptureInfo::UpdateResultState(EffectResultState& cpu_state, EffectResultState& dsp_state) {}
+void CaptureInfo::UpdateResultState(EffectResultState& cpu_state, EffectResultState& dsp_state)
+{
+}
 
-CpuAddr CaptureInfo::GetWorkbuffer(s32 index) {
+CpuAddr CaptureInfo::GetWorkbuffer(s32 index)
+{
     return workbuffers[index].GetReference(true);
 }
 

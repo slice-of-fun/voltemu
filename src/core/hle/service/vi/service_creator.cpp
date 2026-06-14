@@ -1,14 +1,16 @@
 // SPDX-FileCopyrightText: Copyright 2024 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include "core/hle/service/vi/application_display_service.h"
 #include "core/hle/service/vi/service_creator.h"
+
+#include "core/hle/service/vi/application_display_service.h"
 #include "core/hle/service/vi/vi_results.h"
 #include "core/hle/service/vi/vi_types.h"
 
 namespace Service::VI {
 
-static bool IsValidServiceAccess(Permission permission, Policy policy) {
+static bool IsValidServiceAccess(Permission permission, Policy policy)
+{
     if (permission == Permission::User) {
         return policy == Policy::User;
     }
@@ -23,7 +25,8 @@ static bool IsValidServiceAccess(Permission permission, Policy policy) {
 Result GetApplicationDisplayService(
     std::shared_ptr<IApplicationDisplayService>* out_application_display_service,
     Core::System& system, std::shared_ptr<Container> container, Permission permission,
-    Policy policy) {
+    Policy policy)
+{
 
     if (!IsValidServiceAccess(permission, policy)) {
         LOG_ERROR(Service_VI, "Permission denied for policy {}", policy);

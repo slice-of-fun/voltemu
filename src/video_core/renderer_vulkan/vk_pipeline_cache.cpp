@@ -4,16 +4,19 @@
 // SPDX-FileCopyrightText: Copyright 2019 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "video_core/renderer_vulkan/vk_pipeline_cache.h"
+
 #include <algorithm>
+#include <bit>
 #include <cstddef>
 #include <fstream>
 #include <iostream>
 #include <memory>
+#include <numeric>
 #include <span>
 #include <thread>
 #include <vector>
-#include <bit>
-#include <numeric>
+
 #include "common/cityhash.h"
 #include "common/fs/fs.h"
 #include "common/fs/path_util.h"
@@ -26,6 +29,7 @@
 #include "shader_recompiler/program_header.h"
 #include "video_core/engines/kepler_compute.h"
 #include "video_core/engines/maxwell_3d.h"
+#include "video_core/gpu_logging/gpu_logging.h"
 #include "video_core/memory_manager.h"
 #include "video_core/renderer_vulkan/fixed_pipeline_state.h"
 #include "video_core/renderer_vulkan/maxwell_to_vk.h"
@@ -33,7 +37,6 @@
 #include "video_core/renderer_vulkan/pipeline_statistics.h"
 #include "video_core/renderer_vulkan/vk_compute_pipeline.h"
 #include "video_core/renderer_vulkan/vk_descriptor_pool.h"
-#include "video_core/renderer_vulkan/vk_pipeline_cache.h"
 #include "video_core/renderer_vulkan/vk_scheduler.h"
 #include "video_core/renderer_vulkan/vk_shader_util.h"
 #include "video_core/renderer_vulkan/vk_update_descriptor.h"
@@ -43,7 +46,6 @@
 #include "video_core/surface.h"
 #include "video_core/vulkan_common/vulkan_device.h"
 #include "video_core/vulkan_common/vulkan_wrapper.h"
-#include "video_core/gpu_logging/gpu_logging.h"
 
 #ifdef __ANDROID__
 #include "../../android/app/src/main/jni/android_settings.h"
@@ -65,12 +67,13 @@ using VideoCommon::GraphicsEnvironment;
 constexpr u32 CACHE_VERSION = 17;
 constexpr std::array<char, 8> VULKAN_CACHE_MAGIC_NUMBER{'y', 'u', 'z', 'u', 'v', 'k', 'c', 'h'};
 
-template <typename Container>
-auto MakeSpan(Container& container) {
+template<typename Container> auto MakeSpan(Container& container)
+{
     return std::span(container.data(), container.size());
 }
 
-Shader::OutputTopology MaxwellToOutputTopology(Maxwell::PrimitiveTopology topology) {
+Shader::OutputTopology MaxwellToOutputTopology(Maxwell::PrimitiveTopology topology)
+{
     switch (topology) {
     case Maxwell::PrimitiveTopology::Points:
         return Shader::OutputTopology::PointList;
@@ -81,7 +84,8 @@ Shader::OutputTopology MaxwellToOutputTopology(Maxwell::PrimitiveTopology topolo
     }
 }
 
-Shader::CompareFunction MaxwellToCompareFunction(Maxwell::ComparisonOp comparison) {
+Shader::CompareFunction MaxwellToCompareFunction(Maxwell::ComparisonOp comparison)
+{
     switch (comparison) {
     case Maxwell::ComparisonOp::Never_D3D:
     case Maxwell::ComparisonOp::Never_GL:
@@ -112,7 +116,8 @@ Shader::CompareFunction MaxwellToCompareFunction(Maxwell::ComparisonOp compariso
     return {};
 }
 
-Shader::AttributeType CastAttributeType(const FixedPipelineState::VertexAttribute& attr) {
+Shader::AttributeType CastAttributeType(const FixedPipelineState::VertexAttribute& attr)
+{
     if (attr.enabled == 0) {
         return Shader::AttributeType::Disabled;
     }
@@ -136,7 +141,8 @@ Shader::AttributeType CastAttributeType(const FixedPipelineState::VertexAttribut
     return Shader::AttributeType::Float;
 }
 
-Shader::AttributeType AttributeType(const FixedPipelineState& state, size_t index) {
+Shader::AttributeType AttributeType(const FixedPipelineState& state, size_t index)
+{
     switch (state.DynamicAttributeType(index)) {
     case 0:
         return Shader::AttributeType::Disabled;
@@ -154,7 +160,8 @@ Shader::RuntimeInfo MakeRuntimeInfo(std::span<const Shader::IR::Program> program
                                     const GraphicsPipelineCacheKey& key,
                                     const Shader::IR::Program& program,
                                     const Shader::IR::Program* previous_program,
-                                    const Vulkan::Device& device) {
+                                    const Vulkan::Device& device)
+{
     Shader::RuntimeInfo info;
     if (previous_program) {
         info.previous_stage_stores = previous_program->info.stores;
@@ -182,7 +189,9 @@ Shader::RuntimeInfo MakeRuntimeInfo(std::span<const Shader::IR::Program> program
                     info.xfb_varyings = varyings;
                     info.xfb_count = count;
                 } else {
-                    LOG_WARNING(Render_Vulkan, "XFB requested in pipeline key but device lacks VK_EXT_transform_feedback; ignoring XFB decorations");
+                    LOG_WARNING(Render_Vulkan,
+                                "XFB requested in pipeline key but device lacks "
+                                "VK_EXT_transform_feedback; ignoring XFB decorations");
                 }
             }
             info.convert_depth_mode = gl_ndc;
@@ -236,7 +245,8 @@ Shader::RuntimeInfo MakeRuntimeInfo(std::span<const Shader::IR::Program> program
                 info.xfb_varyings = varyings;
                 info.xfb_count = count;
             } else {
-                LOG_WARNING(Render_Vulkan, "XFB requested in pipeline key but device lacks VK_EXT_transform_feedback; ignoring XFB decorations");
+                LOG_WARNING(Render_Vulkan, "XFB requested in pipeline key but device lacks "
+                                           "VK_EXT_transform_feedback; ignoring XFB decorations");
             }
         }
         info.convert_depth_mode = gl_ndc;
@@ -275,8 +285,10 @@ Shader::RuntimeInfo MakeRuntimeInfo(std::span<const Shader::IR::Program> program
 
         if (device.IsMoltenVK()) {
             for (size_t i = 0; i < 8; ++i) {
-                const auto format = static_cast<Tegra::RenderTargetFormat>(key.state.color_formats[i]);
-                const auto pixel_format = VideoCore::Surface::PixelFormatFromRenderTargetFormat(format);
+                const auto format =
+                    static_cast<Tegra::RenderTargetFormat>(key.state.color_formats[i]);
+                const auto pixel_format =
+                    VideoCore::Surface::PixelFormatFromRenderTargetFormat(format);
                 if (VideoCore::Surface::IsPixelFormatInteger(pixel_format)) {
                     if (VideoCore::Surface::IsPixelFormatSignedInteger(pixel_format)) {
                         info.color_output_types[i] = Shader::AttributeType::SignedInt;
@@ -325,7 +337,8 @@ Shader::RuntimeInfo MakeRuntimeInfo(std::span<const Shader::IR::Program> program
     return info;
 }
 
-size_t GetTotalPipelineWorkers() {
+size_t GetTotalPipelineWorkers()
+{
     const size_t max_core_threads =
         std::max<size_t>(static_cast<size_t>(std::thread::hardware_concurrency()), 2ULL) - 1ULL;
 #ifdef __ANDROID__
@@ -343,21 +356,25 @@ size_t GetTotalPipelineWorkers() {
 
 } // Anonymous namespace
 
-size_t ComputePipelineCacheKey::Hash() const noexcept {
+size_t ComputePipelineCacheKey::Hash() const noexcept
+{
     const u64 hash = Common::CityHash64(reinterpret_cast<const char*>(this), sizeof *this);
     return static_cast<size_t>(hash);
 }
 
-bool ComputePipelineCacheKey::operator==(const ComputePipelineCacheKey& rhs) const noexcept {
+bool ComputePipelineCacheKey::operator==(const ComputePipelineCacheKey& rhs) const noexcept
+{
     return std::memcmp(&rhs, this, sizeof *this) == 0;
 }
 
-size_t GraphicsPipelineCacheKey::Hash() const noexcept {
+size_t GraphicsPipelineCacheKey::Hash() const noexcept
+{
     const u64 hash = Common::CityHash64(reinterpret_cast<const char*>(this), Size());
     return static_cast<size_t>(hash);
 }
 
-bool GraphicsPipelineCacheKey::operator==(const GraphicsPipelineCacheKey& rhs) const noexcept {
+bool GraphicsPipelineCacheKey::operator==(const GraphicsPipelineCacheKey& rhs) const noexcept
+{
     return std::memcmp(&rhs, this, Size()) == 0;
 }
 
@@ -375,7 +392,8 @@ PipelineCache::PipelineCache(Tegra::MaxwellDeviceMemoryManager& device_memory_,
       use_vulkan_pipeline_cache{Settings::values.use_vulkan_driver_pipeline_cache.GetValue()},
       workers(device.HasBrokenParallelShaderCompiling() ? 1ULL : GetTotalPipelineWorkers(),
               "VkPipelineBuilder"),
-      serialization_thread(1, "VkPipelineSerialization") {
+      serialization_thread(1, "VkPipelineSerialization")
+{
     const auto& float_control{device.FloatControlProperties()};
     const VkDriverId driver_id{device.GetDriverID()};
     profile = Shader::Profile{
@@ -468,7 +486,8 @@ PipelineCache::PipelineCache(Tegra::MaxwellDeviceMemoryManager& device_memory_,
                     device.GetMaxVertexInputBindings(), Maxwell::NumVertexArrays);
     }
 
-    LOG_INFO(Render_Vulkan, "DynamicState setting value: {}", u32(Settings::values.dyna_state.GetValue()));
+    LOG_INFO(Render_Vulkan, "DynamicState setting value: {}",
+             u32(Settings::values.dyna_state.GetValue()));
 
     dynamic_features = {};
 
@@ -479,11 +498,9 @@ PipelineCache::PipelineCache(Tegra::MaxwellDeviceMemoryManager& device_memory_,
     //   Level 3: Core + EDS1 + EDS2 + EDS3 (accumulative)
     // Here we only verify if extensions were successfully loaded by the device
 
-    dynamic_features.has_extended_dynamic_state =
-        device.IsExtExtendedDynamicStateSupported();
+    dynamic_features.has_extended_dynamic_state = device.IsExtExtendedDynamicStateSupported();
 
-    dynamic_features.has_extended_dynamic_state_2 =
-        device.IsExtExtendedDynamicState2Supported();
+    dynamic_features.has_extended_dynamic_state_2 = device.IsExtExtendedDynamicState2Supported();
     dynamic_features.has_extended_dynamic_state_2_logic_op =
         device.IsExtExtendedDynamicState2ExtrasSupported();
     dynamic_features.has_extended_dynamic_state_2_patch_control_points = false;
@@ -504,22 +521,22 @@ PipelineCache::PipelineCache(Tegra::MaxwellDeviceMemoryManager& device_memory_,
         Settings::values.vertex_input_dynamic_state.GetValue();
 
     dynamic_features.has_provoking_vertex = device.IsExtProvokingVertexSupported();
-    dynamic_features.has_provoking_vertex_first_mode =
-        device.SupportsProvokingVertexFirstMode();
-    dynamic_features.has_provoking_vertex_last_mode =
-        device.SupportsProvokingVertexLastMode();
+    dynamic_features.has_provoking_vertex_first_mode = device.SupportsProvokingVertexFirstMode();
+    dynamic_features.has_provoking_vertex_last_mode = device.SupportsProvokingVertexLastMode();
     dynamic_features.has_provoking_vertex_tf_preserve =
         device.SupportsTransformFeedbackProvokingVertexPreservation();
 }
 
-PipelineCache::~PipelineCache() {
+PipelineCache::~PipelineCache()
+{
     if (use_vulkan_pipeline_cache && !vulkan_pipeline_cache_filename.empty()) {
         SerializeVulkanPipelineCache(vulkan_pipeline_cache_filename, vulkan_pipeline_cache,
                                      CACHE_VERSION);
     }
 }
 
-GraphicsPipeline* PipelineCache::CurrentGraphicsPipeline() {
+GraphicsPipeline* PipelineCache::CurrentGraphicsPipeline()
+{
 
     if (!RefreshStages(graphics_key.unique_hashes)) {
         current_pipeline = nullptr;
@@ -537,7 +554,8 @@ GraphicsPipeline* PipelineCache::CurrentGraphicsPipeline() {
     return CurrentGraphicsPipelineSlowPath();
 }
 
-ComputePipeline* PipelineCache::CurrentComputePipeline() {
+ComputePipeline* PipelineCache::CurrentComputePipeline()
+{
 
     const ShaderInfo* const shader{ComputeShader()};
     if (!shader) {
@@ -559,7 +577,8 @@ ComputePipeline* PipelineCache::CurrentComputePipeline() {
 }
 
 void PipelineCache::LoadDiskResources(u64 title_id, std::stop_token stop_loading,
-                                      const VideoCore::DiskResourceLoadCallback& callback) {
+                                      const VideoCore::DiskResourceLoadCallback& callback)
+{
     if (title_id == 0) {
         return;
     }
@@ -677,7 +696,8 @@ void PipelineCache::LoadDiskResources(u64 title_id, std::stop_token stop_loading
     }
 }
 
-GraphicsPipeline* PipelineCache::CurrentGraphicsPipelineSlowPath() {
+GraphicsPipeline* PipelineCache::CurrentGraphicsPipelineSlowPath()
+{
     const auto [pair, is_new]{graphics_cache.try_emplace(graphics_key)};
     auto& pipeline{pair->second};
     if (is_new) {
@@ -693,7 +713,8 @@ GraphicsPipeline* PipelineCache::CurrentGraphicsPipelineSlowPath() {
     return BuiltPipeline(current_pipeline);
 }
 
-GraphicsPipeline* PipelineCache::BuiltPipeline(GraphicsPipeline* pipeline) const noexcept {
+GraphicsPipeline* PipelineCache::BuiltPipeline(GraphicsPipeline* pipeline) const noexcept
+{
     if (pipeline->IsBuilt()) {
         return pipeline;
     }
@@ -710,10 +731,11 @@ GraphicsPipeline* PipelineCache::BuiltPipeline(GraphicsPipeline* pipeline) const
     return nullptr;
 }
 
-std::unique_ptr<GraphicsPipeline> PipelineCache::CreateGraphicsPipeline(
-    ShaderPools& pools, const GraphicsPipelineCacheKey& key,
-    std::span<Shader::Environment* const> envs, PipelineStatistics* statistics,
-    bool build_in_parallel) try {
+std::unique_ptr<GraphicsPipeline>
+PipelineCache::CreateGraphicsPipeline(ShaderPools& pools, const GraphicsPipelineCacheKey& key,
+                                      std::span<Shader::Environment* const> envs,
+                                      PipelineStatistics* statistics, bool build_in_parallel)
+try {
     auto hash = key.Hash();
     LOG_INFO(Render_Vulkan, "0x{:016x}", hash);
     size_t env_index{0};
@@ -785,12 +807,15 @@ std::unique_ptr<GraphicsPipeline> PipelineCache::CreateGraphicsPipeline(
 
         // Log shader compilation to GPU logger (with SPIR-V binary dump if enabled)
         if (Settings::values.gpu_logging_enabled.GetValue()) {
-            static constexpr std::array stage_names{"vertex", "tess_control", "tess_eval", "geometry", "fragment"};
-            const std::string shader_name = fmt::format("shader_{:016x}_{}", key.unique_hashes[index], stage_names[stage_index]);
-            const std::string shader_info = fmt::format("SPIR-V size: {} bytes, hash: {:016x}",
-                code.size() * sizeof(u32), key.unique_hashes[index]);
-            GPU::Logging::GPULogger::GetInstance().LogShaderCompilation(shader_name, shader_info,
-                std::span<const u32>(code.data(), code.size()));
+            static constexpr std::array stage_names{"vertex", "tess_control", "tess_eval",
+                                                    "geometry", "fragment"};
+            const std::string shader_name = fmt::format(
+                "shader_{:016x}_{}", key.unique_hashes[index], stage_names[stage_index]);
+            const std::string shader_info =
+                fmt::format("SPIR-V size: {} bytes, hash: {:016x}", code.size() * sizeof(u32),
+                            key.unique_hashes[index]);
+            GPU::Logging::GPULogger::GetInstance().LogShaderCompilation(
+                shader_name, shader_info, std::span<const u32>(code.data(), code.size()));
         }
 
         if (device.HasDebuggingToolAttached()) {
@@ -823,7 +848,8 @@ std::unique_ptr<GraphicsPipeline> PipelineCache::CreateGraphicsPipeline(
     return nullptr;
 }
 
-std::unique_ptr<GraphicsPipeline> PipelineCache::CreateGraphicsPipeline() {
+std::unique_ptr<GraphicsPipeline> PipelineCache::CreateGraphicsPipeline()
+{
     GraphicsEnvironments environments;
     GetGraphicsEnvironments(environments, graphics_key.unique_hashes);
 
@@ -846,8 +872,9 @@ std::unique_ptr<GraphicsPipeline> PipelineCache::CreateGraphicsPipeline() {
     return pipeline;
 }
 
-std::unique_ptr<ComputePipeline> PipelineCache::CreateComputePipeline(
-    const ComputePipelineCacheKey& key, const ShaderInfo* shader) {
+std::unique_ptr<ComputePipeline>
+PipelineCache::CreateComputePipeline(const ComputePipelineCacheKey& key, const ShaderInfo* shader)
+{
     const GPUVAddr program_base{kepler_compute->regs.code_loc.Address()};
     const auto& qmd{kepler_compute->launch_description};
     ComputeEnvironment env{*kepler_compute, *gpu_memory, program_base, qmd.program_start};
@@ -865,9 +892,11 @@ std::unique_ptr<ComputePipeline> PipelineCache::CreateComputePipeline(
     return pipeline;
 }
 
-std::unique_ptr<ComputePipeline> PipelineCache::CreateComputePipeline(
-    ShaderPools& pools, const ComputePipelineCacheKey& key, Shader::Environment& env,
-    PipelineStatistics* statistics, bool build_in_parallel) try {
+std::unique_ptr<ComputePipeline>
+PipelineCache::CreateComputePipeline(ShaderPools& pools, const ComputePipelineCacheKey& key,
+                                     Shader::Environment& env, PipelineStatistics* statistics,
+                                     bool build_in_parallel)
+try {
     auto hash = key.Hash();
     if (device.HasBrokenCompute()) {
         LOG_ERROR(Render_Vulkan, "Skipping 0x{:016x}", hash);
@@ -886,15 +915,13 @@ std::unique_ptr<ComputePipeline> PipelineCache::CreateComputePipeline(
     auto program{TranslateProgram(pools.inst, pools.block, env, cfg, host_info)};
     const VkDriverIdKHR driver_id = device.GetDriverID();
     const bool needs_shared_mem_clamp =
-        driver_id == VK_DRIVER_ID_QUALCOMM_PROPRIETARY ||
-        driver_id == VK_DRIVER_ID_ARM_PROPRIETARY;
+        driver_id == VK_DRIVER_ID_QUALCOMM_PROPRIETARY || driver_id == VK_DRIVER_ID_ARM_PROPRIETARY;
     const u32 max_shared_memory = device.GetMaxComputeSharedMemorySize();
     if (needs_shared_mem_clamp && program.shared_memory_size > max_shared_memory) {
         LOG_WARNING(Render_Vulkan,
-                    "Compute shader 0x{:016x} requests {}KB shared memory but device max is {}KB - clamping",
-                    key.unique_hash,
-                    program.shared_memory_size / 1024,
-                    max_shared_memory / 1024);
+                    "Compute shader 0x{:016x} requests {}KB shared memory but device max is {}KB - "
+                    "clamping",
+                    key.unique_hash, program.shared_memory_size / 1024, max_shared_memory / 1024);
         program.shared_memory_size = max_shared_memory;
     }
     const std::vector<u32> code{EmitSPIRV(profile, program)};
@@ -905,9 +932,9 @@ std::unique_ptr<ComputePipeline> PipelineCache::CreateComputePipeline(
     if (Settings::values.gpu_logging_enabled.GetValue()) {
         const std::string shader_name = fmt::format("shader_{:016x}_compute", key.unique_hash);
         const std::string shader_info = fmt::format("SPIR-V size: {} bytes, hash: {:016x}",
-            code.size() * sizeof(u32), key.unique_hash);
-        GPU::Logging::GPULogger::GetInstance().LogShaderCompilation(shader_name, shader_info,
-            std::span<const u32>(code.data(), code.size()));
+                                                    code.size() * sizeof(u32), key.unique_hash);
+        GPU::Logging::GPULogger::GetInstance().LogShaderCompilation(
+            shader_name, shader_info, std::span<const u32>(code.data(), code.size()));
     }
 
     if (device.HasDebuggingToolAttached()) {
@@ -926,7 +953,8 @@ std::unique_ptr<ComputePipeline> PipelineCache::CreateComputePipeline(
 
 void PipelineCache::SerializeVulkanPipelineCache(const std::filesystem::path& filename,
                                                  const vk::PipelineCache& pipeline_cache,
-                                                 u32 cache_version) try {
+                                                 u32 cache_version)
+try {
     std::ofstream file(filename, std::ios::binary);
     file.exceptions(std::ifstream::failbit);
     if (!file.is_open()) {
@@ -958,7 +986,8 @@ void PipelineCache::SerializeVulkanPipelineCache(const std::filesystem::path& fi
 }
 
 vk::PipelineCache PipelineCache::LoadVulkanPipelineCache(const std::filesystem::path& filename,
-                                                         u32 expected_cache_version) {
+                                                         u32 expected_cache_version)
+{
     const auto create_pipeline_cache = [this](size_t data_size, const void* data) {
         VkPipelineCacheCreateInfo pipeline_cache_ci = {
             .sType = VK_STRUCTURE_TYPE_PIPELINE_CACHE_CREATE_INFO,

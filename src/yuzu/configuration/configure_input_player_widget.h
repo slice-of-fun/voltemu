@@ -6,9 +6,9 @@
 
 #pragma once
 
-#include <array>
 #include <QFrame>
 #include <QPointer>
+#include <array>
 
 #include "common/input.h"
 #include "common/settings_input.h"
@@ -201,8 +201,7 @@ private:
     void Draw3dCube(QPainter& p, QPointF center, const Common::Vec3f& euler, float size);
 
     // Draw primitive types
-    template <size_t N>
-    void DrawPolygon(QPainter& p, const std::array<QPointF, N>& polygon);
+    template<size_t N> void DrawPolygon(QPainter& p, const std::array<QPointF, N>& polygon);
     void DrawCircle(QPainter& p, QPointF center, float size);
     void DrawRectangle(QPainter& p, QPointF center, float width, float height);
     void DrawRoundRectangle(QPainter& p, QPointF center, float width, float height, float round);

@@ -7,17 +7,16 @@
 #pragma once
 
 #include <array>
+#include <boost/container/small_vector.hpp>
+#include <boost/intrusive/list.hpp>
 #include <cstring>
 #include <memory>
+#include <numeric>
 #include <type_traits>
 #include <utility>
 #include <vector>
 
-#include <boost/container/small_vector.hpp>
-#include <boost/intrusive/list.hpp>
-
 #include "common/assert.h"
-#include <numeric>
 #include "common/common_types.h"
 #include "shader_recompiler/exception.h"
 #include "shader_recompiler/frontend/ir/attribute.h"
@@ -95,16 +94,19 @@ private:
 static_assert(static_cast<u32>(IR::Type::Void) == 0, "memset relies on IR::Type being zero");
 static_assert(std::is_trivially_copyable_v<Value>);
 
-template <IR::Type type_>
-class TypedValue : public Value {
+template<IR::Type type_> class TypedValue : public Value {
 public:
     TypedValue() = default;
 
-    template <IR::Type other_type>
-        requires((other_type & type_) != IR::Type::Void)
-    explicit(false) TypedValue(const TypedValue<other_type>& value) : Value(value) {}
+    template<IR::Type other_type>
+    requires((other_type & type_) != IR::Type::Void) explicit(false)
+        TypedValue(const TypedValue<other_type>& value)
+        : Value(value)
+    {
+    }
 
-    explicit TypedValue(const Value& value) : Value(value) {
+    explicit TypedValue(const Value& value) : Value(value)
+    {
         if ((value.Type() & type_) == IR::Type::Void) {
             throw InvalidArgument("Incompatible types {} and {}", type_, value.Type());
         }
@@ -125,22 +127,17 @@ public:
     Inst(Inst&&) = delete;
 
     /// Get the number of uses this instruction has.
-    [[nodiscard]] int UseCount() const noexcept {
-        return use_count;
-    }
+    [[nodiscard]] int UseCount() const noexcept { return use_count; }
 
     /// Determines whether this instruction has uses or not.
-    [[nodiscard]] bool HasUses() const noexcept {
-        return use_count > 0;
-    }
+    [[nodiscard]] bool HasUses() const noexcept { return use_count > 0; }
 
     /// Get the opcode this microinstruction represents.
-    [[nodiscard]] IR::Opcode GetOpcode() const noexcept {
-        return op;
-    }
+    [[nodiscard]] IR::Opcode GetOpcode() const noexcept { return op; }
 
     /// Determines if there is a pseudo-operation associated with this instruction.
-    [[nodiscard]] bool HasAssociatedPseudoOperation() const noexcept {
+    [[nodiscard]] bool HasAssociatedPseudoOperation() const noexcept
+    {
         return associated_insts != nullptr;
     }
 
@@ -161,12 +158,14 @@ public:
     [[nodiscard]] IR::Type Type() const;
 
     /// Get the number of arguments this instruction has.
-    [[nodiscard]] size_t NumArgs() const {
+    [[nodiscard]] size_t NumArgs() const
+    {
         return op == IR::Opcode::Phi ? phi_args.size() : NumArgsOf(op);
     }
 
     /// Get the value of a given argument index.
-    [[nodiscard]] Value Arg(size_t index) const noexcept {
+    [[nodiscard]] Value Arg(size_t index) const noexcept
+    {
         if (op == IR::Opcode::Phi) {
             return phi_args[index].second;
         } else {
@@ -192,43 +191,41 @@ public:
 
     void ReplaceOpcode(IR::Opcode opcode);
 
-    template <typename FlagsType>
-        requires(sizeof(FlagsType) <= sizeof(u32) && std::is_trivially_copyable_v<FlagsType>)
-    [[nodiscard]] FlagsType Flags() const noexcept {
+    template<typename FlagsType>
+    requires(sizeof(FlagsType) <= sizeof(u32) && std::is_trivially_copyable_v<FlagsType>)
+        [[nodiscard]] FlagsType Flags() const noexcept
+    {
         FlagsType ret;
         std::memcpy(reinterpret_cast<char*>(&ret), &flags, sizeof(ret));
         return ret;
     }
 
-    template <typename FlagsType>
-        requires(sizeof(FlagsType) <= sizeof(u32) && std::is_trivially_copyable_v<FlagsType>)
-    void SetFlags(FlagsType value) noexcept {
+    template<typename FlagsType>
+    requires(sizeof(FlagsType) <= sizeof(u32) &&
+             std::is_trivially_copyable_v<FlagsType>) void SetFlags(FlagsType value) noexcept
+    {
         std::memcpy(&flags, &value, sizeof(value));
     }
 
     /// Intrusively store the host definition of this instruction.
-    template <typename DefinitionType>
-    void SetDefinition(DefinitionType def) {
+    template<typename DefinitionType> void SetDefinition(DefinitionType def)
+    {
         definition = std::bit_cast<u32>(def);
     }
 
     /// Return the intrusively stored host definition of this instruction.
-    template <typename DefinitionType>
-    [[nodiscard]] DefinitionType Definition() const noexcept {
+    template<typename DefinitionType> [[nodiscard]] DefinitionType Definition() const noexcept
+    {
         return std::bit_cast<DefinitionType>(definition);
     }
 
     /// Destructively remove one reference count from the instruction
     /// Useful for register allocation
-    void DestructiveRemoveUsage() {
-        --use_count;
-    }
+    void DestructiveRemoveUsage() { --use_count; }
 
     /// Destructively add usages to the instruction
     /// Useful for register allocation
-    void DestructiveAddUsage(int count) {
-        use_count += count;
-    }
+    void DestructiveAddUsage(int count) { use_count += count; }
 
 private:
     struct NonTriviallyDummy {
@@ -277,19 +274,23 @@ using U16U32U64 = TypedValue<Type::U16 | Type::U32 | Type::U64>;
 using F16F32F64 = TypedValue<Type::F16 | Type::F32 | Type::F64>;
 using UAny = TypedValue<Type::U8 | Type::U16 | Type::U32 | Type::U64>;
 
-inline bool Value::IsIdentity() const noexcept {
+inline bool Value::IsIdentity() const noexcept
+{
     return type == Type::Opaque && inst->GetOpcode() == Opcode::Identity;
 }
 
-inline bool Value::IsPhi() const noexcept {
+inline bool Value::IsPhi() const noexcept
+{
     return type == Type::Opaque && inst->GetOpcode() == Opcode::Phi;
 }
 
-inline bool Value::IsEmpty() const noexcept {
+inline bool Value::IsEmpty() const noexcept
+{
     return type == Type::Void;
 }
 
-inline bool Value::IsImmediate() const noexcept {
+inline bool Value::IsImmediate() const noexcept
+{
     IR::Type current_type{type};
     const IR::Inst* current_inst{inst};
     while (current_type == Type::Opaque && current_inst->GetOpcode() == Opcode::Identity) {
@@ -300,12 +301,14 @@ inline bool Value::IsImmediate() const noexcept {
     return current_type != Type::Opaque;
 }
 
-inline IR::Inst* Value::Inst() const {
+inline IR::Inst* Value::Inst() const
+{
     DEBUG_ASSERT(type == Type::Opaque);
     return inst;
 }
 
-inline IR::Inst* Value::InstRecursive() const {
+inline IR::Inst* Value::InstRecursive() const
+{
     DEBUG_ASSERT(type == Type::Opaque);
     if (IsIdentity()) {
         return inst->Arg(0).InstRecursive();
@@ -313,41 +316,48 @@ inline IR::Inst* Value::InstRecursive() const {
     return inst;
 }
 
-inline IR::Inst* Value::TryInstRecursive() const {
+inline IR::Inst* Value::TryInstRecursive() const
+{
     if (IsIdentity()) {
         return inst->Arg(0).TryInstRecursive();
     }
     return type == Type::Opaque ? inst : nullptr;
 }
 
-inline IR::Value Value::Resolve() const {
+inline IR::Value Value::Resolve() const
+{
     if (IsIdentity()) {
         return inst->Arg(0).Resolve();
     }
     return *this;
 }
 
-inline IR::Reg Value::Reg() const {
+inline IR::Reg Value::Reg() const
+{
     DEBUG_ASSERT(type == Type::Reg);
     return reg;
 }
 
-inline IR::Pred Value::Pred() const {
+inline IR::Pred Value::Pred() const
+{
     DEBUG_ASSERT(type == Type::Pred);
     return pred;
 }
 
-inline IR::Attribute Value::Attribute() const {
+inline IR::Attribute Value::Attribute() const
+{
     DEBUG_ASSERT(type == Type::Attribute);
     return attribute;
 }
 
-inline IR::Patch Value::Patch() const {
+inline IR::Patch Value::Patch() const
+{
     DEBUG_ASSERT(type == Type::Patch);
     return patch;
 }
 
-inline bool Value::U1() const {
+inline bool Value::U1() const
+{
     if (IsIdentity()) {
         return inst->Arg(0).U1();
     }
@@ -355,7 +365,8 @@ inline bool Value::U1() const {
     return imm_u1;
 }
 
-inline u8 Value::U8() const {
+inline u8 Value::U8() const
+{
     if (IsIdentity()) {
         return inst->Arg(0).U8();
     }
@@ -363,7 +374,8 @@ inline u8 Value::U8() const {
     return imm_u8;
 }
 
-inline u16 Value::U16() const {
+inline u16 Value::U16() const
+{
     if (IsIdentity()) {
         return inst->Arg(0).U16();
     }
@@ -371,7 +383,8 @@ inline u16 Value::U16() const {
     return imm_u16;
 }
 
-inline u32 Value::U32() const {
+inline u32 Value::U32() const
+{
     if (IsIdentity()) {
         return inst->Arg(0).U32();
     }
@@ -379,7 +392,8 @@ inline u32 Value::U32() const {
     return imm_u32;
 }
 
-inline f32 Value::F32() const {
+inline f32 Value::F32() const
+{
     if (IsIdentity()) {
         return inst->Arg(0).F32();
     }
@@ -387,7 +401,8 @@ inline f32 Value::F32() const {
     return imm_f32;
 }
 
-inline u64 Value::U64() const {
+inline u64 Value::U64() const
+{
     if (IsIdentity()) {
         return inst->Arg(0).U64();
     }
@@ -395,7 +410,8 @@ inline u64 Value::U64() const {
     return imm_u64;
 }
 
-inline f64 Value::F64() const {
+inline f64 Value::F64() const
+{
     if (IsIdentity()) {
         return inst->Arg(0).F64();
     }
@@ -403,7 +419,8 @@ inline f64 Value::F64() const {
     return imm_f64;
 }
 
-[[nodiscard]] inline bool IsPhi(const Inst& inst) {
+[[nodiscard]] inline bool IsPhi(const Inst& inst)
+{
     return inst.GetOpcode() == Opcode::Phi;
 }
 

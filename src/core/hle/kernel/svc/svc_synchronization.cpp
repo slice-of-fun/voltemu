@@ -16,7 +16,8 @@
 namespace Kernel::Svc {
 
 /// Close a handle
-Result CloseHandle(Core::System& system, Handle handle) {
+Result CloseHandle(Core::System& system, Handle handle)
+{
     LOG_TRACE(Kernel_SVC, "Closing handle 0x{:08X}", handle);
 
     // Remove the handle.
@@ -27,7 +28,8 @@ Result CloseHandle(Core::System& system, Handle handle) {
 }
 
 /// Clears the signaled state of an event or process.
-Result ResetSignal(Core::System& system, Handle handle) {
+Result ResetSignal(Core::System& system, Handle handle)
+{
     LOG_DEBUG(Kernel_SVC, "called handle 0x{:08X}", handle);
 
     // Get the current handle table.
@@ -54,7 +56,8 @@ Result ResetSignal(Core::System& system, Handle handle) {
 
 /// Wait for the given handles to synchronize, timeout after the specified nanoseconds
 Result WaitSynchronization(Core::System& system, int32_t* out_index, u64 user_handles,
-                           int32_t num_handles, int64_t timeout_ns) {
+                           int32_t num_handles, int64_t timeout_ns)
+{
     LOG_TRACE(Kernel_SVC, "called user_handles={:#x}, num_handles={}, timeout_ns={}", user_handles,
               num_handles, timeout_ns);
 
@@ -81,7 +84,8 @@ Result WaitSynchronization(Core::System& system, int32_t* out_index, u64 user_ha
     }
 
     // Ensure handles are closed when we're done.
-    SCOPE_EXIT {
+    SCOPE_EXIT
+    {
         for (auto i = 0; i < num_handles; ++i) {
             objs[i]->Close();
         }
@@ -107,7 +111,8 @@ Result WaitSynchronization(Core::System& system, int32_t* out_index, u64 user_ha
 }
 
 /// Resumes a thread waiting on WaitSynchronization
-Result CancelSynchronization(Core::System& system, Handle handle) {
+Result CancelSynchronization(Core::System& system, Handle handle)
+{
     LOG_TRACE(Kernel_SVC, "called handle={:#X}", handle);
 
     // Get the thread from its handle.
@@ -120,7 +125,8 @@ Result CancelSynchronization(Core::System& system, Handle handle) {
     R_SUCCEED();
 }
 
-void SynchronizePreemptionState(Core::System& system) {
+void SynchronizePreemptionState(Core::System& system)
+{
     auto& kernel = system.Kernel();
 
     // Lock the scheduler.
@@ -139,45 +145,55 @@ void SynchronizePreemptionState(Core::System& system) {
     }
 }
 
-Result CloseHandle64(Core::System& system, Handle handle) {
+Result CloseHandle64(Core::System& system, Handle handle)
+{
     R_RETURN(CloseHandle(system, handle));
 }
 
-Result ResetSignal64(Core::System& system, Handle handle) {
+Result ResetSignal64(Core::System& system, Handle handle)
+{
     R_RETURN(ResetSignal(system, handle));
 }
 
 Result WaitSynchronization64(Core::System& system, int32_t* out_index, uint64_t handles,
-                             int32_t num_handles, int64_t timeout_ns) {
+                             int32_t num_handles, int64_t timeout_ns)
+{
     R_RETURN(WaitSynchronization(system, out_index, handles, num_handles, timeout_ns));
 }
 
-Result CancelSynchronization64(Core::System& system, Handle handle) {
+Result CancelSynchronization64(Core::System& system, Handle handle)
+{
     R_RETURN(CancelSynchronization(system, handle));
 }
 
-void SynchronizePreemptionState64(Core::System& system) {
+void SynchronizePreemptionState64(Core::System& system)
+{
     SynchronizePreemptionState(system);
 }
 
-Result CloseHandle64From32(Core::System& system, Handle handle) {
+Result CloseHandle64From32(Core::System& system, Handle handle)
+{
     R_RETURN(CloseHandle(system, handle));
 }
 
-Result ResetSignal64From32(Core::System& system, Handle handle) {
+Result ResetSignal64From32(Core::System& system, Handle handle)
+{
     R_RETURN(ResetSignal(system, handle));
 }
 
 Result WaitSynchronization64From32(Core::System& system, int32_t* out_index, uint32_t handles,
-                                   int32_t num_handles, int64_t timeout_ns) {
+                                   int32_t num_handles, int64_t timeout_ns)
+{
     R_RETURN(WaitSynchronization(system, out_index, handles, num_handles, timeout_ns));
 }
 
-Result CancelSynchronization64From32(Core::System& system, Handle handle) {
+Result CancelSynchronization64From32(Core::System& system, Handle handle)
+{
     R_RETURN(CancelSynchronization(system, handle));
 }
 
-void SynchronizePreemptionState64From32(Core::System& system) {
+void SynchronizePreemptionState64From32(Core::System& system)
+{
     SynchronizePreemptionState(system);
 }
 

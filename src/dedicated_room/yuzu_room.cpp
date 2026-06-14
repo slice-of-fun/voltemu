@@ -17,12 +17,12 @@
 
 #ifdef _WIN32
 // windows.h needs to be included before shellapi.h
-#include <windows.h>
-
 #include <shellapi.h>
+#include <windows.h>
 #endif
 
 #include <openssl/evp.h>
+
 #include "common/common_types.h"
 #include "common/detached_tasks.h"
 #include "common/fs/file.h"
@@ -50,7 +50,8 @@
 
 #include "yuzu_room.h"
 
-static void PrintHelp(const char* argv0) {
+static void PrintHelp(const char* argv0)
+{
     LOG_INFO(Network,
              "Usage: {}"
              " [options] <filename>\n"
@@ -72,7 +73,8 @@ static void PrintHelp(const char* argv0) {
              argv0);
 }
 
-static void PrintVersion() {
+static void PrintVersion()
+{
     LOG_INFO(Network, "Eden dedicated room {} {} Libnetwork: {}", Common::g_scm_branch,
              Common::g_scm_desc, Network::network_version);
 }
@@ -82,11 +84,13 @@ static constexpr char BanListMagic[] = "YuzuRoom-BanList-1";
 
 static constexpr char token_delimiter{':'};
 
-static void PadToken(std::string& token) {
+static void PadToken(std::string& token)
+{
     std::array<unsigned char, 512> output{};
     std::array<unsigned char, 2048> roundtrip{};
     for (size_t i = 0; i < 3; i++) {
-        EVP_DecodeBlock(output.data(), reinterpret_cast<const unsigned char*>(token.c_str()), token.size());
+        EVP_DecodeBlock(output.data(), reinterpret_cast<const unsigned char*>(token.c_str()),
+                        token.size());
         EVP_EncodeBlock(output.data(), roundtrip.data(), roundtrip.size());
         if (memcmp(roundtrip.data(), token.data(), token.size()) == 0) {
             break;
@@ -95,23 +99,28 @@ static void PadToken(std::string& token) {
     }
 }
 
-static std::string UsernameFromDisplayToken(const std::string& display_token) {
+static std::string UsernameFromDisplayToken(const std::string& display_token)
+{
     std::size_t outlen = 4 * ((display_token.length() + 2) / 3);
     std::array<unsigned char, 512> output{};
-    EVP_DecodeBlock(output.data(), reinterpret_cast<const unsigned char*>(display_token.c_str()), display_token.length());
+    EVP_DecodeBlock(output.data(), reinterpret_cast<const unsigned char*>(display_token.c_str()),
+                    display_token.length());
     std::string decoded_display_token(reinterpret_cast<char*>(&output), outlen);
     return decoded_display_token.substr(0, decoded_display_token.find(token_delimiter));
 }
 
-static std::string TokenFromDisplayToken(const std::string& display_token) {
+static std::string TokenFromDisplayToken(const std::string& display_token)
+{
     std::size_t outlen = 4 * ((display_token.length() + 2) / 3);
     std::array<unsigned char, 512> output{};
-    EVP_DecodeBlock(output.data(), reinterpret_cast<const unsigned char*>(display_token.c_str()), display_token.length());
+    EVP_DecodeBlock(output.data(), reinterpret_cast<const unsigned char*>(display_token.c_str()),
+                    display_token.length());
     std::string decoded_display_token(reinterpret_cast<char*>(&output), outlen);
     return decoded_display_token.substr(decoded_display_token.find(token_delimiter) + 1);
 }
 
-static Network::Room::BanList LoadBanList(const std::string& path) {
+static Network::Room::BanList LoadBanList(const std::string& path)
+{
     std::ifstream file;
     Common::FS::OpenFileStream(file, path, std::ios_base::in);
     if (!file || file.eof()) {
@@ -149,7 +158,8 @@ static Network::Room::BanList LoadBanList(const std::string& path) {
     return {username_ban_list, ip_ban_list};
 }
 
-static void SaveBanList(const Network::Room::BanList& ban_list, const std::string& path) {
+static void SaveBanList(const Network::Room::BanList& ban_list, const std::string& path)
+{
     std::ofstream file;
     Common::FS::OpenFileStream(file, path, std::ios_base::out);
     if (!file) {
@@ -223,7 +233,8 @@ void LaunchRoom(int argc, char** argv, bool called_by_option)
     Common::Log::Start();
 
     while (optind < argc) {
-        int arg = getopt_long(argc, argv, "n:d:s:p:m:w:g:u:t:a:i:l:hv", long_options, &option_index);
+        int arg =
+            getopt_long(argc, argv, "n:d:s:p:m:w:g:u:t:a:i:l:hv", long_options, &option_index);
         if (arg != -1) {
             char carg = static_cast<char>(arg);
 
@@ -295,8 +306,7 @@ void LaunchRoom(int argc, char** argv, bool called_by_option)
                   "room.\nSet with --preferred-game-id id");
     }
     if (max_members > Network::MaxConcurrentConnections || max_members < 2) {
-        LOG_ERROR(Network,
-                  "max_members needs to be in the range 2 - {}!",
+        LOG_ERROR(Network, "max_members needs to be in the range 2 - {}!",
                   Network::MaxConcurrentConnections);
         PrintHelp(argv[0]);
         std::exit(-1);
@@ -310,9 +320,8 @@ void LaunchRoom(int argc, char** argv, bool called_by_option)
         std::exit(-1);
     }
     if (ban_list_file.empty()) {
-        LOG_ERROR(Network,
-                  "Ban list file not set!\nThis should get set to load and save room ban "
-                  "list.\nSet with --ban-list-file <file>");
+        LOG_ERROR(Network, "Ban list file not set!\nThis should get set to load and save room ban "
+                           "list.\nSet with --ban-list-file <file>");
     }
     bool announce = true;
     if (token.empty() && announce) {

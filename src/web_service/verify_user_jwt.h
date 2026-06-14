@@ -4,6 +4,7 @@
 #pragma once
 
 #include <fmt/ranges.h>
+
 #include "network/verify_user.h"
 #include "web_service/web_backend.h"
 

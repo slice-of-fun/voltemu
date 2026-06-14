@@ -4,7 +4,6 @@
 #pragma once
 
 #include "common/intrusive_list.h"
-
 #include "core/hle/kernel/slab_helpers.h"
 
 namespace Kernel {
@@ -18,21 +17,22 @@ public:
     explicit KSharedMemoryInfo(KernelCore&) {}
     KSharedMemoryInfo() = default;
 
-    constexpr void Initialize(KSharedMemory* m) {
+    constexpr void Initialize(KSharedMemory* m)
+    {
         m_shared_memory = m;
         m_reference_count = 0;
     }
 
-    constexpr KSharedMemory* GetSharedMemory() const {
-        return m_shared_memory;
-    }
+    constexpr KSharedMemory* GetSharedMemory() const { return m_shared_memory; }
 
-    constexpr void Open() {
+    constexpr void Open()
+    {
         ++m_reference_count;
         ASSERT(m_reference_count > 0);
     }
 
-    constexpr bool Close() {
+    constexpr bool Close()
+    {
         ASSERT(m_reference_count > 0);
         return (--m_reference_count) == 0;
     }

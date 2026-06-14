@@ -48,7 +48,8 @@ enum : u8 {
     LastCommonEntry,
 };
 
-constexpr std::pair<u8, u8> GetDirtyFlagsForMethod(u32 method) {
+constexpr std::pair<u8, u8> GetDirtyFlagsForMethod(u32 method)
+{
     const u32 OFF_VERTEX_STREAMS = 0x2C0;
     const u32 OFF_VERTEX_STREAM_LIMITS = 0x2F8;
     const u32 OFF_INDEX_BUFFER = 0x460;
@@ -73,7 +74,8 @@ constexpr std::pair<u8, u8> GetDirtyFlagsForMethod(u32 method) {
         return {static_cast<u8>(VertexBuffer0 + buffer_idx), VertexBuffers};
     }
 
-    if (method == OFF_INDEX_BUFFER || (method > OFF_INDEX_BUFFER && method < OFF_INDEX_BUFFER + 3)) {
+    if (method == OFF_INDEX_BUFFER ||
+        (method > OFF_INDEX_BUFFER && method < OFF_INDEX_BUFFER + 3)) {
         return {IndexBuffer, NullEntry};
     }
 
@@ -90,7 +92,8 @@ constexpr std::pair<u8, u8> GetDirtyFlagsForMethod(u32 method) {
         return {static_cast<u8>(ColorBuffer0 + rt_idx), RenderTargets};
     }
 
-    if (method == OFF_SURFACE_CLIP || (method > OFF_SURFACE_CLIP && method < OFF_SURFACE_CLIP + 4)) {
+    if (method == OFF_SURFACE_CLIP ||
+        (method > OFF_SURFACE_CLIP && method < OFF_SURFACE_CLIP + 4)) {
         return {RenderTargets, NullEntry};
     }
 
@@ -98,7 +101,8 @@ constexpr std::pair<u8, u8> GetDirtyFlagsForMethod(u32 method) {
         return {RenderTargets, RenderTargetControl};
     }
 
-    if (method == OFF_ZETA_ENABLE || method == OFF_ZETA_SIZE_WIDTH || method == OFF_ZETA_SIZE_HEIGHT) {
+    if (method == OFF_ZETA_ENABLE || method == OFF_ZETA_SIZE_WIDTH ||
+        method == OFF_ZETA_SIZE_HEIGHT) {
         return {ZetaBuffer, RenderTargets};
     }
 
@@ -113,16 +117,18 @@ constexpr std::pair<u8, u8> GetDirtyFlagsForMethod(u32 method) {
     return {NullEntry, NullEntry};
 }
 
-template <typename Integer>
+template<typename Integer>
 void FillBlock(Tegra::Engines::Maxwell3D::DirtyState::Table& table, std::size_t begin,
-               std::size_t num, Integer dirty_index) {
+               std::size_t num, Integer dirty_index)
+{
     const auto it = std::begin(table) + begin;
     std::fill(it, it + num, static_cast<u8>(dirty_index));
 }
 
-template <typename Integer1, typename Integer2>
+template<typename Integer1, typename Integer2>
 void FillBlock(Tegra::Engines::Maxwell3D::DirtyState::Tables& tables, std::size_t begin,
-               std::size_t num, Integer1 index_a, Integer2 index_b) {
+               std::size_t num, Integer1 index_a, Integer2 index_b)
+{
     FillBlock(tables[0], begin, num, index_a);
     FillBlock(tables[1], begin, num, index_b);
 }

@@ -11,7 +11,6 @@
 #include "common/common_funcs.h"
 #include "common/common_types.h"
 #include "core/hardware_properties.h"
-
 #include "core/hle/kernel/svc_types.h"
 
 namespace Common {
@@ -86,9 +85,7 @@ public:
     virtual void SetSvcArguments(std::span<const uint64_t, 8> args) = 0;
     virtual u32 GetSvcNumber() const = 0;
 
-    void SetWatchpointArray(const WatchpointArray* watchpoints) {
-        m_watchpoints = watchpoints;
-    }
+    void SetWatchpointArray(const WatchpointArray* watchpoints) { m_watchpoints = watchpoints; }
 
     // Signal an interrupt for execution to halt as soon as possible.
     // It is safe to call this if the CPU is not running.
@@ -102,8 +99,8 @@ public:
     virtual void RewindBreakpointInstruction() = 0;
 
 protected:
-    const Kernel::DebugWatchpoint* MatchingWatchpoint(
-        u64 addr, u64 size, Kernel::DebugWatchpointType access_type) const;
+    const Kernel::DebugWatchpoint*
+    MatchingWatchpoint(u64 addr, u64 size, Kernel::DebugWatchpointType access_type) const;
 
 protected:
     const WatchpointArray* m_watchpoints{};

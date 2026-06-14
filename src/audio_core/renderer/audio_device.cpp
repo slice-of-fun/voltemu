@@ -4,12 +4,13 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "audio_core/renderer/audio_device.h"
+
 #include <array>
 #include <span>
 
 #include "audio_core/audio_core.h"
 #include "audio_core/common/feature_support.h"
-#include "audio_core/renderer/audio_device.h"
 #include "audio_core/sink/sink.h"
 #include "core/core.h"
 
@@ -37,9 +38,12 @@ constexpr std::array output_device_names{
 AudioDevice::AudioDevice(Core::System& system, const u64 applet_resource_user_id_,
                          const u32 revision)
     : output_sink{system.AudioCore().GetOutputSink()},
-      applet_resource_user_id{applet_resource_user_id_}, user_revision{revision} {}
+      applet_resource_user_id{applet_resource_user_id_}, user_revision{revision}
+{
+}
 
-u32 AudioDevice::ListAudioDeviceName(std::span<AudioDeviceName> out_buffer) const {
+u32 AudioDevice::ListAudioDeviceName(std::span<AudioDeviceName> out_buffer) const
+{
     std::span<const AudioDeviceName> names{};
 
     if (CheckFeatureSupported(SupportTags::AudioUsbDeviceOutput, user_revision)) {
@@ -55,8 +59,10 @@ u32 AudioDevice::ListAudioDeviceName(std::span<AudioDeviceName> out_buffer) cons
     return out_count;
 }
 
-u32 AudioDevice::ListAudioOutputDeviceName(std::span<AudioDeviceName> out_buffer) const {
-    const u32 out_count{static_cast<u32>((std::min)(out_buffer.size(), output_device_names.size()))};
+u32 AudioDevice::ListAudioOutputDeviceName(std::span<AudioDeviceName> out_buffer) const
+{
+    const u32 out_count{
+        static_cast<u32>((std::min)(out_buffer.size(), output_device_names.size()))};
 
     for (u32 i = 0; i < out_count; i++) {
         out_buffer[i] = output_device_names[i];
@@ -64,11 +70,13 @@ u32 AudioDevice::ListAudioOutputDeviceName(std::span<AudioDeviceName> out_buffer
     return out_count;
 }
 
-void AudioDevice::SetDeviceVolumes(const f32 volume) {
+void AudioDevice::SetDeviceVolumes(const f32 volume)
+{
     output_sink.SetDeviceVolume(volume);
 }
 
-f32 AudioDevice::GetDeviceVolume([[maybe_unused]] std::string_view name) const {
+f32 AudioDevice::GetDeviceVolume([[maybe_unused]] std::string_view name) const
+{
     return output_sink.GetDeviceVolume();
 }
 

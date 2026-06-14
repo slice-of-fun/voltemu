@@ -4,20 +4,25 @@
 // SPDX-FileCopyrightText: Copyright 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include "core/core.h"
 #include "core/hle/service/psc/time/power_state_request_manager.h"
+
+#include "core/core.h"
 
 namespace Service::PSC::Time {
 
 PowerStateRequestManager::PowerStateRequestManager(Core::System& system)
     : m_system{system}, m_ctx{system, "Psc:PowerStateRequestManager"},
-      m_event{m_ctx.CreateEvent("Psc:PowerStateRequestManager:Event")} {}
+      m_event{m_ctx.CreateEvent("Psc:PowerStateRequestManager:Event")}
+{
+}
 
-PowerStateRequestManager::~PowerStateRequestManager() {
+PowerStateRequestManager::~PowerStateRequestManager()
+{
     m_ctx.CloseEvent(m_event);
 }
 
-void PowerStateRequestManager::UpdatePendingPowerStateRequestPriority(u32 priority) {
+void PowerStateRequestManager::UpdatePendingPowerStateRequestPriority(u32 priority)
+{
     std::scoped_lock l{m_mutex};
     if (m_has_pending_request) {
         m_pending_request_priority = (std::max)(m_pending_request_priority, priority);
@@ -27,7 +32,8 @@ void PowerStateRequestManager::UpdatePendingPowerStateRequestPriority(u32 priori
     }
 }
 
-void PowerStateRequestManager::SignalPowerStateRequestAvailability() {
+void PowerStateRequestManager::SignalPowerStateRequestAvailability()
+{
     std::scoped_lock l{m_mutex};
     if (m_has_pending_request) {
         if (!m_has_available_request) {
@@ -39,7 +45,8 @@ void PowerStateRequestManager::SignalPowerStateRequestAvailability() {
     }
 }
 
-bool PowerStateRequestManager::GetAndClearPowerStateRequest(u32& out_priority) {
+bool PowerStateRequestManager::GetAndClearPowerStateRequest(u32& out_priority)
+{
     std::scoped_lock l{m_mutex};
     auto had_request{m_has_available_request};
     if (m_has_available_request) {

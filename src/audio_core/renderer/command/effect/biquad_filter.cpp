@@ -4,11 +4,13 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include "audio_core/adsp/apps/audio_renderer/command_list_processor.h"
 #include "audio_core/renderer/command/effect/biquad_filter.h"
-#include "audio_core/renderer/voice/voice_state.h"
-#include <numeric>
+
 #include <bit>
+#include <numeric>
+
+#include "audio_core/adsp/apps/audio_renderer/command_list_processor.h"
+#include "audio_core/renderer/voice/voice_state.h"
 
 namespace AudioCore::Renderer {
 /**
@@ -23,7 +25,8 @@ namespace AudioCore::Renderer {
  */
 void ApplyBiquadFilterFloat(std::span<s32> output, std::span<const s32> input,
                             std::array<s16, 3>& b_, std::array<s16, 2>& a_,
-                            VoiceState::BiquadFilterState& state, const u32 sample_count) {
+                            VoiceState::BiquadFilterState& state, const u32 sample_count)
+{
     constexpr f64 min{(std::numeric_limits<s32>::min)()};
     constexpr f64 max{(std::numeric_limits<s32>::max)()};
     std::array<f64, 3> b{Common::FixedPoint<50, 14>::from_base(b_[0]).to_double(),
@@ -57,7 +60,8 @@ void ApplyBiquadFilterFloat(std::span<s32> output, std::span<const s32> input,
  */
 void ApplyBiquadFilterFloat2(std::span<s32> output, std::span<const s32> input,
                              std::array<f32, 3>& b, std::array<f32, 2>& a,
-                             VoiceState::BiquadFilterState& state, const u32 sample_count) {
+                             VoiceState::BiquadFilterState& state, const u32 sample_count)
+{
     constexpr f64 min{std::numeric_limits<s32>::min()};
     constexpr f64 max{std::numeric_limits<s32>::max()};
 
@@ -98,7 +102,8 @@ void ApplyBiquadFilterFloat2(std::span<s32> output, std::span<const s32> input,
  */
 static void ApplyBiquadFilterInt(std::span<s32> output, std::span<const s32> input,
                                  std::array<s16, 3>& b, std::array<s16, 2>& a,
-                                 VoiceState::BiquadFilterState& state, const u32 sample_count) {
+                                 VoiceState::BiquadFilterState& state, const u32 sample_count)
+{
     constexpr s64 min{(std::numeric_limits<s32>::min)()};
     constexpr s64 max{(std::numeric_limits<s32>::max)()};
 
@@ -115,13 +120,15 @@ static void ApplyBiquadFilterInt(std::span<s32> output, std::span<const s32> inp
 }
 
 void BiquadFilterCommand::Dump(
-    [[maybe_unused]] const AudioRenderer::CommandListProcessor& processor, std::string& string) {
+    [[maybe_unused]] const AudioRenderer::CommandListProcessor& processor, std::string& string)
+{
     string += fmt::format(
         "BiquadFilterCommand\n\tinput {:02X} output {:02X} needs_init {} use_float_processing {}\n",
         input, output, needs_init, use_float_processing);
 }
 
-void BiquadFilterCommand::Process(const AudioRenderer::CommandListProcessor& processor) {
+void BiquadFilterCommand::Process(const AudioRenderer::CommandListProcessor& processor)
+{
     auto state_{reinterpret_cast<VoiceState::BiquadFilterState*>(state)};
     if (needs_init) {
         *state_ = {};
@@ -147,7 +154,8 @@ void BiquadFilterCommand::Process(const AudioRenderer::CommandListProcessor& pro
     }
 }
 
-bool BiquadFilterCommand::Verify(const AudioRenderer::CommandListProcessor& processor) {
+bool BiquadFilterCommand::Verify(const AudioRenderer::CommandListProcessor& processor)
+{
     return true;
 }
 

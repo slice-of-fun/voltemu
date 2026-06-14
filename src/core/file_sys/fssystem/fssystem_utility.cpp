@@ -5,7 +5,8 @@
 
 namespace FileSys {
 
-void AddCounter(void* counter_, size_t counter_size, u64 value) {
+void AddCounter(void* counter_, size_t counter_size, u64 value)
+{
     u8* counter = static_cast<u8*>(counter_);
     u64 remaining = value;
     u8 carry = 0;

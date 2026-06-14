@@ -7,13 +7,14 @@
 
 #pragma once
 
+#include <ankerl/unordered_dense.h>
+
 #include <bit>
 #include <list>
 #include <map>
 #include <memory>
 #include <mutex>
 #include <optional>
-#include <ankerl/unordered_dense.h>
 #include <vector>
 
 #include "common/address_space.h"
@@ -173,10 +174,12 @@ private:
         bool big_page : 1; // Only valid if fixed == false
         bool sparse_alloc : 1;
 
-        Mapping(NvCore::NvMap::Handle::Id handle_, DAddr ptr_, u64 offset_, u64 size_, bool fixed_, bool big_page_, bool sparse_alloc_)
-            : ptr(ptr_), offset(offset_), size(size_), handle(handle_)
-            , fixed(fixed_), big_page(big_page_), sparse_alloc(sparse_alloc_)
-        {}
+        Mapping(NvCore::NvMap::Handle::Id handle_, DAddr ptr_, u64 offset_, u64 size_, bool fixed_,
+                bool big_page_, bool sparse_alloc_)
+            : ptr(ptr_), offset(offset_), size(size_), handle(handle_), fixed(fixed_),
+              big_page(big_page_), sparse_alloc(sparse_alloc_)
+        {
+        }
     };
 
     struct Allocation {
@@ -215,7 +218,8 @@ private:
         using Allocator = Common::FlatAllocator<u32, 0, 32>;
 
         std::optional<Allocator> big_page_allocator;
-        std::optional<Allocator> small_page_allocator; //! Shared as this is also used by nvhost::GpuChannel
+        std::optional<Allocator>
+            small_page_allocator; //! Shared as this is also used by nvhost::GpuChannel
 
         bool initialised{};
     } vm;

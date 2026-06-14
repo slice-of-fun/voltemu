@@ -27,8 +27,9 @@ public:
 private:
     Result CreateBcatService(ClientProcessId process_id, OutInterface<IBcatService> out_interface);
 
-    Result CreateDeliveryCacheStorageService(
-        ClientProcessId process_id, OutInterface<IDeliveryCacheStorageService> out_interface);
+    Result
+    CreateDeliveryCacheStorageService(ClientProcessId process_id,
+                                      OutInterface<IDeliveryCacheStorageService> out_interface);
 
     Result CreateDeliveryCacheStorageServiceWithApplicationId(
         u64 application_id, OutInterface<IDeliveryCacheStorageService> out_interface);

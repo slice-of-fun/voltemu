@@ -1,17 +1,21 @@
 // SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+#include "game_card.h"
+
 #include <QPainter>
 #include <QPainterPath>
-#include "game_card.h"
+
 #include "qt_common/config/uisettings.h"
 
-GameCard::GameCard(QObject* parent) : QStyledItemDelegate{parent} {
+GameCard::GameCard(QObject* parent) : QStyledItemDelegate{parent}
+{
     setObjectName("GameCard");
 }
 
 void GameCard::paint(QPainter* painter, const QStyleOptionViewItem& option,
-                     const QModelIndex& index) const {
+                     const QModelIndex& index) const
+{
     if (!index.isValid())
         return;
 
@@ -29,7 +33,8 @@ void GameCard::paint(QPainter* painter, const QStyleOptionViewItem& option,
     const int total_gap = row_width - cardMargin * 2 - m_columns * card_width;
     const int gap = (m_columns > 1) ? (total_gap / (m_columns - 1)) : 0;
 
-    const int card_left = option.rect.left() - column * cell_width + cardMargin + column * (card_width + gap) + 4;
+    const int card_left =
+        option.rect.left() - column * cell_width + cardMargin + column * (card_width + gap) + 4;
     const QRect cardRect(card_left, option.rect.top() + 4, card_width - 8,
                          option.rect.height() - cardMargin);
 
@@ -94,11 +99,13 @@ void GameCard::paint(QPainter* painter, const QStyleOptionViewItem& option,
     painter->restore();
 }
 
-QSize GameCard::sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const {
+QSize GameCard::sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const
+{
     return m_size;
 }
 
-void GameCard::setSize(const QSize& newSize, const int padding, const int columns) {
+void GameCard::setSize(const QSize& newSize, const int padding, const int columns)
+{
     m_size = newSize;
     m_padding = padding;
     m_columns = columns;

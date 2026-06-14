@@ -7,7 +7,8 @@
 
 namespace Shader::Maxwell {
 namespace {
-void BFE(TranslatorVisitor& v, u64 insn, const IR::U32& src) {
+void BFE(TranslatorVisitor& v, u64 insn, const IR::U32& src)
+{
     union {
         u64 insn;
         BitField<0, 8, IR::Reg> dest_reg;
@@ -58,15 +59,18 @@ void BFE(TranslatorVisitor& v, u64 insn, const IR::U32& src) {
 }
 } // Anonymous namespace
 
-void TranslatorVisitor::BFE_reg(u64 insn) {
+void TranslatorVisitor::BFE_reg(u64 insn)
+{
     BFE(*this, insn, GetReg20(insn));
 }
 
-void TranslatorVisitor::BFE_cbuf(u64 insn) {
+void TranslatorVisitor::BFE_cbuf(u64 insn)
+{
     BFE(*this, insn, GetCbuf(insn));
 }
 
-void TranslatorVisitor::BFE_imm(u64 insn) {
+void TranslatorVisitor::BFE_imm(u64 insn)
+{
     BFE(*this, insn, GetImm20(insn));
 }
 

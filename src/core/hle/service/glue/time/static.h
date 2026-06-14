@@ -46,8 +46,8 @@ public:
     Result GetStandardSteadyClock(OutInterface<Service::PSC::Time::SteadyClock> out_service);
     Result GetTimeZoneService(OutInterface<TimeZoneService> out_service);
     Result GetStandardLocalSystemClock(OutInterface<Service::PSC::Time::SystemClock> out_service);
-    Result GetEphemeralNetworkSystemClock(
-        OutInterface<Service::PSC::Time::SystemClock> out_service);
+    Result
+    GetEphemeralNetworkSystemClock(OutInterface<Service::PSC::Time::SystemClock> out_service);
     Result GetSharedMemoryNativeHandle(OutCopyHandle<Kernel::KSharedMemory> out_shared_memory);
     Result SetStandardSteadyClockInternalOffset(s64 offset_ns);
     Result GetStandardSteadyClockRtcValue(Out<s64> out_rtc_value);

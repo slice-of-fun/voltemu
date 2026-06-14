@@ -19,11 +19,13 @@ enum ReadOptionFlag : u32 {
 
 inline constexpr const ReadOption ReadOption::None = {ReadOptionFlag_None};
 
-inline constexpr bool operator==(const ReadOption& lhs, const ReadOption& rhs) {
+inline constexpr bool operator==(const ReadOption& lhs, const ReadOption& rhs)
+{
     return lhs.value == rhs.value;
 }
 
-inline constexpr bool operator!=(const ReadOption& lhs, const ReadOption& rhs) {
+inline constexpr bool operator!=(const ReadOption& lhs, const ReadOption& rhs)
+{
     return !(lhs == rhs);
 }
 
@@ -37,9 +39,7 @@ enum WriteOptionFlag : u32 {
 struct WriteOption {
     u32 value;
 
-    constexpr inline bool HasFlushFlag() const {
-        return value & WriteOptionFlag_Flush;
-    }
+    constexpr inline bool HasFlushFlag() const { return value & WriteOptionFlag_Flush; }
 
     static const WriteOption None;
     static const WriteOption Flush;
@@ -48,11 +48,13 @@ struct WriteOption {
 inline constexpr const WriteOption WriteOption::None = {WriteOptionFlag_None};
 inline constexpr const WriteOption WriteOption::Flush = {WriteOptionFlag_Flush};
 
-inline constexpr bool operator==(const WriteOption& lhs, const WriteOption& rhs) {
+inline constexpr bool operator==(const WriteOption& lhs, const WriteOption& rhs)
+{
     return lhs.value == rhs.value;
 }
 
-inline constexpr bool operator!=(const WriteOption& lhs, const WriteOption& rhs) {
+inline constexpr bool operator!=(const WriteOption& lhs, const WriteOption& rhs)
+{
     return !(lhs == rhs);
 }
 

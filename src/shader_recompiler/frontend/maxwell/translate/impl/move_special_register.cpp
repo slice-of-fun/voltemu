@@ -110,7 +110,8 @@ enum class SpecialRegister : u64 {
     SR_CIRCULARQUEUEENTRYADDRESSHIGH = 99,
 };
 
-[[nodiscard]] IR::U32 Read(IR::IREmitter& ir, SpecialRegister special_register) {
+[[nodiscard]] IR::U32 Read(IR::IREmitter& ir, SpecialRegister special_register)
+{
     switch (special_register) {
     case SpecialRegister::SR_INVOCATION_ID:
         return ir.InvocationId();
@@ -167,7 +168,8 @@ enum class SpecialRegister : u64 {
 }
 } // Anonymous namespace
 
-void TranslatorVisitor::S2R(u64 insn) {
+void TranslatorVisitor::S2R(u64 insn)
+{
     union {
         u64 raw;
         BitField<0, 8, IR::Reg> dest_reg;

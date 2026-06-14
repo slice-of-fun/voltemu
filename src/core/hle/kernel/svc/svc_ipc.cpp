@@ -21,7 +21,8 @@ namespace Kernel::Svc {
 namespace {
 
 Result SendSyncRequestImpl(KernelCore& kernel, uintptr_t message, size_t buffer_size,
-                           Handle session_handle) {
+                           Handle session_handle)
+{
     // Get the client session.
     KScopedAutoObject session =
         GetCurrentProcess(kernel).GetHandleTable().GetObject<KClientSession>(session_handle);
@@ -38,7 +39,8 @@ Result SendSyncRequestImpl(KernelCore& kernel, uintptr_t message, size_t buffer_
 Result ReplyAndReceiveImpl(KernelCore& kernel, int32_t* out_index, uintptr_t message,
                            size_t buffer_size, KPhysicalAddress message_paddr,
                            KSynchronizationObject** objs, int32_t num_objects, Handle reply_target,
-                           int64_t timeout_ns) {
+                           int64_t timeout_ns)
+{
     // Reply to the target, if one is specified.
     if (reply_target != InvalidHandle) {
         KScopedAutoObject session =
@@ -46,7 +48,8 @@ Result ReplyAndReceiveImpl(KernelCore& kernel, int32_t* out_index, uintptr_t mes
         R_UNLESS(session.IsNotNull(), ResultInvalidHandle);
 
         // If we fail to reply, we want to set the output index to -1.
-        ON_RESULT_FAILURE {
+        ON_RESULT_FAILURE
+        {
             *out_index = -1;
         };
 
@@ -103,7 +106,8 @@ Result ReplyAndReceiveImpl(KernelCore& kernel, int32_t* out_index, uintptr_t mes
 Result ReplyAndReceiveImpl(KernelCore& kernel, int32_t* out_index, uintptr_t message,
                            size_t buffer_size, KPhysicalAddress message_paddr,
                            KProcessAddress user_handles, int32_t num_handles, Handle reply_target,
-                           int64_t timeout_ns) {
+                           int64_t timeout_ns)
+{
     // Ensure number of handles is valid.
     R_UNLESS(0 <= num_handles && num_handles <= Svc::ArgumentHandleCountMax, ResultOutOfRange);
 
@@ -132,7 +136,8 @@ Result ReplyAndReceiveImpl(KernelCore& kernel, int32_t* out_index, uintptr_t mes
     }
 
     // Ensure handles are closed when we're done.
-    SCOPE_EXIT {
+    SCOPE_EXIT
+    {
         for (auto i = 0; i < num_handles; ++i) {
             objs[i]->Close();
         }
@@ -145,12 +150,14 @@ Result ReplyAndReceiveImpl(KernelCore& kernel, int32_t* out_index, uintptr_t mes
 } // namespace
 
 /// Makes a blocking IPC call to a service.
-Result SendSyncRequest(Core::System& system, Handle session_handle) {
+Result SendSyncRequest(Core::System& system, Handle session_handle)
+{
     R_RETURN(SendSyncRequestImpl(system.Kernel(), 0, 0, session_handle));
 }
 
 Result SendSyncRequestWithUserBuffer(Core::System& system, uint64_t message, uint64_t buffer_size,
-                                     Handle session_handle) {
+                                     Handle session_handle)
+{
     auto& kernel = system.Kernel();
 
     // Validate that the message buffer is page aligned and does not overflow.
@@ -167,7 +174,8 @@ Result SendSyncRequestWithUserBuffer(Core::System& system, uint64_t message, uin
 
     {
         // If we fail to send the message, unlock the message buffer.
-        ON_RESULT_FAILURE {
+        ON_RESULT_FAILURE
+        {
             page_table.UnlockForIpcUserBuffer(message, buffer_size);
         };
 
@@ -181,8 +189,8 @@ Result SendSyncRequestWithUserBuffer(Core::System& system, uint64_t message, uin
 }
 
 Result SendAsyncRequestWithUserBuffer(Core::System& system, Handle* out_event_handle,
-                                      uint64_t message, uint64_t buffer_size,
-                                      Handle session_handle) {
+                                      uint64_t message, uint64_t buffer_size, Handle session_handle)
+{
     // Get the process and handle table.
     auto& process = GetCurrentProcess(system.Kernel());
     auto& handle_table = process.GetHandleTable();
@@ -211,7 +219,8 @@ Result SendAsyncRequestWithUserBuffer(Core::System& system, Handle* out_event_ha
     event_reservation.Commit();
 
     // At end of scope, kill the standing references to the sub events.
-    SCOPE_EXIT {
+    SCOPE_EXIT
+    {
         event->GetReadableEvent().Close();
         event->Close();
     };
@@ -223,7 +232,8 @@ Result SendAsyncRequestWithUserBuffer(Core::System& system, Handle* out_event_ha
     R_TRY(handle_table.Add(out_event_handle, std::addressof(event->GetReadableEvent())));
 
     // Ensure that if we fail to send the request, we close the readable handle.
-    ON_RESULT_FAILURE {
+    ON_RESULT_FAILURE
+    {
         handle_table.Remove(*out_event_handle);
     };
 
@@ -232,14 +242,16 @@ Result SendAsyncRequestWithUserBuffer(Core::System& system, Handle* out_event_ha
 }
 
 Result ReplyAndReceive(Core::System& system, s32* out_index, uint64_t handles, s32 num_handles,
-                       Handle reply_target, s64 timeout_ns) {
+                       Handle reply_target, s64 timeout_ns)
+{
     R_RETURN(ReplyAndReceiveImpl(system.Kernel(), out_index, 0, 0, 0, handles, num_handles,
                                  reply_target, timeout_ns));
 }
 
 Result ReplyAndReceiveWithUserBuffer(Core::System& system, int32_t* out_index, uint64_t message,
                                      uint64_t buffer_size, uint64_t handles, int32_t num_handles,
-                                     Handle reply_target, int64_t timeout_ns) {
+                                     Handle reply_target, int64_t timeout_ns)
+{
     // Validate that the message buffer is page aligned and does not overflow.
     R_UNLESS(Common::IsAligned(message, PageSize), ResultInvalidAddress);
     R_UNLESS(buffer_size > 0, ResultInvalidSize);
@@ -255,7 +267,8 @@ Result ReplyAndReceiveWithUserBuffer(Core::System& system, int32_t* out_index, u
 
     {
         // If we fail to send the message, unlock the message buffer.
-        ON_RESULT_FAILURE {
+        ON_RESULT_FAILURE
+        {
             page_table.UnlockForIpcUserBuffer(message, buffer_size);
         };
 
@@ -269,62 +282,72 @@ Result ReplyAndReceiveWithUserBuffer(Core::System& system, int32_t* out_index, u
     R_RETURN(page_table.UnlockForIpcUserBuffer(message, buffer_size));
 }
 
-Result SendSyncRequest64(Core::System& system, Handle session_handle) {
+Result SendSyncRequest64(Core::System& system, Handle session_handle)
+{
     R_RETURN(SendSyncRequest(system, session_handle));
 }
 
 Result SendSyncRequestWithUserBuffer64(Core::System& system, uint64_t message_buffer,
-                                       uint64_t message_buffer_size, Handle session_handle) {
+                                       uint64_t message_buffer_size, Handle session_handle)
+{
     R_RETURN(
         SendSyncRequestWithUserBuffer(system, message_buffer, message_buffer_size, session_handle));
 }
 
 Result SendAsyncRequestWithUserBuffer64(Core::System& system, Handle* out_event_handle,
                                         uint64_t message_buffer, uint64_t message_buffer_size,
-                                        Handle session_handle) {
+                                        Handle session_handle)
+{
     R_RETURN(SendAsyncRequestWithUserBuffer(system, out_event_handle, message_buffer,
                                             message_buffer_size, session_handle));
 }
 
 Result ReplyAndReceive64(Core::System& system, int32_t* out_index, uint64_t handles,
-                         int32_t num_handles, Handle reply_target, int64_t timeout_ns) {
+                         int32_t num_handles, Handle reply_target, int64_t timeout_ns)
+{
     R_RETURN(ReplyAndReceive(system, out_index, handles, num_handles, reply_target, timeout_ns));
 }
 
 Result ReplyAndReceiveWithUserBuffer64(Core::System& system, int32_t* out_index,
                                        uint64_t message_buffer, uint64_t message_buffer_size,
                                        uint64_t handles, int32_t num_handles, Handle reply_target,
-                                       int64_t timeout_ns) {
+                                       int64_t timeout_ns)
+{
     R_RETURN(ReplyAndReceiveWithUserBuffer(system, out_index, message_buffer, message_buffer_size,
                                            handles, num_handles, reply_target, timeout_ns));
 }
 
-Result SendSyncRequest64From32(Core::System& system, Handle session_handle) {
+Result SendSyncRequest64From32(Core::System& system, Handle session_handle)
+{
     R_RETURN(SendSyncRequest(system, session_handle));
 }
 
 Result SendSyncRequestWithUserBuffer64From32(Core::System& system, uint32_t message_buffer,
-                                             uint32_t message_buffer_size, Handle session_handle) {
+                                             uint32_t message_buffer_size, Handle session_handle)
+{
     R_RETURN(
         SendSyncRequestWithUserBuffer(system, message_buffer, message_buffer_size, session_handle));
 }
 
 Result SendAsyncRequestWithUserBuffer64From32(Core::System& system, Handle* out_event_handle,
                                               uint32_t message_buffer, uint32_t message_buffer_size,
-                                              Handle session_handle) {
+                                              Handle session_handle)
+{
     R_RETURN(SendAsyncRequestWithUserBuffer(system, out_event_handle, message_buffer,
                                             message_buffer_size, session_handle));
 }
 
 Result ReplyAndReceive64From32(Core::System& system, int32_t* out_index, uint32_t handles,
-                               int32_t num_handles, Handle reply_target, int64_t timeout_ns) {
+                               int32_t num_handles, Handle reply_target, int64_t timeout_ns)
+{
     R_RETURN(ReplyAndReceive(system, out_index, handles, num_handles, reply_target, timeout_ns));
 }
 
 Result ReplyAndReceiveWithUserBuffer64From32(Core::System& system, int32_t* out_index,
                                              uint32_t message_buffer, uint32_t message_buffer_size,
                                              uint32_t handles, int32_t num_handles,
-                                             Handle reply_target, int64_t timeout_ns) {
+                                             Handle reply_target, int64_t timeout_ns)
+{
     R_RETURN(ReplyAndReceiveWithUserBuffer(system, out_index, message_buffer, message_buffer_size,
                                            handles, num_handles, reply_target, timeout_ns));
 }

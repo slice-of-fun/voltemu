@@ -9,8 +9,7 @@
 
 namespace Common {
 
-template <typename AddressType>
-class RangeSet {
+template<typename AddressType> class RangeSet {
 public:
     RangeSet();
     ~RangeSet();
@@ -26,10 +25,9 @@ public:
     void Clear();
     bool Empty() const;
 
-    template <typename Func>
-    void ForEach(Func&& func) const;
+    template<typename Func> void ForEach(Func&& func) const;
 
-    template <typename Func>
+    template<typename Func>
     void ForEachInRange(AddressType device_addr, size_t size, Func&& func) const;
 
 private:
@@ -37,8 +35,7 @@ private:
     std::unique_ptr<RangeSetImpl> m_impl;
 };
 
-template <typename AddressType>
-class OverlapRangeSet {
+template<typename AddressType> class OverlapRangeSet {
 public:
     OverlapRangeSet();
     ~OverlapRangeSet();
@@ -52,17 +49,15 @@ public:
     void Add(AddressType base_address, size_t size);
     void Subtract(AddressType base_address, size_t size);
 
-    template <typename Func>
-    void Subtract(AddressType base_address, size_t size, Func&& on_delete);
+    template<typename Func> void Subtract(AddressType base_address, size_t size, Func&& on_delete);
 
     void DeleteAll(AddressType base_address, size_t size);
     void Clear();
     bool Empty() const;
 
-    template <typename Func>
-    void ForEach(Func&& func) const;
+    template<typename Func> void ForEach(Func&& func) const;
 
-    template <typename Func>
+    template<typename Func>
     void ForEachInRange(AddressType device_addr, size_t size, Func&& func) const;
 
 private:

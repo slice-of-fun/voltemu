@@ -1,9 +1,11 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include <fmt/ranges.h>
-#include "common/common_types.h"
 #include "core/file_sys/system_archive/ng_word.h"
+
+#include <fmt/ranges.h>
+
+#include "common/common_types.h"
 #include "core/file_sys/vfs/vfs_vector.h"
 
 namespace FileSys::SystemArchive {
@@ -22,7 +24,8 @@ constexpr std::array<u8, 30> WORD_TXT{
 
 } // namespace NgWord1Data
 
-VirtualDir NgWord1() {
+VirtualDir NgWord1()
+{
     std::vector<VirtualFile> files;
     files.reserve(NgWord1Data::NUMBER_WORD_TXT_FILES);
 
@@ -52,7 +55,8 @@ constexpr std::array<u8, 0x2C> AC_NX_DATA{
 
 } // namespace NgWord2Data
 
-VirtualDir NgWord2() {
+VirtualDir NgWord2()
+{
     std::vector<VirtualFile> files;
     files.reserve(NgWord2Data::NUMBER_AC_NX_FILES * 3);
 

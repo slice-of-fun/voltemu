@@ -42,7 +42,7 @@ public:
         void DeleteUser(HLERequestContext& ctx);
         void SetUserPosition(HLERequestContext& ctx);
         void GetProfileEditor(HLERequestContext& ctx);
-        void GetBaasAccountAdministrator(HLERequestContext &ctx);
+        void GetBaasAccountAdministrator(HLERequestContext& ctx);
         void ListQualifiedUsers(HLERequestContext& ctx);
         void ListOpenContextStoredUsers(HLERequestContext& ctx);
         void StoreSaveDataThumbnailApplication(HLERequestContext& ctx);
@@ -65,9 +65,7 @@ public:
             Service::Glue::ApplicationLaunchProperty launch_property;
             ApplicationType application_type;
 
-            constexpr explicit operator bool() const {
-                return launch_property.title_id != 0x0;
-            }
+            constexpr explicit operator bool() const { return launch_property.title_id != 0x0; }
         };
 
         ApplicationInfo application_info{};

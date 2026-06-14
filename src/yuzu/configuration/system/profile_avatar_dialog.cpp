@@ -12,7 +12,8 @@
 
 // TODO: Move this to a .ui def
 ProfileAvatarDialog::ProfileAvatarDialog(QWidget* parent)
-    : QDialog{parent}, avatar_list{new QListWidget(this)}, bg_color_button{new QPushButton(this)} {
+    : QDialog{parent}, avatar_list{new QListWidget(this)}, bg_color_button{new QPushButton(this)}
+{
     auto* main_layout = new QVBoxLayout(this);
     auto* button_layout = new QHBoxLayout();
     auto* select_button = new QPushButton(tr("Select"), this);
@@ -55,14 +56,16 @@ ProfileAvatarDialog::ProfileAvatarDialog(QWidget* parent)
 
 ProfileAvatarDialog::~ProfileAvatarDialog() = default;
 
-void ProfileAvatarDialog::SetBackgroundColor(const QColor& color) {
+void ProfileAvatarDialog::SetBackgroundColor(const QColor& color)
+{
     avatar_bg_color = color;
 
     bg_color_button->setStyleSheet(
         QStringLiteral("background-color: %1; min-width: 60px;").arg(avatar_bg_color.name()));
 }
 
-QPixmap ProfileAvatarDialog::CreateAvatar(const QPixmap& avatar) {
+QPixmap ProfileAvatarDialog::CreateAvatar(const QPixmap& avatar)
+{
     QPixmap output(avatar.size());
     output.fill(avatar_bg_color);
 
@@ -83,7 +86,8 @@ QPixmap ProfileAvatarDialog::CreateAvatar(const QPixmap& avatar) {
     return output;
 }
 
-void ProfileAvatarDialog::RefreshAvatars() {
+void ProfileAvatarDialog::RefreshAvatars()
+{
     if (avatar_list->count() != avatar_image_store.size()) {
         return;
     }
@@ -95,7 +99,8 @@ void ProfileAvatarDialog::RefreshAvatars() {
     }
 }
 
-void ProfileAvatarDialog::LoadImages(const QVector<QPixmap>& avatar_images) {
+void ProfileAvatarDialog::LoadImages(const QVector<QPixmap>& avatar_images)
+{
     avatar_image_store = avatar_images;
     avatar_list->clear();
 
@@ -127,10 +132,12 @@ void ProfileAvatarDialog::LoadImages(const QVector<QPixmap>& avatar_images) {
     avatar_list->setMinimumSize(total_width, total_height);
 }
 
-bool ProfileAvatarDialog::AreImagesLoaded() const {
+bool ProfileAvatarDialog::AreImagesLoaded() const
+{
     return !avatar_image_store.isEmpty();
 }
 
-QPixmap ProfileAvatarDialog::GetSelectedAvatar() {
+QPixmap ProfileAvatarDialog::GetSelectedAvatar()
+{
     return CreateAvatar(avatar_image_store[avatar_list->currentRow()]);
 }

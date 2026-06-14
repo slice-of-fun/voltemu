@@ -1,8 +1,9 @@
 // SPDX-FileCopyrightText: 2021 Citra Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include "common/scope_exit.h"
 #include "core/hle/kernel/k_client_port.h"
+
+#include "common/scope_exit.h"
 #include "core/hle/kernel/k_light_session.h"
 #include "core/hle/kernel/k_port.h"
 #include "core/hle/kernel/k_scheduler.h"
@@ -12,10 +13,13 @@
 
 namespace Kernel {
 
-KClientPort::KClientPort(KernelCore& kernel) : KSynchronizationObject{kernel} {}
+KClientPort::KClientPort(KernelCore& kernel) : KSynchronizationObject{kernel}
+{
+}
 KClientPort::~KClientPort() = default;
 
-void KClientPort::Initialize(KPort* parent, s32 max_sessions) {
+void KClientPort::Initialize(KPort* parent, s32 max_sessions)
+{
     // Set member variables.
     m_num_sessions = 0;
     m_peak_sessions = 0;
@@ -23,7 +27,8 @@ void KClientPort::Initialize(KPort* parent, s32 max_sessions) {
     m_max_sessions = max_sessions;
 }
 
-void KClientPort::OnSessionFinalized() {
+void KClientPort::OnSessionFinalized()
+{
     KScopedSchedulerLock sl{m_kernel};
 
     if (const auto prev = m_num_sessions--; prev == m_max_sessions) {
@@ -31,17 +36,22 @@ void KClientPort::OnSessionFinalized() {
     }
 }
 
-void KClientPort::OnServerClosed() {}
+void KClientPort::OnServerClosed()
+{
+}
 
-bool KClientPort::IsLight() const {
+bool KClientPort::IsLight() const
+{
     return this->GetParent()->IsLight();
 }
 
-bool KClientPort::IsServerClosed() const {
+bool KClientPort::IsServerClosed() const
+{
     return this->GetParent()->IsServerClosed();
 }
 
-void KClientPort::Destroy() {
+void KClientPort::Destroy()
+{
     // Note with our parent that we're closed.
     m_parent->OnClientClosed();
 
@@ -49,11 +59,13 @@ void KClientPort::Destroy() {
     m_parent->Close();
 }
 
-bool KClientPort::IsSignaled() const {
+bool KClientPort::IsSignaled() const
+{
     return m_num_sessions.load() < m_max_sessions;
 }
 
-Result KClientPort::CreateSession(KClientSession** out) {
+Result KClientPort::CreateSession(KClientSession** out)
+{
     // Declare the session we're going to allocate.
     KSession* session{};
 
@@ -71,7 +83,8 @@ Result KClientPort::CreateSession(KClientSession** out) {
 
     // Update the session counts.
     {
-        ON_RESULT_FAILURE {
+        ON_RESULT_FAILURE
+        {
             session->Close();
         };
 
@@ -107,7 +120,8 @@ Result KClientPort::CreateSession(KClientSession** out) {
 
     // Register the session.
     KSession::Register(m_kernel, session);
-    ON_RESULT_FAILURE {
+    ON_RESULT_FAILURE
+    {
         session->GetClientSession().Close();
         session->GetServerSession().Close();
     };
@@ -120,7 +134,8 @@ Result KClientPort::CreateSession(KClientSession** out) {
     R_SUCCEED();
 }
 
-Result KClientPort::CreateLightSession(KLightClientSession** out) {
+Result KClientPort::CreateLightSession(KLightClientSession** out)
+{
     // Declare the session we're going to allocate.
     KLightSession* session{};
 
@@ -138,7 +153,8 @@ Result KClientPort::CreateLightSession(KLightClientSession** out) {
 
     // Update the session counts.
     {
-        ON_RESULT_FAILURE {
+        ON_RESULT_FAILURE
+        {
             session->Close();
         };
 
@@ -174,7 +190,8 @@ Result KClientPort::CreateLightSession(KLightClientSession** out) {
 
     // Register the session.
     KLightSession::Register(m_kernel, session);
-    ON_RESULT_FAILURE {
+    ON_RESULT_FAILURE
+    {
         session->GetClientSession().Close();
         session->GetServerSession().Close();
     };

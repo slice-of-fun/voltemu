@@ -9,6 +9,7 @@
 #include <array>
 #include <string>
 #include <vector>
+
 #include "common/common_funcs.h"
 #include "common/common_types.h"
 #include "common/swap.h"
@@ -53,16 +54,14 @@ static_assert(sizeof(ApplicationNeighborDetectionGroupConfiguration) == 0x18);
 
 // NeighborDetectionClientConfiguration
 struct NeighborDetectionClientConfiguration {
-    ApplicationNeighborDetectionGroupConfiguration send_group_configuration; ///< SendGroupConfiguration
-    std::array<ApplicationNeighborDetectionGroupConfiguration, 0x10> receivable_group_configurations; ///< ReceivableGroupConfigurations
+    ApplicationNeighborDetectionGroupConfiguration
+        send_group_configuration; ///< SendGroupConfiguration
+    std::array<ApplicationNeighborDetectionGroupConfiguration, 0x10>
+        receivable_group_configurations; ///< ReceivableGroupConfigurations
 };
 static_assert(sizeof(NeighborDetectionClientConfiguration) == 0x198);
 
-enum class ApparentPlatform : u8 {
-    NX = 0,
-    Ounce = 1,
-    Count = 2
-};
+enum class ApparentPlatform : u8 { NX = 0, Ounce = 1, Count = 2 };
 
 enum class JitConfigurationFlag : u64 {
     None = 0,
@@ -75,10 +74,7 @@ struct JitConfiguration {
 };
 static_assert(sizeof(JitConfiguration) == 0x10);
 
-enum RequiredAddOnContentsSetDescriptorFlag : u16 {
-    None = 0,
-    Continue = 1
-};
+enum RequiredAddOnContentsSetDescriptorFlag : u16 { None = 0, Continue = 1 };
 struct RequiredAddOnContentsSetDescriptor {
     u16 index : 15;
     RequiredAddOnContentsSetDescriptorFlag flag : 1;
@@ -96,12 +92,12 @@ enum class PlayReportPermission : u8 {
 };
 
 enum class CrashScreenshotForProd : u8 {
-    Deny  = 0,
+    Deny = 0,
     Allow = 1,
 };
 
 enum class CrashScreenshotForDev : u8 {
-    Deny  = 0,
+    Deny = 0,
     Allow = 1,
 };
 
@@ -117,7 +113,7 @@ struct AccessibleLaunchRequiredVersion {
 static_assert(sizeof(AccessibleLaunchRequiredVersion) == 0x40);
 
 enum class CrashReport : u8 {
-    Deny  = 0,
+    Deny = 0,
     Allow = 1,
 };
 
@@ -145,31 +141,31 @@ struct ApplicationControlDataCondition {
 static_assert(sizeof(ApplicationControlDataCondition) == 0x89);
 
 // A language on the NX. These are for names and icons.
-#define NACP_LANGUAGE_LIST \
-    NACP_LANGUAGE_ELEM(AmericanEnglish, 0) \
-    NACP_LANGUAGE_ELEM(BritishEnglish, 1) \
-    NACP_LANGUAGE_ELEM(Japanese, 2) \
-    NACP_LANGUAGE_ELEM(French, 3) \
-    NACP_LANGUAGE_ELEM(German, 4) \
-    NACP_LANGUAGE_ELEM(LatinAmericanSpanish, 5) \
-    NACP_LANGUAGE_ELEM(Spanish, 6) \
-    NACP_LANGUAGE_ELEM(Italian, 7) \
-    NACP_LANGUAGE_ELEM(Dutch, 8) \
-    NACP_LANGUAGE_ELEM(CanadianFrench, 9) \
-    NACP_LANGUAGE_ELEM(Portuguese, 10) \
-    NACP_LANGUAGE_ELEM(Russian, 11) \
-    NACP_LANGUAGE_ELEM(Korean, 12) \
-    NACP_LANGUAGE_ELEM(TraditionalChinese, 13) \
-    NACP_LANGUAGE_ELEM(SimplifiedChinese, 14) \
-    NACP_LANGUAGE_ELEM(BrazilianPortuguese, 15) \
-    NACP_LANGUAGE_ELEM(Polish, 16) \
-    NACP_LANGUAGE_ELEM(Thai, 17) \
+#define NACP_LANGUAGE_LIST                                                                         \
+    NACP_LANGUAGE_ELEM(AmericanEnglish, 0)                                                         \
+    NACP_LANGUAGE_ELEM(BritishEnglish, 1)                                                          \
+    NACP_LANGUAGE_ELEM(Japanese, 2)                                                                \
+    NACP_LANGUAGE_ELEM(French, 3)                                                                  \
+    NACP_LANGUAGE_ELEM(German, 4)                                                                  \
+    NACP_LANGUAGE_ELEM(LatinAmericanSpanish, 5)                                                    \
+    NACP_LANGUAGE_ELEM(Spanish, 6)                                                                 \
+    NACP_LANGUAGE_ELEM(Italian, 7)                                                                 \
+    NACP_LANGUAGE_ELEM(Dutch, 8)                                                                   \
+    NACP_LANGUAGE_ELEM(CanadianFrench, 9)                                                          \
+    NACP_LANGUAGE_ELEM(Portuguese, 10)                                                             \
+    NACP_LANGUAGE_ELEM(Russian, 11)                                                                \
+    NACP_LANGUAGE_ELEM(Korean, 12)                                                                 \
+    NACP_LANGUAGE_ELEM(TraditionalChinese, 13)                                                     \
+    NACP_LANGUAGE_ELEM(SimplifiedChinese, 14)                                                      \
+    NACP_LANGUAGE_ELEM(BrazilianPortuguese, 15)                                                    \
+    NACP_LANGUAGE_ELEM(Polish, 16)                                                                 \
+    NACP_LANGUAGE_ELEM(Thai, 17)
 
 enum class Language : u8 {
 #define NACP_LANGUAGE_ELEM(X, N) X = N,
     NACP_LANGUAGE_LIST
 #undef NACP_LANGUAGE_ELEM
-    Count = 18,
+        Count = 18,
     Default = 255,
 };
 
@@ -229,7 +225,7 @@ struct RawNACP {
     u16_le cache_storage_max_index;
     u8 runtime_upgrade;
     u32_le supporting_limited_application_licenses;
-    std::array<u8, 0x8*16> play_log_queryable_application_id;
+    std::array<u8, 0x8 * 16> play_log_queryable_application_id;
     PlayLogQueryCapability play_log_query_capability;
     u8 repair_flag;
     u8 program_index;
@@ -248,7 +244,9 @@ struct RawNACP {
     // SupportedLanguage supported_language_copy; ///< TODO: add to XML generation.
     INSERT_PADDING_BYTES(0x1EF);
     AccessibleLaunchRequiredVersion accessible_launch_required_version;
-    ApplicationControlDataCondition application_control_data_condition; ///< Used for Switch 2 upgrade packs, which are distributed as AddOnContent titles
+    ApplicationControlDataCondition
+        application_control_data_condition; ///< Used for Switch 2 upgrade packs, which are
+                                            ///< distributed as AddOnContent titles
     u8 initial_program_index;
     INSERT_PADDING_BYTES(2);
     u32_le accessible_program_index_flags;

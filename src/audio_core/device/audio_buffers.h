@@ -7,10 +7,10 @@
 #pragma once
 
 #include <array>
+#include <boost/container/static_vector.hpp>
 #include <mutex>
 #include <span>
 #include <vector>
-#include <boost/container/static_vector.hpp>
 
 #include "audio_buffer.h"
 #include "audio_core/device/device_session.h"
@@ -30,8 +30,7 @@ constexpr s32 BufferAppendLimit = 4;
  *
  * @tparam N - Maximum number of buffers in the ring.
  */
-template <size_t N>
-class AudioBuffers {
+template<size_t N> class AudioBuffers {
 public:
     explicit AudioBuffers(size_t limit) : append_limit{static_cast<u32>(limit)} {}
 
@@ -40,7 +39,8 @@ public:
      *
      * @param buffer - The new buffer.
      */
-    void AppendBuffer(const AudioBuffer& buffer) {
+    void AppendBuffer(const AudioBuffer& buffer)
+    {
         std::scoped_lock l{lock};
         buffers[appended_index] = buffer;
         appended_count++;
@@ -52,10 +52,11 @@ public:
      *
      * @param out_buffers - The buffers which were registered.
      */
-    void RegisterBuffers(boost::container::static_vector<AudioBuffer, N>& out_buffers) {
+    void RegisterBuffers(boost::container::static_vector<AudioBuffer, N>& out_buffers)
+    {
         std::scoped_lock l{lock};
         const s32 to_register{(std::min)((std::min)(appended_count, BufferAppendLimit),
-                                       BufferAppendLimit - registered_count)};
+                                         BufferAppendLimit - registered_count)};
 
         for (s32 i = 0; i < to_register; i++) {
             s32 index{appended_index - appended_count};
@@ -80,7 +81,8 @@ public:
      * @param index     - The buffer index to release.
      * @param timestamp - The released timestamp for this buffer.
      */
-    void ReleaseBuffer(s32 index, s64 timestamp) {
+    void ReleaseBuffer(s32 index, s64 timestamp)
+    {
         std::scoped_lock l{lock};
         buffers[index].played_timestamp = timestamp;
 
@@ -98,7 +100,8 @@ public:
      * @return If any buffer was released.
      */
     bool ReleaseBuffers(const Core::Timing::CoreTiming& core_timing, const DeviceSession& session,
-                        bool force) {
+                        bool force)
+    {
         std::scoped_lock l{lock};
         bool buffer_released{false};
         while (registered_count > 0) {
@@ -128,7 +131,8 @@ public:
      * @param tags - Container to be filled with the released buffers' tags.
      * @return The number of buffers released.
      */
-    u32 GetReleasedBuffers(std::span<u64> tags) {
+    u32 GetReleasedBuffers(std::span<u64> tags)
+    {
         std::scoped_lock l{lock};
         u32 released{0};
 
@@ -172,8 +176,10 @@ public:
      * @param max_buffers     - Maximum number of buffers to released.
      * @return The number of buffers released.
      */
-    u32 GetRegisteredAppendedBuffers(
-        boost::container::static_vector<AudioBuffer, N>& buffers_flushed, u32 max_buffers) {
+    u32
+    GetRegisteredAppendedBuffers(boost::container::static_vector<AudioBuffer, N>& buffers_flushed,
+                                 u32 max_buffers)
+    {
         std::scoped_lock l{lock};
         if (registered_count + appended_count == 0) {
             return 0;
@@ -228,7 +234,8 @@ public:
      * @param tag - Unique tag of the buffer to search for.
      * @return True if the buffer is still in the ring, otherwise false.
      */
-    bool ContainsBuffer(const u64 tag) const {
+    bool ContainsBuffer(const u64 tag) const
+    {
         std::scoped_lock l{lock};
         const auto registered_buffers{appended_count + registered_count + released_count};
 
@@ -257,7 +264,8 @@ public:
      *
      * @return Number of active buffers.
      */
-    u32 GetAppendedRegisteredCount() const {
+    u32 GetAppendedRegisteredCount() const
+    {
         std::scoped_lock l{lock};
         return appended_count + registered_count;
     }
@@ -268,7 +276,8 @@ public:
      *
      * @return Number of active buffers.
      */
-    u32 GetTotalBufferCount() const {
+    u32 GetTotalBufferCount() const
+    {
         std::scoped_lock l{lock};
         return static_cast<u32>(appended_count + registered_count + released_count);
     }
@@ -279,7 +288,8 @@ public:
      * @param buffers_released - Output count for the number of buffers released.
      * @return True if buffers were successfully flushed, otherwise false.
      */
-    bool FlushBuffers(u32& buffers_released) {
+    bool FlushBuffers(u32& buffers_released)
+    {
         std::scoped_lock l{lock};
         boost::container::static_vector<AudioBuffer, N> buffers_flushed{};
 
@@ -296,7 +306,8 @@ public:
         return true;
     }
 
-    u64 GetNextTimestamp() const {
+    u64 GetNextTimestamp() const
+    {
         // Iterate backwards through the buffer queue, and take the most recent buffer's end
         std::scoped_lock l{lock};
         auto index{appended_index - 1};

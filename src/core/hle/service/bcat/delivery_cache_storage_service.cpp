@@ -4,17 +4,19 @@
 // SPDX-FileCopyrightText: Copyright 2024 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+#include "core/hle/service/bcat/delivery_cache_storage_service.h"
+
 #include "core/hle/service/bcat/bcat_result.h"
 #include "core/hle/service/bcat/delivery_cache_directory_service.h"
 #include "core/hle/service/bcat/delivery_cache_file_service.h"
-#include "core/hle/service/bcat/delivery_cache_storage_service.h"
 #include "core/hle/service/cmif_serialization.h"
 
 namespace Service::BCAT {
 
 IDeliveryCacheStorageService::IDeliveryCacheStorageService(Core::System& system_,
                                                            FileSys::VirtualDir root_)
-    : ServiceFramework{system_, "IDeliveryCacheStorageService"}, root(std::move(root_)) {
+    : ServiceFramework{system_, "IDeliveryCacheStorageService"}, root(std::move(root_))
+{
     // clang-format off
     static const FunctionInfo functions[] = {
         {0, D<&IDeliveryCacheStorageService::CreateFileService>, "CreateFileService"},
@@ -29,7 +31,8 @@ IDeliveryCacheStorageService::IDeliveryCacheStorageService(Core::System& system_
 IDeliveryCacheStorageService::~IDeliveryCacheStorageService() = default;
 
 Result IDeliveryCacheStorageService::CreateFileService(
-    OutInterface<IDeliveryCacheFileService> out_interface) {
+    OutInterface<IDeliveryCacheFileService> out_interface)
+{
     LOG_DEBUG(Service_BCAT, "called");
 
     *out_interface = std::make_shared<IDeliveryCacheFileService>(system, root);
@@ -37,7 +40,8 @@ Result IDeliveryCacheStorageService::CreateFileService(
 }
 
 Result IDeliveryCacheStorageService::CreateDirectoryService(
-    OutInterface<IDeliveryCacheDirectoryService> out_interface) {
+    OutInterface<IDeliveryCacheDirectoryService> out_interface)
+{
     LOG_DEBUG(Service_BCAT, "called");
 
     *out_interface = std::make_shared<IDeliveryCacheDirectoryService>(system, root);
@@ -45,8 +49,8 @@ Result IDeliveryCacheStorageService::CreateDirectoryService(
 }
 
 Result IDeliveryCacheStorageService::EnumerateDeliveryCacheDirectory(
-    Out<s32> out_directory_count,
-    OutArray<DirectoryName, BufferAttr_HipcMapAlias> out_directories) {
+    Out<s32> out_directory_count, OutArray<DirectoryName, BufferAttr_HipcMapAlias> out_directories)
+{
     LOG_DEBUG(Service_BCAT, "called, size={:016X}", out_directories.size());
 
     *out_directory_count =

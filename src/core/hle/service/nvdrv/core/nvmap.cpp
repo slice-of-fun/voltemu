@@ -5,6 +5,8 @@
 // SPDX-FileCopyrightText: 2022 Skyline Team and Contributors
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+#include "core/hle/service/nvdrv/core/nvmap.h"
+
 #include <functional>
 
 #include "common/alignment.h"
@@ -12,7 +14,6 @@
 #include "common/logging.h"
 #include "core/hle/service/nvdrv/core/container.h"
 #include "core/hle/service/nvdrv/core/heap_mapper.h"
-#include "core/hle/service/nvdrv/core/nvmap.h"
 #include "core/memory.h"
 #include "video_core/host1x/host1x.h"
 
@@ -20,13 +21,14 @@ using Core::Memory::YUZU_PAGESIZE;
 constexpr size_t BIG_PAGE_SIZE = YUZU_PAGESIZE * 16;
 
 namespace Service::Nvidia::NvCore {
-NvMap::Handle::Handle(u64 size_, Id id_)
-    : size(size_), aligned_size(size), orig_size(size), id(id_) {
+NvMap::Handle::Handle(u64 size_, Id id_) : size(size_), aligned_size(size), orig_size(size), id(id_)
+{
     flags.raw = 0;
 }
 
 NvResult NvMap::Handle::Alloc(Flags pFlags, u32 pAlign, u8 pKind, u64 pAddress,
-                              NvCore::SessionId pSessionId) {
+                              NvCore::SessionId pSessionId)
+{
     std::scoped_lock lock(mutex);
     // Handles cannot be allocated twice
     if (allocated) {
@@ -54,7 +56,8 @@ NvResult NvMap::Handle::Alloc(Flags pFlags, u32 pAlign, u8 pKind, u64 pAddress,
     return NvResult::Success;
 }
 
-NvResult NvMap::Handle::Duplicate(bool internal_session) {
+NvResult NvMap::Handle::Duplicate(bool internal_session)
+{
     std::scoped_lock lock(mutex);
     // Unallocated handles cannot be duplicated as duplication requires memory accounting (in HOS)
     if (!allocated) [[unlikely]] {
@@ -72,15 +75,19 @@ NvResult NvMap::Handle::Duplicate(bool internal_session) {
     return NvResult::Success;
 }
 
-NvMap::NvMap(Container& core_, Tegra::Host1x::Host1x& host1x_) : host1x{host1x_}, core{core_} {}
+NvMap::NvMap(Container& core_, Tegra::Host1x::Host1x& host1x_) : host1x{host1x_}, core{core_}
+{
+}
 
-void NvMap::AddHandle(std::shared_ptr<Handle> handle_description) {
+void NvMap::AddHandle(std::shared_ptr<Handle> handle_description)
+{
     std::scoped_lock lock(handles_lock);
 
     handles.emplace(handle_description->id, std::move(handle_description));
 }
 
-void NvMap::UnmapHandle(Handle& handle_description) {
+void NvMap::UnmapHandle(Handle& handle_description)
+{
     // Remove pending unmap queue entry if needed
     if (handle_description.unmap_queue_entry) {
         unmap_queue.erase(*handle_description.unmap_queue_entry);
@@ -90,7 +97,7 @@ void NvMap::UnmapHandle(Handle& handle_description) {
     // Free and unmap the handle from Host1x GMMU
     if (handle_description.pin_virt_address) {
         host1x.gmmu_manager.Unmap(static_cast<GPUVAddr>(handle_description.pin_virt_address),
-                            handle_description.aligned_size);
+                                  handle_description.aligned_size);
         host1x.Allocator().Free(handle_description.pin_virt_address,
                                 static_cast<u32>(handle_description.aligned_size));
         handle_description.pin_virt_address = 0;
@@ -113,7 +120,8 @@ void NvMap::UnmapHandle(Handle& handle_description) {
     handle_description.in_heap = false;
 }
 
-bool NvMap::TryRemoveHandle(const Handle& handle_description) {
+bool NvMap::TryRemoveHandle(const Handle& handle_description)
+{
     // No dupes left, we can remove from handle map
     if (handle_description.dupes == 0 && handle_description.internal_dupes == 0) {
         std::scoped_lock lock(handles_lock);
@@ -129,7 +137,8 @@ bool NvMap::TryRemoveHandle(const Handle& handle_description) {
     }
 }
 
-NvResult NvMap::CreateHandle(u64 size, std::shared_ptr<NvMap::Handle>& result_out) {
+NvResult NvMap::CreateHandle(u64 size, std::shared_ptr<NvMap::Handle>& result_out)
+{
     if (!size) [[unlikely]] {
         return NvResult::BadValue;
     }
@@ -142,7 +151,8 @@ NvResult NvMap::CreateHandle(u64 size, std::shared_ptr<NvMap::Handle>& result_ou
     return NvResult::Success;
 }
 
-std::shared_ptr<NvMap::Handle> NvMap::GetHandle(Handle::Id handle) {
+std::shared_ptr<NvMap::Handle> NvMap::GetHandle(Handle::Id handle)
+{
     std::scoped_lock lock(handles_lock);
     try {
         return handles.at(handle);
@@ -151,7 +161,8 @@ std::shared_ptr<NvMap::Handle> NvMap::GetHandle(Handle::Id handle) {
     }
 }
 
-DAddr NvMap::GetHandleAddress(Handle::Id handle) {
+DAddr NvMap::GetHandleAddress(Handle::Id handle)
+{
     std::scoped_lock lock(handles_lock);
     try {
         return handles.at(handle)->d_address;
@@ -160,7 +171,8 @@ DAddr NvMap::GetHandleAddress(Handle::Id handle) {
     }
 }
 
-DAddr NvMap::PinHandle(NvMap::Handle::Id handle, bool low_area_pin) {
+DAddr NvMap::PinHandle(NvMap::Handle::Id handle, bool low_area_pin)
+{
     auto handle_description{GetHandle(handle)};
     if (!handle_description) [[unlikely]] {
         return 0;
@@ -170,7 +182,8 @@ DAddr NvMap::PinHandle(NvMap::Handle::Id handle, bool low_area_pin) {
     const auto map_low_area = [&] {
         if (handle_description->pin_virt_address == 0) {
             u32 address = host1x.Allocator().Allocate(u32(handle_description->aligned_size));
-            host1x.gmmu_manager.Map(GPUVAddr(address), handle_description->d_address, handle_description->aligned_size);
+            host1x.gmmu_manager.Map(GPUVAddr(address), handle_description->d_address,
+                                    handle_description->aligned_size);
             handle_description->pin_virt_address = address;
         }
     };
@@ -239,7 +252,8 @@ DAddr NvMap::PinHandle(NvMap::Handle::Id handle, bool low_area_pin) {
     return handle_description->d_address;
 }
 
-void NvMap::UnpinHandle(Handle::Id handle) {
+void NvMap::UnpinHandle(Handle::Id handle)
+{
     auto handle_description{GetHandle(handle)};
     if (!handle_description) {
         return;
@@ -257,7 +271,8 @@ void NvMap::UnpinHandle(Handle::Id handle) {
     }
 }
 
-void NvMap::DuplicateHandle(Handle::Id handle, bool internal_session) {
+void NvMap::DuplicateHandle(Handle::Id handle, bool internal_session)
+{
     auto handle_description{GetHandle(handle)};
     if (!handle_description) {
         LOG_CRITICAL(Service_NVDRV, "Unregistered handle!");
@@ -270,7 +285,8 @@ void NvMap::DuplicateHandle(Handle::Id handle, bool internal_session) {
     }
 }
 
-std::optional<NvMap::FreeInfo> NvMap::FreeHandle(Handle::Id handle, bool internal_session) {
+std::optional<NvMap::FreeInfo> NvMap::FreeHandle(Handle::Id handle, bool internal_session)
+{
     std::weak_ptr<Handle> hWeak{GetHandle(handle)};
     FreeInfo freeInfo;
 
@@ -325,7 +341,8 @@ std::optional<NvMap::FreeInfo> NvMap::FreeHandle(Handle::Id handle, bool interna
     return freeInfo;
 }
 
-void NvMap::UnmapAllHandles(NvCore::SessionId session_id) {
+void NvMap::UnmapAllHandles(NvCore::SessionId session_id)
+{
     auto handles_copy = [&] {
         std::scoped_lock lk{handles_lock};
         return handles;

@@ -6,7 +6,8 @@
 namespace Service::OMM {
 
 IOperationModeManager::IOperationModeManager(Core::System& system_)
-    : ServiceFramework{system_, "omm"} {
+    : ServiceFramework{system_, "omm"}
+{
     // clang-format off
     static const FunctionInfo functions[] = {
         {0, nullptr, "GetOperationMode"},

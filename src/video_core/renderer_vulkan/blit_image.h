@@ -84,6 +84,7 @@ public:
     void ClearDepthStencil(const Framebuffer* dst_framebuffer, bool depth_clear, f32 clear_depth,
                            u8 stencil_mask, u32 stencil_ref, u32 stencil_compare_mask,
                            const Region2D& dst_region);
+
 private:
     void Convert(VkPipeline pipeline, const Framebuffer* dst_framebuffer,
                  const ImageView& src_image_view);
@@ -96,8 +97,8 @@ private:
     [[nodiscard]] VkPipeline FindOrEmplaceDepthStencilPipeline(const BlitImagePipelineKey& key);
 
     [[nodiscard]] VkPipeline FindOrEmplaceClearColorPipeline(const BlitImagePipelineKey& key);
-    [[nodiscard]] VkPipeline FindOrEmplaceClearStencilPipeline(
-        const BlitDepthStencilPipelineKey& key);
+    [[nodiscard]] VkPipeline
+    FindOrEmplaceClearStencilPipeline(const BlitDepthStencilPipelineKey& key);
 
     void ConvertPipeline(vk::Pipeline& pipeline, VkRenderPass renderpass, bool is_target_depth);
 

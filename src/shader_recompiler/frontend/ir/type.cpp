@@ -1,14 +1,15 @@
 // SPDX-FileCopyrightText: Copyright 2021 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "shader_recompiler/frontend/ir/type.h"
+
 #include <array>
 #include <string>
 
-#include "shader_recompiler/frontend/ir/type.h"
-
 namespace Shader::IR {
 
-std::string NameOf(Type type) {
+std::string NameOf(Type type)
+{
     static constexpr std::array names{
         "Opaque", "Label", "Reg",   "Pred",  "Attribute", "U1",    "U8",    "U16",   "U32",
         "U64",    "F16",   "F32",   "F64",   "U32x2",     "U32x3", "U32x4", "F16x2", "F16x3",
@@ -30,7 +31,8 @@ std::string NameOf(Type type) {
     return result;
 }
 
-bool AreTypesCompatible(Type lhs, Type rhs) noexcept {
+bool AreTypesCompatible(Type lhs, Type rhs) noexcept
+{
     return lhs == rhs || lhs == Type::Opaque || rhs == Type::Opaque;
 }
 

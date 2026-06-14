@@ -6,9 +6,10 @@
 
 #pragma once
 
-#include <bitset>
-#include <bit>
 #include <fmt/ranges.h>
+
+#include <bit>
+#include <bitset>
 #include <numeric>
 
 #include "common/bit_field.h"
@@ -42,12 +43,8 @@ struct Id {
         BitField<5, 27, u32> index;
     };
 
-    bool operator==(Id rhs) const noexcept {
-        return raw == rhs.raw;
-    }
-    bool operator!=(Id rhs) const noexcept {
-        return !operator==(rhs);
-    }
+    bool operator==(Id rhs) const noexcept { return raw == rhs.raw; }
+    bool operator!=(Id rhs) const noexcept { return !operator==(rhs); }
 };
 static_assert(sizeof(Id) == sizeof(u32));
 
@@ -59,7 +56,8 @@ struct Value {
         u64 imm_u64;
     };
 
-    bool operator==(const Value& rhs) const noexcept {
+    bool operator==(const Value& rhs) const noexcept
+    {
         if (type != rhs.type) {
             return false;
         }
@@ -75,9 +73,7 @@ struct Value {
         }
         return false;
     }
-    bool operator!=(const Value& rhs) const noexcept {
-        return !operator==(rhs);
-    }
+    bool operator!=(const Value& rhs) const noexcept { return !operator==(rhs); }
 };
 struct Register : Value {};
 struct ScalarRegister : Value {};
@@ -106,19 +102,17 @@ public:
 
     void FreeReg(Register reg);
 
-    void InvalidateConditionCodes() {
+    void InvalidateConditionCodes()
+    {
         // This does nothing for now
     }
 
-    [[nodiscard]] size_t NumUsedRegisters() const noexcept {
-        return num_used_registers;
-    }
+    [[nodiscard]] size_t NumUsedRegisters() const noexcept { return num_used_registers; }
 
-    [[nodiscard]] size_t NumUsedLongRegisters() const noexcept {
-        return num_used_long_registers;
-    }
+    [[nodiscard]] size_t NumUsedLongRegisters() const noexcept { return num_used_long_registers; }
 
-    [[nodiscard]] bool IsEmpty() const noexcept {
+    [[nodiscard]] bool IsEmpty() const noexcept
+    {
         return register_use.none() && long_register_use.none();
     }
 
@@ -150,8 +144,8 @@ private:
     std::bitset<NUM_REGS> long_register_use{};
 };
 
-template <bool scalar, typename FormatContext>
-auto FormatTo(FormatContext& ctx, Id id) {
+template<bool scalar, typename FormatContext> auto FormatTo(FormatContext& ctx, Id id)
+{
     if (id.is_condition_code != 0) {
         throw NotImplementedException("Condition code emission");
     }
@@ -181,24 +175,20 @@ auto FormatTo(FormatContext& ctx, Id id) {
 
 } // namespace Shader::Backend::GLASM
 
-template <>
-struct fmt::formatter<Shader::Backend::GLASM::Id> {
-    constexpr auto parse(format_parse_context& ctx) {
-        return ctx.begin();
-    }
-    template <typename FormatContext>
-    auto format(Shader::Backend::GLASM::Id id, FormatContext& ctx) const {
+template<> struct fmt::formatter<Shader::Backend::GLASM::Id> {
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(Shader::Backend::GLASM::Id id, FormatContext& ctx) const
+    {
         return Shader::Backend::GLASM::FormatTo<true>(ctx, id);
     }
 };
 
-template <>
-struct fmt::formatter<Shader::Backend::GLASM::Register> {
-    constexpr auto parse(format_parse_context& ctx) {
-        return ctx.begin();
-    }
-    template <typename FormatContext>
-    auto format(const Shader::Backend::GLASM::Register& value, FormatContext& ctx) const {
+template<> struct fmt::formatter<Shader::Backend::GLASM::Register> {
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(const Shader::Backend::GLASM::Register& value, FormatContext& ctx) const
+    {
         if (value.type != Shader::Backend::GLASM::Type::Register) {
             throw Shader::InvalidArgument("Register value type is not register");
         }
@@ -206,13 +196,11 @@ struct fmt::formatter<Shader::Backend::GLASM::Register> {
     }
 };
 
-template <>
-struct fmt::formatter<Shader::Backend::GLASM::ScalarRegister> {
-    constexpr auto parse(format_parse_context& ctx) {
-        return ctx.begin();
-    }
-    template <typename FormatContext>
-    auto format(const Shader::Backend::GLASM::ScalarRegister& value, FormatContext& ctx) const {
+template<> struct fmt::formatter<Shader::Backend::GLASM::ScalarRegister> {
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(const Shader::Backend::GLASM::ScalarRegister& value, FormatContext& ctx) const
+    {
         if (value.type != Shader::Backend::GLASM::Type::Register) {
             throw Shader::InvalidArgument("Register value type is not register");
         }
@@ -220,13 +208,11 @@ struct fmt::formatter<Shader::Backend::GLASM::ScalarRegister> {
     }
 };
 
-template <>
-struct fmt::formatter<Shader::Backend::GLASM::ScalarU32> {
-    constexpr auto parse(format_parse_context& ctx) {
-        return ctx.begin();
-    }
-    template <typename FormatContext>
-    auto format(const Shader::Backend::GLASM::ScalarU32& value, FormatContext& ctx) const {
+template<> struct fmt::formatter<Shader::Backend::GLASM::ScalarU32> {
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(const Shader::Backend::GLASM::ScalarU32& value, FormatContext& ctx) const
+    {
         switch (value.type) {
         case Shader::Backend::GLASM::Type::Void:
             break;
@@ -241,13 +227,11 @@ struct fmt::formatter<Shader::Backend::GLASM::ScalarU32> {
     }
 };
 
-template <>
-struct fmt::formatter<Shader::Backend::GLASM::ScalarS32> {
-    constexpr auto parse(format_parse_context& ctx) {
-        return ctx.begin();
-    }
-    template <typename FormatContext>
-    auto format(const Shader::Backend::GLASM::ScalarS32& value, FormatContext& ctx) const {
+template<> struct fmt::formatter<Shader::Backend::GLASM::ScalarS32> {
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(const Shader::Backend::GLASM::ScalarS32& value, FormatContext& ctx) const
+    {
         switch (value.type) {
         case Shader::Backend::GLASM::Type::Void:
             break;
@@ -262,13 +246,11 @@ struct fmt::formatter<Shader::Backend::GLASM::ScalarS32> {
     }
 };
 
-template <>
-struct fmt::formatter<Shader::Backend::GLASM::ScalarF32> {
-    constexpr auto parse(format_parse_context& ctx) {
-        return ctx.begin();
-    }
-    template <typename FormatContext>
-    auto format(const Shader::Backend::GLASM::ScalarF32& value, FormatContext& ctx) const {
+template<> struct fmt::formatter<Shader::Backend::GLASM::ScalarF32> {
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(const Shader::Backend::GLASM::ScalarF32& value, FormatContext& ctx) const
+    {
         switch (value.type) {
         case Shader::Backend::GLASM::Type::Void:
             break;
@@ -283,13 +265,11 @@ struct fmt::formatter<Shader::Backend::GLASM::ScalarF32> {
     }
 };
 
-template <>
-struct fmt::formatter<Shader::Backend::GLASM::ScalarF64> {
-    constexpr auto parse(format_parse_context& ctx) {
-        return ctx.begin();
-    }
-    template <typename FormatContext>
-    auto format(const Shader::Backend::GLASM::ScalarF64& value, FormatContext& ctx) const {
+template<> struct fmt::formatter<Shader::Backend::GLASM::ScalarF64> {
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(const Shader::Backend::GLASM::ScalarF64& value, FormatContext& ctx) const
+    {
         switch (value.type) {
         case Shader::Backend::GLASM::Type::Void:
             break;

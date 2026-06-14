@@ -5,12 +5,14 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include "audio_core/renderer/nodes/node_states.h"
+
 #include "common/logging.h"
 
 namespace AudioCore::Renderer {
 
 void NodeStates::Initialize(std::span<u8> buffer_, [[maybe_unused]] const u64 node_buffer_size,
-                            const u32 count) {
+                            const u32 count)
+{
     u64 num_blocks{Common::AlignUp(count, 0x40) / sizeof(u64)};
     u64 offset{0};
 
@@ -39,11 +41,13 @@ void NodeStates::Initialize(std::span<u8> buffer_, [[maybe_unused]] const u64 no
     offset += count * count * sizeof(u32);
 }
 
-bool NodeStates::Tsort(const EdgeMatrix& edge_matrix) {
+bool NodeStates::Tsort(const EdgeMatrix& edge_matrix)
+{
     return DepthFirstSearch(edge_matrix, stack);
 }
 
-bool NodeStates::DepthFirstSearch(const EdgeMatrix& edge_matrix, Stack& stack_) {
+bool NodeStates::DepthFirstSearch(const EdgeMatrix& edge_matrix, Stack& stack_)
+{
     ResetState();
 
     for (u32 node_id = 0; node_id < node_count; node_id++) {
@@ -93,7 +97,8 @@ bool NodeStates::DepthFirstSearch(const EdgeMatrix& edge_matrix, Stack& stack_) 
     return true;
 }
 
-NodeStates::SearchState NodeStates::GetState(const u32 id) const {
+NodeStates::SearchState NodeStates::GetState(const u32 id) const
+{
     if (nodes_found.buffer[id]) {
         return SearchState::Found;
     } else if (nodes_complete.buffer[id]) {
@@ -102,11 +107,13 @@ NodeStates::SearchState NodeStates::GetState(const u32 id) const {
     return SearchState::Unknown;
 }
 
-void NodeStates::PushTsortResult(const u32 id) {
+void NodeStates::PushTsortResult(const u32 id)
+{
     results[result_pos++] = id;
 }
 
-void NodeStates::SetState(const u32 id, const SearchState state) {
+void NodeStates::SetState(const u32 id, const SearchState state)
+{
     switch (state) {
     case SearchState::Complete:
         nodes_found.buffer[id] = false;
@@ -126,18 +133,21 @@ void NodeStates::SetState(const u32 id, const SearchState state) {
     }
 }
 
-void NodeStates::ResetState() {
+void NodeStates::ResetState()
+{
     nodes_found.reset();
     nodes_complete.reset();
     std::fill(results.begin(), results.end(), -1);
     result_pos = 0;
 }
 
-u32 NodeStates::GetNodeCount() const {
+u32 NodeStates::GetNodeCount() const
+{
     return node_count;
 }
 
-std::pair<std::span<u32>::reverse_iterator, size_t> NodeStates::GetSortedResuls() const {
+std::pair<std::span<u32>::reverse_iterator, size_t> NodeStates::GetSortedResuls() const
+{
     return {results.rbegin(), result_pos};
 }
 

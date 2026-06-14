@@ -1,20 +1,22 @@
 // SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#include <numeric>
+#include "core/arm/nce/patcher.h"
+
 #include <bit>
-#include "common/cpu_features.h"
+#include <numeric>
+
 #include "common/alignment.h"
+#include "common/cpu_features.h"
 #include "common/literals.h"
 #include "core/arm/nce/arm_nce.h"
 #include "core/arm/nce/guest_context.h"
 #include "core/arm/nce/instructions.h"
-#include "core/arm/nce/patcher.h"
 #include "core/core.h"
 #include "core/core_timing.h"
+#include "core/hle/kernel/k_thread.h"
 #include "core/hle/kernel/svc.h"
 #include "core/memory.h"
-#include "core/hle/kernel/k_thread.h"
 
 namespace Core::NCE {
 
@@ -26,7 +28,8 @@ using NativeExecutionParameters = Kernel::KThread::NativeExecutionParameters;
 constexpr size_t MaxRelativeBranch = 128_MiB;
 constexpr u32 ModuleCodeIndex = 0x24 / sizeof(u32);
 
-Patcher::Patcher() : c(m_patch_instructions), c_pre(m_patch_instructions_pre) {
+Patcher::Patcher() : c(m_patch_instructions), c_pre(m_patch_instructions_pre)
+{
     // The first word of the patch section is always a branch to the first instruction of the
     // module.
     c.dw(0);
@@ -47,7 +50,8 @@ Patcher::Patcher() : c(m_patch_instructions), c_pre(m_patch_instructions_pre) {
 
 Patcher::~Patcher() = default;
 
-bool Patcher::PatchText(std::span<const u8> program_image, const Kernel::CodeSet::Segment& code) {
+bool Patcher::PatchText(std::span<const u8> program_image, const Kernel::CodeSet::Segment& code)
+{
     // If we have patched modules but cannot reach the new module, then it needs its own patcher.
     const size_t image_size = program_image.size();
 
@@ -107,7 +111,8 @@ bool Patcher::PatchText(std::span<const u8> program_image, const Kernel::CodeSet
             bool pre_buffer = false;
             auto ret = AddRelocations(pre_buffer);
             if (pre_buffer) {
-                WriteSvcTrampoline(ret, svc.GetValue(), c_pre, m_save_context_pre, m_load_context_pre);
+                WriteSvcTrampoline(ret, svc.GetValue(), c_pre, m_save_context_pre,
+                                   m_load_context_pre);
             } else {
                 WriteSvcTrampoline(ret, svc.GetValue(), c, m_save_context, m_load_context);
             }
@@ -152,7 +157,7 @@ bool Patcher::PatchText(std::span<const u8> program_image, const Kernel::CodeSet
         if (auto msr = MSR{inst}; msr.Verify() && msr.GetSystemReg() == TpidrEl0) {
             bool pre_buffer = false;
             auto ret = AddRelocations(pre_buffer);
-             if (pre_buffer) {
+            if (pre_buffer) {
                 WriteMsrHandler(ret, oaknut::XReg{static_cast<int>(msr.GetRt())}, c_pre);
             } else {
                 WriteMsrHandler(ret, oaknut::XReg{static_cast<int>(msr.GetRt())}, c);
@@ -175,11 +180,15 @@ bool Patcher::PatchText(std::span<const u8> program_image, const Kernel::CodeSet
     return true;
 }
 
-bool Patcher::RelocateAndCopy(Common::ProcessAddress load_base, const Kernel::CodeSet::Segment& code, std::vector<u8>& program_image, EntryTrampolines* out_trampolines) {
+bool Patcher::RelocateAndCopy(Common::ProcessAddress load_base,
+                              const Kernel::CodeSet::Segment& code, std::vector<u8>& program_image,
+                              EntryTrampolines* out_trampolines)
+{
     const size_t patch_size = GetSectionSize();
     const size_t pre_patch_size = GetPreSectionSize();
 
-    const size_t image_size = (mode == PatchMode::Split) ? program_image.size() - pre_patch_size : program_image.size();
+    const size_t image_size =
+        (mode == PatchMode::Split) ? program_image.size() - pre_patch_size : program_image.size();
 
     // Retrieve text segment data.
     const auto text = std::span{program_image}.subspan(code.offset, code.size);
@@ -197,12 +206,14 @@ bool Patcher::RelocateAndCopy(Common::ProcessAddress load_base, const Kernel::Co
 
     const auto ApplyBranchToPatchRelocationPre = [&](u32* target, const Relocation& rel) {
         oaknut::CodeGenerator rc{target};
-        rc.B(static_cast<ptrdiff_t>(rel.patch_offset) - static_cast<ptrdiff_t>(pre_patch_size) - static_cast<ptrdiff_t>(rel.module_offset));
+        rc.B(static_cast<ptrdiff_t>(rel.patch_offset) - static_cast<ptrdiff_t>(pre_patch_size) -
+             static_cast<ptrdiff_t>(rel.module_offset));
     };
 
     const auto ApplyBranchToPatchRelocationPostSplit = [&](u32* target, const Relocation& rel) {
         oaknut::CodeGenerator rc{target};
-        rc.B(static_cast<ptrdiff_t>(image_size) + static_cast<ptrdiff_t>(rel.patch_offset) - static_cast<ptrdiff_t>(rel.module_offset));
+        rc.B(static_cast<ptrdiff_t>(image_size) + static_cast<ptrdiff_t>(rel.patch_offset) -
+             static_cast<ptrdiff_t>(rel.module_offset));
     };
 
     const auto ApplyBranchToModuleRelocation = [&](u32* target, const Relocation& rel) {
@@ -216,12 +227,14 @@ bool Patcher::RelocateAndCopy(Common::ProcessAddress load_base, const Kernel::Co
 
     const auto ApplyBranchToModuleRelocationPre = [&](u32* target, const Relocation& rel) {
         oaknut::CodeGenerator rc{target};
-        rc.B(static_cast<ptrdiff_t>(pre_patch_size) + static_cast<ptrdiff_t>(rel.module_offset) - static_cast<ptrdiff_t>(rel.patch_offset));
+        rc.B(static_cast<ptrdiff_t>(pre_patch_size) + static_cast<ptrdiff_t>(rel.module_offset) -
+             static_cast<ptrdiff_t>(rel.patch_offset));
     };
 
-     const auto ApplyBranchToModuleRelocationPostSplit = [&](u32* target, const Relocation& rel) {
+    const auto ApplyBranchToModuleRelocationPostSplit = [&](u32* target, const Relocation& rel) {
         oaknut::CodeGenerator rc{target};
-        rc.B(static_cast<ptrdiff_t>(rel.module_offset) - static_cast<ptrdiff_t>(image_size) - static_cast<ptrdiff_t>(rel.patch_offset));
+        rc.B(static_cast<ptrdiff_t>(rel.module_offset) - static_cast<ptrdiff_t>(image_size) -
+             static_cast<ptrdiff_t>(rel.patch_offset));
     };
 
     const auto RebasePatch = [&](ptrdiff_t patch_offset) {
@@ -248,28 +261,34 @@ bool Patcher::RelocateAndCopy(Common::ProcessAddress load_base, const Kernel::Co
 
     if (mode == PatchMode::Split) {
         for (const Relocation& rel : patch.m_branch_to_pre_patch_relocations) {
-            ApplyBranchToPatchRelocationPre(text_words.data() + rel.module_offset / sizeof(u32), rel);
+            ApplyBranchToPatchRelocationPre(text_words.data() + rel.module_offset / sizeof(u32),
+                                            rel);
         }
         LOG_DEBUG(Core_ARM, "applied Pre: {}", patch.m_branch_to_pre_patch_relocations.size());
 
         for (const Relocation& rel : patch.m_branch_to_patch_relocations) {
-            ApplyBranchToPatchRelocationPostSplit(text_words.data() + rel.module_offset / sizeof(u32), rel);
+            ApplyBranchToPatchRelocationPostSplit(
+                text_words.data() + rel.module_offset / sizeof(u32), rel);
         }
         LOG_DEBUG(Core_ARM, "applied Post: {}", patch.m_branch_to_patch_relocations.size());
 
         for (const Relocation& rel : patch.m_branch_to_module_relocations_pre) {
-            ApplyBranchToModuleRelocationPre(m_patch_instructions_pre.data() + rel.patch_offset / sizeof(u32), rel);
+            ApplyBranchToModuleRelocationPre(
+                m_patch_instructions_pre.data() + rel.patch_offset / sizeof(u32), rel);
         }
-        LOG_DEBUG(Core_ARM, "aplied Pre-module {}", patch.m_branch_to_module_relocations_pre.size());
+        LOG_DEBUG(Core_ARM, "aplied Pre-module {}",
+                  patch.m_branch_to_module_relocations_pre.size());
 
         for (const Relocation& rel : patch.m_branch_to_module_relocations) {
-            ApplyBranchToModuleRelocationPostSplit(m_patch_instructions.data() + rel.patch_offset / sizeof(u32), rel);
+            ApplyBranchToModuleRelocationPostSplit(
+                m_patch_instructions.data() + rel.patch_offset / sizeof(u32), rel);
         }
         LOG_DEBUG(Core_ARM, "applied Post-module {}", patch.m_branch_to_module_relocations.size());
 
         // Pre
         for (const Relocation& rel : patch.m_write_module_pc_relocations_pre) {
-            oaknut::CodeGenerator rc{m_patch_instructions_pre.data() + rel.patch_offset / sizeof(u32)};
+            oaknut::CodeGenerator rc{m_patch_instructions_pre.data() +
+                                     rel.patch_offset / sizeof(u32)};
             rc.dx(RebasePc(rel.module_offset));
         }
         // Post
@@ -280,12 +299,13 @@ bool Patcher::RelocateAndCopy(Common::ProcessAddress load_base, const Kernel::Co
 
         // Trampolines (split pre + post)
         for (const Trampoline& rel : patch.m_trampolines_pre) {
-            out_trampolines->insert({RebasePc(rel.module_offset),
-                                     GetInteger(load_base) + rel.patch_offset});
+            out_trampolines->insert(
+                {RebasePc(rel.module_offset), GetInteger(load_base) + rel.patch_offset});
         }
         for (const Trampoline& rel : patch.m_trampolines) {
-            out_trampolines->insert({RebasePc(rel.module_offset),
-                                     GetInteger(load_base) + pre_patch_size + image_size + rel.patch_offset});
+            out_trampolines->insert(
+                {RebasePc(rel.module_offset),
+                 GetInteger(load_base) + pre_patch_size + image_size + rel.patch_offset});
         }
 
         if (!m_patch_instructions_pre.empty()) {
@@ -293,7 +313,8 @@ bool Patcher::RelocateAndCopy(Common::ProcessAddress load_base, const Kernel::Co
             if ((insn & 0xFC000000) == 0x14000000) {
                 s32 imm26 = insn & 0x3FFFFFF;
                 // Sign extend
-                if (imm26 & 0x2000000) imm26 |= 0xFC000000;
+                if (imm26 & 0x2000000)
+                    imm26 |= 0xFC000000;
             }
         }
     } else {
@@ -301,8 +322,8 @@ bool Patcher::RelocateAndCopy(Common::ProcessAddress load_base, const Kernel::Co
             ApplyBranchToPatchRelocation(text_words.data() + rel.module_offset / sizeof(u32), rel);
         }
         for (const Relocation& rel : patch.m_branch_to_module_relocations) {
-            ApplyBranchToModuleRelocation(m_patch_instructions.data() + rel.patch_offset / sizeof(u32),
-                                          rel);
+            ApplyBranchToModuleRelocation(
+                m_patch_instructions.data() + rel.patch_offset / sizeof(u32), rel);
         }
 
         // Rewrite PC constants
@@ -355,15 +376,19 @@ bool Patcher::RelocateAndCopy(Common::ProcessAddress load_base, const Kernel::Co
     return false;
 }
 
-size_t Patcher::GetSectionSize() const noexcept {
+size_t Patcher::GetSectionSize() const noexcept
+{
     return Common::AlignUp(m_patch_instructions.size() * sizeof(u32), Core::Memory::YUZU_PAGESIZE);
 }
 
-size_t Patcher::GetPreSectionSize() const noexcept {
-    return Common::AlignUp(m_patch_instructions_pre.size() * sizeof(u32), Core::Memory::YUZU_PAGESIZE);
+size_t Patcher::GetPreSectionSize() const noexcept
+{
+    return Common::AlignUp(m_patch_instructions_pre.size() * sizeof(u32),
+                           Core::Memory::YUZU_PAGESIZE);
 }
 
-void Patcher::WriteLoadContext(oaknut::VectorCodeGenerator& cg) {
+void Patcher::WriteLoadContext(oaknut::VectorCodeGenerator& cg)
+{
     // This function was called, which modifies X30, so use that as a scratch register.
     // SP contains the guest X30, so save our return X30 to SP + 8, since we have allocated 16 bytes
     // of stack.
@@ -396,7 +421,8 @@ void Patcher::WriteLoadContext(oaknut::VectorCodeGenerator& cg) {
     cg.RET();
 }
 
-void Patcher::WriteSaveContext(oaknut::VectorCodeGenerator& cg) {
+void Patcher::WriteSaveContext(oaknut::VectorCodeGenerator& cg)
+{
     // This function was called, which modifies X30, so use that as a scratch register.
     // SP contains the guest X30, so save our X30 to SP + 8, since we have allocated 16 bytes of
     // stack.
@@ -434,7 +460,10 @@ void Patcher::WriteSaveContext(oaknut::VectorCodeGenerator& cg) {
     cg.RET();
 }
 
-void Patcher::WriteSvcTrampoline(ModuleDestLabel module_dest, u32 svc_id, oaknut::VectorCodeGenerator& cg, oaknut::Label& save_ctx, oaknut::Label& load_ctx) {
+void Patcher::WriteSvcTrampoline(ModuleDestLabel module_dest, u32 svc_id,
+                                 oaknut::VectorCodeGenerator& cg, oaknut::Label& save_ctx,
+                                 oaknut::Label& load_ctx)
+{
     // Determine if we're writing to the pre-patch buffer
     const bool is_pre = (&cg == &c_pre);
 
@@ -543,7 +572,8 @@ void Patcher::WriteSvcTrampoline(ModuleDestLabel module_dest, u32 svc_id, oaknut
 }
 
 void Patcher::WriteMrsHandler(ModuleDestLabel module_dest, oaknut::XReg dest_reg,
-                              oaknut::SystemReg src_reg, oaknut::VectorCodeGenerator& cg) {
+                              oaknut::SystemReg src_reg, oaknut::VectorCodeGenerator& cg)
+{
     // Retrieve emulated TLS register from GuestContext.
     cg.MRS(dest_reg, oaknut::SystemReg::TPIDR_EL0);
     if (src_reg == oaknut::SystemReg::TPIDRRO_EL0) {
@@ -559,7 +589,9 @@ void Patcher::WriteMrsHandler(ModuleDestLabel module_dest, oaknut::XReg dest_reg
         this->BranchToModule(module_dest);
 }
 
-void Patcher::WriteMsrHandler(ModuleDestLabel module_dest, oaknut::XReg src_reg, oaknut::VectorCodeGenerator& cg) {
+void Patcher::WriteMsrHandler(ModuleDestLabel module_dest, oaknut::XReg src_reg,
+                              oaknut::VectorCodeGenerator& cg)
+{
     const auto scratch_reg = src_reg.index() == 0 ? X1 : X0;
     cg.STR(scratch_reg, SP, PRE_INDEXED, -16);
 
@@ -577,7 +609,9 @@ void Patcher::WriteMsrHandler(ModuleDestLabel module_dest, oaknut::XReg src_reg,
         this->BranchToModule(module_dest);
 }
 
-void Patcher::WriteCntpctHandler(ModuleDestLabel module_dest, oaknut::XReg dest_reg, oaknut::VectorCodeGenerator& cg) {
+void Patcher::WriteCntpctHandler(ModuleDestLabel module_dest, oaknut::XReg dest_reg,
+                                 oaknut::VectorCodeGenerator& cg)
+{
 #if defined(HAS_NCE)
     static Common::WallClock clock(false, 1);
 #else
@@ -625,7 +659,8 @@ void Patcher::WriteCntpctHandler(ModuleDestLabel module_dest, oaknut::XReg dest_
     cg.dx(raw_factor[1]);
 }
 
-void Patcher::LockContext(oaknut::VectorCodeGenerator& cg) {
+void Patcher::LockContext(oaknut::VectorCodeGenerator& cg)
+{
     oaknut::Label retry;
 
     // Save scratches.
@@ -655,7 +690,8 @@ void Patcher::LockContext(oaknut::VectorCodeGenerator& cg) {
     cg.LDP(X0, X1, SP, POST_INDEXED, 16);
 }
 
-void Patcher::UnlockContext(oaknut::VectorCodeGenerator& cg) {
+void Patcher::UnlockContext(oaknut::VectorCodeGenerator& cg)
+{
     // Save scratches.
     cg.STP(X0, X1, SP, PRE_INDEXED, -16);
 

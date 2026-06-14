@@ -4,14 +4,16 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/acc/acc.h"
+
 #include <algorithm>
 #include <array>
+#include <ranges>
 
 #include "common/common_types.h"
 #include "common/fs/file.h"
 #include "common/fs/path_util.h"
 #include "common/logging.h"
-#include <ranges>
 #include "common/stb.h"
 #include "common/string_util.h"
 #include "common/swap.h"
@@ -20,7 +22,6 @@
 #include "core/core_timing.h"
 #include "core/file_sys/control_metadata.h"
 #include "core/file_sys/patch_manager.h"
-#include "core/hle/service/acc/acc.h"
 #include "core/hle/service/acc/acc_aa.h"
 #include "core/hle/service/acc/acc_su.h"
 #include "core/hle/service/acc/acc_u0.h"
@@ -38,18 +39,21 @@ namespace Service::Account {
 // Thumbnails are hard coded to be at least this size
 constexpr std::size_t THUMBNAIL_SIZE = 0x24000;
 
-static std::filesystem::path GetImagePath(const Common::UUID& uuid) {
+static std::filesystem::path GetImagePath(const Common::UUID& uuid)
+{
     return Common::FS::GetVoltPath(Common::FS::VoltPath::NANDDir) /
            fmt::format("system/save/8000000000000010/su/avators/{}.jpg", uuid.FormattedString());
 }
 
-static void JPGToMemory(void* context, void* data, int len) {
+static void JPGToMemory(void* context, void* data, int len)
+{
     std::vector<u8>* jpg_image = static_cast<std::vector<u8>*>(context);
     unsigned char* jpg = static_cast<unsigned char*>(data);
     jpg_image->insert(jpg_image->end(), jpg, jpg + len);
 }
 
-static void SanitizeJPEGImageSize(std::vector<u8>& image) {
+static void SanitizeJPEGImageSize(std::vector<u8>& image)
+{
     constexpr std::size_t max_jpeg_image_size = 0x20000;
     constexpr int profile_dimensions = 256;
     int original_width, original_height, color_channels;
@@ -78,7 +82,8 @@ static void SanitizeJPEGImageSize(std::vector<u8>& image) {
 class IManagerForSystemService final : public ServiceFramework<IManagerForSystemService> {
 public:
     explicit IManagerForSystemService(Core::System& system_, Common::UUID uuid)
-        : ServiceFramework{system_, "IManagerForSystemService"}, account_id{uuid} {
+        : ServiceFramework{system_, "IManagerForSystemService"}, account_id{uuid}
+    {
         // clang-format off
         static const FunctionInfo functions[] = {
             {0, D<&IManagerForSystemService::CheckAvailability>, "CheckAvailability"},
@@ -117,28 +122,33 @@ public:
     }
 
 private:
-    Result CheckAvailability() {
+    Result CheckAvailability()
+    {
         LOG_WARNING(Service_ACC, "(STUBBED) called");
         R_SUCCEED();
     }
 
-    Result GetAccountId(Out<u64> out_account_id) {
+    Result GetAccountId(Out<u64> out_account_id)
+    {
         LOG_WARNING(Service_ACC, "(STUBBED) called");
         *out_account_id = account_id.Hash();
         R_SUCCEED();
     }
 
-    Result LoadIdTokenCacheDeprecated() {
+    Result LoadIdTokenCacheDeprecated()
+    {
         LOG_WARNING(Service_ACC, "(STUBBED) called");
         R_SUCCEED();
     }
 
-    Result LoadIdTokenCache() {
+    Result LoadIdTokenCache()
+    {
         LOG_WARNING(Service_ACC, "(STUBBED) called");
         R_SUCCEED();
     }
 
-    Result GetNetworkServiceLicenseCacheEx(Out<u32> out_license, Out<s64> out_expiration) {
+    Result GetNetworkServiceLicenseCacheEx(Out<u32> out_license, Out<s64> out_expiration)
+    {
         LOG_DEBUG(Service_ACC, "(STUBBED) called.");
 
         *out_license = 0;
@@ -154,7 +164,8 @@ private:
 class IFloatingRegistrationRequest final : public ServiceFramework<IFloatingRegistrationRequest> {
 public:
     explicit IFloatingRegistrationRequest(Core::System& system_, Common::UUID)
-        : ServiceFramework{system_, "IFloatingRegistrationRequest"} {
+        : ServiceFramework{system_, "IFloatingRegistrationRequest"}
+    {
         // clang-format off
         static const FunctionInfo functions[] = {
             {0, nullptr, "GetSessionId"},
@@ -180,7 +191,8 @@ public:
 class IAdministrator final : public ServiceFramework<IAdministrator> {
 public:
     explicit IAdministrator(Core::System& system_, Common::UUID)
-        : ServiceFramework{system_, "IAdministrator"} {
+        : ServiceFramework{system_, "IAdministrator"}
+    {
         // clang-format off
         static const FunctionInfo functions[] = {
             {0, nullptr, "CheckAvailability"},
@@ -240,7 +252,8 @@ public:
     }
 
 private:
-    void IsLinkedWithNintendoAccount(HLERequestContext& ctx) {
+    void IsLinkedWithNintendoAccount(HLERequestContext& ctx)
+    {
         IPC::ResponseBuilder rb{ctx, 3};
         rb.Push(ResultSuccess);
         rb.Push(false);
@@ -250,7 +263,8 @@ private:
 class IAuthorizationRequest final : public ServiceFramework<IAuthorizationRequest> {
 public:
     explicit IAuthorizationRequest(Core::System& system_, Common::UUID)
-        : ServiceFramework{system_, "IAuthorizationRequest"} {
+        : ServiceFramework{system_, "IAuthorizationRequest"}
+    {
         // clang-format off
         static const FunctionInfo functions[] = {
             {0, nullptr, "GetSessionId"},
@@ -269,7 +283,8 @@ public:
 class IOAuthProcedure final : public ServiceFramework<IOAuthProcedure> {
 public:
     explicit IOAuthProcedure(Core::System& system_, Common::UUID)
-        : ServiceFramework{system_, "IOAuthProcedure"} {
+        : ServiceFramework{system_, "IOAuthProcedure"}
+    {
         // clang-format off
         static const FunctionInfo functions[] = {
             {0, nullptr, "PrepareAsync"},
@@ -288,7 +303,8 @@ public:
 class IOAuthProcedureForExternalNsa final : public ServiceFramework<IOAuthProcedureForExternalNsa> {
 public:
     explicit IOAuthProcedureForExternalNsa(Core::System& system_, Common::UUID)
-        : ServiceFramework{system_, "IOAuthProcedureForExternalNsa"} {
+        : ServiceFramework{system_, "IOAuthProcedureForExternalNsa"}
+    {
         // clang-format off
         static const FunctionInfo functions[] = {
             {0, nullptr, "PrepareAsync"},
@@ -312,7 +328,8 @@ class IOAuthProcedureForNintendoAccountLinkage final
     : public ServiceFramework<IOAuthProcedureForNintendoAccountLinkage> {
 public:
     explicit IOAuthProcedureForNintendoAccountLinkage(Core::System& system_, Common::UUID)
-        : ServiceFramework{system_, "IOAuthProcedureForNintendoAccountLinkage"} {
+        : ServiceFramework{system_, "IOAuthProcedureForNintendoAccountLinkage"}
+    {
         // clang-format off
         static const FunctionInfo functions[] = {
             {0, nullptr, "PrepareAsync"},
@@ -337,8 +354,8 @@ public:
 
 class INotifier final : public ServiceFramework<INotifier> {
 public:
-    explicit INotifier(Core::System& system_, Common::UUID)
-        : ServiceFramework{system_, "INotifier"} {
+    explicit INotifier(Core::System& system_, Common::UUID) : ServiceFramework{system_, "INotifier"}
+    {
         // clang-format off
         static const FunctionInfo functions[] = {
             {0, nullptr, "GetSystemEvent"},
@@ -353,7 +370,8 @@ class IProfileCommon : public ServiceFramework<IProfileCommon> {
 public:
     explicit IProfileCommon(Core::System& system_, const char* name, bool editor_commands,
                             Common::UUID user_id_, ProfileManager& profile_manager_)
-        : ServiceFramework{system_, name}, profile_manager{profile_manager_}, user_id{user_id_} {
+        : ServiceFramework{system_, name}, profile_manager{profile_manager_}, user_id{user_id_}
+    {
         // clang-format off
         static const FunctionInfo functions[] = {
             {0, &IProfileCommon::Get, "Get"},
@@ -381,7 +399,8 @@ public:
     }
 
 protected:
-    void Unknown20(HLERequestContext& ctx) {
+    void Unknown20(HLERequestContext& ctx)
+    {
         LOG_DEBUG(Service_ACC, "(STUBBED) called.");
 
         // TODO (jarrodnorwell)
@@ -391,7 +410,8 @@ protected:
         rb.Push(ResultSuccess);
     }
 
-    void Unknown21(HLERequestContext& ctx) {
+    void Unknown21(HLERequestContext& ctx)
+    {
         LOG_DEBUG(Service_ACC, "(STUBBED) called.");
 
         // TODO (jarrodnorwell)
@@ -401,7 +421,8 @@ protected:
         rb.Push(ResultSuccess);
     }
 
-    void Unknown30(HLERequestContext& ctx) {
+    void Unknown30(HLERequestContext& ctx)
+    {
         LOG_DEBUG(Service_ACC, "(STUBBED) called.");
 
         // TODO (jarrodnorwell)
@@ -411,7 +432,8 @@ protected:
         rb.Push(ResultSuccess);
     }
 
-    void Unknown110(HLERequestContext& ctx) {
+    void Unknown110(HLERequestContext& ctx)
+    {
         LOG_DEBUG(Service_ACC, "(STUBBED) called.");
 
         // TODO (jarrodnorwell)
@@ -421,7 +443,8 @@ protected:
         rb.Push(ResultSuccess);
     }
 
-    void Get(HLERequestContext& ctx) {
+    void Get(HLERequestContext& ctx)
+    {
         LOG_DEBUG(Service_ACC, "called user_id=0x{}", user_id.RawString());
         ProfileBase profile_base{};
         UserData data{};
@@ -438,7 +461,8 @@ protected:
         }
     }
 
-    void GetBase(HLERequestContext& ctx) {
+    void GetBase(HLERequestContext& ctx)
+    {
         LOG_DEBUG(Service_ACC, "called user_id=0x{}", user_id.RawString());
         ProfileBase profile_base{};
         if (profile_manager.GetProfileBase(user_id, profile_base)) {
@@ -452,7 +476,8 @@ protected:
         }
     }
 
-    void LoadImage(HLERequestContext& ctx) {
+    void LoadImage(HLERequestContext& ctx)
+    {
         LOG_DEBUG(Service_ACC, "called");
 
         IPC::ResponseBuilder rb{ctx, 3};
@@ -480,7 +505,8 @@ protected:
         rb.Push(static_cast<u32>(buffer.size()));
     }
 
-    void GetImageSize(HLERequestContext& ctx) {
+    void GetImageSize(HLERequestContext& ctx)
+    {
         LOG_DEBUG(Service_ACC, "called");
         IPC::ResponseBuilder rb{ctx, 3};
         rb.Push(ResultSuccess);
@@ -505,7 +531,8 @@ protected:
         rb.Push(static_cast<u32>(buffer.size()));
     }
 
-    void LoadIdTokenCache(HLERequestContext& ctx) {
+    void LoadIdTokenCache(HLERequestContext& ctx)
+    {
         LOG_WARNING(Service_ACC, "(STUBBED) called");
 
         std::vector<u8> token_data(0x100);
@@ -518,7 +545,8 @@ protected:
         rb.Push(static_cast<u32>(token_data.size()));
     }
 
-    void GetNintendoAccountUserResourceCacheForApplication(HLERequestContext& ctx) {
+    void GetNintendoAccountUserResourceCacheForApplication(HLERequestContext& ctx)
+    {
         LOG_WARNING(Service_ACC, "(STUBBED) called");
 
         std::vector<u8> nas_user_base_for_application(0x68);
@@ -534,7 +562,8 @@ protected:
         rb.PushRaw<u64>(profile_manager.GetLastOpenedUser().Hash());
     }
 
-    void Store(HLERequestContext& ctx) {
+    void Store(HLERequestContext& ctx)
+    {
         IPC::RequestParser rp{ctx};
         const auto base = rp.PopRaw<ProfileBase>();
 
@@ -566,7 +595,8 @@ protected:
         rb.Push(ResultSuccess);
     }
 
-    void StoreWithImage(HLERequestContext& ctx) {
+    void StoreWithImage(HLERequestContext& ctx)
+    {
         IPC::RequestParser rp{ctx};
         const auto base = rp.PopRaw<ProfileBase>();
 
@@ -612,20 +642,25 @@ class IProfile final : public IProfileCommon {
 public:
     explicit IProfile(Core::System& system_, Common::UUID user_id_,
                       ProfileManager& profile_manager_)
-        : IProfileCommon{system_, "IProfile", false, user_id_, profile_manager_} {}
+        : IProfileCommon{system_, "IProfile", false, user_id_, profile_manager_}
+    {
+    }
 };
 
 class IProfileEditor final : public IProfileCommon {
 public:
     explicit IProfileEditor(Core::System& system_, Common::UUID user_id_,
                             ProfileManager& profile_manager_)
-        : IProfileCommon{system_, "IProfileEditor", true, user_id_, profile_manager_} {}
+        : IProfileCommon{system_, "IProfileEditor", true, user_id_, profile_manager_}
+    {
+    }
 };
 
 class ISessionObject final : public ServiceFramework<ISessionObject> {
 public:
     explicit ISessionObject(Core::System& system_, Common::UUID)
-        : ServiceFramework{system_, "ISessionObject"} {
+        : ServiceFramework{system_, "ISessionObject"}
+    {
         // clang-format off
         static const FunctionInfo functions[] = {
             {999, nullptr, "Dummy"},
@@ -639,7 +674,8 @@ public:
 class IGuestLoginRequest final : public ServiceFramework<IGuestLoginRequest> {
 public:
     explicit IGuestLoginRequest(Core::System& system_, Common::UUID)
-        : ServiceFramework{system_, "IGuestLoginRequest"} {
+        : ServiceFramework{system_, "IGuestLoginRequest"}
+    {
         // clang-format off
         static const FunctionInfo functions[] = {
             {0, nullptr, "GetSessionId"},
@@ -659,12 +695,14 @@ public:
 
 class EnsureTokenIdCacheAsyncInterface final : public IAsyncContext {
 public:
-    explicit EnsureTokenIdCacheAsyncInterface(Core::System& system_) : IAsyncContext{system_} {
+    explicit EnsureTokenIdCacheAsyncInterface(Core::System& system_) : IAsyncContext{system_}
+    {
         MarkComplete();
     }
     ~EnsureTokenIdCacheAsyncInterface() = default;
 
-    void LoadIdTokenCache(HLERequestContext& ctx) {
+    void LoadIdTokenCache(HLERequestContext& ctx)
+    {
         LOG_WARNING(Service_ACC, "(STUBBED) called");
 
         IPC::ResponseBuilder rb{ctx, 3};
@@ -673,15 +711,11 @@ public:
     }
 
 protected:
-    bool IsComplete() const override {
-        return true;
-    }
+    bool IsComplete() const override { return true; }
 
     void Cancel() override {}
 
-    Result GetResult() const override {
-        return ResultSuccess;
-    }
+    Result GetResult() const override { return ResultSuccess; }
 };
 
 class IManagerForApplication final : public ServiceFramework<IManagerForApplication> {
@@ -690,7 +724,8 @@ public:
                                     const std::shared_ptr<ProfileManager>& profile_manager_)
         : ServiceFramework{system_, "IManagerForApplication"},
           ensure_token_id{std::make_shared<EnsureTokenIdCacheAsyncInterface>(system)},
-          profile_manager{profile_manager_} {
+          profile_manager{profile_manager_}
+    {
         // clang-format off
         static const FunctionInfo functions[] = {
             {0, &IManagerForApplication::CheckAvailability, "CheckAvailability"},
@@ -710,13 +745,15 @@ public:
     }
 
 private:
-    void CheckAvailability(HLERequestContext& ctx) {
+    void CheckAvailability(HLERequestContext& ctx)
+    {
         LOG_DEBUG(Service_ACC, "(STUBBED) called");
         IPC::ResponseBuilder rb{ctx, 2};
         rb.Push(ResultSuccess);
     }
 
-    void GetAccountId(HLERequestContext& ctx) {
+    void GetAccountId(HLERequestContext& ctx)
+    {
         LOG_DEBUG(Service_ACC, "called");
 
         IPC::ResponseBuilder rb{ctx, 4};
@@ -724,7 +761,8 @@ private:
         rb.PushRaw<u64>(profile_manager->GetLastOpenedUser().Hash());
     }
 
-    void EnsureIdTokenCacheAsync(HLERequestContext& ctx) {
+    void EnsureIdTokenCacheAsync(HLERequestContext& ctx)
+    {
         LOG_WARNING(Service_ACC, "(STUBBED) called");
 
         IPC::ResponseBuilder rb{ctx, 2, 0, 1};
@@ -732,13 +770,15 @@ private:
         rb.PushIpcInterface(ensure_token_id);
     }
 
-    void LoadIdTokenCacheDeprecated(HLERequestContext& ctx) {
+    void LoadIdTokenCacheDeprecated(HLERequestContext& ctx)
+    {
         LOG_WARNING(Service_ACC, "(STUBBED) called");
 
         ensure_token_id->LoadIdTokenCache(ctx);
     }
 
-    void LoadIdTokenCache(HLERequestContext& ctx) {
+    void LoadIdTokenCache(HLERequestContext& ctx)
+    {
         LOG_WARNING(Service_ACC, "(STUBBED) called");
 
         std::vector<u8> token_data(0x100);
@@ -751,7 +791,8 @@ private:
         rb.Push(static_cast<u32>(token_data.size()));
     }
 
-    void GetNintendoAccountUserResourceCacheForApplication(HLERequestContext& ctx) {
+    void GetNintendoAccountUserResourceCacheForApplication(HLERequestContext& ctx)
+    {
         LOG_WARNING(Service_ACC, "(STUBBED) called");
 
         std::vector<u8> nas_user_base_for_application(0x68);
@@ -767,7 +808,8 @@ private:
         rb.PushRaw<u64>(profile_manager->GetLastOpenedUser().Hash());
     }
 
-    void StoreOpenContext(HLERequestContext& ctx) {
+    void StoreOpenContext(HLERequestContext& ctx)
+    {
         LOG_DEBUG(Service_ACC, "called");
 
         profile_manager->StoreOpenedUsers();
@@ -785,7 +827,8 @@ class IAsyncNetworkServiceLicenseKindContext final
     : public ServiceFramework<IAsyncNetworkServiceLicenseKindContext> {
 public:
     explicit IAsyncNetworkServiceLicenseKindContext(Core::System& system_, Common::UUID)
-        : ServiceFramework{system_, "IAsyncNetworkServiceLicenseKindContext"} {
+        : ServiceFramework{system_, "IAsyncNetworkServiceLicenseKindContext"}
+    {
         // clang-format off
         static const FunctionInfo functions[] = {
             {0, nullptr, "GetSystemEvent"},
@@ -805,7 +848,8 @@ class IOAuthProcedureForUserRegistration final
     : public ServiceFramework<IOAuthProcedureForUserRegistration> {
 public:
     explicit IOAuthProcedureForUserRegistration(Core::System& system_, Common::UUID)
-        : ServiceFramework{system_, "IOAuthProcedureForUserRegistration"} {
+        : ServiceFramework{system_, "IOAuthProcedureForUserRegistration"}
+    {
         // clang-format off
         static const FunctionInfo functions[] = {
             {0, nullptr, "PrepareAsync"},
@@ -835,7 +879,8 @@ public:
 
 class DAUTH_O final : public ServiceFramework<DAUTH_O> {
 public:
-    explicit DAUTH_O(Core::System& system_, Common::UUID) : ServiceFramework{system_, "dauth:o"} {
+    explicit DAUTH_O(Core::System& system_, Common::UUID) : ServiceFramework{system_, "dauth:o"}
+    {
         // clang-format off
         static const FunctionInfo functions[] = {
             {0, nullptr, "EnsureAuthenticationTokenCacheAsync"},
@@ -862,7 +907,8 @@ public:
 class IAsyncResult final : public ServiceFramework<IAsyncResult> {
 public:
     explicit IAsyncResult(Core::System& system_, Common::UUID)
-        : ServiceFramework{system_, "IAsyncResult"} {
+        : ServiceFramework{system_, "IAsyncResult"}
+    {
         // clang-format off
         static const FunctionInfo functions[] = {
             {0, nullptr, "GetResult"},
@@ -876,14 +922,16 @@ public:
     }
 };
 
-void Module::Interface::GetUserCount(HLERequestContext& ctx) {
+void Module::Interface::GetUserCount(HLERequestContext& ctx)
+{
     LOG_DEBUG(Service_ACC, "called");
     IPC::ResponseBuilder rb{ctx, 3};
     rb.Push(ResultSuccess);
     rb.Push<u32>(static_cast<u32>(profile_manager->GetUserCount()));
 }
 
-void Module::Interface::GetUserExistence(HLERequestContext& ctx) {
+void Module::Interface::GetUserExistence(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     Common::UUID user_id = rp.PopRaw<Common::UUID>();
     LOG_DEBUG(Service_ACC, "called user_id=0x{}", user_id.RawString());
@@ -893,28 +941,32 @@ void Module::Interface::GetUserExistence(HLERequestContext& ctx) {
     rb.Push(profile_manager->UserExists(user_id));
 }
 
-void Module::Interface::ListAllUsers(HLERequestContext& ctx) {
+void Module::Interface::ListAllUsers(HLERequestContext& ctx)
+{
     LOG_DEBUG(Service_ACC, "called");
     ctx.WriteBuffer(profile_manager->GetAllUsers());
     IPC::ResponseBuilder rb{ctx, 2};
     rb.Push(ResultSuccess);
 }
 
-void Module::Interface::ListOpenUsers(HLERequestContext& ctx) {
+void Module::Interface::ListOpenUsers(HLERequestContext& ctx)
+{
     LOG_DEBUG(Service_ACC, "called");
     ctx.WriteBuffer(profile_manager->GetOpenUsers());
     IPC::ResponseBuilder rb{ctx, 2};
     rb.Push(ResultSuccess);
 }
 
-void Module::Interface::GetLastOpenedUser(HLERequestContext& ctx) {
+void Module::Interface::GetLastOpenedUser(HLERequestContext& ctx)
+{
     LOG_DEBUG(Service_ACC, "called");
     IPC::ResponseBuilder rb{ctx, 6};
     rb.Push(ResultSuccess);
     rb.PushRaw<Common::UUID>(profile_manager->GetLastOpenedUser());
 }
 
-void Module::Interface::GetProfile(HLERequestContext& ctx) {
+void Module::Interface::GetProfile(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     Common::UUID user_id = rp.PopRaw<Common::UUID>();
     LOG_DEBUG(Service_ACC, "called user_id=0x{}", user_id.RawString());
@@ -924,20 +976,23 @@ void Module::Interface::GetProfile(HLERequestContext& ctx) {
     rb.PushIpcInterface<IProfile>(system, user_id, *profile_manager);
 }
 
-void Module::Interface::IsUserRegistrationRequestPermitted(HLERequestContext& ctx) {
+void Module::Interface::IsUserRegistrationRequestPermitted(HLERequestContext& ctx)
+{
     LOG_WARNING(Service_ACC, "(STUBBED) called");
     IPC::ResponseBuilder rb{ctx, 3};
     rb.Push(ResultSuccess);
     rb.Push(profile_manager->CanSystemRegisterUser());
 }
 
-void Module::Interface::InitializeApplicationInfo(HLERequestContext& ctx) {
+void Module::Interface::InitializeApplicationInfo(HLERequestContext& ctx)
+{
     LOG_DEBUG(Service_ACC, "called");
     IPC::ResponseBuilder rb{ctx, 2};
     rb.Push(InitializeApplicationInfoBase());
 }
 
-void Module::Interface::InitializeApplicationInfoRestricted(HLERequestContext& ctx) {
+void Module::Interface::InitializeApplicationInfoRestricted(HLERequestContext& ctx)
+{
     LOG_WARNING(Service_ACC, "(Partial implementation) called");
 
     // TODO(ogniK): We require checking if the user actually owns the title and what not. As of
@@ -948,7 +1003,8 @@ void Module::Interface::InitializeApplicationInfoRestricted(HLERequestContext& c
     rb.Push(InitializeApplicationInfoBase());
 }
 
-Result Module::Interface::InitializeApplicationInfoBase() {
+Result Module::Interface::InitializeApplicationInfoBase()
+{
     if (application_info) {
         LOG_ERROR(Service_ACC, "Application already initialized");
         return Account::ResultApplicationInfoAlreadyInitialized;
@@ -989,14 +1045,16 @@ Result Module::Interface::InitializeApplicationInfoBase() {
     return ResultSuccess;
 }
 
-void Module::Interface::GetBaasAccountManagerForApplication(HLERequestContext& ctx) {
+void Module::Interface::GetBaasAccountManagerForApplication(HLERequestContext& ctx)
+{
     LOG_DEBUG(Service_ACC, "called");
     IPC::ResponseBuilder rb{ctx, 2, 0, 1};
     rb.Push(ResultSuccess);
     rb.PushIpcInterface<IManagerForApplication>(system, profile_manager);
 }
 
-void Module::Interface::IsUserAccountSwitchLocked(HLERequestContext& ctx) {
+void Module::Interface::IsUserAccountSwitchLocked(HLERequestContext& ctx)
+{
     LOG_DEBUG(Service_ACC, "called");
     FileSys::NACP nacp;
     const auto res = system.GetAppLoader().ReadControlData(nacp);
@@ -1023,14 +1081,16 @@ void Module::Interface::IsUserAccountSwitchLocked(HLERequestContext& ctx) {
     rb.Push(is_locked);
 }
 
-void Module::Interface::InitializeApplicationInfoV2(HLERequestContext& ctx) {
+void Module::Interface::InitializeApplicationInfoV2(HLERequestContext& ctx)
+{
     LOG_WARNING(Service_ACC, "(STUBBED) called");
 
     IPC::ResponseBuilder rb{ctx, 2};
     rb.Push(ResultSuccess);
 }
 
-void Module::Interface::BeginUserRegistration(HLERequestContext& ctx) {
+void Module::Interface::BeginUserRegistration(HLERequestContext& ctx)
+{
     const auto user_id = Common::UUID::MakeRandom();
     profile_manager->CreateNewUser(user_id, "Eden");
 
@@ -1041,7 +1101,8 @@ void Module::Interface::BeginUserRegistration(HLERequestContext& ctx) {
     rb.PushRaw(user_id);
 }
 
-void Module::Interface::CompleteUserRegistration(HLERequestContext& ctx) {
+void Module::Interface::CompleteUserRegistration(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     Common::UUID user_id = rp.PopRaw<Common::UUID>();
 
@@ -1053,7 +1114,8 @@ void Module::Interface::CompleteUserRegistration(HLERequestContext& ctx) {
     rb.Push(ResultSuccess);
 }
 
-void Module::Interface::DeleteUser(HLERequestContext& ctx) {
+void Module::Interface::DeleteUser(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     Common::UUID user_id = rp.PopRaw<Common::UUID>();
     LOG_INFO(Service_ACC, "called, uuid={}", user_id.FormattedString());
@@ -1067,7 +1129,8 @@ void Module::Interface::DeleteUser(HLERequestContext& ctx) {
     rb.Push(ResultSuccess);
 }
 
-void Module::Interface::SetUserPosition(HLERequestContext& ctx) {
+void Module::Interface::SetUserPosition(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
 
     u64 position = rp.Pop<u64>();
@@ -1081,7 +1144,8 @@ void Module::Interface::SetUserPosition(HLERequestContext& ctx) {
     rb.Push(ResultSuccess);
 }
 
-void Module::Interface::GetProfileEditor(HLERequestContext& ctx) {
+void Module::Interface::GetProfileEditor(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     Common::UUID user_id = rp.PopRaw<Common::UUID>();
 
@@ -1092,7 +1156,8 @@ void Module::Interface::GetProfileEditor(HLERequestContext& ctx) {
     rb.PushIpcInterface<IProfileEditor>(system, user_id, *profile_manager);
 }
 
-void Module::Interface::GetBaasAccountAdministrator(HLERequestContext &ctx) {
+void Module::Interface::GetBaasAccountAdministrator(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     const auto uuid = rp.PopRaw<Common::UUID>();
 
@@ -1103,7 +1168,8 @@ void Module::Interface::GetBaasAccountAdministrator(HLERequestContext &ctx) {
     rb.PushIpcInterface<IAdministrator>(system, uuid);
 }
 
-void Module::Interface::ListQualifiedUsers(HLERequestContext& ctx) {
+void Module::Interface::ListQualifiedUsers(HLERequestContext& ctx)
+{
     LOG_DEBUG(Service_ACC, "called");
 
     // All users should be qualified. We don't actually have parental control or anything to do with
@@ -1114,7 +1180,8 @@ void Module::Interface::ListQualifiedUsers(HLERequestContext& ctx) {
     rb.Push(ResultSuccess);
 }
 
-void Module::Interface::ListOpenContextStoredUsers(HLERequestContext& ctx) {
+void Module::Interface::ListOpenContextStoredUsers(HLERequestContext& ctx)
+{
     LOG_DEBUG(Service_ACC, "called");
 
     ctx.WriteBuffer(profile_manager->GetStoredOpenedUsers());
@@ -1122,7 +1189,8 @@ void Module::Interface::ListOpenContextStoredUsers(HLERequestContext& ctx) {
     rb.Push(ResultSuccess);
 }
 
-void Module::Interface::StoreSaveDataThumbnailApplication(HLERequestContext& ctx) {
+void Module::Interface::StoreSaveDataThumbnailApplication(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     const auto uuid = rp.PopRaw<Common::UUID>();
 
@@ -1135,7 +1203,8 @@ void Module::Interface::StoreSaveDataThumbnailApplication(HLERequestContext& ctx
     StoreSaveDataThumbnail(ctx, uuid, tid);
 }
 
-void Module::Interface::GetBaasAccountManagerForSystemService(HLERequestContext& ctx) {
+void Module::Interface::GetBaasAccountManagerForSystemService(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     const auto uuid = rp.PopRaw<Common::UUID>();
 
@@ -1146,7 +1215,8 @@ void Module::Interface::GetBaasAccountManagerForSystemService(HLERequestContext&
     rb.PushIpcInterface<IManagerForSystemService>(system, uuid);
 }
 
-void Module::Interface::StoreSaveDataThumbnailSystem(HLERequestContext& ctx) {
+void Module::Interface::StoreSaveDataThumbnailSystem(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     const auto uuid = rp.PopRaw<Common::UUID>();
     const auto tid = rp.Pop<u64_le>();
@@ -1155,7 +1225,8 @@ void Module::Interface::StoreSaveDataThumbnailSystem(HLERequestContext& ctx) {
     StoreSaveDataThumbnail(ctx, uuid, tid);
 }
 
-void Module::Interface::GetPinCodeLength(HLERequestContext& ctx) {
+void Module::Interface::GetPinCodeLength(HLERequestContext& ctx)
+{
     LOG_WARNING(Service_ACC, "(STUBBED) called");
 
     IPC::ResponseBuilder rb{ctx, 3};
@@ -1164,7 +1235,8 @@ void Module::Interface::GetPinCodeLength(HLERequestContext& ctx) {
 }
 
 void Module::Interface::StoreSaveDataThumbnail(HLERequestContext& ctx, const Common::UUID& uuid,
-                                               const u64 tid) {
+                                               const u64 tid)
+{
     IPC::ResponseBuilder rb{ctx, 2};
 
     if (tid == 0) {
@@ -1190,7 +1262,8 @@ void Module::Interface::StoreSaveDataThumbnail(HLERequestContext& ctx, const Com
     rb.Push(ResultSuccess);
 }
 
-void Module::Interface::TrySelectUserWithoutInteractionDeprecated(HLERequestContext& ctx) {
+void Module::Interface::TrySelectUserWithoutInteractionDeprecated(HLERequestContext& ctx)
+{
     LOG_DEBUG(Service_ACC, "called");
     // A u8 is passed into this function which we can safely ignore. It's to determine if we have
     // access to use the network or not by the looks of it
@@ -1213,7 +1286,8 @@ void Module::Interface::TrySelectUserWithoutInteractionDeprecated(HLERequestCont
     rb.PushRaw(profile_manager->GetUser(0)->uuid);
 }
 
-void Module::Interface::TrySelectUserWithoutInteraction(HLERequestContext& ctx) {
+void Module::Interface::TrySelectUserWithoutInteraction(HLERequestContext& ctx)
+{
     LOG_DEBUG(Service_ACC, "called");
     // A u8 is passed into this function which we can safely ignore. It's to determine if we have
     // access to use the network or not by the looks of it
@@ -1239,12 +1313,15 @@ void Module::Interface::TrySelectUserWithoutInteraction(HLERequestContext& ctx) 
 Module::Interface::Interface(std::shared_ptr<Module> module_,
                              std::shared_ptr<ProfileManager> profile_manager_,
                              Core::System& system_, const char* name)
-    : ServiceFramework{system_, name}, module{std::move(module_)},
-      profile_manager{std::move(profile_manager_)} {}
+    : ServiceFramework{system_, name}, module{std::move(module_)}, profile_manager{
+                                                                       std::move(profile_manager_)}
+{
+}
 
 Module::Interface::~Interface() = default;
 
-void LoopProcess(Core::System& system) {
+void LoopProcess(Core::System& system)
+{
     auto module = std::make_shared<Module>();
     auto profile_manager = std::make_shared<ProfileManager>();
     auto server_manager = std::make_unique<ServerManager>(system);

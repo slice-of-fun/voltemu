@@ -1,10 +1,11 @@
 // SPDX-FileCopyrightText: Copyright 2020 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "hid_core/frontend/input_interpreter.h"
+
 #include "core/core.h"
 #include "core/hle/service/hid/hid_server.h"
 #include "core/hle/service/sm/sm.h"
-#include "hid_core/frontend/input_interpreter.h"
 #include "hid_core/hid_types.h"
 #include "hid_core/resource_manager.h"
 #include "hid_core/resources/npad/npad.h"
@@ -13,13 +14,15 @@ InputInterpreter::InputInterpreter(Core::System& system)
     : npad{system.ServiceManager()
                .GetService<Service::HID::IHidServer>("hid")
                ->GetResourceManager()
-               ->GetNpad()} {
+               ->GetNpad()}
+{
     ResetButtonStates();
 }
 
 InputInterpreter::~InputInterpreter() = default;
 
-void InputInterpreter::PollInput() {
+void InputInterpreter::PollInput()
+{
     if (npad == nullptr) {
         return;
     }
@@ -31,7 +34,8 @@ void InputInterpreter::PollInput() {
     button_states[current_index] = button_state;
 }
 
-void InputInterpreter::ResetButtonStates() {
+void InputInterpreter::ResetButtonStates()
+{
     previous_index = 0;
     current_index = 0;
 
@@ -42,18 +46,21 @@ void InputInterpreter::ResetButtonStates() {
     }
 }
 
-bool InputInterpreter::IsButtonPressed(Core::HID::NpadButton button) const {
+bool InputInterpreter::IsButtonPressed(Core::HID::NpadButton button) const
+{
     return True(button_states[current_index] & button);
 }
 
-bool InputInterpreter::IsButtonPressedOnce(Core::HID::NpadButton button) const {
+bool InputInterpreter::IsButtonPressedOnce(Core::HID::NpadButton button) const
+{
     const bool current_press = True(button_states[current_index] & button);
     const bool previous_press = True(button_states[previous_index] & button);
 
     return current_press && !previous_press;
 }
 
-bool InputInterpreter::IsButtonHeld(Core::HID::NpadButton button) const {
+bool InputInterpreter::IsButtonHeld(Core::HID::NpadButton button) const
+{
     Core::HID::NpadButton held_buttons{button_states[0]};
 
     for (std::size_t i = 1; i < button_states.size(); ++i) {

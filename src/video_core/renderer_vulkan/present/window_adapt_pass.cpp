@@ -1,13 +1,14 @@
 // SPDX-FileCopyrightText: Copyright 2024 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "video_core/renderer_vulkan/present/window_adapt_pass.h"
+
 #include "core/frontend/framebuffer_layout.h"
 #include "video_core/framebuffer_config.h"
 #include "video_core/host_shaders/vulkan_present_vert_spv.h"
 #include "video_core/renderer_vulkan/present/layer.h"
 #include "video_core/renderer_vulkan/present/present_push_constants.h"
 #include "video_core/renderer_vulkan/present/util.h"
-#include "video_core/renderer_vulkan/present/window_adapt_pass.h"
 #include "video_core/renderer_vulkan/vk_present_manager.h"
 #include "video_core/renderer_vulkan/vk_shader_util.h"
 #include "video_core/vulkan_common/vulkan_device.h"
@@ -17,7 +18,8 @@ namespace Vulkan {
 
 WindowAdaptPass::WindowAdaptPass(const Device& device_, VkFormat frame_format,
                                  vk::Sampler&& sampler_, vk::ShaderModule&& fragment_shader_)
-    : device(device_), sampler(std::move(sampler_)), fragment_shader(std::move(fragment_shader_)) {
+    : device(device_), sampler(std::move(sampler_)), fragment_shader(std::move(fragment_shader_))
+{
     CreateDescriptorSetLayout();
     CreatePipelineLayout();
     CreateVertexShader();
@@ -30,7 +32,8 @@ WindowAdaptPass::~WindowAdaptPass() = default;
 void WindowAdaptPass::Draw(RasterizerVulkan& rasterizer, Scheduler& scheduler, size_t image_index,
                            std::list<Layer>& layers,
                            std::span<const Tegra::FramebufferConfig> configs,
-                           const Layout::FramebufferLayout& layout, Frame* dst) {
+                           const Layout::FramebufferLayout& layout, Frame* dst)
+{
 
     const VkFramebuffer host_framebuffer{*dst->framebuffer};
     const VkRenderPass renderpass{*render_pass};
@@ -103,20 +106,24 @@ void WindowAdaptPass::Draw(RasterizerVulkan& rasterizer, Scheduler& scheduler, s
     });
 }
 
-VkDescriptorSetLayout WindowAdaptPass::GetDescriptorSetLayout() {
+VkDescriptorSetLayout WindowAdaptPass::GetDescriptorSetLayout()
+{
     return *descriptor_set_layout;
 }
 
-VkRenderPass WindowAdaptPass::GetRenderPass() {
+VkRenderPass WindowAdaptPass::GetRenderPass()
+{
     return *render_pass;
 }
 
-void WindowAdaptPass::CreateDescriptorSetLayout() {
+void WindowAdaptPass::CreateDescriptorSetLayout()
+{
     descriptor_set_layout =
         CreateWrappedDescriptorSetLayout(device, {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER});
 }
 
-void WindowAdaptPass::CreatePipelineLayout() {
+void WindowAdaptPass::CreatePipelineLayout()
+{
     const VkPushConstantRange range{
         .stageFlags = VK_SHADER_STAGE_VERTEX_BIT,
         .offset = 0,
@@ -134,15 +141,18 @@ void WindowAdaptPass::CreatePipelineLayout() {
     });
 }
 
-void WindowAdaptPass::CreateVertexShader() {
+void WindowAdaptPass::CreateVertexShader()
+{
     vertex_shader = BuildShader(device, VULKAN_PRESENT_VERT_SPV);
 }
 
-void WindowAdaptPass::CreateRenderPass(VkFormat frame_format) {
+void WindowAdaptPass::CreateRenderPass(VkFormat frame_format)
+{
     render_pass = CreateWrappedRenderPass(device, frame_format, VK_IMAGE_LAYOUT_UNDEFINED);
 }
 
-void WindowAdaptPass::CreatePipelines() {
+void WindowAdaptPass::CreatePipelines()
+{
     opaque_pipeline = CreateWrappedPipeline(device, render_pass, pipeline_layout,
                                             std::tie(vertex_shader, fragment_shader));
     premultiplied_pipeline = CreateWrappedPremultipliedBlendingPipeline(

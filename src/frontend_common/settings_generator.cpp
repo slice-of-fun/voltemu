@@ -1,15 +1,19 @@
 // SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#include <random>
-#include <frozen/string.h>
-#include "common/settings.h"
-#include "common/random.h"
 #include "settings_generator.h"
+
+#include <frozen/string.h>
+
+#include <random>
+
+#include "common/random.h"
+#include "common/settings.h"
 
 namespace FrontendCommon {
 
-void GenerateSettings() {
+void GenerateSettings()
+{
     auto gen = Common::Random::GetMT19937();
     // Web Token
     if (Settings::values.eden_token.GetValue().empty()) {
@@ -33,4 +37,4 @@ void GenerateSettings() {
         Settings::values.serial_battery.SetValue(distribution(gen));
 }
 
-}
+} // namespace FrontendCommon

@@ -4,11 +4,12 @@
 // SPDX-FileCopyrightText: 2018 Citra Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include <sstream>
+#include "yuzu/configuration/configure_motion_touch.h"
 
 #include <QCloseEvent>
 #include <QMessageBox>
 #include <QStringListModel>
+#include <sstream>
 
 #include "common/logging.h"
 #include "common/settings.h"
@@ -16,12 +17,12 @@
 #include "input_common/helpers/udp_protocol.h"
 #include "input_common/main.h"
 #include "ui_configure_motion_touch.h"
-#include "yuzu/configuration/configure_motion_touch.h"
 #include "yuzu/configuration/configure_touch_from_button.h"
 
 CalibrationConfigurationDialog::CalibrationConfigurationDialog(QWidget* parent,
                                                                const std::string& host, u16 port)
-    : QDialog(parent) {
+    : QDialog(parent)
+{
     layout = new QVBoxLayout(this);
     status_label = new QLabel(tr("Communicating with the server..."));
     cancel_button = new QPushButton(tr("Cancel"));
@@ -70,18 +71,21 @@ CalibrationConfigurationDialog::CalibrationConfigurationDialog(QWidget* parent,
 
 CalibrationConfigurationDialog::~CalibrationConfigurationDialog() = default;
 
-void CalibrationConfigurationDialog::UpdateLabelText(const QString& text) {
+void CalibrationConfigurationDialog::UpdateLabelText(const QString& text)
+{
     status_label->setText(text);
 }
 
-void CalibrationConfigurationDialog::UpdateButtonText(const QString& text) {
+void CalibrationConfigurationDialog::UpdateButtonText(const QString& text)
+{
     cancel_button->setText(text);
 }
 
 ConfigureMotionTouch::ConfigureMotionTouch(QWidget* parent,
                                            InputCommon::InputSubsystem* input_subsystem_)
     : QDialog(parent), input_subsystem{input_subsystem_},
-      ui(std::make_unique<Ui::ConfigureMotionTouch>()) {
+      ui(std::make_unique<Ui::ConfigureMotionTouch>())
+{
     ui->setupUi(this);
     SetConfiguration();
     UpdateUiDisplay();
@@ -90,13 +94,15 @@ ConfigureMotionTouch::ConfigureMotionTouch(QWidget* parent,
 
 ConfigureMotionTouch::~ConfigureMotionTouch() = default;
 
-void ConfigureMotionTouch::SetConfiguration() {
+void ConfigureMotionTouch::SetConfiguration()
+{
     const Common::ParamPackage touch_param(Settings::values.touch_device.GetValue());
 
     touch_from_button_maps = Settings::values.touch_from_button_maps;
     for (const auto& touch_map : touch_from_button_maps)
         ui->touch_from_button_map->addItem(QString::fromStdString(touch_map.name));
-    if (auto const index = Settings::values.touch_from_button_map_index.GetValue(); int(index) < ui->touch_from_button_map->count())
+    if (auto const index = Settings::values.touch_from_button_map_index.GetValue();
+        int(index) < ui->touch_from_button_map->count())
         ui->touch_from_button_map->setCurrentIndex(index);
 
     min_x = touch_param.Get("min_x", 100);
@@ -122,7 +128,8 @@ void ConfigureMotionTouch::SetConfiguration() {
     }
 }
 
-void ConfigureMotionTouch::UpdateUiDisplay() {
+void ConfigureMotionTouch::UpdateUiDisplay()
+{
     const QString cemuhook_udp = QStringLiteral("cemuhookudp");
 
     ui->touch_calibration->setVisible(true);
@@ -134,7 +141,8 @@ void ConfigureMotionTouch::UpdateUiDisplay() {
     ui->udp_config_group_box->setVisible(true);
 }
 
-void ConfigureMotionTouch::ConnectEvents() {
+void ConfigureMotionTouch::ConnectEvents()
+{
     connect(ui->udp_test, &QPushButton::clicked, this, &ConfigureMotionTouch::OnCemuhookUDPTest);
     connect(ui->udp_add, &QPushButton::clicked, this, &ConfigureMotionTouch::OnUDPAddServer);
     connect(ui->udp_remove, &QPushButton::clicked, this, &ConfigureMotionTouch::OnUDPDeleteServer);
@@ -151,7 +159,8 @@ void ConfigureMotionTouch::ConnectEvents() {
     });
 }
 
-void ConfigureMotionTouch::OnUDPAddServer() {
+void ConfigureMotionTouch::OnUDPAddServer()
+{
     // Validator for IP address
     const QRegularExpression re(QStringLiteral(
         R"re(^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$)re"));
@@ -193,11 +202,13 @@ void ConfigureMotionTouch::OnUDPAddServer() {
     ui->udp_server_list->setCurrentIndex(index);
 }
 
-void ConfigureMotionTouch::OnUDPDeleteServer() {
+void ConfigureMotionTouch::OnUDPDeleteServer()
+{
     udp_server_list_model->removeRows(ui->udp_server_list->currentIndex().row(), 1);
 }
 
-void ConfigureMotionTouch::OnCemuhookUDPTest() {
+void ConfigureMotionTouch::OnCemuhookUDPTest()
+{
     ui->udp_test->setEnabled(false);
     ui->udp_test->setText(tr("Testing"));
     udp_test_in_progress = true;
@@ -213,7 +224,8 @@ void ConfigureMotionTouch::OnCemuhookUDPTest() {
         });
 }
 
-void ConfigureMotionTouch::OnConfigureTouchCalibration() {
+void ConfigureMotionTouch::OnConfigureTouchCalibration()
+{
     ui->touch_calibration_config->setEnabled(false);
     ui->touch_calibration_config->setText(tr("Configuring"));
     CalibrationConfigurationDialog dialog(this, ui->udp_server->text().toStdString(),
@@ -235,7 +247,8 @@ void ConfigureMotionTouch::OnConfigureTouchCalibration() {
     ui->touch_calibration_config->setText(tr("Configure"));
 }
 
-void ConfigureMotionTouch::closeEvent(QCloseEvent* event) {
+void ConfigureMotionTouch::closeEvent(QCloseEvent* event)
+{
     if (CanCloseDialog()) {
         event->accept();
     } else {
@@ -243,7 +256,8 @@ void ConfigureMotionTouch::closeEvent(QCloseEvent* event) {
     }
 }
 
-void ConfigureMotionTouch::ShowUDPTestResult(bool result) {
+void ConfigureMotionTouch::ShowUDPTestResult(bool result)
+{
     udp_test_in_progress = false;
     if (result) {
         QMessageBox::information(this, tr("Test Successful"),
@@ -258,7 +272,8 @@ void ConfigureMotionTouch::ShowUDPTestResult(bool result) {
     ui->udp_test->setText(tr("Test"));
 }
 
-void ConfigureMotionTouch::OnConfigureTouchFromButton() {
+void ConfigureMotionTouch::OnConfigureTouchFromButton()
+{
     ConfigureTouchFromButton dialog{this, touch_from_button_maps, input_subsystem,
                                     ui->touch_from_button_map->currentIndex()};
     if (dialog.exec() != QDialog::Accepted) {
@@ -275,7 +290,8 @@ void ConfigureMotionTouch::OnConfigureTouchFromButton() {
     ui->touch_from_button_map->setCurrentIndex(dialog.GetSelectedIndex());
 }
 
-bool ConfigureMotionTouch::CanCloseDialog() {
+bool ConfigureMotionTouch::CanCloseDialog()
+{
     if (udp_test_in_progress) {
         QMessageBox::warning(this, tr("Eden"),
                              tr("UDP Test or calibration configuration is in progress.<br>Please "
@@ -285,7 +301,8 @@ bool ConfigureMotionTouch::CanCloseDialog() {
     return true;
 }
 
-void ConfigureMotionTouch::ApplyConfiguration() {
+void ConfigureMotionTouch::ApplyConfiguration()
+{
     if (!CanCloseDialog()) {
         return;
     }
@@ -305,7 +322,8 @@ void ConfigureMotionTouch::ApplyConfiguration() {
     accept();
 }
 
-std::string ConfigureMotionTouch::GetUDPServerString() const {
+std::string ConfigureMotionTouch::GetUDPServerString() const
+{
     QString input_servers;
 
     for (const auto& item : udp_server_list_model->stringList()) {

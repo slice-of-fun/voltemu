@@ -6,9 +6,10 @@
 
 #pragma once
 
-#include <vector>
 #include <QDialog>
 #include <QList>
+#include <vector>
+
 #include "core/frontend/applets/profile_select.h"
 
 class ControllerNavigation;

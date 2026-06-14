@@ -3,18 +3,19 @@
 
 #pragma once
 
-#include "common/common_types.h"
-#include <string>
 #include <filesystem>
+#include <string>
+
+#include "common/common_types.h"
 
 namespace FrontendCommon::DataManager {
 
 enum class DataDir { Saves, UserNand, SysNand, Mods, Shaders };
 
-const std::filesystem::path GetDataDir(DataDir dir, const std::string &user_id = "");
-const std::string GetDataDirString(DataDir dir, const std::string &user_id = "");
+const std::filesystem::path GetDataDir(DataDir dir, const std::string& user_id = "");
+const std::string GetDataDirString(DataDir dir, const std::string& user_id = "");
 
-u64 ClearDir(DataDir dir, const std::string &user_id = "");
+u64 ClearDir(DataDir dir, const std::string& user_id = "");
 std::string ReadableBytesSize(u64 size) noexcept;
 
 u64 DataDirSize(DataDir dir);

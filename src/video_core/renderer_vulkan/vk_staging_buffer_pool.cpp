@@ -4,11 +4,13 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+#include "video_core/renderer_vulkan/vk_staging_buffer_pool.h"
+
+#include <fmt/ranges.h>
+
 #include <algorithm>
 #include <utility>
 #include <vector>
-
-#include <fmt/ranges.h>
 
 #include "common/alignment.h"
 #include "common/assert.h"
@@ -16,7 +18,6 @@
 #include "common/common_types.h"
 #include "common/literals.h"
 #include "video_core/renderer_vulkan/vk_scheduler.h"
-#include "video_core/renderer_vulkan/vk_staging_buffer_pool.h"
 #include "video_core/vulkan_common/vulkan_device.h"
 #include "video_core/vulkan_common/vulkan_wrapper.h"
 
@@ -30,18 +31,19 @@ constexpr VkDeviceSize MAX_ALIGNMENT = 256;
 // Stream buffer size in bytes
 constexpr VkDeviceSize MAX_STREAM_BUFFER_SIZE = 128_MiB;
 
-size_t GetStreamBufferSize(const Device& device) {
+size_t GetStreamBufferSize(const Device& device)
+{
     if (!device.HasDebuggingToolAttached()) {
         return MAX_STREAM_BUFFER_SIZE;
     }
 
     VkDeviceSize size{0};
     bool has_device_local_host_visible_heap{};
-    ForEachDeviceLocalHostVisibleHeap(device, [&size, &has_device_local_host_visible_heap](
-                                                  size_t index, VkMemoryHeap& heap) {
-        has_device_local_host_visible_heap = true;
-        size = (std::max)(size, heap.size);
-    });
+    ForEachDeviceLocalHostVisibleHeap(
+        device, [&size, &has_device_local_host_visible_heap](size_t index, VkMemoryHeap& heap) {
+            has_device_local_host_visible_heap = true;
+            size = (std::max)(size, heap.size);
+        });
     if (has_device_local_host_visible_heap) {
         // If rebar is not supported, cut the max heap size to 40%. This will allow 2 captures to be
         // loaded at the same time in RenderDoc. If rebar is supported, this shouldn't be an issue
@@ -60,7 +62,8 @@ StagingBufferPool::StagingBufferPool(const Device& device_, MemoryAllocator& mem
                                      Scheduler& scheduler_)
     : device{device_}, memory_allocator{memory_allocator_}, scheduler{scheduler_},
       stream_buffer_size{GetStreamBufferSize(device)}, region_size{stream_buffer_size /
-                                                                   StagingBufferPool::NUM_SYNCS} {
+                                                                   StagingBufferPool::NUM_SYNCS}
+{
     VkBufferCreateInfo stream_ci = {
         .sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
         .pNext = nullptr,
@@ -85,14 +88,16 @@ StagingBufferPool::StagingBufferPool(const Device& device_, MemoryAllocator& mem
 
 StagingBufferPool::~StagingBufferPool() = default;
 
-StagingBufferRef StagingBufferPool::Request(size_t size, MemoryUsage usage, bool deferred) {
+StagingBufferRef StagingBufferPool::Request(size_t size, MemoryUsage usage, bool deferred)
+{
     if (!deferred && usage == MemoryUsage::Upload && size <= region_size) {
         return GetStreamBuffer(size);
     }
     return GetStagingBuffer(size, usage, deferred);
 }
 
-void StagingBufferPool::FreeDeferred(StagingBufferRef& ref) {
+void StagingBufferPool::FreeDeferred(StagingBufferRef& ref)
+{
     auto& entries = GetCache(ref.usage)[ref.log2_level].entries;
     const auto is_this_one = [&ref](const StagingBuffer& entry) {
         return entry.index == ref.index;
@@ -104,7 +109,8 @@ void StagingBufferPool::FreeDeferred(StagingBufferRef& ref) {
     it->deferred = false;
 }
 
-void StagingBufferPool::TickFrame() {
+void StagingBufferPool::TickFrame()
+{
     current_delete_level = (current_delete_level + 1) % NUM_LEVELS;
 
     ReleaseCache(MemoryUsage::DeviceLocal);
@@ -112,7 +118,8 @@ void StagingBufferPool::TickFrame() {
     ReleaseCache(MemoryUsage::Download);
 }
 
-StagingBufferRef StagingBufferPool::GetStreamBuffer(size_t size) {
+StagingBufferRef StagingBufferPool::GetStreamBuffer(size_t size)
+{
     if (AreRegionsActive(Region(free_iterator) + 1,
                          (std::min)(Region(iterator + size) + 1, NUM_SYNCS))) {
         // Avoid waiting for the previous usages to be free
@@ -148,23 +155,24 @@ StagingBufferRef StagingBufferPool::GetStreamBuffer(size_t size) {
     };
 }
 
-bool StagingBufferPool::AreRegionsActive(size_t region_begin, size_t region_end) const {
+bool StagingBufferPool::AreRegionsActive(size_t region_begin, size_t region_end) const
+{
     const u64 gpu_tick = scheduler.GetMasterSemaphore().KnownGpuTick();
     return std::any_of(sync_ticks.begin() + region_begin, sync_ticks.begin() + region_end,
                        [gpu_tick](u64 sync_tick) { return gpu_tick < sync_tick; });
 };
 
-StagingBufferRef StagingBufferPool::GetStagingBuffer(size_t size, MemoryUsage usage,
-                                                     bool deferred) {
+StagingBufferRef StagingBufferPool::GetStagingBuffer(size_t size, MemoryUsage usage, bool deferred)
+{
     if (const std::optional<StagingBufferRef> ref = TryGetReservedBuffer(size, usage, deferred)) {
         return *ref;
     }
     return CreateStagingBuffer(size, usage, deferred);
 }
 
-std::optional<StagingBufferRef> StagingBufferPool::TryGetReservedBuffer(size_t size,
-                                                                        MemoryUsage usage,
-                                                                        bool deferred) {
+std::optional<StagingBufferRef>
+StagingBufferPool::TryGetReservedBuffer(size_t size, MemoryUsage usage, bool deferred)
+{
     StagingBuffers& cache_level = GetCache(usage)[Common::Log2Ceil64(size)];
 
     const auto is_free = [this](const StagingBuffer& entry) {
@@ -187,7 +195,8 @@ std::optional<StagingBufferRef> StagingBufferPool::TryGetReservedBuffer(size_t s
 }
 
 StagingBufferRef StagingBufferPool::CreateStagingBuffer(size_t size, MemoryUsage usage,
-                                                        bool deferred) {
+                                                        bool deferred)
+{
     const u32 log2 = Common::Log2Ceil64(size);
     VkBufferCreateInfo buffer_ci = {
         .sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
@@ -222,7 +231,8 @@ StagingBufferRef StagingBufferPool::CreateStagingBuffer(size_t size, MemoryUsage
     return entry.Ref();
 }
 
-StagingBufferPool::StagingBuffersCache& StagingBufferPool::GetCache(MemoryUsage usage) {
+StagingBufferPool::StagingBuffersCache& StagingBufferPool::GetCache(MemoryUsage usage)
+{
     switch (usage) {
     case MemoryUsage::DeviceLocal:
         return device_local_cache;
@@ -236,11 +246,13 @@ StagingBufferPool::StagingBuffersCache& StagingBufferPool::GetCache(MemoryUsage 
     }
 }
 
-void StagingBufferPool::ReleaseCache(MemoryUsage usage) {
+void StagingBufferPool::ReleaseCache(MemoryUsage usage)
+{
     ReleaseLevel(GetCache(usage), current_delete_level);
 }
 
-void StagingBufferPool::ReleaseLevel(StagingBuffersCache& cache, size_t log2) {
+void StagingBufferPool::ReleaseLevel(StagingBuffersCache& cache, size_t log2)
+{
     constexpr size_t deletions_per_tick = 16;
     auto& staging = cache[log2];
     auto& entries = staging.entries;

@@ -10,8 +10,8 @@
 #include <queue>
 
 #include "common/swap.h"
-#include "core/hle/service/am/applet.h"
 #include "core/frontend/applets/net_connect.h"
+#include "core/hle/service/am/applet.h"
 
 union Result;
 
@@ -61,13 +61,9 @@ public:
     virtual void Execute() = 0;
     virtual Result RequestExit() = 0;
 
-    LibraryAppletMode GetLibraryAppletMode() const {
-        return applet_mode;
-    }
+    LibraryAppletMode GetLibraryAppletMode() const { return applet_mode; }
 
-    bool IsInitialized() const {
-        return initialized;
-    }
+    bool IsInitialized() const { return initialized; }
 
 protected:
     std::shared_ptr<IStorage> PopInData();

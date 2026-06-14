@@ -4,13 +4,14 @@
 // SPDX-FileCopyrightText: Copyright 2021 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include <string_view>
+#include "video_core/renderer_vulkan/pipeline_statistics.h"
 
 #include <fmt/ranges.h>
 
+#include <string_view>
+
 #include "common/common_types.h"
 #include "common/logging.h"
-#include "video_core/renderer_vulkan/pipeline_statistics.h"
 #include "video_core/vulkan_common/vulkan_device.h"
 #include "video_core/vulkan_common/vulkan_wrapper.h"
 
@@ -18,7 +19,8 @@ namespace Vulkan {
 
 using namespace std::string_view_literals;
 
-static u64 GetUint64(const VkPipelineExecutableStatisticKHR& statistic) {
+static u64 GetUint64(const VkPipelineExecutableStatisticKHR& statistic)
+{
     switch (statistic.format) {
     case VK_PIPELINE_EXECUTABLE_STATISTIC_FORMAT_INT64_KHR:
         return static_cast<u64>(statistic.value.i64);
@@ -31,9 +33,12 @@ static u64 GetUint64(const VkPipelineExecutableStatisticKHR& statistic) {
     }
 }
 
-PipelineStatistics::PipelineStatistics(const Device& device_) : device{device_} {}
+PipelineStatistics::PipelineStatistics(const Device& device_) : device{device_}
+{
+}
 
-void PipelineStatistics::Collect(VkPipeline pipeline) {
+void PipelineStatistics::Collect(VkPipeline pipeline)
+{
     const auto& dev{device.GetLogical()};
     const std::vector properties{dev.GetPipelineExecutablePropertiesKHR(pipeline)};
     const u32 num_executables{static_cast<u32>(properties.size())};
@@ -64,7 +69,8 @@ void PipelineStatistics::Collect(VkPipeline pipeline) {
     }
 }
 
-void PipelineStatistics::Report() const {
+void PipelineStatistics::Report() const
+{
     double num{};
     Stats total;
     {

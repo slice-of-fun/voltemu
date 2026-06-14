@@ -1,25 +1,30 @@
 // SPDX-FileCopyrightText: 2018 Citra Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include <thread>
-#include "common/assert.h"
 #include "common/detached_tasks.h"
+
+#include <thread>
+
+#include "common/assert.h"
 
 namespace Common {
 
 DetachedTasks* DetachedTasks::instance = nullptr;
 
-DetachedTasks::DetachedTasks() {
+DetachedTasks::DetachedTasks()
+{
     ASSERT(instance == nullptr);
     instance = this;
 }
 
-void DetachedTasks::WaitForAllTasks() {
+void DetachedTasks::WaitForAllTasks()
+{
     std::unique_lock lock{mutex};
     cv.wait(lock, [this]() { return count == 0; });
 }
 
-DetachedTasks::~DetachedTasks() {
+DetachedTasks::~DetachedTasks()
+{
     WaitForAllTasks();
 
     std::unique_lock lock{mutex};
@@ -27,7 +32,8 @@ DetachedTasks::~DetachedTasks() {
     instance = nullptr;
 }
 
-void DetachedTasks::AddTask(std::function<void()> task) {
+void DetachedTasks::AddTask(std::function<void()> task)
+{
     std::unique_lock lock{instance->mutex};
     ++instance->count;
     std::thread([task_{std::move(task)}]() {

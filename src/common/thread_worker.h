@@ -10,11 +10,11 @@
 #include <condition_variable>
 #include <functional>
 #include <mutex>
+#include <queue>
 #include <string>
 #include <thread>
 #include <type_traits>
 #include <vector>
-#include <queue>
 
 #include "common/polyfill_thread.h"
 #include "common/thread.h"
@@ -22,14 +22,11 @@
 
 namespace Common {
 
-template <class StateType = void>
-class StatefulThreadWorker {
+template<class StateType = void> class StatefulThreadWorker {
     static constexpr bool with_state = !std::is_same_v<StateType, void>;
 
     struct DummyCallable {
-        int operator()() const noexcept {
-            return 0;
-        }
+        int operator()() const noexcept { return 0; }
     };
 
     using Task =
@@ -38,7 +35,8 @@ class StatefulThreadWorker {
 
 public:
     explicit StatefulThreadWorker(size_t num_workers, std::string name, StateMaker func = {})
-        : workers_queued{num_workers}, thread_name{std::move(name)} {
+        : workers_queued{num_workers}, thread_name{std::move(name)}
+    {
         const auto lambda = [this, func](std::stop_token stop_token) {
             Common::SetCurrentThreadName(thread_name.c_str());
             {
@@ -50,8 +48,7 @@ public:
                         if (requests.empty()) {
                             wait_condition.notify_all();
                         }
-                        condition.wait(lock, stop_token,
-                                       [this] { return !requests.empty(); });
+                        condition.wait(lock, stop_token, [this] { return !requests.empty(); });
                         if (stop_token.stop_requested()) {
                             break;
                         }
@@ -81,7 +78,8 @@ public:
     StatefulThreadWorker& operator=(StatefulThreadWorker&&) = delete;
     StatefulThreadWorker(StatefulThreadWorker&&) = delete;
 
-    void QueueWork(Task work) {
+    void QueueWork(Task work)
+    {
         {
             std::unique_lock lock{queue_mutex};
             requests.emplace(std::move(work));
@@ -90,7 +88,8 @@ public:
         condition.notify_one();
     }
 
-    void WaitForRequests(std::stop_token stop_token = {}) {
+    void WaitForRequests(std::stop_token stop_token = {})
+    {
         std::stop_callback callback(stop_token, [this] {
             for (auto& thread : threads) {
                 thread.request_stop();

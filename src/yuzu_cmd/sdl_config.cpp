@@ -6,11 +6,12 @@
 
 // SDL will break our main function in yuzu-cmd if we don't define this before adding SDL.h
 #define SDL_MAIN_HANDLED
+#include "sdl_config.h"
+
 #include <SDL3/SDL.h>
 
 #include "common/logging.h"
 #include "input_common/main.h"
-#include "sdl_config.h"
 
 const std::array<int, Settings::NativeButton::NumButtons> SdlConfig::default_buttons = {
     SDL_SCANCODE_A, SDL_SCANCODE_S, SDL_SCANCODE_Z, SDL_SCANCODE_X, SDL_SCANCODE_T,
@@ -49,34 +50,40 @@ const std::array<int, 2> SdlConfig::default_ringcon_analogs{{
     0,
 }};
 
-SdlConfig::SdlConfig(const std::optional<std::string> config_path) {
+SdlConfig::SdlConfig(const std::optional<std::string> config_path)
+{
     Initialize(config_path);
     ReadSdlValues();
     SaveSdlValues();
 }
 
-SdlConfig::~SdlConfig() {
+SdlConfig::~SdlConfig()
+{
     if (global) {
         SdlConfig::SaveAllValues();
     }
 }
 
-void SdlConfig::ReloadAllValues() {
+void SdlConfig::ReloadAllValues()
+{
     Reload();
     ReadSdlValues();
     SaveSdlValues();
 }
 
-void SdlConfig::SaveAllValues() {
+void SdlConfig::SaveAllValues()
+{
     SaveValues();
     SaveSdlValues();
 }
 
-void SdlConfig::ReadSdlValues() {
+void SdlConfig::ReadSdlValues()
+{
     ReadSdlControlValues();
 }
 
-void SdlConfig::ReadSdlControlValues() {
+void SdlConfig::ReadSdlControlValues()
+{
     BeginGroup(Settings::TranslateCategory(Settings::Category::Controls));
 
     Settings::values.players.SetGlobal(!IsCustomConfig());
@@ -93,7 +100,8 @@ void SdlConfig::ReadSdlControlValues() {
     EndGroup();
 }
 
-void SdlConfig::ReadSdlPlayerValues(const std::size_t player_index) {
+void SdlConfig::ReadSdlPlayerValues(const std::size_t player_index)
+{
     std::string player_prefix;
     if (type != ConfigType::InputProfile) {
         player_prefix.append("player_").append(ToString(player_index)).append("_");
@@ -147,7 +155,8 @@ void SdlConfig::ReadSdlPlayerValues(const std::size_t player_index) {
     }
 }
 
-void SdlConfig::ReadDebugControlValues() {
+void SdlConfig::ReadDebugControlValues()
+{
     for (int i = 0; i < Settings::NativeButton::NumButtons; ++i) {
         const std::string default_param = InputCommon::GenerateKeyboardParam(default_buttons[i]);
         auto& debug_pad_buttons = Settings::values.debug_pad_buttons[i];
@@ -170,7 +179,8 @@ void SdlConfig::ReadDebugControlValues() {
     }
 }
 
-void SdlConfig::ReadHidbusValues() {
+void SdlConfig::ReadHidbusValues()
+{
     const std::string default_param = InputCommon::GenerateAnalogParamFromKeys(
         0, 0, default_ringcon_analogs[0], default_ringcon_analogs[1], 0, 0.05f);
     auto& ringcon_analogs = Settings::values.ringcon_analogs;
@@ -181,14 +191,16 @@ void SdlConfig::ReadHidbusValues() {
     }
 }
 
-void SdlConfig::SaveSdlValues() {
+void SdlConfig::SaveSdlValues()
+{
     LOG_DEBUG(Config, "Saving SDL configuration values");
     SaveSdlControlValues();
 
     WriteToIni();
 }
 
-void SdlConfig::SaveSdlControlValues() {
+void SdlConfig::SaveSdlControlValues()
+{
     BeginGroup(Settings::TranslateCategory(Settings::Category::Controls));
 
     Settings::values.players.SetGlobal(!IsCustomConfig());
@@ -205,7 +217,8 @@ void SdlConfig::SaveSdlControlValues() {
     EndGroup();
 }
 
-void SdlConfig::SaveSdlPlayerValues(const std::size_t player_index) {
+void SdlConfig::SaveSdlPlayerValues(const std::size_t player_index)
+{
     std::string player_prefix;
     if (type != ConfigType::InputProfile) {
         player_prefix = std::string("player_").append(ToString(player_index)).append("_");
@@ -236,7 +249,8 @@ void SdlConfig::SaveSdlPlayerValues(const std::size_t player_index) {
     }
 }
 
-void SdlConfig::SaveDebugControlValues() {
+void SdlConfig::SaveDebugControlValues()
+{
     for (int i = 0; i < Settings::NativeButton::NumButtons; ++i) {
         const std::string default_param = InputCommon::GenerateKeyboardParam(default_buttons[i]);
         WriteStringSetting(std::string("debug_pad_").append(Settings::NativeButton::mapping[i]),
@@ -253,13 +267,15 @@ void SdlConfig::SaveDebugControlValues() {
     }
 }
 
-void SdlConfig::SaveHidbusValues() {
+void SdlConfig::SaveHidbusValues()
+{
     const std::string default_param = InputCommon::GenerateAnalogParamFromKeys(
         0, 0, default_ringcon_analogs[0], default_ringcon_analogs[1], 0, 0.05f);
     WriteStringSetting(std::string("ring_controller"), Settings::values.ringcon_analogs,
                        std::make_optional(default_param));
 }
 
-std::vector<Settings::BasicSetting*>& SdlConfig::FindRelevantList(Settings::Category category) {
+std::vector<Settings::BasicSetting*>& SdlConfig::FindRelevantList(Settings::Category category)
+{
     return Settings::values.linkage.by_category[category];
 }

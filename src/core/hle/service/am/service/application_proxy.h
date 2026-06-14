@@ -35,10 +35,10 @@ private:
     Result GetWindowController(Out<SharedPointer<IWindowController>> out_window_controller);
     Result GetSelfController(Out<SharedPointer<ISelfController>> out_self_controller);
     Result GetCommonStateGetter(Out<SharedPointer<ICommonStateGetter>> out_common_state_getter);
-    Result GetLibraryAppletCreator(
-        Out<SharedPointer<ILibraryAppletCreator>> out_library_applet_creator);
-    Result GetApplicationFunctions(
-        Out<SharedPointer<IApplicationFunctions>> out_application_functions);
+    Result
+    GetLibraryAppletCreator(Out<SharedPointer<ILibraryAppletCreator>> out_library_applet_creator);
+    Result
+    GetApplicationFunctions(Out<SharedPointer<IApplicationFunctions>> out_application_functions);
 
 private:
     WindowSystem& m_window_system;

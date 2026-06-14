@@ -4,11 +4,12 @@
 // SPDX-FileCopyrightText: Copyright 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/tools/renderdoc.h"
+
 #include <renderdoc_app.h>
 
 #include "common/assert.h"
 #include "common/dynamic_library.h"
-#include "core/tools/renderdoc.h"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -18,7 +19,8 @@
 
 namespace Tools {
 
-RenderdocAPI::RenderdocAPI() {
+RenderdocAPI::RenderdocAPI()
+{
 #ifdef WIN32
     if (HMODULE mod = GetModuleHandleA("renderdoc.dll")) {
         void* proc = reinterpret_cast<void*>(GetProcAddress(mod, "RENDERDOC_GetAPI"));
@@ -47,7 +49,8 @@ RenderdocAPI::RenderdocAPI() {
 
 RenderdocAPI::~RenderdocAPI() = default;
 
-void RenderdocAPI::ToggleCapture() {
+void RenderdocAPI::ToggleCapture()
+{
     if (!rdoc_api) [[unlikely]] {
         return;
     }

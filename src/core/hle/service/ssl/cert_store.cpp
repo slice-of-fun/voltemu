@@ -1,6 +1,8 @@
 // SPDX-FileCopyrightText: Copyright 2024 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/ssl/cert_store.h"
+
 #include "common/alignment.h"
 #include "core/core.h"
 #include "core/file_sys/content_archive.h"
@@ -8,13 +10,13 @@
 #include "core/file_sys/registered_cache.h"
 #include "core/file_sys/romfs.h"
 #include "core/hle/service/filesystem/filesystem.h"
-#include "core/hle/service/ssl/cert_store.h"
 
 namespace Service::SSL {
 
 // https://switchbrew.org/wiki/SSL_services#CertStore
 
-CertStore::CertStore(Core::System& system) {
+CertStore::CertStore(Core::System& system)
+{
     constexpr u64 CertStoreDataId = 0x0100000000000800ULL;
 
     auto& fsc = system.GetFileSystemController();
@@ -75,8 +77,9 @@ CertStore::CertStore(Core::System& system) {
 
 CertStore::~CertStore() = default;
 
-template <typename F>
-void CertStore::ForEachCertificate(std::span<const CaCertificateId> certificate_ids, F&& f) {
+template<typename F>
+void CertStore::ForEachCertificate(std::span<const CaCertificateId> certificate_ids, F&& f)
+{
     if (certificate_ids.size() == 1 && certificate_ids.front() == CaCertificateId::All) {
         for (const auto& entry : m_certs) {
             f(entry);
@@ -93,7 +96,8 @@ void CertStore::ForEachCertificate(std::span<const CaCertificateId> certificate_
 }
 
 Result CertStore::GetCertificates(u32* out_num_entries, std::span<u8> out_data,
-                                  std::span<const CaCertificateId> certificate_ids) {
+                                  std::span<const CaCertificateId> certificate_ids)
+{
     // Ensure the buffer is large enough to hold the output.
     u32 required_size;
     R_TRY(this->GetCertificateBufSize(std::addressof(required_size), out_num_entries,
@@ -139,7 +143,8 @@ Result CertStore::GetCertificates(u32* out_num_entries, std::span<u8> out_data,
 }
 
 Result CertStore::GetCertificateBufSize(u32* out_size, u32* out_num_entries,
-                                        std::span<const CaCertificateId> certificate_ids) {
+                                        std::span<const CaCertificateId> certificate_ids)
+{
     // Output size is at least the size of the terminator entry.
     *out_size = sizeof(BuiltInCertificateInfo);
     *out_num_entries = 0;

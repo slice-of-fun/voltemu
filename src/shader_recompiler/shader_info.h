@@ -8,14 +8,13 @@
 
 #include <array>
 #include <bitset>
+#include <boost/container/small_vector.hpp>
+#include <boost/container/static_vector.hpp>
 #include <map>
 
 #include "common/common_types.h"
 #include "shader_recompiler/frontend/ir/type.h"
 #include "shader_recompiler/varying_state.h"
-
-#include <boost/container/small_vector.hpp>
-#include <boost/container/static_vector.hpp>
 
 namespace Shader {
 
@@ -338,8 +337,8 @@ struct Info {
     ImageDescriptors image_descriptors;
 };
 
-template <typename Descriptors>
-u32 NumDescriptors(const Descriptors& descriptors) {
+template<typename Descriptors> u32 NumDescriptors(const Descriptors& descriptors)
+{
     u32 num{};
     for (const auto& desc : descriptors) {
         num += desc.count;

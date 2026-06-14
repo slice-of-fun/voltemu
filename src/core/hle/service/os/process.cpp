@@ -1,24 +1,28 @@
 // SPDX-FileCopyrightText: Copyright 2024 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include "common/scope_exit.h"
+#include "core/hle/service/os/process.h"
 
+#include "common/scope_exit.h"
 #include "core/hle/kernel/k_process.h"
 #include "core/hle/kernel/svc_types.h"
-#include "core/hle/service/os/process.h"
 #include "core/loader/loader.h"
 
 namespace Service {
 
 Process::Process(Core::System& system)
     : m_system(system), m_process(), m_main_thread_priority(), m_main_thread_stack_size(),
-      m_process_started() {}
+      m_process_started()
+{
+}
 
-Process::~Process() {
+Process::~Process()
+{
     this->Finalize();
 }
 
-bool Process::Initialize(Loader::AppLoader& loader, Loader::ResultStatus& out_load_result) {
+bool Process::Initialize(Loader::AppLoader& loader, Loader::ResultStatus& out_load_result)
+{
     // First, ensure we are not holding another process.
     this->Finalize();
 
@@ -27,7 +31,8 @@ bool Process::Initialize(Loader::AppLoader& loader, Loader::ResultStatus& out_lo
     Kernel::KProcess::Register(m_system.Kernel(), process);
 
     // On exit, ensure we free the additional reference to the process.
-    SCOPE_EXIT {
+    SCOPE_EXIT
+    {
         process->Close();
     };
 
@@ -58,7 +63,8 @@ bool Process::Initialize(Loader::AppLoader& loader, Loader::ResultStatus& out_lo
     return true;
 }
 
-void Process::Finalize() {
+void Process::Finalize()
+{
     // Terminate, if we are currently holding a process.
     this->Terminate();
 
@@ -77,7 +83,8 @@ void Process::Finalize() {
     m_process_started = false;
 }
 
-bool Process::Run() {
+bool Process::Run()
+{
     // If we already started the process, don't start again.
     if (m_process_started) {
         return false;
@@ -95,19 +102,22 @@ bool Process::Run() {
     return true;
 }
 
-void Process::Terminate() {
+void Process::Terminate()
+{
     if (m_process) {
         m_process->Terminate();
     }
 }
 
-void Process::ResetSignal() {
+void Process::ResetSignal()
+{
     if (m_process) {
         m_process->Reset();
     }
 }
 
-bool Process::IsRunning() const {
+bool Process::IsRunning() const
+{
     if (m_process) {
         const auto state = m_process->GetState();
         return state == Kernel::KProcess::State::Running ||
@@ -118,7 +128,8 @@ bool Process::IsRunning() const {
     return false;
 }
 
-bool Process::IsTerminated() const {
+bool Process::IsTerminated() const
+{
     if (m_process) {
         return m_process->IsTerminated();
     }
@@ -126,7 +137,8 @@ bool Process::IsTerminated() const {
     return false;
 }
 
-u64 Process::GetProcessId() const {
+u64 Process::GetProcessId() const
+{
     if (m_process) {
         return m_process->GetProcessId();
     }
@@ -134,7 +146,8 @@ u64 Process::GetProcessId() const {
     return 0;
 }
 
-u64 Process::GetProgramId() const {
+u64 Process::GetProgramId() const
+{
     if (m_process) {
         return m_process->GetProgramId();
     }
@@ -142,7 +155,8 @@ u64 Process::GetProgramId() const {
     return 0;
 }
 
-void Process::Suspend(bool suspended) {
+void Process::Suspend(bool suspended)
+{
     if (m_process) {
         m_process->SetActivity(suspended ? Kernel::Svc::ProcessActivity::Paused
                                          : Kernel::Svc::ProcessActivity::Runnable);

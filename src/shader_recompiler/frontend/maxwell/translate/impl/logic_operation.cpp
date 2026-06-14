@@ -16,7 +16,8 @@ enum class LogicalOp : u64 {
 };
 
 [[nodiscard]] IR::U32 LogicalOperation(IR::IREmitter& ir, const IR::U32& operand_1,
-                                       const IR::U32& operand_2, LogicalOp op) {
+                                       const IR::U32& operand_2, LogicalOp op)
+{
     switch (op) {
     case LogicalOp::AND:
         return ir.BitwiseAnd(operand_1, operand_2);
@@ -33,7 +34,8 @@ enum class LogicalOp : u64 {
 
 void LOP(TranslatorVisitor& v, u64 insn, IR::U32 op_b, bool x, bool cc, bool inv_a, bool inv_b,
          LogicalOp bit_op, std::optional<PredicateOp> pred_op = std::nullopt,
-         IR::Pred dest_pred = IR::Pred::PT) {
+         IR::Pred dest_pred = IR::Pred::PT)
+{
     union {
         u64 insn;
         BitField<0, 8, IR::Reg> dest_reg;
@@ -70,7 +72,8 @@ void LOP(TranslatorVisitor& v, u64 insn, IR::U32 op_b, bool x, bool cc, bool inv
     v.X(lop.dest_reg, result);
 }
 
-void LOP(TranslatorVisitor& v, u64 insn, const IR::U32& op_b) {
+void LOP(TranslatorVisitor& v, u64 insn, const IR::U32& op_b)
+{
     union {
         u64 insn;
         BitField<39, 1, u64> inv_a;
@@ -87,19 +90,23 @@ void LOP(TranslatorVisitor& v, u64 insn, const IR::U32& op_b) {
 }
 } // Anonymous namespace
 
-void TranslatorVisitor::LOP_reg(u64 insn) {
+void TranslatorVisitor::LOP_reg(u64 insn)
+{
     LOP(*this, insn, GetReg20(insn));
 }
 
-void TranslatorVisitor::LOP_cbuf(u64 insn) {
+void TranslatorVisitor::LOP_cbuf(u64 insn)
+{
     LOP(*this, insn, GetCbuf(insn));
 }
 
-void TranslatorVisitor::LOP_imm(u64 insn) {
+void TranslatorVisitor::LOP_imm(u64 insn)
+{
     LOP(*this, insn, GetImm20(insn));
 }
 
-void TranslatorVisitor::LOP32I(u64 insn) {
+void TranslatorVisitor::LOP32I(u64 insn)
+{
     union {
         u64 raw;
         BitField<53, 2, LogicalOp> bit_op;

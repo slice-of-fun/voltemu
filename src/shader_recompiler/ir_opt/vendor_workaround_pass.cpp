@@ -9,7 +9,8 @@
 namespace Shader::Optimization {
 
 namespace {
-void AddingByteSwapsWorkaround(IR::Block& block, IR::Inst& inst) {
+void AddingByteSwapsWorkaround(IR::Block& block, IR::Inst& inst)
+{
     /*
      * Workaround for an NVIDIA bug seen in Super Mario RPG
      *
@@ -62,7 +63,8 @@ void AddingByteSwapsWorkaround(IR::Block& block, IR::Inst& inst) {
 
 } // Anonymous namespace
 
-void VendorWorkaroundPass(IR::Program& program) {
+void VendorWorkaroundPass(IR::Program& program)
+{
     for (IR::Block* const block : program.post_order_blocks) {
         for (IR::Inst& inst : block->Instructions()) {
             switch (inst.GetOpcode()) {

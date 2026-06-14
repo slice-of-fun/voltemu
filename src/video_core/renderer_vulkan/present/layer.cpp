@@ -5,40 +5,43 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include <variant>
+
 #include "video_core/present.h"
 #include "video_core/renderer_vulkan/present/anti_alias_pass.h"
 /* X11 defines */
 #undef Success
 #undef BadValue
-#include "video_core/renderer_vulkan/vk_rasterizer.h"
-
 #include "common/settings.h"
 #include "video_core/framebuffer_config.h"
 #include "video_core/renderer_vulkan/present/fsr.h"
-#include "video_core/renderer_vulkan/present/sgsr.h"
 #include "video_core/renderer_vulkan/present/fxaa.h"
 #include "video_core/renderer_vulkan/present/layer.h"
 #include "video_core/renderer_vulkan/present/present_push_constants.h"
+#include "video_core/renderer_vulkan/present/sgsr.h"
 #include "video_core/renderer_vulkan/present/smaa.h"
 #include "video_core/renderer_vulkan/present/util.h"
 #include "video_core/renderer_vulkan/vk_blit_screen.h"
+#include "video_core/renderer_vulkan/vk_rasterizer.h"
 #include "video_core/textures/decoders.h"
 
 namespace Vulkan {
 
 namespace {
 
-u32 GetBytesPerPixel(const Tegra::FramebufferConfig& framebuffer) {
+u32 GetBytesPerPixel(const Tegra::FramebufferConfig& framebuffer)
+{
     using namespace VideoCore::Surface;
     return BytesPerBlock(PixelFormatFromGPUPixelFormat(framebuffer.pixel_format));
 }
 
-std::size_t GetSizeInBytes(const Tegra::FramebufferConfig& framebuffer) {
+std::size_t GetSizeInBytes(const Tegra::FramebufferConfig& framebuffer)
+{
     return static_cast<std::size_t>(framebuffer.stride) *
            static_cast<std::size_t>(framebuffer.height) * GetBytesPerPixel(framebuffer);
 }
 
-VkFormat GetFormat(const Tegra::FramebufferConfig& framebuffer) {
+VkFormat GetFormat(const Tegra::FramebufferConfig& framebuffer)
+{
     switch (framebuffer.pixel_format) {
     case Service::android::PixelFormat::Rgba8888:
     case Service::android::PixelFormat::Rgbx8888:
@@ -60,7 +63,8 @@ Layer::Layer(const Device& device_, MemoryAllocator& memory_allocator_, Schedule
              Tegra::MaxwellDeviceMemoryManager& device_memory_, size_t image_count_,
              VkExtent2D output_size, VkDescriptorSetLayout layout, const PresentFilters& filters_)
     : device(device_), memory_allocator(memory_allocator_), scheduler(scheduler_),
-      device_memory(device_memory_), filters(filters_), image_count(image_count_) {
+      device_memory(device_memory_), filters(filters_), image_count(image_count_)
+{
     CreateDescriptorPool();
     CreateDescriptorSets(layout);
     if (filters.get_scaling_filter() == Settings::ScalingFilter::Fsr) {
@@ -72,7 +76,8 @@ Layer::Layer(const Device& device_, MemoryAllocator& memory_allocator_, Schedule
     }
 }
 
-Layer::~Layer() {
+Layer::~Layer()
+{
     ReleaseRawImages();
 }
 
@@ -80,7 +85,8 @@ void Layer::ConfigureDraw(PresentPushConstants* out_push_constants,
                           VkDescriptorSet* out_descriptor_set, RasterizerVulkan& rasterizer,
                           VkSampler sampler, size_t image_index,
                           const Tegra::FramebufferConfig& framebuffer,
-                          const Layout::FramebufferLayout& layout) {
+                          const Layout::FramebufferLayout& layout)
+{
     const auto texture_info = rasterizer.AccelerateDisplay(
         framebuffer, framebuffer.address + framebuffer.offset, framebuffer.stride);
     const u32 texture_width = texture_info ? texture_info->width : framebuffer.width;
@@ -95,7 +101,8 @@ void Layer::ConfigureDraw(PresentPushConstants* out_push_constants,
     // Finish any pending renderpass
     scheduler.RequestOutsideRenderPassOperationContext();
     scheduler.Wait(resource_ticks[image_index]);
-    SCOPE_EXIT {
+    SCOPE_EXIT
+    {
         resource_ticks[image_index] = scheduler.CurrentTick();
     };
 
@@ -120,10 +127,12 @@ void Layer::ConfigureDraw(PresentPushConstants* out_push_constants,
     };
 
     if (auto* fsr = std::get_if<FSR>(&sr_filter)) {
-        source_image_view = fsr->Draw(scheduler, image_index, source_image, source_image_view, render_extent, crop_rect);
+        source_image_view = fsr->Draw(scheduler, image_index, source_image, source_image_view,
+                                      render_extent, crop_rect);
         crop_rect = {0, 0, 1, 1};
     } else if (auto* sgsr = std::get_if<SGSR>(&sr_filter)) {
-        source_image_view = sgsr->Draw(scheduler, image_index, source_image, source_image_view, render_extent, crop_rect);
+        source_image_view = sgsr->Draw(scheduler, image_index, source_image, source_image_view,
+                                       render_extent, crop_rect);
         crop_rect = {0, 0, 1, 1};
     }
 
@@ -134,16 +143,19 @@ void Layer::ConfigureDraw(PresentPushConstants* out_push_constants,
     *out_descriptor_set = descriptor_sets[image_index];
 }
 
-void Layer::CreateDescriptorPool() {
+void Layer::CreateDescriptorPool()
+{
     descriptor_pool = CreateWrappedDescriptorPool(device, image_count, image_count);
 }
 
-void Layer::CreateDescriptorSets(VkDescriptorSetLayout layout) {
+void Layer::CreateDescriptorSets(VkDescriptorSetLayout layout)
+{
     const std::vector layouts(image_count, layout);
     descriptor_sets = CreateWrappedDescriptorSets(descriptor_pool, layouts);
 }
 
-void Layer::CreateStagingBuffer(const Tegra::FramebufferConfig& framebuffer) {
+void Layer::CreateStagingBuffer(const Tegra::FramebufferConfig& framebuffer)
+{
     const VkBufferCreateInfo ci{
         .sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
         .pNext = nullptr,
@@ -159,7 +171,8 @@ void Layer::CreateStagingBuffer(const Tegra::FramebufferConfig& framebuffer) {
     buffer = memory_allocator.CreateBuffer(ci, MemoryUsage::Upload);
 }
 
-void Layer::CreateRawImages(const Tegra::FramebufferConfig& framebuffer) {
+void Layer::CreateRawImages(const Tegra::FramebufferConfig& framebuffer)
+{
     const auto format = GetFormat(framebuffer);
     resource_ticks.resize(image_count);
     raw_images.resize(image_count);
@@ -172,7 +185,8 @@ void Layer::CreateRawImages(const Tegra::FramebufferConfig& framebuffer) {
     }
 }
 
-void Layer::RefreshResources(const Tegra::FramebufferConfig& framebuffer) {
+void Layer::RefreshResources(const Tegra::FramebufferConfig& framebuffer)
+{
     if (framebuffer.width == raw_width && framebuffer.height == raw_height &&
         framebuffer.pixel_format == pixel_format && !raw_images.empty()) {
         return;
@@ -188,8 +202,10 @@ void Layer::RefreshResources(const Tegra::FramebufferConfig& framebuffer) {
     CreateRawImages(framebuffer);
 }
 
-void Layer::SetAntiAliasPass() {
-    if (!std::holds_alternative<std::monostate>(anti_alias) && anti_alias_setting == filters.get_anti_aliasing())
+void Layer::SetAntiAliasPass()
+{
+    if (!std::holds_alternative<std::monostate>(anti_alias) &&
+        anti_alias_setting == filters.get_anti_aliasing())
         return;
 
     anti_alias_setting = filters.get_anti_aliasing();
@@ -212,7 +228,8 @@ void Layer::SetAntiAliasPass() {
     }
 }
 
-void Layer::ReleaseRawImages() {
+void Layer::ReleaseRawImages()
+{
     for (const u64 tick : resource_ticks) {
         scheduler.Wait(tick);
     }
@@ -220,23 +237,25 @@ void Layer::ReleaseRawImages() {
     buffer.reset();
 }
 
-u64 Layer::CalculateBufferSize(const Tegra::FramebufferConfig& framebuffer) const {
+u64 Layer::CalculateBufferSize(const Tegra::FramebufferConfig& framebuffer) const
+{
     return GetSizeInBytes(framebuffer) * image_count;
 }
 
-u64 Layer::GetRawImageOffset(const Tegra::FramebufferConfig& framebuffer,
-                             size_t image_index) const {
+u64 Layer::GetRawImageOffset(const Tegra::FramebufferConfig& framebuffer, size_t image_index) const
+{
     return GetSizeInBytes(framebuffer) * image_index;
 }
 
-void Layer::SetMatrixData(PresentPushConstants& data,
-                          const Layout::FramebufferLayout& layout) const {
+void Layer::SetMatrixData(PresentPushConstants& data, const Layout::FramebufferLayout& layout) const
+{
     data.modelview_matrix =
         MakeOrthographicMatrix(static_cast<f32>(layout.width), static_cast<f32>(layout.height));
 }
 
 void Layer::SetVertexData(PresentPushConstants& data, const Layout::FramebufferLayout& layout,
-                          const Common::Rectangle<f32>& crop) const {
+                          const Common::Rectangle<f32>& crop) const
+{
     // Map the coordinates to the screen.
     const auto& screen = layout.screen;
     const auto x = static_cast<f32>(screen.left);
@@ -250,7 +269,8 @@ void Layer::SetVertexData(PresentPushConstants& data, const Layout::FramebufferL
     data.vertices[3] = ScreenRectVertex(x + w, y + h, crop.right, crop.bottom);
 }
 
-void Layer::UpdateDescriptorSet(VkImageView image_view, VkSampler sampler, size_t image_index) {
+void Layer::UpdateDescriptorSet(VkImageView image_view, VkSampler sampler, size_t image_index)
+{
     const VkDescriptorImageInfo image_info{
         .sampler = sampler,
         .imageView = image_view,
@@ -273,7 +293,8 @@ void Layer::UpdateDescriptorSet(VkImageView image_view, VkSampler sampler, size_
     device.GetLogical().UpdateDescriptorSets(std::array{sampler_write}, {});
 }
 
-void Layer::UpdateRawImage(const Tegra::FramebufferConfig& framebuffer, size_t image_index) {
+void Layer::UpdateRawImage(const Tegra::FramebufferConfig& framebuffer, size_t image_index)
+{
     const std::span<u8> mapped_span = buffer.Mapped();
 
     const u64 image_offset = GetRawImageOffset(framebuffer, image_index);
@@ -291,7 +312,7 @@ void Layer::UpdateRawImage(const Tegra::FramebufferConfig& framebuffer, size_t i
         Tegra::Texture::UnswizzleTexture(
             mapped_span.subspan(image_offset, linear_size), std::span(host_ptr, tiled_size),
             bytes_per_pixel, framebuffer.width, framebuffer.height, 1, block_height_log2, 0);
-        buffer.Flush();  // Ensure host writes are visible before the GPU copy.
+        buffer.Flush(); // Ensure host writes are visible before the GPU copy.
     }
 
     const VkBufferImageCopy copy{

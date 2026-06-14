@@ -7,13 +7,14 @@
 
 #pragma once
 
+#include <ankerl/unordered_dense.h>
+#include <assert.h>
+
 #include <atomic>
 #include <list>
 #include <memory>
 #include <mutex>
 #include <optional>
-#include <ankerl/unordered_dense.h>
-#include <assert.h>
 
 #include "common/bit_field.h"
 #include "common/common_types.h"
@@ -98,7 +99,8 @@ public:
          * @brief Obtains a pointer to the handle's memory and marks the handle it as having been
          * mapped
          */
-        u8* GetPointer() {
+        u8* GetPointer()
+        {
             if (!address) {
                 return nullptr;
             }

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include "core/hle/kernel/k_interrupt_manager.h"
+
 #include "core/hle/kernel/k_process.h"
 #include "core/hle/kernel/k_scheduler.h"
 #include "core/hle/kernel/k_thread.h"
@@ -10,7 +11,8 @@
 
 namespace Kernel::KInterruptManager {
 
-void HandleInterrupt(KernelCore& kernel, s32 core_id) {
+void HandleInterrupt(KernelCore& kernel, s32 core_id)
+{
     // Acknowledge the interrupt.
     kernel.PhysicalCore(core_id).ClearInterrupt();
 
@@ -33,7 +35,8 @@ void HandleInterrupt(KernelCore& kernel, s32 core_id) {
     kernel.CurrentScheduler()->RequestScheduleOnInterrupt();
 }
 
-void SendInterProcessorInterrupt(KernelCore& kernel, u64 core_mask) {
+void SendInterProcessorInterrupt(KernelCore& kernel, u64 core_mask)
+{
     for (std::size_t core_id = 0; core_id < Core::Hardware::NUM_CPU_CORES; ++core_id) {
         if (core_mask & (1ULL << core_id)) {
             kernel.PhysicalCore(core_id).Interrupt();

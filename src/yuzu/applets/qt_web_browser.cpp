@@ -10,16 +10,14 @@
 #include "common/logging.h"
 
 #ifdef YUZU_USE_QT_WEB_ENGINE
-#include <bit>
-
 #include <QApplication>
 #include <QKeyEvent>
-
 #include <QWebEngineProfile>
 #include <QWebEngineScript>
 #include <QWebEngineScriptCollection>
 #include <QWebEngineSettings>
 #include <QWebEngineUrlScheme>
+#include <bit>
 
 #include "hid_core/frontend/input_interpreter.h"
 #include "yuzu/applets/qt_web_browser_scripts.h"
@@ -37,7 +35,8 @@
 
 namespace {
 
-constexpr int HIDButtonToKey(Core::HID::NpadButton button) {
+constexpr int HIDButtonToKey(Core::HID::NpadButton button)
+{
     switch (button) {
     case Core::HID::NpadButton::Left:
     case Core::HID::NpadButton::StickLLeft:
@@ -63,8 +62,9 @@ QtNXWebEngineView::QtNXWebEngineView(QWidget* parent, Core::System& system,
     : QWebEngineView(parent), input_subsystem{input_subsystem_},
       url_interceptor(std::make_unique<UrlRequestInterceptor>()),
       input_interpreter(std::make_unique<InputInterpreter>(system)),
-      default_profile{QWebEngineProfile::defaultProfile()},
-      global_settings{default_profile->settings()} {
+      default_profile{QWebEngineProfile::defaultProfile()}, global_settings{
+                                                                default_profile->settings()}
+{
     default_profile->setPersistentStoragePath(QString::fromStdString(Common::FS::PathToUTF8String(
         Common::FS::GetVoltPath(Common::FS::VoltPath::VoltDir) / "qtwebengine")));
 
@@ -111,13 +111,15 @@ QtNXWebEngineView::QtNXWebEngineView(QWidget* parent, Core::System& system,
         Qt::QueuedConnection);
 }
 
-QtNXWebEngineView::~QtNXWebEngineView() {
+QtNXWebEngineView::~QtNXWebEngineView()
+{
     SetFinished(true);
     StopInputThread();
 }
 
 void QtNXWebEngineView::LoadLocalWebPage(const std::string& main_url,
-                                         const std::string& additional_args) {
+                                         const std::string& additional_args)
+{
     is_local = true;
 
     LoadExtractedFonts();
@@ -133,7 +135,8 @@ void QtNXWebEngineView::LoadLocalWebPage(const std::string& main_url,
 }
 
 void QtNXWebEngineView::LoadExternalWebPage(const std::string& main_url,
-                                            const std::string& additional_args) {
+                                            const std::string& additional_args)
+{
     is_local = false;
 
     FocusFirstLinkElement();
@@ -146,7 +149,8 @@ void QtNXWebEngineView::LoadExternalWebPage(const std::string& main_url,
     load(QUrl(QString::fromStdString(main_url) + QString::fromStdString(additional_args)));
 }
 
-void QtNXWebEngineView::SetUserAgent(UserAgent user_agent) {
+void QtNXWebEngineView::SetUserAgent(UserAgent user_agent)
+{
     const QString user_agent_str = [user_agent] {
         switch (user_agent) {
         case UserAgent::WebApplet:
@@ -171,55 +175,65 @@ void QtNXWebEngineView::SetUserAgent(UserAgent user_agent) {
             .arg(user_agent_str));
 }
 
-bool QtNXWebEngineView::IsFinished() const {
+bool QtNXWebEngineView::IsFinished() const
+{
     return finished;
 }
 
-void QtNXWebEngineView::SetFinished(bool finished_) {
+void QtNXWebEngineView::SetFinished(bool finished_)
+{
     finished = finished_;
 }
 
-Service::AM::Frontend::WebExitReason QtNXWebEngineView::GetExitReason() const {
+Service::AM::Frontend::WebExitReason QtNXWebEngineView::GetExitReason() const
+{
     return exit_reason;
 }
 
-void QtNXWebEngineView::SetExitReason(Service::AM::Frontend::WebExitReason exit_reason_) {
+void QtNXWebEngineView::SetExitReason(Service::AM::Frontend::WebExitReason exit_reason_)
+{
     exit_reason = exit_reason_;
 }
 
-const std::string& QtNXWebEngineView::GetLastURL() const {
+const std::string& QtNXWebEngineView::GetLastURL() const
+{
     return last_url;
 }
 
-void QtNXWebEngineView::SetLastURL(std::string last_url_) {
+void QtNXWebEngineView::SetLastURL(std::string last_url_)
+{
     last_url = std::move(last_url_);
 }
 
-QString QtNXWebEngineView::GetCurrentURL() const {
+QString QtNXWebEngineView::GetCurrentURL() const
+{
     return url_interceptor->GetRequestedURL().toString();
 }
 
-void QtNXWebEngineView::hide() {
+void QtNXWebEngineView::hide()
+{
     SetFinished(true);
     StopInputThread();
 
     QWidget::hide();
 }
 
-void QtNXWebEngineView::keyPressEvent(QKeyEvent* event) {
+void QtNXWebEngineView::keyPressEvent(QKeyEvent* event)
+{
     if (is_local) {
         input_subsystem->GetKeyboard()->PressKey(event->key());
     }
 }
 
-void QtNXWebEngineView::keyReleaseEvent(QKeyEvent* event) {
+void QtNXWebEngineView::keyReleaseEvent(QKeyEvent* event)
+{
     if (is_local) {
         input_subsystem->GetKeyboard()->ReleaseKey(event->key());
     }
 }
 
-template <Core::HID::NpadButton... T>
-void QtNXWebEngineView::HandleWindowFooterButtonPressedOnce() {
+template<Core::HID::NpadButton... T> void QtNXWebEngineView::HandleWindowFooterButtonPressedOnce()
+{
     const auto f = [this](Core::HID::NpadButton button) {
         if (input_interpreter->IsButtonPressedOnce(button)) {
             const auto button_index = std::countr_zero(static_cast<u64>(button));
@@ -256,8 +270,8 @@ void QtNXWebEngineView::HandleWindowFooterButtonPressedOnce() {
     (f(T), ...);
 }
 
-template <Core::HID::NpadButton... T>
-void QtNXWebEngineView::HandleWindowKeyButtonPressedOnce() {
+template<Core::HID::NpadButton... T> void QtNXWebEngineView::HandleWindowKeyButtonPressedOnce()
+{
     const auto f = [this](Core::HID::NpadButton button) {
         if (input_interpreter->IsButtonPressedOnce(button)) {
             SendKeyPressEvent(HIDButtonToKey(button));
@@ -267,8 +281,8 @@ void QtNXWebEngineView::HandleWindowKeyButtonPressedOnce() {
     (f(T), ...);
 }
 
-template <Core::HID::NpadButton... T>
-void QtNXWebEngineView::HandleWindowKeyButtonHold() {
+template<Core::HID::NpadButton... T> void QtNXWebEngineView::HandleWindowKeyButtonHold()
+{
     const auto f = [this](Core::HID::NpadButton button) {
         if (input_interpreter->IsButtonHeld(button)) {
             SendKeyPressEvent(HIDButtonToKey(button));
@@ -278,7 +292,8 @@ void QtNXWebEngineView::HandleWindowKeyButtonHold() {
     (f(T), ...);
 }
 
-void QtNXWebEngineView::SendKeyPressEvent(int key) {
+void QtNXWebEngineView::SendKeyPressEvent(int key)
+{
     if (key == 0) {
         return;
     }
@@ -289,7 +304,8 @@ void QtNXWebEngineView::SendKeyPressEvent(int key) {
                                 new QKeyEvent(QKeyEvent::KeyRelease, key, Qt::NoModifier));
 }
 
-void QtNXWebEngineView::StartInputThread() {
+void QtNXWebEngineView::StartInputThread()
+{
     input_thread = std::jthread([&](std::stop_token stoken) {
         // Wait for 1 second before allowing any inputs to be processed.
         std::this_thread::sleep_for(std::chrono::seconds(1));
@@ -320,14 +336,16 @@ void QtNXWebEngineView::StartInputThread() {
     });
 }
 
-void QtNXWebEngineView::StopInputThread() {
+void QtNXWebEngineView::StopInputThread()
+{
     if (is_local) {
         QWidget::releaseKeyboard();
     }
     input_thread.request_stop();
 }
 
-void QtNXWebEngineView::LoadExtractedFonts() {
+void QtNXWebEngineView::LoadExtractedFonts()
+{
     QWebEngineScript nx_font_css;
     QWebEngineScript load_nx_font;
 
@@ -373,7 +391,8 @@ void QtNXWebEngineView::LoadExtractedFonts() {
         Qt::QueuedConnection);
 }
 
-void QtNXWebEngineView::FocusFirstLinkElement() {
+void QtNXWebEngineView::FocusFirstLinkElement()
+{
     QWebEngineScript focus_link_element;
 
     focus_link_element.setName(QStringLiteral("focus_link_element.js"));
@@ -386,7 +405,8 @@ void QtNXWebEngineView::FocusFirstLinkElement() {
 
 #endif
 
-QtWebBrowser::QtWebBrowser(MainWindow& main_window) {
+QtWebBrowser::QtWebBrowser(MainWindow& main_window)
+{
     connect(this, &QtWebBrowser::MainWindowOpenWebPage, &main_window,
             &MainWindow::WebBrowserOpenWebPage, Qt::QueuedConnection);
     connect(this, &QtWebBrowser::MainWindowRequestExit, &main_window,
@@ -399,14 +419,16 @@ QtWebBrowser::QtWebBrowser(MainWindow& main_window) {
 
 QtWebBrowser::~QtWebBrowser() = default;
 
-void QtWebBrowser::Close() const {
+void QtWebBrowser::Close() const
+{
     callback = {};
     emit MainWindowRequestExit();
 }
 
 void QtWebBrowser::OpenLocalWebPage(const std::string& local_url,
                                     ExtractROMFSCallback extract_romfs_callback_,
-                                    OpenWebPageCallback callback_) const {
+                                    OpenWebPageCallback callback_) const
+{
     extract_romfs_callback = std::move(extract_romfs_callback_);
     callback = std::move(callback_);
 
@@ -420,7 +442,8 @@ void QtWebBrowser::OpenLocalWebPage(const std::string& local_url,
 }
 
 void QtWebBrowser::OpenExternalWebPage(const std::string& external_url,
-                                       OpenWebPageCallback callback_) const {
+                                       OpenWebPageCallback callback_) const
+{
     LOG_INFO(Service_AM, "Opening external URL in host browser: {}", external_url);
 
     const QUrl url(QString::fromStdString(external_url));
@@ -435,12 +458,14 @@ void QtWebBrowser::OpenExternalWebPage(const std::string& external_url,
     }
 }
 
-void QtWebBrowser::MainWindowExtractOfflineRomFS() {
+void QtWebBrowser::MainWindowExtractOfflineRomFS()
+{
     extract_romfs_callback();
 }
 
 void QtWebBrowser::MainWindowWebBrowserClosed(Service::AM::Frontend::WebExitReason exit_reason,
-                                              std::string last_url) {
+                                              std::string last_url)
+{
     if (callback) {
         callback(exit_reason, last_url);
     }

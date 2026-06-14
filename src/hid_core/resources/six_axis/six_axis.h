@@ -35,25 +35,27 @@ public:
                                      Core::HID::GyroscopeZeroDriftMode& drift_mode) const;
     Result IsSixAxisSensorAtRest(const Core::HID::SixAxisSensorHandle& sixaxis_handle,
                                  bool& is_at_rest) const;
-    Result EnableSixAxisSensorUnalteredPassthrough(
-        const Core::HID::SixAxisSensorHandle& sixaxis_handle, bool is_enabled);
-    Result IsSixAxisSensorUnalteredPassthroughEnabled(
-        const Core::HID::SixAxisSensorHandle& sixaxis_handle, bool& is_enabled) const;
+    Result
+    EnableSixAxisSensorUnalteredPassthrough(const Core::HID::SixAxisSensorHandle& sixaxis_handle,
+                                            bool is_enabled);
+    Result
+    IsSixAxisSensorUnalteredPassthroughEnabled(const Core::HID::SixAxisSensorHandle& sixaxis_handle,
+                                               bool& is_enabled) const;
     Result LoadSixAxisSensorCalibrationParameter(
         const Core::HID::SixAxisSensorHandle& sixaxis_handle,
         Core::HID::SixAxisSensorCalibrationParameter& calibration) const;
-    Result GetSixAxisSensorIcInformation(
-        const Core::HID::SixAxisSensorHandle& sixaxis_handle,
-        Core::HID::SixAxisSensorIcInformation& ic_information) const;
+    Result
+    GetSixAxisSensorIcInformation(const Core::HID::SixAxisSensorHandle& sixaxis_handle,
+                                  Core::HID::SixAxisSensorIcInformation& ic_information) const;
     Result SetSixAxisEnabled(const Core::HID::SixAxisSensorHandle& sixaxis_handle,
                              bool sixaxis_status);
     Result IsSixAxisSensorFusionEnabled(const Core::HID::SixAxisSensorHandle& sixaxis_handle,
                                         bool& is_fusion_enabled) const;
     Result SetSixAxisFusionEnabled(const Core::HID::SixAxisSensorHandle& sixaxis_handle,
                                    bool is_fusion_enabled);
-    Result SetSixAxisFusionParameters(
-        const Core::HID::SixAxisSensorHandle& sixaxis_handle,
-        Core::HID::SixAxisSensorFusionParameters sixaxis_fusion_parameters);
+    Result
+    SetSixAxisFusionParameters(const Core::HID::SixAxisSensorHandle& sixaxis_handle,
+                               Core::HID::SixAxisSensorFusionParameters sixaxis_fusion_parameters);
     Result GetSixAxisFusionParameters(const Core::HID::SixAxisSensorHandle& sixaxis_handle,
                                       Core::HID::SixAxisSensorFusionParameters& parameters) const;
 
@@ -95,13 +97,13 @@ private:
     };
 
     SixaxisParameters& GetSixaxisState(const Core::HID::SixAxisSensorHandle& device_handle);
-    const SixaxisParameters& GetSixaxisState(
-        const Core::HID::SixAxisSensorHandle& device_handle) const;
+    const SixaxisParameters&
+    GetSixaxisState(const Core::HID::SixAxisSensorHandle& device_handle) const;
 
-    NpadControllerData& GetControllerFromHandle(
-        const Core::HID::SixAxisSensorHandle& device_handle);
-    const NpadControllerData& GetControllerFromHandle(
-        const Core::HID::SixAxisSensorHandle& device_handle) const;
+    NpadControllerData&
+    GetControllerFromHandle(const Core::HID::SixAxisSensorHandle& device_handle);
+    const NpadControllerData&
+    GetControllerFromHandle(const Core::HID::SixAxisSensorHandle& device_handle) const;
     NpadControllerData& GetControllerFromNpadIdType(Core::HID::NpadIdType npad_id);
     const NpadControllerData& GetControllerFromNpadIdType(Core::HID::NpadIdType npad_id) const;
 

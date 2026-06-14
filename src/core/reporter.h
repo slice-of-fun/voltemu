@@ -11,6 +11,7 @@
 #include <span>
 #include <string>
 #include <vector>
+
 #include "common/common_types.h"
 
 union Result;
@@ -48,10 +49,11 @@ public:
                                          const std::string& service_name) const;
 
     // Used by stub applet implementation
-    void SaveUnimplementedAppletReport(
-        u32 applet_id, u32 common_args_version, u32 library_version, u32 theme_color,
-        bool startup_sound, u64 system_tick, const std::vector<std::vector<u8>>& normal_channel,
-        const std::vector<std::vector<u8>>& interactive_channel) const;
+    void
+    SaveUnimplementedAppletReport(u32 applet_id, u32 common_args_version, u32 library_version,
+                                  u32 theme_color, bool startup_sound, u64 system_tick,
+                                  const std::vector<std::vector<u8>>& normal_channel,
+                                  const std::vector<std::vector<u8>>& interactive_channel) const;
 
     enum class PlayReportType {
         Old,

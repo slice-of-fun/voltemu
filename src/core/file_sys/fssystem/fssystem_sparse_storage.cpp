@@ -8,7 +8,8 @@
 
 namespace FileSys {
 
-size_t SparseStorage::Read(u8* buffer, size_t size, size_t offset) const {
+size_t SparseStorage::Read(u8* buffer, size_t size, size_t offset) const
+{
     // Validate preconditions.
     ASSERT(this->IsInitialized());
     ASSERT(buffer != nullptr);

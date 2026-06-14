@@ -6,6 +6,8 @@
 
 #pragma once
 
+#include <qabstractitemview.h>
+
 #include <QLabel>
 #include <QLineEdit>
 #include <QList>
@@ -15,7 +17,6 @@
 #include <QVBoxLayout>
 #include <QVector>
 #include <QWidget>
-#include <qabstractitemview.h>
 
 #include "common/common_types.h"
 #include "core/core.h"

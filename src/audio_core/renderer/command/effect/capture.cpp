@@ -4,8 +4,9 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include "audio_core/adsp/apps/audio_renderer/command_list_processor.h"
 #include "audio_core/renderer/command/effect/capture.h"
+
+#include "audio_core/adsp/apps/audio_renderer/command_list_processor.h"
 #include "audio_core/renderer/effect/aux_.h"
 #include "core/memory.h"
 
@@ -16,7 +17,8 @@ namespace AudioCore::Renderer {
  * @param memory   - Core memory for writing.
  * @param aux_info - Memory address pointing to the AuxInfo to reset.
  */
-static void ResetAuxBufferDsp(Core::Memory::Memory& memory, const CpuAddr aux_info) {
+static void ResetAuxBufferDsp(Core::Memory::Memory& memory, const CpuAddr aux_info)
+{
     if (aux_info == 0) {
         LOG_ERROR(Service_Audio, "Aux info is 0!");
         return;
@@ -43,8 +45,8 @@ static void ResetAuxBufferDsp(Core::Memory::Memory& memory, const CpuAddr aux_in
  */
 static u32 WriteAuxBufferDsp(Core::Memory::Memory& memory, const CpuAddr send_info_,
                              const CpuAddr send_buffer, u32 count_max, std::span<const s32> input,
-                             const u32 write_count_, const u32 write_offset,
-                             const u32 update_count) {
+                             const u32 write_count_, const u32 write_offset, const u32 update_count)
+{
     if (write_count_ > count_max) {
         LOG_ERROR(Service_Audio,
                   "write_count must be smaller than count_max! write_count {}, count_max {}",
@@ -122,12 +124,14 @@ static u32 WriteAuxBufferDsp(Core::Memory::Memory& memory, const CpuAddr send_in
 }
 
 void CaptureCommand::Dump([[maybe_unused]] const AudioRenderer::CommandListProcessor& processor,
-                          std::string& string) {
+                          std::string& string)
+{
     string += fmt::format("CaptureCommand\n\tenabled {} input {:02X} output {:02X}", effect_enabled,
                           input, output);
 }
 
-void CaptureCommand::Process(const AudioRenderer::CommandListProcessor& processor) {
+void CaptureCommand::Process(const AudioRenderer::CommandListProcessor& processor)
+{
     if (effect_enabled) {
         auto input_buffer{
             processor.mix_buffers.subspan(input * processor.sample_count, processor.sample_count)};
@@ -138,7 +142,8 @@ void CaptureCommand::Process(const AudioRenderer::CommandListProcessor& processo
     }
 }
 
-bool CaptureCommand::Verify(const AudioRenderer::CommandListProcessor& processor) {
+bool CaptureCommand::Verify(const AudioRenderer::CommandListProcessor& processor)
+{
     return true;
 }
 

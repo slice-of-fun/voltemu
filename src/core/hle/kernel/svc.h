@@ -20,365 +20,602 @@ class System;
 
 namespace Kernel::Svc {
 Result SetHeapSize(Core::System& system, uint64_t* out_address, uint64_t size);
-Result SetMemoryPermission(Core::System& system, uint64_t address, uint64_t size, MemoryPermission perm);
-Result SetMemoryAttribute(Core::System& system, uint64_t address, uint64_t size, uint32_t mask, uint32_t attr);
+Result SetMemoryPermission(Core::System& system, uint64_t address, uint64_t size,
+                           MemoryPermission perm);
+Result SetMemoryAttribute(Core::System& system, uint64_t address, uint64_t size, uint32_t mask,
+                          uint32_t attr);
 Result MapMemory(Core::System& system, uint64_t dst_address, uint64_t src_address, uint64_t size);
 Result UnmapMemory(Core::System& system, uint64_t dst_address, uint64_t src_address, uint64_t size);
-Result QueryMemory(Core::System& system, uint64_t out_memory_info, PageInfo* out_page_info, uint64_t address);
+Result QueryMemory(Core::System& system, uint64_t out_memory_info, PageInfo* out_page_info,
+                   uint64_t address);
 void ExitProcess(Core::System& system);
-Result CreateThread(Core::System& system, Handle* out_handle, uint64_t func, uint64_t arg, uint64_t stack_bottom, int32_t priority, int32_t core_id);
+Result CreateThread(Core::System& system, Handle* out_handle, uint64_t func, uint64_t arg,
+                    uint64_t stack_bottom, int32_t priority, int32_t core_id);
 Result StartThread(Core::System& system, Handle thread_handle);
 void ExitThread(Core::System& system);
 void SleepThread(Core::System& system, int64_t ns);
 Result GetThreadPriority(Core::System& system, int32_t* out_priority, Handle thread_handle);
 Result SetThreadPriority(Core::System& system, Handle thread_handle, int32_t priority);
-Result GetThreadCoreMask(Core::System& system, int32_t* out_core_id, uint64_t* out_affinity_mask, Handle thread_handle);
-Result SetThreadCoreMask(Core::System& system, Handle thread_handle, int32_t core_id, uint64_t affinity_mask);
+Result GetThreadCoreMask(Core::System& system, int32_t* out_core_id, uint64_t* out_affinity_mask,
+                         Handle thread_handle);
+Result SetThreadCoreMask(Core::System& system, Handle thread_handle, int32_t core_id,
+                         uint64_t affinity_mask);
 int32_t GetCurrentProcessorNumber(Core::System& system);
 Result SignalEvent(Core::System& system, Handle event_handle);
 Result ClearEvent(Core::System& system, Handle event_handle);
-Result MapSharedMemory(Core::System& system, Handle shmem_handle, uint64_t address, uint64_t size, MemoryPermission map_perm);
-Result UnmapSharedMemory(Core::System& system, Handle shmem_handle, uint64_t address, uint64_t size);
-Result CreateTransferMemory(Core::System& system, Handle* out_handle, uint64_t address, uint64_t size, MemoryPermission map_perm);
+Result MapSharedMemory(Core::System& system, Handle shmem_handle, uint64_t address, uint64_t size,
+                       MemoryPermission map_perm);
+Result UnmapSharedMemory(Core::System& system, Handle shmem_handle, uint64_t address,
+                         uint64_t size);
+Result CreateTransferMemory(Core::System& system, Handle* out_handle, uint64_t address,
+                            uint64_t size, MemoryPermission map_perm);
 Result CloseHandle(Core::System& system, Handle handle);
 Result ResetSignal(Core::System& system, Handle handle);
-Result WaitSynchronization(Core::System& system, int32_t* out_index, uint64_t handles, int32_t num_handles, int64_t timeout_ns);
+Result WaitSynchronization(Core::System& system, int32_t* out_index, uint64_t handles,
+                           int32_t num_handles, int64_t timeout_ns);
 Result CancelSynchronization(Core::System& system, Handle handle);
 Result ArbitrateLock(Core::System& system, Handle thread_handle, uint64_t address, uint32_t tag);
 Result ArbitrateUnlock(Core::System& system, uint64_t address);
-Result WaitProcessWideKeyAtomic(Core::System& system, uint64_t address, uint64_t cv_key, uint32_t tag, int64_t timeout_ns);
+Result WaitProcessWideKeyAtomic(Core::System& system, uint64_t address, uint64_t cv_key,
+                                uint32_t tag, int64_t timeout_ns);
 void SignalProcessWideKey(Core::System& system, uint64_t cv_key, int32_t count);
 int64_t GetSystemTick(Core::System& system);
 Result ConnectToNamedPort(Core::System& system, Handle* out_handle, uint64_t name);
 Result SendSyncRequest(Core::System& system, Handle session_handle);
-Result SendSyncRequestWithUserBuffer(Core::System& system, uint64_t message_buffer, uint64_t message_buffer_size, Handle session_handle);
-Result SendAsyncRequestWithUserBuffer(Core::System& system, Handle* out_event_handle, uint64_t message_buffer, uint64_t message_buffer_size, Handle session_handle);
+Result SendSyncRequestWithUserBuffer(Core::System& system, uint64_t message_buffer,
+                                     uint64_t message_buffer_size, Handle session_handle);
+Result SendAsyncRequestWithUserBuffer(Core::System& system, Handle* out_event_handle,
+                                      uint64_t message_buffer, uint64_t message_buffer_size,
+                                      Handle session_handle);
 Result GetProcessId(Core::System& system, uint64_t* out_process_id, Handle process_handle);
 Result GetThreadId(Core::System& system, uint64_t* out_thread_id, Handle thread_handle);
 void Break(Core::System& system, BreakReason break_reason, uint64_t arg, uint64_t size);
 Result OutputDebugString(Core::System& system, uint64_t debug_str, uint64_t len);
 void ReturnFromException(Core::System& system, Result result);
-Result GetInfo(Core::System& system, uint64_t* out, InfoType info_type, Handle handle, uint64_t info_subtype);
+Result GetInfo(Core::System& system, uint64_t* out, InfoType info_type, Handle handle,
+               uint64_t info_subtype);
 void FlushEntireDataCache(Core::System& system);
 Result FlushDataCache(Core::System& system, uint64_t address, uint64_t size);
 Result MapPhysicalMemory(Core::System& system, uint64_t address, uint64_t size);
 Result UnmapPhysicalMemory(Core::System& system, uint64_t address, uint64_t size);
-Result GetDebugFutureThreadInfo(Core::System& system, lp64::LastThreadContext* out_context, uint64_t* out_thread_id, Handle debug_handle, int64_t ns);
-Result GetLastThreadInfo(Core::System& system, lp64::LastThreadContext* out_context, uint64_t* out_tls_address, uint32_t* out_flags);
-Result GetResourceLimitLimitValue(Core::System& system, int64_t* out_limit_value, Handle resource_limit_handle, LimitableResource which);
-Result GetResourceLimitCurrentValue(Core::System& system, int64_t* out_current_value, Handle resource_limit_handle, LimitableResource which);
-Result SetThreadActivity(Core::System& system, Handle thread_handle, ThreadActivity thread_activity);
+Result GetDebugFutureThreadInfo(Core::System& system, lp64::LastThreadContext* out_context,
+                                uint64_t* out_thread_id, Handle debug_handle, int64_t ns);
+Result GetLastThreadInfo(Core::System& system, lp64::LastThreadContext* out_context,
+                         uint64_t* out_tls_address, uint32_t* out_flags);
+Result GetResourceLimitLimitValue(Core::System& system, int64_t* out_limit_value,
+                                  Handle resource_limit_handle, LimitableResource which);
+Result GetResourceLimitCurrentValue(Core::System& system, int64_t* out_current_value,
+                                    Handle resource_limit_handle, LimitableResource which);
+Result SetThreadActivity(Core::System& system, Handle thread_handle,
+                         ThreadActivity thread_activity);
 Result GetThreadContext3(Core::System& system, uint64_t out_context, Handle thread_handle);
-Result WaitForAddress(Core::System& system, uint64_t address, ArbitrationType arb_type, int32_t value, int64_t timeout_ns);
-Result SignalToAddress(Core::System& system, uint64_t address, SignalType signal_type, int32_t value, int32_t count);
+Result WaitForAddress(Core::System& system, uint64_t address, ArbitrationType arb_type,
+                      int32_t value, int64_t timeout_ns);
+Result SignalToAddress(Core::System& system, uint64_t address, SignalType signal_type,
+                       int32_t value, int32_t count);
 void SynchronizePreemptionState(Core::System& system);
-Result GetResourceLimitPeakValue(Core::System& system, int64_t* out_peak_value, Handle resource_limit_handle, LimitableResource which);
+Result GetResourceLimitPeakValue(Core::System& system, int64_t* out_peak_value,
+                                 Handle resource_limit_handle, LimitableResource which);
 Result CreateIoPool(Core::System& system, Handle* out_handle, IoPoolType which);
-Result CreateIoRegion(Core::System& system, Handle* out_handle, Handle io_pool, uint64_t physical_address, uint64_t size, MemoryMapping mapping, MemoryPermission perm);
-void KernelDebug(Core::System& system, KernelDebugType kern_debug_type, uint64_t arg0, uint64_t arg1, uint64_t arg2);
+Result CreateIoRegion(Core::System& system, Handle* out_handle, Handle io_pool,
+                      uint64_t physical_address, uint64_t size, MemoryMapping mapping,
+                      MemoryPermission perm);
+void KernelDebug(Core::System& system, KernelDebugType kern_debug_type, uint64_t arg0,
+                 uint64_t arg1, uint64_t arg2);
 void ChangeKernelTraceState(Core::System& system, KernelTraceState kern_trace_state);
-Result CreateSession(Core::System& system, Handle* out_server_session_handle, Handle* out_client_session_handle, bool is_light, uint64_t name);
+Result CreateSession(Core::System& system, Handle* out_server_session_handle,
+                     Handle* out_client_session_handle, bool is_light, uint64_t name);
 Result AcceptSession(Core::System& system, Handle* out_handle, Handle port);
-Result ReplyAndReceive(Core::System& system, int32_t* out_index, uint64_t handles, int32_t num_handles, Handle reply_target, int64_t timeout_ns);
-Result ReplyAndReceiveWithUserBuffer(Core::System& system, int32_t* out_index, uint64_t message_buffer, uint64_t message_buffer_size, uint64_t handles, int32_t num_handles, Handle reply_target, int64_t timeout_ns);
+Result ReplyAndReceive(Core::System& system, int32_t* out_index, uint64_t handles,
+                       int32_t num_handles, Handle reply_target, int64_t timeout_ns);
+Result ReplyAndReceiveWithUserBuffer(Core::System& system, int32_t* out_index,
+                                     uint64_t message_buffer, uint64_t message_buffer_size,
+                                     uint64_t handles, int32_t num_handles, Handle reply_target,
+                                     int64_t timeout_ns);
 Result CreateEvent(Core::System& system, Handle* out_write_handle, Handle* out_read_handle);
-Result MapIoRegion(Core::System& system, Handle io_region, uint64_t address, uint64_t size, MemoryPermission perm);
+Result MapIoRegion(Core::System& system, Handle io_region, uint64_t address, uint64_t size,
+                   MemoryPermission perm);
 Result UnmapIoRegion(Core::System& system, Handle io_region, uint64_t address, uint64_t size);
 Result MapPhysicalMemoryUnsafe(Core::System& system, uint64_t address, uint64_t size);
 Result UnmapPhysicalMemoryUnsafe(Core::System& system, uint64_t address, uint64_t size);
 Result SetUnsafeLimit(Core::System& system, uint64_t limit);
 Result CreateCodeMemory(Core::System& system, Handle* out_handle, uint64_t address, uint64_t size);
-Result ControlCodeMemory(Core::System& system, Handle code_memory_handle, CodeMemoryOperation operation, uint64_t address, uint64_t size, MemoryPermission perm);
+Result ControlCodeMemory(Core::System& system, Handle code_memory_handle,
+                         CodeMemoryOperation operation, uint64_t address, uint64_t size,
+                         MemoryPermission perm);
 void SleepSystem(Core::System& system);
-Result ReadWriteRegister(Core::System& system, uint32_t* out_value, uint64_t address, uint32_t mask, uint32_t value);
-Result SetProcessActivity(Core::System& system, Handle process_handle, ProcessActivity process_activity);
-Result CreateSharedMemory(Core::System& system, Handle* out_handle, uint64_t size, MemoryPermission owner_perm, MemoryPermission remote_perm);
-Result MapTransferMemory(Core::System& system, Handle trmem_handle, uint64_t address, uint64_t size, MemoryPermission owner_perm);
-Result UnmapTransferMemory(Core::System& system, Handle trmem_handle, uint64_t address, uint64_t size);
-Result CreateInterruptEvent(Core::System& system, Handle* out_read_handle, int32_t interrupt_id, InterruptType interrupt_type);
-Result QueryPhysicalAddress(Core::System& system, lp64::PhysicalMemoryInfo* out_info, uint64_t address);
-Result QueryIoMapping(Core::System& system, uint64_t* out_address, uint64_t* out_size, uint64_t physical_address, uint64_t size);
-Result CreateDeviceAddressSpace(Core::System& system, Handle* out_handle, uint64_t das_address, uint64_t das_size);
+Result ReadWriteRegister(Core::System& system, uint32_t* out_value, uint64_t address, uint32_t mask,
+                         uint32_t value);
+Result SetProcessActivity(Core::System& system, Handle process_handle,
+                          ProcessActivity process_activity);
+Result CreateSharedMemory(Core::System& system, Handle* out_handle, uint64_t size,
+                          MemoryPermission owner_perm, MemoryPermission remote_perm);
+Result MapTransferMemory(Core::System& system, Handle trmem_handle, uint64_t address, uint64_t size,
+                         MemoryPermission owner_perm);
+Result UnmapTransferMemory(Core::System& system, Handle trmem_handle, uint64_t address,
+                           uint64_t size);
+Result CreateInterruptEvent(Core::System& system, Handle* out_read_handle, int32_t interrupt_id,
+                            InterruptType interrupt_type);
+Result QueryPhysicalAddress(Core::System& system, lp64::PhysicalMemoryInfo* out_info,
+                            uint64_t address);
+Result QueryIoMapping(Core::System& system, uint64_t* out_address, uint64_t* out_size,
+                      uint64_t physical_address, uint64_t size);
+Result CreateDeviceAddressSpace(Core::System& system, Handle* out_handle, uint64_t das_address,
+                                uint64_t das_size);
 Result AttachDeviceAddressSpace(Core::System& system, DeviceName device_name, Handle das_handle);
 Result DetachDeviceAddressSpace(Core::System& system, DeviceName device_name, Handle das_handle);
-Result MapDeviceAddressSpaceByForce(Core::System& system, Handle das_handle, Handle process_handle, uint64_t process_address, uint64_t size, uint64_t device_address, uint32_t option);
-Result MapDeviceAddressSpaceAligned(Core::System& system, Handle das_handle, Handle process_handle, uint64_t process_address, uint64_t size, uint64_t device_address, uint32_t option);
-Result UnmapDeviceAddressSpace(Core::System& system, Handle das_handle, Handle process_handle, uint64_t process_address, uint64_t size, uint64_t device_address);
-Result InvalidateProcessDataCache(Core::System& system, Handle process_handle, uint64_t address, uint64_t size);
-Result StoreProcessDataCache(Core::System& system, Handle process_handle, uint64_t address, uint64_t size);
-Result FlushProcessDataCache(Core::System& system, Handle process_handle, uint64_t address, uint64_t size);
+Result MapDeviceAddressSpaceByForce(Core::System& system, Handle das_handle, Handle process_handle,
+                                    uint64_t process_address, uint64_t size,
+                                    uint64_t device_address, uint32_t option);
+Result MapDeviceAddressSpaceAligned(Core::System& system, Handle das_handle, Handle process_handle,
+                                    uint64_t process_address, uint64_t size,
+                                    uint64_t device_address, uint32_t option);
+Result UnmapDeviceAddressSpace(Core::System& system, Handle das_handle, Handle process_handle,
+                               uint64_t process_address, uint64_t size, uint64_t device_address);
+Result InvalidateProcessDataCache(Core::System& system, Handle process_handle, uint64_t address,
+                                  uint64_t size);
+Result StoreProcessDataCache(Core::System& system, Handle process_handle, uint64_t address,
+                             uint64_t size);
+Result FlushProcessDataCache(Core::System& system, Handle process_handle, uint64_t address,
+                             uint64_t size);
 Result DebugActiveProcess(Core::System& system, Handle* out_handle, uint64_t process_id);
 Result BreakDebugProcess(Core::System& system, Handle debug_handle);
 Result TerminateDebugProcess(Core::System& system, Handle debug_handle);
 Result GetDebugEvent(Core::System& system, uint64_t out_info, Handle debug_handle);
-Result ContinueDebugEvent(Core::System& system, Handle debug_handle, uint32_t flags, uint64_t thread_ids, int32_t num_thread_ids);
-Result GetProcessList(Core::System& system, int32_t* out_num_processes, uint64_t out_process_ids, int32_t max_out_count);
-Result GetThreadList(Core::System& system, int32_t* out_num_threads, uint64_t out_thread_ids, int32_t max_out_count, Handle debug_handle);
-Result GetDebugThreadContext(Core::System& system, uint64_t out_context, Handle debug_handle, uint64_t thread_id, uint32_t context_flags);
-Result SetDebugThreadContext(Core::System& system, Handle debug_handle, uint64_t thread_id, uint64_t context, uint32_t context_flags);
-Result QueryDebugProcessMemory(Core::System& system, uint64_t out_memory_info, PageInfo* out_page_info, Handle process_handle, uint64_t address);
-Result ReadDebugProcessMemory(Core::System& system, uint64_t buffer, Handle debug_handle, uint64_t address, uint64_t size);
-Result WriteDebugProcessMemory(Core::System& system, Handle debug_handle, uint64_t buffer, uint64_t address, uint64_t size);
-Result SetHardwareBreakPoint(Core::System& system, HardwareBreakPointRegisterName name, uint64_t flags, uint64_t value);
-Result GetDebugThreadParam(Core::System& system, uint64_t* out_64, uint32_t* out_32, Handle debug_handle, uint64_t thread_id, DebugThreadParam param);
-Result GetSystemInfo(Core::System& system, uint64_t* out, SystemInfoType info_type, Handle handle, uint64_t info_subtype);
-Result CreatePort(Core::System& system, Handle* out_server_handle, Handle* out_client_handle, int32_t max_sessions, bool is_light, uint64_t name);
-Result ManageNamedPort(Core::System& system, Handle* out_server_handle, uint64_t name, int32_t max_sessions);
+Result ContinueDebugEvent(Core::System& system, Handle debug_handle, uint32_t flags,
+                          uint64_t thread_ids, int32_t num_thread_ids);
+Result GetProcessList(Core::System& system, int32_t* out_num_processes, uint64_t out_process_ids,
+                      int32_t max_out_count);
+Result GetThreadList(Core::System& system, int32_t* out_num_threads, uint64_t out_thread_ids,
+                     int32_t max_out_count, Handle debug_handle);
+Result GetDebugThreadContext(Core::System& system, uint64_t out_context, Handle debug_handle,
+                             uint64_t thread_id, uint32_t context_flags);
+Result SetDebugThreadContext(Core::System& system, Handle debug_handle, uint64_t thread_id,
+                             uint64_t context, uint32_t context_flags);
+Result QueryDebugProcessMemory(Core::System& system, uint64_t out_memory_info,
+                               PageInfo* out_page_info, Handle process_handle, uint64_t address);
+Result ReadDebugProcessMemory(Core::System& system, uint64_t buffer, Handle debug_handle,
+                              uint64_t address, uint64_t size);
+Result WriteDebugProcessMemory(Core::System& system, Handle debug_handle, uint64_t buffer,
+                               uint64_t address, uint64_t size);
+Result SetHardwareBreakPoint(Core::System& system, HardwareBreakPointRegisterName name,
+                             uint64_t flags, uint64_t value);
+Result GetDebugThreadParam(Core::System& system, uint64_t* out_64, uint32_t* out_32,
+                           Handle debug_handle, uint64_t thread_id, DebugThreadParam param);
+Result GetSystemInfo(Core::System& system, uint64_t* out, SystemInfoType info_type, Handle handle,
+                     uint64_t info_subtype);
+Result CreatePort(Core::System& system, Handle* out_server_handle, Handle* out_client_handle,
+                  int32_t max_sessions, bool is_light, uint64_t name);
+Result ManageNamedPort(Core::System& system, Handle* out_server_handle, uint64_t name,
+                       int32_t max_sessions);
 Result ConnectToPort(Core::System& system, Handle* out_handle, Handle port);
-Result SetProcessMemoryPermission(Core::System& system, Handle process_handle, uint64_t address, uint64_t size, MemoryPermission perm);
-Result MapProcessMemory(Core::System& system, uint64_t dst_address, Handle process_handle, uint64_t src_address, uint64_t size);
-Result UnmapProcessMemory(Core::System& system, uint64_t dst_address, Handle process_handle, uint64_t src_address, uint64_t size);
-Result QueryProcessMemory(Core::System& system, uint64_t out_memory_info, PageInfo* out_page_info, Handle process_handle, uint64_t address);
-Result MapProcessCodeMemory(Core::System& system, Handle process_handle, uint64_t dst_address, uint64_t src_address, uint64_t size);
-Result UnmapProcessCodeMemory(Core::System& system, Handle process_handle, uint64_t dst_address, uint64_t src_address, uint64_t size);
-Result CreateProcess(Core::System& system, Handle* out_handle, uint64_t parameters, uint64_t caps, int32_t num_caps);
-Result StartProcess(Core::System& system, Handle process_handle, int32_t priority, int32_t core_id, uint64_t main_thread_stack_size);
+Result SetProcessMemoryPermission(Core::System& system, Handle process_handle, uint64_t address,
+                                  uint64_t size, MemoryPermission perm);
+Result MapProcessMemory(Core::System& system, uint64_t dst_address, Handle process_handle,
+                        uint64_t src_address, uint64_t size);
+Result UnmapProcessMemory(Core::System& system, uint64_t dst_address, Handle process_handle,
+                          uint64_t src_address, uint64_t size);
+Result QueryProcessMemory(Core::System& system, uint64_t out_memory_info, PageInfo* out_page_info,
+                          Handle process_handle, uint64_t address);
+Result MapProcessCodeMemory(Core::System& system, Handle process_handle, uint64_t dst_address,
+                            uint64_t src_address, uint64_t size);
+Result UnmapProcessCodeMemory(Core::System& system, Handle process_handle, uint64_t dst_address,
+                              uint64_t src_address, uint64_t size);
+Result CreateProcess(Core::System& system, Handle* out_handle, uint64_t parameters, uint64_t caps,
+                     int32_t num_caps);
+Result StartProcess(Core::System& system, Handle process_handle, int32_t priority, int32_t core_id,
+                    uint64_t main_thread_stack_size);
 Result TerminateProcess(Core::System& system, Handle process_handle);
-Result GetProcessInfo(Core::System& system, int64_t* out_info, Handle process_handle, ProcessInfoType info_type);
+Result GetProcessInfo(Core::System& system, int64_t* out_info, Handle process_handle,
+                      ProcessInfoType info_type);
 Result CreateResourceLimit(Core::System& system, Handle* out_handle);
-Result SetResourceLimitLimitValue(Core::System& system, Handle resource_limit_handle, LimitableResource which, int64_t limit_value);
+Result SetResourceLimitLimitValue(Core::System& system, Handle resource_limit_handle,
+                                  LimitableResource which, int64_t limit_value);
 Result MapInsecureMemory(Core::System& system, uint64_t address, uint64_t size);
 Result UnmapInsecureMemory(Core::System& system, uint64_t address, uint64_t size);
 
 Result SetHeapSize64From32(Core::System& system, uint64_t* out_address, uint32_t size);
-Result SetMemoryPermission64From32(Core::System& system, uint32_t address, uint32_t size, MemoryPermission perm);
-Result SetMemoryAttribute64From32(Core::System& system, uint32_t address, uint32_t size, uint32_t mask, uint32_t attr);
-Result MapMemory64From32(Core::System& system, uint32_t dst_address, uint32_t src_address, uint32_t size);
-Result UnmapMemory64From32(Core::System& system, uint32_t dst_address, uint32_t src_address, uint32_t size);
-Result QueryMemory64From32(Core::System& system, uint32_t out_memory_info, PageInfo* out_page_info, uint32_t address);
+Result SetMemoryPermission64From32(Core::System& system, uint32_t address, uint32_t size,
+                                   MemoryPermission perm);
+Result SetMemoryAttribute64From32(Core::System& system, uint32_t address, uint32_t size,
+                                  uint32_t mask, uint32_t attr);
+Result MapMemory64From32(Core::System& system, uint32_t dst_address, uint32_t src_address,
+                         uint32_t size);
+Result UnmapMemory64From32(Core::System& system, uint32_t dst_address, uint32_t src_address,
+                           uint32_t size);
+Result QueryMemory64From32(Core::System& system, uint32_t out_memory_info, PageInfo* out_page_info,
+                           uint32_t address);
 void ExitProcess64From32(Core::System& system);
-Result CreateThread64From32(Core::System& system, Handle* out_handle, uint32_t func, uint32_t arg, uint32_t stack_bottom, int32_t priority, int32_t core_id);
+Result CreateThread64From32(Core::System& system, Handle* out_handle, uint32_t func, uint32_t arg,
+                            uint32_t stack_bottom, int32_t priority, int32_t core_id);
 Result StartThread64From32(Core::System& system, Handle thread_handle);
 void ExitThread64From32(Core::System& system);
 void SleepThread64From32(Core::System& system, int64_t ns);
 Result GetThreadPriority64From32(Core::System& system, int32_t* out_priority, Handle thread_handle);
 Result SetThreadPriority64From32(Core::System& system, Handle thread_handle, int32_t priority);
-Result GetThreadCoreMask64From32(Core::System& system, int32_t* out_core_id, uint64_t* out_affinity_mask, Handle thread_handle);
-Result SetThreadCoreMask64From32(Core::System& system, Handle thread_handle, int32_t core_id, uint64_t affinity_mask);
+Result GetThreadCoreMask64From32(Core::System& system, int32_t* out_core_id,
+                                 uint64_t* out_affinity_mask, Handle thread_handle);
+Result SetThreadCoreMask64From32(Core::System& system, Handle thread_handle, int32_t core_id,
+                                 uint64_t affinity_mask);
 int32_t GetCurrentProcessorNumber64From32(Core::System& system);
 Result SignalEvent64From32(Core::System& system, Handle event_handle);
 Result ClearEvent64From32(Core::System& system, Handle event_handle);
-Result MapSharedMemory64From32(Core::System& system, Handle shmem_handle, uint32_t address, uint32_t size, MemoryPermission map_perm);
-Result UnmapSharedMemory64From32(Core::System& system, Handle shmem_handle, uint32_t address, uint32_t size);
-Result CreateTransferMemory64From32(Core::System& system, Handle* out_handle, uint32_t address, uint32_t size, MemoryPermission map_perm);
+Result MapSharedMemory64From32(Core::System& system, Handle shmem_handle, uint32_t address,
+                               uint32_t size, MemoryPermission map_perm);
+Result UnmapSharedMemory64From32(Core::System& system, Handle shmem_handle, uint32_t address,
+                                 uint32_t size);
+Result CreateTransferMemory64From32(Core::System& system, Handle* out_handle, uint32_t address,
+                                    uint32_t size, MemoryPermission map_perm);
 Result CloseHandle64From32(Core::System& system, Handle handle);
 Result ResetSignal64From32(Core::System& system, Handle handle);
-Result WaitSynchronization64From32(Core::System& system, int32_t* out_index, uint32_t handles, int32_t num_handles, int64_t timeout_ns);
+Result WaitSynchronization64From32(Core::System& system, int32_t* out_index, uint32_t handles,
+                                   int32_t num_handles, int64_t timeout_ns);
 Result CancelSynchronization64From32(Core::System& system, Handle handle);
-Result ArbitrateLock64From32(Core::System& system, Handle thread_handle, uint32_t address, uint32_t tag);
+Result ArbitrateLock64From32(Core::System& system, Handle thread_handle, uint32_t address,
+                             uint32_t tag);
 Result ArbitrateUnlock64From32(Core::System& system, uint32_t address);
-Result WaitProcessWideKeyAtomic64From32(Core::System& system, uint32_t address, uint32_t cv_key, uint32_t tag, int64_t timeout_ns);
+Result WaitProcessWideKeyAtomic64From32(Core::System& system, uint32_t address, uint32_t cv_key,
+                                        uint32_t tag, int64_t timeout_ns);
 void SignalProcessWideKey64From32(Core::System& system, uint32_t cv_key, int32_t count);
 int64_t GetSystemTick64From32(Core::System& system);
 Result ConnectToNamedPort64From32(Core::System& system, Handle* out_handle, uint32_t name);
 Result SendSyncRequest64From32(Core::System& system, Handle session_handle);
-Result SendSyncRequestWithUserBuffer64From32(Core::System& system, uint32_t message_buffer, uint32_t message_buffer_size, Handle session_handle);
-Result SendAsyncRequestWithUserBuffer64From32(Core::System& system, Handle* out_event_handle, uint32_t message_buffer, uint32_t message_buffer_size, Handle session_handle);
+Result SendSyncRequestWithUserBuffer64From32(Core::System& system, uint32_t message_buffer,
+                                             uint32_t message_buffer_size, Handle session_handle);
+Result SendAsyncRequestWithUserBuffer64From32(Core::System& system, Handle* out_event_handle,
+                                              uint32_t message_buffer, uint32_t message_buffer_size,
+                                              Handle session_handle);
 Result GetProcessId64From32(Core::System& system, uint64_t* out_process_id, Handle process_handle);
 Result GetThreadId64From32(Core::System& system, uint64_t* out_thread_id, Handle thread_handle);
 void Break64From32(Core::System& system, BreakReason break_reason, uint32_t arg, uint32_t size);
 Result OutputDebugString64From32(Core::System& system, uint32_t debug_str, uint32_t len);
 void ReturnFromException64From32(Core::System& system, Result result);
-Result GetInfo64From32(Core::System& system, uint64_t* out, InfoType info_type, Handle handle, uint64_t info_subtype);
+Result GetInfo64From32(Core::System& system, uint64_t* out, InfoType info_type, Handle handle,
+                       uint64_t info_subtype);
 void FlushEntireDataCache64From32(Core::System& system);
 Result FlushDataCache64From32(Core::System& system, uint32_t address, uint32_t size);
 Result MapPhysicalMemory64From32(Core::System& system, uint32_t address, uint32_t size);
 Result UnmapPhysicalMemory64From32(Core::System& system, uint32_t address, uint32_t size);
-Result GetDebugFutureThreadInfo64From32(Core::System& system, ilp32::LastThreadContext* out_context, uint64_t* out_thread_id, Handle debug_handle, int64_t ns);
-Result GetLastThreadInfo64From32(Core::System& system, ilp32::LastThreadContext* out_context, uint64_t* out_tls_address, uint32_t* out_flags);
-Result GetResourceLimitLimitValue64From32(Core::System& system, int64_t* out_limit_value, Handle resource_limit_handle, LimitableResource which);
-Result GetResourceLimitCurrentValue64From32(Core::System& system, int64_t* out_current_value, Handle resource_limit_handle, LimitableResource which);
-Result SetThreadActivity64From32(Core::System& system, Handle thread_handle, ThreadActivity thread_activity);
+Result GetDebugFutureThreadInfo64From32(Core::System& system, ilp32::LastThreadContext* out_context,
+                                        uint64_t* out_thread_id, Handle debug_handle, int64_t ns);
+Result GetLastThreadInfo64From32(Core::System& system, ilp32::LastThreadContext* out_context,
+                                 uint64_t* out_tls_address, uint32_t* out_flags);
+Result GetResourceLimitLimitValue64From32(Core::System& system, int64_t* out_limit_value,
+                                          Handle resource_limit_handle, LimitableResource which);
+Result GetResourceLimitCurrentValue64From32(Core::System& system, int64_t* out_current_value,
+                                            Handle resource_limit_handle, LimitableResource which);
+Result SetThreadActivity64From32(Core::System& system, Handle thread_handle,
+                                 ThreadActivity thread_activity);
 Result GetThreadContext364From32(Core::System& system, uint32_t out_context, Handle thread_handle);
-Result WaitForAddress64From32(Core::System& system, uint32_t address, ArbitrationType arb_type, int32_t value, int64_t timeout_ns);
-Result SignalToAddress64From32(Core::System& system, uint32_t address, SignalType signal_type, int32_t value, int32_t count);
+Result WaitForAddress64From32(Core::System& system, uint32_t address, ArbitrationType arb_type,
+                              int32_t value, int64_t timeout_ns);
+Result SignalToAddress64From32(Core::System& system, uint32_t address, SignalType signal_type,
+                               int32_t value, int32_t count);
 void SynchronizePreemptionState64From32(Core::System& system);
-Result GetResourceLimitPeakValue64From32(Core::System& system, int64_t* out_peak_value, Handle resource_limit_handle, LimitableResource which);
+Result GetResourceLimitPeakValue64From32(Core::System& system, int64_t* out_peak_value,
+                                         Handle resource_limit_handle, LimitableResource which);
 Result CreateIoPool64From32(Core::System& system, Handle* out_handle, IoPoolType which);
-Result CreateIoRegion64From32(Core::System& system, Handle* out_handle, Handle io_pool, uint64_t physical_address, uint32_t size, MemoryMapping mapping, MemoryPermission perm);
-void KernelDebug64From32(Core::System& system, KernelDebugType kern_debug_type, uint64_t arg0, uint64_t arg1, uint64_t arg2);
+Result CreateIoRegion64From32(Core::System& system, Handle* out_handle, Handle io_pool,
+                              uint64_t physical_address, uint32_t size, MemoryMapping mapping,
+                              MemoryPermission perm);
+void KernelDebug64From32(Core::System& system, KernelDebugType kern_debug_type, uint64_t arg0,
+                         uint64_t arg1, uint64_t arg2);
 void ChangeKernelTraceState64From32(Core::System& system, KernelTraceState kern_trace_state);
-Result CreateSession64From32(Core::System& system, Handle* out_server_session_handle, Handle* out_client_session_handle, bool is_light, uint32_t name);
+Result CreateSession64From32(Core::System& system, Handle* out_server_session_handle,
+                             Handle* out_client_session_handle, bool is_light, uint32_t name);
 Result AcceptSession64From32(Core::System& system, Handle* out_handle, Handle port);
-Result ReplyAndReceive64From32(Core::System& system, int32_t* out_index, uint32_t handles, int32_t num_handles, Handle reply_target, int64_t timeout_ns);
-Result ReplyAndReceiveWithUserBuffer64From32(Core::System& system, int32_t* out_index, uint32_t message_buffer, uint32_t message_buffer_size, uint32_t handles, int32_t num_handles, Handle reply_target, int64_t timeout_ns);
+Result ReplyAndReceive64From32(Core::System& system, int32_t* out_index, uint32_t handles,
+                               int32_t num_handles, Handle reply_target, int64_t timeout_ns);
+Result ReplyAndReceiveWithUserBuffer64From32(Core::System& system, int32_t* out_index,
+                                             uint32_t message_buffer, uint32_t message_buffer_size,
+                                             uint32_t handles, int32_t num_handles,
+                                             Handle reply_target, int64_t timeout_ns);
 Result CreateEvent64From32(Core::System& system, Handle* out_write_handle, Handle* out_read_handle);
-Result MapIoRegion64From32(Core::System& system, Handle io_region, uint32_t address, uint32_t size, MemoryPermission perm);
-Result UnmapIoRegion64From32(Core::System& system, Handle io_region, uint32_t address, uint32_t size);
+Result MapIoRegion64From32(Core::System& system, Handle io_region, uint32_t address, uint32_t size,
+                           MemoryPermission perm);
+Result UnmapIoRegion64From32(Core::System& system, Handle io_region, uint32_t address,
+                             uint32_t size);
 Result MapPhysicalMemoryUnsafe64From32(Core::System& system, uint32_t address, uint32_t size);
 Result UnmapPhysicalMemoryUnsafe64From32(Core::System& system, uint32_t address, uint32_t size);
 Result SetUnsafeLimit64From32(Core::System& system, uint32_t limit);
-Result CreateCodeMemory64From32(Core::System& system, Handle* out_handle, uint32_t address, uint32_t size);
-Result ControlCodeMemory64From32(Core::System& system, Handle code_memory_handle, CodeMemoryOperation operation, uint64_t address, uint64_t size, MemoryPermission perm);
+Result CreateCodeMemory64From32(Core::System& system, Handle* out_handle, uint32_t address,
+                                uint32_t size);
+Result ControlCodeMemory64From32(Core::System& system, Handle code_memory_handle,
+                                 CodeMemoryOperation operation, uint64_t address, uint64_t size,
+                                 MemoryPermission perm);
 void SleepSystem64From32(Core::System& system);
-Result ReadWriteRegister64From32(Core::System& system, uint32_t* out_value, uint64_t address, uint32_t mask, uint32_t value);
-Result SetProcessActivity64From32(Core::System& system, Handle process_handle, ProcessActivity process_activity);
-Result CreateSharedMemory64From32(Core::System& system, Handle* out_handle, uint32_t size, MemoryPermission owner_perm, MemoryPermission remote_perm);
-Result MapTransferMemory64From32(Core::System& system, Handle trmem_handle, uint32_t address, uint32_t size, MemoryPermission owner_perm);
-Result UnmapTransferMemory64From32(Core::System& system, Handle trmem_handle, uint32_t address, uint32_t size);
-Result CreateInterruptEvent64From32(Core::System& system, Handle* out_read_handle, int32_t interrupt_id, InterruptType interrupt_type);
-Result QueryPhysicalAddress64From32(Core::System& system, ilp32::PhysicalMemoryInfo* out_info, uint32_t address);
-Result QueryIoMapping64From32(Core::System& system, uint64_t* out_address, uint64_t* out_size, uint64_t physical_address, uint32_t size);
-Result CreateDeviceAddressSpace64From32(Core::System& system, Handle* out_handle, uint64_t das_address, uint64_t das_size);
-Result AttachDeviceAddressSpace64From32(Core::System& system, DeviceName device_name, Handle das_handle);
-Result DetachDeviceAddressSpace64From32(Core::System& system, DeviceName device_name, Handle das_handle);
-Result MapDeviceAddressSpaceByForce64From32(Core::System& system, Handle das_handle, Handle process_handle, uint64_t process_address, uint32_t size, uint64_t device_address, uint32_t option);
-Result MapDeviceAddressSpaceAligned64From32(Core::System& system, Handle das_handle, Handle process_handle, uint64_t process_address, uint32_t size, uint64_t device_address, uint32_t option);
-Result UnmapDeviceAddressSpace64From32(Core::System& system, Handle das_handle, Handle process_handle, uint64_t process_address, uint32_t size, uint64_t device_address);
-Result InvalidateProcessDataCache64From32(Core::System& system, Handle process_handle, uint64_t address, uint64_t size);
-Result StoreProcessDataCache64From32(Core::System& system, Handle process_handle, uint64_t address, uint64_t size);
-Result FlushProcessDataCache64From32(Core::System& system, Handle process_handle, uint64_t address, uint64_t size);
+Result ReadWriteRegister64From32(Core::System& system, uint32_t* out_value, uint64_t address,
+                                 uint32_t mask, uint32_t value);
+Result SetProcessActivity64From32(Core::System& system, Handle process_handle,
+                                  ProcessActivity process_activity);
+Result CreateSharedMemory64From32(Core::System& system, Handle* out_handle, uint32_t size,
+                                  MemoryPermission owner_perm, MemoryPermission remote_perm);
+Result MapTransferMemory64From32(Core::System& system, Handle trmem_handle, uint32_t address,
+                                 uint32_t size, MemoryPermission owner_perm);
+Result UnmapTransferMemory64From32(Core::System& system, Handle trmem_handle, uint32_t address,
+                                   uint32_t size);
+Result CreateInterruptEvent64From32(Core::System& system, Handle* out_read_handle,
+                                    int32_t interrupt_id, InterruptType interrupt_type);
+Result QueryPhysicalAddress64From32(Core::System& system, ilp32::PhysicalMemoryInfo* out_info,
+                                    uint32_t address);
+Result QueryIoMapping64From32(Core::System& system, uint64_t* out_address, uint64_t* out_size,
+                              uint64_t physical_address, uint32_t size);
+Result CreateDeviceAddressSpace64From32(Core::System& system, Handle* out_handle,
+                                        uint64_t das_address, uint64_t das_size);
+Result AttachDeviceAddressSpace64From32(Core::System& system, DeviceName device_name,
+                                        Handle das_handle);
+Result DetachDeviceAddressSpace64From32(Core::System& system, DeviceName device_name,
+                                        Handle das_handle);
+Result MapDeviceAddressSpaceByForce64From32(Core::System& system, Handle das_handle,
+                                            Handle process_handle, uint64_t process_address,
+                                            uint32_t size, uint64_t device_address,
+                                            uint32_t option);
+Result MapDeviceAddressSpaceAligned64From32(Core::System& system, Handle das_handle,
+                                            Handle process_handle, uint64_t process_address,
+                                            uint32_t size, uint64_t device_address,
+                                            uint32_t option);
+Result UnmapDeviceAddressSpace64From32(Core::System& system, Handle das_handle,
+                                       Handle process_handle, uint64_t process_address,
+                                       uint32_t size, uint64_t device_address);
+Result InvalidateProcessDataCache64From32(Core::System& system, Handle process_handle,
+                                          uint64_t address, uint64_t size);
+Result StoreProcessDataCache64From32(Core::System& system, Handle process_handle, uint64_t address,
+                                     uint64_t size);
+Result FlushProcessDataCache64From32(Core::System& system, Handle process_handle, uint64_t address,
+                                     uint64_t size);
 Result DebugActiveProcess64From32(Core::System& system, Handle* out_handle, uint64_t process_id);
 Result BreakDebugProcess64From32(Core::System& system, Handle debug_handle);
 Result TerminateDebugProcess64From32(Core::System& system, Handle debug_handle);
 Result GetDebugEvent64From32(Core::System& system, uint32_t out_info, Handle debug_handle);
-Result ContinueDebugEvent64From32(Core::System& system, Handle debug_handle, uint32_t flags, uint32_t thread_ids, int32_t num_thread_ids);
-Result GetProcessList64From32(Core::System& system, int32_t* out_num_processes, uint32_t out_process_ids, int32_t max_out_count);
-Result GetThreadList64From32(Core::System& system, int32_t* out_num_threads, uint32_t out_thread_ids, int32_t max_out_count, Handle debug_handle);
-Result GetDebugThreadContext64From32(Core::System& system, uint32_t out_context, Handle debug_handle, uint64_t thread_id, uint32_t context_flags);
-Result SetDebugThreadContext64From32(Core::System& system, Handle debug_handle, uint64_t thread_id, uint32_t context, uint32_t context_flags);
-Result QueryDebugProcessMemory64From32(Core::System& system, uint32_t out_memory_info, PageInfo* out_page_info, Handle process_handle, uint32_t address);
-Result ReadDebugProcessMemory64From32(Core::System& system, uint32_t buffer, Handle debug_handle, uint32_t address, uint32_t size);
-Result WriteDebugProcessMemory64From32(Core::System& system, Handle debug_handle, uint32_t buffer, uint32_t address, uint32_t size);
-Result SetHardwareBreakPoint64From32(Core::System& system, HardwareBreakPointRegisterName name, uint64_t flags, uint64_t value);
-Result GetDebugThreadParam64From32(Core::System& system, uint64_t* out_64, uint32_t* out_32, Handle debug_handle, uint64_t thread_id, DebugThreadParam param);
-Result GetSystemInfo64From32(Core::System& system, uint64_t* out, SystemInfoType info_type, Handle handle, uint64_t info_subtype);
-Result CreatePort64From32(Core::System& system, Handle* out_server_handle, Handle* out_client_handle, int32_t max_sessions, bool is_light, uint32_t name);
-Result ManageNamedPort64From32(Core::System& system, Handle* out_server_handle, uint32_t name, int32_t max_sessions);
+Result ContinueDebugEvent64From32(Core::System& system, Handle debug_handle, uint32_t flags,
+                                  uint32_t thread_ids, int32_t num_thread_ids);
+Result GetProcessList64From32(Core::System& system, int32_t* out_num_processes,
+                              uint32_t out_process_ids, int32_t max_out_count);
+Result GetThreadList64From32(Core::System& system, int32_t* out_num_threads,
+                             uint32_t out_thread_ids, int32_t max_out_count, Handle debug_handle);
+Result GetDebugThreadContext64From32(Core::System& system, uint32_t out_context,
+                                     Handle debug_handle, uint64_t thread_id,
+                                     uint32_t context_flags);
+Result SetDebugThreadContext64From32(Core::System& system, Handle debug_handle, uint64_t thread_id,
+                                     uint32_t context, uint32_t context_flags);
+Result QueryDebugProcessMemory64From32(Core::System& system, uint32_t out_memory_info,
+                                       PageInfo* out_page_info, Handle process_handle,
+                                       uint32_t address);
+Result ReadDebugProcessMemory64From32(Core::System& system, uint32_t buffer, Handle debug_handle,
+                                      uint32_t address, uint32_t size);
+Result WriteDebugProcessMemory64From32(Core::System& system, Handle debug_handle, uint32_t buffer,
+                                       uint32_t address, uint32_t size);
+Result SetHardwareBreakPoint64From32(Core::System& system, HardwareBreakPointRegisterName name,
+                                     uint64_t flags, uint64_t value);
+Result GetDebugThreadParam64From32(Core::System& system, uint64_t* out_64, uint32_t* out_32,
+                                   Handle debug_handle, uint64_t thread_id, DebugThreadParam param);
+Result GetSystemInfo64From32(Core::System& system, uint64_t* out, SystemInfoType info_type,
+                             Handle handle, uint64_t info_subtype);
+Result CreatePort64From32(Core::System& system, Handle* out_server_handle,
+                          Handle* out_client_handle, int32_t max_sessions, bool is_light,
+                          uint32_t name);
+Result ManageNamedPort64From32(Core::System& system, Handle* out_server_handle, uint32_t name,
+                               int32_t max_sessions);
 Result ConnectToPort64From32(Core::System& system, Handle* out_handle, Handle port);
-Result SetProcessMemoryPermission64From32(Core::System& system, Handle process_handle, uint64_t address, uint64_t size, MemoryPermission perm);
-Result MapProcessMemory64From32(Core::System& system, uint32_t dst_address, Handle process_handle, uint64_t src_address, uint32_t size);
-Result UnmapProcessMemory64From32(Core::System& system, uint32_t dst_address, Handle process_handle, uint64_t src_address, uint32_t size);
-Result QueryProcessMemory64From32(Core::System& system, uint32_t out_memory_info, PageInfo* out_page_info, Handle process_handle, uint64_t address);
-Result MapProcessCodeMemory64From32(Core::System& system, Handle process_handle, uint64_t dst_address, uint64_t src_address, uint64_t size);
-Result UnmapProcessCodeMemory64From32(Core::System& system, Handle process_handle, uint64_t dst_address, uint64_t src_address, uint64_t size);
-Result CreateProcess64From32(Core::System& system, Handle* out_handle, uint32_t parameters, uint32_t caps, int32_t num_caps);
-Result StartProcess64From32(Core::System& system, Handle process_handle, int32_t priority, int32_t core_id, uint64_t main_thread_stack_size);
+Result SetProcessMemoryPermission64From32(Core::System& system, Handle process_handle,
+                                          uint64_t address, uint64_t size, MemoryPermission perm);
+Result MapProcessMemory64From32(Core::System& system, uint32_t dst_address, Handle process_handle,
+                                uint64_t src_address, uint32_t size);
+Result UnmapProcessMemory64From32(Core::System& system, uint32_t dst_address, Handle process_handle,
+                                  uint64_t src_address, uint32_t size);
+Result QueryProcessMemory64From32(Core::System& system, uint32_t out_memory_info,
+                                  PageInfo* out_page_info, Handle process_handle, uint64_t address);
+Result MapProcessCodeMemory64From32(Core::System& system, Handle process_handle,
+                                    uint64_t dst_address, uint64_t src_address, uint64_t size);
+Result UnmapProcessCodeMemory64From32(Core::System& system, Handle process_handle,
+                                      uint64_t dst_address, uint64_t src_address, uint64_t size);
+Result CreateProcess64From32(Core::System& system, Handle* out_handle, uint32_t parameters,
+                             uint32_t caps, int32_t num_caps);
+Result StartProcess64From32(Core::System& system, Handle process_handle, int32_t priority,
+                            int32_t core_id, uint64_t main_thread_stack_size);
 Result TerminateProcess64From32(Core::System& system, Handle process_handle);
-Result GetProcessInfo64From32(Core::System& system, int64_t* out_info, Handle process_handle, ProcessInfoType info_type);
+Result GetProcessInfo64From32(Core::System& system, int64_t* out_info, Handle process_handle,
+                              ProcessInfoType info_type);
 Result CreateResourceLimit64From32(Core::System& system, Handle* out_handle);
-Result SetResourceLimitLimitValue64From32(Core::System& system, Handle resource_limit_handle, LimitableResource which, int64_t limit_value);
+Result SetResourceLimitLimitValue64From32(Core::System& system, Handle resource_limit_handle,
+                                          LimitableResource which, int64_t limit_value);
 Result MapInsecureMemory64From32(Core::System& system, uint32_t address, uint32_t size);
 Result UnmapInsecureMemory64From32(Core::System& system, uint32_t address, uint32_t size);
 
 Result SetHeapSize64(Core::System& system, uint64_t* out_address, uint64_t size);
-Result SetMemoryPermission64(Core::System& system, uint64_t address, uint64_t size, MemoryPermission perm);
-Result SetMemoryAttribute64(Core::System& system, uint64_t address, uint64_t size, uint32_t mask, uint32_t attr);
+Result SetMemoryPermission64(Core::System& system, uint64_t address, uint64_t size,
+                             MemoryPermission perm);
+Result SetMemoryAttribute64(Core::System& system, uint64_t address, uint64_t size, uint32_t mask,
+                            uint32_t attr);
 Result MapMemory64(Core::System& system, uint64_t dst_address, uint64_t src_address, uint64_t size);
-Result UnmapMemory64(Core::System& system, uint64_t dst_address, uint64_t src_address, uint64_t size);
-Result QueryMemory64(Core::System& system, uint64_t out_memory_info, PageInfo* out_page_info, uint64_t address);
+Result UnmapMemory64(Core::System& system, uint64_t dst_address, uint64_t src_address,
+                     uint64_t size);
+Result QueryMemory64(Core::System& system, uint64_t out_memory_info, PageInfo* out_page_info,
+                     uint64_t address);
 void ExitProcess64(Core::System& system);
-Result CreateThread64(Core::System& system, Handle* out_handle, uint64_t func, uint64_t arg, uint64_t stack_bottom, int32_t priority, int32_t core_id);
+Result CreateThread64(Core::System& system, Handle* out_handle, uint64_t func, uint64_t arg,
+                      uint64_t stack_bottom, int32_t priority, int32_t core_id);
 Result StartThread64(Core::System& system, Handle thread_handle);
 void ExitThread64(Core::System& system);
 void SleepThread64(Core::System& system, int64_t ns);
 Result GetThreadPriority64(Core::System& system, int32_t* out_priority, Handle thread_handle);
 Result SetThreadPriority64(Core::System& system, Handle thread_handle, int32_t priority);
-Result GetThreadCoreMask64(Core::System& system, int32_t* out_core_id, uint64_t* out_affinity_mask, Handle thread_handle);
-Result SetThreadCoreMask64(Core::System& system, Handle thread_handle, int32_t core_id, uint64_t affinity_mask);
+Result GetThreadCoreMask64(Core::System& system, int32_t* out_core_id, uint64_t* out_affinity_mask,
+                           Handle thread_handle);
+Result SetThreadCoreMask64(Core::System& system, Handle thread_handle, int32_t core_id,
+                           uint64_t affinity_mask);
 int32_t GetCurrentProcessorNumber64(Core::System& system);
 Result SignalEvent64(Core::System& system, Handle event_handle);
 Result ClearEvent64(Core::System& system, Handle event_handle);
-Result MapSharedMemory64(Core::System& system, Handle shmem_handle, uint64_t address, uint64_t size, MemoryPermission map_perm);
-Result UnmapSharedMemory64(Core::System& system, Handle shmem_handle, uint64_t address, uint64_t size);
-Result CreateTransferMemory64(Core::System& system, Handle* out_handle, uint64_t address, uint64_t size, MemoryPermission map_perm);
+Result MapSharedMemory64(Core::System& system, Handle shmem_handle, uint64_t address, uint64_t size,
+                         MemoryPermission map_perm);
+Result UnmapSharedMemory64(Core::System& system, Handle shmem_handle, uint64_t address,
+                           uint64_t size);
+Result CreateTransferMemory64(Core::System& system, Handle* out_handle, uint64_t address,
+                              uint64_t size, MemoryPermission map_perm);
 Result CloseHandle64(Core::System& system, Handle handle);
 Result ResetSignal64(Core::System& system, Handle handle);
-Result WaitSynchronization64(Core::System& system, int32_t* out_index, uint64_t handles, int32_t num_handles, int64_t timeout_ns);
+Result WaitSynchronization64(Core::System& system, int32_t* out_index, uint64_t handles,
+                             int32_t num_handles, int64_t timeout_ns);
 Result CancelSynchronization64(Core::System& system, Handle handle);
 Result ArbitrateLock64(Core::System& system, Handle thread_handle, uint64_t address, uint32_t tag);
 Result ArbitrateUnlock64(Core::System& system, uint64_t address);
-Result WaitProcessWideKeyAtomic64(Core::System& system, uint64_t address, uint64_t cv_key, uint32_t tag, int64_t timeout_ns);
+Result WaitProcessWideKeyAtomic64(Core::System& system, uint64_t address, uint64_t cv_key,
+                                  uint32_t tag, int64_t timeout_ns);
 void SignalProcessWideKey64(Core::System& system, uint64_t cv_key, int32_t count);
 int64_t GetSystemTick64(Core::System& system);
 Result ConnectToNamedPort64(Core::System& system, Handle* out_handle, uint64_t name);
 Result SendSyncRequest64(Core::System& system, Handle session_handle);
-Result SendSyncRequestWithUserBuffer64(Core::System& system, uint64_t message_buffer, uint64_t message_buffer_size, Handle session_handle);
-Result SendAsyncRequestWithUserBuffer64(Core::System& system, Handle* out_event_handle, uint64_t message_buffer, uint64_t message_buffer_size, Handle session_handle);
+Result SendSyncRequestWithUserBuffer64(Core::System& system, uint64_t message_buffer,
+                                       uint64_t message_buffer_size, Handle session_handle);
+Result SendAsyncRequestWithUserBuffer64(Core::System& system, Handle* out_event_handle,
+                                        uint64_t message_buffer, uint64_t message_buffer_size,
+                                        Handle session_handle);
 Result GetProcessId64(Core::System& system, uint64_t* out_process_id, Handle process_handle);
 Result GetThreadId64(Core::System& system, uint64_t* out_thread_id, Handle thread_handle);
 void Break64(Core::System& system, BreakReason break_reason, uint64_t arg, uint64_t size);
 Result OutputDebugString64(Core::System& system, uint64_t debug_str, uint64_t len);
 void ReturnFromException64(Core::System& system, Result result);
-Result GetInfo64(Core::System& system, uint64_t* out, InfoType info_type, Handle handle, uint64_t info_subtype);
+Result GetInfo64(Core::System& system, uint64_t* out, InfoType info_type, Handle handle,
+                 uint64_t info_subtype);
 void FlushEntireDataCache64(Core::System& system);
 Result FlushDataCache64(Core::System& system, uint64_t address, uint64_t size);
 Result MapPhysicalMemory64(Core::System& system, uint64_t address, uint64_t size);
 Result UnmapPhysicalMemory64(Core::System& system, uint64_t address, uint64_t size);
-Result GetDebugFutureThreadInfo64(Core::System& system, lp64::LastThreadContext* out_context, uint64_t* out_thread_id, Handle debug_handle, int64_t ns);
-Result GetLastThreadInfo64(Core::System& system, lp64::LastThreadContext* out_context, uint64_t* out_tls_address, uint32_t* out_flags);
-Result GetResourceLimitLimitValue64(Core::System& system, int64_t* out_limit_value, Handle resource_limit_handle, LimitableResource which);
-Result GetResourceLimitCurrentValue64(Core::System& system, int64_t* out_current_value, Handle resource_limit_handle, LimitableResource which);
-Result SetThreadActivity64(Core::System& system, Handle thread_handle, ThreadActivity thread_activity);
+Result GetDebugFutureThreadInfo64(Core::System& system, lp64::LastThreadContext* out_context,
+                                  uint64_t* out_thread_id, Handle debug_handle, int64_t ns);
+Result GetLastThreadInfo64(Core::System& system, lp64::LastThreadContext* out_context,
+                           uint64_t* out_tls_address, uint32_t* out_flags);
+Result GetResourceLimitLimitValue64(Core::System& system, int64_t* out_limit_value,
+                                    Handle resource_limit_handle, LimitableResource which);
+Result GetResourceLimitCurrentValue64(Core::System& system, int64_t* out_current_value,
+                                      Handle resource_limit_handle, LimitableResource which);
+Result SetThreadActivity64(Core::System& system, Handle thread_handle,
+                           ThreadActivity thread_activity);
 Result GetThreadContext364(Core::System& system, uint64_t out_context, Handle thread_handle);
-Result WaitForAddress64(Core::System& system, uint64_t address, ArbitrationType arb_type, int32_t value, int64_t timeout_ns);
-Result SignalToAddress64(Core::System& system, uint64_t address, SignalType signal_type, int32_t value, int32_t count);
+Result WaitForAddress64(Core::System& system, uint64_t address, ArbitrationType arb_type,
+                        int32_t value, int64_t timeout_ns);
+Result SignalToAddress64(Core::System& system, uint64_t address, SignalType signal_type,
+                         int32_t value, int32_t count);
 void SynchronizePreemptionState64(Core::System& system);
-Result GetResourceLimitPeakValue64(Core::System& system, int64_t* out_peak_value, Handle resource_limit_handle, LimitableResource which);
+Result GetResourceLimitPeakValue64(Core::System& system, int64_t* out_peak_value,
+                                   Handle resource_limit_handle, LimitableResource which);
 Result CreateIoPool64(Core::System& system, Handle* out_handle, IoPoolType which);
-Result CreateIoRegion64(Core::System& system, Handle* out_handle, Handle io_pool, uint64_t physical_address, uint64_t size, MemoryMapping mapping, MemoryPermission perm);
-void KernelDebug64(Core::System& system, KernelDebugType kern_debug_type, uint64_t arg0, uint64_t arg1, uint64_t arg2);
+Result CreateIoRegion64(Core::System& system, Handle* out_handle, Handle io_pool,
+                        uint64_t physical_address, uint64_t size, MemoryMapping mapping,
+                        MemoryPermission perm);
+void KernelDebug64(Core::System& system, KernelDebugType kern_debug_type, uint64_t arg0,
+                   uint64_t arg1, uint64_t arg2);
 void ChangeKernelTraceState64(Core::System& system, KernelTraceState kern_trace_state);
-Result CreateSession64(Core::System& system, Handle* out_server_session_handle, Handle* out_client_session_handle, bool is_light, uint64_t name);
+Result CreateSession64(Core::System& system, Handle* out_server_session_handle,
+                       Handle* out_client_session_handle, bool is_light, uint64_t name);
 Result AcceptSession64(Core::System& system, Handle* out_handle, Handle port);
-Result ReplyAndReceive64(Core::System& system, int32_t* out_index, uint64_t handles, int32_t num_handles, Handle reply_target, int64_t timeout_ns);
-Result ReplyAndReceiveWithUserBuffer64(Core::System& system, int32_t* out_index, uint64_t message_buffer, uint64_t message_buffer_size, uint64_t handles, int32_t num_handles, Handle reply_target, int64_t timeout_ns);
+Result ReplyAndReceive64(Core::System& system, int32_t* out_index, uint64_t handles,
+                         int32_t num_handles, Handle reply_target, int64_t timeout_ns);
+Result ReplyAndReceiveWithUserBuffer64(Core::System& system, int32_t* out_index,
+                                       uint64_t message_buffer, uint64_t message_buffer_size,
+                                       uint64_t handles, int32_t num_handles, Handle reply_target,
+                                       int64_t timeout_ns);
 Result CreateEvent64(Core::System& system, Handle* out_write_handle, Handle* out_read_handle);
-Result MapIoRegion64(Core::System& system, Handle io_region, uint64_t address, uint64_t size, MemoryPermission perm);
+Result MapIoRegion64(Core::System& system, Handle io_region, uint64_t address, uint64_t size,
+                     MemoryPermission perm);
 Result UnmapIoRegion64(Core::System& system, Handle io_region, uint64_t address, uint64_t size);
 Result MapPhysicalMemoryUnsafe64(Core::System& system, uint64_t address, uint64_t size);
 Result UnmapPhysicalMemoryUnsafe64(Core::System& system, uint64_t address, uint64_t size);
 Result SetUnsafeLimit64(Core::System& system, uint64_t limit);
-Result CreateCodeMemory64(Core::System& system, Handle* out_handle, uint64_t address, uint64_t size);
-Result ControlCodeMemory64(Core::System& system, Handle code_memory_handle, CodeMemoryOperation operation, uint64_t address, uint64_t size, MemoryPermission perm);
+Result CreateCodeMemory64(Core::System& system, Handle* out_handle, uint64_t address,
+                          uint64_t size);
+Result ControlCodeMemory64(Core::System& system, Handle code_memory_handle,
+                           CodeMemoryOperation operation, uint64_t address, uint64_t size,
+                           MemoryPermission perm);
 void SleepSystem64(Core::System& system);
-Result ReadWriteRegister64(Core::System& system, uint32_t* out_value, uint64_t address, uint32_t mask, uint32_t value);
-Result SetProcessActivity64(Core::System& system, Handle process_handle, ProcessActivity process_activity);
-Result CreateSharedMemory64(Core::System& system, Handle* out_handle, uint64_t size, MemoryPermission owner_perm, MemoryPermission remote_perm);
-Result MapTransferMemory64(Core::System& system, Handle trmem_handle, uint64_t address, uint64_t size, MemoryPermission owner_perm);
-Result UnmapTransferMemory64(Core::System& system, Handle trmem_handle, uint64_t address, uint64_t size);
-Result CreateInterruptEvent64(Core::System& system, Handle* out_read_handle, int32_t interrupt_id, InterruptType interrupt_type);
-Result QueryPhysicalAddress64(Core::System& system, lp64::PhysicalMemoryInfo* out_info, uint64_t address);
-Result QueryIoMapping64(Core::System& system, uint64_t* out_address, uint64_t* out_size, uint64_t physical_address, uint64_t size);
-Result CreateDeviceAddressSpace64(Core::System& system, Handle* out_handle, uint64_t das_address, uint64_t das_size);
+Result ReadWriteRegister64(Core::System& system, uint32_t* out_value, uint64_t address,
+                           uint32_t mask, uint32_t value);
+Result SetProcessActivity64(Core::System& system, Handle process_handle,
+                            ProcessActivity process_activity);
+Result CreateSharedMemory64(Core::System& system, Handle* out_handle, uint64_t size,
+                            MemoryPermission owner_perm, MemoryPermission remote_perm);
+Result MapTransferMemory64(Core::System& system, Handle trmem_handle, uint64_t address,
+                           uint64_t size, MemoryPermission owner_perm);
+Result UnmapTransferMemory64(Core::System& system, Handle trmem_handle, uint64_t address,
+                             uint64_t size);
+Result CreateInterruptEvent64(Core::System& system, Handle* out_read_handle, int32_t interrupt_id,
+                              InterruptType interrupt_type);
+Result QueryPhysicalAddress64(Core::System& system, lp64::PhysicalMemoryInfo* out_info,
+                              uint64_t address);
+Result QueryIoMapping64(Core::System& system, uint64_t* out_address, uint64_t* out_size,
+                        uint64_t physical_address, uint64_t size);
+Result CreateDeviceAddressSpace64(Core::System& system, Handle* out_handle, uint64_t das_address,
+                                  uint64_t das_size);
 Result AttachDeviceAddressSpace64(Core::System& system, DeviceName device_name, Handle das_handle);
 Result DetachDeviceAddressSpace64(Core::System& system, DeviceName device_name, Handle das_handle);
-Result MapDeviceAddressSpaceByForce64(Core::System& system, Handle das_handle, Handle process_handle, uint64_t process_address, uint64_t size, uint64_t device_address, uint32_t option);
-Result MapDeviceAddressSpaceAligned64(Core::System& system, Handle das_handle, Handle process_handle, uint64_t process_address, uint64_t size, uint64_t device_address, uint32_t option);
-Result UnmapDeviceAddressSpace64(Core::System& system, Handle das_handle, Handle process_handle, uint64_t process_address, uint64_t size, uint64_t device_address);
-Result InvalidateProcessDataCache64(Core::System& system, Handle process_handle, uint64_t address, uint64_t size);
-Result StoreProcessDataCache64(Core::System& system, Handle process_handle, uint64_t address, uint64_t size);
-Result FlushProcessDataCache64(Core::System& system, Handle process_handle, uint64_t address, uint64_t size);
+Result MapDeviceAddressSpaceByForce64(Core::System& system, Handle das_handle,
+                                      Handle process_handle, uint64_t process_address,
+                                      uint64_t size, uint64_t device_address, uint32_t option);
+Result MapDeviceAddressSpaceAligned64(Core::System& system, Handle das_handle,
+                                      Handle process_handle, uint64_t process_address,
+                                      uint64_t size, uint64_t device_address, uint32_t option);
+Result UnmapDeviceAddressSpace64(Core::System& system, Handle das_handle, Handle process_handle,
+                                 uint64_t process_address, uint64_t size, uint64_t device_address);
+Result InvalidateProcessDataCache64(Core::System& system, Handle process_handle, uint64_t address,
+                                    uint64_t size);
+Result StoreProcessDataCache64(Core::System& system, Handle process_handle, uint64_t address,
+                               uint64_t size);
+Result FlushProcessDataCache64(Core::System& system, Handle process_handle, uint64_t address,
+                               uint64_t size);
 Result DebugActiveProcess64(Core::System& system, Handle* out_handle, uint64_t process_id);
 Result BreakDebugProcess64(Core::System& system, Handle debug_handle);
 Result TerminateDebugProcess64(Core::System& system, Handle debug_handle);
 Result GetDebugEvent64(Core::System& system, uint64_t out_info, Handle debug_handle);
-Result ContinueDebugEvent64(Core::System& system, Handle debug_handle, uint32_t flags, uint64_t thread_ids, int32_t num_thread_ids);
-Result GetProcessList64(Core::System& system, int32_t* out_num_processes, uint64_t out_process_ids, int32_t max_out_count);
-Result GetThreadList64(Core::System& system, int32_t* out_num_threads, uint64_t out_thread_ids, int32_t max_out_count, Handle debug_handle);
-Result GetDebugThreadContext64(Core::System& system, uint64_t out_context, Handle debug_handle, uint64_t thread_id, uint32_t context_flags);
-Result SetDebugThreadContext64(Core::System& system, Handle debug_handle, uint64_t thread_id, uint64_t context, uint32_t context_flags);
-Result QueryDebugProcessMemory64(Core::System& system, uint64_t out_memory_info, PageInfo* out_page_info, Handle process_handle, uint64_t address);
-Result ReadDebugProcessMemory64(Core::System& system, uint64_t buffer, Handle debug_handle, uint64_t address, uint64_t size);
-Result WriteDebugProcessMemory64(Core::System& system, Handle debug_handle, uint64_t buffer, uint64_t address, uint64_t size);
-Result SetHardwareBreakPoint64(Core::System& system, HardwareBreakPointRegisterName name, uint64_t flags, uint64_t value);
-Result GetDebugThreadParam64(Core::System& system, uint64_t* out_64, uint32_t* out_32, Handle debug_handle, uint64_t thread_id, DebugThreadParam param);
-Result GetSystemInfo64(Core::System& system, uint64_t* out, SystemInfoType info_type, Handle handle, uint64_t info_subtype);
-Result CreatePort64(Core::System& system, Handle* out_server_handle, Handle* out_client_handle, int32_t max_sessions, bool is_light, uint64_t name);
-Result ManageNamedPort64(Core::System& system, Handle* out_server_handle, uint64_t name, int32_t max_sessions);
+Result ContinueDebugEvent64(Core::System& system, Handle debug_handle, uint32_t flags,
+                            uint64_t thread_ids, int32_t num_thread_ids);
+Result GetProcessList64(Core::System& system, int32_t* out_num_processes, uint64_t out_process_ids,
+                        int32_t max_out_count);
+Result GetThreadList64(Core::System& system, int32_t* out_num_threads, uint64_t out_thread_ids,
+                       int32_t max_out_count, Handle debug_handle);
+Result GetDebugThreadContext64(Core::System& system, uint64_t out_context, Handle debug_handle,
+                               uint64_t thread_id, uint32_t context_flags);
+Result SetDebugThreadContext64(Core::System& system, Handle debug_handle, uint64_t thread_id,
+                               uint64_t context, uint32_t context_flags);
+Result QueryDebugProcessMemory64(Core::System& system, uint64_t out_memory_info,
+                                 PageInfo* out_page_info, Handle process_handle, uint64_t address);
+Result ReadDebugProcessMemory64(Core::System& system, uint64_t buffer, Handle debug_handle,
+                                uint64_t address, uint64_t size);
+Result WriteDebugProcessMemory64(Core::System& system, Handle debug_handle, uint64_t buffer,
+                                 uint64_t address, uint64_t size);
+Result SetHardwareBreakPoint64(Core::System& system, HardwareBreakPointRegisterName name,
+                               uint64_t flags, uint64_t value);
+Result GetDebugThreadParam64(Core::System& system, uint64_t* out_64, uint32_t* out_32,
+                             Handle debug_handle, uint64_t thread_id, DebugThreadParam param);
+Result GetSystemInfo64(Core::System& system, uint64_t* out, SystemInfoType info_type, Handle handle,
+                       uint64_t info_subtype);
+Result CreatePort64(Core::System& system, Handle* out_server_handle, Handle* out_client_handle,
+                    int32_t max_sessions, bool is_light, uint64_t name);
+Result ManageNamedPort64(Core::System& system, Handle* out_server_handle, uint64_t name,
+                         int32_t max_sessions);
 Result ConnectToPort64(Core::System& system, Handle* out_handle, Handle port);
-Result SetProcessMemoryPermission64(Core::System& system, Handle process_handle, uint64_t address, uint64_t size, MemoryPermission perm);
-Result MapProcessMemory64(Core::System& system, uint64_t dst_address, Handle process_handle, uint64_t src_address, uint64_t size);
-Result UnmapProcessMemory64(Core::System& system, uint64_t dst_address, Handle process_handle, uint64_t src_address, uint64_t size);
-Result QueryProcessMemory64(Core::System& system, uint64_t out_memory_info, PageInfo* out_page_info, Handle process_handle, uint64_t address);
-Result MapProcessCodeMemory64(Core::System& system, Handle process_handle, uint64_t dst_address, uint64_t src_address, uint64_t size);
-Result UnmapProcessCodeMemory64(Core::System& system, Handle process_handle, uint64_t dst_address, uint64_t src_address, uint64_t size);
-Result CreateProcess64(Core::System& system, Handle* out_handle, uint64_t parameters, uint64_t caps, int32_t num_caps);
-Result StartProcess64(Core::System& system, Handle process_handle, int32_t priority, int32_t core_id, uint64_t main_thread_stack_size);
+Result SetProcessMemoryPermission64(Core::System& system, Handle process_handle, uint64_t address,
+                                    uint64_t size, MemoryPermission perm);
+Result MapProcessMemory64(Core::System& system, uint64_t dst_address, Handle process_handle,
+                          uint64_t src_address, uint64_t size);
+Result UnmapProcessMemory64(Core::System& system, uint64_t dst_address, Handle process_handle,
+                            uint64_t src_address, uint64_t size);
+Result QueryProcessMemory64(Core::System& system, uint64_t out_memory_info, PageInfo* out_page_info,
+                            Handle process_handle, uint64_t address);
+Result MapProcessCodeMemory64(Core::System& system, Handle process_handle, uint64_t dst_address,
+                              uint64_t src_address, uint64_t size);
+Result UnmapProcessCodeMemory64(Core::System& system, Handle process_handle, uint64_t dst_address,
+                                uint64_t src_address, uint64_t size);
+Result CreateProcess64(Core::System& system, Handle* out_handle, uint64_t parameters, uint64_t caps,
+                       int32_t num_caps);
+Result StartProcess64(Core::System& system, Handle process_handle, int32_t priority,
+                      int32_t core_id, uint64_t main_thread_stack_size);
 Result TerminateProcess64(Core::System& system, Handle process_handle);
-Result GetProcessInfo64(Core::System& system, int64_t* out_info, Handle process_handle, ProcessInfoType info_type);
+Result GetProcessInfo64(Core::System& system, int64_t* out_info, Handle process_handle,
+                        ProcessInfoType info_type);
 Result CreateResourceLimit64(Core::System& system, Handle* out_handle);
-Result SetResourceLimitLimitValue64(Core::System& system, Handle resource_limit_handle, LimitableResource which, int64_t limit_value);
+Result SetResourceLimitLimitValue64(Core::System& system, Handle resource_limit_handle,
+                                    LimitableResource which, int64_t limit_value);
 Result MapInsecureMemory64(Core::System& system, uint64_t address, uint64_t size);
 Result UnmapInsecureMemory64(Core::System& system, uint64_t address, uint64_t size);
 

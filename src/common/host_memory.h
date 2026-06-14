@@ -7,6 +7,7 @@
 #pragma once
 
 #include <memory>
+
 #include "common/common_funcs.h"
 #include "common/common_types.h"
 #include "common/virtual_buffer.h"
@@ -54,21 +55,14 @@ public:
 
     void ClearBackingRegion(size_t physical_offset, size_t length, u32 fill_value);
 
-    [[nodiscard]] u8* BackingBasePointer() noexcept {
-        return backing_base;
-    }
-    [[nodiscard]] const u8* BackingBasePointer() const noexcept {
-        return backing_base;
-    }
+    [[nodiscard]] u8* BackingBasePointer() noexcept { return backing_base; }
+    [[nodiscard]] const u8* BackingBasePointer() const noexcept { return backing_base; }
 
-    [[nodiscard]] u8* VirtualBasePointer() noexcept {
-        return virtual_base;
-    }
-    [[nodiscard]] const u8* VirtualBasePointer() const noexcept {
-        return virtual_base;
-    }
+    [[nodiscard]] u8* VirtualBasePointer() noexcept { return virtual_base; }
+    [[nodiscard]] const u8* VirtualBasePointer() const noexcept { return virtual_base; }
 
-    bool IsInVirtualRange(void* address) const noexcept {
+    bool IsInVirtualRange(void* address) const noexcept
+    {
         return address >= virtual_base && address < virtual_base + virtual_size;
     }
 

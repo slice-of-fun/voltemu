@@ -10,6 +10,7 @@
 #include <mutex>
 #include <optional>
 #include <string_view>
+
 #include "common/intrusive_list.h"
 #include "core/file_sys/fs_filesystem.h"
 #include "core/file_sys/vfs/vfs.h"
@@ -141,8 +142,7 @@ private:
     RealVfsDirectory(RealVfsFilesystem& base, const std::string& path,
                      OpenMode perms = OpenMode::Read);
 
-    template <typename T, typename R>
-    std::vector<std::shared_ptr<R>> IterateEntries() const;
+    template<typename T, typename R> std::vector<std::shared_ptr<R>> IterateEntries() const;
 
     RealVfsFilesystem& base;
     std::string path;

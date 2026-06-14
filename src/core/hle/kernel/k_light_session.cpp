@@ -1,19 +1,23 @@
 // SPDX-FileCopyrightText: Copyright 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/kernel/k_light_session.h"
+
 #include "core/hle/kernel/k_client_port.h"
 #include "core/hle/kernel/k_light_client_session.h"
 #include "core/hle/kernel/k_light_server_session.h"
-#include "core/hle/kernel/k_light_session.h"
 #include "core/hle/kernel/k_process.h"
 
 namespace Kernel {
 
 KLightSession::KLightSession(KernelCore& kernel)
-    : KAutoObjectWithSlabHeapAndContainer(kernel), m_server(kernel), m_client(kernel) {}
+    : KAutoObjectWithSlabHeapAndContainer(kernel), m_server(kernel), m_client(kernel)
+{
+}
 KLightSession::~KLightSession() = default;
 
-void KLightSession::Initialize(KClientPort* client_port, uintptr_t name) {
+void KLightSession::Initialize(KClientPort* client_port, uintptr_t name)
+{
     // Increment reference count.
     // Because reference count is one on creation, this will result
     // in a reference count of two. Thus, when both server and client are closed
@@ -46,14 +50,16 @@ void KLightSession::Initialize(KClientPort* client_port, uintptr_t name) {
     m_initialized = true;
 }
 
-void KLightSession::Finalize() {
+void KLightSession::Finalize()
+{
     if (m_port != nullptr) {
         m_port->OnSessionFinalized();
         m_port->Close();
     }
 }
 
-void KLightSession::OnServerClosed() {
+void KLightSession::OnServerClosed()
+{
     if (m_state == State::Normal) {
         m_state = State::ServerClosed;
         m_client.OnServerClosed();
@@ -62,7 +68,8 @@ void KLightSession::OnServerClosed() {
     this->Close();
 }
 
-void KLightSession::OnClientClosed() {
+void KLightSession::OnClientClosed()
+{
     if (m_state == State::Normal) {
         m_state = State::ClientClosed;
         m_server.OnClientClosed();
@@ -71,7 +78,8 @@ void KLightSession::OnClientClosed() {
     this->Close();
 }
 
-void KLightSession::PostDestroy(uintptr_t arg) {
+void KLightSession::PostDestroy(uintptr_t arg)
+{
     // Release the session count resource the owner process holds.
     KProcess* owner = reinterpret_cast<KProcess*>(arg);
     owner->ReleaseResource(Svc::LimitableResource::SessionCountMax, 1);

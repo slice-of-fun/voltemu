@@ -5,7 +5,8 @@
 
 namespace Service::PSC::Time {
 
-void StandardLocalSystemClockCore::Initialize(const SystemClockContext& context, s64 time) {
+void StandardLocalSystemClockCore::Initialize(const SystemClockContext& context, s64 time)
+{
     SteadyClockTimePoint time_point{};
     if (GetCurrentTimePoint(time_point) == ResultSuccess &&
         context.steady_time_point.IdMatches(time_point)) {

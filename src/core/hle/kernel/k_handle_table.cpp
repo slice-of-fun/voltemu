@@ -5,11 +5,13 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include "core/hle/kernel/k_handle_table.h"
+
 #include "core/hle/kernel/k_process.h"
 
 namespace Kernel {
 
-void KHandleTable::Finalize() {
+void KHandleTable::Finalize()
+{
     // Get the table and clear our record of it.
     u16 saved_table_size = 0;
     {
@@ -27,7 +29,8 @@ void KHandleTable::Finalize() {
     }
 }
 
-bool KHandleTable::Remove(Handle handle) {
+bool KHandleTable::Remove(Handle handle)
+{
     // Don't allow removal of a pseudo-handle.
     if (Svc::IsPseudoHandle(handle)) [[unlikely]] {
         return false;
@@ -61,7 +64,8 @@ bool KHandleTable::Remove(Handle handle) {
     return true;
 }
 
-Result KHandleTable::Add(Handle* out_handle, KAutoObject* obj) {
+Result KHandleTable::Add(Handle* out_handle, KAutoObject* obj)
+{
     KScopedDisableDispatch dd{m_kernel};
     KScopedSpinLock lk(m_lock);
 
@@ -85,7 +89,8 @@ Result KHandleTable::Add(Handle* out_handle, KAutoObject* obj) {
 }
 
 KScopedAutoObject<KAutoObject> KHandleTable::GetObjectForIpc(Handle handle,
-                                                             KThread* cur_thread) const {
+                                                             KThread* cur_thread) const
+{
     // Handle pseudo-handles.
     ASSERT(cur_thread != nullptr);
     if (handle == Svc::PseudoHandle::CurrentProcess) {
@@ -100,7 +105,8 @@ KScopedAutoObject<KAutoObject> KHandleTable::GetObjectForIpc(Handle handle,
     return GetObjectForIpcWithoutPseudoHandle(handle);
 }
 
-Result KHandleTable::Reserve(Handle* out_handle) {
+Result KHandleTable::Reserve(Handle* out_handle)
+{
     KScopedDisableDispatch dd{m_kernel};
     KScopedSpinLock lk(m_lock);
 
@@ -111,7 +117,8 @@ Result KHandleTable::Reserve(Handle* out_handle) {
     R_SUCCEED();
 }
 
-void KHandleTable::Unreserve(Handle handle) {
+void KHandleTable::Unreserve(Handle handle)
+{
     KScopedDisableDispatch dd{m_kernel};
     KScopedSpinLock lk(m_lock);
 
@@ -130,7 +137,8 @@ void KHandleTable::Unreserve(Handle handle) {
     }
 }
 
-void KHandleTable::Register(Handle handle, KAutoObject* obj) {
+void KHandleTable::Register(Handle handle, KAutoObject* obj)
+{
     KScopedDisableDispatch dd{m_kernel};
     KScopedSpinLock lk(m_lock);
 

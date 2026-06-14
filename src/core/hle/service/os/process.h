@@ -33,9 +33,7 @@ public:
     void Suspend(bool suspended);
     void ResetSignal();
 
-    bool IsInitialized() const {
-        return m_process != nullptr;
-    }
+    bool IsInitialized() const { return m_process != nullptr; }
 
     bool IsRunning() const;
     bool IsTerminated() const;
@@ -43,9 +41,7 @@ public:
     u64 GetProcessId() const;
     u64 GetProgramId() const;
 
-    Kernel::KProcess* GetHandle() const {
-        return m_process;
-    }
+    Kernel::KProcess* GetHandle() const { return m_process; }
 
 private:
     Core::System& m_system;

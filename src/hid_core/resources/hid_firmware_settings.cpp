@@ -1,23 +1,27 @@
 // SPDX-FileCopyrightText: Copyright 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+#include "hid_core/resources/hid_firmware_settings.h"
+
 #include "core/hle/service/set/system_settings_server.h"
 #include "core/hle/service/sm/sm.h"
-#include "hid_core/resources/hid_firmware_settings.h"
 
 namespace Service::HID {
 
-HidFirmwareSettings::HidFirmwareSettings(Core::System& system) {
+HidFirmwareSettings::HidFirmwareSettings(Core::System& system)
+{
     m_set_sys =
         system.ServiceManager().GetService<Service::Set::ISystemSettingsServer>("set:sys", true);
     LoadSettings(true);
 }
 
-void HidFirmwareSettings::Reload() {
+void HidFirmwareSettings::Reload()
+{
     LoadSettings(true);
 }
 
-void HidFirmwareSettings::LoadSettings(bool reload_config) {
+void HidFirmwareSettings::LoadSettings(bool reload_config)
+{
     if (is_initialized && !reload_config) {
         return;
     }
@@ -52,67 +56,80 @@ void HidFirmwareSettings::LoadSettings(bool reload_config) {
     is_initialized = true;
 }
 
-bool HidFirmwareSettings::IsDebugPadEnabled() {
+bool HidFirmwareSettings::IsDebugPadEnabled()
+{
     LoadSettings(false);
     return is_debug_pad_enabled;
 }
 
-bool HidFirmwareSettings::IsDeviceManaged() {
+bool HidFirmwareSettings::IsDeviceManaged()
+{
     LoadSettings(false);
     return is_device_managed;
 }
 
-bool HidFirmwareSettings::IsEmulateFutureDevice() {
+bool HidFirmwareSettings::IsEmulateFutureDevice()
+{
     LoadSettings(false);
     return is_future_devices_emulated;
 }
 
-bool HidFirmwareSettings::IsTouchI2cManaged() {
+bool HidFirmwareSettings::IsTouchI2cManaged()
+{
     LoadSettings(false);
     return is_touch_i2c_managed;
 }
 
-bool HidFirmwareSettings::IsHandheldForced() {
+bool HidFirmwareSettings::IsHandheldForced()
+{
     LoadSettings(false);
     return is_handheld_forced;
 }
 
-bool HidFirmwareSettings::IsRailEnabled() {
+bool HidFirmwareSettings::IsRailEnabled()
+{
     LoadSettings(false);
     return is_rail_enabled;
 }
 
-bool HidFirmwareSettings::IsHardwareErrorEmulated() {
+bool HidFirmwareSettings::IsHardwareErrorEmulated()
+{
     LoadSettings(false);
     return is_mcu_hardware_error_emulated;
 }
 
-bool HidFirmwareSettings::IsBleDisabled() {
+bool HidFirmwareSettings::IsBleDisabled()
+{
     LoadSettings(false);
     return is_ble_disabled;
 }
 
-bool HidFirmwareSettings::IsDscaleDisabled() {
+bool HidFirmwareSettings::IsDscaleDisabled()
+{
     LoadSettings(false);
     return is_dscale_disabled;
 }
 
-bool HidFirmwareSettings::IsTouchAutoUpdateDisabled() {
+bool HidFirmwareSettings::IsTouchAutoUpdateDisabled()
+{
     LoadSettings(false);
     return is_touch_firmware_auto_update_disabled;
 }
 
-HidFirmwareSettings::FirmwareSetting HidFirmwareSettings::GetFirmwareUpdateFailure() {
+HidFirmwareSettings::FirmwareSetting HidFirmwareSettings::GetFirmwareUpdateFailure()
+{
     LoadSettings(false);
     return is_firmware_update_failure;
 }
 
-HidFirmwareSettings::FeaturesPerId HidFirmwareSettings::FeaturesDisabledPerId() {
+HidFirmwareSettings::FeaturesPerId HidFirmwareSettings::FeaturesDisabledPerId()
+{
     LoadSettings(false);
     return features_per_id_disabled;
 }
 
-Set::PlatformConfig HidFirmwareSettings::GetPlatformConfig() {
+Set::PlatformConfig HidFirmwareSettings::GetPlatformConfig()
+{
     LoadSettings(false);
     return platform_config;
 }

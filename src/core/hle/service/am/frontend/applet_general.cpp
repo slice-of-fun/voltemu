@@ -4,6 +4,8 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/am/frontend/applet_general.h"
+
 #include "common/assert.h"
 #include "common/hex_util.h"
 #include "common/logging.h"
@@ -12,7 +14,6 @@
 #include "core/hle/result.h"
 #include "core/hle/service/am/am.h"
 #include "core/hle/service/am/applet_data_broker.h"
-#include "core/hle/service/am/frontend/applet_general.h"
 #include "core/hle/service/am/service/storage.h"
 #include "core/reporter.h"
 
@@ -20,7 +21,8 @@ namespace Service::AM::Frontend {
 
 constexpr Result ERROR_INVALID_PIN{ErrorModule::PCTL, 221};
 
-static void LogCurrentStorage(std::shared_ptr<Applet> applet, std::string_view prefix) {
+static void LogCurrentStorage(std::shared_ptr<Applet> applet, std::string_view prefix)
+{
     std::shared_ptr<IStorage> storage;
     while (R_SUCCEEDED(applet->caller_applet_broker->GetInData().Pop(&storage))) {
         const auto data = storage->GetData();
@@ -39,11 +41,14 @@ static void LogCurrentStorage(std::shared_ptr<Applet> applet, std::string_view p
 
 Auth::Auth(Core::System& system_, std::shared_ptr<Applet> applet_, LibraryAppletMode applet_mode_,
            Core::Frontend::ParentalControlsApplet& frontend_)
-    : FrontendApplet{system_, applet_, applet_mode_}, frontend{frontend_} {}
+    : FrontendApplet{system_, applet_, applet_mode_}, frontend{frontend_}
+{
+}
 
 Auth::~Auth() = default;
 
-void Auth::Initialize() {
+void Auth::Initialize()
+{
     FrontendApplet::Initialize();
     complete = false;
 
@@ -71,15 +76,18 @@ void Auth::Initialize() {
     arg2 = arg.arg2;
 }
 
-Result Auth::GetStatus() const {
+Result Auth::GetStatus() const
+{
     return successful ? ResultSuccess : ERROR_INVALID_PIN;
 }
 
-void Auth::ExecuteInteractive() {
+void Auth::ExecuteInteractive()
+{
     ASSERT_MSG(false, "Unexpected interactive applet data.");
 }
 
-void Auth::Execute() {
+void Auth::Execute()
+{
     if (complete) {
         return;
     }
@@ -133,7 +141,8 @@ void Auth::Execute() {
     }
 }
 
-void Auth::AuthFinished(bool is_successful) {
+void Auth::AuthFinished(bool is_successful)
+{
     successful = is_successful;
 
     struct Return {
@@ -150,7 +159,8 @@ void Auth::AuthFinished(bool is_successful) {
     Exit();
 }
 
-Result Auth::RequestExit() {
+Result Auth::RequestExit()
+{
     frontend.Close();
     R_SUCCEED();
 }
@@ -158,11 +168,14 @@ Result Auth::RequestExit() {
 PhotoViewer::PhotoViewer(Core::System& system_, std::shared_ptr<Applet> applet_,
                          LibraryAppletMode applet_mode_,
                          const Core::Frontend::PhotoViewerApplet& frontend_)
-    : FrontendApplet{system_, applet_, applet_mode_}, frontend{frontend_} {}
+    : FrontendApplet{system_, applet_, applet_mode_}, frontend{frontend_}
+{
+}
 
 PhotoViewer::~PhotoViewer() = default;
 
-void PhotoViewer::Initialize() {
+void PhotoViewer::Initialize()
+{
     FrontendApplet::Initialize();
     complete = false;
 
@@ -173,15 +186,18 @@ void PhotoViewer::Initialize() {
     mode = static_cast<PhotoViewerAppletMode>(data[0]);
 }
 
-Result PhotoViewer::GetStatus() const {
+Result PhotoViewer::GetStatus() const
+{
     return ResultSuccess;
 }
 
-void PhotoViewer::ExecuteInteractive() {
+void PhotoViewer::ExecuteInteractive()
+{
     ASSERT_MSG(false, "Unexpected interactive applet data.");
 }
 
-void PhotoViewer::Execute() {
+void PhotoViewer::Execute()
+{
     if (complete)
         return;
 
@@ -199,35 +215,42 @@ void PhotoViewer::Execute() {
     }
 }
 
-void PhotoViewer::ViewFinished() {
+void PhotoViewer::ViewFinished()
+{
     PushOutData(std::make_shared<IStorage>(system, std::vector<u8>{}));
     Exit();
 }
 
-Result PhotoViewer::RequestExit() {
+Result PhotoViewer::RequestExit()
+{
     frontend.Close();
     R_SUCCEED();
 }
 
 StubApplet::StubApplet(Core::System& system_, std::shared_ptr<Applet> applet_, AppletId id_,
                        LibraryAppletMode applet_mode_)
-    : FrontendApplet{system_, applet_, applet_mode_}, id{id_} {}
+    : FrontendApplet{system_, applet_, applet_mode_}, id{id_}
+{
+}
 
 StubApplet::~StubApplet() = default;
 
-void StubApplet::Initialize() {
+void StubApplet::Initialize()
+{
     LOG_WARNING(Service_AM, "called (STUBBED)");
     FrontendApplet::Initialize();
 
     LogCurrentStorage(applet.lock(), "Initialize");
 }
 
-Result StubApplet::GetStatus() const {
+Result StubApplet::GetStatus() const
+{
     LOG_WARNING(Service_AM, "called (STUBBED)");
     return ResultSuccess;
 }
 
-void StubApplet::ExecuteInteractive() {
+void StubApplet::ExecuteInteractive()
+{
     LOG_WARNING(Service_AM, "called (STUBBED)");
     LogCurrentStorage(applet.lock(), "ExecuteInteractive");
 
@@ -236,7 +259,8 @@ void StubApplet::ExecuteInteractive() {
     Exit();
 }
 
-void StubApplet::Execute() {
+void StubApplet::Execute()
+{
     LOG_WARNING(Service_AM, "called (STUBBED)");
     LogCurrentStorage(applet.lock(), "Execute");
 
@@ -245,7 +269,8 @@ void StubApplet::Execute() {
     Exit();
 }
 
-Result StubApplet::RequestExit() {
+Result StubApplet::RequestExit()
+{
     // Nothing to do.
     R_SUCCEED();
 }

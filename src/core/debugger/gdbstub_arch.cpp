@@ -4,14 +4,15 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include "common/hex_util.h"
 #include "core/debugger/gdbstub_arch.h"
+
+#include "common/hex_util.h"
 #include "core/hle/kernel/k_thread.h"
 
 namespace Core {
 
-template <typename T>
-static T HexToValue(std::string_view hex) {
+template<typename T> static T HexToValue(std::string_view hex)
+{
     static_assert(std::is_trivially_copyable_v<T>);
     T value{};
     const auto mem{Common::HexStringToVector(hex, false)};
@@ -19,8 +20,8 @@ static T HexToValue(std::string_view hex) {
     return value;
 }
 
-template <typename T>
-static std::string ValueToHex(const T value) {
+template<typename T> static std::string ValueToHex(const T value)
+{
     static_assert(std::is_trivially_copyable_v<T>);
     std::array<u8, sizeof(T)> mem{};
     std::memcpy(mem.data(), &value, sizeof(T));
@@ -29,7 +30,8 @@ static std::string ValueToHex(const T value) {
 
 // For sample XML files see the GDB source /gdb/features
 // This XML defines what the registers are for this specific ARM device
-std::string_view GDBStubA64::GetTargetXML() const {
+std::string_view GDBStubA64::GetTargetXML() const
+{
     return R"(<?xml version="1.0"?>
 <!DOCTYPE target SYSTEM "gdb-target.dtd">
 <target version="1.0">
@@ -167,7 +169,8 @@ std::string_view GDBStubA64::GetTargetXML() const {
 </target>)";
 }
 
-std::string GDBStubA64::RegRead(const Kernel::KThread* thread, size_t id) const {
+std::string GDBStubA64::RegRead(const Kernel::KThread* thread, size_t id) const
+{
     if (!thread) {
         return "";
     }
@@ -199,7 +202,8 @@ std::string GDBStubA64::RegRead(const Kernel::KThread* thread, size_t id) const 
     }
 }
 
-void GDBStubA64::RegWrite(Kernel::KThread* thread, size_t id, std::string_view value) const {
+void GDBStubA64::RegWrite(Kernel::KThread* thread, size_t id, std::string_view value) const
+{
     if (!thread) {
         return;
     }
@@ -227,7 +231,8 @@ void GDBStubA64::RegWrite(Kernel::KThread* thread, size_t id, std::string_view v
     }
 }
 
-std::string GDBStubA64::ReadRegisters(const Kernel::KThread* thread) const {
+std::string GDBStubA64::ReadRegisters(const Kernel::KThread* thread) const
+{
     std::string output;
 
     for (size_t reg = 0; reg <= FPCR_REGISTER; reg++) {
@@ -237,7 +242,8 @@ std::string GDBStubA64::ReadRegisters(const Kernel::KThread* thread) const {
     return output;
 }
 
-void GDBStubA64::WriteRegisters(Kernel::KThread* thread, std::string_view register_data) const {
+void GDBStubA64::WriteRegisters(Kernel::KThread* thread, std::string_view register_data) const
+{
     for (size_t i = 0, reg = 0; reg <= FPCR_REGISTER; reg++) {
         if (reg <= SP_REGISTER || reg == PC_REGISTER) {
             RegWrite(thread, reg, register_data.substr(i, 16));
@@ -252,18 +258,21 @@ void GDBStubA64::WriteRegisters(Kernel::KThread* thread, std::string_view regist
     }
 }
 
-std::string GDBStubA64::ThreadStatus(const Kernel::KThread* thread, u8 signal) const {
+std::string GDBStubA64::ThreadStatus(const Kernel::KThread* thread, u8 signal) const
+{
     return fmt::format("T{:02x}{:02x}:{};{:02x}:{};{:02x}:{};thread:{:x};", signal, PC_REGISTER,
                        RegRead(thread, PC_REGISTER), SP_REGISTER, RegRead(thread, SP_REGISTER),
                        LR_REGISTER, RegRead(thread, LR_REGISTER), thread->GetThreadId());
 }
 
-u32 GDBStubA64::BreakpointInstruction() const {
+u32 GDBStubA64::BreakpointInstruction() const
+{
     // A64: brk #0
     return 0xd4200000;
 }
 
-std::string_view GDBStubA32::GetTargetXML() const {
+std::string_view GDBStubA32::GetTargetXML() const
+{
     return R"(<?xml version="1.0"?>
 <!DOCTYPE target SYSTEM "gdb-target.dtd">
 <target version="1.0">
@@ -372,7 +381,8 @@ std::string_view GDBStubA32::GetTargetXML() const {
 </target>)";
 }
 
-std::string GDBStubA32::RegRead(const Kernel::KThread* thread, size_t id) const {
+std::string GDBStubA32::RegRead(const Kernel::KThread* thread, size_t id) const
+{
     if (!thread) {
         return "";
     }
@@ -396,7 +406,8 @@ std::string GDBStubA32::RegRead(const Kernel::KThread* thread, size_t id) const 
     }
 }
 
-void GDBStubA32::RegWrite(Kernel::KThread* thread, size_t id, std::string_view value) const {
+void GDBStubA32::RegWrite(Kernel::KThread* thread, size_t id, std::string_view value) const
+{
     if (!thread) {
         return;
     }
@@ -418,7 +429,8 @@ void GDBStubA32::RegWrite(Kernel::KThread* thread, size_t id, std::string_view v
     }
 }
 
-std::string GDBStubA32::ReadRegisters(const Kernel::KThread* thread) const {
+std::string GDBStubA32::ReadRegisters(const Kernel::KThread* thread) const
+{
     std::string output;
 
     for (size_t reg = 0; reg <= FPSCR_REGISTER; reg++) {
@@ -436,7 +448,8 @@ std::string GDBStubA32::ReadRegisters(const Kernel::KThread* thread) const {
     return output;
 }
 
-void GDBStubA32::WriteRegisters(Kernel::KThread* thread, std::string_view register_data) const {
+void GDBStubA32::WriteRegisters(Kernel::KThread* thread, std::string_view register_data) const
+{
     for (size_t i = 0, reg = 0; reg <= FPSCR_REGISTER; reg++) {
         const bool gpr{reg <= PC_REGISTER};
         const bool dfpr{reg >= D0_REGISTER && reg < Q0_REGISTER};
@@ -461,13 +474,15 @@ void GDBStubA32::WriteRegisters(Kernel::KThread* thread, std::string_view regist
     }
 }
 
-std::string GDBStubA32::ThreadStatus(const Kernel::KThread* thread, u8 signal) const {
+std::string GDBStubA32::ThreadStatus(const Kernel::KThread* thread, u8 signal) const
+{
     return fmt::format("T{:02x}{:02x}:{};{:02x}:{};{:02x}:{};thread:{:x};", signal, PC_REGISTER,
                        RegRead(thread, PC_REGISTER), SP_REGISTER, RegRead(thread, SP_REGISTER),
                        LR_REGISTER, RegRead(thread, LR_REGISTER), thread->GetThreadId());
 }
 
-u32 GDBStubA32::BreakpointInstruction() const {
+u32 GDBStubA32::BreakpointInstruction() const
+{
     // A32: trap
     // T32: trap + b #4
     return 0xe7ffdefe;

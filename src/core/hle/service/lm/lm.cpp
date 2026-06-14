@@ -4,15 +4,17 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/lm/lm.h"
+
+#include <ankerl/unordered_dense.h>
+
+#include <boost/container_hash/hash.hpp>
+#include <optional>
 #include <string>
 
-#include <optional>
-#include <ankerl/unordered_dense.h>
-#include <boost/container_hash/hash.hpp>
 #include "common/logging.h"
 #include "core/core.h"
 #include "core/hle/service/ipc_helpers.h"
-#include "core/hle/service/lm/lm.h"
 #include "core/hle/service/server_manager.h"
 #include "core/hle/service/service.h"
 
@@ -37,9 +39,9 @@ struct LogPacketHeaderEntry {
 } // namespace Service::LM
 
 namespace std {
-template <>
-struct hash<Service::LM::LogPacketHeaderEntry> {
-    std::size_t operator()(const Service::LM::LogPacketHeaderEntry& k) const noexcept {
+template<> struct hash<Service::LM::LogPacketHeaderEntry> {
+    std::size_t operator()(const Service::LM::LogPacketHeaderEntry& k) const noexcept
+    {
         std::size_t seed{};
         boost::hash_combine(seed, k.pid);
         boost::hash_combine(seed, k.tid);
@@ -52,7 +54,8 @@ struct hash<Service::LM::LogPacketHeaderEntry> {
 
 namespace Service::LM {
 namespace {
-std::string_view NameOf(LogSeverity severity) {
+std::string_view NameOf(LogSeverity severity)
+{
     switch (severity) {
     case LogSeverity::Trace:
         return "TRACE";
@@ -87,18 +90,20 @@ DECLARE_ENUM_FLAG_OPERATORS(LogPacketFlags);
 
 class ILogger final : public ServiceFramework<ILogger> {
 public:
-    explicit ILogger(Core::System& system_) : ServiceFramework{system_, "ILogger"} {
+    explicit ILogger(Core::System& system_) : ServiceFramework{system_, "ILogger"}
+    {
         static const FunctionInfo functions[] = {
             {0, &ILogger::Log, "Log"},
             {1, &ILogger::SetDestination, "SetDestination"},
-            {2, nullptr, "TransmitHashedLog"}, //20.0.0+
-            {3, nullptr, "DevNotify"}, //20.0.0+
+            {2, nullptr, "TransmitHashedLog"}, // 20.0.0+
+            {3, nullptr, "DevNotify"},         // 20.0.0+
         };
         RegisterHandlers(functions);
     }
 
 private:
-    void Log(HLERequestContext& ctx) {
+    void Log(HLERequestContext& ctx)
+    {
         std::size_t offset{};
         const auto data = ctx.ReadBuffer();
 
@@ -153,7 +158,8 @@ private:
         }
     }
 
-    void SetDestination(HLERequestContext& ctx) {
+    void SetDestination(HLERequestContext& ctx)
+    {
         IPC::RequestParser rp{ctx};
         const auto log_destination = rp.PopEnum<LogDestination>();
 
@@ -164,7 +170,8 @@ private:
         rb.Push(ResultSuccess);
     }
 
-    u64 ReadLeb128(std::span<const u8> data, std::size_t& offset) {
+    u64 ReadLeb128(std::span<const u8> data, std::size_t& offset)
+    {
         u64 result{};
         u32 shift{};
 
@@ -181,7 +188,8 @@ private:
     }
 
     std::optional<std::string> ReadString(std::span<const u8> data, std::size_t& offset,
-                                          std::size_t length) {
+                                          std::size_t length)
+    {
         if (length == 0) {
             return std::nullopt;
         }
@@ -193,7 +201,8 @@ private:
         return output;
     }
 
-    u32_le ReadAsU32(std::span<const u8> data, std::size_t& offset, std::size_t length) {
+    u32_le ReadAsU32(std::span<const u8> data, std::size_t& offset, std::size_t length)
+    {
         ASSERT(length == sizeof(u32));
         u32_le output{};
         std::memcpy(&output, data.data() + offset, sizeof(u32));
@@ -201,7 +210,8 @@ private:
         return output;
     }
 
-    u64_le ReadAsU64(std::span<const u8> data, std::size_t& offset, std::size_t length) {
+    u64_le ReadAsU64(std::span<const u8> data, std::size_t& offset, std::size_t length)
+    {
         ASSERT(length == sizeof(u64));
         u64_le output{};
         std::memcpy(&output, data.data() + offset, sizeof(u64));
@@ -209,7 +219,8 @@ private:
         return output;
     }
 
-    void ParseLog(const LogPacketHeaderEntry entry, std::span<const u8> log_data) {
+    void ParseLog(const LogPacketHeaderEntry entry, std::span<const u8> log_data)
+    {
         // Possible entries
         std::optional<std::string> text_log;
         std::optional<u32> line_number;
@@ -286,7 +297,8 @@ private:
                   DestinationToString(destination), output_log);
     }
 
-    static std::string DestinationToString(LogDestination destination) {
+    static std::string DestinationToString(LogDestination destination)
+    {
         if (True(destination & LogDestination::All)) {
             return "TargetManager | Uart | UartSleep";
         }
@@ -337,7 +349,8 @@ private:
 
 class LM final : public ServiceFramework<LM> {
 public:
-    explicit LM(Core::System& system_) : ServiceFramework{system_, "lm"} {
+    explicit LM(Core::System& system_) : ServiceFramework{system_, "lm"}
+    {
         // clang-format off
         static const FunctionInfo functions[] = {
             {0, &LM::OpenLogger, "OpenLogger"},
@@ -348,7 +361,8 @@ public:
     }
 
 private:
-    void OpenLogger(HLERequestContext& ctx) {
+    void OpenLogger(HLERequestContext& ctx)
+    {
         LOG_DEBUG(Service_LM, "called");
 
         IPC::ResponseBuilder rb{ctx, 2, 0, 1};
@@ -357,7 +371,8 @@ private:
     }
 };
 
-void LoopProcess(Core::System& system) {
+void LoopProcess(Core::System& system)
+{
     auto server_manager = std::make_unique<ServerManager>(system);
 
     server_manager->RegisterNamedService("lm", std::make_shared<LM>(system));

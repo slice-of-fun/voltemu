@@ -6,7 +6,8 @@
 namespace Service::OMM {
 
 IPolicyManagerSystem::IPolicyManagerSystem(Core::System& system_)
-    : ServiceFramework{system_, "idle:sys"} {
+    : ServiceFramework{system_, "idle:sys"}
+{
     // clang-format off
     static const FunctionInfo functions[] = {
         {0, nullptr, "GetAutoPowerDownEvent"},

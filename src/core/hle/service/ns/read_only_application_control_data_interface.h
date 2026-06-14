@@ -7,9 +7,9 @@
 #pragma once
 
 #include "core/hle/service/cmif_types.h"
-#include "core/hle/service/service.h"
 #include "core/hle/service/ns/language.h"
 #include "core/hle/service/ns/ns_types.h"
+#include "core/hle/service/service.h"
 
 namespace Service::NS {
 
@@ -27,23 +27,16 @@ public:
                                          u32 supported_languages);
     Result ConvertApplicationLanguageToLanguageCode(Out<u64> out_language_code,
                                                     ApplicationLanguage application_language);
-    Result GetApplicationControlData2(
-        OutBuffer<BufferAttr_HipcMapAlias> out_buffer,
-        Out<u64> out_total_size,
-        ApplicationControlSource application_control_source,
-        u8 flag1,
-        u8 flag2,
-        u64 application_id);
+    Result GetApplicationControlData2(OutBuffer<BufferAttr_HipcMapAlias> out_buffer,
+                                      Out<u64> out_total_size,
+                                      ApplicationControlSource application_control_source, u8 flag1,
+                                      u8 flag2, u64 application_id);
     void ListApplicationTitle(HLERequestContext& ctx);
-    Result GetApplicationControlData3(
-        OutBuffer<BufferAttr_HipcMapAlias> out_buffer,
-        Out<u32> out_flags_a,
-        Out<u32> out_flags_b,
-        Out<u32> out_actual_size,
-        ApplicationControlSource application_control_source,
-        u8 flag1,
-        u8 flag2,
-        u64 application_id);
+    Result GetApplicationControlData3(OutBuffer<BufferAttr_HipcMapAlias> out_buffer,
+                                      Out<u32> out_flags_a, Out<u32> out_flags_b,
+                                      Out<u32> out_actual_size,
+                                      ApplicationControlSource application_control_source, u8 flag1,
+                                      u8 flag2, u64 application_id);
 };
 
 } // namespace Service::NS

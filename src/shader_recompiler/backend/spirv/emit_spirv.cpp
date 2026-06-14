@@ -4,6 +4,8 @@
 // SPDX-FileCopyrightText: Copyright 2021 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "shader_recompiler/backend/spirv/emit_spirv.h"
+
 #include <span>
 #include <tuple>
 #include <type_traits>
@@ -11,7 +13,6 @@
 #include <vector>
 
 #include "common/settings.h"
-#include "shader_recompiler/backend/spirv/emit_spirv.h"
 #include "shader_recompiler/backend/spirv/emit_spirv_instructions.h"
 #include "shader_recompiler/backend/spirv/spirv_emit_context.h"
 #include "shader_recompiler/frontend/ir/basic_block.h"
@@ -19,17 +20,15 @@
 
 namespace Shader::Backend::SPIRV {
 namespace {
-template <class Func>
-struct FuncTraits {};
+template<class Func> struct FuncTraits {
+};
 
-template <class ReturnType_, class... Args>
-struct FuncTraits<ReturnType_ (*)(Args...)> {
+template<class ReturnType_, class... Args> struct FuncTraits<ReturnType_ (*)(Args...)> {
     using ReturnType = ReturnType_;
 
     static constexpr size_t NUM_ARGS = sizeof...(Args);
 
-    template <size_t I>
-    using ArgType = std::tuple_element_t<I, std::tuple<Args...>>;
+    template<size_t I> using ArgType = std::tuple_element_t<I, std::tuple<Args...>>;
 };
 
 #ifdef _MSC_VER
@@ -37,8 +36,9 @@ struct FuncTraits<ReturnType_ (*)(Args...)> {
 #pragma warning(disable : 4702) // Ignore unreachable code warning
 #endif
 
-template <auto func, typename... Args>
-void SetDefinition(EmitContext& ctx, IR::Inst* inst, Args... args) {
+template<auto func, typename... Args>
+void SetDefinition(EmitContext& ctx, IR::Inst* inst, Args... args)
+{
     inst->SetDefinition<Id>(func(ctx, std::forward<Args>(args)...));
 }
 
@@ -46,8 +46,8 @@ void SetDefinition(EmitContext& ctx, IR::Inst* inst, Args... args) {
 #pragma warning(pop)
 #endif
 
-template <typename ArgType>
-ArgType Arg(EmitContext& ctx, const IR::Value& arg) {
+template<typename ArgType> ArgType Arg(EmitContext& ctx, const IR::Value& arg)
+{
     if constexpr (std::is_same_v<ArgType, Id>) {
         return ctx.Def(arg);
     } else if constexpr (std::is_same_v<ArgType, const IR::Value&>) {
@@ -63,8 +63,9 @@ ArgType Arg(EmitContext& ctx, const IR::Value& arg) {
     }
 }
 
-template <auto func, bool is_first_arg_inst, size_t... I>
-void Invoke(EmitContext& ctx, IR::Inst* inst, std::index_sequence<I...>) {
+template<auto func, bool is_first_arg_inst, size_t... I>
+void Invoke(EmitContext& ctx, IR::Inst* inst, std::index_sequence<I...>)
+{
     using Traits = FuncTraits<decltype(func)>;
     if constexpr (std::is_same_v<typename Traits::ReturnType, Id>) {
         if constexpr (is_first_arg_inst) {
@@ -84,8 +85,8 @@ void Invoke(EmitContext& ctx, IR::Inst* inst, std::index_sequence<I...>) {
     }
 }
 
-template <auto func>
-void Invoke(EmitContext& ctx, IR::Inst* inst) {
+template<auto func> void Invoke(EmitContext& ctx, IR::Inst* inst)
+{
     using Traits = FuncTraits<decltype(func)>;
     static_assert(Traits::NUM_ARGS >= 1, "Insufficient arguments");
     if constexpr (Traits::NUM_ARGS == 1) {
@@ -98,7 +99,8 @@ void Invoke(EmitContext& ctx, IR::Inst* inst) {
     }
 }
 
-void EmitInst(EmitContext& ctx, IR::Inst* inst) {
+void EmitInst(EmitContext& ctx, IR::Inst* inst)
+{
     switch (inst->GetOpcode()) {
 #define OPCODE(name, result_type, ...)                                                             \
     case IR::Opcode::name:                                                                         \
@@ -109,7 +111,8 @@ void EmitInst(EmitContext& ctx, IR::Inst* inst) {
     throw LogicError("Invalid opcode {}", inst->GetOpcode());
 }
 
-Id TypeId(const EmitContext& ctx, IR::Type type) {
+Id TypeId(const EmitContext& ctx, IR::Type type)
+{
     switch (type) {
     case IR::Type::U1:
         return ctx.U1;
@@ -120,7 +123,8 @@ Id TypeId(const EmitContext& ctx, IR::Type type) {
     }
 }
 
-void Traverse(EmitContext& ctx, IR::Program& program) {
+void Traverse(EmitContext& ctx, IR::Program& program)
+{
     IR::Block* current_block{};
     for (const IR::AbstractSyntaxNode& node : program.syntax_list) {
         switch (node.type) {
@@ -198,7 +202,8 @@ void Traverse(EmitContext& ctx, IR::Program& program) {
     }
 }
 
-Id DefineMain(EmitContext& ctx, IR::Program& program) {
+Id DefineMain(EmitContext& ctx, IR::Program& program)
+{
     const Id void_function{ctx.TypeFunction(ctx.void_id)};
     const Id main{ctx.OpFunction(ctx.void_id, spv::FunctionControlMask::MaskNone, void_function)};
     for (IR::Block* const block : program.blocks) {
@@ -209,7 +214,8 @@ Id DefineMain(EmitContext& ctx, IR::Program& program) {
     return main;
 }
 
-spv::ExecutionMode ExecutionMode(TessPrimitive primitive) {
+spv::ExecutionMode ExecutionMode(TessPrimitive primitive)
+{
     switch (primitive) {
     case TessPrimitive::Isolines:
         return spv::ExecutionMode::Isolines;
@@ -221,7 +227,8 @@ spv::ExecutionMode ExecutionMode(TessPrimitive primitive) {
     throw InvalidArgument("Tessellation primitive {}", primitive);
 }
 
-spv::ExecutionMode ExecutionMode(TessSpacing spacing) {
+spv::ExecutionMode ExecutionMode(TessSpacing spacing)
+{
     switch (spacing) {
     case TessSpacing::Equal:
         return spv::ExecutionMode::SpacingEqual;
@@ -233,7 +240,8 @@ spv::ExecutionMode ExecutionMode(TessSpacing spacing) {
     throw InvalidArgument("Tessellation spacing {}", spacing);
 }
 
-void DefineEntryPoint(const IR::Program& program, EmitContext& ctx, Id main) {
+void DefineEntryPoint(const IR::Program& program, EmitContext& ctx, Id main)
+{
     const std::span interfaces(ctx.interfaces.data(), ctx.interfaces.size());
     spv::ExecutionModel execution_model{};
     switch (program.stage) {
@@ -330,7 +338,8 @@ void DefineEntryPoint(const IR::Program& program, EmitContext& ctx, Id main) {
 }
 
 void SetupDenormControl(const Profile& profile, const IR::Program& program, EmitContext& ctx,
-                        Id main_func) {
+                        Id main_func)
+{
     const Info& info{program.info};
     if (info.uses_fp32_denorms_flush && info.uses_fp32_denorms_preserve) {
         LOG_DEBUG(Shader_SPIRV, "Fp32 denorm flush and preserve on the same shader");
@@ -373,7 +382,8 @@ void SetupDenormControl(const Profile& profile, const IR::Program& program, Emit
 }
 
 void SetupSignedNanCapabilities(const Profile& profile, const IR::Program& program,
-                                EmitContext& ctx, Id main_func) {
+                                EmitContext& ctx, Id main_func)
+{
     if (profile.has_broken_fp16_float_controls && program.info.uses_fp16) {
         return;
     }
@@ -391,7 +401,8 @@ void SetupSignedNanCapabilities(const Profile& profile, const IR::Program& progr
     }
 }
 
-void SetupTransformFeedbackCapabilities(EmitContext& ctx, Id main_func) {
+void SetupTransformFeedbackCapabilities(EmitContext& ctx, Id main_func)
+{
     if (ctx.runtime_info.xfb_count == 0) {
         return;
     }
@@ -399,7 +410,8 @@ void SetupTransformFeedbackCapabilities(EmitContext& ctx, Id main_func) {
     ctx.AddExecutionMode(main_func, spv::ExecutionMode::Xfb);
 }
 
-void SetupCapabilities(const Profile& profile, const Info& info, EmitContext& ctx) {
+void SetupCapabilities(const Profile& profile, const Info& info, EmitContext& ctx)
+{
     if (info.uses_sampled_1d) {
         ctx.AddCapability(spv::Capability::Sampled1D);
     }
@@ -471,35 +483,38 @@ void SetupCapabilities(const Profile& profile, const Info& info, EmitContext& ct
     }
 }
 
-void PatchPhiNodes(IR::Program& program, EmitContext& ctx) {
-            // Flatten all leading PHIs from each block into a vector
-            std::vector<IR::Inst*> phi_instructions;
-            for (IR::Block* block : program.blocks) {
-                for (auto it = block->begin(); it != block->end(); ++it) {
-                    if (it->GetOpcode() != IR::Opcode::Phi)
-                        break;
-                    phi_instructions.push_back(&*it);
-                }
-            }
-
-            if (phi_instructions.empty()) {
-                return; // nothing to patch
-            }
-
-            // Start "before" first PHI; advance on phi_arg == 0
-            size_t phi_index = static_cast<size_t>(-1);
-
-            ctx.PatchDeferredPhi([&](size_t phi_arg, Id parent) -> std::pair<Id, Id> {
-                if (phi_arg == 0) {
-                    ++phi_index;
-                }
-                IR::Inst* phi = phi_instructions[phi_index];
-                return { ctx.Def(phi->Arg(phi_arg)), parent };
-            });
+void PatchPhiNodes(IR::Program& program, EmitContext& ctx)
+{
+    // Flatten all leading PHIs from each block into a vector
+    std::vector<IR::Inst*> phi_instructions;
+    for (IR::Block* block : program.blocks) {
+        for (auto it = block->begin(); it != block->end(); ++it) {
+            if (it->GetOpcode() != IR::Opcode::Phi)
+                break;
+            phi_instructions.push_back(&*it);
         }
+    }
+
+    if (phi_instructions.empty()) {
+        return; // nothing to patch
+    }
+
+    // Start "before" first PHI; advance on phi_arg == 0
+    size_t phi_index = static_cast<size_t>(-1);
+
+    ctx.PatchDeferredPhi([&](size_t phi_arg, Id parent) -> std::pair<Id, Id> {
+        if (phi_arg == 0) {
+            ++phi_index;
+        }
+        IR::Inst* phi = phi_instructions[phi_index];
+        return {ctx.Def(phi->Arg(phi_arg)), parent};
+    });
+}
 } // Anonymous namespace
 
-std::vector<u32> EmitSPIRV(const Profile& profile, const RuntimeInfo& runtime_info, IR::Program& program, Bindings& bindings) {
+std::vector<u32> EmitSPIRV(const Profile& profile, const RuntimeInfo& runtime_info,
+                           IR::Program& program, Bindings& bindings)
+{
     EmitContext ctx{profile, runtime_info, program, bindings};
     const Id main{DefineMain(ctx, program)};
     DefineEntryPoint(program, ctx, main);
@@ -514,7 +529,8 @@ std::vector<u32> EmitSPIRV(const Profile& profile, const RuntimeInfo& runtime_in
     return ctx.Assemble();
 }
 
-Id EmitPhi(EmitContext& ctx, IR::Inst* inst) {
+Id EmitPhi(EmitContext& ctx, IR::Inst* inst)
+{
     const size_t num_args{inst->NumArgs()};
     boost::container::small_vector<Id, 32> blocks;
     blocks.reserve(num_args);
@@ -526,9 +542,12 @@ Id EmitPhi(EmitContext& ctx, IR::Inst* inst) {
     return ctx.DeferredOpPhi(result_type, std::span(blocks.data(), blocks.size()));
 }
 
-void EmitVoid(EmitContext&) {}
+void EmitVoid(EmitContext&)
+{
+}
 
-Id EmitIdentity(EmitContext& ctx, const IR::Value& value) {
+Id EmitIdentity(EmitContext& ctx, const IR::Value& value)
+{
     const Id id{ctx.Def(value)};
     if (!Sirit::ValidId(id)) {
         throw NotImplementedException("Forward identity declaration");
@@ -536,7 +555,8 @@ Id EmitIdentity(EmitContext& ctx, const IR::Value& value) {
     return id;
 }
 
-Id EmitConditionRef(EmitContext& ctx, const IR::Value& value) {
+Id EmitConditionRef(EmitContext& ctx, const IR::Value& value)
+{
     const Id id{ctx.Def(value)};
     if (!Sirit::ValidId(id)) {
         throw NotImplementedException("Forward identity declaration");
@@ -544,33 +564,42 @@ Id EmitConditionRef(EmitContext& ctx, const IR::Value& value) {
     return id;
 }
 
-void EmitReference(EmitContext&) {}
+void EmitReference(EmitContext&)
+{
+}
 
-void EmitPhiMove(EmitContext&) {
+void EmitPhiMove(EmitContext&)
+{
     throw LogicError("Unreachable instruction");
 }
 
-void EmitGetZeroFromOp(EmitContext&) {
+void EmitGetZeroFromOp(EmitContext&)
+{
     throw LogicError("Unreachable instruction");
 }
 
-void EmitGetSignFromOp(EmitContext&) {
+void EmitGetSignFromOp(EmitContext&)
+{
     throw LogicError("Unreachable instruction");
 }
 
-void EmitGetCarryFromOp(EmitContext&) {
+void EmitGetCarryFromOp(EmitContext&)
+{
     throw LogicError("Unreachable instruction");
 }
 
-void EmitGetOverflowFromOp(EmitContext&) {
+void EmitGetOverflowFromOp(EmitContext&)
+{
     throw LogicError("Unreachable instruction");
 }
 
-void EmitGetSparseFromOp(EmitContext&) {
+void EmitGetSparseFromOp(EmitContext&)
+{
     throw LogicError("Unreachable instruction");
 }
 
-void EmitGetInBoundsFromOp(EmitContext&) {
+void EmitGetInBoundsFromOp(EmitContext&)
+{
     throw LogicError("Unreachable instruction");
 }
 

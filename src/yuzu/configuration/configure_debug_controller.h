@@ -3,8 +3,8 @@
 
 #pragma once
 
-#include <memory>
 #include <QDialog>
+#include <memory>
 
 class QPushButton;
 

@@ -19,7 +19,8 @@ enum class LocalScope : u64 {
 };
 } // Anonymous namespace
 
-void TranslatorVisitor::MEMBAR(u64 inst) {
+void TranslatorVisitor::MEMBAR(u64 inst)
+{
     union {
         u64 raw;
         BitField<8, 2, LocalScope> scope;
@@ -32,11 +33,13 @@ void TranslatorVisitor::MEMBAR(u64 inst) {
     }
 }
 
-void TranslatorVisitor::DEPBAR(u64) {
+void TranslatorVisitor::DEPBAR(u64)
+{
     // DEPBAR is a no-op
 }
 
-void TranslatorVisitor::BAR(u64 insn) {
+void TranslatorVisitor::BAR(u64 insn)
+{
     enum class Mode {
         RedPopc,
         Scan,

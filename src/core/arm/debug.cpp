@@ -4,8 +4,9 @@
 // SPDX-FileCopyrightText: Copyright 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include "common/demangle.h"
 #include "core/arm/debug.h"
+
+#include "common/demangle.h"
 #include "core/arm/symbols.h"
 #include "core/hle/kernel/k_process.h"
 #include "core/hle/kernel/k_thread.h"
@@ -16,7 +17,8 @@ namespace Core {
 namespace {
 
 std::optional<std::string> GetNameFromThreadType64(Core::Memory::Memory& memory,
-                                                   const Kernel::KThread& thread) {
+                                                   const Kernel::KThread& thread)
+{
     // Read thread type from TLS
     const VAddr tls_thread_type{memory.Read64(thread.GetTlsAddress() + 0x1f8)};
     const VAddr argument_thread_type{thread.GetArgument()};
@@ -47,7 +49,8 @@ std::optional<std::string> GetNameFromThreadType64(Core::Memory::Memory& memory,
 }
 
 std::optional<std::string> GetNameFromThreadType32(Core::Memory::Memory& memory,
-                                                   const Kernel::KThread& thread) {
+                                                   const Kernel::KThread& thread)
+{
     // Read thread type from TLS
     const VAddr tls_thread_type{memory.Read32(thread.GetTlsAddress() + 0x1fc)};
     const VAddr argument_thread_type{thread.GetArgument()};
@@ -82,7 +85,8 @@ constexpr std::array<u64, 2> SegmentBases{
     0x7100000000ULL,
 };
 
-void SymbolicateBacktrace(Kernel::KProcess* process, std::vector<BacktraceEntry>& out) {
+void SymbolicateBacktrace(Kernel::KProcess* process, std::vector<BacktraceEntry>& out)
+{
     auto modules = FindModules(process);
 
     const bool is_64 = process->Is64Bit();
@@ -122,7 +126,8 @@ void SymbolicateBacktrace(Kernel::KProcess* process, std::vector<BacktraceEntry>
 }
 
 std::vector<BacktraceEntry> GetAArch64Backtrace(Kernel::KProcess* process,
-                                                const Kernel::Svc::ThreadContext& ctx) {
+                                                const Kernel::Svc::ThreadContext& ctx)
+{
     std::vector<BacktraceEntry> out;
     auto& memory = process->GetMemory();
     auto pc = ctx.pc, lr = ctx.lr, fp = ctx.fp;
@@ -148,7 +153,8 @@ std::vector<BacktraceEntry> GetAArch64Backtrace(Kernel::KProcess* process,
 }
 
 std::vector<BacktraceEntry> GetAArch32Backtrace(Kernel::KProcess* process,
-                                                const Kernel::Svc::ThreadContext& ctx) {
+                                                const Kernel::Svc::ThreadContext& ctx)
+{
     std::vector<BacktraceEntry> out;
     auto& memory = process->GetMemory();
     auto pc = ctx.pc, lr = ctx.lr, fp = ctx.fp;
@@ -175,7 +181,8 @@ std::vector<BacktraceEntry> GetAArch32Backtrace(Kernel::KProcess* process,
 
 } // namespace
 
-std::optional<std::string> GetThreadName(const Kernel::KThread* thread) {
+std::optional<std::string> GetThreadName(const Kernel::KThread* thread)
+{
     auto* process = thread->GetOwnerProcess();
     if (process->Is64Bit()) {
         return GetNameFromThreadType64(process->GetMemory(), *thread);
@@ -184,7 +191,8 @@ std::optional<std::string> GetThreadName(const Kernel::KThread* thread) {
     }
 }
 
-std::string_view GetThreadWaitReason(const Kernel::KThread* thread) {
+std::string_view GetThreadWaitReason(const Kernel::KThread* thread)
+{
     switch (thread->GetWaitReasonForDebugging()) {
     case Kernel::ThreadWaitReasonForDebugging::Sleep:
         return "Sleep";
@@ -203,7 +211,8 @@ std::string_view GetThreadWaitReason(const Kernel::KThread* thread) {
     }
 }
 
-std::string GetThreadState(const Kernel::KThread* thread) {
+std::string GetThreadState(const Kernel::KThread* thread)
+{
     switch (thread->GetState()) {
     case Kernel::ThreadState::Initialized:
         return "Initialized";
@@ -218,8 +227,8 @@ std::string GetThreadState(const Kernel::KThread* thread) {
     }
 }
 
-Kernel::KProcessAddress GetModuleEnd(const Kernel::KProcess* process,
-                                     Kernel::KProcessAddress base) {
+Kernel::KProcessAddress GetModuleEnd(const Kernel::KProcess* process, Kernel::KProcessAddress base)
+{
     Kernel::KMemoryInfo mem_info;
     Kernel::Svc::MemoryInfo svc_mem_info;
     Kernel::Svc::PageInfo page_info;
@@ -251,7 +260,8 @@ Kernel::KProcessAddress GetModuleEnd(const Kernel::KProcess* process,
     return cur_addr - 1;
 }
 
-Loader::AppLoader::Modules FindModules(Kernel::KProcess* process) {
+Loader::AppLoader::Modules FindModules(Kernel::KProcess* process)
+{
     Loader::AppLoader::Modules modules;
 
     auto& page_table = process->GetPageTable();
@@ -315,7 +325,8 @@ Loader::AppLoader::Modules FindModules(Kernel::KProcess* process) {
     return modules;
 }
 
-Kernel::KProcessAddress FindMainModuleEntrypoint(Kernel::KProcess* process) {
+Kernel::KProcessAddress FindMainModuleEntrypoint(Kernel::KProcess* process)
+{
     // Do we have any loaded executable sections?
     auto modules = FindModules(process);
 
@@ -331,7 +342,8 @@ Kernel::KProcessAddress FindMainModuleEntrypoint(Kernel::KProcess* process) {
     return GetInteger(process->GetPageTable().GetCodeRegionStart());
 }
 
-void InvalidateInstructionCacheRange(const Kernel::KProcess* process, u64 address, u64 size) {
+void InvalidateInstructionCacheRange(const Kernel::KProcess* process, u64 address, u64 size)
+{
     for (size_t i = 0; i < Core::Hardware::NUM_CPU_CORES; i++) {
         auto* interface = process->GetArmInterface(i);
         if (interface) {
@@ -341,7 +353,8 @@ void InvalidateInstructionCacheRange(const Kernel::KProcess* process, u64 addres
 }
 
 std::vector<BacktraceEntry> GetBacktraceFromContext(Kernel::KProcess* process,
-                                                    const Kernel::Svc::ThreadContext& ctx) {
+                                                    const Kernel::Svc::ThreadContext& ctx)
+{
     if (process->Is64Bit()) {
         return GetAArch64Backtrace(process, ctx);
     } else {
@@ -349,7 +362,8 @@ std::vector<BacktraceEntry> GetBacktraceFromContext(Kernel::KProcess* process,
     }
 }
 
-std::vector<BacktraceEntry> GetBacktrace(const Kernel::KThread* thread) {
+std::vector<BacktraceEntry> GetBacktrace(const Kernel::KThread* thread)
+{
     Kernel::Svc::ThreadContext ctx = thread->GetContext();
     return GetBacktraceFromContext(thread->GetOwnerProcess(), ctx);
 }

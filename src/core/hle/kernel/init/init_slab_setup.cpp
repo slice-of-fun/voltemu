@@ -1,13 +1,14 @@
 // SPDX-FileCopyrightText: Copyright 2021 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/kernel/init/init_slab_setup.h"
+
 #include "common/alignment.h"
 #include "common/assert.h"
 #include "common/common_funcs.h"
 #include "core/core.h"
 #include "core/device_memory.h"
 #include "core/hardware_properties.h"
-#include "core/hle/kernel/init/init_slab_setup.h"
 #include "core/hle/kernel/k_code_memory.h"
 #include "core/hle/kernel/k_debug.h"
 #include "core/hle/kernel/k_device_address_space.h"
@@ -105,14 +106,16 @@ static_assert(KernelPageBufferAdditionalSize ==
 /// Helper function to translate from the slab virtual address to the reserved location in physical
 /// memory.
 static KPhysicalAddress TranslateSlabAddrToPhysical(KMemoryLayout& memory_layout,
-                                                    KVirtualAddress slab_addr) {
+                                                    KVirtualAddress slab_addr)
+{
     slab_addr -= memory_layout.GetSlabRegion().GetAddress();
     return GetInteger(slab_addr) + Core::DramMemoryMap::SlabHeapBase;
 }
 
-template <typename T>
+template<typename T>
 KVirtualAddress InitializeSlabHeap(Core::System& system, KMemoryLayout& memory_layout,
-                                   KVirtualAddress address, size_t num_objects) {
+                                   KVirtualAddress address, size_t num_objects)
+{
 
     const size_t size = Common::AlignUp(sizeof(T) * num_objects, alignof(void*));
     KVirtualAddress start = Common::AlignUp(GetInteger(address), alignof(T));
@@ -135,7 +138,8 @@ KVirtualAddress InitializeSlabHeap(Core::System& system, KMemoryLayout& memory_l
     return start + size;
 }
 
-size_t CalculateSlabHeapGapSize() {
+size_t CalculateSlabHeapGapSize()
+{
     constexpr size_t KernelSlabHeapGapSize = 2_MiB - 356_KiB;
     static_assert(KernelSlabHeapGapSize <= KernelSlabHeapGapsSizeMax);
     return KernelSlabHeapGapSize;
@@ -143,7 +147,8 @@ size_t CalculateSlabHeapGapSize() {
 
 } // namespace
 
-KSlabResourceCounts KSlabResourceCounts::CreateDefault() {
+KSlabResourceCounts KSlabResourceCounts::CreateDefault()
+{
     return {
         .num_KProcess = SlabCountKProcess,
         .num_KThread = SlabCountKThread,
@@ -165,14 +170,16 @@ KSlabResourceCounts KSlabResourceCounts::CreateDefault() {
     };
 }
 
-void InitializeSlabResourceCounts(KernelCore& kernel) {
+void InitializeSlabResourceCounts(KernelCore& kernel)
+{
     kernel.SlabResourceCounts() = KSlabResourceCounts::CreateDefault();
     if (KSystemControl::Init::ShouldIncreaseThreadResourceLimit()) {
         kernel.SlabResourceCounts().num_KThread += SlabCountExtraKThread;
     }
 }
 
-size_t CalculateTotalSlabHeapSize(const KernelCore& kernel) {
+size_t CalculateTotalSlabHeapSize(const KernelCore& kernel)
+{
     size_t size = 0;
 
 #define ADD_SLAB_SIZE(NAME, COUNT, ...)                                                            \
@@ -192,7 +199,8 @@ size_t CalculateTotalSlabHeapSize(const KernelCore& kernel) {
     return size;
 }
 
-void InitializeSlabHeaps(Core::System& system, KMemoryLayout& memory_layout) {
+void InitializeSlabHeaps(Core::System& system, KMemoryLayout& memory_layout)
+{
     auto& kernel = system.Kernel();
 
     // Get the start of the slab region, since that's where we'll be working.
@@ -272,7 +280,8 @@ void InitializeSlabHeaps(Core::System& system, KMemoryLayout& memory_layout) {
 
 namespace Kernel {
 
-void KPageBufferSlabHeap::Initialize(Core::System& system) {
+void KPageBufferSlabHeap::Initialize(Core::System& system)
+{
     auto& kernel = system.Kernel();
     const auto& counts = kernel.SlabResourceCounts();
     const size_t num_pages =

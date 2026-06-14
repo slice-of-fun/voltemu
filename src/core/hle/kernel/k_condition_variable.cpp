@@ -4,9 +4,10 @@
 // SPDX-FileCopyrightText: Copyright 2021 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/kernel/k_condition_variable.h"
+
 #include "core/arm/exclusive_monitor.h"
 #include "core/core.h"
-#include "core/hle/kernel/k_condition_variable.h"
 #include "core/hle/kernel/k_process.h"
 #include "core/hle/kernel/k_scheduler.h"
 #include "core/hle/kernel/k_scoped_scheduler_lock_and_sleep.h"
@@ -21,18 +22,21 @@ namespace Kernel {
 
 namespace {
 
-bool ReadFromUser(KernelCore& kernel, u32* out, KProcessAddress address) {
+bool ReadFromUser(KernelCore& kernel, u32* out, KProcessAddress address)
+{
     *out = GetCurrentMemory(kernel).Read32(GetInteger(address));
     return true;
 }
 
-bool WriteToUser(KernelCore& kernel, KProcessAddress address, u32 val) {
+bool WriteToUser(KernelCore& kernel, KProcessAddress address, u32 val)
+{
     GetCurrentMemory(kernel).Write32(GetInteger(address), val);
     return true;
 }
 
 bool UpdateLockAtomic(KernelCore& kernel, u32* out, KProcessAddress address, u32 if_zero,
-                      u32 new_orr_mask) {
+                      u32 new_orr_mask)
+{
     auto& monitor = GetCurrentProcess(kernel).GetExclusiveMonitor();
     const auto current_core = kernel.CurrentPhysicalCoreIndex();
 
@@ -66,9 +70,12 @@ bool UpdateLockAtomic(KernelCore& kernel, u32* out, KProcessAddress address, u32
 class ThreadQueueImplForKConditionVariableWaitForAddress final : public KThreadQueue {
 public:
     explicit ThreadQueueImplForKConditionVariableWaitForAddress(KernelCore& kernel)
-        : KThreadQueue(kernel) {}
+        : KThreadQueue(kernel)
+    {
+    }
 
-    void CancelWait(KThread* waiting_thread, Result wait_result, bool cancel_timer_task) override {
+    void CancelWait(KThread* waiting_thread, Result wait_result, bool cancel_timer_task) override
+    {
         // Remove the thread as a waiter from its owner.
         waiting_thread->GetLockOwner()->RemoveWaiter(waiting_thread);
 
@@ -84,9 +91,12 @@ private:
 public:
     explicit ThreadQueueImplForKConditionVariableWaitConditionVariable(
         KernelCore& kernel, KConditionVariable::ThreadTree* t)
-        : KThreadQueue(kernel), m_tree(t) {}
+        : KThreadQueue(kernel), m_tree(t)
+    {
+    }
 
-    void CancelWait(KThread* waiting_thread, Result wait_result, bool cancel_timer_task) override {
+    void CancelWait(KThread* waiting_thread, Result wait_result, bool cancel_timer_task) override
+    {
         // Remove the thread as a waiter from its owner.
         if (KThread* owner = waiting_thread->GetLockOwner(); owner != nullptr) {
             owner->RemoveWaiter(waiting_thread);
@@ -106,11 +116,14 @@ public:
 } // namespace
 
 KConditionVariable::KConditionVariable(Core::System& system)
-    : m_system{system}, m_kernel{system.Kernel()} {}
+    : m_system{system}, m_kernel{system.Kernel()}
+{
+}
 
 KConditionVariable::~KConditionVariable() = default;
 
-Result KConditionVariable::SignalToAddress(KernelCore& kernel, KProcessAddress addr) {
+Result KConditionVariable::SignalToAddress(KernelCore& kernel, KProcessAddress addr)
+{
     KThread* owner_thread = GetCurrentThreadPointer(kernel);
 
     // Signal the address.
@@ -152,7 +165,8 @@ Result KConditionVariable::SignalToAddress(KernelCore& kernel, KProcessAddress a
 }
 
 Result KConditionVariable::WaitForAddress(KernelCore& kernel, Handle handle, KProcessAddress addr,
-                                          u32 value) {
+                                          u32 value)
+{
     KThread* cur_thread = GetCurrentThreadPointer(kernel);
     ThreadQueueImplForKConditionVariableWaitForAddress wait_queue(kernel);
 
@@ -194,7 +208,8 @@ Result KConditionVariable::WaitForAddress(KernelCore& kernel, Handle handle, KPr
     R_RETURN(cur_thread->GetWaitResult());
 }
 
-void KConditionVariable::SignalImpl(KThread* thread) {
+void KConditionVariable::SignalImpl(KThread* thread)
+{
     // Check pre-conditions.
     ASSERT(KScheduler::IsSchedulerLockedByCurrentThread(m_kernel));
 
@@ -243,7 +258,8 @@ void KConditionVariable::SignalImpl(KThread* thread) {
     }
 }
 
-void KConditionVariable::Signal(u64 cv_key, s32 count) {
+void KConditionVariable::Signal(u64 cv_key, s32 count)
+{
     // Perform signaling.
     s32 num_waiters{};
     {
@@ -270,7 +286,8 @@ void KConditionVariable::Signal(u64 cv_key, s32 count) {
     }
 }
 
-Result KConditionVariable::Wait(KProcessAddress addr, u64 key, u32 value, s64 timeout) {
+Result KConditionVariable::Wait(KProcessAddress addr, u64 key, u32 value, s64 timeout)
+{
     // Prepare to wait.
     KThread* cur_thread = GetCurrentThreadPointer(m_kernel);
     KHardwareTimer* timer{};

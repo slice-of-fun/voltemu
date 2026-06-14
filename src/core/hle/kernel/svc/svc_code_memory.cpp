@@ -14,25 +14,30 @@
 namespace Kernel::Svc {
 namespace {
 
-constexpr bool IsValidMapCodeMemoryPermission(MemoryPermission perm) {
+constexpr bool IsValidMapCodeMemoryPermission(MemoryPermission perm)
+{
     return perm == MemoryPermission::ReadWrite;
 }
 
-constexpr bool IsValidMapToOwnerCodeMemoryPermission(MemoryPermission perm) {
+constexpr bool IsValidMapToOwnerCodeMemoryPermission(MemoryPermission perm)
+{
     return perm == MemoryPermission::Read || perm == MemoryPermission::ReadExecute;
 }
 
-constexpr bool IsValidUnmapCodeMemoryPermission(MemoryPermission perm) {
+constexpr bool IsValidUnmapCodeMemoryPermission(MemoryPermission perm)
+{
     return perm == MemoryPermission::None;
 }
 
-constexpr bool IsValidUnmapFromOwnerCodeMemoryPermission(MemoryPermission perm) {
+constexpr bool IsValidUnmapFromOwnerCodeMemoryPermission(MemoryPermission perm)
+{
     return perm == MemoryPermission::None;
 }
 
 } // namespace
 
-Result CreateCodeMemory(Core::System& system, Handle* out, u64 address, uint64_t size) {
+Result CreateCodeMemory(Core::System& system, Handle* out, u64 address, uint64_t size)
+{
     LOG_TRACE(Kernel_SVC, "called, address={:#X}, size=0x{:X}", address, size);
 
     // Get kernel instance.
@@ -48,7 +53,8 @@ Result CreateCodeMemory(Core::System& system, Handle* out, u64 address, uint64_t
 
     KCodeMemory* code_mem = KCodeMemory::Create(kernel);
     R_UNLESS(code_mem != nullptr, ResultOutOfResource);
-    SCOPE_EXIT {
+    SCOPE_EXIT
+    {
         code_mem->Close();
     };
 
@@ -70,7 +76,8 @@ Result CreateCodeMemory(Core::System& system, Handle* out, u64 address, uint64_t
 
 Result ControlCodeMemory(Core::System& system, Handle code_memory_handle,
                          CodeMemoryOperation operation, u64 address, uint64_t size,
-                         MemoryPermission perm) {
+                         MemoryPermission perm)
+{
 
     LOG_TRACE(Kernel_SVC,
               "called, code_memory_handle={:#X}, operation=0x{:X}, address=0x{:X}, size=0x{:X}, "
@@ -151,25 +158,28 @@ Result ControlCodeMemory(Core::System& system, Handle code_memory_handle,
     R_SUCCEED();
 }
 
-Result CreateCodeMemory64(Core::System& system, Handle* out_handle, uint64_t address,
-                          uint64_t size) {
+Result CreateCodeMemory64(Core::System& system, Handle* out_handle, uint64_t address, uint64_t size)
+{
     R_RETURN(CreateCodeMemory(system, out_handle, address, size));
 }
 
 Result ControlCodeMemory64(Core::System& system, Handle code_memory_handle,
                            CodeMemoryOperation operation, uint64_t address, uint64_t size,
-                           MemoryPermission perm) {
+                           MemoryPermission perm)
+{
     R_RETURN(ControlCodeMemory(system, code_memory_handle, operation, address, size, perm));
 }
 
 Result CreateCodeMemory64From32(Core::System& system, Handle* out_handle, uint32_t address,
-                                uint32_t size) {
+                                uint32_t size)
+{
     R_RETURN(CreateCodeMemory(system, out_handle, address, size));
 }
 
 Result ControlCodeMemory64From32(Core::System& system, Handle code_memory_handle,
                                  CodeMemoryOperation operation, uint64_t address, uint64_t size,
-                                 MemoryPermission perm) {
+                                 MemoryPermission perm)
+{
     R_RETURN(ControlCodeMemory(system, code_memory_handle, operation, address, size, perm));
 }
 

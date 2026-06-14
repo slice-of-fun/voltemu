@@ -4,11 +4,12 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "audio_core/sink/cubeb_sink.h"
+
 #include <span>
 #include <vector>
 
 #include "audio_core/common/common.h"
-#include "audio_core/sink/cubeb_sink.h"
 #include "audio_core/sink/sink_stream.h"
 #include "common/logging.h"
 #include "common/scope_exit.h"
@@ -41,7 +42,8 @@ public:
     CubebSinkStream(cubeb* ctx_, u32 device_channels_, u32 system_channels_,
                     cubeb_devid output_device, cubeb_devid input_device, const std::string& name_,
                     StreamType type_, Core::System& system_)
-        : SinkStream(system_, type_), ctx{ctx_} {
+        : SinkStream(system_, type_), ctx{ctx_}
+    {
 #ifdef _WIN32
         CoInitializeEx(nullptr, COINIT_MULTITHREADED);
 #endif
@@ -102,7 +104,8 @@ public:
     /**
      * Destroy the sink stream.
      */
-    ~CubebSinkStream() override {
+    ~CubebSinkStream() override
+    {
         LOG_DEBUG(Service_Audio, "Destructing cubeb stream {}", name);
 
         if (!ctx) {
@@ -119,7 +122,8 @@ public:
     /**
      * Finalize the sink stream.
      */
-    void Finalize() override {
+    void Finalize() override
+    {
         Stop();
         cubeb_stream_destroy(stream_backend);
     }
@@ -130,7 +134,8 @@ public:
      * @param resume - Set to true if this is resuming the stream a previously-active stream.
      *                 Default false.
      */
-    void Start(bool resume = false) override {
+    void Start(bool resume = false) override
+    {
         if (!ctx || !paused) {
             return;
         }
@@ -144,7 +149,8 @@ public:
     /**
      * Stop the sink stream.
      */
-    void Stop() override {
+    void Stop() override
+    {
         if (!ctx || paused) {
             return;
         }
@@ -167,8 +173,8 @@ private:
      * @param num_frames_ - Number of frames of audio in the buffers. Note: Not number of samples.
      */
     static long DataCallback([[maybe_unused]] cubeb_stream* stream, void* user_data,
-                             [[maybe_unused]] const void* in_buff, void* out_buff,
-                             long num_frames_) {
+                             [[maybe_unused]] const void* in_buff, void* out_buff, long num_frames_)
+    {
         auto* impl = static_cast<CubebSinkStream*>(user_data);
         if (!impl) {
             return -1;
@@ -197,7 +203,9 @@ private:
      * @param user_data   - Custom data pointer passed along, points to a CubebSinkStream.
      * @param state       - New state of the device.
      */
-    static void StateCallback(cubeb_stream*, void*, cubeb_state) {}
+    static void StateCallback(cubeb_stream*, void*, cubeb_state)
+    {
+    }
 
     /// Main Cubeb context
     cubeb* ctx{};
@@ -205,7 +213,8 @@ private:
     cubeb_stream* stream_backend{};
 };
 
-CubebSink::CubebSink(std::string_view target_device_name) {
+CubebSink::CubebSink(std::string_view target_device_name)
+{
     // Cubeb requires COM to be initialized on the thread calling cubeb_init on Windows
 #ifdef _WIN32
     com_init_result = CoInitializeEx(nullptr, COINIT_MULTITHREADED);
@@ -238,7 +247,8 @@ CubebSink::CubebSink(std::string_view target_device_name) {
     device_channels = device_channels >= 6U ? 6U : 2U;
 }
 
-CubebSink::~CubebSink() {
+CubebSink::~CubebSink()
+{
     if (!ctx) {
         return;
     }
@@ -257,7 +267,8 @@ CubebSink::~CubebSink() {
 }
 
 SinkStream* CubebSink::AcquireSinkStream(Core::System& system, u32 system_channels_,
-                                         const std::string& name, StreamType type) {
+                                         const std::string& name, StreamType type)
+{
     system_channels = system_channels_;
     SinkStreamPtr& stream = sink_streams.emplace_back(std::make_unique<CubebSinkStream>(
         ctx, device_channels, system_channels, output_device, input_device, name, type, system));
@@ -265,7 +276,8 @@ SinkStream* CubebSink::AcquireSinkStream(Core::System& system, u32 system_channe
     return stream.get();
 }
 
-void CubebSink::CloseStream(SinkStream* stream) {
+void CubebSink::CloseStream(SinkStream* stream)
+{
     for (size_t i = 0; i < sink_streams.size(); i++) {
         if (sink_streams[i].get() == stream) {
             sink_streams[i].reset();
@@ -275,11 +287,13 @@ void CubebSink::CloseStream(SinkStream* stream) {
     }
 }
 
-void CubebSink::CloseStreams() {
+void CubebSink::CloseStreams()
+{
     sink_streams.clear();
 }
 
-f32 CubebSink::GetDeviceVolume() const {
+f32 CubebSink::GetDeviceVolume() const
+{
     if (sink_streams.empty()) {
         return 1.0f;
     }
@@ -287,19 +301,22 @@ f32 CubebSink::GetDeviceVolume() const {
     return sink_streams[0]->GetDeviceVolume();
 }
 
-void CubebSink::SetDeviceVolume(f32 volume) {
+void CubebSink::SetDeviceVolume(f32 volume)
+{
     for (auto& stream : sink_streams) {
         stream->SetDeviceVolume(volume);
     }
 }
 
-void CubebSink::SetSystemVolume(f32 volume) {
+void CubebSink::SetSystemVolume(f32 volume)
+{
     for (auto& stream : sink_streams) {
         stream->SetSystemVolume(volume);
     }
 }
 
-std::vector<std::string> ListCubebSinkDevices(bool capture) {
+std::vector<std::string> ListCubebSinkDevices(bool capture)
+{
     std::vector<std::string> device_list;
     cubeb* ctx;
 
@@ -338,7 +355,8 @@ std::vector<std::string> ListCubebSinkDevices(bool capture) {
 }
 
 /* REVERSION TO 3833 - function GetCubebLatency REINTRODUCED FROM 3833 - DIABLO 3 FIX */
-u32 GetCubebLatency() {
+u32 GetCubebLatency()
+{
     cubeb* ctx;
 
 #ifdef _WIN32
@@ -377,7 +395,8 @@ u32 GetCubebLatency() {
     return latency;
 }
 
-// REVERTED back to 3833 - Below namespace section and function IsCubebSuitable() removed, reverting to GetCubebLatency() above. - DIABLO 3 FIX
+// REVERTED back to 3833 - Below namespace section and function IsCubebSuitable() removed, reverting
+// to GetCubebLatency() above. - DIABLO 3 FIX
 /*
 namespace {
 static long TmpDataCallback(cubeb_stream*, void*, const void*, void*, long) {

@@ -4,14 +4,16 @@
 // SPDX-FileCopyrightText: Copyright 2021 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include <thread>
+#include "input_common/drivers/mouse.h"
+
 #include <fmt/ranges.h>
 #include <math.h>
+
+#include <thread>
 
 #include "common/param_package.h"
 #include "common/settings.h"
 #include "common/thread.h"
-#include "input_common/drivers/mouse.h"
 
 namespace InputCommon {
 constexpr int update_time = 10;
@@ -50,7 +52,8 @@ constexpr PadIdentifier touch_identifier = {
     .pad = 0,
 };
 
-Mouse::Mouse(std::string input_engine_) : InputEngine(std::move(input_engine_)) {
+Mouse::Mouse(std::string input_engine_) : InputEngine(std::move(input_engine_))
+{
     PreSetController(identifier);
     PreSetController(real_mouse_identifier);
     PreSetController(touch_identifier);
@@ -83,7 +86,8 @@ Mouse::Mouse(std::string input_engine_) : InputEngine(std::move(input_engine_)) 
     });
 }
 
-void Mouse::UpdateStickInput() {
+void Mouse::UpdateStickInput()
+{
     if (!IsMousePanningEnabled()) {
         return;
     }
@@ -109,7 +113,8 @@ void Mouse::UpdateStickInput() {
     last_mouse_change *= clamped_decay;
 }
 
-void Mouse::UpdateMotionInput() {
+void Mouse::UpdateMotionInput()
+{
     const float sensitivity =
         IsMousePanningEnabled() ? default_motion_panning_sensitivity : default_motion_sensitivity;
 
@@ -142,7 +147,8 @@ void Mouse::UpdateMotionInput() {
     SetMotion(motion_identifier, 0, motion_data);
 }
 
-void Mouse::Move(int x, int y, int center_x, int center_y) {
+void Mouse::Move(int x, int y, int center_x, int center_y)
+{
     if (IsMousePanningEnabled()) {
         const auto mouse_change =
             (Common::MakeVec(x, y) - Common::MakeVec(center_x, center_y)).Cast<float>();
@@ -185,17 +191,20 @@ void Mouse::Move(int x, int y, int center_x, int center_y) {
     }
 }
 
-void Mouse::MouseMove(f32 touch_x, f32 touch_y) {
+void Mouse::MouseMove(f32 touch_x, f32 touch_y)
+{
     SetAxis(real_mouse_identifier, mouse_axis_x, touch_x);
     SetAxis(real_mouse_identifier, mouse_axis_y, touch_y);
 }
 
-void Mouse::TouchMove(f32 touch_x, f32 touch_y) {
+void Mouse::TouchMove(f32 touch_x, f32 touch_y)
+{
     SetAxis(touch_identifier, mouse_axis_x, touch_x);
     SetAxis(touch_identifier, mouse_axis_y, touch_y);
 }
 
-void Mouse::PressButton(int x, int y, MouseButton button) {
+void Mouse::PressButton(int x, int y, MouseButton button)
+{
     SetButton(identifier, static_cast<int>(button), true);
 
     // Set initial analog parameters
@@ -204,17 +213,20 @@ void Mouse::PressButton(int x, int y, MouseButton button) {
     button_pressed = true;
 }
 
-void Mouse::PressMouseButton(MouseButton button) {
+void Mouse::PressMouseButton(MouseButton button)
+{
     SetButton(real_mouse_identifier, static_cast<int>(button), true);
 }
 
-void Mouse::PressTouchButton(f32 touch_x, f32 touch_y, MouseButton button) {
+void Mouse::PressTouchButton(f32 touch_x, f32 touch_y, MouseButton button)
+{
     SetAxis(touch_identifier, mouse_axis_x, touch_x);
     SetAxis(touch_identifier, mouse_axis_y, touch_y);
     SetButton(touch_identifier, static_cast<int>(button), true);
 }
 
-void Mouse::ReleaseButton(MouseButton button) {
+void Mouse::ReleaseButton(MouseButton button)
+{
     SetButton(identifier, static_cast<int>(button), false);
     SetButton(real_mouse_identifier, static_cast<int>(button), false);
     SetButton(touch_identifier, static_cast<int>(button), false);
@@ -230,7 +242,8 @@ void Mouse::ReleaseButton(MouseButton button) {
     button_pressed = false;
 }
 
-void Mouse::MouseWheelChange(int x, int y) {
+void Mouse::MouseWheelChange(int x, int y)
+{
     wheel_position.x += x;
     wheel_position.y += y;
     last_motion_change.z += static_cast<f32>(y);
@@ -238,17 +251,20 @@ void Mouse::MouseWheelChange(int x, int y) {
     SetAxis(identifier, wheel_axis_y, static_cast<f32>(wheel_position.y));
 }
 
-void Mouse::ReleaseAllButtons() {
+void Mouse::ReleaseAllButtons()
+{
     ResetButtonState();
     button_pressed = false;
 }
 
-bool Mouse::IsMousePanningEnabled() {
+bool Mouse::IsMousePanningEnabled()
+{
     // Disable mouse panning when a real mouse is connected
     return Settings::values.mouse_panning && !Settings::values.mouse_enabled;
 }
 
-std::vector<Common::ParamPackage> Mouse::GetInputDevices() const {
+std::vector<Common::ParamPackage> Mouse::GetInputDevices() const
+{
     std::vector<Common::ParamPackage> devices;
     devices.emplace_back(Common::ParamPackage{
         {"engine", GetEngineName()},
@@ -257,8 +273,8 @@ std::vector<Common::ParamPackage> Mouse::GetInputDevices() const {
     return devices;
 }
 
-AnalogMapping Mouse::GetAnalogMappingForDevice(
-    [[maybe_unused]] const Common::ParamPackage& params) {
+AnalogMapping Mouse::GetAnalogMappingForDevice([[maybe_unused]] const Common::ParamPackage& params)
+{
     // Only overwrite different buttons from default
     AnalogMapping mapping = {};
     Common::ParamPackage right_analog_params;
@@ -272,7 +288,8 @@ AnalogMapping Mouse::GetAnalogMappingForDevice(
     return mapping;
 }
 
-Common::Input::ButtonNames Mouse::GetUIButtonName(const Common::ParamPackage& params) const {
+Common::Input::ButtonNames Mouse::GetUIButtonName(const Common::ParamPackage& params) const
+{
     const auto button = static_cast<MouseButton>(params.Get("button", 0));
     switch (button) {
     case MouseButton::Left:
@@ -295,7 +312,8 @@ Common::Input::ButtonNames Mouse::GetUIButtonName(const Common::ParamPackage& pa
     }
 }
 
-Common::Input::ButtonNames Mouse::GetUIName(const Common::ParamPackage& params) const {
+Common::Input::ButtonNames Mouse::GetUIName(const Common::ParamPackage& params) const
+{
     if (params.Has("button")) {
         return GetUIButtonName(params);
     }

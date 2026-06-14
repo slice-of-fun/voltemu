@@ -1,28 +1,35 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "hid_core/resources/debug_pad/debug_pad.h"
+
 #include "common/settings.h"
 #include "core/core_timing.h"
 #include "hid_core/frontend/emulated_controller.h"
 #include "hid_core/hid_core.h"
 #include "hid_core/hid_types.h"
 #include "hid_core/resources/applet_resource.h"
-#include "hid_core/resources/debug_pad/debug_pad.h"
 #include "hid_core/resources/shared_memory_format.h"
 
 namespace Service::HID {
 
-DebugPad::DebugPad(Core::HID::HIDCore& hid_core_) : ControllerBase{hid_core_} {
+DebugPad::DebugPad(Core::HID::HIDCore& hid_core_) : ControllerBase{hid_core_}
+{
     controller = hid_core.GetEmulatedController(Core::HID::NpadIdType::Other);
 }
 
 DebugPad::~DebugPad() = default;
 
-void DebugPad::OnInit() {}
+void DebugPad::OnInit()
+{
+}
 
-void DebugPad::OnRelease() {}
+void DebugPad::OnRelease()
+{
+}
 
-void DebugPad::OnUpdate(const Core::Timing::CoreTiming& core_timing) {
+void DebugPad::OnUpdate(const Core::Timing::CoreTiming& core_timing)
+{
     std::scoped_lock shared_lock{*shared_mutex};
     const u64 aruid = applet_resource->GetActiveAruid();
     auto* data = applet_resource->GetAruidData(aruid);

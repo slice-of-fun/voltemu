@@ -4,14 +4,16 @@
 // SPDX-FileCopyrightText: 2015 Citra Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "video_core/renderer_opengl/gl_rasterizer.h"
+
+#include <glad/glad.h>
+
 #include <algorithm>
 #include <array>
 #include <bitset>
 #include <memory>
 #include <string_view>
 #include <utility>
-
-#include <glad/glad.h>
 
 #include "common/assert.h"
 #include "common/logging.h"
@@ -24,7 +26,6 @@
 #include "video_core/memory_manager.h"
 #include "video_core/renderer_opengl/gl_device.h"
 #include "video_core/renderer_opengl/gl_query_cache.h"
-#include "video_core/renderer_opengl/gl_rasterizer.h"
 #include "video_core/renderer_opengl/gl_shader_cache.h"
 #include "video_core/renderer_opengl/gl_staging_buffer_pool.h"
 #include "video_core/renderer_opengl/gl_texture_cache.h"
@@ -45,11 +46,13 @@ using VideoCore::Surface::SurfaceType;
 namespace {
 constexpr size_t NUM_SUPPORTED_VERTEX_ATTRIBUTES = 16;
 
-void oglEnable(GLenum cap, bool state) {
+void oglEnable(GLenum cap, bool state)
+{
     (state ? glEnable : glDisable)(cap);
 }
 
-std::optional<VideoCore::QueryType> MaxwellToVideoCoreQuery(VideoCommon::QueryType type) {
+std::optional<VideoCore::QueryType> MaxwellToVideoCoreQuery(VideoCommon::QueryType type)
+{
     switch (type) {
     case VideoCommon::QueryType::PrimitivesGenerated:
     case VideoCommon::QueryType::VtgPrimitivesOut:
@@ -80,11 +83,14 @@ RasterizerOpenGL::RasterizerOpenGL(Core::Frontend::EmuWindow& emu_window_, Tegra
                    program_manager, state_tracker, gpu.ShaderNotify()),
       query_cache(*this, device_memory_), accelerate_dma(buffer_cache, texture_cache),
       fence_manager(*this, gpu, texture_cache, buffer_cache, query_cache),
-      blit_image(program_manager_) {}
+      blit_image(program_manager_)
+{
+}
 
 RasterizerOpenGL::~RasterizerOpenGL() = default;
 
-void RasterizerOpenGL::SyncVertexFormats() {
+void RasterizerOpenGL::SyncVertexFormats()
+{
     auto& flags = maxwell3d->dirty.flags;
     if (!flags[Dirty::VertexFormats]) {
         return;
@@ -126,7 +132,8 @@ void RasterizerOpenGL::SyncVertexFormats() {
     }
 }
 
-void RasterizerOpenGL::SyncVertexInstances() {
+void RasterizerOpenGL::SyncVertexInstances()
+{
     auto& flags = maxwell3d->dirty.flags;
     if (!flags[Dirty::VertexInstances]) {
         return;
@@ -148,11 +155,13 @@ void RasterizerOpenGL::SyncVertexInstances() {
 }
 
 void RasterizerOpenGL::LoadDiskResources(u64 title_id, std::stop_token stop_loading,
-                                         const VideoCore::DiskResourceLoadCallback& callback) {
+                                         const VideoCore::DiskResourceLoadCallback& callback)
+{
     shader_cache.LoadDiskResources(title_id, stop_loading, callback);
 }
 
-void RasterizerOpenGL::Clear(u32 layer_count) {
+void RasterizerOpenGL::Clear(u32 layer_count)
+{
     gpu_memory->FlushCaching();
     const auto& regs = maxwell3d->regs;
     bool use_color{};
@@ -221,9 +230,10 @@ void RasterizerOpenGL::Clear(u32 layer_count) {
     ++num_queued_commands;
 }
 
-template <typename Func>
-void RasterizerOpenGL::PrepareDraw(bool is_indexed, Func&& draw_func) {
-    SCOPE_EXIT {
+template<typename Func> void RasterizerOpenGL::PrepareDraw(bool is_indexed, Func&& draw_func)
+{
+    SCOPE_EXIT
+    {
         gpu.TickWork();
     };
     gpu_memory->FlushCaching();
@@ -258,7 +268,8 @@ void RasterizerOpenGL::PrepareDraw(bool is_indexed, Func&& draw_func) {
     has_written_global_memory |= pipeline->WritesGlobalMemory();
 }
 
-void RasterizerOpenGL::Draw(bool is_indexed, u32 instance_count) {
+void RasterizerOpenGL::Draw(bool is_indexed, u32 instance_count)
+{
     PrepareDraw(is_indexed, [this, is_indexed, instance_count](GLenum primitive_mode) {
         const auto& draw_state = maxwell3d->draw_manager.draw_state;
         const GLuint base_instance = GLuint(draw_state.base_instance);
@@ -301,7 +312,8 @@ void RasterizerOpenGL::Draw(bool is_indexed, u32 instance_count) {
     });
 }
 
-void RasterizerOpenGL::DrawIndirect() {
+void RasterizerOpenGL::DrawIndirect()
+{
     const auto& params = maxwell3d->draw_manager.indirect_state;
     buffer_cache.SetDrawIndirect(&params);
     PrepareDraw(params.is_indexed, [this, &params](GLenum primitive_mode) {
@@ -348,8 +360,10 @@ void RasterizerOpenGL::DrawIndirect() {
     buffer_cache.SetDrawIndirect(nullptr);
 }
 
-void RasterizerOpenGL::DrawTexture() {
-    SCOPE_EXIT {
+void RasterizerOpenGL::DrawTexture()
+{
+    SCOPE_EXIT
+    {
         gpu.TickWork();
     };
 
@@ -394,7 +408,8 @@ void RasterizerOpenGL::DrawTexture() {
     ++num_queued_commands;
 }
 
-void RasterizerOpenGL::DispatchCompute() {
+void RasterizerOpenGL::DispatchCompute()
+{
     gpu_memory->FlushCaching();
     ComputePipeline* const pipeline{shader_cache.CurrentComputePipeline()};
     if (!pipeline) {
@@ -422,7 +437,8 @@ void RasterizerOpenGL::DispatchCompute() {
     has_written_global_memory |= pipeline->WritesGlobalMemory();
 }
 
-void RasterizerOpenGL::ResetCounter(VideoCommon::QueryType type) {
+void RasterizerOpenGL::ResetCounter(VideoCommon::QueryType type)
+{
     const auto query_cache_type = MaxwellToVideoCoreQuery(type);
     if (!query_cache_type.has_value()) {
         UNIMPLEMENTED_IF_MSG(type != VideoCommon::QueryType::Payload, "Reset query type: {}", type);
@@ -432,7 +448,8 @@ void RasterizerOpenGL::ResetCounter(VideoCommon::QueryType type) {
 }
 
 void RasterizerOpenGL::Query(GPUVAddr gpu_addr, VideoCommon::QueryType type,
-                             VideoCommon::QueryPropertiesFlags flags, u32 payload, u32 subreport) {
+                             VideoCommon::QueryPropertiesFlags flags, u32 payload, u32 subreport)
+{
     const auto query_cache_type = MaxwellToVideoCoreQuery(type);
     if (!query_cache_type.has_value()) {
         return QueryFallback(gpu_addr, type, flags, payload, subreport);
@@ -444,7 +461,8 @@ void RasterizerOpenGL::Query(GPUVAddr gpu_addr, VideoCommon::QueryType type,
 
 void RasterizerOpenGL::QueryFallback(GPUVAddr gpu_addr, VideoCommon::QueryType type,
                                      VideoCommon::QueryPropertiesFlags flags, u32 payload,
-                                     u32 subreport) {
+                                     u32 subreport)
+{
     if (type != VideoCommon::QueryType::Payload) {
         payload = 1u;
     }
@@ -465,18 +483,23 @@ void RasterizerOpenGL::QueryFallback(GPUVAddr gpu_addr, VideoCommon::QueryType t
 }
 
 void RasterizerOpenGL::BindGraphicsUniformBuffer(size_t stage, u32 index, GPUVAddr gpu_addr,
-                                                 u32 size) {
+                                                 u32 size)
+{
     std::scoped_lock lock{buffer_cache.mutex};
     buffer_cache.BindGraphicsUniformBuffer(stage, index, gpu_addr, size);
 }
 
-void RasterizerOpenGL::DisableGraphicsUniformBuffer(size_t stage, u32 index) {
+void RasterizerOpenGL::DisableGraphicsUniformBuffer(size_t stage, u32 index)
+{
     buffer_cache.DisableGraphicsUniformBuffer(stage, index);
 }
 
-void RasterizerOpenGL::FlushAll() {}
+void RasterizerOpenGL::FlushAll()
+{
+}
 
-void RasterizerOpenGL::FlushRegion(DAddr addr, u64 size, VideoCommon::CacheType which) {
+void RasterizerOpenGL::FlushRegion(DAddr addr, u64 size, VideoCommon::CacheType which)
+{
     if (addr == 0 || size == 0) {
         return;
     }
@@ -493,7 +516,8 @@ void RasterizerOpenGL::FlushRegion(DAddr addr, u64 size, VideoCommon::CacheType 
     }
 }
 
-bool RasterizerOpenGL::MustFlushRegion(DAddr addr, u64 size, VideoCommon::CacheType which) {
+bool RasterizerOpenGL::MustFlushRegion(DAddr addr, u64 size, VideoCommon::CacheType which)
+{
     if ((True(which & VideoCommon::CacheType::BufferCache))) {
         std::scoped_lock lock{buffer_cache.mutex};
         if (buffer_cache.IsRegionGpuModified(addr, size)) {
@@ -510,7 +534,8 @@ bool RasterizerOpenGL::MustFlushRegion(DAddr addr, u64 size, VideoCommon::CacheT
     return false;
 }
 
-VideoCore::RasterizerDownloadArea RasterizerOpenGL::GetFlushArea(DAddr addr, u64 size) {
+VideoCore::RasterizerDownloadArea RasterizerOpenGL::GetFlushArea(DAddr addr, u64 size)
+{
     {
         std::scoped_lock lock{texture_cache.mutex};
         auto area = texture_cache.GetFlushArea(addr, size);
@@ -533,7 +558,8 @@ VideoCore::RasterizerDownloadArea RasterizerOpenGL::GetFlushArea(DAddr addr, u64
     return new_area;
 }
 
-void RasterizerOpenGL::InvalidateRegion(DAddr addr, u64 size, VideoCommon::CacheType which) {
+void RasterizerOpenGL::InvalidateRegion(DAddr addr, u64 size, VideoCommon::CacheType which)
+{
     if (addr == 0 || size == 0) {
         return;
     }
@@ -553,7 +579,8 @@ void RasterizerOpenGL::InvalidateRegion(DAddr addr, u64 size, VideoCommon::Cache
     }
 }
 
-bool RasterizerOpenGL::OnCPUWrite(DAddr addr, u64 size) {
+bool RasterizerOpenGL::OnCPUWrite(DAddr addr, u64 size)
+{
     DEBUG_ASSERT(addr != 0 || size != 0);
     {
         std::scoped_lock lock{buffer_cache.mutex};
@@ -569,7 +596,8 @@ bool RasterizerOpenGL::OnCPUWrite(DAddr addr, u64 size) {
     return false;
 }
 
-void RasterizerOpenGL::OnCacheInvalidation(DAddr addr, u64 size) {
+void RasterizerOpenGL::OnCacheInvalidation(DAddr addr, u64 size)
+{
     if (addr == 0 || size == 0) {
         return;
     }
@@ -584,11 +612,13 @@ void RasterizerOpenGL::OnCacheInvalidation(DAddr addr, u64 size) {
     shader_cache.InvalidateRegion(addr, size);
 }
 
-void RasterizerOpenGL::InvalidateGPUCache() {
+void RasterizerOpenGL::InvalidateGPUCache()
+{
     gpu.InvalidateGPUCache();
 }
 
-void RasterizerOpenGL::UnmapMemory(DAddr addr, u64 size) {
+void RasterizerOpenGL::UnmapMemory(DAddr addr, u64 size)
+{
     {
         std::scoped_lock lock{texture_cache.mutex};
         texture_cache.UnmapMemory(addr, size);
@@ -600,56 +630,66 @@ void RasterizerOpenGL::UnmapMemory(DAddr addr, u64 size) {
     shader_cache.OnCacheInvalidation(addr, size);
 }
 
-void RasterizerOpenGL::ModifyGPUMemory(size_t as_id, GPUVAddr addr, u64 size) {
+void RasterizerOpenGL::ModifyGPUMemory(size_t as_id, GPUVAddr addr, u64 size)
+{
     {
         std::scoped_lock lock{texture_cache.mutex};
         texture_cache.UnmapGPUMemory(as_id, addr, size);
     }
 }
 
-void RasterizerOpenGL::SignalFence(std::function<void()>&& func) {
+void RasterizerOpenGL::SignalFence(std::function<void()>&& func)
+{
     fence_manager.SignalFence(std::move(func));
 }
 
-void RasterizerOpenGL::SyncOperation(std::function<void()>&& func) {
+void RasterizerOpenGL::SyncOperation(std::function<void()>&& func)
+{
     fence_manager.SyncOperation(std::move(func));
 }
 
-void RasterizerOpenGL::SignalSyncPoint(u32 value) {
+void RasterizerOpenGL::SignalSyncPoint(u32 value)
+{
     fence_manager.SignalSyncPoint(value);
 }
 
-void RasterizerOpenGL::SignalReference() {
+void RasterizerOpenGL::SignalReference()
+{
     fence_manager.SignalOrdering();
 }
 
-void RasterizerOpenGL::ReleaseFences(bool force) {
+void RasterizerOpenGL::ReleaseFences(bool force)
+{
     fence_manager.WaitPendingFences(force);
 }
 
-void RasterizerOpenGL::FlushAndInvalidateRegion(DAddr addr, u64 size,
-                                                VideoCommon::CacheType which) {
+void RasterizerOpenGL::FlushAndInvalidateRegion(DAddr addr, u64 size, VideoCommon::CacheType which)
+{
     if (Settings::IsGPULevelHigh()) {
         FlushRegion(addr, size, which);
     }
     InvalidateRegion(addr, size, which);
 }
 
-void RasterizerOpenGL::WaitForIdle() {
+void RasterizerOpenGL::WaitForIdle()
+{
     glMemoryBarrier(GL_ALL_BARRIER_BITS);
     SignalReference();
 }
 
-void RasterizerOpenGL::FragmentBarrier() {
+void RasterizerOpenGL::FragmentBarrier()
+{
     glTextureBarrier();
     glMemoryBarrier(GL_FRAMEBUFFER_BARRIER_BIT | GL_TEXTURE_FETCH_BARRIER_BIT);
 }
 
-void RasterizerOpenGL::TiledCacheBarrier() {
+void RasterizerOpenGL::TiledCacheBarrier()
+{
     glTextureBarrier();
 }
 
-void RasterizerOpenGL::FlushCommands() {
+void RasterizerOpenGL::FlushCommands()
+{
     // Only flush when we have commands queued to OpenGL.
     if (num_queued_commands == 0) {
         return;
@@ -665,7 +705,8 @@ void RasterizerOpenGL::FlushCommands() {
     glFlush();
 }
 
-void RasterizerOpenGL::TickFrame() {
+void RasterizerOpenGL::TickFrame()
+{
     // Ticking a frame means that buffers will be swapped, calling glFlush implicitly.
     num_queued_commands = 0;
 
@@ -680,7 +721,8 @@ void RasterizerOpenGL::TickFrame() {
     }
 }
 
-bool RasterizerOpenGL::AccelerateConditionalRendering() {
+bool RasterizerOpenGL::AccelerateConditionalRendering()
+{
     gpu_memory->FlushCaching();
     if (Settings::IsGPULevelHigh()) {
         // Reimplement Host conditional rendering.
@@ -698,17 +740,20 @@ bool RasterizerOpenGL::AccelerateConditionalRendering() {
 
 bool RasterizerOpenGL::AccelerateSurfaceCopy(const Tegra::Engines::Fermi2D::Surface& src,
                                              const Tegra::Engines::Fermi2D::Surface& dst,
-                                             const Tegra::Engines::Fermi2D::Config& copy_config) {
+                                             const Tegra::Engines::Fermi2D::Config& copy_config)
+{
     std::scoped_lock lock{texture_cache.mutex};
     return texture_cache.BlitImage(dst, src, copy_config);
 }
 
-Tegra::Engines::AccelerateDMAInterface& RasterizerOpenGL::AccessAccelerateDMA() {
+Tegra::Engines::AccelerateDMAInterface& RasterizerOpenGL::AccessAccelerateDMA()
+{
     return accelerate_dma;
 }
 
 void RasterizerOpenGL::AccelerateInlineToMemory(GPUVAddr address, size_t copy_size,
-                                                std::span<const u8> memory) {
+                                                std::span<const u8> memory)
+{
     auto cpu_addr = gpu_memory->GpuToCpuAddress(address);
     if (!cpu_addr) [[unlikely]] {
         gpu_memory->WriteBlock(address, memory.data(), copy_size);
@@ -729,8 +774,10 @@ void RasterizerOpenGL::AccelerateInlineToMemory(GPUVAddr address, size_t copy_si
     query_cache.InvalidateRegion(*cpu_addr, copy_size);
 }
 
-std::optional<FramebufferTextureInfo> RasterizerOpenGL::AccelerateDisplay(
-    const Tegra::FramebufferConfig& config, DAddr framebuffer_addr, u32 pixel_stride) {
+std::optional<FramebufferTextureInfo>
+RasterizerOpenGL::AccelerateDisplay(const Tegra::FramebufferConfig& config, DAddr framebuffer_addr,
+                                    u32 pixel_stride)
+{
     if (framebuffer_addr == 0) {
         return {};
     }
@@ -753,7 +800,8 @@ std::optional<FramebufferTextureInfo> RasterizerOpenGL::AccelerateDisplay(
     return info;
 }
 
-void RasterizerOpenGL::SyncState() {
+void RasterizerOpenGL::SyncState()
+{
     SyncViewport();
     SyncRasterizeEnable();
     SyncPolygonModes();
@@ -777,7 +825,8 @@ void RasterizerOpenGL::SyncState() {
     SyncVertexInstances();
 }
 
-void RasterizerOpenGL::SyncViewport() {
+void RasterizerOpenGL::SyncViewport()
+{
     auto& flags = maxwell3d->dirty.flags;
     const auto& regs = maxwell3d->regs;
 
@@ -894,7 +943,8 @@ void RasterizerOpenGL::SyncViewport() {
     }
 }
 
-void RasterizerOpenGL::SyncDepthClamp() {
+void RasterizerOpenGL::SyncDepthClamp()
+{
     auto& flags = maxwell3d->dirty.flags;
     if (!flags[Dirty::DepthClampEnabled]) {
         return;
@@ -910,7 +960,8 @@ void RasterizerOpenGL::SyncDepthClamp() {
     oglEnable(GL_DEPTH_CLAMP, !depth_clamp_disabled);
 }
 
-void RasterizerOpenGL::SyncClipEnabled(u32 clip_mask) {
+void RasterizerOpenGL::SyncClipEnabled(u32 clip_mask)
+{
     auto& flags = maxwell3d->dirty.flags;
     if (!flags[Dirty::ClipDistances] && !flags[VideoCommon::Dirty::Shaders]) {
         return;
@@ -928,11 +979,13 @@ void RasterizerOpenGL::SyncClipEnabled(u32 clip_mask) {
     }
 }
 
-void RasterizerOpenGL::SyncClipCoef() {
+void RasterizerOpenGL::SyncClipCoef()
+{
     UNIMPLEMENTED();
 }
 
-void RasterizerOpenGL::SyncCullMode() {
+void RasterizerOpenGL::SyncCullMode()
+{
     auto& flags = maxwell3d->dirty.flags;
     const auto& regs = maxwell3d->regs;
 
@@ -948,7 +1001,8 @@ void RasterizerOpenGL::SyncCullMode() {
     }
 }
 
-void RasterizerOpenGL::SyncPrimitiveRestart() {
+void RasterizerOpenGL::SyncPrimitiveRestart()
+{
     auto& flags = maxwell3d->dirty.flags;
     if (!flags[Dirty::PrimitiveRestart]) {
         return;
@@ -963,7 +1017,8 @@ void RasterizerOpenGL::SyncPrimitiveRestart() {
     }
 }
 
-void RasterizerOpenGL::SyncDepthTestState() {
+void RasterizerOpenGL::SyncDepthTestState()
+{
     auto& flags = maxwell3d->dirty.flags;
     const auto& regs = maxwell3d->regs;
 
@@ -983,7 +1038,8 @@ void RasterizerOpenGL::SyncDepthTestState() {
     }
 }
 
-void RasterizerOpenGL::SyncStencilTestState() {
+void RasterizerOpenGL::SyncStencilTestState()
+{
     auto& flags = maxwell3d->dirty.flags;
     if (!flags[Dirty::StencilTest]) {
         return;
@@ -1014,7 +1070,8 @@ void RasterizerOpenGL::SyncStencilTestState() {
     }
 }
 
-void RasterizerOpenGL::SyncRasterizeEnable() {
+void RasterizerOpenGL::SyncRasterizeEnable()
+{
     auto& flags = maxwell3d->dirty.flags;
     if (!flags[Dirty::RasterizeEnable]) {
         return;
@@ -1024,7 +1081,8 @@ void RasterizerOpenGL::SyncRasterizeEnable() {
     oglEnable(GL_RASTERIZER_DISCARD, maxwell3d->regs.rasterize_enable == 0);
 }
 
-void RasterizerOpenGL::SyncPolygonModes() {
+void RasterizerOpenGL::SyncPolygonModes()
+{
     auto& flags = maxwell3d->dirty.flags;
     if (!flags[Dirty::PolygonModes]) {
         return;
@@ -1063,7 +1121,8 @@ void RasterizerOpenGL::SyncPolygonModes() {
     }
 }
 
-void RasterizerOpenGL::SyncColorMask() {
+void RasterizerOpenGL::SyncColorMask()
+{
     auto& flags = maxwell3d->dirty.flags;
     if (!flags[Dirty::ColorMasks]) {
         return;
@@ -1097,7 +1156,8 @@ void RasterizerOpenGL::SyncColorMask() {
     }
 }
 
-void RasterizerOpenGL::SyncMultiSampleState() {
+void RasterizerOpenGL::SyncMultiSampleState()
+{
     auto& flags = maxwell3d->dirty.flags;
     if (!flags[Dirty::MultisampleControl]) {
         return;
@@ -1109,7 +1169,8 @@ void RasterizerOpenGL::SyncMultiSampleState() {
     oglEnable(GL_SAMPLE_ALPHA_TO_ONE, regs.anti_alias_alpha_control.alpha_to_one);
 }
 
-void RasterizerOpenGL::SyncFragmentColorClampState() {
+void RasterizerOpenGL::SyncFragmentColorClampState()
+{
     auto& flags = maxwell3d->dirty.flags;
     if (!flags[Dirty::FragmentClampColor]) {
         return;
@@ -1120,7 +1181,8 @@ void RasterizerOpenGL::SyncFragmentColorClampState() {
                  maxwell3d->regs.frag_color_clamp.AnyEnabled() ? GL_TRUE : GL_FALSE);
 }
 
-void RasterizerOpenGL::SyncBlendState() {
+void RasterizerOpenGL::SyncBlendState()
+{
     auto& flags = maxwell3d->dirty.flags;
     const auto& regs = maxwell3d->regs;
 
@@ -1185,7 +1247,8 @@ void RasterizerOpenGL::SyncBlendState() {
     }
 }
 
-void RasterizerOpenGL::SyncLogicOpState() {
+void RasterizerOpenGL::SyncLogicOpState()
+{
     auto& flags = maxwell3d->dirty.flags;
     if (!flags[Dirty::LogicOp]) {
         return;
@@ -1198,12 +1261,8 @@ void RasterizerOpenGL::SyncLogicOpState() {
         using namespace Tegra::Engines;
 
         bool has_float = std::any_of(
-            regs.vertex_attrib_format.begin(),
-            regs.vertex_attrib_format.end(),
-            [](const auto& n) {
-                return n.type == Maxwell3D::Regs::VertexAttribute::Type::Float;
-            }
-        );
+            regs.vertex_attrib_format.begin(), regs.vertex_attrib_format.end(),
+            [](const auto& n) { return n.type == Maxwell3D::Regs::VertexAttribute::Type::Float; });
 
         regs.logic_op.enable = static_cast<u32>(!has_float);
     }
@@ -1216,7 +1275,8 @@ void RasterizerOpenGL::SyncLogicOpState() {
     }
 }
 
-void RasterizerOpenGL::SyncScissorTest() {
+void RasterizerOpenGL::SyncScissorTest()
+{
     auto& flags = maxwell3d->dirty.flags;
     if (!flags[Dirty::Scissors] && !flags[VideoCommon::Dirty::RescaleScissors]) {
         return;
@@ -1261,7 +1321,8 @@ void RasterizerOpenGL::SyncScissorTest() {
     }
 }
 
-void RasterizerOpenGL::SyncPointState() {
+void RasterizerOpenGL::SyncPointState()
+{
     auto& flags = maxwell3d->dirty.flags;
     if (!flags[Dirty::PointSize]) {
         return;
@@ -1275,7 +1336,8 @@ void RasterizerOpenGL::SyncPointState() {
     glPointSize((std::max)(1.0f, maxwell3d->regs.point_size * scale));
 }
 
-void RasterizerOpenGL::SyncLineState() {
+void RasterizerOpenGL::SyncLineState()
+{
     auto& flags = maxwell3d->dirty.flags;
     if (!flags[Dirty::LineWidth]) {
         return;
@@ -1287,7 +1349,8 @@ void RasterizerOpenGL::SyncLineState() {
     glLineWidth(regs.line_anti_alias_enable ? regs.line_width_smooth : regs.line_width_aliased);
 }
 
-void RasterizerOpenGL::SyncPolygonOffset() {
+void RasterizerOpenGL::SyncPolygonOffset()
+{
     auto& flags = maxwell3d->dirty.flags;
     if (!flags[Dirty::PolygonOffset]) {
         return;
@@ -1307,7 +1370,8 @@ void RasterizerOpenGL::SyncPolygonOffset() {
     }
 }
 
-void RasterizerOpenGL::SyncAlphaTest() {
+void RasterizerOpenGL::SyncAlphaTest()
+{
     auto& flags = maxwell3d->dirty.flags;
     if (!flags[Dirty::AlphaTest]) {
         return;
@@ -1323,7 +1387,8 @@ void RasterizerOpenGL::SyncAlphaTest() {
     }
 }
 
-void RasterizerOpenGL::SyncFramebufferSRGB() {
+void RasterizerOpenGL::SyncFramebufferSRGB()
+{
     auto& flags = maxwell3d->dirty.flags;
     if (!flags[Dirty::FramebufferSRGB]) {
         return;
@@ -1333,7 +1398,8 @@ void RasterizerOpenGL::SyncFramebufferSRGB() {
     oglEnable(GL_FRAMEBUFFER_SRGB, maxwell3d->regs.framebuffer_srgb);
 }
 
-void RasterizerOpenGL::BeginTransformFeedback(GraphicsPipeline* program, GLenum primitive_mode) {
+void RasterizerOpenGL::BeginTransformFeedback(GraphicsPipeline* program, GLenum primitive_mode)
+{
     const auto& regs = maxwell3d->regs;
     if (regs.transform_feedback_enabled == 0) {
         return;
@@ -1350,13 +1416,15 @@ void RasterizerOpenGL::BeginTransformFeedback(GraphicsPipeline* program, GLenum 
     glBeginTransformFeedback(primitive_mode);
 }
 
-void RasterizerOpenGL::EndTransformFeedback() {
+void RasterizerOpenGL::EndTransformFeedback()
+{
     if (maxwell3d->regs.transform_feedback_enabled != 0) {
         glEndTransformFeedback();
     }
 }
 
-void RasterizerOpenGL::InitializeChannel(Tegra::Control::ChannelState& channel) {
+void RasterizerOpenGL::InitializeChannel(Tegra::Control::ChannelState& channel)
+{
     CreateChannel(channel);
     {
         std::scoped_lock lock{buffer_cache.mutex, texture_cache.mutex};
@@ -1368,7 +1436,8 @@ void RasterizerOpenGL::InitializeChannel(Tegra::Control::ChannelState& channel) 
     state_tracker.SetupTables(channel);
 }
 
-void RasterizerOpenGL::BindChannel(Tegra::Control::ChannelState& channel) {
+void RasterizerOpenGL::BindChannel(Tegra::Control::ChannelState& channel)
+{
     const s32 channel_id = channel.bind_id;
     BindToChannel(channel_id);
     {
@@ -1382,7 +1451,8 @@ void RasterizerOpenGL::BindChannel(Tegra::Control::ChannelState& channel) {
     state_tracker.InvalidateState();
 }
 
-void RasterizerOpenGL::ReleaseChannel(s32 channel_id) {
+void RasterizerOpenGL::ReleaseChannel(s32 channel_id)
+{
     EraseChannel(channel_id);
     {
         std::scoped_lock lock{buffer_cache.mutex, texture_cache.mutex};
@@ -1393,27 +1463,33 @@ void RasterizerOpenGL::ReleaseChannel(s32 channel_id) {
     query_cache.EraseChannel(channel_id);
 }
 
-void RasterizerOpenGL::RegisterTransformFeedback(GPUVAddr tfb_object_addr) {
+void RasterizerOpenGL::RegisterTransformFeedback(GPUVAddr tfb_object_addr)
+{
     buffer_cache_runtime.BindTransformFeedbackObject(tfb_object_addr);
 }
 
 AccelerateDMA::AccelerateDMA(BufferCache& buffer_cache_, TextureCache& texture_cache_)
-    : buffer_cache{buffer_cache_}, texture_cache{texture_cache_} {}
+    : buffer_cache{buffer_cache_}, texture_cache{texture_cache_}
+{
+}
 
-bool AccelerateDMA::BufferCopy(GPUVAddr src_address, GPUVAddr dest_address, u64 amount) {
+bool AccelerateDMA::BufferCopy(GPUVAddr src_address, GPUVAddr dest_address, u64 amount)
+{
     std::scoped_lock lock{buffer_cache.mutex};
     return buffer_cache.DMACopy(src_address, dest_address, amount);
 }
 
-bool AccelerateDMA::BufferClear(GPUVAddr src_address, u64 amount, u32 value) {
+bool AccelerateDMA::BufferClear(GPUVAddr src_address, u64 amount, u32 value)
+{
     std::scoped_lock lock{buffer_cache.mutex};
     return buffer_cache.DMAClear(src_address, amount, value);
 }
 
-template <bool IS_IMAGE_UPLOAD>
+template<bool IS_IMAGE_UPLOAD>
 bool AccelerateDMA::DmaBufferImageCopy(const Tegra::DMA::ImageCopy& copy_info,
                                        const Tegra::DMA::BufferOperand& buffer_operand,
-                                       const Tegra::DMA::ImageOperand& image_operand) {
+                                       const Tegra::DMA::ImageOperand& image_operand)
+{
     std::scoped_lock lock{buffer_cache.mutex, texture_cache.mutex};
     const auto image_id = texture_cache.DmaImageId(image_operand, IS_IMAGE_UPLOAD);
     if (image_id == VideoCommon::NULL_IMAGE_ID) {
@@ -1445,13 +1521,15 @@ bool AccelerateDMA::DmaBufferImageCopy(const Tegra::DMA::ImageCopy& copy_info,
 
 bool AccelerateDMA::ImageToBuffer(const Tegra::DMA::ImageCopy& copy_info,
                                   const Tegra::DMA::ImageOperand& image_operand,
-                                  const Tegra::DMA::BufferOperand& buffer_operand) {
+                                  const Tegra::DMA::BufferOperand& buffer_operand)
+{
     return DmaBufferImageCopy<false>(copy_info, buffer_operand, image_operand);
 }
 
 bool AccelerateDMA::BufferToImage(const Tegra::DMA::ImageCopy& copy_info,
                                   const Tegra::DMA::BufferOperand& buffer_operand,
-                                  const Tegra::DMA::ImageOperand& image_operand) {
+                                  const Tegra::DMA::ImageOperand& image_operand)
+{
     return DmaBufferImageCopy<true>(copy_info, buffer_operand, image_operand);
 }
 

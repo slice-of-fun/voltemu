@@ -10,10 +10,10 @@
 
 #pragma once
 
-#define AREATEX_WIDTH 160
+#define AREATEX_WIDTH  160
 #define AREATEX_HEIGHT 560
-#define AREATEX_PITCH (AREATEX_WIDTH * 2)
-#define AREATEX_SIZE (AREATEX_HEIGHT * AREATEX_PITCH)
+#define AREATEX_PITCH  (AREATEX_WIDTH * 2)
+#define AREATEX_SIZE   (AREATEX_HEIGHT * AREATEX_PITCH)
 
 /**
  * Stored in R8G8 format. Load it in the following format:

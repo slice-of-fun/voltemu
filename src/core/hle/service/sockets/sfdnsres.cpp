@@ -4,6 +4,8 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/sockets/sfdnsres.h"
+
 #include <string_view>
 #include <utility>
 #include <vector>
@@ -12,7 +14,6 @@
 #include "common/swap.h"
 #include "core/core.h"
 #include "core/hle/service/ipc_helpers.h"
-#include "core/hle/service/sockets/sfdnsres.h"
 #include "core/hle/service/sockets/sockets.h"
 #include "core/hle/service/sockets/sockets_translate.h"
 #include "core/internal_network/network.h"
@@ -20,7 +21,8 @@
 
 namespace Service::Sockets {
 
-SFDNSRES::SFDNSRES(Core::System& system_) : ServiceFramework{system_, "sfdnsres"} {
+SFDNSRES::SFDNSRES(Core::System& system_) : ServiceFramework{system_, "sfdnsres"}
+{
     static const FunctionInfo functions[] = {
         {0, nullptr, "SetDnsAddressesPrivateRequest"},
         {1, nullptr, "GetDnsAddressPrivateRequest"},
@@ -54,7 +56,7 @@ enum class NetDbError : s32 {
 };
 
 static const constexpr std::array blockedDomains = {
-    "srv.nintendo.net", //obvious
+    "srv.nintendo.net", // obvious
     "nintendo.es",
     "nintendowifi.net",
     "nintendo-europe.com",
@@ -86,22 +88,23 @@ static const constexpr std::array blockedDomains = {
     "nintendoswitch.com.cn",
     "nintendoswitch.com",
     "sun.hac.lp1.d4c.nintendo.net",
-    "phoenix-api.wbagora.com", //hogwarts legacy
+    "phoenix-api.wbagora.com", // hogwarts legacy
     "battle.net",
-    "microsoft.com", //minecraft dungeons + other games
+    "microsoft.com", // minecraft dungeons + other games
     "mojang.com",
     "xboxlive.com",
     "api.epicgames.dev", // marvel cosmic invasion +?
-    "minecraftservices.com"
-};
+    "minecraftservices.com"};
 
-static bool IsBlockedHost(const std::string& host) {
+static bool IsBlockedHost(const std::string& host)
+{
     return std::any_of(
         blockedDomains.begin(), blockedDomains.end(),
         [&host](const std::string& domain) { return host.find(domain) != std::string::npos; });
 }
 
-static NetDbError GetAddrInfoErrorToNetDbError(GetAddrInfoError result) {
+static NetDbError GetAddrInfoErrorToNetDbError(GetAddrInfoError result)
+{
     // These combinations have been verified on console (but are not
     // exhaustive).
     switch (result) {
@@ -118,7 +121,8 @@ static NetDbError GetAddrInfoErrorToNetDbError(GetAddrInfoError result) {
     }
 }
 
-static Errno GetAddrInfoErrorToErrno(GetAddrInfoError result) {
+static Errno GetAddrInfoErrorToErrno(GetAddrInfoError result)
+{
     // These combinations have been verified on console (but are not
     // exhaustive).
     switch (result) {
@@ -137,14 +141,15 @@ static Errno GetAddrInfoErrorToErrno(GetAddrInfoError result) {
     }
 }
 
-template <typename T>
-static void Append(std::vector<u8>& vec, T t) {
+template<typename T> static void Append(std::vector<u8>& vec, T t)
+{
     const size_t offset = vec.size();
     vec.resize(offset + sizeof(T));
     std::memcpy(vec.data() + offset, &t, sizeof(T));
 }
 
-static void AppendNulTerminated(std::vector<u8>& vec, std::string_view str) {
+static void AppendNulTerminated(std::vector<u8>& vec, std::string_view str)
+{
     const size_t offset = vec.size();
     vec.resize(offset + str.size() + 1);
     std::memmove(vec.data() + offset, str.data(), str.size());
@@ -155,7 +160,8 @@ static void AppendNulTerminated(std::vector<u8>& vec, std::string_view str) {
 // behaves the same on Unix and Windows, unlike gethostbyname where Windows
 // doesn't implement h_errno.
 static std::vector<u8> SerializeAddrInfoAsHostEnt(const std::vector<Network::AddrInfo>& vec,
-                                                  std::string_view host) {
+                                                  std::string_view host)
+{
 
     std::vector<u8> data;
     // h_name: use the input hostname (append nul-terminated)
@@ -181,7 +187,8 @@ static std::vector<u8> SerializeAddrInfoAsHostEnt(const std::vector<Network::Add
     return data;
 }
 
-static std::pair<u32, GetAddrInfoError> GetHostByNameRequestImpl(HLERequestContext& ctx) {
+static std::pair<u32, GetAddrInfoError> GetHostByNameRequestImpl(HLERequestContext& ctx)
+{
     struct InputParameters {
         u8 use_nsd_resolve;
         u32 cancel_handle;
@@ -219,7 +226,8 @@ static std::pair<u32, GetAddrInfoError> GetHostByNameRequestImpl(HLERequestConte
     return {data_size, GetAddrInfoError::SUCCESS};
 }
 
-void SFDNSRES::GetHostByNameRequest(HLERequestContext& ctx) {
+void SFDNSRES::GetHostByNameRequest(HLERequestContext& ctx)
+{
     auto [data_size, emu_gai_err] = GetHostByNameRequestImpl(ctx);
 
     struct OutputParameters {
@@ -238,7 +246,8 @@ void SFDNSRES::GetHostByNameRequest(HLERequestContext& ctx) {
     });
 }
 
-void SFDNSRES::GetHostByNameRequestWithOptions(HLERequestContext& ctx) {
+void SFDNSRES::GetHostByNameRequestWithOptions(HLERequestContext& ctx)
+{
     auto [data_size, emu_gai_err] = GetHostByNameRequestImpl(ctx);
 
     struct OutputParameters {
@@ -258,7 +267,8 @@ void SFDNSRES::GetHostByNameRequestWithOptions(HLERequestContext& ctx) {
 }
 
 static std::vector<u8> SerializeAddrInfo(const std::vector<Network::AddrInfo>& vec,
-                                         std::string_view host) {
+                                         std::string_view host)
+{
     // Adapted from
     // https://github.com/switchbrew/libnx/blob/c5a9a909a91657a9818a3b7e18c9b91ff0cbb6e3/nx/source/runtime/resolver.c#L190
     std::vector<u8> data;
@@ -270,7 +280,7 @@ static std::vector<u8> SerializeAddrInfo(const std::vector<Network::AddrInfo>& v
         Append<u32_be>(data, static_cast<u32>(Translate(addrinfo.family)));      // ai_family
         Append<u32_be>(data, static_cast<u32>(Translate(addrinfo.socket_type))); // ai_socktype
         Append<u32_be>(data, static_cast<u32>(Translate(addrinfo.protocol)));    // ai_protocol
-        Append<u32_be>(data, 16); // ai_addrlen
+        Append<u32_be>(data, 16);                                                // ai_addrlen
         // ^ *not* sizeof(SerializedSockAddrIn), not that it matters since they're the same size
 
         // ai_addr:
@@ -296,7 +306,8 @@ static std::vector<u8> SerializeAddrInfo(const std::vector<Network::AddrInfo>& v
     return data;
 }
 
-static std::pair<u32, GetAddrInfoError> GetAddrInfoRequestImpl(HLERequestContext& ctx) {
+static std::pair<u32, GetAddrInfoError> GetAddrInfoRequestImpl(HLERequestContext& ctx)
+{
     struct InputParameters {
         u8 use_nsd_resolve;
         u32 cancel_handle;
@@ -344,7 +355,8 @@ static std::pair<u32, GetAddrInfoError> GetAddrInfoRequestImpl(HLERequestContext
     return {data_size, GetAddrInfoError::SUCCESS};
 }
 
-void SFDNSRES::GetAddrInfoRequest(HLERequestContext& ctx) {
+void SFDNSRES::GetAddrInfoRequest(HLERequestContext& ctx)
+{
     auto [data_size, emu_gai_err] = GetAddrInfoRequestImpl(ctx);
 
     struct OutputParameters {
@@ -363,7 +375,8 @@ void SFDNSRES::GetAddrInfoRequest(HLERequestContext& ctx) {
     });
 }
 
-void SFDNSRES::GetGaiStringErrorRequest(HLERequestContext& ctx) {
+void SFDNSRES::GetGaiStringErrorRequest(HLERequestContext& ctx)
+{
     struct InputParameters {
         GetAddrInfoError gai_errno;
     };
@@ -377,7 +390,8 @@ void SFDNSRES::GetGaiStringErrorRequest(HLERequestContext& ctx) {
     rb.Push(ResultSuccess);
 }
 
-void SFDNSRES::GetAddrInfoRequestWithOptions(HLERequestContext& ctx) {
+void SFDNSRES::GetAddrInfoRequestWithOptions(HLERequestContext& ctx)
+{
     // Additional options are ignored
     auto [data_size, emu_gai_err] = GetAddrInfoRequestImpl(ctx);
 
@@ -399,7 +413,8 @@ void SFDNSRES::GetAddrInfoRequestWithOptions(HLERequestContext& ctx) {
     });
 }
 
-void SFDNSRES::ResolverSetOptionRequest(HLERequestContext& ctx) {
+void SFDNSRES::ResolverSetOptionRequest(HLERequestContext& ctx)
+{
     LOG_WARNING(Service, "(STUBBED) called");
 
     IPC::ResponseBuilder rb{ctx, 3};

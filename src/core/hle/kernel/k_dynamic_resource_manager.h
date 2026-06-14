@@ -10,8 +10,7 @@
 
 namespace Kernel {
 
-template <typename T, bool ClearNode = false>
-class KDynamicResourceManager {
+template<typename T, bool ClearNode = false> class KDynamicResourceManager {
     YUZU_NON_COPYABLE(KDynamicResourceManager);
     YUZU_NON_MOVEABLE(KDynamicResourceManager);
 
@@ -21,31 +20,20 @@ public:
 public:
     constexpr KDynamicResourceManager() = default;
 
-    constexpr size_t GetSize() const {
-        return m_slab_heap->GetSize();
-    }
-    constexpr size_t GetUsed() const {
-        return m_slab_heap->GetUsed();
-    }
-    constexpr size_t GetPeak() const {
-        return m_slab_heap->GetPeak();
-    }
-    constexpr size_t GetCount() const {
-        return m_slab_heap->GetCount();
-    }
+    constexpr size_t GetSize() const { return m_slab_heap->GetSize(); }
+    constexpr size_t GetUsed() const { return m_slab_heap->GetUsed(); }
+    constexpr size_t GetPeak() const { return m_slab_heap->GetPeak(); }
+    constexpr size_t GetCount() const { return m_slab_heap->GetCount(); }
 
-    void Initialize(KDynamicPageManager* page_allocator, DynamicSlabType* slab_heap) {
+    void Initialize(KDynamicPageManager* page_allocator, DynamicSlabType* slab_heap)
+    {
         m_page_allocator = page_allocator;
         m_slab_heap = slab_heap;
     }
 
-    T* Allocate() const {
-        return m_slab_heap->Allocate(m_page_allocator);
-    }
+    T* Allocate() const { return m_slab_heap->Allocate(m_page_allocator); }
 
-    void Free(T* t) const {
-        m_slab_heap->Free(t);
-    }
+    void Free(T* t) const { m_slab_heap->Free(t); }
 
 private:
     KDynamicPageManager* m_page_allocator{};

@@ -4,14 +4,16 @@
 // SPDX-FileCopyrightText: 2014 Citra Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "video_core/surface.h"
+
 #include "common/common_types.h"
 #include "common/math_util.h"
 #include "common/settings.h"
-#include "video_core/surface.h"
 
 namespace VideoCore::Surface {
 
-SurfaceTarget SurfaceTargetFromTextureType(Tegra::Texture::TextureType texture_type) {
+SurfaceTarget SurfaceTargetFromTextureType(Tegra::Texture::TextureType texture_type)
+{
     switch (texture_type) {
     case Tegra::Texture::TextureType::Texture1D:
         return SurfaceTarget::Texture1D;
@@ -37,7 +39,8 @@ SurfaceTarget SurfaceTargetFromTextureType(Tegra::Texture::TextureType texture_t
     }
 }
 
-bool SurfaceTargetIsLayered(SurfaceTarget target) {
+bool SurfaceTargetIsLayered(SurfaceTarget target)
+{
     switch (target) {
     case SurfaceTarget::Texture1D:
     case SurfaceTarget::TextureBuffer:
@@ -56,7 +59,8 @@ bool SurfaceTargetIsLayered(SurfaceTarget target) {
     }
 }
 
-bool SurfaceTargetIsArray(SurfaceTarget target) {
+bool SurfaceTargetIsArray(SurfaceTarget target)
+{
     switch (target) {
     case SurfaceTarget::Texture1D:
     case SurfaceTarget::TextureBuffer:
@@ -75,7 +79,8 @@ bool SurfaceTargetIsArray(SurfaceTarget target) {
     }
 }
 
-PixelFormat PixelFormatFromDepthFormat(Tegra::DepthFormat format) {
+PixelFormat PixelFormatFromDepthFormat(Tegra::DepthFormat format)
+{
     switch (format) {
     case Tegra::DepthFormat::Z24_UNORM_S8_UINT:
         return PixelFormat::S8_UINT_D24_UNORM;
@@ -97,7 +102,8 @@ PixelFormat PixelFormatFromDepthFormat(Tegra::DepthFormat format) {
     }
 }
 
-PixelFormat PixelFormatFromRenderTargetFormat(Tegra::RenderTargetFormat format) {
+PixelFormat PixelFormatFromRenderTargetFormat(Tegra::RenderTargetFormat format)
+{
     switch (format) {
     case Tegra::RenderTargetFormat::R32G32B32A32_FLOAT:
     case Tegra::RenderTargetFormat::R32G32B32X32_FLOAT:
@@ -205,7 +211,8 @@ PixelFormat PixelFormatFromRenderTargetFormat(Tegra::RenderTargetFormat format) 
     }
 }
 
-PixelFormat PixelFormatFromGPUPixelFormat(Service::android::PixelFormat format) {
+PixelFormat PixelFormatFromGPUPixelFormat(Service::android::PixelFormat format)
+{
     switch (format) {
     case Service::android::PixelFormat::Rgba8888:
     case Service::android::PixelFormat::Rgbx8888:
@@ -220,7 +227,8 @@ PixelFormat PixelFormatFromGPUPixelFormat(Service::android::PixelFormat format) 
     }
 }
 
-SurfaceType GetFormatType(PixelFormat pixel_format) {
+SurfaceType GetFormatType(PixelFormat pixel_format)
+{
     if (pixel_format < PixelFormat::MaxColorFormat) {
         return SurfaceType::ColorTexture;
     }
@@ -240,45 +248,47 @@ SurfaceType GetFormatType(PixelFormat pixel_format) {
     return SurfaceType::Invalid;
 }
 
-bool HasAlpha(PixelFormat pixel_format) {
+bool HasAlpha(PixelFormat pixel_format)
+{
     switch (pixel_format) {
-        case PixelFormat::A8B8G8R8_UNORM:
-        case PixelFormat::A8B8G8R8_SNORM:
-        case PixelFormat::A8B8G8R8_SINT:
-        case PixelFormat::A8B8G8R8_UINT:
-        case PixelFormat::A1R5G5B5_UNORM:
-        case PixelFormat::A2B10G10R10_UNORM:
-        case PixelFormat::A2B10G10R10_UINT:
-        case PixelFormat::A2R10G10B10_UNORM:
-        case PixelFormat::A1B5G5R5_UNORM:
-        case PixelFormat::A5B5G5R1_UNORM:
-        case PixelFormat::R16G16B16A16_FLOAT:
-        case PixelFormat::R16G16B16A16_UNORM:
-        case PixelFormat::R16G16B16A16_SNORM:
-        case PixelFormat::R16G16B16A16_SINT:
-        case PixelFormat::R16G16B16A16_UINT:
-        case PixelFormat::R32G32B32A32_UINT:
-        case PixelFormat::BC1_RGBA_UNORM:
-        case PixelFormat::B8G8R8A8_UNORM:
-        case PixelFormat::R32G32B32A32_FLOAT:
-        case PixelFormat::R32G32B32A32_SINT:
-        case PixelFormat::A8B8G8R8_SRGB:
-        case PixelFormat::B8G8R8A8_SRGB:
-        case PixelFormat::BC1_RGBA_SRGB:
-        case PixelFormat::A4B4G4R4_UNORM:
-        case PixelFormat::BC2_SRGB:
-        case PixelFormat::BC2_UNORM:
-        case PixelFormat::BC3_SRGB:
-        case PixelFormat::BC3_UNORM:
-        case PixelFormat::BC7_SRGB:
-        case PixelFormat::BC7_UNORM:
-            return true;
-        default:
-            return false;
+    case PixelFormat::A8B8G8R8_UNORM:
+    case PixelFormat::A8B8G8R8_SNORM:
+    case PixelFormat::A8B8G8R8_SINT:
+    case PixelFormat::A8B8G8R8_UINT:
+    case PixelFormat::A1R5G5B5_UNORM:
+    case PixelFormat::A2B10G10R10_UNORM:
+    case PixelFormat::A2B10G10R10_UINT:
+    case PixelFormat::A2R10G10B10_UNORM:
+    case PixelFormat::A1B5G5R5_UNORM:
+    case PixelFormat::A5B5G5R1_UNORM:
+    case PixelFormat::R16G16B16A16_FLOAT:
+    case PixelFormat::R16G16B16A16_UNORM:
+    case PixelFormat::R16G16B16A16_SNORM:
+    case PixelFormat::R16G16B16A16_SINT:
+    case PixelFormat::R16G16B16A16_UINT:
+    case PixelFormat::R32G32B32A32_UINT:
+    case PixelFormat::BC1_RGBA_UNORM:
+    case PixelFormat::B8G8R8A8_UNORM:
+    case PixelFormat::R32G32B32A32_FLOAT:
+    case PixelFormat::R32G32B32A32_SINT:
+    case PixelFormat::A8B8G8R8_SRGB:
+    case PixelFormat::B8G8R8A8_SRGB:
+    case PixelFormat::BC1_RGBA_SRGB:
+    case PixelFormat::A4B4G4R4_UNORM:
+    case PixelFormat::BC2_SRGB:
+    case PixelFormat::BC2_UNORM:
+    case PixelFormat::BC3_SRGB:
+    case PixelFormat::BC3_UNORM:
+    case PixelFormat::BC7_SRGB:
+    case PixelFormat::BC7_UNORM:
+        return true;
+    default:
+        return false;
     }
 }
 
-bool IsPixelFormatASTC(PixelFormat format) {
+bool IsPixelFormatASTC(PixelFormat format)
+{
     switch (format) {
     case PixelFormat::ASTC_2D_4X4_UNORM:
     case PixelFormat::ASTC_2D_5X4_UNORM:
@@ -314,7 +324,8 @@ bool IsPixelFormatASTC(PixelFormat format) {
     }
 }
 
-bool IsPixelFormatBCn(PixelFormat format) {
+bool IsPixelFormatBCn(PixelFormat format)
+{
     switch (format) {
     case PixelFormat::BC1_RGBA_UNORM:
     case PixelFormat::BC2_UNORM:
@@ -336,7 +347,8 @@ bool IsPixelFormatBCn(PixelFormat format) {
     }
 }
 
-bool IsPixelFormatETC2(PixelFormat format) {
+bool IsPixelFormatETC2(PixelFormat format)
+{
     switch (format) {
     case PixelFormat::ETC2_RGB_UNORM:
     case PixelFormat::ETC2_RGBA_UNORM:
@@ -350,7 +362,8 @@ bool IsPixelFormatETC2(PixelFormat format) {
     }
 }
 
-bool IsPixelFormatSRGB(PixelFormat format) {
+bool IsPixelFormatSRGB(PixelFormat format)
+{
     switch (format) {
     case PixelFormat::A8B8G8R8_SRGB:
     case PixelFormat::B8G8R8A8_SRGB:
@@ -381,7 +394,8 @@ bool IsPixelFormatSRGB(PixelFormat format) {
     }
 }
 
-bool IsPixelFormatInteger(PixelFormat format) {
+bool IsPixelFormatInteger(PixelFormat format)
+{
     switch (format) {
     case PixelFormat::A8B8G8R8_SINT:
     case PixelFormat::A8B8G8R8_UINT:
@@ -408,7 +422,8 @@ bool IsPixelFormatInteger(PixelFormat format) {
     }
 }
 
-bool IsPixelFormatSignedInteger(PixelFormat format) {
+bool IsPixelFormatSignedInteger(PixelFormat format)
+{
     switch (format) {
     case PixelFormat::A8B8G8R8_SINT:
     case PixelFormat::R8_SINT:
@@ -425,7 +440,8 @@ bool IsPixelFormatSignedInteger(PixelFormat format) {
     }
 }
 
-size_t PixelComponentSizeBitsInteger(PixelFormat format) {
+size_t PixelComponentSizeBitsInteger(PixelFormat format)
+{
     switch (format) {
     case PixelFormat::A8B8G8R8_SINT:
     case PixelFormat::A8B8G8R8_UINT:
@@ -455,11 +471,13 @@ size_t PixelComponentSizeBitsInteger(PixelFormat format) {
     }
 }
 
-std::pair<u32, u32> GetASTCBlockSize(PixelFormat format) {
+std::pair<u32, u32> GetASTCBlockSize(PixelFormat format)
+{
     return {DefaultBlockWidth(format), DefaultBlockHeight(format)};
 }
 
-u64 TranscodedAstcSize(u64 base_size, PixelFormat format) {
+u64 TranscodedAstcSize(u64 base_size, PixelFormat format)
+{
     constexpr u64 RGBA8_PIXEL_SIZE = 4;
     const u64 base_block_size = static_cast<u64>(DefaultBlockWidth(format)) *
                                 static_cast<u64>(DefaultBlockHeight(format)) * RGBA8_PIXEL_SIZE;

@@ -33,7 +33,8 @@ public:
 public:
     explicit KHandleTable(KernelCore& kernel) : m_kernel(kernel) {}
 
-    Result Initialize(s32 size) {
+    Result Initialize(s32 size)
+    {
         // Check that the table size is valid.
         R_UNLESS(size <= static_cast<s32>(MaxTableSize), ResultOutOfMemory);
 
@@ -58,21 +59,16 @@ public:
         R_SUCCEED();
     }
 
-    size_t GetTableSize() const {
-        return m_table_size;
-    }
-    size_t GetCount() const {
-        return m_count;
-    }
-    size_t GetMaxCount() const {
-        return m_max_count;
-    }
+    size_t GetTableSize() const { return m_table_size; }
+    size_t GetCount() const { return m_count; }
+    size_t GetMaxCount() const { return m_max_count; }
 
     void Finalize();
     bool Remove(Handle handle);
 
-    template <typename T = KAutoObject>
-    KScopedAutoObject<T> GetObjectWithoutPseudoHandle(Handle handle) const {
+    template<typename T = KAutoObject>
+    KScopedAutoObject<T> GetObjectWithoutPseudoHandle(Handle handle) const
+    {
         // Lock and look up in table.
         KScopedDisableDispatch dd{m_kernel};
         KScopedSpinLock lk(m_lock);
@@ -88,8 +84,8 @@ public:
         }
     }
 
-    template <typename T = KAutoObject>
-    KScopedAutoObject<T> GetObject(Handle handle) const {
+    template<typename T = KAutoObject> KScopedAutoObject<T> GetObject(Handle handle) const
+    {
         // Handle pseudo-handles.
         if constexpr (std::derived_from<KProcess, T>) {
             if (handle == Svc::PseudoHandle::CurrentProcess) {
@@ -108,7 +104,8 @@ public:
         return this->template GetObjectWithoutPseudoHandle<T>(handle);
     }
 
-    KScopedAutoObject<KAutoObject> GetObjectForIpcWithoutPseudoHandle(Handle handle) const {
+    KScopedAutoObject<KAutoObject> GetObjectForIpcWithoutPseudoHandle(Handle handle) const
+    {
         // Lock and look up in table.
         KScopedDisableDispatch dd{m_kernel};
         KScopedSpinLock lk(m_lock);
@@ -118,7 +115,8 @@ public:
 
     KScopedAutoObject<KAutoObject> GetObjectForIpc(Handle handle, KThread* cur_thread) const;
 
-    KScopedAutoObject<KAutoObject> GetObjectByIndex(Handle* out_handle, size_t index) const {
+    KScopedAutoObject<KAutoObject> GetObjectByIndex(Handle* out_handle, size_t index) const
+    {
         KScopedDisableDispatch dd{m_kernel};
         KScopedSpinLock lk(m_lock);
 
@@ -131,8 +129,9 @@ public:
     Result Add(Handle* out_handle, KAutoObject* obj);
     void Register(Handle handle, KAutoObject* obj);
 
-    template <typename T>
-    bool GetMultipleObjects(T** out, const Handle* handles, size_t num_handles) const {
+    template<typename T>
+    bool GetMultipleObjects(T** out, const Handle* handles, size_t num_handles) const
+    {
         // Try to convert and open all the handles.
         size_t num_opened;
         {
@@ -175,7 +174,8 @@ public:
     }
 
 private:
-    s32 AllocateEntry() {
+    s32 AllocateEntry()
+    {
         ASSERT(m_count < m_table_size);
 
         const auto index = m_free_head_index;
@@ -187,7 +187,8 @@ private:
         return index;
     }
 
-    void FreeEntry(s32 index) {
+    void FreeEntry(s32 index)
+    {
         ASSERT(m_count > 0);
 
         m_objects[index] = nullptr;
@@ -198,7 +199,8 @@ private:
         --m_count;
     }
 
-    u16 AllocateLinearId() {
+    u16 AllocateLinearId()
+    {
         const u16 id = m_next_linear_id++;
         if (m_next_linear_id > MaxLinearId) {
             m_next_linear_id = MinLinearId;
@@ -206,7 +208,8 @@ private:
         return id;
     }
 
-    bool IsValidHandle(Handle handle) const {
+    bool IsValidHandle(Handle handle) const
+    {
         // Unpack the handle.
         const auto handle_pack = HandlePack(handle);
         const auto raw_value = handle_pack.raw;
@@ -237,7 +240,8 @@ private:
         return true;
     }
 
-    KAutoObject* GetObjectImpl(Handle handle) const {
+    KAutoObject* GetObjectImpl(Handle handle) const
+    {
         // Handles must not have reserved bits set.
         const auto handle_pack = HandlePack(handle);
         if (handle_pack.reserved != 0) [[unlikely]] {
@@ -251,7 +255,8 @@ private:
         }
     }
 
-    KAutoObject* GetObjectByIndexImpl(Handle* out_handle, size_t index) const {
+    KAutoObject* GetObjectByIndexImpl(Handle* out_handle, size_t index) const
+    {
         // Index must be in bounds.
         if (index >= m_table_size) [[unlikely]] {
             return nullptr;
@@ -277,7 +282,8 @@ private:
         BitField<30, 2, u32> reserved;
     };
 
-    static constexpr Handle EncodeHandle(u16 index, u16 linear_id) {
+    static constexpr Handle EncodeHandle(u16 index, u16 linear_id)
+    {
         HandlePack handle{};
         handle.index.Assign(index);
         handle.linear_id.Assign(linear_id);
@@ -293,12 +299,8 @@ private:
         u16 linear_id;
         s16 next_free_index;
 
-        constexpr u16 GetLinearId() const {
-            return linear_id;
-        }
-        constexpr s32 GetNextFreeIndex() const {
-            return next_free_index;
-        }
+        constexpr u16 GetLinearId() const { return linear_id; }
+        constexpr s32 GetNextFreeIndex() const { return next_free_index; }
     };
 
 private:

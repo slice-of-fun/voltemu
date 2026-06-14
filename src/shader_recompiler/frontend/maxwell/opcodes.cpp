@@ -3,15 +3,17 @@
 // SPDX-FileCopyrightText: Copyright 2021 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "shader_recompiler/frontend/maxwell/opcodes.h"
+
 #include <array>
 #include <string_view>
 
 #include "shader_recompiler/exception.h"
-#include "shader_recompiler/frontend/maxwell/opcodes.h"
 
 namespace Shader::Maxwell {
 
-const char* NameOf(Opcode opcode) {
+const char* NameOf(Opcode opcode)
+{
     constexpr const char* NAME_TABLE[] = {
 #define INST(name, cute, encode) cute,
 #include "maxwell.inc"

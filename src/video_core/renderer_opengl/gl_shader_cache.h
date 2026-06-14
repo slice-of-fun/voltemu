@@ -6,8 +6,9 @@
 
 #pragma once
 
-#include <filesystem>
 #include <ankerl/unordered_dense.h>
+
+#include <filesystem>
 
 #include "common/common_types.h"
 #include "common/thread_worker.h"
@@ -52,10 +53,10 @@ private:
 
     std::unique_ptr<GraphicsPipeline> CreateGraphicsPipeline();
 
-    std::unique_ptr<GraphicsPipeline> CreateGraphicsPipeline(
-        ShaderContext::ShaderPools& pools, const GraphicsPipelineKey& key,
-        std::span<Shader::Environment* const> envs, bool use_shader_workers,
-        bool force_context_flush = false);
+    std::unique_ptr<GraphicsPipeline>
+    CreateGraphicsPipeline(ShaderContext::ShaderPools& pools, const GraphicsPipelineKey& key,
+                           std::span<Shader::Environment* const> envs, bool use_shader_workers,
+                           bool force_context_flush = false);
 
     std::unique_ptr<ComputePipeline> CreateComputePipeline(const ComputePipelineKey& key,
                                                            const VideoCommon::ShaderInfo* shader);
@@ -81,8 +82,10 @@ private:
     GraphicsPipeline* current_pipeline{};
 
     ShaderContext::ShaderPools main_pools;
-    ankerl::unordered_dense::map<GraphicsPipelineKey, std::unique_ptr<GraphicsPipeline>> graphics_cache;
-    ankerl::unordered_dense::map<ComputePipelineKey, std::unique_ptr<ComputePipeline>> compute_cache;
+    ankerl::unordered_dense::map<GraphicsPipelineKey, std::unique_ptr<GraphicsPipeline>>
+        graphics_cache;
+    ankerl::unordered_dense::map<ComputePipelineKey, std::unique_ptr<ComputePipeline>>
+        compute_cache;
 
     Shader::Profile profile;
     Shader::HostTranslateInfo host_info;

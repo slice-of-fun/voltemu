@@ -6,15 +6,16 @@
 
 #pragma once
 
+#include <fmt/ranges.h>
+
 #include <array>
 #include <filesystem>
 #include <map>
 #include <optional>
 #include <span>
 #include <string>
-
 #include <variant>
-#include <fmt/ranges.h>
+
 #include "common/common_funcs.h"
 #include "common/common_types.h"
 #include "core/crypto/partition_data_manager.h"
@@ -140,24 +141,25 @@ struct Ticket {
 static_assert(sizeof(Key128) == 16, "Key128 must be 128 bytes big.");
 static_assert(sizeof(Key256) == 32, "Key256 must be 256 bytes big.");
 
-template <size_t bit_size, size_t byte_size = (bit_size >> 3)>
-struct RSAKeyPair {
+template<size_t bit_size, size_t byte_size = (bit_size >> 3)> struct RSAKeyPair {
     std::array<u8, byte_size> encryption_key;
     std::array<u8, byte_size> decryption_key;
     std::array<u8, byte_size> modulus;
     std::array<u8, 4> exponent;
 };
 
-template <size_t bit_size, size_t byte_size>
+template<size_t bit_size, size_t byte_size>
 bool operator==(const RSAKeyPair<bit_size, byte_size>& lhs,
-                const RSAKeyPair<bit_size, byte_size>& rhs) {
+                const RSAKeyPair<bit_size, byte_size>& rhs)
+{
     return std::tie(lhs.encryption_key, lhs.decryption_key, lhs.modulus, lhs.exponent) ==
            std::tie(rhs.encryption_key, rhs.decryption_key, rhs.modulus, rhs.exponent);
 }
 
-template <size_t bit_size, size_t byte_size>
+template<size_t bit_size, size_t byte_size>
 bool operator!=(const RSAKeyPair<bit_size, byte_size>& lhs,
-                const RSAKeyPair<bit_size, byte_size>& rhs) {
+                const RSAKeyPair<bit_size, byte_size>& rhs)
+{
     return !(lhs == rhs);
 }
 
@@ -231,13 +233,13 @@ enum class RSAKekType : u8 {
     Seed3,
 };
 
-template <typename KeyType>
-struct KeyIndex {
+template<typename KeyType> struct KeyIndex {
     KeyType type;
     u64 field1;
     u64 field2;
 
-    std::string DebugInfo() const {
+    std::string DebugInfo() const
+    {
         u8 key_size = 16;
         if constexpr (std::is_same_v<KeyType, S256KeyType>)
             key_size = 32;
@@ -247,14 +249,16 @@ struct KeyIndex {
 };
 
 // boost flat_map requires operator< for O(log(n)) lookups.
-template <typename KeyType>
-bool operator<(const KeyIndex<KeyType>& lhs, const KeyIndex<KeyType>& rhs) {
+template<typename KeyType>
+bool operator<(const KeyIndex<KeyType>& lhs, const KeyIndex<KeyType>& rhs)
+{
     return std::tie(lhs.type, lhs.field1, lhs.field2) < std::tie(rhs.type, rhs.field1, rhs.field2);
 }
 
 class KeyManager {
 public:
-    static KeyManager& Instance() {
+    static KeyManager& Instance()
+    {
         static KeyManager instance;
         return instance;
     }
@@ -317,7 +321,7 @@ private:
     bool dev_mode;
     void LoadFromFile(const std::filesystem::path& file_path, bool is_title_keys);
 
-    template <size_t Size>
+    template<size_t Size>
     void WriteKeyToFile(KeyCategory category, std::string_view keyname,
                         const std::array<u8, Size>& key);
 

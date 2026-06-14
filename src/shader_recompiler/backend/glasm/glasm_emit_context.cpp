@@ -1,16 +1,18 @@
 // SPDX-FileCopyrightText: Copyright 2021 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "shader_recompiler/backend/glasm/glasm_emit_context.h"
+
 #include "shader_recompiler/backend/bindings.h"
 #include "shader_recompiler/backend/glasm/emit_glasm.h"
-#include "shader_recompiler/backend/glasm/glasm_emit_context.h"
 #include "shader_recompiler/frontend/ir/program.h"
 #include "shader_recompiler/profile.h"
 #include "shader_recompiler/runtime_info.h"
 
 namespace Shader::Backend::GLASM {
 namespace {
-std::string_view InterpDecorator(Interpolation interp) {
+std::string_view InterpDecorator(Interpolation interp)
+{
     switch (interp) {
     case Interpolation::Smooth:
         return "";
@@ -22,7 +24,8 @@ std::string_view InterpDecorator(Interpolation interp) {
     throw InvalidArgument("Invalid interpolation {}", interp);
 }
 
-bool IsInputArray(Stage stage) {
+bool IsInputArray(Stage stage)
+{
     return stage == Stage::Geometry || stage == Stage::TessellationControl ||
            stage == Stage::TessellationEval;
 }
@@ -30,7 +33,8 @@ bool IsInputArray(Stage stage) {
 
 EmitContext::EmitContext(IR::Program& program, Bindings& bindings, const Profile& profile_,
                          const RuntimeInfo& runtime_info_)
-    : info{program.info}, profile{profile_}, runtime_info{runtime_info_} {
+    : info{program.info}, profile{profile_}, runtime_info{runtime_info_}
+{
     // FIXME: Temporary partial implementation
     u32 cbuf_index{};
     for (const auto& desc : info.constant_buffer_descriptors) {

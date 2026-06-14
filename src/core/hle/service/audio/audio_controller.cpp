@@ -7,21 +7,24 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include "audio_core/audio_core.h"
 #include "core/hle/service/audio/audio_controller.h"
-#include "core/hle/service/audio/audio_out_manager.h"
+
+#include <algorithm>
+
+#include "audio_core/audio_core.h"
+#include "common/settings.h"
 #include "core/core.h"
+#include "core/hle/service/audio/audio_out_manager.h"
 #include "core/hle/service/cmif_serialization.h"
 #include "core/hle/service/ipc_helpers.h"
 #include "core/hle/service/set/system_settings_server.h"
 #include "core/hle/service/sm/sm.h"
-#include "common/settings.h"
-#include <algorithm>
 
 namespace Service::Audio {
 
 IAudioController::IAudioController(Core::System& system_)
-    : ServiceFramework{system_, "audctl"}, service_context{system, "audctl"} {
+    : ServiceFramework{system_, "audctl"}, service_context{system, "audctl"}
+{
     // clang-format off
     static const FunctionInfo functions[] = {
         {0, D<&IAudioController::GetTargetVolume>, "GetTargetVolume"},
@@ -96,7 +99,8 @@ IAudioController::IAudioController(Core::System& system_)
     // Probably shouldn't do this in constructor?
     try {
         const int ui_volume = Settings::values.volume.GetValue();
-        const int mapped = static_cast<int>(std::lround((static_cast<double>(ui_volume) / 100.0) * 15.0));
+        const int mapped =
+            static_cast<int>(std::lround((static_cast<double>(ui_volume) / 100.0) * 15.0));
         const auto active_idx = static_cast<size_t>(m_active_target);
         if (active_idx < m_target_volumes.size()) {
             m_target_volumes[active_idx] = std::clamp(mapped, 0, 15);
@@ -117,8 +121,11 @@ IAudioController::IAudioController(Core::System& system_)
                 LOG_WARNING(Audio, "Failed to apply initial sink volume from settings");
             }
 
-            if (auto audout_mgr = system.ServiceManager().GetService<Service::Audio::IAudioOutManager>("audout:u")) {
-                audout_mgr->SetAllAudioOutVolume(static_cast<float>(m_target_volumes[active_idx]) / 15.0f);
+            if (auto audout_mgr =
+                    system.ServiceManager().GetService<Service::Audio::IAudioOutManager>(
+                        "audout:u")) {
+                audout_mgr->SetAllAudioOutVolume(static_cast<float>(m_target_volumes[active_idx]) /
+                                                 15.0f);
             }
         }
     } catch (...) {
@@ -126,11 +133,13 @@ IAudioController::IAudioController(Core::System& system_)
     }
 }
 
-IAudioController::~IAudioController() {
+IAudioController::~IAudioController()
+{
     service_context.CloseEvent(notification_event);
 };
 
-Result IAudioController::GetTargetVolumeMin(Out<s32> out_target_min_volume) {
+Result IAudioController::GetTargetVolumeMin(Out<s32> out_target_min_volume)
+{
     LOG_DEBUG(Audio, "called.");
 
     // This service function is currently hardcoded on the
@@ -139,7 +148,8 @@ Result IAudioController::GetTargetVolumeMin(Out<s32> out_target_min_volume) {
     R_SUCCEED();
 }
 
-Result IAudioController::GetTargetVolumeMax(Out<s32> out_target_max_volume) {
+Result IAudioController::GetTargetVolumeMax(Out<s32> out_target_max_volume)
+{
     LOG_DEBUG(Audio, "called.");
 
     // This service function is currently hardcoded on the
@@ -149,7 +159,8 @@ Result IAudioController::GetTargetVolumeMax(Out<s32> out_target_max_volume) {
 }
 
 Result IAudioController::GetAudioOutputMode(Out<Set::AudioOutputMode> out_output_mode,
-                                            Set::AudioOutputModeTarget target) {
+                                            Set::AudioOutputModeTarget target)
+{
     const auto result = m_set_sys->GetAudioOutputMode(out_output_mode, target);
 
     LOG_INFO(Service_SET, "called, target={}, output_mode={}", target, *out_output_mode);
@@ -157,13 +168,15 @@ Result IAudioController::GetAudioOutputMode(Out<Set::AudioOutputMode> out_output
 }
 
 Result IAudioController::SetAudioOutputMode(Set::AudioOutputModeTarget target,
-                                            Set::AudioOutputMode output_mode) {
+                                            Set::AudioOutputMode output_mode)
+{
     LOG_INFO(Service_SET, "called, target={}, output_mode={}", target, output_mode);
 
     R_RETURN(m_set_sys->SetAudioOutputMode(target, output_mode));
 }
 
-Result IAudioController::GetForceMutePolicy(Out<ForceMutePolicy> out_mute_policy) {
+Result IAudioController::GetForceMutePolicy(Out<ForceMutePolicy> out_mute_policy)
+{
     LOG_WARNING(Audio, "(STUBBED) called");
 
     // Removed on FW 13.2.1+
@@ -172,7 +185,8 @@ Result IAudioController::GetForceMutePolicy(Out<ForceMutePolicy> out_mute_policy
 }
 
 Result IAudioController::GetOutputModeSetting(Out<Set::AudioOutputMode> out_output_mode,
-                                              Set::AudioOutputModeTarget target) {
+                                              Set::AudioOutputModeTarget target)
+{
     LOG_WARNING(Audio, "(STUBBED) called, target={}", target);
 
     *out_output_mode = Set::AudioOutputMode::ch_7_1;
@@ -180,36 +194,42 @@ Result IAudioController::GetOutputModeSetting(Out<Set::AudioOutputMode> out_outp
 }
 
 Result IAudioController::SetOutputModeSetting(Set::AudioOutputModeTarget target,
-                                              Set::AudioOutputMode output_mode) {
+                                              Set::AudioOutputMode output_mode)
+{
     LOG_INFO(Service_SET, "called, target={}, output_mode={}", target, output_mode);
     R_SUCCEED();
 }
 
-Result IAudioController::SetHeadphoneOutputLevelMode(HeadphoneOutputLevelMode output_level_mode) {
+Result IAudioController::SetHeadphoneOutputLevelMode(HeadphoneOutputLevelMode output_level_mode)
+{
     LOG_WARNING(Audio, "(STUBBED) called, output_level_mode={}", output_level_mode);
     R_SUCCEED();
 }
 
-Result IAudioController::GetHeadphoneOutputLevelMode(
-    Out<HeadphoneOutputLevelMode> out_output_level_mode) {
+Result
+IAudioController::GetHeadphoneOutputLevelMode(Out<HeadphoneOutputLevelMode> out_output_level_mode)
+{
     LOG_INFO(Audio, "called");
 
     *out_output_level_mode = HeadphoneOutputLevelMode::Normal;
     R_SUCCEED();
 }
 
-Result IAudioController::NotifyHeadphoneVolumeWarningDisplayedEvent() {
+Result IAudioController::NotifyHeadphoneVolumeWarningDisplayedEvent()
+{
     LOG_WARNING(Service_Audio, "(STUBBED) called");
     R_SUCCEED();
 }
 
-Result IAudioController::SetSpeakerAutoMuteEnabled(bool is_speaker_auto_mute_enabled) {
+Result IAudioController::SetSpeakerAutoMuteEnabled(bool is_speaker_auto_mute_enabled)
+{
     LOG_INFO(Audio, "called, is_speaker_auto_mute_enabled={}", is_speaker_auto_mute_enabled);
 
     R_RETURN(m_set_sys->SetSpeakerAutoMuteFlag(is_speaker_auto_mute_enabled));
 }
 
-Result IAudioController::IsSpeakerAutoMuteEnabled(Out<bool> out_is_speaker_auto_mute_enabled) {
+Result IAudioController::IsSpeakerAutoMuteEnabled(Out<bool> out_is_speaker_auto_mute_enabled)
+{
     const auto result = m_set_sys->GetSpeakerAutoMuteFlag(out_is_speaker_auto_mute_enabled);
 
     LOG_INFO(Audio, "called, is_speaker_auto_mute_enabled={}", *out_is_speaker_auto_mute_enabled);
@@ -217,13 +237,15 @@ Result IAudioController::IsSpeakerAutoMuteEnabled(Out<bool> out_is_speaker_auto_
 }
 
 Result IAudioController::AcquireTargetNotification(
-    OutCopyHandle<Kernel::KReadableEvent> out_notification_event) {
+    OutCopyHandle<Kernel::KReadableEvent> out_notification_event)
+{
     LOG_WARNING(Service_AM, "(STUBBED) called");
 
     *out_notification_event = &notification_event->GetReadableEvent();
     R_SUCCEED();
 }
-Result IAudioController::Unknown5000(Out<SharedPointer<IAudioController>> out_audio_controller) {
+Result IAudioController::Unknown5000(Out<SharedPointer<IAudioController>> out_audio_controller)
+{
     LOG_DEBUG(Audio, "Creating duplicate audio controller interface");
 
     // Return a new reference to this controller instance
@@ -232,7 +254,9 @@ Result IAudioController::Unknown5000(Out<SharedPointer<IAudioController>> out_au
     R_SUCCEED();
 }
 
-Result IAudioController::GetTargetVolume(Out<s32> out_target_volume, Set::AudioOutputModeTarget target) {
+Result IAudioController::GetTargetVolume(Out<s32> out_target_volume,
+                                         Set::AudioOutputModeTarget target)
+{
     LOG_DEBUG(Audio, "GetTargetVolume called, target={}", target);
 
     const auto idx = static_cast<size_t>(target);
@@ -245,7 +269,8 @@ Result IAudioController::GetTargetVolume(Out<s32> out_target_volume, Set::AudioO
     R_SUCCEED();
 }
 
-Result IAudioController::SetTargetVolume(Set::AudioOutputModeTarget target, s32 target_volume) {
+Result IAudioController::SetTargetVolume(Set::AudioOutputModeTarget target, s32 target_volume)
+{
     LOG_INFO(Audio, "SetTargetVolume called, target={}, volume={}", target, target_volume);
 
     const auto idx = static_cast<size_t>(target);
@@ -280,14 +305,17 @@ Result IAudioController::SetTargetVolume(Set::AudioOutputModeTarget target, s32 
     }
 
     if (m_active_target == target) {
-        const int ui_volume = static_cast<int>(std::lround((static_cast<double>(target_volume) / 15.0) * 100.0));
+        const int ui_volume =
+            static_cast<int>(std::lround((static_cast<double>(target_volume) / 15.0) * 100.0));
         Settings::values.volume.SetValue(static_cast<u8>(std::clamp(ui_volume, 0, 100)));
     }
 
     R_SUCCEED();
 }
 
-Result IAudioController::IsTargetMute(Out<bool> out_is_target_muted, Set::AudioOutputModeTarget target) {
+Result IAudioController::IsTargetMute(Out<bool> out_is_target_muted,
+                                      Set::AudioOutputModeTarget target)
+{
     LOG_DEBUG(Audio, "called, target={}", target);
 
     const auto idx = static_cast<size_t>(target);
@@ -300,7 +328,8 @@ Result IAudioController::IsTargetMute(Out<bool> out_is_target_muted, Set::AudioO
     R_SUCCEED();
 }
 
-Result IAudioController::SetTargetMute(bool is_muted, Set::AudioOutputModeTarget target) {
+Result IAudioController::SetTargetMute(bool is_muted, Set::AudioOutputModeTarget target)
+{
     LOG_INFO(Audio, "called, target={}, muted={}", target, is_muted);
 
     const auto idx = static_cast<size_t>(target);
@@ -342,7 +371,8 @@ Result IAudioController::SetTargetMute(bool is_muted, Set::AudioOutputModeTarget
     R_SUCCEED();
 }
 
-Result IAudioController::GetActiveOutputTarget(Out<Set::AudioOutputModeTarget> out_active_target) {
+Result IAudioController::GetActiveOutputTarget(Out<Set::AudioOutputModeTarget> out_active_target)
+{
     LOG_DEBUG(Audio, "GetActiveOutputTarget called");
     *out_active_target = m_active_target;
     R_SUCCEED();

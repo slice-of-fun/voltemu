@@ -1,12 +1,14 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/file_sys/fsmitm_romfsbuild.h"
+
 #include <cstring>
 #include <span>
 #include <string_view>
+
 #include "common/alignment.h"
 #include "common/assert.h"
-#include "core/file_sys/fsmitm_romfsbuild.h"
 #include "core/file_sys/ips_layer.h"
 #include "core/file_sys/vfs/vfs.h"
 #include "core/file_sys/vfs/vfs_vector.h"
@@ -78,8 +80,8 @@ struct RomFSBuildFileContext {
     VirtualFile source;
 };
 
-static u32 romfs_calc_path_hash(u32 parent, std::string_view path, u32 start,
-                                std::size_t path_len) {
+static u32 romfs_calc_path_hash(u32 parent, std::string_view path, u32 start, std::size_t path_len)
+{
     u32 hash = parent ^ 123456789;
     for (u32 i = 0; i < path_len; i++) {
         hash = (hash >> 5) | (hash << 27);
@@ -89,7 +91,8 @@ static u32 romfs_calc_path_hash(u32 parent, std::string_view path, u32 start,
     return hash;
 }
 
-static u64 romfs_get_hash_table_count(u64 num_entries) {
+static u64 romfs_get_hash_table_count(u64 num_entries)
+{
     if (num_entries < 3) {
         return 3;
     }
@@ -107,7 +110,8 @@ static u64 romfs_get_hash_table_count(u64 num_entries) {
 }
 
 void RomFSBuildContext::VisitDirectory(VirtualDir romfs_dir, VirtualDir ext_dir,
-                                       std::shared_ptr<RomFSBuildDirectoryContext> parent) {
+                                       std::shared_ptr<RomFSBuildDirectoryContext> parent)
+{
     for (auto& child_romfs_file : romfs_dir->GetFiles()) {
         const auto name = child_romfs_file->GetName();
         const auto child = std::make_shared<RomFSBuildFileContext>();
@@ -163,7 +167,8 @@ void RomFSBuildContext::VisitDirectory(VirtualDir romfs_dir, VirtualDir ext_dir,
 }
 
 bool RomFSBuildContext::AddDirectory(std::shared_ptr<RomFSBuildDirectoryContext> parent_dir_ctx,
-                                     std::shared_ptr<RomFSBuildDirectoryContext> dir_ctx) {
+                                     std::shared_ptr<RomFSBuildDirectoryContext> dir_ctx)
+{
     // Add a new directory.
     num_dirs++;
     dir_table_size +=
@@ -175,7 +180,8 @@ bool RomFSBuildContext::AddDirectory(std::shared_ptr<RomFSBuildDirectoryContext>
 }
 
 bool RomFSBuildContext::AddFile(std::shared_ptr<RomFSBuildDirectoryContext> parent_dir_ctx,
-                                std::shared_ptr<RomFSBuildFileContext> file_ctx) {
+                                std::shared_ptr<RomFSBuildFileContext> file_ctx)
+{
     // Add a new file.
     num_files++;
     file_table_size +=
@@ -187,7 +193,8 @@ bool RomFSBuildContext::AddFile(std::shared_ptr<RomFSBuildDirectoryContext> pare
 }
 
 RomFSBuildContext::RomFSBuildContext(VirtualDir base_, VirtualDir ext_)
-    : base(std::move(base_)), ext(std::move(ext_)) {
+    : base(std::move(base_)), ext(std::move(ext_))
+{
     root = std::make_shared<RomFSBuildDirectoryContext>();
     root->path = "\0";
     directories.emplace_back(root);
@@ -199,7 +206,8 @@ RomFSBuildContext::RomFSBuildContext(VirtualDir base_, VirtualDir ext_)
 
 RomFSBuildContext::~RomFSBuildContext() = default;
 
-std::vector<std::pair<u64, VirtualFile>> RomFSBuildContext::Build() {
+std::vector<std::pair<u64, VirtualFile>> RomFSBuildContext::Build()
+{
     const u64 dir_hash_table_entry_count = romfs_get_hash_table_count(num_dirs);
     const u64 file_hash_table_entry_count = romfs_get_hash_table_count(num_files);
     dir_hash_table_size = 4 * dir_hash_table_entry_count;

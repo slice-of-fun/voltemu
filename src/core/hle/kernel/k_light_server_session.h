@@ -29,16 +29,15 @@ public:
     explicit KLightServerSession(KernelCore& kernel);
     ~KLightServerSession();
 
-    void Initialize(KLightSession* parent) {
+    void Initialize(KLightSession* parent)
+    {
         // Set member variables. */
         m_parent = parent;
     }
 
     virtual void Destroy() override;
 
-    constexpr const KLightSession* GetParent() const {
-        return m_parent;
-    }
+    constexpr const KLightSession* GetParent() const { return m_parent; }
 
     Result OnRequest(KThread* request_thread);
     Result ReplyAndReceive(u32* data);

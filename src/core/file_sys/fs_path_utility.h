@@ -34,8 +34,9 @@ constexpr inline const char InvalidCharactersForMountName[5] = {'*', '?', '<', '
 
 namespace impl {
 
-template <const char* InvalidCharacterSet, size_t NumInvalidCharacters>
-consteval u64 MakeInvalidCharacterMask(size_t n) {
+template<const char* InvalidCharacterSet, size_t NumInvalidCharacters>
+consteval u64 MakeInvalidCharacterMask(size_t n)
+{
     u64 mask = 0;
     for (size_t i = 0; i < NumInvalidCharacters; ++i) {
         if ((static_cast<u64>(InvalidCharacterSet[i]) >> 6) == n) {
@@ -45,8 +46,9 @@ consteval u64 MakeInvalidCharacterMask(size_t n) {
     return mask;
 }
 
-template <const char* InvalidCharacterSet, size_t NumInvalidCharacters>
-constexpr bool IsInvalidCharacterImpl(char c) {
+template<const char* InvalidCharacterSet, size_t NumInvalidCharacters>
+constexpr bool IsInvalidCharacterImpl(char c)
+{
     constexpr u64 Masks[4] = {
         MakeInvalidCharacterMask<InvalidCharacterSet, NumInvalidCharacters>(0),
         MakeInvalidCharacterMask<InvalidCharacterSet, NumInvalidCharacters>(1),
@@ -59,14 +61,19 @@ constexpr bool IsInvalidCharacterImpl(char c) {
 
 } // namespace impl
 
-constexpr bool IsInvalidCharacter(char c) {
+constexpr bool IsInvalidCharacter(char c)
+{
     return impl::IsInvalidCharacterImpl<InvalidCharacters, std::size(InvalidCharacters)>(c);
 }
-constexpr bool IsInvalidCharacterForHostName(char c) {
-    return impl::IsInvalidCharacterImpl<InvalidCharactersForHostName, std::size(InvalidCharactersForHostName)>(c);
+constexpr bool IsInvalidCharacterForHostName(char c)
+{
+    return impl::IsInvalidCharacterImpl<InvalidCharactersForHostName,
+                                        std::size(InvalidCharactersForHostName)>(c);
 }
-constexpr bool IsInvalidCharacterForMountName(char c) {
-    return impl::IsInvalidCharacterImpl<InvalidCharactersForMountName, std::size(InvalidCharactersForMountName)>(c);
+constexpr bool IsInvalidCharacterForMountName(char c)
+{
+    return impl::IsInvalidCharacterImpl<InvalidCharactersForMountName,
+                                        std::size(InvalidCharactersForMountName)>(c);
 }
 
 } // namespace StringTraits
@@ -88,12 +95,19 @@ private:
     u32 m_value;
 
 public:
-    constexpr PathFlags() : m_value(0) { /* ... */
+    constexpr PathFlags() : m_value(0)
+    { /* ... */
     }
 
 #define DECLARE_PATH_FLAG_HANDLER(__WHICH__)                                                       \
-    constexpr bool Is##__WHICH__##Allowed() const { return (m_value & __WHICH__##Flag) != 0; }     \
-    constexpr void Allow##__WHICH__() { m_value |= __WHICH__##Flag; }
+    constexpr bool Is##__WHICH__##Allowed() const                                                  \
+    {                                                                                              \
+        return (m_value & __WHICH__##Flag) != 0;                                                   \
+    }                                                                                              \
+    constexpr void Allow##__WHICH__()                                                              \
+    {                                                                                              \
+        m_value |= __WHICH__##Flag;                                                                \
+    }
 
     DECLARE_PATH_FLAG_HANDLER(WindowsPath)
     DECLARE_PATH_FLAG_HANDLER(RelativePath)
@@ -105,9 +119,10 @@ public:
 #undef DECLARE_PATH_FLAG_HANDLER
 };
 
-template <typename T>
-    requires(std::same_as<T, char> || std::same_as<T, wchar_t>)
-constexpr inline bool IsDosDevicePath(const T* path) {
+template<typename T>
+requires(std::same_as<T, char> ||
+         std::same_as<T, wchar_t>) constexpr inline bool IsDosDevicePath(const T* path)
+{
     ASSERT(path != nullptr);
 
     using namespace StringTraits;
@@ -117,10 +132,10 @@ constexpr inline bool IsDosDevicePath(const T* path) {
            (path[3] == DirectorySeparator || path[3] == AlternateDirectorySeparator);
 }
 
-template <typename T>
-    requires(std::same_as<T, char> || std::same_as<T, wchar_t>)
-constexpr inline bool IsUncPath(const T* path, bool allow_forward_slash = true,
-                                bool allow_back_slash = true) {
+template<typename T>
+requires(std::same_as<T, char> || std::same_as<T, wchar_t>) constexpr inline bool IsUncPath(
+    const T* path, bool allow_forward_slash = true, bool allow_back_slash = true)
+{
     ASSERT(path != nullptr);
 
     using namespace StringTraits;
@@ -131,19 +146,22 @@ constexpr inline bool IsUncPath(const T* path, bool allow_forward_slash = true,
             path[1] == AlternateDirectorySeparator);
 }
 
-constexpr inline bool IsWindowsDrive(const char* path) {
+constexpr inline bool IsWindowsDrive(const char* path)
+{
     ASSERT(path != nullptr);
 
     return (('a' <= path[0] && path[0] <= 'z') || ('A' <= path[0] && path[0] <= 'Z')) &&
            path[1] == StringTraits::DriveSeparator;
 }
 
-constexpr inline bool IsWindowsPath(const char* path, bool allow_forward_slash_unc) {
+constexpr inline bool IsWindowsPath(const char* path, bool allow_forward_slash_unc)
+{
     return IsWindowsDrive(path) || IsDosDevicePath(path) ||
            IsUncPath(path, allow_forward_slash_unc, true);
 }
 
-constexpr inline int GetWindowsSkipLength(const char* path) {
+constexpr inline int GetWindowsSkipLength(const char* path)
+{
     if (IsDosDevicePath(path)) {
         return DosDevicePathPrefixLength;
     } else if (IsWindowsDrive(path)) {
@@ -155,29 +173,35 @@ constexpr inline int GetWindowsSkipLength(const char* path) {
     }
 }
 
-constexpr inline bool IsPathAbsolute(const char* path) {
+constexpr inline bool IsPathAbsolute(const char* path)
+{
     return IsWindowsPath(path, false) || path[0] == StringTraits::DirectorySeparator;
 }
 
-constexpr inline bool IsPathRelative(const char* path) {
+constexpr inline bool IsPathRelative(const char* path)
+{
     return path[0] && !IsPathAbsolute(path);
 }
 
-constexpr inline bool IsCurrentDirectory(const char* path) {
+constexpr inline bool IsCurrentDirectory(const char* path)
+{
     return path[0] == StringTraits::Dot &&
            (path[1] == StringTraits::NullTerminator || path[1] == StringTraits::DirectorySeparator);
 }
 
-constexpr inline bool IsParentDirectory(const char* path) {
+constexpr inline bool IsParentDirectory(const char* path)
+{
     return path[0] == StringTraits::Dot && path[1] == StringTraits::Dot &&
            (path[2] == StringTraits::NullTerminator || path[2] == StringTraits::DirectorySeparator);
 }
 
-constexpr inline bool IsPathStartWithCurrentDirectory(const char* path) {
+constexpr inline bool IsPathStartWithCurrentDirectory(const char* path)
+{
     return IsCurrentDirectory(path) || IsParentDirectory(path);
 }
 
-constexpr inline bool IsSubPath(const char* lhs, const char* rhs) {
+constexpr inline bool IsSubPath(const char* lhs, const char* rhs)
+{
     // Check pre-conditions
     ASSERT(lhs != nullptr);
     ASSERT(rhs != nullptr);
@@ -215,7 +239,8 @@ constexpr inline bool IsSubPath(const char* lhs, const char* rhs) {
 }
 
 // Path utilities
-constexpr inline void Replace(char* dst, size_t dst_size, char old_char, char new_char) {
+constexpr inline void Replace(char* dst, size_t dst_size, char old_char, char new_char)
+{
     ASSERT(dst != nullptr);
     for (char* cur = dst; cur < dst + dst_size && *cur; ++cur) {
         if (*cur == old_char) {
@@ -224,7 +249,8 @@ constexpr inline void Replace(char* dst, size_t dst_size, char old_char, char ne
     }
 }
 
-constexpr inline Result CheckUtf8(const char* s) {
+constexpr inline Result CheckUtf8(const char* s)
+{
     // Check pre-conditions
     ASSERT(s != nullptr);
 
@@ -256,7 +282,8 @@ private:
     };
 
 private:
-    static constexpr void ReplaceParentDirectoryPath(char* dst, const char* src) {
+    static constexpr void ReplaceParentDirectoryPath(char* dst, const char* src)
+    {
         // Use StringTraits names for remainder of scope
         using namespace StringTraits;
 
@@ -292,7 +319,8 @@ private:
     }
 
 public:
-    static constexpr bool IsParentDirectoryPathReplacementNeeded(const char* path) {
+    static constexpr bool IsParentDirectoryPathReplacementNeeded(const char* path)
+    {
         // Use StringTraits names for remainder of scope
         using namespace StringTraits;
 
@@ -333,7 +361,8 @@ public:
     }
 
     static constexpr Result IsNormalized(bool* out, size_t* out_len, const char* path,
-                                         bool allow_all_characters = false) {
+                                         bool allow_all_characters = false)
+    {
         // Use StringTraits names for remainder of scope
         using namespace StringTraits;
 
@@ -430,7 +459,8 @@ public:
     static constexpr Result Normalize(char* dst, size_t* out_len, const char* path,
                                       size_t max_out_size, bool is_windows_path,
                                       bool is_drive_relative_path,
-                                      bool allow_all_characters = false) {
+                                      bool allow_all_characters = false)
+    {
         // Use StringTraits names for remainder of scope
         using namespace StringTraits;
 
@@ -449,7 +479,8 @@ public:
         char* replacement_path = nullptr;
         size_t replacement_path_size = 0;
 
-        SCOPE_EXIT {
+        SCOPE_EXIT
+        {
             if (replacement_path != nullptr) {
                 if (std::is_constant_evaluated()) {
                     delete[] replacement_path;
@@ -607,7 +638,8 @@ public:
 
 class PathFormatter {
 private:
-    static constexpr Result CheckSharedName(const char* name, size_t len) {
+    static constexpr Result CheckSharedName(const char* name, size_t len)
+    {
         // Use StringTraits names for remainder of scope
         using namespace StringTraits;
 
@@ -624,7 +656,8 @@ private:
         R_SUCCEED();
     }
 
-    static constexpr Result CheckHostName(const char* name, size_t len) {
+    static constexpr Result CheckHostName(const char* name, size_t len)
+    {
         // Use StringTraits names for remainder of scope
         using namespace StringTraits;
 
@@ -640,7 +673,8 @@ private:
     }
 
     static constexpr Result CheckInvalidBackslash(bool* out_contains_backslash, const char* path,
-                                                  bool allow_backslash) {
+                                                  bool allow_backslash)
+    {
         // Use StringTraits names for remainder of scope
         using namespace StringTraits;
 
@@ -659,18 +693,21 @@ private:
     }
 
 public:
-    static constexpr Result CheckPathFormat(const char* path, const PathFlags& flags) {
+    static constexpr Result CheckPathFormat(const char* path, const PathFlags& flags)
+    {
         bool normalized;
         size_t len;
         R_RETURN(IsNormalized(std::addressof(normalized), std::addressof(len), path, flags));
     }
 
-    static constexpr Result SkipMountName(const char** out, size_t* out_len, const char* path) {
+    static constexpr Result SkipMountName(const char** out, size_t* out_len, const char* path)
+    {
         R_RETURN(ParseMountName(out, out_len, nullptr, 0, path));
     }
 
     static constexpr Result ParseMountName(const char** out, size_t* out_len, char* out_mount_name,
-                                           size_t out_mount_name_buffer_size, const char* path) {
+                                           size_t out_mount_name_buffer_size, const char* path)
+    {
         // Check pre-conditions
         ASSERT(path != nullptr);
         ASSERT(out_len != nullptr);
@@ -734,15 +771,15 @@ public:
         R_SUCCEED();
     }
 
-    static constexpr Result SkipRelativeDotPath(const char** out, size_t* out_len,
-                                                const char* path) {
+    static constexpr Result SkipRelativeDotPath(const char** out, size_t* out_len, const char* path)
+    {
         R_RETURN(ParseRelativeDotPath(out, out_len, nullptr, 0, path));
     }
 
     static constexpr Result ParseRelativeDotPath(const char** out, size_t* out_len,
                                                  char* out_relative,
-                                                 size_t out_relative_buffer_size,
-                                                 const char* path) {
+                                                 size_t out_relative_buffer_size, const char* path)
+    {
         // Check pre-conditions
         ASSERT(path != nullptr);
         ASSERT(out_len != nullptr);
@@ -782,17 +819,21 @@ public:
     }
 
     static constexpr Result SkipWindowsPath(const char** out, size_t* out_len, bool* out_normalized,
-                                            const char* path, bool has_mount_name) {
+                                            const char* path, bool has_mount_name)
+    {
         // We're normalized if and only if the parsing doesn't throw ResultNotNormalized()
         *out_normalized = true;
 
-        R_TRY_CATCH(ParseWindowsPath(out, out_len, nullptr, 0, path, has_mount_name)) {
-            R_CATCH(ResultNotNormalized) {
+        R_TRY_CATCH(ParseWindowsPath(out, out_len, nullptr, 0, path, has_mount_name))
+        {
+            R_CATCH(ResultNotNormalized)
+            {
                 *out_normalized = false;
             }
         }
         R_END_TRY_CATCH;
-        ON_RESULT_INCLUDED(ResultNotNormalized) {
+        ON_RESULT_INCLUDED(ResultNotNormalized)
+        {
             *out_normalized = false;
         };
 
@@ -801,7 +842,8 @@ public:
 
     static constexpr Result ParseWindowsPath(const char** out, size_t* out_len, char* out_win,
                                              size_t out_win_buffer_size, const char* path,
-                                             bool has_mount_name) {
+                                             bool has_mount_name)
+    {
         // Check pre-conditions
         ASSERT(path != nullptr);
         ASSERT(out_len != nullptr);
@@ -962,7 +1004,8 @@ public:
     }
 
     static constexpr Result IsNormalized(bool* out, size_t* out_len, const char* path,
-                                         const PathFlags& flags = {}) {
+                                         const PathFlags& flags = {})
+    {
         // Ensure nothing is null
         R_UNLESS(out != nullptr, ResultNullptrArgument);
         R_UNLESS(out_len != nullptr, ResultNullptrArgument);
@@ -1105,7 +1148,8 @@ public:
     }
 
     static constexpr Result Normalize(char* dst, size_t dst_size, const char* path, size_t path_len,
-                                      const PathFlags& flags) {
+                                      const PathFlags& flags)
+    {
         // Use StringTraits names for remainder of scope
         using namespace StringTraits;
 
@@ -1201,7 +1245,8 @@ public:
             const size_t replaced_src_len = path_len - (src - path);
 
             char* replaced_src = nullptr;
-            SCOPE_EXIT {
+            SCOPE_EXIT
+            {
                 if (replaced_src != nullptr) {
                     if (std::is_constant_evaluated()) {
                         delete[] replaced_src;

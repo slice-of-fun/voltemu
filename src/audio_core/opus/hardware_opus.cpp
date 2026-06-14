@@ -1,17 +1,19 @@
 // SPDX-FileCopyrightText: Copyright 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "audio_core/opus/hardware_opus.h"
+
 #include <array>
 
 #include "audio_core/audio_core.h"
-#include "audio_core/opus/hardware_opus.h"
 #include "core/core.h"
 
 namespace AudioCore::OpusDecoder {
 namespace {
 using namespace Service::Audio;
 
-static constexpr Result ResultCodeFromLibOpusErrorCode(u64 error_code) {
+static constexpr Result ResultCodeFromLibOpusErrorCode(u64 error_code)
+{
     s32 error{static_cast<s32>(error_code)};
     ASSERT(error <= OPUS_OK);
     switch (error) {
@@ -38,11 +40,13 @@ static constexpr Result ResultCodeFromLibOpusErrorCode(u64 error_code) {
 } // namespace
 
 HardwareOpus::HardwareOpus(Core::System& system_)
-    : system{system_}, opus_decoder{system.AudioCore().ADSP().OpusDecoder()} {
+    : system{system_}, opus_decoder{system.AudioCore().ADSP().OpusDecoder()}
+{
     opus_decoder.SetSharedMemory(shared_memory);
 }
 
-u32 HardwareOpus::GetWorkBufferSize(u32 channel) {
+u32 HardwareOpus::GetWorkBufferSize(u32 channel)
+{
     if (!opus_decoder.IsRunning()) {
         return 0;
     }
@@ -58,7 +62,8 @@ u32 HardwareOpus::GetWorkBufferSize(u32 channel) {
     return static_cast<u32>(shared_memory.dsp_return_data[0]);
 }
 
-u32 HardwareOpus::GetWorkBufferSizeForMultiStream(u32 total_stream_count, u32 stereo_stream_count) {
+u32 HardwareOpus::GetWorkBufferSizeForMultiStream(u32 total_stream_count, u32 stereo_stream_count)
+{
     std::scoped_lock l{mutex};
     shared_memory.host_send_data[0] = total_stream_count;
     shared_memory.host_send_data[1] = stereo_stream_count;
@@ -74,7 +79,8 @@ u32 HardwareOpus::GetWorkBufferSizeForMultiStream(u32 total_stream_count, u32 st
 }
 
 Result HardwareOpus::InitializeDecodeObject(u32 sample_rate, u32 channel_count, void* buffer,
-                                            u64 buffer_size) {
+                                            u64 buffer_size)
+{
     std::scoped_lock l{mutex};
     shared_memory.host_send_data[0] = (u64)buffer;
     shared_memory.host_send_data[1] = buffer_size;
@@ -96,7 +102,8 @@ Result HardwareOpus::InitializeMultiStreamDecodeObject(u32 sample_rate, u32 chan
                                                        u32 total_stream_count,
                                                        u32 stereo_stream_count,
                                                        const void* mappings, void* buffer,
-                                                       u64 buffer_size) {
+                                                       u64 buffer_size)
+{
     std::scoped_lock l{mutex};
     shared_memory.host_send_data[0] = (u64)buffer;
     shared_memory.host_send_data[1] = buffer_size;
@@ -120,7 +127,8 @@ Result HardwareOpus::InitializeMultiStreamDecodeObject(u32 sample_rate, u32 chan
     R_RETURN(ResultCodeFromLibOpusErrorCode(shared_memory.dsp_return_data[0]));
 }
 
-Result HardwareOpus::ShutdownDecodeObject(void* buffer, u64 buffer_size) {
+Result HardwareOpus::ShutdownDecodeObject(void* buffer, u64 buffer_size)
+{
     std::scoped_lock l{mutex};
     shared_memory.host_send_data[0] = (u64)buffer;
     shared_memory.host_send_data[1] = buffer_size;
@@ -134,7 +142,8 @@ Result HardwareOpus::ShutdownDecodeObject(void* buffer, u64 buffer_size) {
     R_RETURN(ResultCodeFromLibOpusErrorCode(shared_memory.dsp_return_data[0]));
 }
 
-Result HardwareOpus::ShutdownMultiStreamDecodeObject(void* buffer, u64 buffer_size) {
+Result HardwareOpus::ShutdownMultiStreamDecodeObject(void* buffer, u64 buffer_size)
+{
     std::scoped_lock l{mutex};
     shared_memory.host_send_data[0] = (u64)buffer;
     shared_memory.host_send_data[1] = buffer_size;
@@ -152,7 +161,8 @@ Result HardwareOpus::ShutdownMultiStreamDecodeObject(void* buffer, u64 buffer_si
 Result HardwareOpus::DecodeInterleaved(u32& out_sample_count, void* output_data,
                                        u64 output_data_size, u32 channel_count, void* input_data,
                                        u64 input_data_size, void* buffer, u64& out_time_taken,
-                                       bool reset) {
+                                       bool reset)
+{
     std::scoped_lock l{mutex};
     shared_memory.host_send_data[0] = (u64)buffer;
     shared_memory.host_send_data[1] = (u64)input_data;
@@ -181,8 +191,8 @@ Result HardwareOpus::DecodeInterleaved(u32& out_sample_count, void* output_data,
 Result HardwareOpus::DecodeInterleavedForMultiStream(u32& out_sample_count, void* output_data,
                                                      u64 output_data_size, u32 channel_count,
                                                      void* input_data, u64 input_data_size,
-                                                     void* buffer, u64& out_time_taken,
-                                                     bool reset) {
+                                                     void* buffer, u64& out_time_taken, bool reset)
+{
     std::scoped_lock l{mutex};
     shared_memory.host_send_data[0] = (u64)buffer;
     shared_memory.host_send_data[1] = (u64)input_data;
@@ -209,7 +219,8 @@ Result HardwareOpus::DecodeInterleavedForMultiStream(u32& out_sample_count, void
     R_RETURN(ResultCodeFromLibOpusErrorCode(error_code));
 }
 
-Result HardwareOpus::MapMemory(void* buffer, u64 buffer_size) {
+Result HardwareOpus::MapMemory(void* buffer, u64 buffer_size)
+{
     std::scoped_lock l{mutex};
     shared_memory.host_send_data[0] = (u64)buffer;
     shared_memory.host_send_data[1] = buffer_size;
@@ -224,7 +235,8 @@ Result HardwareOpus::MapMemory(void* buffer, u64 buffer_size) {
     R_SUCCEED();
 }
 
-Result HardwareOpus::UnmapMemory(void* buffer, u64 buffer_size) {
+Result HardwareOpus::UnmapMemory(void* buffer, u64 buffer_size)
+{
     std::scoped_lock l{mutex};
     shared_memory.host_send_data[0] = (u64)buffer;
     shared_memory.host_send_data[1] = buffer_size;

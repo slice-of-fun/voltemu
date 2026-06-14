@@ -1,14 +1,16 @@
 // SPDX-FileCopyrightText: Copyright 2020 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include "core/core.h"
 #include "core/hle/kernel/k_page_heap.h"
+
+#include "core/core.h"
 
 namespace Kernel {
 
 void KPageHeap::Initialize(KPhysicalAddress address, size_t size,
                            KVirtualAddress management_address, size_t management_size,
-                           const size_t* block_shifts, size_t num_block_shifts) {
+                           const size_t* block_shifts, size_t num_block_shifts)
+{
     // Check our assumptions.
     ASSERT(Common::IsAligned(GetInteger(address), PageSize));
     ASSERT(Common::IsAligned(size, PageSize));
@@ -34,7 +36,8 @@ void KPageHeap::Initialize(KPhysicalAddress address, size_t size,
     ASSERT(KVirtualAddress(cur_bitmap_storage) <= management_end);
 }
 
-size_t KPageHeap::GetNumFreePages() const {
+size_t KPageHeap::GetNumFreePages() const
+{
     size_t num_free = 0;
 
     for (size_t i = 0; i < m_num_blocks; i++) {
@@ -44,7 +47,8 @@ size_t KPageHeap::GetNumFreePages() const {
     return num_free;
 }
 
-KPhysicalAddress KPageHeap::AllocateByLinearSearch(s32 index) {
+KPhysicalAddress KPageHeap::AllocateByLinearSearch(s32 index)
+{
     const size_t needed_size = m_blocks[index].GetSize();
 
     for (s32 i = index; i < static_cast<s32>(m_num_blocks); i++) {
@@ -59,7 +63,8 @@ KPhysicalAddress KPageHeap::AllocateByLinearSearch(s32 index) {
     return 0;
 }
 
-KPhysicalAddress KPageHeap::AllocateByRandom(s32 index, size_t num_pages, size_t align_pages) {
+KPhysicalAddress KPageHeap::AllocateByRandom(s32 index, size_t num_pages, size_t align_pages)
+{
     // Get the size and required alignment.
     const size_t needed_size = num_pages * PageSize;
     const size_t align_size = align_pages * PageSize;
@@ -141,13 +146,15 @@ KPhysicalAddress KPageHeap::AllocateByRandom(s32 index, size_t num_pages, size_t
     return 0;
 }
 
-void KPageHeap::FreeBlock(KPhysicalAddress block, s32 index) {
+void KPageHeap::FreeBlock(KPhysicalAddress block, s32 index)
+{
     do {
         block = m_blocks[index++].PushBlock(block);
     } while (block != 0);
 }
 
-void KPageHeap::Free(KPhysicalAddress addr, size_t num_pages) {
+void KPageHeap::Free(KPhysicalAddress addr, size_t num_pages)
+{
     // Freeing no pages is a no-op.
     if (num_pages == 0) {
         return;
@@ -198,7 +205,8 @@ void KPageHeap::Free(KPhysicalAddress addr, size_t num_pages) {
 }
 
 size_t KPageHeap::CalculateManagementOverheadSize(size_t region_size, const size_t* block_shifts,
-                                                  size_t num_block_shifts) {
+                                                  size_t num_block_shifts)
+{
     size_t overhead_size = 0;
     for (size_t i = 0; i < num_block_shifts; i++) {
         const size_t cur_block_shift = block_shifts[i];

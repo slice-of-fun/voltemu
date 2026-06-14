@@ -4,12 +4,13 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "video_core/renderer_opengl/gl_buffer_cache.h"
+
 #include <algorithm>
 #include <span>
 
 #include "shader_recompiler/backend/glasm/emit_glasm.h"
 #include "video_core/buffer_cache/buffer_cache.h"
-#include "video_core/renderer_opengl/gl_buffer_cache.h"
 #include "video_core/renderer_opengl/gl_device.h"
 #include "video_core/renderer_opengl/maxwell_to_gl.h"
 
@@ -29,7 +30,8 @@ constexpr std::array PROGRAM_LUT{
     GL_GEOMETRY_PROGRAM_NV, GL_FRAGMENT_PROGRAM_NV,
 };
 
-[[nodiscard]] GLenum GetTextureBufferFormat(GLenum gl_format) {
+[[nodiscard]] GLenum GetTextureBufferFormat(GLenum gl_format)
+{
     switch (gl_format) {
     case GL_RGBA8_SNORM:
         return GL_RGBA8I;
@@ -50,10 +52,13 @@ constexpr std::array PROGRAM_LUT{
 } // Anonymous namespace
 
 Buffer::Buffer(BufferCacheRuntime&, VideoCommon::NullBufferParams null_params)
-    : VideoCommon::BufferBase(null_params) {}
+    : VideoCommon::BufferBase(null_params)
+{
+}
 
 Buffer::Buffer(BufferCacheRuntime& runtime, DAddr cpu_addr_, u64 size_bytes_)
-    : VideoCommon::BufferBase(cpu_addr_, size_bytes_) {
+    : VideoCommon::BufferBase(cpu_addr_, size_bytes_)
+{
     buffer.Create();
     if (runtime.device.HasDebuggingToolAttached()) {
         const std::string name = fmt::format("Buffer 0x{:x}", CpuAddr());
@@ -65,17 +70,20 @@ Buffer::Buffer(BufferCacheRuntime& runtime, DAddr cpu_addr_, u64 size_bytes_)
     }
 }
 
-void Buffer::ImmediateUpload(size_t offset, std::span<const u8> data) noexcept {
+void Buffer::ImmediateUpload(size_t offset, std::span<const u8> data) noexcept
+{
     glNamedBufferSubData(buffer.handle, static_cast<GLintptr>(offset),
                          static_cast<GLsizeiptr>(data.size_bytes()), data.data());
 }
 
-void Buffer::ImmediateDownload(size_t offset, std::span<u8> data) noexcept {
+void Buffer::ImmediateDownload(size_t offset, std::span<u8> data) noexcept
+{
     glGetNamedBufferSubData(buffer.handle, static_cast<GLintptr>(offset),
                             static_cast<GLsizeiptr>(data.size_bytes()), data.data());
 }
 
-void Buffer::MakeResident(GLenum access) noexcept {
+void Buffer::MakeResident(GLenum access) noexcept
+{
     // Abuse GLenum's order to exit early
     // GL_NONE (default) < GL_READ_ONLY < GL_READ_WRITE
     if (access <= current_residency_access || buffer.handle == 0) {
@@ -88,7 +96,8 @@ void Buffer::MakeResident(GLenum access) noexcept {
     glMakeNamedBufferResidentNV(buffer.handle, access);
 }
 
-GLuint Buffer::View(u32 offset, u32 size, PixelFormat format) {
+GLuint Buffer::View(u32 offset, u32 size, PixelFormat format)
+{
     const auto it{std::ranges::find_if(views, [offset, size, format](const BufferView& view) {
         return offset == view.offset && size == view.size && format == view.format;
     })};
@@ -115,7 +124,8 @@ BufferCacheRuntime::BufferCacheRuntime(const Device& device_,
       has_fast_buffer_sub_data{device.HasFastBufferSubData()},
       use_assembly_shaders{device.UseAssemblyShaders()},
       has_unified_vertex_buffers{device.HasVertexBufferUnifiedMemory()},
-      stream_buffer{has_fast_buffer_sub_data ? std::nullopt : std::make_optional<StreamBuffer>()} {
+      stream_buffer{has_fast_buffer_sub_data ? std::nullopt : std::make_optional<StreamBuffer>()}
+{
     GLint gl_max_attributes;
     glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &gl_max_attributes);
     max_attributes = static_cast<u32>(gl_max_attributes);
@@ -147,19 +157,23 @@ BufferCacheRuntime::BufferCacheRuntime(const Device& device_,
     }();
 }
 
-StagingBufferMap BufferCacheRuntime::UploadStagingBuffer(size_t size) {
+StagingBufferMap BufferCacheRuntime::UploadStagingBuffer(size_t size)
+{
     return staging_buffer_pool.RequestUploadBuffer(size);
 }
 
-StagingBufferMap BufferCacheRuntime::DownloadStagingBuffer(size_t size, bool deferred) {
+StagingBufferMap BufferCacheRuntime::DownloadStagingBuffer(size_t size, bool deferred)
+{
     return staging_buffer_pool.RequestDownloadBuffer(size, deferred);
 }
 
-void BufferCacheRuntime::FreeDeferredStagingBuffer(StagingBufferMap& buffer) {
+void BufferCacheRuntime::FreeDeferredStagingBuffer(StagingBufferMap& buffer)
+{
     staging_buffer_pool.FreeDeferredStagingBuffer(buffer);
 }
 
-u64 BufferCacheRuntime::GetDeviceMemoryUsage() const {
+u64 BufferCacheRuntime::GetDeviceMemoryUsage() const
+{
     if (device.CanReportMemoryUsage()) {
         return device_access_memory - device.GetCurrentDedicatedVideoMemory();
     }
@@ -167,7 +181,8 @@ u64 BufferCacheRuntime::GetDeviceMemoryUsage() const {
 }
 
 void BufferCacheRuntime::CopyBuffer(GLuint dst_buffer, GLuint src_buffer,
-                                    std::span<const VideoCommon::BufferCopy> copies, bool barrier) {
+                                    std::span<const VideoCommon::BufferCopy> copies, bool barrier)
+{
     if (barrier) {
         PreCopyBarrier();
     }
@@ -182,40 +197,48 @@ void BufferCacheRuntime::CopyBuffer(GLuint dst_buffer, GLuint src_buffer,
 }
 
 void BufferCacheRuntime::CopyBuffer(GLuint dst_buffer, Buffer& src_buffer,
-                                    std::span<const VideoCommon::BufferCopy> copies, bool barrier) {
+                                    std::span<const VideoCommon::BufferCopy> copies, bool barrier)
+{
     CopyBuffer(dst_buffer, src_buffer.Handle(), copies, barrier);
 }
 
 void BufferCacheRuntime::CopyBuffer(Buffer& dst_buffer, GLuint src_buffer,
                                     std::span<const VideoCommon::BufferCopy> copies, bool barrier,
-                                    bool) {
+                                    bool)
+{
     CopyBuffer(dst_buffer.Handle(), src_buffer, copies, barrier);
 }
 
 void BufferCacheRuntime::CopyBuffer(Buffer& dst_buffer, Buffer& src_buffer,
-                                    std::span<const VideoCommon::BufferCopy> copies, bool) {
+                                    std::span<const VideoCommon::BufferCopy> copies, bool)
+{
     CopyBuffer(dst_buffer.Handle(), src_buffer.Handle(), copies, true);
 }
 
-void BufferCacheRuntime::PreCopyBarrier() {
+void BufferCacheRuntime::PreCopyBarrier()
+{
     // TODO: finer grained barrier?
     glMemoryBarrier(GL_ALL_BARRIER_BITS);
 }
 
-void BufferCacheRuntime::PostCopyBarrier() {
+void BufferCacheRuntime::PostCopyBarrier()
+{
     glMemoryBarrier(GL_BUFFER_UPDATE_BARRIER_BIT | GL_CLIENT_MAPPED_BUFFER_BARRIER_BIT);
 }
 
-void BufferCacheRuntime::Finish() {
+void BufferCacheRuntime::Finish()
+{
     glFinish();
 }
 
-void BufferCacheRuntime::ClearBuffer(Buffer& dest_buffer, u32 offset, size_t size, u32 value) {
+void BufferCacheRuntime::ClearBuffer(Buffer& dest_buffer, u32 offset, size_t size, u32 value)
+{
     glClearNamedBufferSubData(dest_buffer.Handle(), GL_R32UI, static_cast<GLintptr>(offset),
                               static_cast<GLsizeiptr>(size), GL_RED, GL_UNSIGNED_INT, &value);
 }
 
-void BufferCacheRuntime::BindIndexBuffer(Buffer& buffer, u32 offset, u32 size) {
+void BufferCacheRuntime::BindIndexBuffer(Buffer& buffer, u32 offset, u32 size)
+{
     if (has_unified_vertex_buffers) {
         buffer.MakeResident(GL_READ_ONLY);
         glBufferAddressRangeNV(GL_ELEMENT_ARRAY_ADDRESS_NV, 0, buffer.HostGpuAddr() + offset,
@@ -227,7 +250,8 @@ void BufferCacheRuntime::BindIndexBuffer(Buffer& buffer, u32 offset, u32 size) {
 }
 
 void BufferCacheRuntime::BindVertexBuffer(u32 index, Buffer& buffer, u32 offset, u32 size,
-                                          u32 stride) {
+                                          u32 stride)
+{
     if (index >= max_attributes) {
         return;
     }
@@ -242,7 +266,8 @@ void BufferCacheRuntime::BindVertexBuffer(u32 index, Buffer& buffer, u32 offset,
     }
 }
 
-void BufferCacheRuntime::BindVertexBuffers(VideoCommon::HostBindings<Buffer>& bindings) {
+void BufferCacheRuntime::BindVertexBuffers(VideoCommon::HostBindings<Buffer>& bindings)
+{
     // TODO: Should HostBindings provide the correct runtime types to avoid these transforms?
     std::array<GLuint, 32> buffer_handles;
     std::array<GLsizei, 32> buffer_strides;
@@ -272,7 +297,8 @@ void BufferCacheRuntime::BindVertexBuffers(VideoCommon::HostBindings<Buffer>& bi
 }
 
 void BufferCacheRuntime::BindUniformBuffer(size_t stage, u32 binding_index, Buffer& buffer,
-                                           u32 offset, u32 size) {
+                                           u32 offset, u32 size)
+{
     if (use_assembly_shaders) {
         GLuint handle;
         if (offset != 0) {
@@ -292,7 +318,8 @@ void BufferCacheRuntime::BindUniformBuffer(size_t stage, u32 binding_index, Buff
 }
 
 void BufferCacheRuntime::BindComputeUniformBuffer(u32 binding_index, Buffer& buffer, u32 offset,
-                                                  u32 size) {
+                                                  u32 size)
+{
     if (use_assembly_shaders) {
         GLuint handle;
         if (offset != 0) {
@@ -310,7 +337,8 @@ void BufferCacheRuntime::BindComputeUniformBuffer(u32 binding_index, Buffer& buf
 }
 
 void BufferCacheRuntime::BindStorageBuffer(size_t stage, u32 binding_index, Buffer& buffer,
-                                           u32 offset, u32 size, bool is_written) {
+                                           u32 offset, u32 size, bool is_written)
+{
     if (use_storage_buffers) {
         const GLuint base_binding = graphics_base_storage_bindings[stage];
         const GLuint binding = base_binding + binding_index;
@@ -331,7 +359,8 @@ void BufferCacheRuntime::BindStorageBuffer(size_t stage, u32 binding_index, Buff
 }
 
 void BufferCacheRuntime::BindComputeStorageBuffer(u32 binding_index, Buffer& buffer, u32 offset,
-                                                  u32 size, bool is_written) {
+                                                  u32 size, bool is_written)
+{
     if (use_storage_buffers) {
         if (size != 0) {
             glBindBufferRange(GL_SHADER_STORAGE_BUFFER, binding_index, buffer.Handle(),
@@ -354,12 +383,14 @@ void BufferCacheRuntime::BindComputeStorageBuffer(u32 binding_index, Buffer& buf
 }
 
 void BufferCacheRuntime::BindTransformFeedbackBuffer(u32 index, Buffer& buffer, u32 offset,
-                                                     u32 size) {
+                                                     u32 size)
+{
     glBindBufferRange(GL_TRANSFORM_FEEDBACK_BUFFER, index, buffer.Handle(),
                       static_cast<GLintptr>(offset), static_cast<GLsizeiptr>(size));
 }
 
-void BufferCacheRuntime::BindTransformFeedbackBuffers(VideoCommon::HostBindings<Buffer>& bindings) {
+void BufferCacheRuntime::BindTransformFeedbackBuffers(VideoCommon::HostBindings<Buffer>& bindings)
+{
     std::array<GLuint, 4> buffer_handles;
     std::ranges::transform(bindings.buffers, buffer_handles.begin(),
                            [](const Buffer* const buffer) { return buffer->Handle(); });
@@ -369,22 +400,25 @@ void BufferCacheRuntime::BindTransformFeedbackBuffers(VideoCommon::HostBindings<
                        reinterpret_cast<const GLsizeiptr*>(bindings.sizes.data()));
 }
 
-void BufferCacheRuntime::BindTextureBuffer(Buffer& buffer, u32 offset, u32 size,
-                                           PixelFormat format) {
+void BufferCacheRuntime::BindTextureBuffer(Buffer& buffer, u32 offset, u32 size, PixelFormat format)
+{
     *texture_handles++ = buffer.View(offset, size, format);
 }
 
-void BufferCacheRuntime::BindImageBuffer(Buffer& buffer, u32 offset, u32 size, PixelFormat format) {
+void BufferCacheRuntime::BindImageBuffer(Buffer& buffer, u32 offset, u32 size, PixelFormat format)
+{
     *image_handles++ = buffer.View(offset, size, format);
 }
 
-void BufferCacheRuntime::BindTransformFeedbackObject(GPUVAddr tfb_object_addr) {
+void BufferCacheRuntime::BindTransformFeedbackObject(GPUVAddr tfb_object_addr)
+{
     OGLTransformFeedback& tfb_object = tfb_objects[tfb_object_addr];
     tfb_object.Create();
     glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, tfb_object.handle);
 }
 
-GLuint BufferCacheRuntime::GetTransformFeedbackObject(GPUVAddr tfb_object_addr) {
+GLuint BufferCacheRuntime::GetTransformFeedbackObject(GPUVAddr tfb_object_addr)
+{
     ASSERT(tfb_objects.contains(tfb_object_addr));
     return tfb_objects[tfb_object_addr].handle;
 }

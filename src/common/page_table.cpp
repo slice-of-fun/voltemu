@@ -5,6 +5,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include "common/page_table.h"
+
 #include "common/scope_exit.h"
 
 namespace Common {
@@ -14,14 +15,16 @@ PageTable::PageTable() = default;
 PageTable::~PageTable() noexcept = default;
 
 bool PageTable::BeginTraversal(TraversalEntry* out_entry, TraversalContext* out_context,
-                               Common::ProcessAddress address) const {
+                               Common::ProcessAddress address) const
+{
     out_context->next_offset = GetInteger(address);
     out_context->next_page = address / page_size;
 
     return this->ContinueTraversal(out_entry, out_context);
 }
 
-bool PageTable::ContinueTraversal(TraversalEntry* out_entry, TraversalContext* context) const {
+bool PageTable::ContinueTraversal(TraversalEntry* out_entry, TraversalContext* context) const
+{
     // Setup invalid defaults.
     out_entry->phys_addr = 0;
     out_entry->block_size = page_size;
@@ -41,7 +44,8 @@ bool PageTable::ContinueTraversal(TraversalEntry* out_entry, TraversalContext* c
     return false;
 }
 
-void PageTable::Resize(std::size_t address_space_width_in_bits, std::size_t page_size_in_bits) {
+void PageTable::Resize(std::size_t address_space_width_in_bits, std::size_t page_size_in_bits)
+{
     auto const num_page_table_entries = 1ULL << (address_space_width_in_bits - page_size_in_bits);
     entries.resize(num_page_table_entries);
     current_address_space_width_in_bits = address_space_width_in_bits;

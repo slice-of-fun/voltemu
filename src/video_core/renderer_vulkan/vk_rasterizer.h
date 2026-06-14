@@ -7,7 +7,6 @@
 #pragma once
 
 #include <array>
-
 #include <boost/container/static_vector.hpp>
 
 #include "common/common_types.h"
@@ -66,7 +65,7 @@ public:
                        const Tegra::DMA::ImageOperand& dst) override;
 
 private:
-    template <bool IS_IMAGE_UPLOAD>
+    template<bool IS_IMAGE_UPLOAD>
     bool DmaBufferImageCopy(const Tegra::DMA::ImageCopy& copy_info,
                             const Tegra::DMA::BufferOperand& src,
                             const Tegra::DMA::ImageOperand& dst);
@@ -114,8 +113,9 @@ public:
     void SignalSyncPoint(u32 value) override;
     void SignalReference() override;
     void ReleaseFences(bool force = true) override;
-    void FlushAndInvalidateRegion(
-        DAddr addr, u64 size, VideoCommon::CacheType which = VideoCommon::CacheType::All) override;
+    void
+    FlushAndInvalidateRegion(DAddr addr, u64 size,
+                             VideoCommon::CacheType which = VideoCommon::CacheType::All) override;
     void WaitForIdle() override;
     void FragmentBarrier() override;
     void TiledCacheBarrier() override;
@@ -153,8 +153,7 @@ private:
 
     static constexpr VkDeviceSize DEFAULT_BUFFER_SIZE = 4 * sizeof(float);
 
-    template <typename Func>
-    void PrepareDraw(bool is_indexed, Func&&);
+    template<typename Func> void PrepareDraw(bool is_indexed, Func&&);
 
     void FlushWork();
 

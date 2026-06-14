@@ -1731,47 +1731,58 @@ const std::array<RandomMiiData2, 3> RandomMiiGlassType{
     },
 };
 
-u8 FromVer3GetFacelineColor(u8 color) {
+u8 FromVer3GetFacelineColor(u8 color)
+{
     return FromVer3FacelineColorTable[color];
 }
 
-u8 FromVer3GetHairColor(u8 color) {
+u8 FromVer3GetHairColor(u8 color)
+{
     return FromVer3HairColorTable[color];
 }
 
-u8 FromVer3GetEyeColor(u8 color) {
+u8 FromVer3GetEyeColor(u8 color)
+{
     return FromVer3EyeColorTable[color];
 }
 
-u8 FromVer3GetMouthlineColor(u8 color) {
+u8 FromVer3GetMouthlineColor(u8 color)
+{
     return FromVer3MouthlineColorTable[color];
 }
 
-u8 FromVer3GetGlassColor(u8 color) {
+u8 FromVer3GetGlassColor(u8 color)
+{
     return FromVer3GlassColorTable[color];
 }
 
-u8 FromVer3GetGlassType(u8 type) {
+u8 FromVer3GetGlassType(u8 type)
+{
     return FromVer3GlassTypeTable[type];
 }
 
-FacelineColor GetFacelineColorFromVer3(u32 color) {
+FacelineColor GetFacelineColorFromVer3(u32 color)
+{
     return static_cast<FacelineColor>(Ver3FacelineColorTable[color]);
 }
 
-CommonColor GetHairColorFromVer3(u32 color) {
+CommonColor GetHairColorFromVer3(u32 color)
+{
     return static_cast<CommonColor>(Ver3HairColorTable[color]);
 }
 
-CommonColor GetEyeColorFromVer3(u32 color) {
+CommonColor GetEyeColorFromVer3(u32 color)
+{
     return static_cast<CommonColor>(Ver3EyeColorTable[color]);
 }
 
-CommonColor GetMouthColorFromVer3(u32 color) {
+CommonColor GetMouthColorFromVer3(u32 color)
+{
     return static_cast<CommonColor>(Ver3MouthColorTable[color]);
 }
 
-CommonColor GetGlassColorFromVer3(u32 color) {
+CommonColor GetGlassColorFromVer3(u32 color)
+{
     return static_cast<CommonColor>(Ver3GlassColorTable[color]);
 }
 

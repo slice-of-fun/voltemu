@@ -5,9 +5,10 @@
 
 #pragma once
 
-#include <memory>
 #include <QDialog>
 #include <QFutureWatcher>
+#include <memory>
+
 #include "yuzu/multiplayer/validation.h"
 
 namespace Ui {

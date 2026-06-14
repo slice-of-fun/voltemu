@@ -5,16 +5,19 @@
 
 namespace AudioCore::Renderer {
 
-void SinkContext::Initialize(std::span<SinkInfoBase> sink_infos_, const u32 sink_count_) {
+void SinkContext::Initialize(std::span<SinkInfoBase> sink_infos_, const u32 sink_count_)
+{
     sink_infos = sink_infos_;
     sink_count = sink_count_;
 }
 
-SinkInfoBase* SinkContext::GetInfo(const u32 index) {
+SinkInfoBase* SinkContext::GetInfo(const u32 index)
+{
     return &sink_infos[index];
 }
 
-u32 SinkContext::GetCount() const {
+u32 SinkContext::GetCount() const
+{
     return sink_count;
 }
 

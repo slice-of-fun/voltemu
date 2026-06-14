@@ -4,6 +4,8 @@
 // SPDX-FileCopyrightText: Copyright 2020 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/nvdrv/devices/nvhost_nvdec_common.h"
+
 #include <algorithm>
 #include <cstring>
 
@@ -15,7 +17,6 @@
 #include "core/hle/service/nvdrv/core/container.h"
 #include "core/hle/service/nvdrv/core/nvmap.h"
 #include "core/hle/service/nvdrv/core/syncpoint_manager.h"
-#include "core/hle/service/nvdrv/devices/nvhost_nvdec_common.h"
 #include "core/memory.h"
 #include "video_core/host1x/host1x.h"
 #include "video_core/memory_manager.h"
@@ -26,9 +27,10 @@ namespace Service::Nvidia::Devices {
 namespace {
 // Copies count amount of type T from the input vector into the dst vector.
 // Returns the number of bytes written into dst.
-template <typename T>
+template<typename T>
 std::size_t SliceVectors(std::span<const u8> input, std::vector<T>& dst, std::size_t count,
-                         std::size_t offset) {
+                         std::size_t offset)
+{
     if (dst.empty()) {
         return 0;
     }
@@ -42,8 +44,9 @@ std::size_t SliceVectors(std::span<const u8> input, std::vector<T>& dst, std::si
 
 // Writes the data in src to an offset into the dst vector. The offset is specified in bytes
 // Returns the number of bytes written into dst.
-template <typename T>
-std::size_t WriteVectors(std::span<u8> dst, const std::vector<T>& src, std::size_t offset) {
+template<typename T>
+std::size_t WriteVectors(std::span<u8> dst, const std::vector<T>& src, std::size_t offset)
+{
     if (src.empty()) {
         return 0;
     }
@@ -59,8 +62,9 @@ std::size_t WriteVectors(std::span<u8> dst, const std::vector<T>& src, std::size
 nvhost_nvdec_common::nvhost_nvdec_common(Core::System& system_, NvCore::Container& core_,
                                          NvCore::ChannelType channel_type_)
     : nvdevice{system_}, host1x{system_.Host1x()}, core{core_},
-      syncpoint_manager{core.GetSyncpointManager()}, nvmap{core.GetNvMapFile()},
-      channel_type{channel_type_} {
+      syncpoint_manager{core.GetSyncpointManager()}, nvmap{core.GetNvMapFile()}, channel_type{
+                                                                                     channel_type_}
+{
     auto& syncpts_accumulated = core.Host1xDeviceFile().syncpts_accumulated;
     if (syncpts_accumulated.empty()) {
         channel_syncpoint = syncpoint_manager.AllocateSyncpoint(false);
@@ -70,18 +74,21 @@ nvhost_nvdec_common::nvhost_nvdec_common(Core::System& system_, NvCore::Containe
     }
 }
 
-nvhost_nvdec_common::~nvhost_nvdec_common() {
+nvhost_nvdec_common::~nvhost_nvdec_common()
+{
     core.Host1xDeviceFile().syncpts_accumulated.push_back(channel_syncpoint);
 }
 
-NvResult nvhost_nvdec_common::SetNVMAPfd(IoctlSetNvmapFD& params) {
+NvResult nvhost_nvdec_common::SetNVMAPfd(IoctlSetNvmapFD& params)
+{
     LOG_DEBUG(Service_NVDRV, "called, fd={}", params.nvmap_fd);
 
     nvmap_fd = params.nvmap_fd;
     return NvResult::Success;
 }
 
-NvResult nvhost_nvdec_common::Submit(IoctlSubmit& params, std::span<u8> data, DeviceFD fd) {
+NvResult nvhost_nvdec_common::Submit(IoctlSubmit& params, std::span<u8> data, DeviceFD fd)
+{
     LOG_DEBUG(Service_NVDRV, "called NVDEC Submit, cmd_buffer_count={}", params.cmd_buffer_count);
 
     // Instantiate param buffers
@@ -128,20 +135,23 @@ NvResult nvhost_nvdec_common::Submit(IoctlSubmit& params, std::span<u8> data, De
     return NvResult::Success;
 }
 
-NvResult nvhost_nvdec_common::GetSyncpoint(IoctlGetSyncpoint& params) {
+NvResult nvhost_nvdec_common::GetSyncpoint(IoctlGetSyncpoint& params)
+{
     LOG_DEBUG(Service_NVDRV, "called GetSyncpoint, id={}", params.param);
     params.value = channel_syncpoint;
     return NvResult::Success;
 }
 
-NvResult nvhost_nvdec_common::GetWaitbase(IoctlGetWaitbase& params) {
+NvResult nvhost_nvdec_common::GetWaitbase(IoctlGetWaitbase& params)
+{
     LOG_DEBUG(Service_NVDRV, "called WAITBASE");
     params.value = 0;
     return NvResult::Success;
 }
 
 NvResult nvhost_nvdec_common::MapBuffer(IoctlMapBuffer& params, std::span<MapBufferEntry> entries,
-                                        DeviceFD fd) {
+                                        DeviceFD fd)
+{
     const size_t num_entries = (std::min)(params.num_entries, static_cast<u32>(entries.size()));
     for (size_t i = 0; i < num_entries; i++) {
         DAddr pin_address = nvmap.PinHandle(entries[i].map_handle, true);
@@ -151,8 +161,8 @@ NvResult nvhost_nvdec_common::MapBuffer(IoctlMapBuffer& params, std::span<MapBuf
     return NvResult::Success;
 }
 
-NvResult nvhost_nvdec_common::UnmapBuffer(IoctlMapBuffer& params,
-                                          std::span<MapBufferEntry> entries) {
+NvResult nvhost_nvdec_common::UnmapBuffer(IoctlMapBuffer& params, std::span<MapBufferEntry> entries)
+{
     const size_t num_entries = (std::min)(params.num_entries, static_cast<u32>(entries.size()));
     for (size_t i = 0; i < num_entries; i++) {
         nvmap.UnpinHandle(entries[i].map_handle);
@@ -163,19 +173,22 @@ NvResult nvhost_nvdec_common::UnmapBuffer(IoctlMapBuffer& params,
     return NvResult::Success;
 }
 
-NvResult nvhost_nvdec_common::SetSubmitTimeout(u32 timeout) {
+NvResult nvhost_nvdec_common::SetSubmitTimeout(u32 timeout)
+{
     LOG_WARNING(Service_NVDRV, "(STUBBED) called");
     return NvResult::Success;
 }
 
-NvResult nvhost_nvdec_common::GetClkRate(IoctlGetClkRate& params) {
+NvResult nvhost_nvdec_common::GetClkRate(IoctlGetClkRate& params)
+{
     LOG_WARNING(Service_NVDRV, "(STUBBED) called");
     params.clk_rate = 614400000;
     params.module_id = 0;
     return NvResult::Success;
 }
 
-Kernel::KEvent* nvhost_nvdec_common::QueryEvent(u32 event_id) {
+Kernel::KEvent* nvhost_nvdec_common::QueryEvent(u32 event_id)
+{
     LOG_CRITICAL(Service_NVDRV, "Unknown HOSTX1 Event {}", event_id);
     return nullptr;
 }

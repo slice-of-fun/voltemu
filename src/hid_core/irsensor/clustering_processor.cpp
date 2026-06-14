@@ -1,19 +1,21 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+#include "hid_core/irsensor/clustering_processor.h"
+
 #include <queue>
 
 #include "core/core.h"
 #include "core/core_timing.h"
 #include "hid_core/frontend/emulated_controller.h"
 #include "hid_core/hid_core.h"
-#include "hid_core/irsensor/clustering_processor.h"
 
 namespace Service::IRS {
 ClusteringProcessor::ClusteringProcessor(Core::System& system_,
                                          Core::IrSensor::DeviceFormat& device_format,
                                          std::size_t npad_index)
-    : device{device_format}, system{system_} {
+    : device{device_format}, system{system_}
+{
     npad_device = system.HIDCore().GetEmulatedControllerByIndex(npad_index);
 
     device.mode = Core::IrSensor::IrSensorMode::ClusteringProcessor;
@@ -31,20 +33,27 @@ ClusteringProcessor::ClusteringProcessor(Core::System& system_,
     callback_key = npad_device->SetCallback(engine_callback);
 }
 
-ClusteringProcessor::~ClusteringProcessor() {
+ClusteringProcessor::~ClusteringProcessor()
+{
     npad_device->DeleteCallback(callback_key);
 };
 
-void ClusteringProcessor::StartProcessor() {
+void ClusteringProcessor::StartProcessor()
+{
     device.camera_status = Core::IrSensor::IrCameraStatus::Available;
     device.camera_internal_status = Core::IrSensor::IrCameraInternalStatus::Ready;
 }
 
-void ClusteringProcessor::SuspendProcessor() {}
+void ClusteringProcessor::SuspendProcessor()
+{
+}
 
-void ClusteringProcessor::StopProcessor() {}
+void ClusteringProcessor::StopProcessor()
+{
+}
 
-void ClusteringProcessor::OnControllerUpdate(Core::HID::ControllerTriggerType type) {
+void ClusteringProcessor::OnControllerUpdate(Core::HID::ControllerTriggerType type)
+{
     if (type != Core::HID::ControllerTriggerType::IrSensor) {
         return;
     }
@@ -94,7 +103,8 @@ void ClusteringProcessor::OnControllerUpdate(Core::HID::ControllerTriggerType ty
     }
 }
 
-void ClusteringProcessor::RemoveLowIntensityData(std::vector<u8>& data) {
+void ClusteringProcessor::RemoveLowIntensityData(std::vector<u8>& data)
+{
     for (u8& pixel : data) {
         if (pixel < current_config.pixel_count_min) {
             pixel = 0;
@@ -102,9 +112,9 @@ void ClusteringProcessor::RemoveLowIntensityData(std::vector<u8>& data) {
     }
 }
 
-ClusteringProcessor::ClusteringData ClusteringProcessor::GetClusterProperties(std::vector<u8>& data,
-                                                                              std::size_t x,
-                                                                              std::size_t y) {
+ClusteringProcessor::ClusteringData
+ClusteringProcessor::GetClusterProperties(std::vector<u8>& data, std::size_t x, std::size_t y)
+{
     using DataPoint = Common::Point<std::size_t>;
     std::queue<DataPoint> search_points{};
     ClusteringData current_cluster = GetPixelProperties(data, x, y);
@@ -147,8 +157,10 @@ ClusteringProcessor::ClusteringData ClusteringProcessor::GetClusterProperties(st
     return current_cluster;
 }
 
-ClusteringProcessor::ClusteringData ClusteringProcessor::GetPixelProperties(
-    const std::vector<u8>& data, std::size_t x, std::size_t y) const {
+ClusteringProcessor::ClusteringData
+ClusteringProcessor::GetPixelProperties(const std::vector<u8>& data, std::size_t x,
+                                        std::size_t y) const
+{
     return {
         .average_intensity = GetPixel(data, x, y) / 255.0f,
         .centroid =
@@ -168,8 +180,9 @@ ClusteringProcessor::ClusteringData ClusteringProcessor::GetPixelProperties(
     };
 }
 
-ClusteringProcessor::ClusteringData ClusteringProcessor::MergeCluster(
-    const ClusteringData a, const ClusteringData b) const {
+ClusteringProcessor::ClusteringData ClusteringProcessor::MergeCluster(const ClusteringData a,
+                                                                      const ClusteringData b) const
+{
     const f32 a_pixel_count = static_cast<f32>(a.pixel_count);
     const f32 b_pixel_count = static_cast<f32>(b.pixel_count);
     const f32 pixel_count = a_pixel_count + b_pixel_count;
@@ -203,21 +216,24 @@ ClusteringProcessor::ClusteringData ClusteringProcessor::MergeCluster(
     };
 }
 
-u8 ClusteringProcessor::GetPixel(const std::vector<u8>& data, std::size_t x, std::size_t y) const {
+u8 ClusteringProcessor::GetPixel(const std::vector<u8>& data, std::size_t x, std::size_t y) const
+{
     if ((y * width) + x >= data.size()) {
         return 0;
     }
     return data[(y * width) + x];
 }
 
-void ClusteringProcessor::SetPixel(std::vector<u8>& data, std::size_t x, std::size_t y, u8 value) {
+void ClusteringProcessor::SetPixel(std::vector<u8>& data, std::size_t x, std::size_t y, u8 value)
+{
     if ((y * width) + x >= data.size()) {
         return;
     }
     data[(y * width) + x] = value;
 }
 
-void ClusteringProcessor::SetDefaultConfig() {
+void ClusteringProcessor::SetDefaultConfig()
+{
     using namespace std::literals::chrono_literals;
     current_config.camera_config.exposure_time = std::chrono::microseconds(200ms).count();
     current_config.camera_config.gain = 2;
@@ -237,7 +253,8 @@ void ClusteringProcessor::SetDefaultConfig() {
     npad_device->SetCameraFormat(format);
 }
 
-void ClusteringProcessor::SetConfig(Core::IrSensor::PackedClusteringProcessorConfig config) {
+void ClusteringProcessor::SetConfig(Core::IrSensor::PackedClusteringProcessorConfig config)
+{
     current_config.camera_config.exposure_time = config.camera_config.exposure_time;
     current_config.camera_config.gain = config.camera_config.gain;
     current_config.camera_config.is_negative_used = config.camera_config.is_negative_used;

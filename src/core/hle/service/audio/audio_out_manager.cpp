@@ -4,9 +4,10 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/audio/audio_out_manager.h"
+
 #include "common/string_util.h"
 #include "core/hle/service/audio/audio_out.h"
-#include "core/hle/service/audio/audio_out_manager.h"
 #include "core/hle/service/cmif_serialization.h"
 #include "core/memory.h"
 
@@ -14,7 +15,8 @@ namespace Service::Audio {
 using namespace AudioCore::AudioOut;
 
 IAudioOutManager::IAudioOutManager(Core::System& system_)
-    : ServiceFramework{system_, "audout:u"}, impl{std::make_unique<Manager>(system_)} {
+    : ServiceFramework{system_, "audout:u"}, impl{std::make_unique<Manager>(system_)}
+{
     // clang-format off
     static const FunctionInfo functions[] = {
         {0, D<&IAudioOutManager::ListAudioOuts>, "ListAudioOuts"},
@@ -29,8 +31,10 @@ IAudioOutManager::IAudioOutManager(Core::System& system_)
 
 IAudioOutManager::~IAudioOutManager() = default;
 
-Result IAudioOutManager::ListAudioOuts(
-    OutArray<AudioDeviceName, BufferAttr_HipcMapAlias> out_audio_outs, Out<u32> out_count) {
+Result
+IAudioOutManager::ListAudioOuts(OutArray<AudioDeviceName, BufferAttr_HipcMapAlias> out_audio_outs,
+                                Out<u32> out_count)
+{
     R_RETURN(this->ListAudioOutsAuto(out_audio_outs, out_count));
 }
 
@@ -40,13 +44,15 @@ Result IAudioOutManager::OpenAudioOut(Out<AudioOutParameterInternal> out_paramet
                                       InArray<AudioDeviceName, BufferAttr_HipcMapAlias> name,
                                       AudioOutParameter parameter,
                                       InCopyHandle<Kernel::KProcess> process_handle,
-                                      ClientAppletResourceUserId aruid) {
+                                      ClientAppletResourceUserId aruid)
+{
     R_RETURN(this->OpenAudioOutAuto(out_parameter_internal, out_audio_out, out_name, name,
                                     parameter, process_handle, aruid));
 }
 
 Result IAudioOutManager::ListAudioOutsAuto(
-    OutArray<AudioDeviceName, BufferAttr_HipcAutoSelect> out_audio_outs, Out<u32> out_count) {
+    OutArray<AudioDeviceName, BufferAttr_HipcAutoSelect> out_audio_outs, Out<u32> out_count)
+{
     if (!out_audio_outs.empty()) {
         out_audio_outs[0] = AudioDeviceName("DeviceOut");
         *out_count = 1;
@@ -64,7 +70,8 @@ Result IAudioOutManager::OpenAudioOutAuto(
     Out<SharedPointer<IAudioOut>> out_audio_out,
     OutArray<AudioDeviceName, BufferAttr_HipcAutoSelect> out_name,
     InArray<AudioDeviceName, BufferAttr_HipcAutoSelect> name, AudioOutParameter parameter,
-    InCopyHandle<Kernel::KProcess> process_handle, ClientAppletResourceUserId aruid) {
+    InCopyHandle<Kernel::KProcess> process_handle, ClientAppletResourceUserId aruid)
+{
     if (!process_handle) {
         LOG_ERROR(Service_Audio, "Failed to get process handle");
         R_THROW(ResultUnknown);
@@ -101,7 +108,8 @@ Result IAudioOutManager::OpenAudioOutAuto(
     R_SUCCEED();
 }
 
-Result IAudioOutManager::SetAllAudioOutVolume(f32 volume) {
+Result IAudioOutManager::SetAllAudioOutVolume(f32 volume)
+{
     std::scoped_lock l{impl->mutex};
     for (auto& session : impl->sessions) {
         if (session) {

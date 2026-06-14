@@ -5,8 +5,8 @@
 
 namespace Service::Glue::Time {
 
-PmStateChangeHandler::PmStateChangeHandler(AlarmWorker& alarm_worker)
-    : m_alarm_worker{alarm_worker} {
+PmStateChangeHandler::PmStateChangeHandler(AlarmWorker& alarm_worker) : m_alarm_worker{alarm_worker}
+{
     // TODO Initialize IPmModule, dependent on Rtc and Fs
 }
 

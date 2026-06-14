@@ -4,22 +4,22 @@
 // SPDX-FileCopyrightText: Copyright 2021 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include <algorithm>
-#include <memory>
-#include <string>
+#include "shader_recompiler/frontend/maxwell/structured_control_flow.h"
+
 #include <ankerl/unordered_dense.h>
+#include <fmt/ranges.h>
+
+#include <algorithm>
+#include <boost/intrusive/list.hpp>
+#include <memory>
+#include <ranges>
+#include <string>
 #include <utility>
 #include <vector>
 
-#include <fmt/ranges.h>
-
-#include <boost/intrusive/list.hpp>
-
-#include <ranges>
 #include "shader_recompiler/environment.h"
 #include "shader_recompiler/frontend/ir/basic_block.h"
 #include "shader_recompiler/frontend/ir/ir_emitter.h"
-#include "shader_recompiler/frontend/maxwell/structured_control_flow.h"
 #include "shader_recompiler/frontend/maxwell/translate/translate.h"
 #include "shader_recompiler/host_translate_info.h"
 #include "shader_recompiler/object_pool.h"
@@ -59,7 +59,8 @@ enum class StatementType {
     IndirectBranchCond,
 };
 
-bool HasChildren(StatementType type) {
+bool HasChildren(StatementType type)
+{
     switch (type) {
     case StatementType::If:
     case StatementType::Loop:
@@ -93,36 +94,58 @@ struct IndirectBranchCond {};
 #endif
 struct Statement : ListBaseHook {
     Statement(const Flow::Block* block_, Statement* up_)
-        : block{block_}, up{up_}, type{StatementType::Code} {}
+        : block{block_}, up{up_}, type{StatementType::Code}
+    {
+    }
     Statement(Goto, Statement* cond_, Node label_, Statement* up_)
-        : label{label_}, cond{cond_}, up{up_}, type{StatementType::Goto} {}
+        : label{label_}, cond{cond_}, up{up_}, type{StatementType::Goto}
+    {
+    }
     Statement(Label, u32 id_, Statement* up_) : id{id_}, up{up_}, type{StatementType::Label} {}
     Statement(If, Statement* cond_, Tree&& children_, Statement* up_)
-        : children{std::move(children_)}, cond{cond_}, up{up_}, type{StatementType::If} {}
+        : children{std::move(children_)}, cond{cond_}, up{up_}, type{StatementType::If}
+    {
+    }
     Statement(Loop, Statement* cond_, Tree&& children_, Statement* up_)
-        : children{std::move(children_)}, cond{cond_}, up{up_}, type{StatementType::Loop} {}
+        : children{std::move(children_)}, cond{cond_}, up{up_}, type{StatementType::Loop}
+    {
+    }
     Statement(Break, Statement* cond_, Statement* up_)
-        : cond{cond_}, up{up_}, type{StatementType::Break} {}
+        : cond{cond_}, up{up_}, type{StatementType::Break}
+    {
+    }
     Statement(Return, Statement* up_) : up{up_}, type{StatementType::Return} {}
     Statement(Kill, Statement* up_) : up{up_}, type{StatementType::Kill} {}
     Statement(Unreachable, Statement* up_) : up{up_}, type{StatementType::Unreachable} {}
     Statement(FunctionTag) : children{}, type{StatementType::Function} {}
     Statement(Identity, IR::Condition cond_, Statement* up_)
-        : guest_cond{cond_}, up{up_}, type{StatementType::Identity} {}
+        : guest_cond{cond_}, up{up_}, type{StatementType::Identity}
+    {
+    }
     Statement(Not, Statement* op_, Statement* up_) : op{op_}, up{up_}, type{StatementType::Not} {}
     Statement(Or, Statement* op_a_, Statement* op_b_, Statement* up_)
-        : op_a{op_a_}, op_b{op_b_}, up{up_}, type{StatementType::Or} {}
+        : op_a{op_a_}, op_b{op_b_}, up{up_}, type{StatementType::Or}
+    {
+    }
     Statement(SetVariable, u32 id_, Statement* op_, Statement* up_)
-        : op{op_}, id{id_}, up{up_}, type{StatementType::SetVariable} {}
+        : op{op_}, id{id_}, up{up_}, type{StatementType::SetVariable}
+    {
+    }
     Statement(SetIndirectBranchVariable, IR::Reg branch_reg_, s32 branch_offset_, Statement* up_)
         : branch_offset{branch_offset_},
-          branch_reg{branch_reg_}, up{up_}, type{StatementType::SetIndirectBranchVariable} {}
-    Statement(Variable, u32 id_, Statement* up_)
-        : id{id_}, up{up_}, type{StatementType::Variable} {}
+          branch_reg{branch_reg_}, up{up_}, type{StatementType::SetIndirectBranchVariable}
+    {
+    }
+    Statement(Variable, u32 id_, Statement* up_) : id{id_}, up{up_}, type{StatementType::Variable}
+    {
+    }
     Statement(IndirectBranchCond, u32 location_, Statement* up_)
-        : location{location_}, up{up_}, type{StatementType::IndirectBranchCond} {}
+        : location{location_}, up{up_}, type{StatementType::IndirectBranchCond}
+    {
+    }
 
-    ~Statement() {
+    ~Statement()
+    {
         if (HasChildren(type)) {
             std::destroy_at(&children);
         }
@@ -151,7 +174,8 @@ struct Statement : ListBaseHook {
 #pragma warning(pop)
 #endif
 
-std::string DumpExpr(const Statement* stmt) {
+std::string DumpExpr(const Statement* stmt)
+{
     switch (stmt->type) {
     case StatementType::Identity:
         return fmt::format("{}", stmt->guest_cond);
@@ -168,7 +192,8 @@ std::string DumpExpr(const Statement* stmt) {
     }
 }
 
-[[maybe_unused]] std::string DumpTree(const Tree& tree, u32 indentation = 0) {
+[[maybe_unused]] std::string DumpTree(const Tree& tree, u32 indentation = 0)
+{
     std::string ret;
     std::string indent(indentation, ' ');
     for (auto stmt = tree.begin(); stmt != tree.end(); ++stmt) {
@@ -226,13 +251,15 @@ std::string DumpExpr(const Statement* stmt) {
     return ret;
 }
 
-void SanitizeNoBreaks(const Tree& tree) {
+void SanitizeNoBreaks(const Tree& tree)
+{
     if (std::ranges::find(tree, StatementType::Break, &Statement::type) != tree.end()) {
         throw NotImplementedException("Capturing statement with break nodes");
     }
 }
 
-size_t Level(Node stmt) {
+size_t Level(Node stmt)
+{
     size_t level{0};
     Statement* node{stmt->up};
     while (node) {
@@ -242,7 +269,8 @@ size_t Level(Node stmt) {
     return level;
 }
 
-bool IsDirectlyRelated(Node goto_stmt, Node label_stmt) {
+bool IsDirectlyRelated(Node goto_stmt, Node label_stmt)
+{
     const size_t goto_level{Level(goto_stmt)};
     const size_t label_level{Level(label_stmt)};
     size_t min_level;
@@ -267,11 +295,13 @@ bool IsDirectlyRelated(Node goto_stmt, Node label_stmt) {
     return min->up == max->up;
 }
 
-bool IsIndirectlyRelated(Node goto_stmt, Node label_stmt) {
+bool IsIndirectlyRelated(Node goto_stmt, Node label_stmt)
+{
     return goto_stmt->up != label_stmt->up && !IsDirectlyRelated(goto_stmt, label_stmt);
 }
 
-[[maybe_unused]] bool AreSiblings(Node goto_stmt, Node label_stmt) noexcept {
+[[maybe_unused]] bool AreSiblings(Node goto_stmt, Node label_stmt) noexcept
+{
     Node it{goto_stmt};
     do {
         if (it == label_stmt) {
@@ -288,7 +318,8 @@ bool IsIndirectlyRelated(Node goto_stmt, Node label_stmt) {
     return false;
 }
 
-Node SiblingFromNephew(Node uncle, Node nephew) noexcept {
+Node SiblingFromNephew(Node uncle, Node nephew) noexcept
+{
     Statement* const parent{uncle->up};
     Statement* it{&*nephew};
     while (it->up != parent) {
@@ -297,7 +328,8 @@ Node SiblingFromNephew(Node uncle, Node nephew) noexcept {
     return Tree::s_iterator_to(*it);
 }
 
-bool AreOrdered(Node left_sibling, Node right_sibling) noexcept {
+bool AreOrdered(Node left_sibling, Node right_sibling) noexcept
+{
     const Node end{right_sibling->up->children.end()};
     for (auto it = right_sibling; it != end; ++it) {
         if (it == left_sibling) {
@@ -307,14 +339,16 @@ bool AreOrdered(Node left_sibling, Node right_sibling) noexcept {
     return true;
 }
 
-bool NeedsLift(Node goto_stmt, Node label_stmt) noexcept {
+bool NeedsLift(Node goto_stmt, Node label_stmt) noexcept
+{
     const Node sibling{SiblingFromNephew(goto_stmt, label_stmt)};
     return AreOrdered(sibling, goto_stmt);
 }
 
 class GotoPass {
 public:
-    explicit GotoPass(Flow::CFG& cfg, ObjectPool<Statement>& stmt_pool) : pool{stmt_pool} {
+    explicit GotoPass(Flow::CFG& cfg, ObjectPool<Statement>& stmt_pool) : pool{stmt_pool}
+    {
         std::vector gotos{BuildTree(cfg)};
         const auto end{gotos.rend()};
         for (auto goto_stmt = gotos.rbegin(); goto_stmt != end; ++goto_stmt) {
@@ -322,12 +356,11 @@ public:
         }
     }
 
-    Statement& RootStatement() noexcept {
-        return root_stmt;
-    }
+    Statement& RootStatement() noexcept { return root_stmt; }
 
 private:
-    void RemoveGoto(Node goto_stmt) {
+    void RemoveGoto(Node goto_stmt)
+    {
         // Force goto_stmt and label_stmt to be directly related
         const Node label_stmt{goto_stmt->label};
         if (IsIndirectlyRelated(goto_stmt, label_stmt)) {
@@ -377,7 +410,8 @@ private:
         }
     }
 
-    std::vector<Node> BuildTree(Flow::CFG& cfg) {
+    std::vector<Node> BuildTree(Flow::CFG& cfg)
+    {
         u32 label_id{0};
         std::vector<Node> gotos;
         Flow::Function& first_function{cfg.Functions().front()};
@@ -387,7 +421,8 @@ private:
 
     void BuildTree(Flow::CFG& cfg, Flow::Function& function, u32& label_id,
                    std::vector<Node>& gotos, Node function_insert_point,
-                   std::optional<Node> return_label) {
+                   std::optional<Node> return_label)
+    {
         Statement* const false_stmt{pool.Create(Identity{}, IR::Condition{false}, &root_stmt)};
         Tree& root{root_stmt.children};
         ankerl::unordered_dense::map<Flow::Block*, Node> local_labels;
@@ -469,13 +504,15 @@ private:
         }
     }
 
-    void UpdateTreeUp(Statement* tree) {
+    void UpdateTreeUp(Statement* tree)
+    {
         for (Statement& stmt : tree->children) {
             stmt.up = tree;
         }
     }
 
-    void EliminateAsConditional(Node goto_stmt, Node label_stmt) {
+    void EliminateAsConditional(Node goto_stmt, Node label_stmt)
+    {
         Tree& body{goto_stmt->up->children};
         Tree if_body;
         if_body.splice(if_body.begin(), body, std::next(goto_stmt), label_stmt);
@@ -486,7 +523,8 @@ private:
         body.erase(goto_stmt);
     }
 
-    void EliminateAsLoop(Node goto_stmt, Node label_stmt) {
+    void EliminateAsLoop(Node goto_stmt, Node label_stmt)
+    {
         Tree& body{goto_stmt->up->children};
         Tree loop_body;
         loop_body.splice(loop_body.begin(), body, label_stmt, goto_stmt);
@@ -497,7 +535,8 @@ private:
         body.erase(goto_stmt);
     }
 
-    [[nodiscard]] Node MoveOutward(Node goto_stmt) {
+    [[nodiscard]] Node MoveOutward(Node goto_stmt)
+    {
         switch (goto_stmt->up->type) {
         case StatementType::If:
             return MoveOutwardIf(goto_stmt);
@@ -508,7 +547,8 @@ private:
         }
     }
 
-    [[nodiscard]] Node MoveInward(Node goto_stmt) {
+    [[nodiscard]] Node MoveInward(Node goto_stmt)
+    {
         Statement* const parent{goto_stmt->up};
         Tree& body{parent->children};
         const Node label{goto_stmt->label};
@@ -546,7 +586,8 @@ private:
         return nested_tree.insert(nested_tree.begin(), *new_goto);
     }
 
-    [[nodiscard]] Node Lift(Node goto_stmt) {
+    [[nodiscard]] Node Lift(Node goto_stmt)
+    {
         Statement* const parent{goto_stmt->up};
         Tree& body{parent->children};
         const Node label{goto_stmt->label};
@@ -572,7 +613,8 @@ private:
         return new_goto_node;
     }
 
-    Node MoveOutwardIf(Node goto_stmt) {
+    Node MoveOutwardIf(Node goto_stmt)
+    {
         const Node parent{Tree::s_iterator_to(*goto_stmt->up)};
         Tree& body{parent->children};
         const u32 label_id{goto_stmt->label->id};
@@ -597,7 +639,8 @@ private:
         return parent_tree.insert(std::next(parent), *new_goto);
     }
 
-    Node MoveOutwardLoop(Node goto_stmt) {
+    Node MoveOutwardLoop(Node goto_stmt)
+    {
         Statement* const parent{goto_stmt->up};
         Tree& body{parent->children};
         const u32 label_id{goto_stmt->label->id};
@@ -620,7 +663,8 @@ private:
     Statement root_stmt{FunctionTag{}};
 };
 
-[[nodiscard]] Statement* TryFindForwardBlock(Statement& stmt) {
+[[nodiscard]] Statement* TryFindForwardBlock(Statement& stmt)
+{
     Tree& tree{stmt.up->children};
     const Node end{tree.end()};
     Node forward_node{std::next(Tree::s_iterator_to(stmt))};
@@ -633,7 +677,8 @@ private:
     return nullptr;
 }
 
-[[nodiscard]] IR::U1 VisitExpr(IR::IREmitter& ir, const Statement& stmt) {
+[[nodiscard]] IR::U1 VisitExpr(IR::IREmitter& ir, const Statement& stmt)
+{
     switch (stmt.type) {
     case StatementType::Identity:
         return ir.Condition(stmt.guest_cond);
@@ -656,7 +701,8 @@ public:
                   ObjectPool<Statement>& stmt_pool_, Environment& env_, Statement& root_stmt,
                   IR::AbstractSyntaxList& syntax_list_, const HostTranslateInfo& host_info)
         : stmt_pool{stmt_pool_}, inst_pool{inst_pool_}, block_pool{block_pool_}, env{env_},
-          syntax_list{syntax_list_} {
+          syntax_list{syntax_list_}
+    {
         Visit(root_stmt, nullptr, nullptr);
 
         IR::Block& first_block{*syntax_list.front().data.block};
@@ -668,7 +714,8 @@ public:
     }
 
 private:
-    void Visit(Statement& parent, IR::Block* break_block, IR::Block* fallthrough_block) {
+    void Visit(Statement& parent, IR::Block* break_block, IR::Block* fallthrough_block)
+    {
         IR::Block* current_block{};
         const auto ensure_block{[&] {
             if (current_block) {
@@ -858,7 +905,8 @@ private:
         }
     }
 
-    IR::Block* MergeBlock(Statement& parent, Statement& stmt) {
+    IR::Block* MergeBlock(Statement& parent, Statement& stmt)
+    {
         Statement* merge_stmt{TryFindForwardBlock(stmt)};
         if (!merge_stmt) {
             // Create a merge block we can visit later
@@ -868,7 +916,8 @@ private:
         return block_pool.Create(inst_pool);
     }
 
-    void DemoteCombinationPass() {
+    void DemoteCombinationPass()
+    {
         using Type = IR::AbstractSyntaxNode::Type;
         std::vector<IR::Block*> demote_blocks;
         std::vector<IR::U1> demote_conds;
@@ -985,7 +1034,8 @@ private:
 
 IR::AbstractSyntaxList BuildASL(ObjectPool<IR::Inst>& inst_pool, ObjectPool<IR::Block>& block_pool,
                                 Environment& env, Flow::CFG& cfg,
-                                const HostTranslateInfo& host_info) {
+                                const HostTranslateInfo& host_info)
+{
     ObjectPool<Statement> stmt_pool{64};
     GotoPass goto_pass{cfg, stmt_pool};
     Statement& root{goto_pass.RootStatement()};

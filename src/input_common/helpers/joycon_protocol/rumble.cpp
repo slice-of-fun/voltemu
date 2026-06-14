@@ -4,26 +4,31 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "input_common/helpers/joycon_protocol/rumble.h"
+
 #include <algorithm>
 #include <cmath>
 
 #include "common/input.h"
 #include "common/logging.h"
-#include "input_common/helpers/joycon_protocol/rumble.h"
 
 namespace InputCommon::Joycon {
 
 RumbleProtocol::RumbleProtocol(std::shared_ptr<JoyconHandle> handle)
-    : JoyconCommonProtocol(std::move(handle)) {}
+    : JoyconCommonProtocol(std::move(handle))
+{
+}
 
-Common::Input::DriverResult RumbleProtocol::EnableRumble(bool is_enabled) {
+Common::Input::DriverResult RumbleProtocol::EnableRumble(bool is_enabled)
+{
     LOG_DEBUG(Input, "Enable Rumble");
     ScopedSetBlocking sb(this);
     const std::array<u8, 1> buffer{static_cast<u8>(is_enabled ? 1 : 0)};
     return SendSubCommand(SubCommand::ENABLE_VIBRATION, buffer);
 }
 
-Common::Input::DriverResult RumbleProtocol::SendVibration(const VibrationValue& vibration) {
+Common::Input::DriverResult RumbleProtocol::SendVibration(const VibrationValue& vibration)
+{
     std::array<u8, sizeof(DefaultVibrationBuffer)> buffer{};
 
     if (vibration.high_amplitude <= 0.0f && vibration.low_amplitude <= 0.0f) {
@@ -54,19 +59,22 @@ Common::Input::DriverResult RumbleProtocol::SendVibration(const VibrationValue& 
     return SendVibrationReport(buffer);
 }
 
-u16 RumbleProtocol::EncodeHighFrequency(f32 frequency) const {
+u16 RumbleProtocol::EncodeHighFrequency(f32 frequency) const
+{
     const u8 new_frequency =
         static_cast<u8>(std::clamp(std::log2(frequency / 10.0f) * 32.0f, 0.0f, 255.0f));
     return static_cast<u16>((new_frequency - 0x60) * 4);
 }
 
-u8 RumbleProtocol::EncodeLowFrequency(f32 frequency) const {
+u8 RumbleProtocol::EncodeLowFrequency(f32 frequency) const
+{
     const u8 new_frequency =
         static_cast<u8>(std::clamp(std::log2(frequency / 10.0f) * 32.0f, 0.0f, 255.0f));
     return static_cast<u8>(new_frequency - 0x40);
 }
 
-u8 RumbleProtocol::EncodeHighAmplitude(f32 amplitude) const {
+u8 RumbleProtocol::EncodeHighAmplitude(f32 amplitude) const
+{
     // More information about these values can be found here:
     // https://github.com/dekuNukem/Nintendo_Switch_Reverse_Engineering/blob/master/rumble_data_table.md
 
@@ -183,7 +191,8 @@ u8 RumbleProtocol::EncodeHighAmplitude(f32 amplitude) const {
     return static_cast<u8>(high_frequency_amplitude[high_frequency_amplitude.size() - 1].second);
 }
 
-u16 RumbleProtocol::EncodeLowAmplitude(f32 amplitude) const {
+u16 RumbleProtocol::EncodeLowAmplitude(f32 amplitude) const
+{
     // More information about these values can be found here:
     // https://github.com/dekuNukem/Nintendo_Switch_Reverse_Engineering/blob/master/rumble_data_table.md
 

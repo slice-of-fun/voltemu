@@ -4,16 +4,18 @@
 // SPDX-FileCopyrightText: Copyright 2021 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "hid_core/frontend/input_converter.h"
+
 #include <algorithm>
 #include <random>
 
-#include "common/random.h"
 #include "common/input.h"
-#include "hid_core/frontend/input_converter.h"
+#include "common/random.h"
 
 namespace Core::HID {
 
-Common::Input::BatteryStatus TransformToBattery(const Common::Input::CallbackStatus& callback) {
+Common::Input::BatteryStatus TransformToBattery(const Common::Input::CallbackStatus& callback)
+{
     Common::Input::BatteryStatus battery{Common::Input::BatteryStatus::None};
     switch (callback.type) {
     case Common::Input::InputType::Analog:
@@ -52,7 +54,8 @@ Common::Input::BatteryStatus TransformToBattery(const Common::Input::CallbackSta
     return battery;
 }
 
-Common::Input::ButtonStatus TransformToButton(const Common::Input::CallbackStatus& callback) {
+Common::Input::ButtonStatus TransformToButton(const Common::Input::CallbackStatus& callback)
+{
     Common::Input::ButtonStatus status{};
     switch (callback.type) {
     case Common::Input::InputType::Analog:
@@ -81,7 +84,8 @@ Common::Input::ButtonStatus TransformToButton(const Common::Input::CallbackStatu
     return status;
 }
 
-Common::Input::MotionStatus TransformToMotion(const Common::Input::CallbackStatus& callback) {
+Common::Input::MotionStatus TransformToMotion(const Common::Input::CallbackStatus& callback)
+{
     Common::Input::MotionStatus status{};
     switch (callback.type) {
     case Common::Input::InputType::Button: {
@@ -151,7 +155,8 @@ Common::Input::MotionStatus TransformToMotion(const Common::Input::CallbackStatu
     return status;
 }
 
-Common::Input::StickStatus TransformToStick(const Common::Input::CallbackStatus& callback) {
+Common::Input::StickStatus TransformToStick(const Common::Input::CallbackStatus& callback)
+{
     Common::Input::StickStatus status{};
 
     switch (callback.type) {
@@ -178,7 +183,8 @@ Common::Input::StickStatus TransformToStick(const Common::Input::CallbackStatus&
     return status;
 }
 
-Common::Input::TouchStatus TransformToTouch(const Common::Input::CallbackStatus& callback) {
+Common::Input::TouchStatus TransformToTouch(const Common::Input::CallbackStatus& callback)
+{
     Common::Input::TouchStatus status{};
 
     switch (callback.type) {
@@ -214,7 +220,8 @@ Common::Input::TouchStatus TransformToTouch(const Common::Input::CallbackStatus&
     return status;
 }
 
-Common::Input::TriggerStatus TransformToTrigger(const Common::Input::CallbackStatus& callback) {
+Common::Input::TriggerStatus TransformToTrigger(const Common::Input::CallbackStatus& callback)
+{
     Common::Input::TriggerStatus status{};
     float& raw_value = status.analog.raw_value;
     bool calculate_button_value = true;
@@ -260,7 +267,8 @@ Common::Input::TriggerStatus TransformToTrigger(const Common::Input::CallbackSta
     return status;
 }
 
-Common::Input::AnalogStatus TransformToAnalog(const Common::Input::CallbackStatus& callback) {
+Common::Input::AnalogStatus TransformToAnalog(const Common::Input::CallbackStatus& callback)
+{
     Common::Input::AnalogStatus status{};
 
     switch (callback.type) {
@@ -281,7 +289,8 @@ Common::Input::AnalogStatus TransformToAnalog(const Common::Input::CallbackStatu
     return status;
 }
 
-Common::Input::CameraStatus TransformToCamera(const Common::Input::CallbackStatus& callback) {
+Common::Input::CameraStatus TransformToCamera(const Common::Input::CallbackStatus& callback)
+{
     Common::Input::CameraStatus camera{};
     switch (callback.type) {
     case Common::Input::InputType::IrSensor:
@@ -298,7 +307,8 @@ Common::Input::CameraStatus TransformToCamera(const Common::Input::CallbackStatu
     return camera;
 }
 
-Common::Input::NfcStatus TransformToNfc(const Common::Input::CallbackStatus& callback) {
+Common::Input::NfcStatus TransformToNfc(const Common::Input::CallbackStatus& callback)
+{
     Common::Input::NfcStatus nfc{};
     switch (callback.type) {
     case Common::Input::InputType::Nfc:
@@ -311,7 +321,8 @@ Common::Input::NfcStatus TransformToNfc(const Common::Input::CallbackStatus& cal
     return nfc;
 }
 
-Common::Input::BodyColorStatus TransformToColor(const Common::Input::CallbackStatus& callback) {
+Common::Input::BodyColorStatus TransformToColor(const Common::Input::CallbackStatus& callback)
+{
     switch (callback.type) {
     case Common::Input::InputType::Color:
         return callback.color_status;
@@ -323,7 +334,8 @@ Common::Input::BodyColorStatus TransformToColor(const Common::Input::CallbackSta
     }
 }
 
-void SanitizeAnalog(Common::Input::AnalogStatus& analog, bool clamp_value) {
+void SanitizeAnalog(Common::Input::AnalogStatus& analog, bool clamp_value)
+{
     const auto& properties = analog.properties;
     float& raw_value = analog.raw_value;
     float& value = analog.value;
@@ -364,7 +376,8 @@ void SanitizeAnalog(Common::Input::AnalogStatus& analog, bool clamp_value) {
 }
 
 void SanitizeStick(Common::Input::AnalogStatus& analog_x, Common::Input::AnalogStatus& analog_y,
-                   bool clamp_value) {
+                   bool clamp_value)
+{
     const auto& properties_x = analog_x.properties;
     const auto& properties_y = analog_y.properties;
     float& raw_x = analog_x.raw_value;

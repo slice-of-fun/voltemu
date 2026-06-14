@@ -18,9 +18,9 @@ class System;
 
 namespace std {
 // Hash used to create lists from AlbumFileId data
-template <>
-struct hash<Service::Capture::AlbumFileId> {
-    size_t operator()(const Service::Capture::AlbumFileId& pad_id) const noexcept {
+template<> struct hash<Service::Capture::AlbumFileId> {
+    size_t operator()(const Service::Capture::AlbumFileId& pad_id) const noexcept
+    {
         u64 hash_value = (static_cast<u64>(pad_id.date.year) << 8);
         hash_value ^= (static_cast<u64>(pad_id.date.month) << 7);
         hash_value ^= (static_cast<u64>(pad_id.date.day) << 6);

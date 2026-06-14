@@ -7,6 +7,8 @@
 // SPDX-FileCopyrightText: Copyright 2024 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "video_core/renderer_opengl/present/window_adapt_pass.h"
+
 #include "common/settings.h"
 #include "video_core/framebuffer_config.h"
 #include "video_core/host_shaders/opengl_present_vert.h"
@@ -15,13 +17,13 @@
 #include "video_core/renderer_opengl/gl_shader_util.h"
 #include "video_core/renderer_opengl/present/layer.h"
 #include "video_core/renderer_opengl/present/present_uniforms.h"
-#include "video_core/renderer_opengl/present/window_adapt_pass.h"
 
 namespace OpenGL {
 
 WindowAdaptPass::WindowAdaptPass(const Device& device_, OGLSampler&& sampler_,
                                  std::string_view frag_source)
-    : device(device_), sampler(std::move(sampler_)) {
+    : device(device_), sampler(std::move(sampler_))
+{
     vert = CreateProgram(HostShaders::OPENGL_PRESENT_VERT, GL_VERTEX_SHADER);
     frag = CreateProgram(frag_source, GL_FRAGMENT_SHADER);
 
@@ -43,7 +45,8 @@ WindowAdaptPass::~WindowAdaptPass() = default;
 
 void WindowAdaptPass::DrawToFramebuffer(ProgramManager& program_manager, std::list<Layer>& layers,
                                         std::span<const Tegra::FramebufferConfig> framebuffers,
-                                        const Layout::FramebufferLayout& layout, bool invert_y) {
+                                        const Layout::FramebufferLayout& layout, bool invert_y)
+{
     GLint old_read_fb;
     GLint old_draw_fb;
     glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &old_read_fb);
@@ -114,7 +117,8 @@ void WindowAdaptPass::DrawToFramebuffer(ProgramManager& program_manager, std::li
         }
 
         glBindTextureUnit(0, textures[i]);
-        glProgramUniformMatrix3x2fv(vert.handle, ModelViewMatrixLocation, 1, GL_FALSE, matrices[i].data());
+        glProgramUniformMatrix3x2fv(vert.handle, ModelViewMatrixLocation, 1, GL_FALSE,
+                                    matrices[i].data());
         glNamedBufferSubData(vertex_buffer.handle, 0, sizeof(vertices[i]), std::data(vertices[i]));
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     }

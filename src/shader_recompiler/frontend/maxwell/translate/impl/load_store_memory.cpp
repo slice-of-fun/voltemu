@@ -45,7 +45,8 @@ enum class StoreCache : u64 {
     WT, // Cache write-through (to system memory)
 };
 
-IR::U64 Address(TranslatorVisitor& v, u64 insn) {
+IR::U64 Address(TranslatorVisitor& v, u64 insn)
+{
     union {
         u64 raw;
         BitField<8, 8, IR::Reg> addr_reg;
@@ -78,7 +79,8 @@ IR::U64 Address(TranslatorVisitor& v, u64 insn) {
 }
 } // Anonymous namespace
 
-void TranslatorVisitor::LDG(u64 insn) {
+void TranslatorVisitor::LDG(u64 insn)
+{
     // LDG loads global memory into registers
     union {
         u64 raw;
@@ -132,7 +134,8 @@ void TranslatorVisitor::LDG(u64 insn) {
     }
 }
 
-void TranslatorVisitor::STG(u64 insn) {
+void TranslatorVisitor::STG(u64 insn)
+{
     // STG stores registers into global memory.
     union {
         u64 raw;

@@ -11,7 +11,8 @@
 
 namespace Kernel::Svc {
 
-Result SendSyncRequestLight(Core::System& system, Handle session_handle, u32* args) {
+Result SendSyncRequestLight(Core::System& system, Handle session_handle, u32* args)
+{
     // Get the light client session from its handle.
     KScopedAutoObject session = GetCurrentProcess(system.Kernel())
                                     .GetHandleTable()
@@ -24,7 +25,8 @@ Result SendSyncRequestLight(Core::System& system, Handle session_handle, u32* ar
     R_SUCCEED();
 }
 
-Result ReplyAndReceiveLight(Core::System& system, Handle session_handle, u32* args) {
+Result ReplyAndReceiveLight(Core::System& system, Handle session_handle, u32* args)
+{
     // Get the light server session from its handle.
     KScopedAutoObject session = GetCurrentProcess(system.Kernel())
                                     .GetHandleTable()
@@ -37,26 +39,31 @@ Result ReplyAndReceiveLight(Core::System& system, Handle session_handle, u32* ar
     R_SUCCEED();
 }
 
-Result SendSyncRequestLight64(Core::System& system, Handle session_handle, u32* args) {
+Result SendSyncRequestLight64(Core::System& system, Handle session_handle, u32* args)
+{
     R_RETURN(SendSyncRequestLight(system, session_handle, args));
 }
 
-Result ReplyAndReceiveLight64(Core::System& system, Handle session_handle, u32* args) {
+Result ReplyAndReceiveLight64(Core::System& system, Handle session_handle, u32* args)
+{
     R_RETURN(ReplyAndReceiveLight(system, session_handle, args));
 }
 
-Result SendSyncRequestLight64From32(Core::System& system, Handle session_handle, u32* args) {
+Result SendSyncRequestLight64From32(Core::System& system, Handle session_handle, u32* args)
+{
     R_RETURN(SendSyncRequestLight(system, session_handle, args));
 }
 
-Result ReplyAndReceiveLight64From32(Core::System& system, Handle session_handle, u32* args) {
+Result ReplyAndReceiveLight64From32(Core::System& system, Handle session_handle, u32* args)
+{
     R_RETURN(ReplyAndReceiveLight(system, session_handle, args));
 }
 
 // Custom ABI implementation for light IPC.
 
-template <typename F>
-static void SvcWrap_LightIpc(Core::System& system, std::span<uint64_t, 8> args, F&& cb) {
+template<typename F>
+static void SvcWrap_LightIpc(Core::System& system, std::span<uint64_t, 8> args, F&& cb)
+{
     std::array<u32, 7> ipc_args{};
 
     Handle session_handle = static_cast<Handle>(args[0]);
@@ -72,19 +79,23 @@ static void SvcWrap_LightIpc(Core::System& system, std::span<uint64_t, 8> args, 
     }
 }
 
-void SvcWrap_SendSyncRequestLight64(Core::System& system, std::span<uint64_t, 8> args) {
+void SvcWrap_SendSyncRequestLight64(Core::System& system, std::span<uint64_t, 8> args)
+{
     SvcWrap_LightIpc(system, args, SendSyncRequestLight64);
 }
 
-void SvcWrap_ReplyAndReceiveLight64(Core::System& system, std::span<uint64_t, 8> args) {
+void SvcWrap_ReplyAndReceiveLight64(Core::System& system, std::span<uint64_t, 8> args)
+{
     SvcWrap_LightIpc(system, args, ReplyAndReceiveLight64);
 }
 
-void SvcWrap_SendSyncRequestLight64From32(Core::System& system, std::span<uint64_t, 8> args) {
+void SvcWrap_SendSyncRequestLight64From32(Core::System& system, std::span<uint64_t, 8> args)
+{
     SvcWrap_LightIpc(system, args, SendSyncRequestLight64From32);
 }
 
-void SvcWrap_ReplyAndReceiveLight64From32(Core::System& system, std::span<uint64_t, 8> args) {
+void SvcWrap_ReplyAndReceiveLight64From32(Core::System& system, std::span<uint64_t, 8> args)
+{
     SvcWrap_LightIpc(system, args, ReplyAndReceiveLight64From32);
 }
 

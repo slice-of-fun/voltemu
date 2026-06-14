@@ -11,18 +11,17 @@
 #include "common/common_types.h"
 
 namespace Common {
-template <typename VaType, size_t AddressSpaceBits>
-concept AddressSpaceValid = std::is_unsigned_v<VaType> && sizeof(VaType) * 8 >=
-AddressSpaceBits;
+template<typename VaType, size_t AddressSpaceBits>
+concept AddressSpaceValid = std::is_unsigned_v<VaType> && sizeof(VaType) * 8 >= AddressSpaceBits;
 
 struct EmptyStruct {};
 
 /**
  * @brief FlatAddressSpaceMap provides a generic VA->PA mapping implementation using a sorted vector
  */
-template <typename VaType, VaType UnmappedVa, typename PaType, PaType UnmappedPa,
-          bool PaContigSplit, size_t AddressSpaceBits, typename ExtraBlockInfo = EmptyStruct>
-    requires AddressSpaceValid<VaType, AddressSpaceBits>
+template<typename VaType, VaType UnmappedVa, typename PaType, PaType UnmappedPa, bool PaContigSplit,
+         size_t AddressSpaceBits, typename ExtraBlockInfo = EmptyStruct>
+requires AddressSpaceValid<VaType, AddressSpaceBits>
 class FlatAddressSpaceMap {
 public:
     /// The maximum VA that this AS can technically reach
@@ -34,19 +33,19 @@ public:
 
     FlatAddressSpaceMap() = default;
 
-    void Map(VaType virt, PaType phys, VaType size, ExtraBlockInfo extra_info = {}) {
+    void Map(VaType virt, PaType phys, VaType size, ExtraBlockInfo extra_info = {})
+    {
         std::scoped_lock lock(block_mutex);
         MapLocked(virt, phys, size, extra_info);
     }
 
-    void Unmap(VaType virt, VaType size) {
+    void Unmap(VaType virt, VaType size)
+    {
         std::scoped_lock lock(block_mutex);
         UnmapLocked(virt, size);
     }
 
-    VaType GetVALimit() const {
-        return va_limit;
-    }
+    VaType GetVALimit() const { return va_limit; }
 
 protected:
     /**
@@ -63,23 +62,17 @@ protected:
         Block() = default;
 
         Block(VaType virt_, PaType phys_, ExtraBlockInfo extra_info_)
-            : virt(virt_), phys(phys_), extra_info(extra_info_) {}
-
-        bool Valid() const {
-            return virt != UnmappedVa;
+            : virt(virt_), phys(phys_), extra_info(extra_info_)
+        {
         }
 
-        bool Mapped() const {
-            return phys != UnmappedPa;
-        }
+        bool Valid() const { return virt != UnmappedVa; }
 
-        bool Unmapped() const {
-            return phys == UnmappedPa;
-        }
+        bool Mapped() const { return phys != UnmappedPa; }
 
-        bool operator<(const VaType& p_virt) const {
-            return virt < p_virt;
-        }
+        bool Unmapped() const { return phys == UnmappedPa; }
+
+        bool operator<(const VaType& p_virt) const { return virt < p_virt; }
     };
 
     /**
@@ -109,8 +102,8 @@ private:
  * @brief FlatMemoryManager specialises FlatAddressSpaceMap to work as an allocator, with an
  * initial, fast linear pass and a subsequent slower pass that iterates until it finds a free block
  */
-template <typename VaType, VaType UnmappedVa, size_t AddressSpaceBits>
-    requires AddressSpaceValid<VaType, AddressSpaceBits>
+template<typename VaType, VaType UnmappedVa, size_t AddressSpaceBits>
+requires AddressSpaceValid<VaType, AddressSpaceBits>
 class FlatAllocator
     : public FlatAddressSpaceMap<VaType, UnmappedVa, bool, false, false, AddressSpaceBits> {
 private:
@@ -134,9 +127,7 @@ public:
      */
     void Free(VaType virt, VaType size);
 
-    VaType GetVAStart() const {
-        return virt_start;
-    }
+    VaType GetVAStart() const { return virt_start; }
 
 private:
     /// The base VA of the allocator, no allocations will be below this

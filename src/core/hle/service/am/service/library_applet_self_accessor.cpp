@@ -4,6 +4,8 @@
 // SPDX-FileCopyrightText: Copyright 2024 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/am/service/library_applet_self_accessor.h"
+
 #include "core/core_timing.h"
 #include "core/file_sys/control_metadata.h"
 #include "core/file_sys/patch_manager.h"
@@ -12,7 +14,6 @@
 #include "core/hle/service/am/applet_data_broker.h"
 #include "core/hle/service/am/applet_manager.h"
 #include "core/hle/service/am/frontend/applets.h"
-#include "core/hle/service/am/service/library_applet_self_accessor.h"
 #include "core/hle/service/am/service/storage.h"
 #include "core/hle/service/cmif_serialization.h"
 #include "core/hle/service/filesystem/filesystem.h"
@@ -25,7 +26,8 @@ namespace Service::AM {
 
 namespace {
 
-AppletIdentityInfo GetCallerIdentity(Applet& applet) {
+AppletIdentityInfo GetCallerIdentity(Applet& applet)
+{
     if (const auto caller_applet = applet.caller_applet.lock(); caller_applet) {
         // TODO: is this actually the application ID?
         return {
@@ -45,7 +47,8 @@ AppletIdentityInfo GetCallerIdentity(Applet& applet) {
 ILibraryAppletSelfAccessor::ILibraryAppletSelfAccessor(Core::System& system_,
                                                        std::shared_ptr<Applet> applet)
     : ServiceFramework{system_, "ILibraryAppletSelfAccessor"}, m_applet{std::move(applet)},
-      m_broker{m_applet->caller_applet_broker} {
+      m_broker{m_applet->caller_applet_broker}
+{
     // clang-format off
     static const FunctionInfo functions[] = {
         {0, D<&ILibraryAppletSelfAccessor::PopInData>, "PopInData"},
@@ -91,44 +94,51 @@ ILibraryAppletSelfAccessor::ILibraryAppletSelfAccessor(Core::System& system_,
 
 ILibraryAppletSelfAccessor::~ILibraryAppletSelfAccessor() = default;
 
-Result ILibraryAppletSelfAccessor::PopInData(Out<SharedPointer<IStorage>> out_storage) {
+Result ILibraryAppletSelfAccessor::PopInData(Out<SharedPointer<IStorage>> out_storage)
+{
     LOG_INFO(Service_AM, "called");
     R_RETURN(m_broker->GetInData().Pop(out_storage));
 }
 
-Result ILibraryAppletSelfAccessor::PushOutData(SharedPointer<IStorage> storage) {
+Result ILibraryAppletSelfAccessor::PushOutData(SharedPointer<IStorage> storage)
+{
     LOG_INFO(Service_AM, "called");
     m_broker->GetOutData().Push(storage);
     R_SUCCEED();
 }
 
-Result ILibraryAppletSelfAccessor::PopInteractiveInData(Out<SharedPointer<IStorage>> out_storage) {
+Result ILibraryAppletSelfAccessor::PopInteractiveInData(Out<SharedPointer<IStorage>> out_storage)
+{
     LOG_INFO(Service_AM, "called");
     R_RETURN(m_broker->GetInteractiveInData().Pop(out_storage));
 }
 
-Result ILibraryAppletSelfAccessor::PushInteractiveOutData(SharedPointer<IStorage> storage) {
+Result ILibraryAppletSelfAccessor::PushInteractiveOutData(SharedPointer<IStorage> storage)
+{
     LOG_INFO(Service_AM, "called");
     m_broker->GetInteractiveOutData().Push(storage);
     R_SUCCEED();
 }
 
-Result ILibraryAppletSelfAccessor::GetPopInDataEvent(
-    OutCopyHandle<Kernel::KReadableEvent> out_event) {
+Result
+ILibraryAppletSelfAccessor::GetPopInDataEvent(OutCopyHandle<Kernel::KReadableEvent> out_event)
+{
     LOG_INFO(Service_AM, "called");
     *out_event = m_broker->GetInData().GetEvent();
     R_SUCCEED();
 }
 
 Result ILibraryAppletSelfAccessor::GetPopInteractiveInDataEvent(
-    OutCopyHandle<Kernel::KReadableEvent> out_event) {
+    OutCopyHandle<Kernel::KReadableEvent> out_event)
+{
     LOG_INFO(Service_AM, "called");
     *out_event = m_broker->GetInteractiveInData().GetEvent();
     R_SUCCEED();
 }
 
-Result ILibraryAppletSelfAccessor::GetLibraryAppletInfo(
-    Out<LibraryAppletInfo> out_library_applet_info) {
+Result
+ILibraryAppletSelfAccessor::GetLibraryAppletInfo(Out<LibraryAppletInfo> out_library_applet_info)
+{
     LOG_INFO(Service_AM, "called");
     *out_library_applet_info = {
         .applet_id = m_applet->applet_id,
@@ -137,8 +147,9 @@ Result ILibraryAppletSelfAccessor::GetLibraryAppletInfo(
     R_SUCCEED();
 }
 
-Result ILibraryAppletSelfAccessor::GetMainAppletIdentityInfo(
-    Out<AppletIdentityInfo> out_identity_info) {
+Result
+ILibraryAppletSelfAccessor::GetMainAppletIdentityInfo(Out<AppletIdentityInfo> out_identity_info)
+{
     LOG_WARNING(Service_AM, "(STUBBED) called");
     *out_identity_info = {
         .applet_id = AppletId::QLaunch,
@@ -147,7 +158,8 @@ Result ILibraryAppletSelfAccessor::GetMainAppletIdentityInfo(
     R_SUCCEED();
 }
 
-Result ILibraryAppletSelfAccessor::CanUseApplicationCore(Out<bool> out_can_use_application_core) {
+Result ILibraryAppletSelfAccessor::CanUseApplicationCore(Out<bool> out_can_use_application_core)
+{
     // TODO: This appears to read the NPDM from state and check the core mask of the applet.
     LOG_WARNING(Service_AM, "(STUBBED) called");
     *out_can_use_application_core = false;
@@ -155,7 +167,8 @@ Result ILibraryAppletSelfAccessor::CanUseApplicationCore(Out<bool> out_can_use_a
 }
 
 Result ILibraryAppletSelfAccessor::GetMainAppletApplicationControlProperty(
-    OutLargeData<std::array<u8, 0x4000>, BufferAttr_HipcMapAlias> out_nacp) {
+    OutLargeData<std::array<u8, 0x4000>, BufferAttr_HipcMapAlias> out_nacp)
+{
     LOG_WARNING(Service_AM, "(STUBBED) called");
 
     // TODO: this should be the main applet, not the caller applet
@@ -171,13 +184,15 @@ Result ILibraryAppletSelfAccessor::GetMainAppletApplicationControlProperty(
     R_RETURN(result);
 }
 
-Result ILibraryAppletSelfAccessor::GetMainAppletStorageId(Out<FileSys::StorageId> out_storage_id) {
+Result ILibraryAppletSelfAccessor::GetMainAppletStorageId(Out<FileSys::StorageId> out_storage_id)
+{
     LOG_INFO(Service_AM, "(STUBBED) called");
     *out_storage_id = FileSys::StorageId::NandUser;
     R_SUCCEED();
 }
 
-Result ILibraryAppletSelfAccessor::ExitProcessAndReturn() {
+Result ILibraryAppletSelfAccessor::ExitProcessAndReturn()
+{
     LOG_INFO(Service_AM, "called");
 
     if (const auto caller_applet = m_applet->caller_applet.lock(); caller_applet) {
@@ -190,15 +205,17 @@ Result ILibraryAppletSelfAccessor::ExitProcessAndReturn() {
     R_SUCCEED();
 }
 
-Result ILibraryAppletSelfAccessor::GetCallerAppletIdentityInfo(
-    Out<AppletIdentityInfo> out_identity_info) {
+Result
+ILibraryAppletSelfAccessor::GetCallerAppletIdentityInfo(Out<AppletIdentityInfo> out_identity_info)
+{
     LOG_INFO(Service_AM, "called");
     *out_identity_info = GetCallerIdentity(*m_applet);
     R_SUCCEED();
 }
 
 Result ILibraryAppletSelfAccessor::GetCallerAppletIdentityInfoStack(
-    Out<s32> out_count, OutArray<AppletIdentityInfo, BufferAttr_HipcMapAlias> out_identity_info) {
+    Out<s32> out_count, OutArray<AppletIdentityInfo, BufferAttr_HipcMapAlias> out_identity_info)
+{
     LOG_INFO(Service_AM, "called");
 
     std::shared_ptr<Applet> applet = m_applet;
@@ -214,32 +231,37 @@ Result ILibraryAppletSelfAccessor::GetCallerAppletIdentityInfoStack(
     R_SUCCEED();
 }
 
-Result ILibraryAppletSelfAccessor::GetDesirableKeyboardLayout(Out<u32> out_desirable_layout) {
+Result ILibraryAppletSelfAccessor::GetDesirableKeyboardLayout(Out<u32> out_desirable_layout)
+{
     LOG_WARNING(Service_AM, "(STUBBED) called");
     *out_desirable_layout = 0;
     R_SUCCEED();
 }
 
-Result ILibraryAppletSelfAccessor::ReportVisibleError(ErrorCode error_code) {
+Result ILibraryAppletSelfAccessor::ReportVisibleError(ErrorCode error_code)
+{
     LOG_WARNING(Service_AM, "(STUBBED) called, error {}-{}", error_code.category,
                 error_code.number);
     R_SUCCEED();
 }
 
 Result ILibraryAppletSelfAccessor::ReportVisibleErrorWithErrorContext(
-    ErrorCode error_code, InLargeData<ErrorContext, BufferAttr_HipcMapAlias> error_context) {
+    ErrorCode error_code, InLargeData<ErrorContext, BufferAttr_HipcMapAlias> error_context)
+{
     LOG_WARNING(Service_AM, "(STUBBED) called, error {}-{}", error_code.category,
                 error_code.number);
     R_SUCCEED();
 }
 
-Result ILibraryAppletSelfAccessor::UnpopInData() {
+Result ILibraryAppletSelfAccessor::UnpopInData()
+{
     LOG_WARNING(Service_AM, "(STUBBED) called");
     R_SUCCEED();
 }
 
-Result ILibraryAppletSelfAccessor::GetMainAppletApplicationDesiredLanguage(
-    Out<u64> out_desired_language) {
+Result
+ILibraryAppletSelfAccessor::GetMainAppletApplicationDesiredLanguage(Out<u64> out_desired_language)
+{
     // FIXME: this is copied from IApplicationFunctions::GetDesiredLanguage
     // FIXME: all of this stuff belongs to ns
     auto identity = GetCallerIdentity(*m_applet);
@@ -290,7 +312,8 @@ Result ILibraryAppletSelfAccessor::GetMainAppletApplicationDesiredLanguage(
     R_SUCCEED();
 }
 
-Result ILibraryAppletSelfAccessor::GetCurrentApplicationId(Out<u64> out_application_id) {
+Result ILibraryAppletSelfAccessor::GetCurrentApplicationId(Out<u64> out_application_id)
+{
     LOG_WARNING(Service_AM, "(STUBBED) called");
 
     // TODO: this should be the main applet, not the caller applet
@@ -302,7 +325,8 @@ Result ILibraryAppletSelfAccessor::GetCurrentApplicationId(Out<u64> out_applicat
 
 Result ILibraryAppletSelfAccessor::GetMainAppletAvailableUsers(
     Out<bool> out_can_select_any_user, Out<s32> out_users_count,
-    OutArray<Common::UUID, BufferAttr_HipcMapAlias> out_users) {
+    OutArray<Common::UUID, BufferAttr_HipcMapAlias> out_users)
+{
     const Service::Account::ProfileManager manager{};
 
     *out_can_select_any_user = false;
@@ -324,14 +348,16 @@ Result ILibraryAppletSelfAccessor::GetMainAppletAvailableUsers(
 }
 
 Result ILibraryAppletSelfAccessor::ShouldSetGpuTimeSliceManually(
-    Out<bool> out_should_set_gpu_time_slice_manually) {
+    Out<bool> out_should_set_gpu_time_slice_manually)
+{
     LOG_INFO(Service_AM, "(STUBBED) called");
     *out_should_set_gpu_time_slice_manually = false;
     R_SUCCEED();
 }
 
-Result ILibraryAppletSelfAccessor::GetLibraryAppletInfoEx(
-    Out<LibraryAppletInfo> out_library_applet_info) {
+Result
+ILibraryAppletSelfAccessor::GetLibraryAppletInfoEx(Out<LibraryAppletInfo> out_library_applet_info)
+{
     LOG_INFO(Service_AM, "called");
     *out_library_applet_info = {
         .applet_id = m_applet->applet_id,

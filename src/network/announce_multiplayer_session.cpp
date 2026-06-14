@@ -4,10 +4,12 @@
 // SPDX-FileCopyrightText: Copyright 2017 Citra Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "announce_multiplayer_session.h"
+
 #include <chrono>
 #include <future>
 #include <vector>
-#include "announce_multiplayer_session.h"
+
 #include "common/announce_multiplayer_room.h"
 #include "common/assert.h"
 #include "common/settings.h"
@@ -19,7 +21,8 @@
 
 namespace Core {
 
-AnnounceMultiplayerSession::AnnounceMultiplayerSession() {
+AnnounceMultiplayerSession::AnnounceMultiplayerSession()
+{
 #ifdef ENABLE_WEB_SERVICE
     backend = std::make_unique<WebService::RoomJson>(Settings::values.web_api_url.GetValue(),
                                                      Settings::values.eden_username.GetValue(),
@@ -29,7 +32,8 @@ AnnounceMultiplayerSession::AnnounceMultiplayerSession() {
 #endif
 }
 
-WebService::WebResult AnnounceMultiplayerSession::Register() {
+WebService::WebResult AnnounceMultiplayerSession::Register()
+{
     auto room = Network::GetRoom().lock();
     if (!room) {
         return WebService::WebResult{WebService::WebResult::Code::LibError,
@@ -49,7 +53,8 @@ WebService::WebResult AnnounceMultiplayerSession::Register() {
     return WebService::WebResult{WebService::WebResult::Code::Success, "", ""};
 }
 
-void AnnounceMultiplayerSession::Start() {
+void AnnounceMultiplayerSession::Start()
+{
     if (announce_multiplayer_thread.has_value()) {
         Stop();
     }
@@ -99,7 +104,8 @@ void AnnounceMultiplayerSession::Start() {
     });
 }
 
-void AnnounceMultiplayerSession::Stop() {
+void AnnounceMultiplayerSession::Stop()
+{
     if (announce_multiplayer_thread.has_value()) {
         shutdown_event.Set();
         announce_multiplayer_thread.reset();
@@ -109,23 +115,27 @@ void AnnounceMultiplayerSession::Stop() {
 }
 
 AnnounceMultiplayerSession::CallbackHandle AnnounceMultiplayerSession::BindErrorCallback(
-    std::function<void(const WebService::WebResult&)> function) {
+    std::function<void(const WebService::WebResult&)> function)
+{
     std::lock_guard lock(callback_mutex);
     auto handle = std::make_shared<std::function<void(const WebService::WebResult&)>>(function);
     error_callbacks.insert(handle);
     return handle;
 }
 
-void AnnounceMultiplayerSession::UnbindErrorCallback(CallbackHandle handle) {
+void AnnounceMultiplayerSession::UnbindErrorCallback(CallbackHandle handle)
+{
     std::lock_guard lock(callback_mutex);
     error_callbacks.erase(handle);
 }
 
-AnnounceMultiplayerSession::~AnnounceMultiplayerSession() {
+AnnounceMultiplayerSession::~AnnounceMultiplayerSession()
+{
     Stop();
 }
 
-void AnnounceMultiplayerSession::UpdateBackendData(std::shared_ptr<Network::Room> room) {
+void AnnounceMultiplayerSession::UpdateBackendData(std::shared_ptr<Network::Room> room)
+{
     Network::RoomInformation room_information = room->GetRoomInformation();
     std::vector<AnnounceMultiplayerRoom::Member> memberlist = room->GetRoomMemberList();
     backend->SetRoomInformation(room_information.name, room_information.description,
@@ -138,11 +148,13 @@ void AnnounceMultiplayerSession::UpdateBackendData(std::shared_ptr<Network::Room
     }
 }
 
-AnnounceMultiplayerRoom::RoomList AnnounceMultiplayerSession::GetRoomList() {
+AnnounceMultiplayerRoom::RoomList AnnounceMultiplayerSession::GetRoomList()
+{
     return backend->GetRoomList();
 }
 
-void AnnounceMultiplayerSession::UpdateCredentials() {
+void AnnounceMultiplayerSession::UpdateCredentials()
+{
     ASSERT_MSG(!IsRunning(), "Credentials can only be updated when session is not running");
 #ifdef ENABLE_WEB_SERVICE
     backend = std::make_unique<WebService::RoomJson>(Settings::values.web_api_url.GetValue(),

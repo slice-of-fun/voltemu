@@ -2,8 +2,9 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #pragma once
-#include <atomic>
 #include <common/socket_types.h>
+
+#include <atomic>
 #include <mutex>
 
 namespace Network {

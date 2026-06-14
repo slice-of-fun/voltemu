@@ -20,7 +20,8 @@ enum class TextureType : u64 {
     ARRAY_CUBE,
 };
 
-Shader::TextureType GetType(TextureType type) {
+Shader::TextureType GetType(TextureType type)
+{
     switch (type) {
     case TextureType::_1D:
         return Shader::TextureType::Color1D;
@@ -42,7 +43,8 @@ Shader::TextureType GetType(TextureType type) {
     throw NotImplementedException("Invalid texture type {}", type);
 }
 
-IR::Value MakeOffset(TranslatorVisitor& v, IR::Reg reg, bool has_lod_clamp) {
+IR::Value MakeOffset(TranslatorVisitor& v, IR::Reg reg, bool has_lod_clamp)
+{
     const IR::U32 value{v.X(reg)};
     const u32 base{has_lod_clamp ? 12U : 16U};
     return v.ir.CompositeConstruct(
@@ -50,7 +52,8 @@ IR::Value MakeOffset(TranslatorVisitor& v, IR::Reg reg, bool has_lod_clamp) {
         v.ir.BitFieldExtract(value, v.ir.Imm32(base + 4), v.ir.Imm32(4), true));
 }
 
-void Impl(TranslatorVisitor& v, u64 insn, bool is_bindless) {
+void Impl(TranslatorVisitor& v, u64 insn, bool is_bindless)
+{
     union {
         u64 raw;
         BitField<49, 1, u64> nodep;
@@ -169,11 +172,13 @@ void Impl(TranslatorVisitor& v, u64 insn, bool is_bindless) {
 }
 } // Anonymous namespace
 
-void TranslatorVisitor::TXD(u64 insn) {
+void TranslatorVisitor::TXD(u64 insn)
+{
     Impl(*this, insn, false);
 }
 
-void TranslatorVisitor::TXD_b(u64 insn) {
+void TranslatorVisitor::TXD_b(u64 insn)
+{
     Impl(*this, insn, true);
 }
 

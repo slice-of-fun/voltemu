@@ -5,37 +5,36 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include <array>
-#include <string>
-#include <thread>
-#include <utility>
 #include <boost/asio.hpp>
 #include <boost/crc.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <string>
+#include <thread>
+#include <utility>
 
 #include "input_common/drivers/udp_client.h"
 #include "input_common/helpers/udp_protocol.h"
 
-
 class FakeCemuhookServer {
 public:
     FakeCemuhookServer()
-        : socket(io_context, boost::asio::ip::udp::endpoint(boost::asio::ip::udp::v4(), 0)) {}
+        : socket(io_context, boost::asio::ip::udp::endpoint(boost::asio::ip::udp::v4(), 0))
+    {
+    }
 
-    ~FakeCemuhookServer() {
+    ~FakeCemuhookServer()
+    {
         boost::system::error_code error_code;
         socket.shutdown(boost::asio::socket_base::shutdown_both, error_code);
         socket.close();
     }
 
-    u16 GetPort() {
-        return socket.local_endpoint().port();
-    }
+    u16 GetPort() { return socket.local_endpoint().port(); }
 
-    std::string GetHost() {
-        return socket.local_endpoint().address().to_string();
-    }
+    std::string GetHost() { return socket.local_endpoint().address().to_string(); }
 
-    void Run(const std::vector<InputCommon::CemuhookUDP::Response::TouchPad> touch_movement_path) {
+    void Run(const std::vector<InputCommon::CemuhookUDP::Response::TouchPad> touch_movement_path)
+    {
         constexpr size_t HeaderSize = sizeof(InputCommon::CemuhookUDP::Header);
         constexpr size_t PadDataSize =
             sizeof(InputCommon::CemuhookUDP::Message<InputCommon::CemuhookUDP::Response::PadData>);
@@ -89,7 +88,8 @@ private:
     std::jthread handler;
 };
 
-TEST_CASE("CalibrationConfigurationJob completed", "[input_common]") {
+TEST_CASE("CalibrationConfigurationJob completed", "[input_common]")
+{
     Common::Event complete_event;
     FakeCemuhookServer server;
     server.Run({{

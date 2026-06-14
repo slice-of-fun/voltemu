@@ -4,9 +4,10 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/btm/btm.h"
+
 #include <memory>
 
-#include "core/hle/service/btm/btm.h"
 #include "core/hle/service/btm/btm_debug.h"
 #include "core/hle/service/btm/btm_system.h"
 #include "core/hle/service/btm/btm_user.h"
@@ -17,7 +18,8 @@ namespace Service::BTM {
 
 class IBtm final : public ServiceFramework<IBtm> {
 public:
-    explicit IBtm(Core::System& system_) : ServiceFramework{system_, "btm"} {
+    explicit IBtm(Core::System& system_) : ServiceFramework{system_, "btm"}
+    {
         // clang-format off
         static const FunctionInfo functions[] = {
             {0, nullptr, "GetState"},
@@ -114,7 +116,8 @@ public:
     }
 };
 
-void LoopProcess(Core::System& system) {
+void LoopProcess(Core::System& system)
+{
     auto server_manager = std::make_unique<ServerManager>(system);
 
     server_manager->RegisterNamedService("btm", std::make_shared<IBtm>(system));

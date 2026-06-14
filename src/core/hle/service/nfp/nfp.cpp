@@ -4,9 +4,10 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/nfp/nfp.h"
+
 #include "common/logging.h"
 #include "core/hle/service/ipc_helpers.h"
-#include "core/hle/service/nfp/nfp.h"
 #include "core/hle/service/nfp/nfp_interface.h"
 #include "core/hle/service/server_manager.h"
 
@@ -14,7 +15,8 @@ namespace Service::NFP {
 
 class IUser final : public Interface {
 public:
-    explicit IUser(Core::System& system_) : Interface(system_, "NFP:IUser") {
+    explicit IUser(Core::System& system_) : Interface(system_, "NFP:IUser")
+    {
         // clang-format off
         static const FunctionInfoTyped<IUser> functions[] = {
             {0, &IUser::Initialize, "Initialize"},
@@ -51,7 +53,8 @@ public:
 
 class ISystem final : public Interface {
 public:
-    explicit ISystem(Core::System& system_) : Interface(system_, "NFP:ISystem") {
+    explicit ISystem(Core::System& system_) : Interface(system_, "NFP:ISystem")
+    {
         // clang-format off
         static const FunctionInfoTyped<ISystem> functions[] = {
             {0, &ISystem::InitializeSystem, "InitializeSystem"},
@@ -90,7 +93,8 @@ public:
 
 class IDebug final : public Interface {
 public:
-    explicit IDebug(Core::System& system_) : Interface(system_, "NFP:IDebug") {
+    explicit IDebug(Core::System& system_) : Interface(system_, "NFP:IDebug")
+    {
         // clang-format off
         static const FunctionInfoTyped<IDebug> functions[] = {
             {0, &IDebug::InitializeDebug, "InitializeDebug"},
@@ -141,7 +145,8 @@ public:
 
 class IUserManager final : public ServiceFramework<IUserManager> {
 public:
-    explicit IUserManager(Core::System& system_) : ServiceFramework{system_, "nfp:user"} {
+    explicit IUserManager(Core::System& system_) : ServiceFramework{system_, "nfp:user"}
+    {
         // clang-format off
         static const FunctionInfo functions[] = {
             {0, &IUserManager::CreateUserInterface, "CreateUserInterface"},
@@ -152,7 +157,8 @@ public:
     }
 
 private:
-    void CreateUserInterface(HLERequestContext& ctx) {
+    void CreateUserInterface(HLERequestContext& ctx)
+    {
         LOG_DEBUG(Service_NFP, "called");
 
         IPC::ResponseBuilder rb{ctx, 2, 0, 1};
@@ -163,7 +169,8 @@ private:
 
 class ISystemManager final : public ServiceFramework<ISystemManager> {
 public:
-    explicit ISystemManager(Core::System& system_) : ServiceFramework{system_, "nfp:sys"} {
+    explicit ISystemManager(Core::System& system_) : ServiceFramework{system_, "nfp:sys"}
+    {
         // clang-format off
         static const FunctionInfo functions[] = {
             {0, &ISystemManager::CreateSystemInterface, "CreateSystemInterface"},
@@ -174,7 +181,8 @@ public:
     }
 
 private:
-    void CreateSystemInterface(HLERequestContext& ctx) {
+    void CreateSystemInterface(HLERequestContext& ctx)
+    {
         LOG_DEBUG(Service_NFP, "called");
 
         IPC::ResponseBuilder rb{ctx, 2, 0, 1};
@@ -185,7 +193,8 @@ private:
 
 class IDebugManager final : public ServiceFramework<IDebugManager> {
 public:
-    explicit IDebugManager(Core::System& system_) : ServiceFramework{system_, "nfp:dbg"} {
+    explicit IDebugManager(Core::System& system_) : ServiceFramework{system_, "nfp:dbg"}
+    {
         // clang-format off
         static const FunctionInfo functions[] = {
             {0, &IDebugManager::CreateDebugInterface, "CreateDebugInterface"},
@@ -196,7 +205,8 @@ public:
     }
 
 private:
-    void CreateDebugInterface(HLERequestContext& ctx) {
+    void CreateDebugInterface(HLERequestContext& ctx)
+    {
         LOG_DEBUG(Service_NFP, "called");
 
         IPC::ResponseBuilder rb{ctx, 2, 0, 1};
@@ -205,7 +215,8 @@ private:
     }
 };
 
-void LoopProcess(Core::System& system) {
+void LoopProcess(Core::System& system)
+{
     auto server_manager = std::make_unique<ServerManager>(system);
 
     server_manager->RegisterNamedService("nfp:user", std::make_shared<IUserManager>(system));

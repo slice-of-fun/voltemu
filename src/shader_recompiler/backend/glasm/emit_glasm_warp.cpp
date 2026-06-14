@@ -8,49 +8,59 @@
 
 namespace Shader::Backend::GLASM {
 
-void EmitLaneId(EmitContext& ctx, IR::Inst& inst) {
+void EmitLaneId(EmitContext& ctx, IR::Inst& inst)
+{
     ctx.Add("MOV.S {}.x,{}.threadid;", inst, ctx.stage_name);
 }
 
-void EmitVoteAll(EmitContext& ctx, IR::Inst& inst, ScalarS32 pred) {
+void EmitVoteAll(EmitContext& ctx, IR::Inst& inst, ScalarS32 pred)
+{
     ctx.Add("TGALL.S {}.x,{};", inst, pred);
 }
 
-void EmitVoteAny(EmitContext& ctx, IR::Inst& inst, ScalarS32 pred) {
+void EmitVoteAny(EmitContext& ctx, IR::Inst& inst, ScalarS32 pred)
+{
     ctx.Add("TGANY.S {}.x,{};", inst, pred);
 }
 
-void EmitVoteEqual(EmitContext& ctx, IR::Inst& inst, ScalarS32 pred) {
+void EmitVoteEqual(EmitContext& ctx, IR::Inst& inst, ScalarS32 pred)
+{
     ctx.Add("TGEQ.S {}.x,{};", inst, pred);
 }
 
-void EmitSubgroupBallot(EmitContext& ctx, IR::Inst& inst, ScalarS32 pred) {
+void EmitSubgroupBallot(EmitContext& ctx, IR::Inst& inst, ScalarS32 pred)
+{
     ctx.Add("TGBALLOT {}.x,{};", inst, pred);
 }
 
-void EmitSubgroupEqMask(EmitContext& ctx, IR::Inst& inst) {
+void EmitSubgroupEqMask(EmitContext& ctx, IR::Inst& inst)
+{
     ctx.Add("MOV.U {},{}.threadeqmask;", inst, ctx.stage_name);
 }
 
-void EmitSubgroupLtMask(EmitContext& ctx, IR::Inst& inst) {
+void EmitSubgroupLtMask(EmitContext& ctx, IR::Inst& inst)
+{
     ctx.Add("MOV.U {},{}.threadltmask;", inst, ctx.stage_name);
 }
 
-void EmitSubgroupLeMask(EmitContext& ctx, IR::Inst& inst) {
+void EmitSubgroupLeMask(EmitContext& ctx, IR::Inst& inst)
+{
     ctx.Add("MOV.U {},{}.threadlemask;", inst, ctx.stage_name);
 }
 
-void EmitSubgroupGtMask(EmitContext& ctx, IR::Inst& inst) {
+void EmitSubgroupGtMask(EmitContext& ctx, IR::Inst& inst)
+{
     ctx.Add("MOV.U {},{}.threadgtmask;", inst, ctx.stage_name);
 }
 
-void EmitSubgroupGeMask(EmitContext& ctx, IR::Inst& inst) {
+void EmitSubgroupGeMask(EmitContext& ctx, IR::Inst& inst)
+{
     ctx.Add("MOV.U {},{}.threadgemask;", inst, ctx.stage_name);
 }
 
 static void Shuffle(EmitContext& ctx, IR::Inst& inst, ScalarU32 value, ScalarU32 index,
-                    const IR::Value& clamp, const IR::Value& segmentation_mask,
-                    std::string_view op) {
+                    const IR::Value& clamp, const IR::Value& segmentation_mask, std::string_view op)
+{
     IR::Inst* const in_bounds{inst.GetAssociatedPseudoOperation(IR::Opcode::GetInBoundsFromOp)};
     if (in_bounds) {
         in_bounds->Invalidate();
@@ -78,27 +88,32 @@ static void Shuffle(EmitContext& ctx, IR::Inst& inst, ScalarU32 value, ScalarU32
 }
 
 void EmitShuffleIndex(EmitContext& ctx, IR::Inst& inst, ScalarU32 value, ScalarU32 index,
-                      const IR::Value& clamp, const IR::Value& segmentation_mask) {
+                      const IR::Value& clamp, const IR::Value& segmentation_mask)
+{
     Shuffle(ctx, inst, value, index, clamp, segmentation_mask, "IDX");
 }
 
 void EmitShuffleUp(EmitContext& ctx, IR::Inst& inst, ScalarU32 value, ScalarU32 index,
-                   const IR::Value& clamp, const IR::Value& segmentation_mask) {
+                   const IR::Value& clamp, const IR::Value& segmentation_mask)
+{
     Shuffle(ctx, inst, value, index, clamp, segmentation_mask, "UP");
 }
 
 void EmitShuffleDown(EmitContext& ctx, IR::Inst& inst, ScalarU32 value, ScalarU32 index,
-                     const IR::Value& clamp, const IR::Value& segmentation_mask) {
+                     const IR::Value& clamp, const IR::Value& segmentation_mask)
+{
     Shuffle(ctx, inst, value, index, clamp, segmentation_mask, "DOWN");
 }
 
 void EmitShuffleButterfly(EmitContext& ctx, IR::Inst& inst, ScalarU32 value, ScalarU32 index,
-                          const IR::Value& clamp, const IR::Value& segmentation_mask) {
+                          const IR::Value& clamp, const IR::Value& segmentation_mask)
+{
     Shuffle(ctx, inst, value, index, clamp, segmentation_mask, "XOR");
 }
 
 void EmitFSwizzleAdd(EmitContext& ctx, IR::Inst& inst, ScalarF32 op_a, ScalarF32 op_b,
-                     ScalarU32 swizzle) {
+                     ScalarU32 swizzle)
+{
     const auto ret{ctx.reg_alloc.Define(inst)};
     ctx.Add("AND.U RC.z,{}.threadid,3;"
             "SHL.U RC.z,RC.z,1;"
@@ -110,7 +125,8 @@ void EmitFSwizzleAdd(EmitContext& ctx, IR::Inst& inst, ScalarF32 op_a, ScalarF32
             ctx.stage_name, swizzle, op_a, op_b, ret);
 }
 
-void EmitDPdxFine(EmitContext& ctx, IR::Inst& inst, ScalarF32 p) {
+void EmitDPdxFine(EmitContext& ctx, IR::Inst& inst, ScalarF32 p)
+{
     if (ctx.profile.support_derivative_control) {
         ctx.Add("DDX.FINE {}.x,{};", inst, p);
     } else {
@@ -119,7 +135,8 @@ void EmitDPdxFine(EmitContext& ctx, IR::Inst& inst, ScalarF32 p) {
     }
 }
 
-void EmitDPdyFine(EmitContext& ctx, IR::Inst& inst, ScalarF32 p) {
+void EmitDPdyFine(EmitContext& ctx, IR::Inst& inst, ScalarF32 p)
+{
     if (ctx.profile.support_derivative_control) {
         ctx.Add("DDY.FINE {}.x,{};", inst, p);
     } else {
@@ -128,7 +145,8 @@ void EmitDPdyFine(EmitContext& ctx, IR::Inst& inst, ScalarF32 p) {
     }
 }
 
-void EmitDPdxCoarse(EmitContext& ctx, IR::Inst& inst, ScalarF32 p) {
+void EmitDPdxCoarse(EmitContext& ctx, IR::Inst& inst, ScalarF32 p)
+{
     if (ctx.profile.support_derivative_control) {
         ctx.Add("DDX.COARSE {}.x,{};", inst, p);
     } else {
@@ -137,7 +155,8 @@ void EmitDPdxCoarse(EmitContext& ctx, IR::Inst& inst, ScalarF32 p) {
     }
 }
 
-void EmitDPdyCoarse(EmitContext& ctx, IR::Inst& inst, ScalarF32 p) {
+void EmitDPdyCoarse(EmitContext& ctx, IR::Inst& inst, ScalarF32 p)
+{
     if (ctx.profile.support_derivative_control) {
         ctx.Add("DDY.COARSE {}.x,{};", inst, p);
     } else {

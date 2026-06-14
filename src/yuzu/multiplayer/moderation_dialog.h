@@ -6,9 +6,10 @@
 
 #pragma once
 
+#include <QDialog>
 #include <memory>
 #include <optional>
-#include <QDialog>
+
 #include "network/room.h"
 #include "network/room_member.h"
 

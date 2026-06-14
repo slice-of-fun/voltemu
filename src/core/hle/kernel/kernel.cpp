@@ -4,13 +4,16 @@
 // SPDX-FileCopyrightText: Copyright 2021 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/kernel/kernel.h"
+
+#include <ankerl/unordered_dense.h>
+
 #include <array>
 #include <atomic>
 #include <bitset>
 #include <functional>
 #include <memory>
 #include <thread>
-#include <ankerl/unordered_dense.h>
 #include <utility>
 
 #include "common/assert.h"
@@ -41,7 +44,6 @@
 #include "core/hle/kernel/k_system_resource.h"
 #include "core/hle/kernel/k_thread.h"
 #include "core/hle/kernel/k_worker_task_manager.h"
-#include "core/hle/kernel/kernel.h"
 #include "core/hle/kernel/physical_core.h"
 #include "core/hle/result.h"
 #include "core/hle/service/server_manager.h"
@@ -79,15 +81,15 @@ struct KernelCore::Impl {
     // so it will be statically given a TLS slot anyways.
     static inline thread_local ThreadLocalData tls_data = {};
 
-    explicit Impl(Core::System& system_, KernelCore& kernel_) : system{system_} {
+    explicit Impl(Core::System& system_, KernelCore& kernel_) : system{system_}
+    {
         tls_data.lock = true;
     }
 
-    void SetMulticore(bool is_multi) {
-        is_multicore = is_multi;
-    }
+    void SetMulticore(bool is_multi) { is_multicore = is_multi; }
 
-    void Initialize(KernelCore& kernel) {
+    void Initialize(KernelCore& kernel)
+    {
         hardware_timer.emplace(kernel);
         hardware_timer->Initialize();
 
@@ -111,14 +113,16 @@ struct KernelCore::Impl {
         {
             const auto& pt_heap_region = memory_layout->GetPageTableHeapRegion();
             ASSERT(pt_heap_region.GetEndAddress() != 0);
-            InitializeResourceManagers(kernel, pt_heap_region.GetAddress(), pt_heap_region.GetSize());
+            InitializeResourceManagers(kernel, pt_heap_region.GetAddress(),
+                                       pt_heap_region.GetSize());
         }
 
         InitializeHackSharedMemory(kernel);
         RegisterHostThread(nullptr);
     }
 
-    void TerminateAllProcesses() {
+    void TerminateAllProcesses()
+    {
         std::scoped_lock lk{process_list_lock};
         for (auto& process : process_list) {
             process->Terminate();
@@ -128,9 +132,11 @@ struct KernelCore::Impl {
         process_list.clear();
     }
 
-    void Shutdown() {
+    void Shutdown()
+    {
         is_shutting_down.store(true, std::memory_order_relaxed);
-        SCOPE_EXIT {
+        SCOPE_EXIT
+        {
             is_shutting_down.store(false, std::memory_order_relaxed);
         };
 
@@ -204,13 +210,15 @@ struct KernelCore::Impl {
         hardware_timer.reset();
     }
 
-    void CloseServices() {
+    void CloseServices()
+    {
         // Ensures all servers gracefully shutdown.
         std::scoped_lock lk{server_lock};
         server_managers.clear();
     }
 
-    void InitializePhysicalCores() {
+    void InitializePhysicalCores()
+    {
         for (u32 i = 0; i < Core::Hardware::NUM_CPU_CORES; i++) {
             auto const core = s32(i);
             schedulers[i].emplace(system.Kernel());
@@ -232,7 +240,8 @@ struct KernelCore::Impl {
 
     // Creates the default system resource limit
     void InitializeSystemResourceLimit(KernelCore& kernel,
-                                       const Core::Timing::CoreTiming& core_timing) {
+                                       const Core::Timing::CoreTiming& core_timing)
+    {
         system_resource_limit = KResourceLimit::Create(system.Kernel());
         system_resource_limit->Initialize();
         KResourceLimit::Register(kernel, system_resource_limit);
@@ -242,11 +251,17 @@ struct KernelCore::Impl {
         const auto kernel_size{sizes.second};
 
         // If setting the default system values fails, then something seriously wrong has occurred.
-        ASSERT(system_resource_limit->SetLimitValue(LimitableResource::PhysicalMemoryMax, total_size).IsSuccess());
-        ASSERT(system_resource_limit->SetLimitValue(LimitableResource::ThreadCountMax, 800).IsSuccess());
-        ASSERT(system_resource_limit->SetLimitValue(LimitableResource::EventCountMax, 900).IsSuccess());
-        ASSERT(system_resource_limit->SetLimitValue(LimitableResource::TransferMemoryCountMax, 200).IsSuccess());
-        ASSERT(system_resource_limit->SetLimitValue(LimitableResource::SessionCountMax, 1133).IsSuccess());
+        ASSERT(
+            system_resource_limit->SetLimitValue(LimitableResource::PhysicalMemoryMax, total_size)
+                .IsSuccess());
+        ASSERT(system_resource_limit->SetLimitValue(LimitableResource::ThreadCountMax, 800)
+                   .IsSuccess());
+        ASSERT(system_resource_limit->SetLimitValue(LimitableResource::EventCountMax, 900)
+                   .IsSuccess());
+        ASSERT(system_resource_limit->SetLimitValue(LimitableResource::TransferMemoryCountMax, 200)
+                   .IsSuccess());
+        ASSERT(system_resource_limit->SetLimitValue(LimitableResource::SessionCountMax, 1133)
+                   .IsSuccess());
         system_resource_limit->Reserve(LimitableResource::PhysicalMemoryMax, kernel_size);
 
         // Reserve secure applet memory, introduced in firmware 5.0.0
@@ -255,32 +270,39 @@ struct KernelCore::Impl {
                                               secure_applet_memory_size));
     }
 
-    void InitializePreemption(KernelCore& kernel) {
-        preemption_event = Core::Timing::CreateEvent("PreemptionCallback", [this, &kernel](s64 time, std::chrono::nanoseconds) -> std::optional<std::chrono::nanoseconds> {
-            {
-                KScopedSchedulerLock lock(kernel);
-                global_scheduler_context->PreemptThreads();
-            }
-            return std::nullopt;
-        });
+    void InitializePreemption(KernelCore& kernel)
+    {
+        preemption_event = Core::Timing::CreateEvent(
+            "PreemptionCallback",
+            [this, &kernel](s64 time,
+                            std::chrono::nanoseconds) -> std::optional<std::chrono::nanoseconds> {
+                {
+                    KScopedSchedulerLock lock(kernel);
+                    global_scheduler_context->PreemptThreads();
+                }
+                return std::nullopt;
+            });
 
         const auto time_interval = std::chrono::nanoseconds{std::chrono::milliseconds(10)};
         system.CoreTiming().ScheduleLoopingEvent(time_interval, time_interval, preemption_event);
     }
 
-    void InitializeResourceManagers(KernelCore& kernel, KVirtualAddress address, size_t size) {
+    void InitializeResourceManagers(KernelCore& kernel, KVirtualAddress address, size_t size)
+    {
         // Ensure that the buffer is suitable for our use.
         ASSERT(Common::IsAligned(GetInteger(address), PageSize));
         ASSERT(Common::IsAligned(size, PageSize));
 
         // Ensure that we have space for our reference counts.
-        const size_t rc_size = Common::AlignUp(KPageTableSlabHeap::CalculateReferenceCountSize(size), PageSize);
+        const size_t rc_size =
+            Common::AlignUp(KPageTableSlabHeap::CalculateReferenceCountSize(size), PageSize);
         ASSERT(rc_size < size);
         size -= rc_size;
 
         // Initialize the resource managers' shared page manager.
         resource_manager_page_manager.emplace();
-        resource_manager_page_manager->Initialize(address, size, std::max<size_t>(PageSize, KPageBufferSlabHeap::BufferSize));
+        resource_manager_page_manager->Initialize(
+            address, size, std::max<size_t>(PageSize, KPageBufferSlabHeap::BufferSize));
 
         // Initialize the KPageBuffer slab heap.
         page_buffer_slab_heap.Initialize(system);
@@ -289,12 +311,17 @@ struct KernelCore::Impl {
         app_memory_block_heap.emplace();
         sys_memory_block_heap.emplace();
         block_info_heap.emplace();
-        app_memory_block_heap->Initialize(std::addressof(*resource_manager_page_manager), ApplicationMemoryBlockSlabHeapSize);
-        sys_memory_block_heap->Initialize(std::addressof(*resource_manager_page_manager), SystemMemoryBlockSlabHeapSize);
-        block_info_heap->Initialize(std::addressof(*resource_manager_page_manager), BlockInfoSlabHeapSize);
+        app_memory_block_heap->Initialize(std::addressof(*resource_manager_page_manager),
+                                          ApplicationMemoryBlockSlabHeapSize);
+        sys_memory_block_heap->Initialize(std::addressof(*resource_manager_page_manager),
+                                          SystemMemoryBlockSlabHeapSize);
+        block_info_heap->Initialize(std::addressof(*resource_manager_page_manager),
+                                    BlockInfoSlabHeapSize);
 
         // Reserve all but a fixed number of remaining pages for the page table heap.
-        const size_t num_pt_pages = resource_manager_page_manager->GetCount() - resource_manager_page_manager->GetUsed() - ReservedDynamicPageCount;
+        const size_t num_pt_pages = resource_manager_page_manager->GetCount() -
+                                    resource_manager_page_manager->GetUsed() -
+                                    ReservedDynamicPageCount;
         page_table_heap.emplace();
 
         // TODO(bunnei): Pass in address once we support kernel virtual memory allocations.
@@ -306,7 +333,8 @@ struct KernelCore::Impl {
         KDynamicPageManager* const app_dynamic_page_manager = nullptr;
         KDynamicPageManager* const sys_dynamic_page_manager =
             /*KTargetSystem::IsDynamicResourceLimitsEnabled()*/ true
-            ? std::addressof(*resource_manager_page_manager) : nullptr;
+                ? std::addressof(*resource_manager_page_manager)
+                : nullptr;
         app_memory_block_manager.emplace();
         sys_memory_block_manager.emplace();
         app_block_info_manager.emplace();
@@ -314,17 +342,25 @@ struct KernelCore::Impl {
         app_page_table_manager.emplace();
         sys_page_table_manager.emplace();
 
-        app_memory_block_manager->Initialize(app_dynamic_page_manager, std::addressof(*app_memory_block_heap));
-        sys_memory_block_manager->Initialize(sys_dynamic_page_manager, std::addressof(*sys_memory_block_heap));
+        app_memory_block_manager->Initialize(app_dynamic_page_manager,
+                                             std::addressof(*app_memory_block_heap));
+        sys_memory_block_manager->Initialize(sys_dynamic_page_manager,
+                                             std::addressof(*sys_memory_block_heap));
 
-        app_block_info_manager->Initialize(app_dynamic_page_manager, std::addressof(*block_info_heap));
-        sys_block_info_manager->Initialize(sys_dynamic_page_manager, std::addressof(*block_info_heap));
+        app_block_info_manager->Initialize(app_dynamic_page_manager,
+                                           std::addressof(*block_info_heap));
+        sys_block_info_manager->Initialize(sys_dynamic_page_manager,
+                                           std::addressof(*block_info_heap));
 
-        app_page_table_manager->Initialize(app_dynamic_page_manager, std::addressof(*page_table_heap));
-        sys_page_table_manager->Initialize(sys_dynamic_page_manager, std::addressof(*page_table_heap));
+        app_page_table_manager->Initialize(app_dynamic_page_manager,
+                                           std::addressof(*page_table_heap));
+        sys_page_table_manager->Initialize(sys_dynamic_page_manager,
+                                           std::addressof(*page_table_heap));
 
         // Check that we have the correct number of dynamic pages available.
-        ASSERT(resource_manager_page_manager->GetCount() - resource_manager_page_manager->GetUsed() == ReservedDynamicPageCount);
+        ASSERT(resource_manager_page_manager->GetCount() -
+                   resource_manager_page_manager->GetUsed() ==
+               ReservedDynamicPageCount);
 
         // Create the system page table managers.
         app_system_resource.emplace(kernel);
@@ -333,30 +369,34 @@ struct KernelCore::Impl {
         KAutoObject::Create(std::addressof(*sys_system_resource));
 
         // Set the managers for the system resources.
-        app_system_resource->SetManagers(*app_memory_block_manager, *app_block_info_manager, *app_page_table_manager);
-        sys_system_resource->SetManagers(*sys_memory_block_manager, *sys_block_info_manager, *sys_page_table_manager);
+        app_system_resource->SetManagers(*app_memory_block_manager, *app_block_info_manager,
+                                         *app_page_table_manager);
+        sys_system_resource->SetManagers(*sys_memory_block_manager, *sys_block_info_manager,
+                                         *sys_page_table_manager);
     }
 
-    void InitializeShutdownThreads() {
+    void InitializeShutdownThreads()
+    {
         for (u32 core_id = 0; core_id < Core::Hardware::NUM_CPU_CORES; core_id++) {
             shutdown_threads[core_id] = KThread::Create(system.Kernel());
-            ASSERT(KThread::InitializeHighPriorityThread(system, shutdown_threads[core_id], {}, {}, core_id)
-                .IsSuccess());
+            ASSERT(KThread::InitializeHighPriorityThread(system, shutdown_threads[core_id], {}, {},
+                                                         core_id)
+                       .IsSuccess());
             KThread::Register(system.Kernel(), shutdown_threads[core_id]);
         }
     }
 
-    void InitializeGlobalData(KernelCore& kernel) {
-        object_name_global_data.emplace(kernel);
-    }
+    void InitializeGlobalData(KernelCore& kernel) { object_name_global_data.emplace(kernel); }
 
-    void MakeApplicationProcess(KProcess* process) {
+    void MakeApplicationProcess(KProcess* process)
+    {
         application_process = process;
         application_process->Open();
     }
 
     /// Sets the host thread ID for the caller.
-    u32 SetHostThreadId(std::size_t core_id) {
+    u32 SetHostThreadId(std::size_t core_id)
+    {
         // This should only be called during core init.
         ASSERT(tls_data.host_thread_id == UINT8_MAX);
 
@@ -367,12 +407,11 @@ struct KernelCore::Impl {
     }
 
     /// Gets the host thread ID for the caller
-    u32 GetHostThreadId() const {
-        return tls_data.host_thread_id;
-    }
+    u32 GetHostThreadId() const { return tls_data.host_thread_id; }
 
     // Gets the dummy KThread for the caller, allocating a new one if this is the first time
-    KThread* GetHostDummyThread(ThreadLocalData& t, KThread* existing_thread) {
+    KThread* GetHostDummyThread(ThreadLocalData& t, KThread* existing_thread)
+    {
         if (t.thread == nullptr) {
             auto const initialize{[](KThread* thread) {
                 ASSERT(KThread::InitializeDummyThread(thread, nullptr).IsSuccess());
@@ -386,7 +425,8 @@ struct KernelCore::Impl {
     }
 
     /// Registers a CPU core thread by allocating a host thread ID for it
-    void RegisterCoreThread(std::size_t core_id) {
+    void RegisterCoreThread(std::size_t core_id)
+    {
         ASSERT(core_id < Core::Hardware::NUM_CPU_CORES);
         const auto this_id = SetHostThreadId(core_id);
         if (!is_multicore)
@@ -394,11 +434,13 @@ struct KernelCore::Impl {
     }
 
     /// Registers a new host thread by allocating a host thread ID for it
-    void RegisterHostThread(KThread* existing_thread) {
+    void RegisterHostThread(KThread* existing_thread)
+    {
         (void)GetHostDummyThread(tls_data, existing_thread);
     }
 
-    [[nodiscard]] u32 GetCurrentHostThreadID() {
+    [[nodiscard]] u32 GetCurrentHostThreadID()
+    {
         auto const this_id = GetHostThreadId();
         if (!is_multicore && single_core_thread_id == this_id)
             return u32(system.GetCpuManager().CurrentCore());
@@ -406,28 +448,26 @@ struct KernelCore::Impl {
     }
 
     // Forces singlecore
-    bool IsPhantomModeForSingleCore() const {
-        return tls_data.is_phantom_mode_for_singlecore;
-    }
-    void SetIsPhantomModeForSingleCore(bool value) {
+    bool IsPhantomModeForSingleCore() const { return tls_data.is_phantom_mode_for_singlecore; }
+    void SetIsPhantomModeForSingleCore(bool value)
+    {
         ASSERT(!is_multicore);
         tls_data.is_phantom_mode_for_singlecore = value;
     }
 
-    bool IsShuttingDown() const {
-        return is_shutting_down.load(std::memory_order_relaxed);
-    }
+    bool IsShuttingDown() const { return is_shutting_down.load(std::memory_order_relaxed); }
 
-    KThread* GetCurrentEmuThread() {
+    KThread* GetCurrentEmuThread()
+    {
         auto& t = tls_data;
-        return t.current_thread ? t.current_thread : (t.current_thread = GetHostDummyThread(t, nullptr));
+        return t.current_thread ? t.current_thread
+                                : (t.current_thread = GetHostDummyThread(t, nullptr));
     }
 
-    void SetCurrentEmuThread(KThread* thread) {
-        tls_data.current_thread = thread;
-    }
+    void SetCurrentEmuThread(KThread* thread) { tls_data.current_thread = thread; }
 
-    void DeriveInitialMemoryLayout() {
+    void DeriveInitialMemoryLayout()
+    {
         memory_layout.emplace();
 
         // Insert the root region for the virtual memory tree, from which all other regions will
@@ -721,7 +761,8 @@ struct KernelCore::Impl {
                                                          linear_region_start);
     }
 
-    void InitializeMemoryLayout() {
+    void InitializeMemoryLayout()
+    {
         // Initialize the memory manager.
         memory_manager.emplace(system);
         const auto& management_region = memory_layout->GetPoolManagementRegion();
@@ -729,7 +770,8 @@ struct KernelCore::Impl {
         memory_manager->Initialize(management_region.GetAddress(), management_region.GetSize());
     }
 
-    void InitializeHackSharedMemory(KernelCore& kernel) {
+    void InitializeHackSharedMemory(KernelCore& kernel)
+    {
         // Setup memory regions for emulated processes
         // TODO(bunnei): These should not be hardcoded regions initialized within the kernel
         constexpr std::size_t font_size{0x1100000};
@@ -839,61 +881,75 @@ struct KernelCore::Impl {
     Core::System& system;
 };
 
-KernelCore::KernelCore(Core::System& system) : impl{std::make_unique<Impl>(system, *this)} {}
+KernelCore::KernelCore(Core::System& system) : impl{std::make_unique<Impl>(system, *this)}
+{
+}
 KernelCore::~KernelCore() = default;
 
-void KernelCore::SetMulticore(bool is_multicore) {
+void KernelCore::SetMulticore(bool is_multicore)
+{
     impl->SetMulticore(is_multicore);
 }
 
-void KernelCore::Initialize() {
+void KernelCore::Initialize()
+{
     slab_heap_container = std::make_unique<SlabHeapContainer>();
     impl->Initialize(*this);
 }
 
-void KernelCore::Shutdown() {
+void KernelCore::Shutdown()
+{
     impl->Shutdown();
 }
 
-void KernelCore::CloseServices() {
+void KernelCore::CloseServices()
+{
     impl->CloseServices();
 }
 
-const KResourceLimit* KernelCore::GetSystemResourceLimit() const {
+const KResourceLimit* KernelCore::GetSystemResourceLimit() const
+{
     return impl->system_resource_limit;
 }
 
-KResourceLimit* KernelCore::GetSystemResourceLimit() {
+KResourceLimit* KernelCore::GetSystemResourceLimit()
+{
     return impl->system_resource_limit;
 }
 
-void KernelCore::AppendNewProcess(KProcess* process) {
+void KernelCore::AppendNewProcess(KProcess* process)
+{
     process->Open();
 
     std::scoped_lock lk{impl->process_list_lock};
     impl->process_list.push_back(process);
 }
 
-void KernelCore::RemoveProcess(KProcess* process) {
+void KernelCore::RemoveProcess(KProcess* process)
+{
     std::scoped_lock lk{impl->process_list_lock};
     if (std::erase(impl->process_list, process)) {
         process->Close();
     }
 }
 
-void KernelCore::MakeApplicationProcess(KProcess* process) {
+void KernelCore::MakeApplicationProcess(KProcess* process)
+{
     impl->MakeApplicationProcess(process);
 }
 
-KProcess* KernelCore::ApplicationProcess() {
+KProcess* KernelCore::ApplicationProcess()
+{
     return impl->application_process;
 }
 
-const KProcess* KernelCore::ApplicationProcess() const {
+const KProcess* KernelCore::ApplicationProcess() const
+{
     return impl->application_process;
 }
 
-std::list<KScopedAutoObject<KProcess>> KernelCore::GetProcessList() {
+std::list<KScopedAutoObject<KProcess>> KernelCore::GetProcessList()
+{
     std::list<KScopedAutoObject<KProcess>> processes;
     std::scoped_lock lk{impl->process_list_lock};
 
@@ -904,31 +960,38 @@ std::list<KScopedAutoObject<KProcess>> KernelCore::GetProcessList() {
     return processes;
 }
 
-Kernel::GlobalSchedulerContext& KernelCore::GlobalSchedulerContext() {
+Kernel::GlobalSchedulerContext& KernelCore::GlobalSchedulerContext()
+{
     return *impl->global_scheduler_context;
 }
 
-const Kernel::GlobalSchedulerContext& KernelCore::GlobalSchedulerContext() const {
+const Kernel::GlobalSchedulerContext& KernelCore::GlobalSchedulerContext() const
+{
     return *impl->global_scheduler_context;
 }
 
-Kernel::KScheduler& KernelCore::Scheduler(std::size_t id) {
+Kernel::KScheduler& KernelCore::Scheduler(std::size_t id)
+{
     return *impl->schedulers[id];
 }
 
-const Kernel::KScheduler& KernelCore::Scheduler(std::size_t id) const {
+const Kernel::KScheduler& KernelCore::Scheduler(std::size_t id) const
+{
     return *impl->schedulers[id];
 }
 
-Kernel::PhysicalCore& KernelCore::PhysicalCore(std::size_t id) {
+Kernel::PhysicalCore& KernelCore::PhysicalCore(std::size_t id)
+{
     return *impl->cores[id];
 }
 
-const Kernel::PhysicalCore& KernelCore::PhysicalCore(std::size_t id) const {
+const Kernel::PhysicalCore& KernelCore::PhysicalCore(std::size_t id) const
+{
     return *impl->cores[id];
 }
 
-size_t KernelCore::CurrentPhysicalCoreIndex() const {
+size_t KernelCore::CurrentPhysicalCoreIndex() const
+{
     const u32 core_id = impl->GetCurrentHostThreadID();
     if (core_id >= Core::Hardware::NUM_CPU_CORES) {
         return Core::Hardware::NUM_CPU_CORES - 1;
@@ -936,57 +999,70 @@ size_t KernelCore::CurrentPhysicalCoreIndex() const {
     return core_id;
 }
 
-Kernel::PhysicalCore& KernelCore::CurrentPhysicalCore() {
+Kernel::PhysicalCore& KernelCore::CurrentPhysicalCore()
+{
     return *impl->cores[CurrentPhysicalCoreIndex()];
 }
 
-const Kernel::PhysicalCore& KernelCore::CurrentPhysicalCore() const {
+const Kernel::PhysicalCore& KernelCore::CurrentPhysicalCore() const
+{
     return *impl->cores[CurrentPhysicalCoreIndex()];
 }
 
-Kernel::KScheduler* KernelCore::CurrentScheduler() {
-    if (auto const core_id = impl->GetCurrentHostThreadID(); core_id < Core::Hardware::NUM_CPU_CORES)
+Kernel::KScheduler* KernelCore::CurrentScheduler()
+{
+    if (auto const core_id = impl->GetCurrentHostThreadID();
+        core_id < Core::Hardware::NUM_CPU_CORES)
         return std::addressof(*impl->schedulers[core_id]);
     return {}; // This is expected when called from not a guest thread
 }
 
-Kernel::KHardwareTimer& KernelCore::HardwareTimer() {
+Kernel::KHardwareTimer& KernelCore::HardwareTimer()
+{
     return *impl->hardware_timer;
 }
 
-KAutoObjectWithListContainer& KernelCore::ObjectListContainer() {
+KAutoObjectWithListContainer& KernelCore::ObjectListContainer()
+{
     return *impl->global_object_list_container;
 }
 
-const KAutoObjectWithListContainer& KernelCore::ObjectListContainer() const {
+const KAutoObjectWithListContainer& KernelCore::ObjectListContainer() const
+{
     return *impl->global_object_list_container;
 }
 
-void KernelCore::PrepareReschedule(std::size_t id) {
+void KernelCore::PrepareReschedule(std::size_t id)
+{
     // TODO: Reimplement, this
 }
 
-void KernelCore::RegisterKernelObject(KAutoObject* object) {
+void KernelCore::RegisterKernelObject(KAutoObject* object)
+{
     std::scoped_lock lk{impl->registered_objects_lock};
     impl->registered_objects.insert(object);
 }
 
-void KernelCore::UnregisterKernelObject(KAutoObject* object) {
+void KernelCore::UnregisterKernelObject(KAutoObject* object)
+{
     std::scoped_lock lk{impl->registered_objects_lock};
     impl->registered_objects.erase(object);
 }
 
-void KernelCore::RegisterInUseObject(KAutoObject* object) {
+void KernelCore::RegisterInUseObject(KAutoObject* object)
+{
     std::scoped_lock lk{impl->registered_in_use_objects_lock};
     impl->registered_in_use_objects.insert(object);
 }
 
-void KernelCore::UnregisterInUseObject(KAutoObject* object) {
+void KernelCore::UnregisterInUseObject(KAutoObject* object)
+{
     std::scoped_lock lk{impl->registered_in_use_objects_lock};
     impl->registered_in_use_objects.erase(object);
 }
 
-void KernelCore::RunServer(std::unique_ptr<Service::ServerManager>&& server_manager) {
+void KernelCore::RunServer(std::unique_ptr<Service::ServerManager>&& server_manager)
+{
     auto* manager = server_manager.get();
 
     {
@@ -1001,27 +1077,33 @@ void KernelCore::RunServer(std::unique_ptr<Service::ServerManager>&& server_mana
     manager->LoopProcess();
 }
 
-u32 KernelCore::CreateNewObjectID() {
+u32 KernelCore::CreateNewObjectID()
+{
     return impl->next_object_id++;
 }
 
-u64 KernelCore::CreateNewThreadID() {
+u64 KernelCore::CreateNewThreadID()
+{
     return impl->next_thread_id++;
 }
 
-u64 KernelCore::CreateNewKernelProcessID() {
+u64 KernelCore::CreateNewKernelProcessID()
+{
     return impl->next_kernel_process_id++;
 }
 
-u64 KernelCore::CreateNewUserProcessID() {
+u64 KernelCore::CreateNewUserProcessID()
+{
     return impl->next_user_process_id++;
 }
 
-void KernelCore::RegisterCoreThread(std::size_t core_id) {
+void KernelCore::RegisterCoreThread(std::size_t core_id)
+{
     impl->RegisterCoreThread(core_id);
 }
 
-void KernelCore::RegisterHostThread(KThread* existing_thread) {
+void KernelCore::RegisterHostThread(KThread* existing_thread)
+{
     impl->RegisterHostThread(existing_thread);
 
     if (existing_thread != nullptr) {
@@ -1030,7 +1112,8 @@ void KernelCore::RegisterHostThread(KThread* existing_thread) {
 }
 
 static std::jthread RunHostThreadFunc(KernelCore& kernel, KProcess* process,
-                                      std::string&& thread_name, std::function<void()>&& func) {
+                                      std::string&& thread_name, std::function<void()>&& func)
+{
     // Reserve a new thread from the process resource limit.
     KScopedResourceReservation thread_reservation(process, LimitableResource::ThreadCountMax);
     ASSERT(thread_reservation.Succeeded());
@@ -1045,31 +1128,34 @@ static std::jthread RunHostThreadFunc(KernelCore& kernel, KProcess* process,
     // Register the thread.
     KThread::Register(kernel, thread);
 
-    return std::jthread([&kernel, thread, thread_name_{std::move(thread_name)}, func_{std::move(func)}] {
-        // Set the thread name.
-        Common::SetCurrentThreadName(thread_name_.c_str());
+    return std::jthread(
+        [&kernel, thread, thread_name_{std::move(thread_name)}, func_{std::move(func)}] {
+            // Set the thread name.
+            Common::SetCurrentThreadName(thread_name_.c_str());
 
-        // Set the thread as current.
-        kernel.RegisterHostThread(thread);
+            // Set the thread as current.
+            kernel.RegisterHostThread(thread);
 
-        // Run the callback.
-        func_();
+            // Run the callback.
+            func_();
 
-        // Close the thread.
-        // This will free the process if it is the last reference.
-        thread->Close();
-    });
+            // Close the thread.
+            // This will free the process if it is the last reference.
+            thread->Close();
+        });
 }
 
 std::jthread KernelCore::RunOnHostCoreProcess(std::string&& process_name,
-                                              std::function<void()> func) {
+                                              std::function<void()> func)
+{
     // Make a new process.
     KProcess* process = KProcess::Create(*this);
     ASSERT(R_SUCCEEDED(
         process->Initialize(Svc::CreateProcessParameter{}, GetSystemResourceLimit(), false)));
 
     // Ensure that we don't hold onto any extra references.
-    SCOPE_EXIT {
+    SCOPE_EXIT
+    {
         process->Close();
     };
 
@@ -1080,8 +1166,8 @@ std::jthread KernelCore::RunOnHostCoreProcess(std::string&& process_name,
     return RunHostThreadFunc(*this, process, std::move(process_name), std::move(func));
 }
 
-std::jthread KernelCore::RunOnHostCoreThread(std::string&& thread_name,
-                                             std::function<void()> func) {
+std::jthread KernelCore::RunOnHostCoreThread(std::string&& thread_name, std::function<void()> func)
+{
     // Get the current process.
     KProcess* process = GetCurrentProcessPointer(*this);
 
@@ -1089,7 +1175,8 @@ std::jthread KernelCore::RunOnHostCoreThread(std::string&& thread_name,
     return RunHostThreadFunc(*this, process, std::move(thread_name), std::move(func));
 }
 
-void KernelCore::RunOnGuestCoreProcess(std::string&& process_name, std::function<void()> func) {
+void KernelCore::RunOnGuestCoreProcess(std::string&& process_name, std::function<void()> func)
+{
     constexpr s32 ServiceThreadPriority = 16;
     constexpr s32 ServiceThreadCore = 3;
 
@@ -1099,7 +1186,8 @@ void KernelCore::RunOnGuestCoreProcess(std::string&& process_name, std::function
         process->Initialize(Svc::CreateProcessParameter{}, GetSystemResourceLimit(), false)));
 
     // Ensure that we don't hold onto any extra references.
-    SCOPE_EXIT {
+    SCOPE_EXIT
+    {
         process->Close();
     };
 
@@ -1125,79 +1213,98 @@ void KernelCore::RunOnGuestCoreProcess(std::string&& process_name, std::function
     ASSERT(R_SUCCEEDED(thread->Run()));
 }
 
-u32 KernelCore::GetCurrentHostThreadID() const {
+u32 KernelCore::GetCurrentHostThreadID() const
+{
     return impl->GetCurrentHostThreadID();
 }
 
-KThread* KernelCore::GetCurrentEmuThread() const {
+KThread* KernelCore::GetCurrentEmuThread() const
+{
     return impl->GetCurrentEmuThread();
 }
 
-void KernelCore::SetCurrentEmuThread(KThread* thread) {
+void KernelCore::SetCurrentEmuThread(KThread* thread)
+{
     impl->SetCurrentEmuThread(thread);
 }
 
-KObjectNameGlobalData& KernelCore::ObjectNameGlobalData() {
+KObjectNameGlobalData& KernelCore::ObjectNameGlobalData()
+{
     return *impl->object_name_global_data;
 }
 
-KMemoryManager& KernelCore::MemoryManager() {
+KMemoryManager& KernelCore::MemoryManager()
+{
     return *impl->memory_manager;
 }
 
-const KMemoryManager& KernelCore::MemoryManager() const {
+const KMemoryManager& KernelCore::MemoryManager() const
+{
     return *impl->memory_manager;
 }
 
-KSystemResource& KernelCore::GetAppSystemResource() {
+KSystemResource& KernelCore::GetAppSystemResource()
+{
     return *impl->app_system_resource;
 }
 
-const KSystemResource& KernelCore::GetAppSystemResource() const {
+const KSystemResource& KernelCore::GetAppSystemResource() const
+{
     return *impl->app_system_resource;
 }
 
-KSystemResource& KernelCore::GetSystemSystemResource() {
+KSystemResource& KernelCore::GetSystemSystemResource()
+{
     return *impl->sys_system_resource;
 }
 
-const KSystemResource& KernelCore::GetSystemSystemResource() const {
+const KSystemResource& KernelCore::GetSystemSystemResource() const
+{
     return *impl->sys_system_resource;
 }
 
-Kernel::KSharedMemory& KernelCore::GetFontSharedMem() {
+Kernel::KSharedMemory& KernelCore::GetFontSharedMem()
+{
     return *impl->font_shared_mem;
 }
 
-const Kernel::KSharedMemory& KernelCore::GetFontSharedMem() const {
+const Kernel::KSharedMemory& KernelCore::GetFontSharedMem() const
+{
     return *impl->font_shared_mem;
 }
 
-Kernel::KSharedMemory& KernelCore::GetIrsSharedMem() {
+Kernel::KSharedMemory& KernelCore::GetIrsSharedMem()
+{
     return *impl->irs_shared_mem;
 }
 
-const Kernel::KSharedMemory& KernelCore::GetIrsSharedMem() const {
+const Kernel::KSharedMemory& KernelCore::GetIrsSharedMem() const
+{
     return *impl->irs_shared_mem;
 }
 
-Kernel::KSharedMemory& KernelCore::GetTimeSharedMem() {
+Kernel::KSharedMemory& KernelCore::GetTimeSharedMem()
+{
     return *impl->time_shared_mem;
 }
 
-const Kernel::KSharedMemory& KernelCore::GetTimeSharedMem() const {
+const Kernel::KSharedMemory& KernelCore::GetTimeSharedMem() const
+{
     return *impl->time_shared_mem;
 }
 
-Kernel::KSharedMemory& KernelCore::GetHidBusSharedMem() {
+Kernel::KSharedMemory& KernelCore::GetHidBusSharedMem()
+{
     return *impl->hidbus_shared_mem;
 }
 
-const Kernel::KSharedMemory& KernelCore::GetHidBusSharedMem() const {
+const Kernel::KSharedMemory& KernelCore::GetHidBusSharedMem() const
+{
     return *impl->hidbus_shared_mem;
 }
 
-void KernelCore::SuspendEmulation(bool suspended) {
+void KernelCore::SuspendEmulation(bool suspended)
+{
     const bool should_suspend{exception_exited || suspended};
     auto processes = GetProcessList();
 
@@ -1242,7 +1349,8 @@ void KernelCore::SuspendEmulation(bool suspended) {
     }
 }
 
-void KernelCore::ShutdownCores() {
+void KernelCore::ShutdownCores()
+{
     impl->TerminateAllProcesses();
 
     KScopedSchedulerLock lk{*this};
@@ -1252,52 +1360,64 @@ void KernelCore::ShutdownCores() {
     }
 }
 
-bool KernelCore::IsMulticore() const {
+bool KernelCore::IsMulticore() const
+{
     return impl->is_multicore;
 }
 
-bool KernelCore::IsShuttingDown() const {
+bool KernelCore::IsShuttingDown() const
+{
     return impl->IsShuttingDown();
 }
 
-void KernelCore::ExceptionalExitApplication() {
+void KernelCore::ExceptionalExitApplication()
+{
     exception_exited = true;
     SuspendEmulation(true);
 }
 
-Init::KSlabResourceCounts& KernelCore::SlabResourceCounts() {
+Init::KSlabResourceCounts& KernelCore::SlabResourceCounts()
+{
     return impl->slab_resource_counts;
 }
 
-const Init::KSlabResourceCounts& KernelCore::SlabResourceCounts() const {
+const Init::KSlabResourceCounts& KernelCore::SlabResourceCounts() const
+{
     return impl->slab_resource_counts;
 }
 
-KWorkerTaskManager& KernelCore::WorkerTaskManager() {
+KWorkerTaskManager& KernelCore::WorkerTaskManager()
+{
     return impl->worker_task_manager;
 }
 
-const KWorkerTaskManager& KernelCore::WorkerTaskManager() const {
+const KWorkerTaskManager& KernelCore::WorkerTaskManager() const
+{
     return impl->worker_task_manager;
 }
 
-const KMemoryLayout& KernelCore::MemoryLayout() const {
+const KMemoryLayout& KernelCore::MemoryLayout() const
+{
     return *impl->memory_layout;
 }
 
-bool KernelCore::IsPhantomModeForSingleCore() const {
+bool KernelCore::IsPhantomModeForSingleCore() const
+{
     return impl->IsPhantomModeForSingleCore();
 }
 
-void KernelCore::SetIsPhantomModeForSingleCore(bool value) {
+void KernelCore::SetIsPhantomModeForSingleCore(bool value)
+{
     impl->SetIsPhantomModeForSingleCore(value);
 }
 
-Core::System& KernelCore::System() {
+Core::System& KernelCore::System()
+{
     return impl->system;
 }
 
-const Core::System& KernelCore::System() const {
+const Core::System& KernelCore::System() const
+{
     return impl->system;
 }
 
@@ -1325,8 +1445,8 @@ struct KernelCore::SlabHeapContainer {
     KSlabHeap<KDebug> debug;
 };
 
-template <typename T>
-KSlabHeap<T>& KernelCore::SlabHeap() {
+template<typename T> KSlabHeap<T>& KernelCore::SlabHeap()
+{
     if constexpr (std::is_same_v<T, KClientSession>) {
         return slab_heap_container->client_session;
     } else if constexpr (std::is_same_v<T, KEvent>) {

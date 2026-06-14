@@ -4,10 +4,11 @@
 // SPDX-FileCopyrightText: Copyright 2024 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+#include "hid_core/resources/abstracted_pad/abstract_battery_handler.h"
+
 #include "core/core_timing.h"
 #include "hid_core/hid_result.h"
 #include "hid_core/hid_util.h"
-#include "hid_core/resources/abstracted_pad/abstract_battery_handler.h"
 #include "hid_core/resources/abstracted_pad/abstract_pad_holder.h"
 #include "hid_core/resources/abstracted_pad/abstract_properties_handler.h"
 #include "hid_core/resources/applet_resource.h"
@@ -16,23 +17,29 @@
 
 namespace Service::HID {
 
-NpadAbstractBatteryHandler::NpadAbstractBatteryHandler() {}
+NpadAbstractBatteryHandler::NpadAbstractBatteryHandler()
+{
+}
 
 NpadAbstractBatteryHandler::~NpadAbstractBatteryHandler() = default;
 
-void NpadAbstractBatteryHandler::SetAbstractPadHolder(NpadAbstractedPadHolder* holder) {
+void NpadAbstractBatteryHandler::SetAbstractPadHolder(NpadAbstractedPadHolder* holder)
+{
     abstract_pad_holder = holder;
 }
 
-void NpadAbstractBatteryHandler::SetAppletResource(AppletResourceHolder* applet_resource) {
+void NpadAbstractBatteryHandler::SetAppletResource(AppletResourceHolder* applet_resource)
+{
     applet_resource_holder = applet_resource;
 }
 
-void NpadAbstractBatteryHandler::SetPropertiesHandler(NpadAbstractPropertiesHandler* handler) {
+void NpadAbstractBatteryHandler::SetPropertiesHandler(NpadAbstractPropertiesHandler* handler)
+{
     properties_handler = handler;
 }
 
-Result NpadAbstractBatteryHandler::IncrementRefCounter() {
+Result NpadAbstractBatteryHandler::IncrementRefCounter()
+{
     if (ref_counter == (std::numeric_limits<s32>::max)() - 1) {
         return ResultNpadHandlerOverflow;
     }
@@ -40,7 +47,8 @@ Result NpadAbstractBatteryHandler::IncrementRefCounter() {
     return ResultSuccess;
 }
 
-Result NpadAbstractBatteryHandler::DecrementRefCounter() {
+Result NpadAbstractBatteryHandler::DecrementRefCounter()
+{
     if (ref_counter == 0) {
         return ResultNpadHandlerNotInitialized;
     }
@@ -48,7 +56,8 @@ Result NpadAbstractBatteryHandler::DecrementRefCounter() {
     return ResultSuccess;
 }
 
-Result NpadAbstractBatteryHandler::UpdateBatteryState(u64 aruid) {
+Result NpadAbstractBatteryHandler::UpdateBatteryState(u64 aruid)
+{
     const auto npad_index = NpadIdTypeToIndex(properties_handler->GetNpadId());
     AruidData* aruid_data = applet_resource_holder->applet_resource->GetAruidData(aruid);
     if (aruid_data == nullptr) {
@@ -73,14 +82,16 @@ Result NpadAbstractBatteryHandler::UpdateBatteryState(u64 aruid) {
     return ResultSuccess;
 }
 
-void NpadAbstractBatteryHandler::UpdateBatteryState() {
+void NpadAbstractBatteryHandler::UpdateBatteryState()
+{
     if (ref_counter == 0) {
         return;
     }
     has_new_battery_data = GetNewBatteryState();
 }
 
-bool NpadAbstractBatteryHandler::GetNewBatteryState() {
+bool NpadAbstractBatteryHandler::GetNewBatteryState()
+{
     bool has_changed = false;
     Core::HID::NpadPowerInfo new_dual_battery_state{};
     Core::HID::NpadPowerInfo new_left_battery_state{};
@@ -143,7 +154,8 @@ bool NpadAbstractBatteryHandler::GetNewBatteryState() {
     return has_changed;
 }
 
-void NpadAbstractBatteryHandler::UpdateCoreBatteryState() {
+void NpadAbstractBatteryHandler::UpdateCoreBatteryState()
+{
     if (ref_counter == 0) {
         return;
     }
@@ -154,11 +166,13 @@ void NpadAbstractBatteryHandler::UpdateCoreBatteryState() {
     UpdateBatteryState(0);
 }
 
-void NpadAbstractBatteryHandler::InitializeBatteryState(u64 aruid) {
+void NpadAbstractBatteryHandler::InitializeBatteryState(u64 aruid)
+{
     UpdateBatteryState(aruid);
 }
 
-bool NpadAbstractBatteryHandler::HasBattery() const {
+bool NpadAbstractBatteryHandler::HasBattery() const
+{
     std::array<IAbstractedPad*, 5> abstract_pads{};
     const std::size_t count = abstract_pad_holder->GetAbstractedPads(abstract_pads);
 
@@ -174,7 +188,8 @@ bool NpadAbstractBatteryHandler::HasBattery() const {
     return false;
 }
 
-void NpadAbstractBatteryHandler::HasLeftRightBattery(bool& has_left, bool& has_right) const {
+void NpadAbstractBatteryHandler::HasLeftRightBattery(bool& has_left, bool& has_right) const
+{
     std::array<IAbstractedPad*, 5> abstract_pads{};
     const std::size_t count = abstract_pad_holder->GetAbstractedPads(abstract_pads);
 

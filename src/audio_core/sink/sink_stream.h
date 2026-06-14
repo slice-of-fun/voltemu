@@ -84,88 +84,68 @@ public:
      *
      * @return True if paused, otherwise false.
      */
-    bool IsPaused() const {
-        return paused;
-    }
+    bool IsPaused() const { return paused; }
 
     /**
      * Get the number of system channels in this stream.
      *
      * @return Number of system channels.
      */
-    u32 GetSystemChannels() const {
-        return system_channels;
-    }
+    u32 GetSystemChannels() const { return system_channels; }
 
     /**
      * Set the number of channels the system expects.
      *
      * @param channels - New number of system channels.
      */
-    void SetSystemChannels(u32 channels) {
-        system_channels = channels;
-    }
+    void SetSystemChannels(u32 channels) { system_channels = channels; }
 
     /**
      * Get the number of channels the hardware supports.
      *
      * @return Number of channels supported.
      */
-    u32 GetDeviceChannels() const {
-        return device_channels;
-    }
+    u32 GetDeviceChannels() const { return device_channels; }
 
     /**
      * Get the system volume.
      *
      * @return The current system volume.
      */
-    f32 GetSystemVolume() const {
-        return system_volume;
-    }
+    f32 GetSystemVolume() const { return system_volume; }
 
     /**
      * Get the device volume.
      *
      * @return The current device volume.
      */
-    f32 GetDeviceVolume() const {
-        return device_volume;
-    }
+    f32 GetDeviceVolume() const { return device_volume; }
 
     /**
      * Set the system volume.
      *
      * @param volume_ - The new system volume.
      */
-    void SetSystemVolume(f32 volume_) {
-        system_volume = volume_;
-    }
+    void SetSystemVolume(f32 volume_) { system_volume = volume_; }
 
     /**
      * Set the device volume.
      *
      * @param volume_ - The new device volume.
      */
-    void SetDeviceVolume(f32 volume_) {
-        device_volume = volume_;
-    }
+    void SetDeviceVolume(f32 volume_) { device_volume = volume_; }
 
     /**
      * Get the number of queued audio buffers.
      *
      * @return The number of queued buffers.
      */
-    u32 GetQueueSize() const {
-        return queued_buffers.load();
-    }
+    u32 GetQueueSize() const { return queued_buffers.load(); }
 
     /**
      * Set the maximum buffer queue size.
      */
-    void SetRingSize(u32 ring_size) {
-        max_queue_size = ring_size;
-    }
+    void SetRingSize(u32 ring_size) { max_queue_size = ring_size; }
 
     /**
      * Append a new buffer and its samples to a waiting queue to play.

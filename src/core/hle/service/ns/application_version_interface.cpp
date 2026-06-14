@@ -6,7 +6,8 @@
 namespace Service::NS {
 
 IApplicationVersionInterface::IApplicationVersionInterface(Core::System& system_)
-    : ServiceFramework{system_, "IApplicationVersionInterface"} {
+    : ServiceFramework{system_, "IApplicationVersionInterface"}
+{
     // clang-format off
     static const FunctionInfo functions[] = {
         {0, nullptr, "GetLaunchRequiredVersion"},

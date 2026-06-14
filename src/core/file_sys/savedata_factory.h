@@ -5,6 +5,7 @@
 
 #include <memory>
 #include <string>
+
 #include "common/common_funcs.h"
 #include "common/common_types.h"
 #include "core/file_sys/fs_save_data_types.h"
@@ -17,7 +18,8 @@ class System;
 
 namespace FileSys {
 
-constexpr const char* GetSaveDataSizeFileName() {
+constexpr const char* GetSaveDataSizeFileName()
+{
     return ".yuzu_save_size";
 }
 

@@ -220,8 +220,7 @@ private:
     u8 GetCrcValue(const std::vector<u8>& data) const;
 
     // Converts structs to an u8 vector equivalent
-    template <typename T>
-    u64 GetData(const T& reply, std::span<u8> out_data) const;
+    template<typename T> u64 GetData(const T& reply, std::span<u8> out_data) const;
 
     RingConCommands command{RingConCommands::Error};
 

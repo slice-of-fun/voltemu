@@ -6,9 +6,9 @@
 
 #pragma once
 
-#include "discord.h"
-
 #include <string>
+
+#include "discord.h"
 
 namespace Core {
 class System;

@@ -6,9 +6,10 @@
 
 #pragma once
 
-#include <type_traits>
 #include <bitset>
 #include <initializer_list>
+#include <type_traits>
+
 #include "common/assert.h"
 
 // xbyak hates human beings
@@ -23,18 +24,18 @@
 
 // You must ensure this matches with src/common/x64/xbyak.h on root dir
 #include <ankerl/unordered_dense.h>
+
 #include <boost/unordered_map.hpp>
-#define XBYAK_STD_UNORDERED_SET ankerl::unordered_dense::set
-#define XBYAK_STD_UNORDERED_MAP ankerl::unordered_dense::map
+#define XBYAK_STD_UNORDERED_SET      ankerl::unordered_dense::set
+#define XBYAK_STD_UNORDERED_MAP      ankerl::unordered_dense::map
 #define XBYAK_STD_UNORDERED_MULTIMAP boost::unordered_multimap
 #include <xbyak/xbyak.h>
 #include <xbyak/xbyak_util.h>
 
-#include <xbyak/xbyak.h>
-
 namespace Common::X64 {
 
-constexpr size_t RegToIndex(const Xbyak::Reg& reg) {
+constexpr size_t RegToIndex(const Xbyak::Reg& reg)
+{
     using Kind = Xbyak::Reg::Kind;
     ASSERT_MSG((reg.getKind() & (Kind::REG | Kind::XMM)) != 0,
                "RegSet only support GPRs and XMM registers.");
@@ -42,17 +43,20 @@ constexpr size_t RegToIndex(const Xbyak::Reg& reg) {
     return static_cast<size_t>(reg.getIdx()) + (reg.getKind() == Kind::REG ? 0 : 16);
 }
 
-constexpr Xbyak::Reg64 IndexToReg64(size_t reg_index) {
+constexpr Xbyak::Reg64 IndexToReg64(size_t reg_index)
+{
     ASSERT(reg_index < 16);
     return Xbyak::Reg64(static_cast<int>(reg_index));
 }
 
-constexpr Xbyak::Xmm IndexToXmm(size_t reg_index) {
+constexpr Xbyak::Xmm IndexToXmm(size_t reg_index)
+{
     ASSERT(reg_index >= 16 && reg_index < 32);
     return Xbyak::Xmm(static_cast<int>(reg_index - 16));
 }
 
-constexpr Xbyak::Reg IndexToReg(size_t reg_index) {
+constexpr Xbyak::Reg IndexToReg(size_t reg_index)
+{
     if (reg_index < 16) {
         return IndexToReg64(reg_index);
     } else {
@@ -60,7 +64,8 @@ constexpr Xbyak::Reg IndexToReg(size_t reg_index) {
     }
 }
 
-constexpr std::bitset<32> BuildRegSet(std::initializer_list<Xbyak::Reg> regs) {
+constexpr std::bitset<32> BuildRegSet(std::initializer_list<Xbyak::Reg> regs)
+{
     size_t bits = 0;
     for (const Xbyak::Reg& reg : regs) {
         bits |= size_t{1} << RegToIndex(reg);
@@ -181,7 +186,8 @@ struct ABIFrameInfo {
 };
 
 inline ABIFrameInfo ABI_CalculateFrameSize(std::bitset<32> regs, size_t rsp_alignment,
-                                           size_t needed_frame_size) {
+                                           size_t needed_frame_size)
+{
     const auto count = (regs & ABI_ALL_GPRS).count();
     rsp_alignment -= count * 8;
     size_t subtraction = 0;
@@ -198,13 +204,12 @@ inline ABIFrameInfo ABI_CalculateFrameSize(std::bitset<32> regs, size_t rsp_alig
     rsp_alignment -= subtraction;
     subtraction += rsp_alignment & 0xF;
 
-    return ABIFrameInfo{
-        s32(subtraction),
-        s32(subtraction - xmm_base_subtraction)
-    };
+    return ABIFrameInfo{s32(subtraction), s32(subtraction - xmm_base_subtraction)};
 }
 
-inline size_t ABI_PushRegistersAndAdjustStack(Xbyak::CodeGenerator& code, std::bitset<32> regs, size_t rsp_alignment, size_t needed_frame_size = 0) {
+inline size_t ABI_PushRegistersAndAdjustStack(Xbyak::CodeGenerator& code, std::bitset<32> regs,
+                                              size_t rsp_alignment, size_t needed_frame_size = 0)
+{
     auto frame_info = ABI_CalculateFrameSize(regs, rsp_alignment, needed_frame_size);
 
     for (size_t i = 0; i < regs.size(); ++i) {
@@ -227,7 +232,9 @@ inline size_t ABI_PushRegistersAndAdjustStack(Xbyak::CodeGenerator& code, std::b
     return ABI_SHADOW_SPACE;
 }
 
-inline void ABI_PopRegistersAndAdjustStack(Xbyak::CodeGenerator& code, std::bitset<32> regs, size_t rsp_alignment, size_t needed_frame_size = 0) {
+inline void ABI_PopRegistersAndAdjustStack(Xbyak::CodeGenerator& code, std::bitset<32> regs,
+                                           size_t rsp_alignment, size_t needed_frame_size = 0)
+{
     auto frame_info = ABI_CalculateFrameSize(regs, rsp_alignment, needed_frame_size);
 
     for (size_t i = 0; i < regs.size(); ++i) {
@@ -262,13 +269,14 @@ enum {
     CMP_ORD = 7,
 };
 
-constexpr bool IsWithin2G(uintptr_t ref, uintptr_t target) noexcept {
+constexpr bool IsWithin2G(uintptr_t ref, uintptr_t target) noexcept
+{
     u64 const distance = target - (ref + 5);
     return (distance & 0xffff'ffff) == distance;
 }
 
-template <typename T>
-inline void CallFarFunction(Xbyak::CodeGenerator& code, const T f) {
+template<typename T> inline void CallFarFunction(Xbyak::CodeGenerator& code, const T f)
+{
     static_assert(std::is_pointer_v<T>, "Argument must be a (function) pointer.");
     uintptr_t addr = uintptr_t(f);
     if (IsWithin2G(uintptr_t(code.getCurr()), addr)) {

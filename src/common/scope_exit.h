@@ -4,11 +4,11 @@
 #pragma once
 
 #include <utility>
+
 #include "common/common_funcs.h"
 
 namespace detail {
-template <class F>
-class ScopeGuard {
+template<class F> class ScopeGuard {
     YUZU_NON_COPYABLE(ScopeGuard);
 
 private:
@@ -17,38 +17,38 @@ private:
 
 public:
     constexpr ScopeGuard(F f_) : f(std::move(f_)), active(true) {}
-    constexpr ~ScopeGuard() {
+    constexpr ~ScopeGuard()
+    {
         if (active) {
             f();
         }
     }
-    constexpr void Cancel() {
-        active = false;
-    }
+    constexpr void Cancel() { active = false; }
 
-    constexpr ScopeGuard(ScopeGuard&& rhs) : f(std::move(rhs.f)), active(rhs.active) {
+    constexpr ScopeGuard(ScopeGuard&& rhs) : f(std::move(rhs.f)), active(rhs.active)
+    {
         rhs.Cancel();
     }
 
     ScopeGuard& operator=(ScopeGuard&& rhs) = delete;
 };
 
-template <class F>
-constexpr ScopeGuard<F> MakeScopeGuard(F f) {
+template<class F> constexpr ScopeGuard<F> MakeScopeGuard(F f)
+{
     return ScopeGuard<F>(std::move(f));
 }
 
 enum class ScopeGuardOnExit {};
 
-template <typename F>
-constexpr ScopeGuard<F> operator+(ScopeGuardOnExit, F&& f) {
+template<typename F> constexpr ScopeGuard<F> operator+(ScopeGuardOnExit, F&& f)
+{
     return ScopeGuard<F>(std::forward<F>(f));
 }
 
 } // namespace detail
 
 #define CONCATENATE_IMPL(s1, s2) s1##s2
-#define CONCATENATE(s1, s2) CONCATENATE_IMPL(s1, s2)
+#define CONCATENATE(s1, s2)      CONCATENATE_IMPL(s1, s2)
 
 #ifdef __COUNTER__
 #define ANONYMOUS_VARIABLE(pref) CONCATENATE(pref, __COUNTER__)

@@ -1,29 +1,36 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include "audio_core/renderer/memory/address_info.h"
 #include "audio_core/renderer/memory/pool_mapper.h"
+
+#include "audio_core/renderer/memory/address_info.h"
 #include "core/hle/kernel/k_process.h"
 #include "core/hle/kernel/svc.h"
 
 namespace AudioCore::Renderer {
 
 PoolMapper::PoolMapper(Kernel::KProcess* process_handle_, bool force_map_)
-    : process_handle{process_handle_}, force_map{force_map_} {}
+    : process_handle{process_handle_}, force_map{force_map_}
+{
+}
 
 PoolMapper::PoolMapper(Kernel::KProcess* process_handle_, std::span<MemoryPoolInfo> pool_infos_,
                        u32 pool_count_, bool force_map_)
     : process_handle{process_handle_}, pool_infos{pool_infos_.data()},
-      pool_count{pool_count_}, force_map{force_map_} {}
+      pool_count{pool_count_}, force_map{force_map_}
+{
+}
 
-void PoolMapper::ClearUseState(std::span<MemoryPoolInfo> pools, const u32 count) {
+void PoolMapper::ClearUseState(std::span<MemoryPoolInfo> pools, const u32 count)
+{
     for (u32 i = 0; i < count; i++) {
         pools[i].SetUsed(false);
     }
 }
 
 MemoryPoolInfo* PoolMapper::FindMemoryPool(MemoryPoolInfo* pools, const u64 count,
-                                           const CpuAddr address, const u64 size) const {
+                                           const CpuAddr address, const u64 size) const
+{
     auto pool{pools};
     for (u64 i = 0; i < count; i++, pool++) {
         if (pool->Contains(address, size)) {
@@ -33,7 +40,8 @@ MemoryPoolInfo* PoolMapper::FindMemoryPool(MemoryPoolInfo* pools, const u64 coun
     return nullptr;
 }
 
-MemoryPoolInfo* PoolMapper::FindMemoryPool(const CpuAddr address, const u64 size) const {
+MemoryPoolInfo* PoolMapper::FindMemoryPool(const CpuAddr address, const u64 size) const
+{
     auto pool{pool_infos};
     for (u64 i = 0; i < pool_count; i++, pool++) {
         if (pool->Contains(address, size)) {
@@ -44,7 +52,8 @@ MemoryPoolInfo* PoolMapper::FindMemoryPool(const CpuAddr address, const u64 size
 }
 
 bool PoolMapper::FillDspAddr(AddressInfo& address_info, MemoryPoolInfo* pools,
-                             const u32 count) const {
+                             const u32 count) const
+{
     if (address_info.GetCpuAddr() == 0) {
         address_info.SetPool(nullptr);
         return false;
@@ -66,7 +75,8 @@ bool PoolMapper::FillDspAddr(AddressInfo& address_info, MemoryPoolInfo* pools,
     return false;
 }
 
-bool PoolMapper::FillDspAddr(AddressInfo& address_info) const {
+bool PoolMapper::FillDspAddr(AddressInfo& address_info) const
+{
     if (address_info.GetCpuAddr() == 0) {
         address_info.SetPool(nullptr);
         return false;
@@ -88,7 +98,8 @@ bool PoolMapper::FillDspAddr(AddressInfo& address_info) const {
 }
 
 bool PoolMapper::TryAttachBuffer(BehaviorInfo::ErrorInfo& error_info, AddressInfo& address_info,
-                                 const CpuAddr address, const u64 size) const {
+                                 const CpuAddr address, const u64 size) const
+{
     address_info.Setup(address, size);
 
     if (!FillDspAddr(address_info)) {
@@ -102,11 +113,13 @@ bool PoolMapper::TryAttachBuffer(BehaviorInfo::ErrorInfo& error_info, AddressInf
     return true;
 }
 
-bool PoolMapper::IsForceMapEnabled() const {
+bool PoolMapper::IsForceMapEnabled() const
+{
     return force_map;
 }
 
-Kernel::KProcess* PoolMapper::GetProcessHandle(const MemoryPoolInfo* pool) const {
+Kernel::KProcess* PoolMapper::GetProcessHandle(const MemoryPoolInfo* pool) const
+{
     switch (pool->GetLocation()) {
     case MemoryPoolInfo::Location::CPU:
         return process_handle;
@@ -120,12 +133,14 @@ Kernel::KProcess* PoolMapper::GetProcessHandle(const MemoryPoolInfo* pool) const
 }
 
 bool PoolMapper::Map([[maybe_unused]] const u32 handle, [[maybe_unused]] const CpuAddr cpu_addr,
-                     [[maybe_unused]] const u64 size) const {
+                     [[maybe_unused]] const u64 size) const
+{
     // nn::audio::dsp::MapUserPointer(handle, cpu_addr, size);
     return true;
 }
 
-bool PoolMapper::Map(MemoryPoolInfo& pool) const {
+bool PoolMapper::Map(MemoryPoolInfo& pool) const
+{
     switch (pool.GetLocation()) {
     case MemoryPoolInfo::Location::CPU:
         // Map with process_handle
@@ -143,12 +158,14 @@ bool PoolMapper::Map(MemoryPoolInfo& pool) const {
 }
 
 bool PoolMapper::Unmap([[maybe_unused]] const u32 handle, [[maybe_unused]] const CpuAddr cpu_addr,
-                       [[maybe_unused]] const u64 size) const {
+                       [[maybe_unused]] const u64 size) const
+{
     // nn::audio::dsp::UnmapUserPointer(handle, cpu_addr, size);
     return true;
 }
 
-bool PoolMapper::Unmap(MemoryPoolInfo& pool) const {
+bool PoolMapper::Unmap(MemoryPoolInfo& pool) const
+{
     [[maybe_unused]] Kernel::KProcess* handle{};
 
     switch (pool.GetLocation()) {
@@ -165,7 +182,8 @@ bool PoolMapper::Unmap(MemoryPoolInfo& pool) const {
     return true;
 }
 
-void PoolMapper::ForceUnmapPointer(const AddressInfo& address_info) const {
+void PoolMapper::ForceUnmapPointer(const AddressInfo& address_info) const
+{
     if (force_map) {
         [[maybe_unused]] auto found_pool{
             FindMemoryPool(address_info.GetCpuAddr(), address_info.GetSize())};
@@ -175,7 +193,8 @@ void PoolMapper::ForceUnmapPointer(const AddressInfo& address_info) const {
 
 MemoryPoolInfo::ResultState PoolMapper::Update(MemoryPoolInfo& pool,
                                                const MemoryPoolInfo::InParameter& in_params,
-                                               MemoryPoolInfo::OutStatus& out_params) const {
+                                               MemoryPoolInfo::OutStatus& out_params) const
+{
     if (in_params.state != MemoryPoolInfo::State::RequestAttach &&
         in_params.state != MemoryPoolInfo::State::RequestDetach) {
         return MemoryPoolInfo::ResultState::Success;
@@ -223,8 +242,8 @@ MemoryPoolInfo::ResultState PoolMapper::Update(MemoryPoolInfo& pool,
     return MemoryPoolInfo::ResultState::Success;
 }
 
-bool PoolMapper::InitializeSystemPool(MemoryPoolInfo& pool, const u8* memory,
-                                      const u64 size_) const {
+bool PoolMapper::InitializeSystemPool(MemoryPoolInfo& pool, const u8* memory, const u64 size_) const
+{
     switch (pool.GetLocation()) {
     case MemoryPoolInfo::Location::CPU:
         return false;

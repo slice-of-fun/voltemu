@@ -6,9 +6,9 @@
 #pragma once
 
 #include <mutex>
+#include <queue>
 #include <span>
 #include <vector>
-#include <queue>
 
 #include "common/common_funcs.h"
 #include "core/internal_network/sockets.h"
@@ -73,8 +73,7 @@ public:
 
     Errno SetNonBlock(bool enable) override;
 
-    template <typename T>
-    Errno SetSockOpt(SOCKET fd, int option, T value);
+    template<typename T> Errno SetSockOpt(SOCKET fd, int option, T value);
 
     std::pair<Errno, Errno> GetPendingError() override;
 

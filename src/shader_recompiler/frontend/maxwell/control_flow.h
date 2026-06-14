@@ -3,13 +3,12 @@
 
 #pragma once
 
+#include <boost/container/small_vector.hpp>
+#include <boost/intrusive/set.hpp>
 #include <optional>
 #include <span>
 #include <string>
 #include <vector>
-
-#include <boost/container/small_vector.hpp>
-#include <boost/intrusive/set.hpp>
 
 #include "shader_recompiler/environment.h"
 #include "shader_recompiler/frontend/ir/condition.h"
@@ -71,9 +70,7 @@ struct Block : boost::intrusive::set_base_hook<
                    boost::intrusive::link_mode<boost::intrusive::normal_link>> {
     [[nodiscard]] bool Contains(Location pc) const noexcept;
 
-    bool operator<(const Block& rhs) const noexcept {
-        return begin < rhs.begin;
-    }
+    bool operator<(const Block& rhs) const noexcept { return begin < rhs.begin; }
 
     Location begin;
     Location end;
@@ -121,16 +118,16 @@ public:
 
     [[nodiscard]] std::string Dot() const;
 
-    [[nodiscard]] std::span<const Function> Functions() const noexcept {
+    [[nodiscard]] std::span<const Function> Functions() const noexcept
+    {
         return std::span(functions.data(), functions.size());
     }
-    [[nodiscard]] std::span<Function> Functions() noexcept {
+    [[nodiscard]] std::span<Function> Functions() noexcept
+    {
         return std::span(functions.data(), functions.size());
     }
 
-    [[nodiscard]] bool ExitsToDispatcher() const {
-        return exits_to_dispatcher;
-    }
+    [[nodiscard]] bool ExitsToDispatcher() const { return exits_to_dispatcher; }
 
 private:
     void AnalyzeLabel(FunctionId function_id, Label& label);

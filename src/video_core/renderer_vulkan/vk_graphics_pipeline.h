@@ -36,13 +36,9 @@ struct GraphicsPipelineCacheKey {
 
     bool operator==(const GraphicsPipelineCacheKey& rhs) const noexcept;
 
-    bool operator!=(const GraphicsPipelineCacheKey& rhs) const noexcept {
-        return !operator==(rhs);
-    }
+    bool operator!=(const GraphicsPipelineCacheKey& rhs) const noexcept { return !operator==(rhs); }
 
-    size_t Size() const noexcept {
-        return sizeof(unique_hashes) + state.Size();
-    }
+    size_t Size() const noexcept { return sizeof(unique_hashes) + state.Size(); }
 };
 static_assert(std::has_unique_object_representations_v<GraphicsPipelineCacheKey>);
 static_assert(std::is_trivially_copyable_v<GraphicsPipelineCacheKey>);
@@ -51,11 +47,8 @@ static_assert(std::is_trivially_constructible_v<GraphicsPipelineCacheKey>);
 } // namespace Vulkan
 
 namespace std {
-template <>
-struct hash<Vulkan::GraphicsPipelineCacheKey> {
-    size_t operator()(const Vulkan::GraphicsPipelineCacheKey& k) const noexcept {
-        return k.Hash();
-    }
+template<> struct hash<Vulkan::GraphicsPipelineCacheKey> {
+    size_t operator()(const Vulkan::GraphicsPipelineCacheKey& k) const noexcept { return k.Hash(); }
 };
 } // namespace std
 
@@ -82,17 +75,11 @@ public:
         const std::array<const Shader::Info*, NUM_STAGES>& infos);
 
     bool HasDynamicVertexInput() const noexcept { return key.state.dynamic_vertex_input; }
-    bool SupportsAlphaToCoverage() const noexcept {
-        return fragment_has_color0_output;
-    }
+    bool SupportsAlphaToCoverage() const noexcept { return fragment_has_color0_output; }
 
-    bool SupportsAlphaToOne() const noexcept {
-        return fragment_has_color0_output;
-    }
+    bool SupportsAlphaToOne() const noexcept { return fragment_has_color0_output; }
 
-    bool UsesExtendedDynamicState() const noexcept {
-        return key.state.extended_dynamic_state != 0;
-    }
+    bool UsesExtendedDynamicState() const noexcept { return key.state.extended_dynamic_state != 0; }
     GraphicsPipeline& operator=(GraphicsPipeline&&) noexcept = delete;
     GraphicsPipeline(GraphicsPipeline&&) noexcept = delete;
 
@@ -101,11 +88,10 @@ public:
 
     void AddTransition(GraphicsPipeline* transition);
 
-    bool Configure(bool is_indexed) {
-        return configure_func(this, is_indexed);
-    }
+    bool Configure(bool is_indexed) { return configure_func(this, is_indexed); }
 
-    [[nodiscard]] GraphicsPipeline* Next(const GraphicsPipelineCacheKey& current_key) noexcept {
+    [[nodiscard]] GraphicsPipeline* Next(const GraphicsPipelineCacheKey& current_key) noexcept
+    {
         if (key == current_key) {
             return this;
         }
@@ -114,23 +100,26 @@ public:
                                            : nullptr;
     }
 
-    [[nodiscard]] bool IsBuilt() const noexcept {
+    [[nodiscard]] bool IsBuilt() const noexcept
+    {
         return is_built.load(std::memory_order::relaxed);
     }
 
-    template <typename Spec>
-    static auto MakeConfigureSpecFunc() {
-        return [](GraphicsPipeline* pl, bool is_indexed) { return pl->ConfigureImpl<Spec>(is_indexed); };
+    template<typename Spec> static auto MakeConfigureSpecFunc()
+    {
+        return [](GraphicsPipeline* pl, bool is_indexed) {
+            return pl->ConfigureImpl<Spec>(is_indexed);
+        };
     }
 
-    void SetEngine(Tegra::Engines::Maxwell3D* maxwell3d_, Tegra::MemoryManager* gpu_memory_) {
+    void SetEngine(Tegra::Engines::Maxwell3D* maxwell3d_, Tegra::MemoryManager* gpu_memory_)
+    {
         maxwell3d = maxwell3d_;
         gpu_memory = gpu_memory_;
     }
 
 private:
-    template <typename Spec>
-    bool ConfigureImpl(bool is_indexed);
+    template<typename Spec> bool ConfigureImpl(bool is_indexed);
 
     void ConfigureDraw(const RescalingPushConstant& rescaling,
                        const RenderAreaPushConstant& render_are);

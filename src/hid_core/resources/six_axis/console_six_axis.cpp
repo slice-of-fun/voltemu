@@ -1,25 +1,32 @@
 // SPDX-FileCopyrightText: Copyright 2021 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "hid_core/resources/six_axis/console_six_axis.h"
+
 #include "core/core_timing.h"
 #include "hid_core/frontend/emulated_console.h"
 #include "hid_core/hid_core.h"
 #include "hid_core/resources/shared_memory_format.h"
-#include "hid_core/resources/six_axis/console_six_axis.h"
 
 namespace Service::HID {
 
-ConsoleSixAxis::ConsoleSixAxis(Core::HID::HIDCore& hid_core_) : ControllerBase{hid_core_} {
+ConsoleSixAxis::ConsoleSixAxis(Core::HID::HIDCore& hid_core_) : ControllerBase{hid_core_}
+{
     console = hid_core.GetEmulatedConsole();
 }
 
 ConsoleSixAxis::~ConsoleSixAxis() = default;
 
-void ConsoleSixAxis::OnInit() {}
+void ConsoleSixAxis::OnInit()
+{
+}
 
-void ConsoleSixAxis::OnRelease() {}
+void ConsoleSixAxis::OnRelease()
+{
+}
 
-void ConsoleSixAxis::OnUpdate(const Core::Timing::CoreTiming& core_timing) {
+void ConsoleSixAxis::OnUpdate(const Core::Timing::CoreTiming& core_timing)
+{
     std::scoped_lock shared_lock{*shared_mutex};
     const u64 aruid = applet_resource->GetActiveAruid();
     auto* data = applet_resource->GetAruidData(aruid);

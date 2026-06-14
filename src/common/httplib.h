@@ -4,7 +4,7 @@
 #pragma once
 
 #define CPPHTTPLIB_DISABLE_MACOSX_AUTOMATIC_ROOT_CERTIFICATES 1
-#define CPPHTTPLIB_OPENSSL_SUPPORT 1
+#define CPPHTTPLIB_OPENSSL_SUPPORT                            1
 
 #ifdef __GNUC__
 #pragma GCC diagnostic push

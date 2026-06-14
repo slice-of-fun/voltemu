@@ -37,7 +37,7 @@ public:
                                DescriptorPool& descriptor_pool, TextureCache& texture_cache_);
     ~QueryCacheRuntime();
 
-    template <typename SyncValuesType>
+    template<typename SyncValuesType>
     void SyncValues(std::span<SyncValuesType> values, VkBuffer base_src_buffer = VkBuffer{});
 
     void Barriers(bool is_prebarrier);
@@ -58,8 +58,7 @@ public:
 
     void Bind3DEngine(Tegra::Engines::Maxwell3D* maxwell3d);
 
-    template <typename Func>
-    void View3DRegs(Func&& func);
+    template<typename Func> void View3DRegs(Func&& func);
 
 private:
     void HostConditionalRenderingCompareValueImpl(VideoCommon::LookupData object, bool is_equal);

@@ -1,16 +1,17 @@
 // SPDX-FileCopyrightText: Copyright 2021 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include <catch2/catch_test_macros.hpp>
-
 #include "common/cityhash.h"
+
+#include <catch2/catch_test_macros.hpp>
 
 constexpr char msg[] = "The blue frogs are singing under the crimson sky.\n"
                        "It is time to run, Robert.";
 
 using namespace Common;
 
-TEST_CASE("CityHash", "[common]") {
+TEST_CASE("CityHash", "[common]")
+{
     // These test results were built against a known good version.
     REQUIRE(CityHash64(msg, sizeof(msg)) == 0x92d5c2e9cbfbbc01);
     REQUIRE(CityHash64WithSeed(msg, sizeof(msg), 0xdead) == 0xbfbe93f21a2820dd);

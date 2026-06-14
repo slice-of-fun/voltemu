@@ -11,9 +11,7 @@ class ConnectionError {
 
 public:
     explicit ConnectionError(std::string str) : err(std::move(str)) {}
-    const std::string& GetString() const {
-        return err;
-    }
+    const std::string& GetString() const { return err; }
 
 private:
     std::string err;

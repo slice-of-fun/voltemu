@@ -98,8 +98,8 @@ public:
     public:
         explicit Reader(std::span<const u8> buffer);
 
-        template <typename T>
-        bool Read(T& out) {
+        template<typename T> bool Read(T& out)
+        {
             if constexpr (std::is_same_v<T, NewsStruct>) {
                 return ReadNewsStruct(out);
             } else {

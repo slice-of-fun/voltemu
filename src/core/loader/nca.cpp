@@ -4,11 +4,15 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include <utility>
+#include "core/loader/nca.h"
+
 #include <openssl/err.h>
 #include <openssl/evp.h>
 
+#include <utility>
+
 #include "common/hex_util.h"
+#include "common/literals.h"
 #include "common/scope_exit.h"
 #include "core/core.h"
 #include "core/file_sys/content_archive.h"
@@ -18,12 +22,11 @@
 #include "core/hle/kernel/k_process.h"
 #include "core/hle/service/filesystem/filesystem.h"
 #include "core/loader/deconstructed_rom_directory.h"
-#include "core/loader/nca.h"
-#include "common/literals.h"
 
 namespace Loader {
 
-static u32 CalculatePointerBufferSize(size_t heap_size) {
+static u32 CalculatePointerBufferSize(size_t heap_size)
+{
     if (heap_size > 1073741824) { // Games with 1 GiB
         return 0x10000;
     } else if (heap_size > 536870912) { // Games with 512 MiB
@@ -34,11 +37,14 @@ static u32 CalculatePointerBufferSize(size_t heap_size) {
 }
 
 AppLoader_NCA::AppLoader_NCA(FileSys::VirtualFile file_)
-    : AppLoader(std::move(file_)), nca(std::make_unique<FileSys::NCA>(file)) {}
+    : AppLoader(std::move(file_)), nca(std::make_unique<FileSys::NCA>(file))
+{
+}
 
 AppLoader_NCA::~AppLoader_NCA() = default;
 
-FileType AppLoader_NCA::IdentifyType(const FileSys::VirtualFile& nca_file) {
+FileType AppLoader_NCA::IdentifyType(const FileSys::VirtualFile& nca_file)
+{
     const FileSys::NCA nca(nca_file);
 
     if (nca.GetStatus() == ResultStatus::Success &&
@@ -49,7 +55,8 @@ FileType AppLoader_NCA::IdentifyType(const FileSys::VirtualFile& nca_file) {
     return FileType::Error;
 }
 
-AppLoader_NCA::LoadResult AppLoader_NCA::Load(Kernel::KProcess& process, Core::System& system) {
+AppLoader_NCA::LoadResult AppLoader_NCA::Load(Kernel::KProcess& process, Core::System& system)
+{
     if (is_loaded) {
         return {ResultStatus::ErrorAlreadyLoaded, {}};
     }
@@ -109,7 +116,8 @@ AppLoader_NCA::LoadResult AppLoader_NCA::Load(Kernel::KProcess& process, Core::S
         return load_result;
     }
 
-    LOG_INFO(Loader, "Set pointer buffer size to {:#x} bytes for ProgramID {:#018x} (Heap size: {:#x})",
+    LOG_INFO(Loader,
+             "Set pointer buffer size to {:#x} bytes for ProgramID {:#018x} (Heap size: {:#x})",
              process.GetPointerBufferSize(), nca->GetTitleId(), heap_size);
 
     // Register the process in the file system controller
@@ -122,7 +130,8 @@ AppLoader_NCA::LoadResult AppLoader_NCA::Load(Kernel::KProcess& process, Core::S
     return load_result;
 }
 
-ResultStatus AppLoader_NCA::VerifyIntegrity(std::function<bool(size_t, size_t)> progress_callback) {
+ResultStatus AppLoader_NCA::VerifyIntegrity(std::function<bool(size_t, size_t)> progress_callback)
+{
     using namespace Common::Literals;
 
     constexpr size_t NcaFileNameWithHashLength = 36;
@@ -156,7 +165,8 @@ ResultStatus AppLoader_NCA::VerifyIntegrity(std::function<bool(size_t, size_t)> 
         return ResultStatus::ErrorNotInitialized;
 
     // Ensure we maintain a clean state on exit.
-    SCOPE_EXIT {
+    SCOPE_EXIT
+    {
         EVP_MD_CTX_free(ctx);
     };
 
@@ -204,7 +214,8 @@ ResultStatus AppLoader_NCA::VerifyIntegrity(std::function<bool(size_t, size_t)> 
     return ResultStatus::Success;
 }
 
-ResultStatus AppLoader_NCA::ReadRomFS(FileSys::VirtualFile& dir) {
+ResultStatus AppLoader_NCA::ReadRomFS(FileSys::VirtualFile& dir)
+{
     if (nca == nullptr) {
         return ResultStatus::ErrorNotInitialized;
     }
@@ -217,7 +228,8 @@ ResultStatus AppLoader_NCA::ReadRomFS(FileSys::VirtualFile& dir) {
     return ResultStatus::Success;
 }
 
-ResultStatus AppLoader_NCA::ReadProgramId(u64& out_program_id) {
+ResultStatus AppLoader_NCA::ReadProgramId(u64& out_program_id)
+{
     if (nca == nullptr || nca->GetStatus() != ResultStatus::Success) {
         return ResultStatus::ErrorNotInitialized;
     }
@@ -226,7 +238,8 @@ ResultStatus AppLoader_NCA::ReadProgramId(u64& out_program_id) {
     return ResultStatus::Success;
 }
 
-ResultStatus AppLoader_NCA::ReadBanner(std::vector<u8>& buffer) {
+ResultStatus AppLoader_NCA::ReadBanner(std::vector<u8>& buffer)
+{
     if (nca == nullptr || nca->GetStatus() != ResultStatus::Success) {
         return ResultStatus::ErrorNotInitialized;
     }
@@ -240,7 +253,8 @@ ResultStatus AppLoader_NCA::ReadBanner(std::vector<u8>& buffer) {
     return ResultStatus::Success;
 }
 
-ResultStatus AppLoader_NCA::ReadLogo(std::vector<u8>& buffer) {
+ResultStatus AppLoader_NCA::ReadLogo(std::vector<u8>& buffer)
+{
     if (nca == nullptr || nca->GetStatus() != ResultStatus::Success) {
         return ResultStatus::ErrorNotInitialized;
     }
@@ -254,7 +268,8 @@ ResultStatus AppLoader_NCA::ReadLogo(std::vector<u8>& buffer) {
     return ResultStatus::Success;
 }
 
-ResultStatus AppLoader_NCA::ReadNSOModules(Modules& modules) {
+ResultStatus AppLoader_NCA::ReadNSOModules(Modules& modules)
+{
     if (directory_loader == nullptr) {
         return ResultStatus::ErrorNotInitialized;
     }

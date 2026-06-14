@@ -1,13 +1,15 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include "audio_core/adsp/apps/audio_renderer/command_list_processor.h"
 #include "audio_core/renderer/command/resample/downmix_6ch_to_2ch.h"
+
+#include "audio_core/adsp/apps/audio_renderer/command_list_processor.h"
 
 namespace AudioCore::Renderer {
 
 void DownMix6chTo2chCommand::Dump(
-    [[maybe_unused]] const AudioRenderer::CommandListProcessor& processor, std::string& string) {
+    [[maybe_unused]] const AudioRenderer::CommandListProcessor& processor, std::string& string)
+{
     string += fmt::format("DownMix6chTo2chCommand\n\tinputs:  ");
     for (u32 i = 0; i < MaxChannels; i++) {
         string += fmt::format("{:02X}, ", inputs[i]);
@@ -19,7 +21,8 @@ void DownMix6chTo2chCommand::Dump(
     string += "\n";
 }
 
-void DownMix6chTo2chCommand::Process(const AudioRenderer::CommandListProcessor& processor) {
+void DownMix6chTo2chCommand::Process(const AudioRenderer::CommandListProcessor& processor)
+{
     auto in_front_left{
         processor.mix_buffers.subspan(inputs[0] * processor.sample_count, processor.sample_count)};
     auto in_front_right{
@@ -67,7 +70,8 @@ void DownMix6chTo2chCommand::Process(const AudioRenderer::CommandListProcessor& 
     std::memset(out_back_right.data(), 0, out_back_right.size_bytes());
 }
 
-bool DownMix6chTo2chCommand::Verify(const AudioRenderer::CommandListProcessor& processor) {
+bool DownMix6chTo2chCommand::Verify(const AudioRenderer::CommandListProcessor& processor)
+{
     return true;
 }
 

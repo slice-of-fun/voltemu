@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include "core/hle/service/omm/omm.h"
+
 #include "core/hle/service/omm/operation_mode_manager.h"
 #include "core/hle/service/omm/policy_manager_system.h"
 #include "core/hle/service/omm/power_state_interface.h"
@@ -9,7 +10,8 @@
 
 namespace Service::OMM {
 
-void LoopProcess(Core::System& system) {
+void LoopProcess(Core::System& system)
+{
     auto server_manager = std::make_unique<ServerManager>(system);
 
     server_manager->RegisterNamedService("idle:sys",

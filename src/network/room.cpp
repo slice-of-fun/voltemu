@@ -3,6 +3,8 @@
 // SPDX-FileCopyrightText: Copyright 2017 Citra Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "network/room.h"
+
 #include <algorithm>
 #include <atomic>
 #include <iomanip>
@@ -12,11 +14,11 @@
 #include <shared_mutex>
 #include <sstream>
 #include <thread>
-#include "common/polyfill_thread.h"
+
 #include "common/logging.h"
+#include "common/polyfill_thread.h"
 #include "enet/enet.h"
 #include "network/packet.h"
-#include "network/room.h"
 #include "network/verify_user.h"
 
 namespace Network {
@@ -236,7 +238,8 @@ public:
 };
 
 // RoomImpl
-void Room::RoomImpl::StartLoop() {
+void Room::RoomImpl::StartLoop()
+{
     room_thread.emplace([&](std::stop_token stoken) {
         while (state != State::Closed) {
             ENetEvent event;
@@ -289,7 +292,8 @@ void Room::RoomImpl::StartLoop() {
     });
 }
 
-void Room::RoomImpl::HandleJoinRequest(const ENetEvent* event) {
+void Room::RoomImpl::HandleJoinRequest(const ENetEvent* event)
+{
     {
         std::lock_guard lock(member_mutex);
         if (members.size() >= room_information.member_slots) {
@@ -354,7 +358,7 @@ void Room::RoomImpl::HandleJoinRequest(const ENetEvent* event) {
     }
 
     if (verify_backend != nullptr)
-     member.user_data = verify_backend->LoadUserData(uid, token);
+        member.user_data = verify_backend->LoadUserData(uid, token);
 
     if (nickname == room_information.host_username) {
         member.user_data.moderator = true;
@@ -402,7 +406,8 @@ void Room::RoomImpl::HandleJoinRequest(const ENetEvent* event) {
     }
 }
 
-void Room::RoomImpl::HandleModKickPacket(const ENetEvent* event) {
+void Room::RoomImpl::HandleModKickPacket(const ENetEvent* event)
+{
     if (!HasModPermission(event->peer)) {
         SendModPermissionDenied(event->peer);
         return;
@@ -444,7 +449,8 @@ void Room::RoomImpl::HandleModKickPacket(const ENetEvent* event) {
     BroadcastRoomInformation();
 }
 
-void Room::RoomImpl::HandleModBanPacket(const ENetEvent* event) {
+void Room::RoomImpl::HandleModBanPacket(const ENetEvent* event)
+{
     if (!HasModPermission(event->peer)) {
         SendModPermissionDenied(event->peer);
         return;
@@ -505,7 +511,8 @@ void Room::RoomImpl::HandleModBanPacket(const ENetEvent* event) {
     BroadcastRoomInformation();
 }
 
-void Room::RoomImpl::HandleModUnbanPacket(const ENetEvent* event) {
+void Room::RoomImpl::HandleModUnbanPacket(const ENetEvent* event)
+{
     if (!HasModPermission(event->peer)) {
         SendModPermissionDenied(event->peer);
         return;
@@ -542,7 +549,8 @@ void Room::RoomImpl::HandleModUnbanPacket(const ENetEvent* event) {
     }
 }
 
-void Room::RoomImpl::HandleModGetBanListPacket(const ENetEvent* event) {
+void Room::RoomImpl::HandleModGetBanListPacket(const ENetEvent* event)
+{
     if (!HasModPermission(event->peer)) {
         SendModPermissionDenied(event->peer);
         return;
@@ -551,7 +559,8 @@ void Room::RoomImpl::HandleModGetBanListPacket(const ENetEvent* event) {
     SendModBanListResponse(event->peer);
 }
 
-bool Room::RoomImpl::IsValidNickname(const std::string& nickname) const {
+bool Room::RoomImpl::IsValidNickname(const std::string& nickname) const
+{
     // A nickname is valid if it matches the regex and is not already taken by anybody else in the
     // room.
     const std::regex nickname_regex("^[ a-zA-Z0-9._-]{4,20}$");
@@ -563,14 +572,16 @@ bool Room::RoomImpl::IsValidNickname(const std::string& nickname) const {
                        [&nickname](const auto& member) { return member.nickname != nickname; });
 }
 
-bool Room::RoomImpl::IsValidFakeIPAddress(const IPv4Address& address) const {
+bool Room::RoomImpl::IsValidFakeIPAddress(const IPv4Address& address) const
+{
     // An IP address is valid if it is not already taken by anybody else in the room.
     std::lock_guard lock(member_mutex);
     return std::all_of(members.begin(), members.end(),
                        [&address](const auto& member) { return member.fake_ip != address; });
 }
 
-bool Room::RoomImpl::HasModPermission(const ENetPeer* client) const {
+bool Room::RoomImpl::HasModPermission(const ENetPeer* client) const
+{
     std::lock_guard lock(member_mutex);
     const auto sending_member =
         std::find_if(members.begin(), members.end(),
@@ -590,7 +601,8 @@ bool Room::RoomImpl::HasModPermission(const ENetPeer* client) const {
     return false;
 }
 
-void Room::RoomImpl::SendNameCollision(ENetPeer* client) {
+void Room::RoomImpl::SendNameCollision(ENetPeer* client)
+{
     Packet packet;
     packet.Write(static_cast<u8>(IdNameCollision));
 
@@ -600,7 +612,8 @@ void Room::RoomImpl::SendNameCollision(ENetPeer* client) {
     enet_host_flush(server);
 }
 
-void Room::RoomImpl::SendIPCollision(ENetPeer* client) {
+void Room::RoomImpl::SendIPCollision(ENetPeer* client)
+{
     Packet packet;
     packet.Write(static_cast<u8>(IdIpCollision));
 
@@ -610,7 +623,8 @@ void Room::RoomImpl::SendIPCollision(ENetPeer* client) {
     enet_host_flush(server);
 }
 
-void Room::RoomImpl::SendWrongPassword(ENetPeer* client) {
+void Room::RoomImpl::SendWrongPassword(ENetPeer* client)
+{
     Packet packet;
     packet.Write(static_cast<u8>(IdWrongPassword));
 
@@ -620,7 +634,8 @@ void Room::RoomImpl::SendWrongPassword(ENetPeer* client) {
     enet_host_flush(server);
 }
 
-void Room::RoomImpl::SendRoomIsFull(ENetPeer* client) {
+void Room::RoomImpl::SendRoomIsFull(ENetPeer* client)
+{
     Packet packet;
     packet.Write(static_cast<u8>(IdRoomIsFull));
 
@@ -630,7 +645,8 @@ void Room::RoomImpl::SendRoomIsFull(ENetPeer* client) {
     enet_host_flush(server);
 }
 
-void Room::RoomImpl::SendVersionMismatch(ENetPeer* client) {
+void Room::RoomImpl::SendVersionMismatch(ENetPeer* client)
+{
     Packet packet;
     packet.Write(static_cast<u8>(IdVersionMismatch));
     packet.Write(network_version);
@@ -641,7 +657,8 @@ void Room::RoomImpl::SendVersionMismatch(ENetPeer* client) {
     enet_host_flush(server);
 }
 
-void Room::RoomImpl::SendJoinSuccess(ENetPeer* client, IPv4Address fake_ip) {
+void Room::RoomImpl::SendJoinSuccess(ENetPeer* client, IPv4Address fake_ip)
+{
     Packet packet;
     packet.Write(static_cast<u8>(IdJoinSuccess));
     packet.Write(fake_ip);
@@ -651,7 +668,8 @@ void Room::RoomImpl::SendJoinSuccess(ENetPeer* client, IPv4Address fake_ip) {
     enet_host_flush(server);
 }
 
-void Room::RoomImpl::SendJoinSuccessAsMod(ENetPeer* client, IPv4Address fake_ip) {
+void Room::RoomImpl::SendJoinSuccessAsMod(ENetPeer* client, IPv4Address fake_ip)
+{
     Packet packet;
     packet.Write(static_cast<u8>(IdJoinSuccessAsMod));
     packet.Write(fake_ip);
@@ -661,7 +679,8 @@ void Room::RoomImpl::SendJoinSuccessAsMod(ENetPeer* client, IPv4Address fake_ip)
     enet_host_flush(server);
 }
 
-void Room::RoomImpl::SendUserKicked(ENetPeer* client) {
+void Room::RoomImpl::SendUserKicked(ENetPeer* client)
+{
     Packet packet;
     packet.Write(static_cast<u8>(IdHostKicked));
 
@@ -671,7 +690,8 @@ void Room::RoomImpl::SendUserKicked(ENetPeer* client) {
     enet_host_flush(server);
 }
 
-void Room::RoomImpl::SendUserBanned(ENetPeer* client) {
+void Room::RoomImpl::SendUserBanned(ENetPeer* client)
+{
     Packet packet;
     packet.Write(static_cast<u8>(IdHostBanned));
 
@@ -681,7 +701,8 @@ void Room::RoomImpl::SendUserBanned(ENetPeer* client) {
     enet_host_flush(server);
 }
 
-void Room::RoomImpl::SendModPermissionDenied(ENetPeer* client) {
+void Room::RoomImpl::SendModPermissionDenied(ENetPeer* client)
+{
     Packet packet;
     packet.Write(static_cast<u8>(IdModPermissionDenied));
 
@@ -691,7 +712,8 @@ void Room::RoomImpl::SendModPermissionDenied(ENetPeer* client) {
     enet_host_flush(server);
 }
 
-void Room::RoomImpl::SendModNoSuchUser(ENetPeer* client) {
+void Room::RoomImpl::SendModNoSuchUser(ENetPeer* client)
+{
     Packet packet;
     packet.Write(static_cast<u8>(IdModNoSuchUser));
 
@@ -701,7 +723,8 @@ void Room::RoomImpl::SendModNoSuchUser(ENetPeer* client) {
     enet_host_flush(server);
 }
 
-void Room::RoomImpl::SendModBanListResponse(ENetPeer* client) {
+void Room::RoomImpl::SendModBanListResponse(ENetPeer* client)
+{
     Packet packet;
     packet.Write(static_cast<u8>(IdModBanListResponse));
     {
@@ -716,7 +739,8 @@ void Room::RoomImpl::SendModBanListResponse(ENetPeer* client) {
     enet_host_flush(server);
 }
 
-void Room::RoomImpl::SendCloseMessage() {
+void Room::RoomImpl::SendCloseMessage()
+{
     Packet packet;
     packet.Write(static_cast<u8>(IdCloseRoom));
     std::lock_guard lock(member_mutex);
@@ -734,7 +758,8 @@ void Room::RoomImpl::SendCloseMessage() {
 }
 
 void Room::RoomImpl::SendStatusMessage(StatusMessageTypes type, const std::string& nickname,
-                                       const std::string& username, const std::string& ip) {
+                                       const std::string& username, const std::string& ip)
+{
     Packet packet;
     packet.Write(static_cast<u8>(IdStatusMessage));
     packet.Write(static_cast<u8>(type));
@@ -772,7 +797,8 @@ void Room::RoomImpl::SendStatusMessage(StatusMessageTypes type, const std::strin
     }
 }
 
-void Room::RoomImpl::BroadcastRoomInformation() {
+void Room::RoomImpl::BroadcastRoomInformation()
+{
     Packet packet;
     packet.Write(static_cast<u8>(IdRoomInformation));
     packet.Write(room_information.name);
@@ -803,20 +829,23 @@ void Room::RoomImpl::BroadcastRoomInformation() {
     enet_host_flush(server);
 }
 
-IPv4Address Room::RoomImpl::GenerateFakeIPAddress() {
+IPv4Address Room::RoomImpl::GenerateFakeIPAddress()
+{
     // An IP address is valid if it is not already taken by anybody else in the room.
     std::lock_guard lock(member_mutex);
     for (u8 i = 0x01; i < 0xFF; ++i)
         for (u8 j = 0x01; j < 0xFF; ++j) {
             IPv4Address addr{192, 168, i, j};
-            if (std::all_of(members.begin(), members.end(), [&addr](auto const& member) { return member.fake_ip != addr; }))
+            if (std::all_of(members.begin(), members.end(),
+                            [&addr](auto const& member) { return member.fake_ip != addr; }))
                 return addr;
         }
     LOG_ERROR(Network, "All addresses are taken");
     return IPv4Address{192, 168, 0, 0};
 }
 
-void Room::RoomImpl::HandleProxyPacket(const ENetEvent* event) {
+void Room::RoomImpl::HandleProxyPacket(const ENetEvent* event)
+{
     Packet in_packet;
     in_packet.Append(event->packet->data, event->packet->dataLength);
     in_packet.IgnoreBytes(sizeof(u8)); // Message type
@@ -874,7 +903,8 @@ void Room::RoomImpl::HandleProxyPacket(const ENetEvent* event) {
     enet_host_flush(server);
 }
 
-void Room::RoomImpl::HandleLdnPacket(const ENetEvent* event) {
+void Room::RoomImpl::HandleLdnPacket(const ENetEvent* event)
+{
     Packet in_packet;
     in_packet.Append(event->packet->data, event->packet->dataLength);
 
@@ -928,7 +958,8 @@ void Room::RoomImpl::HandleLdnPacket(const ENetEvent* event) {
     enet_host_flush(server);
 }
 
-void Room::RoomImpl::HandleChatPacket(const ENetEvent* event) {
+void Room::RoomImpl::HandleChatPacket(const ENetEvent* event)
+{
     Packet in_packet;
     in_packet.Append(event->packet->data, event->packet->dataLength);
 
@@ -978,7 +1009,8 @@ void Room::RoomImpl::HandleChatPacket(const ENetEvent* event) {
     }
 }
 
-void Room::RoomImpl::HandleGameInfoPacket(const ENetEvent* event) {
+void Room::RoomImpl::HandleGameInfoPacket(const ENetEvent* event)
+{
     Packet in_packet;
     in_packet.Append(event->packet->data, event->packet->dataLength);
 
@@ -1013,7 +1045,8 @@ void Room::RoomImpl::HandleGameInfoPacket(const ENetEvent* event) {
     BroadcastRoomInformation();
 }
 
-void Room::RoomImpl::HandleClientDisconnection(ENetPeer* client) {
+void Room::RoomImpl::HandleClientDisconnection(ENetPeer* client)
+{
     // Remove the client from the members list.
     std::string nickname, username, ip;
     {
@@ -1042,7 +1075,9 @@ void Room::RoomImpl::HandleClientDisconnection(ENetPeer* client) {
 }
 
 // Room
-Room::Room() : room_impl{std::make_unique<RoomImpl>()} {}
+Room::Room() : room_impl{std::make_unique<RoomImpl>()}
+{
+}
 
 Room::~Room() = default;
 
@@ -1051,7 +1086,8 @@ bool Room::Create(const std::string& name, const std::string& description,
                   const u32 max_connections, const std::string& host_username,
                   const GameInfo preferred_game,
                   std::unique_ptr<VerifyUser::Backend> verify_backend,
-                  const Room::BanList& ban_list) {
+                  const Room::BanList& ban_list)
+{
     ENetAddress address;
     address.host = ENET_HOST_ANY;
     if (!server_address.empty()) {
@@ -1082,25 +1118,30 @@ bool Room::Create(const std::string& name, const std::string& description,
     return true;
 }
 
-Room::State Room::GetState() const {
+Room::State Room::GetState() const
+{
     return room_impl->state;
 }
 
-const RoomInformation& Room::GetRoomInformation() const {
+const RoomInformation& Room::GetRoomInformation() const
+{
     return room_impl->room_information;
 }
 
-std::string Room::GetVerifyUID() const {
+std::string Room::GetVerifyUID() const
+{
     std::lock_guard lock(room_impl->verify_uid_mutex);
     return room_impl->verify_uid;
 }
 
-Room::BanList Room::GetBanList() const {
+Room::BanList Room::GetBanList() const
+{
     std::lock_guard lock(room_impl->ban_list_mutex);
     return {room_impl->username_ban_list, room_impl->ip_ban_list};
 }
 
-std::vector<Member> Room::GetRoomMemberList() const {
+std::vector<Member> Room::GetRoomMemberList() const
+{
     std::vector<Member> member_list;
     std::lock_guard lock(room_impl->member_mutex);
     for (const auto& member_impl : room_impl->members) {
@@ -1116,16 +1157,19 @@ std::vector<Member> Room::GetRoomMemberList() const {
     return member_list;
 }
 
-bool Room::HasPassword() const {
+bool Room::HasPassword() const
+{
     return !room_impl->password.empty();
 }
 
-void Room::SetVerifyUID(const std::string& uid) {
+void Room::SetVerifyUID(const std::string& uid)
+{
     std::lock_guard lock(room_impl->verify_uid_mutex);
     room_impl->verify_uid = uid;
 }
 
-void Room::Destroy() {
+void Room::Destroy()
+{
     room_impl->state = State::Closed;
     room_impl->room_thread.reset();
 

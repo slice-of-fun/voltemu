@@ -4,11 +4,11 @@
 // SPDX-FileCopyrightText: Copyright 2021 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "video_core/fsr.h"
+
 #include "common/common_types.h"
 #include "common/div_ceil.h"
 #include "common/settings.h"
-
-#include "video_core/fsr.h"
 #include "video_core/host_shaders/vulkan_fidelityfx_fsr_easu_fp16_frag_spv.h"
 #include "video_core/host_shaders/vulkan_fidelityfx_fsr_easu_fp32_frag_spv.h"
 #include "video_core/host_shaders/vulkan_fidelityfx_fsr_rcas_fp16_frag_spv.h"
@@ -28,7 +28,8 @@ using PushConstants = std::array<u32, 4 * 4>;
 FSR::FSR(const Device& device, MemoryAllocator& memory_allocator, size_t image_count,
          VkExtent2D extent)
     : m_device{device}, m_memory_allocator{memory_allocator},
-      m_image_count{image_count}, m_extent{extent} {
+      m_image_count{image_count}, m_extent{extent}
+{
 
     CreateImages();
     CreateRenderPasses();
@@ -41,29 +42,39 @@ FSR::FSR(const Device& device, MemoryAllocator& memory_allocator, size_t image_c
     CreatePipelines();
 }
 
-void FSR::CreateImages() {
+void FSR::CreateImages()
+{
     m_dynamic_images.resize(m_image_count);
     for (auto& images : m_dynamic_images) {
-        images.images[Easu] = CreateWrappedImage(m_memory_allocator, m_extent, VK_FORMAT_R16G16B16A16_SFLOAT);
-        images.images[Rcas] = CreateWrappedImage(m_memory_allocator, m_extent, VK_FORMAT_R16G16B16A16_SFLOAT);
-        images.image_views[Easu] = CreateWrappedImageView(m_device, images.images[Easu], VK_FORMAT_R16G16B16A16_SFLOAT);
-        images.image_views[Rcas] = CreateWrappedImageView(m_device, images.images[Rcas], VK_FORMAT_R16G16B16A16_SFLOAT);
+        images.images[Easu] =
+            CreateWrappedImage(m_memory_allocator, m_extent, VK_FORMAT_R16G16B16A16_SFLOAT);
+        images.images[Rcas] =
+            CreateWrappedImage(m_memory_allocator, m_extent, VK_FORMAT_R16G16B16A16_SFLOAT);
+        images.image_views[Easu] =
+            CreateWrappedImageView(m_device, images.images[Easu], VK_FORMAT_R16G16B16A16_SFLOAT);
+        images.image_views[Rcas] =
+            CreateWrappedImageView(m_device, images.images[Rcas], VK_FORMAT_R16G16B16A16_SFLOAT);
     }
 }
 
-void FSR::CreateRenderPasses() {
+void FSR::CreateRenderPasses()
+{
     m_renderpass = CreateWrappedRenderPass(m_device, VK_FORMAT_R16G16B16A16_SFLOAT);
     for (auto& images : m_dynamic_images) {
-        images.framebuffers[Easu] = CreateWrappedFramebuffer(m_device, m_renderpass, images.image_views[Easu], m_extent);
-        images.framebuffers[Rcas] = CreateWrappedFramebuffer(m_device, m_renderpass, images.image_views[Rcas], m_extent);
+        images.framebuffers[Easu] =
+            CreateWrappedFramebuffer(m_device, m_renderpass, images.image_views[Easu], m_extent);
+        images.framebuffers[Rcas] =
+            CreateWrappedFramebuffer(m_device, m_renderpass, images.image_views[Rcas], m_extent);
     }
 }
 
-void FSR::CreateSampler() {
+void FSR::CreateSampler()
+{
     m_sampler = CreateBilinearSampler(m_device);
 }
 
-void FSR::CreateShaders() {
+void FSR::CreateShaders()
+{
     m_vert_shader = BuildShader(m_device, VULKAN_FIDELITYFX_FSR_VERT_SPV);
 
     if (m_device.IsFloat16Supported()) {
@@ -75,24 +86,29 @@ void FSR::CreateShaders() {
     }
 }
 
-void FSR::CreateDescriptorPool() {
+void FSR::CreateDescriptorPool()
+{
     // EASU: 1 descriptor
     // RCAS: 1 descriptor
     // 2 descriptors, 2 descriptor sets per invocation
     m_descriptor_pool = CreateWrappedDescriptorPool(m_device, 2 * m_image_count, 2 * m_image_count);
 }
 
-void FSR::CreateDescriptorSetLayout() {
-    m_descriptor_set_layout = CreateWrappedDescriptorSetLayout(m_device, {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER});
+void FSR::CreateDescriptorSetLayout()
+{
+    m_descriptor_set_layout =
+        CreateWrappedDescriptorSetLayout(m_device, {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER});
 }
 
-void FSR::CreateDescriptorSets() {
+void FSR::CreateDescriptorSets()
+{
     std::vector<VkDescriptorSetLayout> layouts(MaxFsrStage, *m_descriptor_set_layout);
     for (auto& images : m_dynamic_images)
         images.descriptor_sets = CreateWrappedDescriptorSets(m_descriptor_pool, layouts);
 }
 
-void FSR::CreatePipelineLayouts() {
+void FSR::CreatePipelineLayouts()
+{
     const VkPushConstantRange range{
         .stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT,
         .offset = 0,
@@ -111,25 +127,29 @@ void FSR::CreatePipelineLayouts() {
     m_pipeline_layout = m_device.GetLogical().CreatePipelineLayout(ci);
 }
 
-void FSR::CreatePipelines() {
+void FSR::CreatePipelines()
+{
     m_easu_pipeline = CreateWrappedPipeline(m_device, m_renderpass, m_pipeline_layout,
                                             std::tie(m_vert_shader, m_easu_shader));
     m_rcas_pipeline = CreateWrappedPipeline(m_device, m_renderpass, m_pipeline_layout,
                                             std::tie(m_vert_shader, m_rcas_shader));
 }
 
-void FSR::UpdateDescriptorSets(VkImageView image_view, size_t image_index) {
+void FSR::UpdateDescriptorSets(VkImageView image_view, size_t image_index)
+{
     Images& images = m_dynamic_images[image_index];
     std::vector<VkDescriptorImageInfo> image_infos;
     image_infos.reserve(2);
     std::vector<VkWriteDescriptorSet> updates{
-        CreateWriteDescriptorSet(image_infos, *m_sampler, image_view, images.descriptor_sets[Easu], 0),
-        CreateWriteDescriptorSet(image_infos, *m_sampler, *images.image_views[Easu], images.descriptor_sets[Rcas], 0)
-    };
+        CreateWriteDescriptorSet(image_infos, *m_sampler, image_view, images.descriptor_sets[Easu],
+                                 0),
+        CreateWriteDescriptorSet(image_infos, *m_sampler, *images.image_views[Easu],
+                                 images.descriptor_sets[Rcas], 0)};
     m_device.GetLogical().UpdateDescriptorSets(updates, {});
 }
 
-void FSR::UploadImages(Scheduler& scheduler) {
+void FSR::UploadImages(Scheduler& scheduler)
+{
     if (!m_images_ready) {
         m_images_ready = true;
         scheduler.Record([&](vk::CommandBuffer cmdbuf) {
@@ -144,7 +164,8 @@ void FSR::UploadImages(Scheduler& scheduler) {
 
 VkImageView FSR::Draw(Scheduler& scheduler, size_t image_index, VkImage source_image,
                       VkImageView source_image_view, VkExtent2D input_image_extent,
-                      const Common::Rectangle<f32>& crop_rect) {
+                      const Common::Rectangle<f32>& crop_rect)
+{
     Images& images = m_dynamic_images[image_index];
 
     VkImage easu_image = *images.images[Easu];

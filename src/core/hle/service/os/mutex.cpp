@@ -1,14 +1,16 @@
 // SPDX-FileCopyrightText: Copyright 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/os/mutex.h"
+
 #include "core/core.h"
 #include "core/hle/kernel/k_event.h"
 #include "core/hle/kernel/k_synchronization_object.h"
-#include "core/hle/service/os/mutex.h"
 
 namespace Service {
 
-Mutex::Mutex(Core::System& system) : m_system(system) {
+Mutex::Mutex(Core::System& system) : m_system(system)
+{
     m_event = Kernel::KEvent::Create(system.Kernel());
     m_event->Initialize(nullptr);
 
@@ -18,12 +20,14 @@ Mutex::Mutex(Core::System& system) : m_system(system) {
     ASSERT(R_SUCCEEDED(m_event->Signal()));
 }
 
-Mutex::~Mutex() {
+Mutex::~Mutex()
+{
     m_event->GetReadableEvent().Close();
     m_event->Close();
 }
 
-void Mutex::lock() {
+void Mutex::lock()
+{
     // Infinitely retry until we successfully clear the event.
     while (R_FAILED(m_event->GetReadableEvent().Reset())) {
         s32 index;
@@ -38,7 +42,8 @@ void Mutex::lock() {
     // We successfully cleared the event, and now have exclusive ownership.
 }
 
-void Mutex::unlock() {
+void Mutex::unlock()
+{
     // Unlock.
     ASSERT(R_SUCCEEDED(m_event->Signal()));
 }

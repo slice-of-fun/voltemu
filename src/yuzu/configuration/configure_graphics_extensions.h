@@ -3,9 +3,10 @@
 
 #pragma once
 
+#include <QWidget>
 #include <memory>
 #include <vector>
-#include <QWidget>
+
 #include "yuzu/configuration/configuration_shared.h"
 
 namespace Core {

@@ -1,6 +1,8 @@
 // SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+#include "core/file_sys/ips_layer.h"
+
 #include <algorithm>
 #include <cstring>
 #include <map>
@@ -11,7 +13,6 @@
 #include "common/hex_util.h"
 #include "common/logging.h"
 #include "common/swap.h"
-#include "core/file_sys/ips_layer.h"
 #include "core/file_sys/vfs/vfs_vector.h"
 
 namespace FileSys {
@@ -36,7 +37,8 @@ constexpr std::array<std::pair<const char*, const char*>, 11> ESCAPE_CHARACTER_M
     {"\\\?", "\?"},
 }};
 
-static IPSFileType IdentifyMagic(const std::vector<u8>& magic) {
+static IPSFileType IdentifyMagic(const std::vector<u8>& magic)
+{
     if (magic.size() != 5) {
         return IPSFileType::Error;
     }
@@ -54,7 +56,8 @@ static IPSFileType IdentifyMagic(const std::vector<u8>& magic) {
     return IPSFileType::Error;
 }
 
-static bool IsEOF(IPSFileType type, const std::vector<u8>& data) {
+static bool IsEOF(IPSFileType type, const std::vector<u8>& data)
+{
     static constexpr std::array<u8, 3> eof{{'E', 'O', 'F'}};
     if (type == IPSFileType::IPS && std::equal(data.begin(), data.end(), eof.begin())) {
         return true;
@@ -64,7 +67,8 @@ static bool IsEOF(IPSFileType type, const std::vector<u8>& data) {
     return type == IPSFileType::IPS32 && std::equal(data.begin(), data.end(), eeof.begin());
 }
 
-VirtualFile PatchIPS(const VirtualFile& in, const VirtualFile& ips) {
+VirtualFile PatchIPS(const VirtualFile& in, const VirtualFile& ips)
+{
     if (in == nullptr || ips == nullptr)
         return nullptr;
 
@@ -139,25 +143,30 @@ struct IPSwitchCompiler::IPSwitchPatch {
     std::map<u32, std::vector<u8>> records;
 };
 
-IPSwitchCompiler::IPSwitchCompiler(VirtualFile patch_text_) : patch_text(std::move(patch_text_)) {
+IPSwitchCompiler::IPSwitchCompiler(VirtualFile patch_text_) : patch_text(std::move(patch_text_))
+{
     Parse();
 }
 
 IPSwitchCompiler::~IPSwitchCompiler() = default;
 
-std::array<u8, 32> IPSwitchCompiler::GetBuildID() const {
+std::array<u8, 32> IPSwitchCompiler::GetBuildID() const
+{
     return nso_build_id;
 }
 
-bool IPSwitchCompiler::IsValid() const {
+bool IPSwitchCompiler::IsValid() const
+{
     return valid;
 }
 
-static bool StartsWith(std::string_view base, std::string_view check) {
+static bool StartsWith(std::string_view base, std::string_view check)
+{
     return base.size() >= check.size() && base.substr(0, check.size()) == check;
 }
 
-static std::string EscapeStringSequences(std::string in) {
+static std::string EscapeStringSequences(std::string in)
+{
     for (const auto& seq : ESCAPE_CHARACTER_MAP) {
         for (auto index = in.find(seq.first); index != std::string::npos;
              index = in.find(seq.first, index)) {
@@ -169,7 +178,8 @@ static std::string EscapeStringSequences(std::string in) {
     return in;
 }
 
-void IPSwitchCompiler::ParseFlag(const std::string& line) {
+void IPSwitchCompiler::ParseFlag(const std::string& line)
+{
     if (StartsWith(line, "@flag offset_shift ")) {
         // Offset Shift Flag
         offset_shift = std::strtoll(line.substr(19).c_str(), nullptr, 0);
@@ -185,7 +195,8 @@ void IPSwitchCompiler::ParseFlag(const std::string& line) {
     }
 }
 
-void IPSwitchCompiler::Parse() {
+void IPSwitchCompiler::Parse()
+{
     const auto bytes = patch_text->ReadAllBytes();
     std::stringstream s;
     s.write(reinterpret_cast<const char*>(bytes.data()), bytes.size());
@@ -321,7 +332,8 @@ void IPSwitchCompiler::Parse() {
     valid = true;
 }
 
-VirtualFile IPSwitchCompiler::Apply(const VirtualFile& in) const {
+VirtualFile IPSwitchCompiler::Apply(const VirtualFile& in) const
+{
     if (in == nullptr || !valid)
         return nullptr;
 

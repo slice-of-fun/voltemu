@@ -4,15 +4,15 @@
 // SPDX-FileCopyrightText: Copyright 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+#include "core/hle/service/hid/hid_debug_server.h"
+
 #include <algorithm>
 
 #include "core/hle/service/cmif_serialization.h"
-#include "core/hle/service/hid/hid_debug_server.h"
 #include "core/hle/service/ipc_helpers.h"
 #include "hid_core/hid_types.h"
 #include "hid_core/resource_manager.h"
 #include "hid_core/resources/hid_firmware_settings.h"
-
 #include "hid_core/resources/touch_screen/gesture.h"
 #include "hid_core/resources/touch_screen/touch_screen.h"
 
@@ -20,8 +20,8 @@ namespace Service::HID {
 
 IHidDebugServer::IHidDebugServer(Core::System& system_, std::shared_ptr<ResourceManager> resource,
                                  std::shared_ptr<HidFirmwareSettings> settings)
-    : ServiceFramework{system_, "hid:dbg"}, resource_manager{resource}, firmware_settings{
-                                                                            settings} {
+    : ServiceFramework{system_, "hid:dbg"}, resource_manager{resource}, firmware_settings{settings}
+{
     // clang-format off
     static const FunctionInfo functions[] = {
         {0, nullptr, "DeactivateDebugPad"},
@@ -190,7 +190,8 @@ IHidDebugServer::IHidDebugServer(Core::System& system_, std::shared_ptr<Resource
 
 IHidDebugServer::~IHidDebugServer() = default;
 
-Result IHidDebugServer::DeactivateTouchScreen() {
+Result IHidDebugServer::DeactivateTouchScreen()
+{
     LOG_INFO(Service_HID, "called");
 
     if (!firmware_settings->IsDeviceManaged()) {
@@ -201,7 +202,8 @@ Result IHidDebugServer::DeactivateTouchScreen() {
 }
 
 Result IHidDebugServer::SetTouchScreenAutoPilotState(
-    InArray<TouchState, BufferAttr_HipcMapAlias> auto_pilot_buffer) {
+    InArray<TouchState, BufferAttr_HipcMapAlias> auto_pilot_buffer)
+{
     AutoPilotState auto_pilot{};
 
     auto_pilot.count =
@@ -214,14 +216,16 @@ Result IHidDebugServer::SetTouchScreenAutoPilotState(
     R_RETURN(GetResourceManager()->GetTouchScreen()->SetTouchScreenAutoPilotState(auto_pilot));
 }
 
-Result IHidDebugServer::UnsetTouchScreenAutoPilotState() {
+Result IHidDebugServer::UnsetTouchScreenAutoPilotState()
+{
     LOG_INFO(Service_HID, "called");
     R_RETURN(GetResourceManager()->GetTouchScreen()->UnsetTouchScreenAutoPilotState());
 }
 
 Result IHidDebugServer::GetTouchScreenConfiguration(
     Out<Core::HID::TouchScreenConfigurationForNx> out_touchscreen_config,
-    ClientAppletResourceUserId aruid) {
+    ClientAppletResourceUserId aruid)
+{
     LOG_INFO(Service_HID, "called, applet_resource_user_id={}", aruid.pid);
 
     R_TRY(GetResourceManager()->GetTouchScreen()->GetTouchScreenConfiguration(
@@ -235,12 +239,14 @@ Result IHidDebugServer::GetTouchScreenConfiguration(
     R_SUCCEED();
 }
 
-Result IHidDebugServer::ProcessTouchScreenAutoTune() {
+Result IHidDebugServer::ProcessTouchScreenAutoTune()
+{
     LOG_INFO(Service_HID, "called");
     R_RETURN(GetResourceManager()->GetTouchScreen()->ProcessTouchScreenAutoTune());
 }
 
-Result IHidDebugServer::ForceStopTouchScreenManagement() {
+Result IHidDebugServer::ForceStopTouchScreenManagement()
+{
     LOG_INFO(Service_HID, "called");
 
     if (!firmware_settings->IsDeviceManaged()) {
@@ -268,7 +274,8 @@ Result IHidDebugServer::ForceStopTouchScreenManagement() {
 }
 
 Result IHidDebugServer::ForceRestartTouchScreenManagement(u32 basic_gesture_id,
-                                                          ClientAppletResourceUserId aruid) {
+                                                          ClientAppletResourceUserId aruid)
+{
     LOG_INFO(Service_HID, "called, basic_gesture_id={}, applet_resource_user_id={}",
              basic_gesture_id, aruid.pid);
 
@@ -285,7 +292,8 @@ Result IHidDebugServer::ForceRestartTouchScreenManagement(u32 basic_gesture_id,
     R_SUCCEED();
 }
 
-Result IHidDebugServer::IsTouchScreenManaged(Out<bool> out_is_managed) {
+Result IHidDebugServer::IsTouchScreenManaged(Out<bool> out_is_managed)
+{
     LOG_INFO(Service_HID, "called");
 
     bool is_touch_active{};
@@ -297,7 +305,8 @@ Result IHidDebugServer::IsTouchScreenManaged(Out<bool> out_is_managed) {
     R_SUCCEED();
 }
 
-Result IHidDebugServer::DeactivateGesture() {
+Result IHidDebugServer::DeactivateGesture()
+{
     LOG_INFO(Service_HID, "called");
 
     if (!firmware_settings->IsDeviceManaged()) {
@@ -307,7 +316,8 @@ Result IHidDebugServer::DeactivateGesture() {
     R_SUCCEED();
 }
 
-std::shared_ptr<ResourceManager> IHidDebugServer::GetResourceManager() {
+std::shared_ptr<ResourceManager> IHidDebugServer::GetResourceManager()
+{
     resource_manager->Initialize();
     return resource_manager;
 }

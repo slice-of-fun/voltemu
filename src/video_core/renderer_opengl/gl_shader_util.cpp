@@ -4,17 +4,20 @@
 // SPDX-FileCopyrightText: 2014 Citra Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "video_core/renderer_opengl/gl_shader_util.h"
+
+#include <glad/glad.h>
+
 #include <string_view>
 #include <vector>
-#include <glad/glad.h>
 
 #include "common/logging.h"
 #include "common/settings.h"
-#include "video_core/renderer_opengl/gl_shader_util.h"
 
 namespace OpenGL {
 
-static OGLProgram LinkSeparableProgram(GLuint shader) {
+static OGLProgram LinkSeparableProgram(GLuint shader)
+{
     OGLProgram program;
     program.handle = glCreateProgram();
     glProgramParameteri(program.handle, GL_PROGRAM_SEPARABLE, GL_TRUE);
@@ -42,7 +45,8 @@ static OGLProgram LinkSeparableProgram(GLuint shader) {
     return program;
 }
 
-static void LogShader(GLuint shader, std::string_view code = {}) {
+static void LogShader(GLuint shader, std::string_view code = {})
+{
     GLint shader_status{};
     glGetShaderiv(shader, GL_COMPILE_STATUS, &shader_status);
     if (shader_status == GL_FALSE) {
@@ -65,7 +69,8 @@ static void LogShader(GLuint shader, std::string_view code = {}) {
     }
 }
 
-OGLProgram CreateProgram(std::string_view code, GLenum stage) {
+OGLProgram CreateProgram(std::string_view code, GLenum stage)
+{
     OGLShader shader;
     shader.handle = glCreateShader(stage);
 
@@ -79,7 +84,8 @@ OGLProgram CreateProgram(std::string_view code, GLenum stage) {
     return LinkSeparableProgram(shader.handle);
 }
 
-OGLProgram CreateProgram(std::span<const u32> code, GLenum stage) {
+OGLProgram CreateProgram(std::span<const u32> code, GLenum stage)
+{
     OGLShader shader;
     shader.handle = glCreateShader(stage);
 
@@ -92,7 +98,8 @@ OGLProgram CreateProgram(std::span<const u32> code, GLenum stage) {
     return LinkSeparableProgram(shader.handle);
 }
 
-OGLAssemblyProgram CompileProgram(std::string_view code, GLenum target) {
+OGLAssemblyProgram CompileProgram(std::string_view code, GLenum target)
+{
     OGLAssemblyProgram program;
     glGenProgramsARB(1, &program.handle);
     glNamedProgramStringEXT(program.handle, target, GL_PROGRAM_FORMAT_ASCII_ARB,

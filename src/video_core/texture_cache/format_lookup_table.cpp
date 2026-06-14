@@ -4,9 +4,10 @@
 // SPDX-FileCopyrightText: Copyright 2019 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "video_core/texture_cache/format_lookup_table.h"
+
 #include "common/common_types.h"
 #include "common/logging.h"
-#include "video_core/texture_cache/format_lookup_table.h"
 
 namespace VideoCommon {
 
@@ -25,7 +26,8 @@ constexpr bool LINEAR = false;
 constexpr bool SRGB = true;
 
 constexpr u32 Hash(TextureFormat format, ComponentType red_component, ComponentType green_component,
-                   ComponentType blue_component, ComponentType alpha_component, bool is_srgb) {
+                   ComponentType blue_component, ComponentType alpha_component, bool is_srgb)
+{
     u32 hash = is_srgb ? 1 : 0;
     hash |= static_cast<u32>(red_component) << 1;
     hash |= static_cast<u32>(green_component) << 4;
@@ -35,7 +37,8 @@ constexpr u32 Hash(TextureFormat format, ComponentType red_component, ComponentT
     return hash;
 }
 
-constexpr u32 Hash(TextureFormat format, ComponentType component, bool is_srgb = LINEAR) {
+constexpr u32 Hash(TextureFormat format, ComponentType component, bool is_srgb = LINEAR)
+{
     return Hash(format, component, component, component, component, is_srgb);
 }
 
@@ -43,7 +46,8 @@ constexpr u32 Hash(TextureFormat format, ComponentType component, bool is_srgb =
 
 PixelFormat PixelFormatFromTextureInfo(TextureFormat format, ComponentType red, ComponentType green,
                                        ComponentType blue, ComponentType alpha,
-                                       bool is_srgb) noexcept {
+                                       bool is_srgb) noexcept
+{
     switch (Hash(format, red, green, blue, alpha, is_srgb)) {
     case Hash(TextureFormat::A8B8G8R8, UNORM):
         return PixelFormat::A8B8G8R8_UNORM;

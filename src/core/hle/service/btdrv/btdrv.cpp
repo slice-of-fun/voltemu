@@ -4,10 +4,11 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/btdrv/btdrv.h"
+
 #include "common/logging.h"
 #include "core/core.h"
 #include "core/hle/kernel/k_event.h"
-#include "core/hle/service/btdrv/btdrv.h"
 #include "core/hle/service/cmif_serialization.h"
 #include "core/hle/service/ipc_helpers.h"
 #include "core/hle/service/kernel_helpers.h"
@@ -20,7 +21,8 @@ namespace Service::BtDrv {
 class IBluetoothUser final : public ServiceFramework<IBluetoothUser> {
 public:
     explicit IBluetoothUser(Core::System& system_)
-        : ServiceFramework{system_, "bt"}, service_context{system_, "bt"} {
+        : ServiceFramework{system_, "bt"}, service_context{system_, "bt"}
+    {
         // clang-format off
         static const FunctionInfo functions[] = {
             {0, nullptr, "LeClientReadCharacteristic"},
@@ -40,12 +42,11 @@ public:
         register_event = service_context.CreateEvent("BT:RegisterEvent");
     }
 
-    ~IBluetoothUser() override {
-        service_context.CloseEvent(register_event);
-    }
+    ~IBluetoothUser() override { service_context.CloseEvent(register_event); }
 
 private:
-    Result RegisterBleEvent(OutCopyHandle<Kernel::KReadableEvent> out_event) {
+    Result RegisterBleEvent(OutCopyHandle<Kernel::KReadableEvent> out_event)
+    {
         LOG_WARNING(Service_BTM, "(STUBBED) called");
 
         *out_event = &register_event->GetReadableEvent();
@@ -59,7 +60,8 @@ private:
 
 class IBluetoothDriver final : public ServiceFramework<IBluetoothDriver> {
 public:
-    explicit IBluetoothDriver(Core::System& system_) : ServiceFramework{system_, "btdrv"} {
+    explicit IBluetoothDriver(Core::System& system_) : ServiceFramework{system_, "btdrv"}
+    {
         // clang-format off
         static const FunctionInfo functions[] = {
             {0, nullptr, "InitializeBluetoothDriver"},
@@ -200,13 +202,15 @@ public:
     }
 
 private:
-    Result EnableRadio() {
+    Result EnableRadio()
+    {
         LOG_WARNING(Service_BTDRV, "(STUBBED) called");
         R_SUCCEED();
     }
 };
 
-void LoopProcess(Core::System& system) {
+void LoopProcess(Core::System& system)
+{
     auto server_manager = std::make_unique<ServerManager>(system);
 
     server_manager->RegisterNamedService("btdrv", std::make_shared<IBluetoothDriver>(system));

@@ -4,10 +4,13 @@
 // SPDX-FileCopyrightText: Copyright 2020 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "yuzu/configuration/configure_cpu.h"
+
+#include <QComboBox>
 #include <memory>
 #include <typeinfo>
 #include <vector>
-#include <QComboBox>
+
 #include "common/common_types.h"
 #include "common/settings.h"
 #include "common/settings_enums.h"
@@ -15,13 +18,13 @@
 #include "core/core.h"
 #include "ui_configure_cpu.h"
 #include "yuzu/configuration/configuration_shared.h"
-#include "yuzu/configuration/configure_cpu.h"
 
 ConfigureCpu::ConfigureCpu(const Core::System& system_,
                            std::shared_ptr<std::vector<ConfigurationShared::Tab*>> group_,
                            const ConfigurationShared::Builder& builder, QWidget* parent)
     : Tab(group_, parent), ui{std::make_unique<Ui::ConfigureCpu>()}, system{system_},
-      combobox_translations(builder.ComboboxTranslations()) {
+      combobox_translations(builder.ComboboxTranslations())
+{
     ui->setupUi(this);
 
     Setup(builder);
@@ -41,8 +44,11 @@ ConfigureCpu::ConfigureCpu(const Core::System& system_,
 
 ConfigureCpu::~ConfigureCpu() = default;
 
-void ConfigureCpu::SetConfiguration() {}
-void ConfigureCpu::Setup(const ConfigurationShared::Builder& builder) {
+void ConfigureCpu::SetConfiguration()
+{
+}
+void ConfigureCpu::Setup(const ConfigurationShared::Builder& builder)
+{
     auto* accuracy_layout = ui->widget_accuracy->layout();
     auto* backend_layout = ui->widget_backend->layout();
     auto* unsafe_layout = ui->unsafe_widget->layout();
@@ -92,7 +98,8 @@ void ConfigureCpu::Setup(const ConfigurationShared::Builder& builder) {
     UpdateGroup();
 }
 
-void ConfigureCpu::UpdateGroup() {
+void ConfigureCpu::UpdateGroup()
+{
     const u32 accuracy = accuracy_combobox->currentIndex();
     const u32 backend = backend_combobox->currentIndex();
     // TODO(crueter): see if this works on NCE
@@ -100,14 +107,16 @@ void ConfigureCpu::UpdateGroup() {
                                  backend == (u32)Settings::CpuBackend::Dynarmic);
 }
 
-void ConfigureCpu::ApplyConfiguration() {
+void ConfigureCpu::ApplyConfiguration()
+{
     const bool is_powered_on = system.IsPoweredOn();
     for (const auto& apply_func : apply_funcs) {
         apply_func(is_powered_on);
     }
 }
 
-void ConfigureCpu::changeEvent(QEvent* event) {
+void ConfigureCpu::changeEvent(QEvent* event)
+{
     if (event->type() == QEvent::LanguageChange) {
         RetranslateUI();
     }
@@ -115,6 +124,7 @@ void ConfigureCpu::changeEvent(QEvent* event) {
     QWidget::changeEvent(event);
 }
 
-void ConfigureCpu::RetranslateUI() {
+void ConfigureCpu::RetranslateUI()
+{
     ui->retranslateUi(this);
 }

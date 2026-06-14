@@ -21,8 +21,7 @@
 #endif
 
 namespace Common {
-template <typename T, typename E>
-class Expected;
+template<typename T, typename E> class Expected;
 }
 
 namespace Network {
@@ -104,12 +103,14 @@ void CancelPendingSocketOperations();
 void RestartSocketOperations();
 
 #ifdef _WIN32
-constexpr IPv4Address TranslateIPv4(in_addr addr) {
+constexpr IPv4Address TranslateIPv4(in_addr addr)
+{
     auto& bytes = addr.S_un.S_un_b;
     return IPv4Address{bytes.s_b1, bytes.s_b2, bytes.s_b3, bytes.s_b4};
 }
 #else
-constexpr IPv4Address TranslateIPv4(in_addr addr) {
+constexpr IPv4Address TranslateIPv4(in_addr addr)
+{
     const u32 bytes = addr.s_addr;
     return IPv4Address{static_cast<u8>(bytes), static_cast<u8>(bytes >> 8),
                        static_cast<u8>(bytes >> 16), static_cast<u8>(bytes >> 24)};
@@ -124,7 +125,7 @@ std::string IPv4AddressToString(IPv4Address ip_addr);
 u32 IPv4AddressToInteger(IPv4Address ip_addr);
 
 // named to avoid name collision with Windows macro
-Common::Expected<std::vector<AddrInfo>, GetAddrInfoError> GetAddressInfo(
-    const std::string& host, const std::optional<std::string>& service);
+Common::Expected<std::vector<AddrInfo>, GetAddrInfoError>
+GetAddressInfo(const std::string& host, const std::optional<std::string>& service);
 
 } // namespace Network

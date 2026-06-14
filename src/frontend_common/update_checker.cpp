@@ -11,15 +11,17 @@
 #endif
 
 #include <fmt/format.h>
+
+#include "common/logging.h"
 #include "common/net/net.h"
 #include "common/scm_rev.h"
 #include "update_checker.h"
 
-#include "common/logging.h"
-
-std::optional<Common::Net::Release> UpdateChecker::GetUpdate() {
+std::optional<Common::Net::Release> UpdateChecker::GetUpdate()
+{
     const auto latest = Common::Net::GetLatestRelease();
-    if (!latest) return std::nullopt;
+    if (!latest)
+        return std::nullopt;
 
     LOG_INFO(Frontend, "Received update {}", latest->title);
 

@@ -4,13 +4,14 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include <span>
-#include <vector>
+#include "audio_core/sink/sdl3_sink.h"
 
 #include <SDL3/SDL.h>
 
+#include <span>
+#include <vector>
+
 #include "audio_core/common/common.h"
-#include "audio_core/sink/sdl3_sink.h"
 #include "audio_core/sink/sink_stream.h"
 #include "common/logging.h"
 #include "common/scope_exit.h"
@@ -19,7 +20,8 @@
 namespace AudioCore::Sink {
 
 namespace {
-SDL_AudioDeviceID FindAudioDeviceByName(const std::string& device_name, bool capture) {
+SDL_AudioDeviceID FindAudioDeviceByName(const std::string& device_name, bool capture)
+{
     int device_count = 0;
     SDL_AudioDeviceID* devices = capture ? SDL_GetAudioRecordingDevices(&device_count)
                                          : SDL_GetAudioPlaybackDevices(&device_count);
@@ -27,8 +29,8 @@ SDL_AudioDeviceID FindAudioDeviceByName(const std::string& device_name, bool cap
         return capture ? SDL_AUDIO_DEVICE_DEFAULT_RECORDING : SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK;
     }
 
-    SDL_AudioDeviceID selected = capture ? SDL_AUDIO_DEVICE_DEFAULT_RECORDING
-                                         : SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK;
+    SDL_AudioDeviceID selected =
+        capture ? SDL_AUDIO_DEVICE_DEFAULT_RECORDING : SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK;
     for (int i = 0; i < device_count; ++i) {
         const char* current_name = SDL_GetAudioDeviceName(devices[i]);
         if (current_name != nullptr && device_name == current_name) {
@@ -59,7 +61,8 @@ public:
      */
     SDLSinkStream(u32 device_channels_, u32 system_channels_, const std::string& output_device,
                   const std::string& input_device, StreamType type_, Core::System& system_)
-        : SinkStream{system_, type_} {
+        : SinkStream{system_, type_}
+    {
         system_channels = system_channels_;
         device_channels = device_channels_;
 
@@ -76,12 +79,11 @@ public:
         }
 
         const SDL_AudioDeviceID audio_device =
-            device_name.empty() ? (capture ? SDL_AUDIO_DEVICE_DEFAULT_RECORDING
-                                           : SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK)
-                                : FindAudioDeviceByName(device_name, capture);
+            device_name.empty()
+                ? (capture ? SDL_AUDIO_DEVICE_DEFAULT_RECORDING : SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK)
+                : FindAudioDeviceByName(device_name, capture);
 
-        stream = SDL_OpenAudioDeviceStream(audio_device, &spec, &SDLSinkStream::DataCallback,
-                                           this);
+        stream = SDL_OpenAudioDeviceStream(audio_device, &spec, &SDLSinkStream::DataCallback, this);
 
         if (stream == nullptr) {
             LOG_CRITICAL(Audio_Sink, "Error opening SDL audio device: {}", SDL_GetError());
@@ -102,7 +104,8 @@ public:
     /**
      * Destroy the sink stream.
      */
-    ~SDLSinkStream() override {
+    ~SDLSinkStream() override
+    {
         LOG_DEBUG(Service_Audio, "Destructing SDL stream {}", name);
         Finalize();
     }
@@ -110,7 +113,8 @@ public:
     /**
      * Finalize the sink stream.
      */
-    void Finalize() override {
+    void Finalize() override
+    {
         if (stream == nullptr) {
             return;
         }
@@ -127,7 +131,8 @@ public:
      * @param resume - Set to true if this is resuming the stream a previously-active stream.
      *                 Default false.
      */
-    void Start(bool resume = false) override {
+    void Start(bool resume = false) override
+    {
         if (stream == nullptr || !paused) {
             return;
         }
@@ -139,7 +144,8 @@ public:
     /**
      * Stop the sink stream.
      */
-    void Stop() override {
+    void Stop() override
+    {
         if (stream == nullptr || paused) {
             return;
         }
@@ -157,7 +163,8 @@ private:
      * @param len      - Length of the stream in bytes.
      */
     static void DataCallback(void* userdata, SDL_AudioStream* stream, int additional_amount,
-                             int total_amount) {
+                             int total_amount)
+    {
         auto* impl = static_cast<SDLSinkStream*>(userdata);
 
         if (!impl) {
@@ -203,7 +210,8 @@ private:
     SDL_AudioStream* stream{};
 };
 
-SDLSink::SDLSink(std::string_view target_device_name) {
+SDLSink::SDLSink(std::string_view target_device_name)
+{
     if (!SDL_WasInit(SDL_INIT_AUDIO)) {
         if (!SDL_InitSubSystem(SDL_INIT_AUDIO)) {
             LOG_CRITICAL(Audio_Sink, "SDL_InitSubSystem audio failed: {}", SDL_GetError());
@@ -223,14 +231,16 @@ SDLSink::SDLSink(std::string_view target_device_name) {
 SDLSink::~SDLSink() = default;
 
 SinkStream* SDLSink::AcquireSinkStream(Core::System& system, u32 system_channels_,
-                                       const std::string&, StreamType type) {
+                                       const std::string&, StreamType type)
+{
     system_channels = system_channels_;
     SinkStreamPtr& stream = sink_streams.emplace_back(std::make_unique<SDLSinkStream>(
         device_channels, system_channels, output_device, input_device, type, system));
     return stream.get();
 }
 
-void SDLSink::CloseStream(SinkStream* stream) {
+void SDLSink::CloseStream(SinkStream* stream)
+{
     for (size_t i = 0; i < sink_streams.size(); i++) {
         if (sink_streams[i].get() == stream) {
             sink_streams[i].reset();
@@ -240,11 +250,13 @@ void SDLSink::CloseStream(SinkStream* stream) {
     }
 }
 
-void SDLSink::CloseStreams() {
+void SDLSink::CloseStreams()
+{
     sink_streams.clear();
 }
 
-f32 SDLSink::GetDeviceVolume() const {
+f32 SDLSink::GetDeviceVolume() const
+{
     if (sink_streams.empty()) {
         return 1.0f;
     }
@@ -252,19 +264,22 @@ f32 SDLSink::GetDeviceVolume() const {
     return sink_streams[0]->GetDeviceVolume();
 }
 
-void SDLSink::SetDeviceVolume(f32 volume) {
+void SDLSink::SetDeviceVolume(f32 volume)
+{
     for (auto& stream : sink_streams) {
         stream->SetDeviceVolume(volume);
     }
 }
 
-void SDLSink::SetSystemVolume(f32 volume) {
+void SDLSink::SetSystemVolume(f32 volume)
+{
     for (auto& stream : sink_streams) {
         stream->SetSystemVolume(volume);
     }
 }
 
-std::vector<std::string> ListSDLSinkDevices(bool capture) {
+std::vector<std::string> ListSDLSinkDevices(bool capture)
+{
     std::vector<std::string> device_list;
 
     if (!SDL_WasInit(SDL_INIT_AUDIO)) {
@@ -275,9 +290,8 @@ std::vector<std::string> ListSDLSinkDevices(bool capture) {
     }
 
     int device_count = 0;
-    SDL_AudioDeviceID* devices =
-        capture ? SDL_GetAudioRecordingDevices(&device_count)
-                : SDL_GetAudioPlaybackDevices(&device_count);
+    SDL_AudioDeviceID* devices = capture ? SDL_GetAudioRecordingDevices(&device_count)
+                                         : SDL_GetAudioPlaybackDevices(&device_count);
     if (devices == nullptr) {
         return device_list;
     }
@@ -293,11 +307,13 @@ std::vector<std::string> ListSDLSinkDevices(bool capture) {
 }
 
 /* REVERSION to 3833 - function GetSDLLatency() REINTRODUCED FROM 3833 - DIABLO 3 FIX */
-u32 GetSDLLatency() {
+u32 GetSDLLatency()
+{
     return TargetSampleCount * 2;
 }
 
-// REVERTED back to 3833 - Below function IsSDLSuitable() removed, reverting to GetSDLLatency() above. - DIABLO 3 FIX
+// REVERTED back to 3833 - Below function IsSDLSuitable() removed, reverting to GetSDLLatency()
+// above. - DIABLO 3 FIX
 /*
 bool IsSDLSuitable() {
 #if !defined(HAVE_SDL3)

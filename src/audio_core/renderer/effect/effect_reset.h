@@ -21,7 +21,8 @@ namespace AudioCore::Renderer {
  * @param effect - Effect to reset and re-construct.
  * @param type   - Type of the new effect to create.
  */
-static void ResetEffect(EffectInfoBase* effect, const EffectInfoBase::Type type) {
+static void ResetEffect(EffectInfoBase* effect, const EffectInfoBase::Type type)
+{
     *effect = {};
 
     switch (type) {

@@ -5,11 +5,13 @@
 // https://cs.android.com/android/platform/superproject/+/android-5.1.1_r38:frameworks/native/libs/gui/IGraphicBufferProducer.cpp
 
 #include "core/hle/service/nvnflinger/graphic_buffer_producer.h"
+
 #include "core/hle/service/nvnflinger/parcel.h"
 
 namespace Service::android {
 
-QueueBufferInput::QueueBufferInput(InputParcel& parcel) {
+QueueBufferInput::QueueBufferInput(InputParcel& parcel)
+{
     parcel.ReadFlattened(*this);
 }
 

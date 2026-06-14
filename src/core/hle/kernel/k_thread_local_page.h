@@ -8,12 +8,12 @@
 
 #include <algorithm>
 #include <array>
+#include <ranges>
 
 #include "common/alignment.h"
 #include "common/assert.h"
 #include "common/common_types.h"
 #include "common/intrusive_red_black_tree.h"
-#include <ranges>
 #include "core/hle/kernel/memory_types.h"
 #include "core/hle/kernel/slab_helpers.h"
 #include "core/hle/result.h"
@@ -30,14 +30,12 @@ public:
     static_assert(RegionsPerPage > 0);
 
 public:
-    constexpr explicit KThreadLocalPage(KernelCore&, KProcessAddress addr = {})
-        : m_virt_addr(addr) {
+    constexpr explicit KThreadLocalPage(KernelCore&, KProcessAddress addr = {}) : m_virt_addr(addr)
+    {
         m_is_region_free.fill(true);
     }
 
-    constexpr KProcessAddress GetAddress() const {
-        return m_virt_addr;
-    }
+    constexpr KProcessAddress GetAddress() const { return m_virt_addr; }
 
     Result Initialize(KernelCore& kernel, KProcess* process);
     Result Finalize();
@@ -45,37 +43,37 @@ public:
     KProcessAddress Reserve();
     void Release(KProcessAddress addr);
 
-    bool IsAllUsed() const {
+    bool IsAllUsed() const
+    {
         return std::ranges::all_of(m_is_region_free.begin(), m_is_region_free.end(),
                                    [](bool is_free) { return !is_free; });
     }
 
-    bool IsAllFree() const {
+    bool IsAllFree() const
+    {
         return std::ranges::all_of(m_is_region_free.begin(), m_is_region_free.end(),
                                    [](bool is_free) { return is_free; });
     }
 
-    bool IsAnyUsed() const {
-        return !this->IsAllFree();
-    }
+    bool IsAnyUsed() const { return !this->IsAllFree(); }
 
-    bool IsAnyFree() const {
-        return !this->IsAllUsed();
-    }
+    bool IsAnyFree() const { return !this->IsAllUsed(); }
 
 public:
     using RedBlackKeyType = KProcessAddress;
 
-    static constexpr RedBlackKeyType GetRedBlackKey(const RedBlackKeyType& v) {
-        return v;
-    }
-    static constexpr RedBlackKeyType GetRedBlackKey(const KThreadLocalPage& v) {
+    static constexpr RedBlackKeyType GetRedBlackKey(const RedBlackKeyType& v) { return v; }
+    static constexpr RedBlackKeyType GetRedBlackKey(const KThreadLocalPage& v)
+    {
         return v.GetAddress();
     }
 
-    template <typename T>
-        requires(std::same_as<T, KThreadLocalPage> || std::same_as<T, RedBlackKeyType>)
-    static constexpr int Compare(const T& lhs, const KThreadLocalPage& rhs) {
+    template<typename T>
+    requires(
+        std::same_as<T, KThreadLocalPage> ||
+        std::same_as<T, RedBlackKeyType>) static constexpr int Compare(const T& lhs,
+                                                                       const KThreadLocalPage& rhs)
+    {
         const KProcessAddress lval = GetRedBlackKey(lhs);
         const KProcessAddress rval = GetRedBlackKey(rhs);
 
@@ -89,15 +87,18 @@ public:
     }
 
 private:
-    constexpr KProcessAddress GetRegionAddress(size_t i) const {
+    constexpr KProcessAddress GetRegionAddress(size_t i) const
+    {
         return this->GetAddress() + i * Svc::ThreadLocalRegionSize;
     }
 
-    constexpr bool Contains(KProcessAddress addr) const {
+    constexpr bool Contains(KProcessAddress addr) const
+    {
         return this->GetAddress() <= addr && addr < this->GetAddress() + PageSize;
     }
 
-    constexpr size_t GetRegionIndex(KProcessAddress addr) const {
+    constexpr size_t GetRegionIndex(KProcessAddress addr) const
+    {
         ASSERT(Common::IsAligned(GetInteger(addr), Svc::ThreadLocalRegionSize));
         ASSERT(this->Contains(addr));
         return (addr - this->GetAddress()) / Svc::ThreadLocalRegionSize;

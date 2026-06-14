@@ -9,6 +9,7 @@
 #include <mutex>
 #include <optional>
 #include <vector>
+
 #include "common/common_types.h"
 
 namespace Core::Timing {

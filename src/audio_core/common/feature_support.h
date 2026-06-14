@@ -13,7 +13,6 @@
 #include "common/assert.h"
 #include "common/common_funcs.h"
 #include "common/common_types.h"
-#include <ranges>
 
 namespace AudioCore {
 constexpr u32 CurrentRevision = 15;
@@ -56,7 +55,8 @@ enum class SupportTags {
     Size
 };
 
-constexpr u32 GetRevisionNum(u32 user_revision) {
+constexpr u32 GetRevisionNum(u32 user_revision)
+{
     if (user_revision >= 0x100) {
         user_revision -= Common::MakeMagic('R', 'E', 'V', '0');
         user_revision >>= 24;
@@ -65,7 +65,8 @@ constexpr u32 GetRevisionNum(u32 user_revision) {
     return user_revision;
 };
 
-constexpr bool CheckFeatureSupported(SupportTags tag, u32 user_revision) {
+constexpr bool CheckFeatureSupported(SupportTags tag, u32 user_revision)
+{
     constexpr std::array<std::pair<SupportTags, u32>, static_cast<u32>(SupportTags::Size)> features{
         {
             {SupportTags::AudioRendererProcessingTimeLimit70Percent, 1},
@@ -111,7 +112,8 @@ constexpr bool CheckFeatureSupported(SupportTags tag, u32 user_revision) {
     return (*feature).second <= user_revision;
 }
 
-constexpr bool CheckValidRevision(u32 user_revision) {
+constexpr bool CheckValidRevision(u32 user_revision)
+{
     return GetRevisionNum(user_revision) <= CurrentRevision;
 };
 

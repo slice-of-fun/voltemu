@@ -4,39 +4,46 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "audio_core/renderer/splitter/splitter_context.h"
+
 #include "audio_core/common/audio_renderer_parameter.h"
 #include "audio_core/common/workbuffer_allocator.h"
 #include "audio_core/renderer/behavior/behavior_info.h"
-#include "audio_core/renderer/splitter/splitter_context.h"
 #include "common/alignment.h"
 
 namespace AudioCore::Renderer {
 
 SplitterDestinationData* SplitterContext::GetDestinationData(const s32 splitter_id,
-                                                             const s32 destination_id) {
+                                                             const s32 destination_id)
+{
     return splitter_infos[splitter_id].GetData(destination_id);
 }
 
-SplitterInfo& SplitterContext::GetInfo(const s32 splitter_id) {
+SplitterInfo& SplitterContext::GetInfo(const s32 splitter_id)
+{
     return splitter_infos[splitter_id];
 }
 
-u32 SplitterContext::GetDataCount() const {
+u32 SplitterContext::GetDataCount() const
+{
     return destinations_count;
 }
 
-u32 SplitterContext::GetInfoCount() const {
+u32 SplitterContext::GetInfoCount() const
+{
     return info_count;
 }
 
-SplitterDestinationData& SplitterContext::GetData(const u32 index) {
+SplitterDestinationData& SplitterContext::GetData(const u32 index)
+{
     return splitter_destinations[index];
 }
 
 void SplitterContext::Setup(std::span<SplitterInfo> splitter_infos_, const u32 splitter_info_count_,
                             SplitterDestinationData* splitter_destinations_,
                             const u32 destination_count_, const bool splitter_bug_fixed_,
-                            const BehaviorInfo& behavior) {
+                            const BehaviorInfo& behavior)
+{
     splitter_infos = splitter_infos_;
     info_count = splitter_info_count_;
     splitter_destinations = splitter_destinations_;
@@ -47,12 +54,14 @@ void SplitterContext::Setup(std::span<SplitterInfo> splitter_infos_, const u32 s
     splitter_float_coeff_supported = behavior.IsSplitterDestinationV2bSupported();
 }
 
-bool SplitterContext::UsingSplitter() const {
+bool SplitterContext::UsingSplitter() const
+{
     return splitter_infos.size() > 0 && info_count > 0 && splitter_destinations != nullptr &&
            destinations_count > 0;
 }
 
-void SplitterContext::ClearAllNewConnectionFlag() {
+void SplitterContext::ClearAllNewConnectionFlag()
+{
     for (s32 i = 0; i < info_count; i++) {
         splitter_infos[i].SetNewConnectionFlag();
     }
@@ -60,7 +69,8 @@ void SplitterContext::ClearAllNewConnectionFlag() {
 
 bool SplitterContext::Initialize(const BehaviorInfo& behavior,
                                  const AudioRendererParameterInternal& params,
-                                 WorkbufferAllocator& allocator) {
+                                 WorkbufferAllocator& allocator)
+{
     if (behavior.IsSplitterSupported() && params.splitter_infos > 0 &&
         params.splitter_destinations > 0) {
         splitter_infos = allocator.Allocate<SplitterInfo>(params.splitter_infos, 0x10);
@@ -93,7 +103,8 @@ bool SplitterContext::Initialize(const BehaviorInfo& behavior,
     return true;
 }
 
-bool SplitterContext::Update(const u8* input) {
+bool SplitterContext::Update(const u8* input)
+{
     auto in_params{reinterpret_cast<const InParameterHeader*>(input)};
 
     if (destinations_count == 0 || info_count == 0) {
@@ -114,7 +125,8 @@ bool SplitterContext::Update(const u8* input) {
     return true;
 }
 
-u32 SplitterContext::UpdateInfo(const u8* input, u32 offset, const u32 splitter_count) {
+u32 SplitterContext::UpdateInfo(const u8* input, u32 offset, const u32 splitter_count)
+{
     for (u32 i = 0; i < splitter_count; i++) {
         auto info_header{reinterpret_cast<const SplitterInfo::InParameter*>(input + offset)};
 
@@ -135,7 +147,8 @@ u32 SplitterContext::UpdateInfo(const u8* input, u32 offset, const u32 splitter_
     return offset;
 }
 
-u32 SplitterContext::UpdateData(const u8* input, u32 offset, const u32 count) {
+u32 SplitterContext::UpdateData(const u8* input, u32 offset, const u32 count)
+{
     for (u32 i = 0; i < count; i++) {
         // Version selection based on feature flags:
         // - REV12: integer biquad params (Version2a)
@@ -240,14 +253,16 @@ u32 SplitterContext::UpdateData(const u8* input, u32 offset, const u32 count) {
     return offset;
 }
 
-void SplitterContext::UpdateInternalState() {
+void SplitterContext::UpdateInternalState()
+{
     for (s32 i = 0; i < info_count; i++) {
         splitter_infos[i].UpdateInternalState();
     }
 }
 
 void SplitterContext::RecomposeDestination(SplitterInfo& out_info,
-                                           const SplitterInfo::InParameter* info_header) {
+                                           const SplitterInfo::InParameter* info_header)
+{
     auto destination{out_info.GetData(0)};
     while (destination != nullptr) {
         auto dest{destination->GetNext()};
@@ -279,7 +294,8 @@ void SplitterContext::RecomposeDestination(SplitterInfo& out_info,
     out_info.SetDestinationCount(dest_count);
 }
 
-u32 SplitterContext::GetDestCountPerInfoForCompat() const {
+u32 SplitterContext::GetDestCountPerInfoForCompat() const
+{
     if (info_count <= 0) {
         return 0;
     }
@@ -287,7 +303,8 @@ u32 SplitterContext::GetDestCountPerInfoForCompat() const {
 }
 
 u64 SplitterContext::CalcWorkBufferSize(const BehaviorInfo& behavior,
-                                        const AudioRendererParameterInternal& params) {
+                                        const AudioRendererParameterInternal& params)
+{
     u64 size{0};
     if (!behavior.IsSplitterSupported()) {
         return size;

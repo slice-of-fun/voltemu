@@ -1,17 +1,18 @@
 // SPDX-FileCopyrightText: Copyright 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "common/signal_chain.h"
+
 #include <dlfcn.h>
 
 #include "common/assert.h"
 #include "common/dynamic_library.h"
 #include "common/scope_exit.h"
-#include "common/signal_chain.h"
 
 namespace Common {
 
-template <typename T>
-T* LookupLibcSymbol(const char* name) {
+template<typename T> T* LookupLibcSymbol(const char* name)
+{
 #if defined(__BIONIC__)
     Common::DynamicLibrary provider("libc.so");
     if (!provider.IsOpen()) {
@@ -34,7 +35,8 @@ T* LookupLibcSymbol(const char* name) {
     return reinterpret_cast<T*>(sym);
 }
 
-int SigAction(int signum, const struct sigaction* act, struct sigaction* oldact) {
+int SigAction(int signum, const struct sigaction* act, struct sigaction* oldact)
+{
     static auto libc_sigaction = LookupLibcSymbol<decltype(sigaction)>("sigaction");
     return libc_sigaction(signum, act, oldact);
 }

@@ -4,7 +4,10 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/loader/deconstructed_rom_directory.h"
+
 #include <cstring>
+
 #include "common/logging.h"
 #include "common/random.h"
 #include "common/settings.h"
@@ -16,7 +19,6 @@
 #include "core/hle/kernel/k_page_table.h"
 #include "core/hle/kernel/k_process.h"
 #include "core/hle/service/filesystem/filesystem.h"
-#include "core/loader/deconstructed_rom_directory.h"
 #include "core/loader/nso.h"
 
 #ifdef HAS_NCE
@@ -32,19 +34,22 @@ class Patcher {};
 namespace Loader {
 
 struct PatchCollection {
-    explicit PatchCollection(bool is_application_) : is_application{is_application_} {
+    explicit PatchCollection(bool is_application_) : is_application{is_application_}
+    {
         module_patcher_indices.fill(-1);
         patchers.emplace_back();
     }
 
-    std::vector<Core::NCE::Patcher>* GetPatchers() {
+    std::vector<Core::NCE::Patcher>* GetPatchers()
+    {
         if (is_application && Settings::IsNceEnabled()) {
             return &patchers;
         }
         return nullptr;
     }
 
-    size_t GetTotalPatchSize() const {
+    size_t GetTotalPatchSize() const
+    {
         size_t total_size{};
 #ifdef HAS_NCE
         for (auto& patcher : patchers) {
@@ -54,15 +59,18 @@ struct PatchCollection {
         return total_size;
     }
 
-    void SaveIndex(size_t module) {
+    void SaveIndex(size_t module)
+    {
         module_patcher_indices[module] = static_cast<s32>(patchers.size() - 1);
     }
 
-    s32 GetIndex(size_t module) const {
+    s32 GetIndex(size_t module) const
+    {
         return module_patcher_indices[module];
     }
 
-    s32 GetLastIndex() const {
+    s32 GetLastIndex() const
+    {
         return static_cast<s32>(patchers.size()) - 1;
     }
 
@@ -71,9 +79,9 @@ struct PatchCollection {
     std::array<s32, 13> module_patcher_indices{};
 };
 
-AppLoader_DeconstructedRomDirectory::AppLoader_DeconstructedRomDirectory(FileSys::VirtualFile file_, bool override_update_)
-    : AppLoader(std::move(file_))
-    , override_update(override_update_)
+AppLoader_DeconstructedRomDirectory::AppLoader_DeconstructedRomDirectory(FileSys::VirtualFile file_,
+                                                                         bool override_update_)
+    : AppLoader(std::move(file_)), override_update(override_update_)
 {
     const auto file_dir = file->GetContainingDirectory();
 
@@ -126,12 +134,13 @@ AppLoader_DeconstructedRomDirectory::AppLoader_DeconstructedRomDirectory(FileSys
 
 AppLoader_DeconstructedRomDirectory::AppLoader_DeconstructedRomDirectory(
     FileSys::VirtualDir directory, bool override_update_)
-    : AppLoader(directory->GetFile("main"))
-    , dir(std::move(directory))
-    , override_update(override_update_)
-{}
+    : AppLoader(directory->GetFile("main")), dir(std::move(directory)),
+      override_update(override_update_)
+{
+}
 
-FileType AppLoader_DeconstructedRomDirectory::IdentifyType(const FileSys::VirtualFile& dir_file) {
+FileType AppLoader_DeconstructedRomDirectory::IdentifyType(const FileSys::VirtualFile& dir_file)
+{
     if (FileSys::IsDirectoryExeFS(dir_file->GetContainingDirectory())) {
         return FileType::DeconstructedRomDirectory;
     }
@@ -139,8 +148,9 @@ FileType AppLoader_DeconstructedRomDirectory::IdentifyType(const FileSys::Virtua
     return FileType::Error;
 }
 
-AppLoader_DeconstructedRomDirectory::LoadResult AppLoader_DeconstructedRomDirectory::Load(
-    Kernel::KProcess& process, Core::System& system) {
+AppLoader_DeconstructedRomDirectory::LoadResult
+AppLoader_DeconstructedRomDirectory::Load(Kernel::KProcess& process, Core::System& system)
+{
     if (is_loaded) {
         return {ResultStatus::ErrorAlreadyLoaded, {}};
     }
@@ -231,8 +241,11 @@ AppLoader_DeconstructedRomDirectory::LoadResult AppLoader_DeconstructedRomDirect
     code_size += patch_ctx.GetTotalPatchSize();
 
     // TODO: this is bad form of ASLR, it sucks
-    std::uintptr_t aslr_offset = ((::Settings::values.rng_seed_enabled.GetValue()
-        ? ::Settings::values.rng_seed.GetValue() : Common::Random::Random64(0)) << 12) & 0xfff000;
+    std::uintptr_t aslr_offset =
+        ((::Settings::values.rng_seed_enabled.GetValue() ? ::Settings::values.rng_seed.GetValue()
+                                                         : Common::Random::Random64(0))
+         << 12) &
+        0xfff000;
 
     // Setup the process code layout
     if (process.LoadFromMetadata(metadata, code_size, fastmem_base, aslr_offset).IsError()) {
@@ -271,7 +284,8 @@ AppLoader_DeconstructedRomDirectory::LoadResult AppLoader_DeconstructedRomDirect
             LoadParameters{metadata.GetMainThreadPriority(), metadata.GetMainThreadStackSize()}};
 }
 
-ResultStatus AppLoader_DeconstructedRomDirectory::ReadRomFS(FileSys::VirtualFile& out_dir) {
+ResultStatus AppLoader_DeconstructedRomDirectory::ReadRomFS(FileSys::VirtualFile& out_dir)
+{
     if (romfs == nullptr) {
         return ResultStatus::ErrorNoRomFS;
     }
@@ -280,7 +294,8 @@ ResultStatus AppLoader_DeconstructedRomDirectory::ReadRomFS(FileSys::VirtualFile
     return ResultStatus::Success;
 }
 
-ResultStatus AppLoader_DeconstructedRomDirectory::ReadIcon(std::vector<u8>& out_buffer) {
+ResultStatus AppLoader_DeconstructedRomDirectory::ReadIcon(std::vector<u8>& out_buffer)
+{
     if (icon_data.empty()) {
         return ResultStatus::ErrorNoIcon;
     }
@@ -289,12 +304,14 @@ ResultStatus AppLoader_DeconstructedRomDirectory::ReadIcon(std::vector<u8>& out_
     return ResultStatus::Success;
 }
 
-ResultStatus AppLoader_DeconstructedRomDirectory::ReadProgramId(u64& out_program_id) {
+ResultStatus AppLoader_DeconstructedRomDirectory::ReadProgramId(u64& out_program_id)
+{
     out_program_id = title_id;
     return ResultStatus::Success;
 }
 
-ResultStatus AppLoader_DeconstructedRomDirectory::ReadTitle(std::string& out_title) {
+ResultStatus AppLoader_DeconstructedRomDirectory::ReadTitle(std::string& out_title)
+{
     if (name.empty()) {
         return ResultStatus::ErrorNoControl;
     }
@@ -303,11 +320,13 @@ ResultStatus AppLoader_DeconstructedRomDirectory::ReadTitle(std::string& out_tit
     return ResultStatus::Success;
 }
 
-bool AppLoader_DeconstructedRomDirectory::IsRomFSUpdatable() const {
+bool AppLoader_DeconstructedRomDirectory::IsRomFSUpdatable() const
+{
     return false;
 }
 
-ResultStatus AppLoader_DeconstructedRomDirectory::ReadNSOModules(Modules& out_modules) {
+ResultStatus AppLoader_DeconstructedRomDirectory::ReadNSOModules(Modules& out_modules)
+{
     if (!is_loaded) {
         return ResultStatus::ErrorNotInitialized;
     }

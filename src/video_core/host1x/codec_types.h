@@ -18,9 +18,7 @@ namespace Tegra {
 namespace Decoders {
 
 struct Offset {
-    constexpr u32 Address() const noexcept {
-        return offset << 8;
-    }
+    constexpr u32 Address() const noexcept { return offset << 8; }
 
 private:
     u32 offset;
@@ -346,7 +344,8 @@ struct PictureInfo {
     LoopFilter loop_filter;                ///< 0xE4
     INSERT_PADDING_BYTES_NOINIT(21);       ///< 0xEB
 
-    [[nodiscard]] Vp9PictureInfo Convert() const {
+    [[nodiscard]] Vp9PictureInfo Convert() const
+    {
         return {
             .bitstream_size = bitstream_size,
             .frame_offsets{},
@@ -422,7 +421,8 @@ struct EntropyProbs {
     INSERT_PADDING_BYTES_NOINIT(17);                   ///< 0x058F
     std::array<u8, 2304> coef_probs;                   ///< 0x05A0
 
-    void Convert(Vp9EntropyProbs& fc) {
+    void Convert(Vp9EntropyProbs& fc)
+    {
         fc.inter_mode_prob = inter_mode_prob;
         fc.intra_inter_prob = intra_inter_prob;
         fc.tx_8x8_prob = tx_8x8_prob;
@@ -470,7 +470,8 @@ struct RefPoolElement {
     bool refresh{};
 };
 
-#define ASSERT_POSITION(field_name, position) static_assert(offsetof(Vp9EntropyProbs, field_name) == position)
+#define ASSERT_POSITION(field_name, position)                                                      \
+    static_assert(offsetof(Vp9EntropyProbs, field_name) == position)
 ASSERT_POSITION(partition_prob, 0x0024);
 ASSERT_POSITION(switchable_interp_prob, 0x0724);
 ASSERT_POSITION(sign, 0x0772);
@@ -478,7 +479,8 @@ ASSERT_POSITION(class_0_fr, 0x079E);
 ASSERT_POSITION(high_precision, 0x07B2);
 #undef ASSERT_POSITION
 
-#define ASSERT_POSITION(field_name, position) static_assert(offsetof(PictureInfo, field_name) == position)
+#define ASSERT_POSITION(field_name, position)                                                      \
+    static_assert(offsetof(PictureInfo, field_name) == position)
 ASSERT_POSITION(bitstream_size, 0x30);
 ASSERT_POSITION(last_frame_size, 0x48);
 ASSERT_POSITION(first_level, 0x70);
@@ -486,7 +488,8 @@ ASSERT_POSITION(segmentation, 0x80);
 ASSERT_POSITION(loop_filter, 0xE4);
 #undef ASSERT_POSITION
 
-#define ASSERT_POSITION(field_name, position) static_assert(offsetof(EntropyProbs, field_name) == position)
+#define ASSERT_POSITION(field_name, position)                                                      \
+    static_assert(offsetof(EntropyProbs, field_name) == position)
 
 ASSERT_POSITION(inter_mode_prob, 0x400);
 ASSERT_POSITION(tx_8x8_prob, 0x470);

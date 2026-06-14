@@ -1,14 +1,16 @@
 // SPDX-FileCopyrightText: Copyright 2019 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include <algorithm>
+#include "common/zstd_compression.h"
+
 #include <zstd.h>
 
-#include "common/zstd_compression.h"
+#include <algorithm>
 
 namespace Common::Compression {
 
-std::vector<u8> CompressDataZSTD(const u8* source, std::size_t source_size, s32 compression_level) {
+std::vector<u8> CompressDataZSTD(const u8* source, std::size_t source_size, s32 compression_level)
+{
     compression_level = std::clamp(compression_level, 1, ZSTD_maxCLevel());
 
     const std::size_t max_compressed_size = ZSTD_compressBound(source_size);
@@ -27,11 +29,13 @@ std::vector<u8> CompressDataZSTD(const u8* source, std::size_t source_size, s32 
     return compressed;
 }
 
-std::vector<u8> CompressDataZSTDDefault(const u8* source, std::size_t source_size) {
+std::vector<u8> CompressDataZSTDDefault(const u8* source, std::size_t source_size)
+{
     return CompressDataZSTD(source, source_size, ZSTD_CLEVEL_DEFAULT);
 }
 
-std::vector<u8> DecompressDataZSTD(std::span<const u8> compressed) {
+std::vector<u8> DecompressDataZSTD(std::span<const u8> compressed)
+{
     const std::size_t decompressed_size =
         ZSTD_getFrameContentSize(compressed.data(), compressed.size());
     std::vector<u8> decompressed(decompressed_size);

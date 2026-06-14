@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include "core/hle/service/ldr/ldr.h"
+
 #include "core/hle/service/server_manager.h"
 #include "core/hle/service/service.h"
 
@@ -9,7 +10,8 @@ namespace Service::LDR {
 
 class DebugMonitor final : public ServiceFramework<DebugMonitor> {
 public:
-    explicit DebugMonitor(Core::System& system_) : ServiceFramework{system_, "ldr:dmnt"} {
+    explicit DebugMonitor(Core::System& system_) : ServiceFramework{system_, "ldr:dmnt"}
+    {
         // clang-format off
         static const FunctionInfo functions[] = {
             {0, nullptr, "SetProgramArgument"},
@@ -24,7 +26,8 @@ public:
 
 class ProcessManager final : public ServiceFramework<ProcessManager> {
 public:
-    explicit ProcessManager(Core::System& system_) : ServiceFramework{system_, "ldr:pm"} {
+    explicit ProcessManager(Core::System& system_) : ServiceFramework{system_, "ldr:pm"}
+    {
         // clang-format off
         static const FunctionInfo functions[] = {
             {0, nullptr, "CreateProcess"},
@@ -41,7 +44,8 @@ public:
 
 class Shell final : public ServiceFramework<Shell> {
 public:
-    explicit Shell(Core::System& system_) : ServiceFramework{system_, "ldr:shel"} {
+    explicit Shell(Core::System& system_) : ServiceFramework{system_, "ldr:shel"}
+    {
         // clang-format off
         static const FunctionInfo functions[] = {
             {0, nullptr, "SetProgramArgument"},
@@ -53,7 +57,8 @@ public:
     }
 };
 
-void LoopProcess(Core::System& system) {
+void LoopProcess(Core::System& system)
+{
     auto server_manager = std::make_unique<ServerManager>(system);
 
     server_manager->RegisterNamedService("ldr:dmnt", std::make_shared<DebugMonitor>(system));

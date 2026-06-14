@@ -9,6 +9,7 @@
 #include <array>
 #include <cstddef>
 #include <vector>
+
 #include "common/bit_field.h"
 #include "common/common_funcs.h"
 #include "common/common_types.h"
@@ -52,11 +53,11 @@ public:
 
         explicit MethodCall(u32 method_, u32 argument_, u32 subchannel_ = 0, u32 method_count_ = 0)
             : method(method_), argument(argument_), subchannel(subchannel_),
-              method_count(method_count_) {}
-
-        [[nodiscard]] bool IsLastCall() const {
-            return method_count <= 1;
+              method_count(method_count_)
+        {
         }
+
+        [[nodiscard]] bool IsLastCall() const { return method_count <= 1; }
     };
 
     enum class FenceOperation : u32 {
@@ -107,7 +108,8 @@ private:
                     u32 address_high;
                     u32 address_low;
 
-                    [[nodiscard]] GPUVAddr SemaphoreAddress() const {
+                    [[nodiscard]] GPUVAddr SemaphoreAddress() const
+                    {
                         return static_cast<GPUVAddr>((static_cast<GPUVAddr>(address_high) << 32) |
                                                      address_low);
                     }

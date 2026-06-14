@@ -4,6 +4,12 @@
 // SPDX-FileCopyrightText: 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "play_time_manager.h"
+
+#include <fmt/format.h>
+
+#include <algorithm>
+
 #include "common/fs/file.h"
 #include "common/fs/fs.h"
 #include "common/fs/path_util.h"
@@ -11,10 +17,6 @@
 #include "common/settings.h"
 #include "common/thread.h"
 #include "core/hle/service/acc/profile_manager.h"
-#include "play_time_manager.h"
-
-#include <fmt/format.h>
-#include <algorithm>
 
 namespace PlayTime {
 
@@ -25,12 +27,13 @@ struct PlayTimeElement {
     PlayTime play_time;
 };
 
-std::optional<std::filesystem::path> GetCurrentUserPlayTimePath() {
-    return Common::FS::GetVoltPath(Common::FS::VoltPath::PlayTimeDir) /
-           "playtime.bin";
+std::optional<std::filesystem::path> GetCurrentUserPlayTimePath()
+{
+    return Common::FS::GetVoltPath(Common::FS::VoltPath::PlayTimeDir) / "playtime.bin";
 }
 
-[[nodiscard]] bool ReadPlayTimeFile(PlayTimeDatabase& out_play_time_db) {
+[[nodiscard]] bool ReadPlayTimeFile(PlayTimeDatabase& out_play_time_db)
+{
     const auto filename = GetCurrentUserPlayTimePath();
 
     if (!filename.has_value()) {
@@ -66,7 +69,8 @@ std::optional<std::filesystem::path> GetCurrentUserPlayTimePath() {
     return true;
 }
 
-[[nodiscard]] bool WritePlayTimeFile(const PlayTimeDatabase& play_time_db) {
+[[nodiscard]] bool WritePlayTimeFile(const PlayTimeDatabase& play_time_db)
+{
     const auto filename = GetCurrentUserPlayTimePath();
 
     if (!filename.has_value()) {
@@ -96,29 +100,35 @@ std::optional<std::filesystem::path> GetCurrentUserPlayTimePath() {
 
 } // namespace
 
-PlayTimeManager::PlayTimeManager() : running_program_id() {
+PlayTimeManager::PlayTimeManager() : running_program_id()
+{
     if (!ReadPlayTimeFile(database)) {
         LOG_ERROR(Frontend, "Failed to read play time database! Resetting to default.");
     }
 }
 
-PlayTimeManager::~PlayTimeManager() {
+PlayTimeManager::~PlayTimeManager()
+{
     Save();
 }
 
-void PlayTimeManager::SetProgramId(u64 program_id) {
+void PlayTimeManager::SetProgramId(u64 program_id)
+{
     running_program_id = program_id;
 }
 
-void PlayTimeManager::Start() {
+void PlayTimeManager::Start()
+{
     play_time_thread = std::jthread([&](std::stop_token stop_token) { AutoTimestamp(stop_token); });
 }
 
-void PlayTimeManager::Stop() {
+void PlayTimeManager::Stop()
+{
     play_time_thread = {};
 }
 
-void PlayTimeManager::AutoTimestamp(std::stop_token stop_token) {
+void PlayTimeManager::AutoTimestamp(std::stop_token stop_token)
+{
     Common::SetCurrentThreadName("PlayTimeReport");
 
     using namespace std::literals::chrono_literals;
@@ -141,13 +151,15 @@ void PlayTimeManager::AutoTimestamp(std::stop_token stop_token) {
     }
 }
 
-void PlayTimeManager::Save() {
+void PlayTimeManager::Save()
+{
     if (!WritePlayTimeFile(database)) {
         LOG_ERROR(Frontend, "Failed to update play time database!");
     }
 }
 
-u64 PlayTimeManager::GetPlayTime(u64 program_id) const {
+u64 PlayTimeManager::GetPlayTime(u64 program_id) const
+{
     auto it = database.find(program_id);
     if (it != database.end()) {
         return it->second;
@@ -156,30 +168,36 @@ u64 PlayTimeManager::GetPlayTime(u64 program_id) const {
     }
 }
 
-void PlayTimeManager::SetPlayTime(u64 program_id, u64 play_time) {
+void PlayTimeManager::SetPlayTime(u64 program_id, u64 play_time)
+{
     database[program_id] = play_time;
     Save();
 }
 
-void PlayTimeManager::ResetProgramPlayTime(u64 program_id) {
+void PlayTimeManager::ResetProgramPlayTime(u64 program_id)
+{
     database.erase(program_id);
     Save();
 }
 
-std::string PlayTimeManager::GetReadablePlayTime(u64 t) {
+std::string PlayTimeManager::GetReadablePlayTime(u64 t)
+{
     return t > 0 ? fmt::format("{:02}:{:02}:{:02}", t / 3600, (t / 60) % 60, t % 60)
-        : std::string{};
+                 : std::string{};
 }
 
-std::string PlayTimeManager::GetPlayTimeHours(u64 time_seconds) {
+std::string PlayTimeManager::GetPlayTimeHours(u64 time_seconds)
+{
     return fmt::format("{}", time_seconds / 3600);
 }
 
-std::string PlayTimeManager::GetPlayTimeMinutes(u64 time_seconds) {
+std::string PlayTimeManager::GetPlayTimeMinutes(u64 time_seconds)
+{
     return fmt::format("{}", (time_seconds % 3600) / 60);
 }
 
-std::string PlayTimeManager::GetPlayTimeSeconds(u64 time_seconds) {
+std::string PlayTimeManager::GetPlayTimeSeconds(u64 time_seconds)
+{
     return fmt::format("{}", time_seconds % 60);
 }
 

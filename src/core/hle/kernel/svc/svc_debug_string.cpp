@@ -21,7 +21,8 @@ constexpr auto MAX_MSG_TIME = std::chrono::milliseconds(250);
 const auto MAX_MSG_SIZE = 0x1000;
 
 /// Used to output a message on a debug hardware unit - does nothing on a retail unit
-Result OutputDebugString(Core::System& system, u64 address, u64 len) {
+Result OutputDebugString(Core::System& system, u64 address, u64 len)
+{
     static struct DebugFlusher {
         std::string msg_buffer;
         std::mutex msg_mutex;
@@ -42,9 +43,11 @@ Result OutputDebugString(Core::System& system, u64 address, u64 len) {
                     break;
                 auto timeout = flusher_data.last_msg_time + MAX_MSG_TIME;
                 bool woke_early = flusher_data.msg_cv.wait_until(lock, timeout, [&stop_token] {
-                    return flusher_data.msg_buffer.size() >= MAX_MSG_SIZE || stop_token.stop_requested();
+                    return flusher_data.msg_buffer.size() >= MAX_MSG_SIZE ||
+                           stop_token.stop_requested();
                 });
-                if (!woke_early || flusher_data.msg_buffer.size() >= MAX_MSG_SIZE || stop_token.stop_requested()) {
+                if (!woke_early || flusher_data.msg_buffer.size() >= MAX_MSG_SIZE ||
+                    stop_token.stop_requested()) {
                     if (!flusher_data.msg_buffer.empty()) {
                         // Remove trailing newline as LOG_INFO adds that anyways
                         if (flusher_data.msg_buffer.back() == '\n')
@@ -53,7 +56,8 @@ Result OutputDebugString(Core::System& system, u64 address, u64 len) {
                         LOG_INFO(Debug_Emulated, "\n{}", flusher_data.msg_buffer);
                         flusher_data.msg_buffer.clear();
                     }
-                    if (stop_token.stop_requested()) break;
+                    if (stop_token.stop_requested())
+                        break;
                 }
             }
             flusher_data.msg_cv.notify_all();
@@ -63,18 +67,21 @@ Result OutputDebugString(Core::System& system, u64 address, u64 len) {
         std::lock_guard lock(flusher_data.msg_mutex);
         const auto old_size = flusher_data.msg_buffer.size();
         flusher_data.msg_buffer.resize(old_size + len);
-        GetCurrentMemory(system.Kernel()).ReadBlock(address, flusher_data.msg_buffer.data() + old_size, len);
+        GetCurrentMemory(system.Kernel())
+            .ReadBlock(address, flusher_data.msg_buffer.data() + old_size, len);
         flusher_data.last_msg_time = std::chrono::steady_clock::now();
     }
     flusher_data.msg_cv.notify_one();
     R_SUCCEED();
 }
 
-Result OutputDebugString64(Core::System& system, uint64_t debug_str, uint64_t len) {
+Result OutputDebugString64(Core::System& system, uint64_t debug_str, uint64_t len)
+{
     R_RETURN(OutputDebugString(system, debug_str, len));
 }
 
-Result OutputDebugString64From32(Core::System& system, uint32_t debug_str, uint32_t len) {
+Result OutputDebugString64From32(Core::System& system, uint32_t debug_str, uint32_t len)
+{
     R_RETURN(OutputDebugString(system, debug_str, len));
 }
 

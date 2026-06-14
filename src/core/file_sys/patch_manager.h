@@ -10,6 +10,7 @@
 #include <memory>
 #include <optional>
 #include <string>
+
 #include "common/common_types.h"
 #include "core/file_sys/nca_metadata.h"
 #include "core/file_sys/vfs/vfs_types.h"
@@ -79,8 +80,8 @@ public:
     [[nodiscard]] bool HasNSOPatch(const BuildID& build_id, std::string_view name) const;
 
     // Creates a CheatList object with all
-    [[nodiscard]] std::vector<Core::Memory::CheatEntry> CreateCheatList(
-        const BuildID& build_id) const;
+    [[nodiscard]] std::vector<Core::Memory::CheatEntry>
+    CreateCheatList(const BuildID& build_id) const;
 
     // Currently tracked RomFS patches:
     // - Game Updates

@@ -4,13 +4,13 @@
 // SPDX-FileCopyrightText: Copyright 2021 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/kernel/board/nintendo/nx/k_system_control.h"
+
 #include <random>
 
 #include "common/literals.h"
 #include "common/random.h"
 #include "common/settings.h"
-
-#include "core/hle/kernel/board/nintendo/nx/k_system_control.h"
 #include "core/hle/kernel/board/nintendo/nx/secure_monitor.h"
 #include "core/hle/kernel/k_memory_manager.h"
 #include "core/hle/kernel/k_page_table.h"
@@ -44,7 +44,8 @@ namespace {
 
 using namespace Common::Literals;
 
-u32 GetMemorySizeForInit() {
+u32 GetMemorySizeForInit()
+{
     switch (Settings::values.memory_layout_mode.GetValue()) {
     case Settings::MemoryLayout::Memory_4Gb:
         return Smc::MemorySize_4GB;
@@ -60,7 +61,8 @@ u32 GetMemorySizeForInit() {
     return Smc::MemorySize_4GB;
 }
 
-Smc::MemoryArrangement GetMemoryArrangeForInit() {
+Smc::MemoryArrangement GetMemoryArrangeForInit()
+{
     switch (Settings::values.memory_layout_mode.GetValue()) {
     case Settings::MemoryLayout::Memory_4Gb:
         return Smc::MemoryArrangement_4GB;
@@ -77,12 +79,14 @@ Smc::MemoryArrangement GetMemoryArrangeForInit() {
 }
 } // namespace
 
-size_t KSystemControl::Init::GetRealMemorySize() {
+size_t KSystemControl::Init::GetRealMemorySize()
+{
     return GetIntendedMemorySize();
 }
 
 // Initialization.
-size_t KSystemControl::Init::GetIntendedMemorySize() {
+size_t KSystemControl::Init::GetIntendedMemorySize()
+{
     switch (GetMemorySizeForInit()) {
     case Smc::MemorySize_4GB:
     default: // All invalid modes should go to 4GB.
@@ -98,7 +102,8 @@ size_t KSystemControl::Init::GetIntendedMemorySize() {
     }
 }
 
-KPhysicalAddress KSystemControl::Init::GetKernelPhysicalBaseAddress(KPhysicalAddress base_address) {
+KPhysicalAddress KSystemControl::Init::GetKernelPhysicalBaseAddress(KPhysicalAddress base_address)
+{
     const size_t real_dram_size = KSystemControl::Init::GetRealMemorySize();
     const size_t intended_dram_size = KSystemControl::Init::GetIntendedMemorySize();
     if (intended_dram_size * 2 < real_dram_size) {
@@ -108,11 +113,13 @@ KPhysicalAddress KSystemControl::Init::GetKernelPhysicalBaseAddress(KPhysicalAdd
     }
 }
 
-bool KSystemControl::Init::ShouldIncreaseThreadResourceLimit() {
+bool KSystemControl::Init::ShouldIncreaseThreadResourceLimit()
+{
     return true;
 }
 
-std::size_t KSystemControl::Init::GetApplicationPoolSize() {
+std::size_t KSystemControl::Init::GetApplicationPoolSize()
+{
     // Get the base pool size.
     const size_t base_pool_size = []() -> size_t {
         switch (GetMemoryArrangeForInit()) {
@@ -141,7 +148,8 @@ std::size_t KSystemControl::Init::GetApplicationPoolSize() {
     return base_pool_size;
 }
 
-size_t KSystemControl::Init::GetAppletPoolSize() {
+size_t KSystemControl::Init::GetAppletPoolSize()
+{
     // Get the base pool size.
     const size_t base_pool_size = []() -> size_t {
         switch (GetMemoryArrangeForInit()) {
@@ -171,7 +179,8 @@ size_t KSystemControl::Init::GetAppletPoolSize() {
     return base_pool_size - ExtraSystemMemoryForAtmosphere - KTraceBufferSize;
 }
 
-size_t KSystemControl::Init::GetMinimumNonSecureSystemPoolSize() {
+size_t KSystemControl::Init::GetMinimumNonSecureSystemPoolSize()
+{
     // Verify that our minimum is at least as large as Nintendo's.
     constexpr size_t MinimumSizeWithFatal = RequiredNonSecureSystemMemorySizeWithFatal;
     static_assert(MinimumSizeWithFatal >= 0x2C04000);
@@ -183,8 +192,8 @@ size_t KSystemControl::Init::GetMinimumNonSecureSystemPoolSize() {
 }
 
 namespace {
-template <typename F>
-u64 GenerateUniformRange(u64 min, u64 max, F f) {
+template<typename F> u64 GenerateUniformRange(u64 min, u64 max, F f)
+{
     // Handle the case where the difference is too large to represent.
     if (max == (std::numeric_limits<u64>::max)() && min == (std::numeric_limits<u64>::min)()) {
         return f();
@@ -202,11 +211,13 @@ u64 GenerateUniformRange(u64 min, u64 max, F f) {
 
 } // Anonymous namespace
 
-u64 KSystemControl::GenerateRandomRange(u64 min, u64 max) {
+u64 KSystemControl::GenerateRandomRange(u64 min, u64 max)
+{
     return GenerateUniformRange(min, max, Common::Random::GetMT19937());
 }
 
-size_t KSystemControl::CalculateRequiredSecureMemorySize(size_t size, u32 pool) {
+size_t KSystemControl::CalculateRequiredSecureMemorySize(size_t size, u32 pool)
+{
     if (pool == static_cast<u32>(KMemoryManager::Pool::Applet)) {
         return 0;
     } else {
@@ -216,7 +227,8 @@ size_t KSystemControl::CalculateRequiredSecureMemorySize(size_t size, u32 pool) 
 }
 
 Result KSystemControl::AllocateSecureMemory(KernelCore& kernel, KVirtualAddress* out, size_t size,
-                                            u32 pool) {
+                                            u32 pool)
+{
     // Applet secure memory is handled separately.
     UNIMPLEMENTED_IF(pool == static_cast<u32>(KMemoryManager::Pool::Applet));
 
@@ -234,7 +246,8 @@ Result KSystemControl::AllocateSecureMemory(KernelCore& kernel, KVirtualAddress*
     R_UNLESS(paddr != 0, ResultOutOfMemory);
 
     // Ensure we don't leak references to the memory on error.
-    ON_RESULT_FAILURE {
+    ON_RESULT_FAILURE
+    {
         kernel.MemoryManager().Close(paddr, num_pages);
     };
 
@@ -244,7 +257,8 @@ Result KSystemControl::AllocateSecureMemory(KernelCore& kernel, KVirtualAddress*
 }
 
 void KSystemControl::FreeSecureMemory(KernelCore& kernel, KVirtualAddress address, size_t size,
-                                      u32 pool) {
+                                      u32 pool)
+{
     // Applet secure memory is handled separately.
     UNIMPLEMENTED_IF(pool == static_cast<u32>(KMemoryManager::Pool::Applet));
 
@@ -260,11 +274,13 @@ void KSystemControl::FreeSecureMemory(KernelCore& kernel, KVirtualAddress addres
 }
 
 // Insecure Memory.
-KResourceLimit* KSystemControl::GetInsecureMemoryResourceLimit(KernelCore& kernel) {
+KResourceLimit* KSystemControl::GetInsecureMemoryResourceLimit(KernelCore& kernel)
+{
     return kernel.GetSystemResourceLimit();
 }
 
-u32 KSystemControl::GetInsecureMemoryPool() {
+u32 KSystemControl::GetInsecureMemoryPool()
+{
     return static_cast<u32>(KMemoryManager::Pool::SystemNonSecure);
 }
 

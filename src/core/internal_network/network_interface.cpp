@@ -2,37 +2,36 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include <algorithm>
+#include <bit>
 #include <fstream>
-#include <sstream>
-#include <vector>
 #include <numeric>
 #include <ranges>
-#include <bit>
+#include <sstream>
+#include <vector>
 
 #ifdef _WIN32
-#include <winsock2.h>
-#include <windows.h>
 #include <iphlpapi.h>
+#include <windows.h>
+#include <winsock2.h>
 #elif defined(__linux__) || defined(__ANDROID__)
-#include <cerrno>
 #include <ifaddrs.h>
 #include <net/if.h>
+
+#include <cerrno>
 #elif defined(__FreeBSD__)
-#include <sys/types.h>
-#include <sys/time.h>
-#include <sys/socket.h>
-#include <net/if.h>
-#include <net/route.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <sys/sysctl.h>
-#include <net/if.h>
-#include <net/route.h>
-#include <net/if_dl.h>
-#include <netinet/in.h>
-#include <netinet/if_ether.h>
 #include <arpa/inet.h>
+#include <fcntl.h>
+#include <net/if.h>
+#include <net/if_dl.h>
+#include <net/route.h>
 #include <netdb.h>
+#include <netinet/if_ether.h>
+#include <netinet/in.h>
+#include <sys/socket.h>
+#include <sys/sysctl.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <unistd.h>
 #endif
 
 #include "common/common_types.h"
@@ -46,7 +45,8 @@ namespace Network {
 
 #ifdef _WIN32
 
-std::vector<Network::NetworkInterface> GetAvailableNetworkInterfaces() {
+std::vector<Network::NetworkInterface> GetAvailableNetworkInterfaces()
+{
 
     ULONG buf_size = 0;
     if (GetAdaptersAddresses(
@@ -94,8 +94,8 @@ std::vector<Network::NetworkInterface> GetAvailableNetworkInterfaces() {
             .ip_address = ip,
             .subnet_mask = mask,
             .gateway = gw,
-            .kind = (a->IfType == IF_TYPE_IEEE80211 ? HostAdapterKind::Wifi : HostAdapterKind::Ethernet)
-        });
+            .kind = (a->IfType == IF_TYPE_IEEE80211 ? HostAdapterKind::Wifi
+                                                    : HostAdapterKind::Ethernet)});
     }
 
     return result;
@@ -103,7 +103,8 @@ std::vector<Network::NetworkInterface> GetAvailableNetworkInterfaces() {
 
 #else
 
-std::vector<Network::NetworkInterface> GetAvailableNetworkInterfaces() {
+std::vector<Network::NetworkInterface> GetAvailableNetworkInterfaces()
+{
 #if defined(__ANDROID__) || defined(__linux__)
     struct ifaddrs* ifaddr = nullptr;
     if (getifaddrs(&ifaddr) != 0) {
@@ -123,12 +124,11 @@ std::vector<Network::NetworkInterface> GetAvailableNetworkInterfaces() {
     // Even through Linux based, we can't reliably obtain routing information from there :(
 #else
     if (std::ifstream file("/proc/net/route"); file.is_open()) {
-        file.ignore((std::numeric_limits<std::streamsize>::max)(), '\n'); //ignore header
+        file.ignore((std::numeric_limits<std::streamsize>::max)(), '\n'); // ignore header
         for (std::string line; std::getline(file, line);) {
             std::istringstream iss{line};
             RoutingEntry info{};
-            iss >> info.iface_name >> std::hex
-                >> info.dest >> info.gateway >> info.flags;
+            iss >> info.iface_name >> std::hex >> info.dest >> info.gateway >> info.flags;
             routes.emplace_back(info);
         }
     } else {
@@ -138,14 +138,14 @@ std::vector<Network::NetworkInterface> GetAvailableNetworkInterfaces() {
     std::vector<Network::NetworkInterface> ifaces;
     for (auto ifa = ifaddr; ifa != nullptr; ifa = ifa->ifa_next) {
         if (ifa->ifa_addr == nullptr || ifa->ifa_netmask == nullptr /* Have a netmask and address */
-        || ifa->ifa_addr->sa_family != AF_INET /* Must be of kind AF_INET */
-        || (ifa->ifa_flags & IFF_UP) == 0 || (ifa->ifa_flags & IFF_LOOPBACK) != 0) /* Not loopback */
+            || ifa->ifa_addr->sa_family != AF_INET                  /* Must be of kind AF_INET */
+            || (ifa->ifa_flags & IFF_UP) == 0 ||
+            (ifa->ifa_flags & IFF_LOOPBACK) != 0) /* Not loopback */
             continue;
         // Just use 0 as the gateway address if not found OR routes are empty :)
         auto const it = std::ranges::find_if(routes, [&ifa](auto const& e) {
-            return e.iface_name == ifa->ifa_name
-                && e.dest == 0 // not the default route
-                && (e.flags & 0x02) != 0; // flag RTF_GATEWAY (defined in <linux/route.h>)
+            return e.iface_name == ifa->ifa_name && e.dest == 0 // not the default route
+                   && (e.flags & 0x02) != 0; // flag RTF_GATEWAY (defined in <linux/route.h>)
         });
         in_addr gw; // Solaris defines s_addr as a macro, can't use special C++ shenanigans here
         gw.s_addr = it != routes.end() ? it->gateway : 0;
@@ -153,8 +153,7 @@ std::vector<Network::NetworkInterface> GetAvailableNetworkInterfaces() {
             .name = ifa->ifa_name,
             .ip_address = std::bit_cast<struct sockaddr_in>(*ifa->ifa_addr).sin_addr,
             .subnet_mask = std::bit_cast<struct sockaddr_in>(*ifa->ifa_netmask).sin_addr,
-            .gateway = gw
-        });
+            .gateway = gw});
     }
     freeifaddrs(ifaddr);
     return ifaces;
@@ -167,10 +166,7 @@ std::vector<Network::NetworkInterface> GetAvailableNetworkInterfaces() {
     }
 
     size_t bufsz = 0;
-    int mib[6] = {
-        CTL_NET, PF_ROUTE, 0,
-        AF_UNSPEC, NET_RT_IFLIST, 0
-    };
+    int mib[6] = {CTL_NET, PF_ROUTE, 0, AF_UNSPEC, NET_RT_IFLIST, 0};
     if (::sysctl(mib, sizeof(mib) / sizeof(mib[0]), nullptr, &bufsz, nullptr, 0) < 0) {
         LOG_ERROR(Network, "sysctl.1: {}", std::strerror(errno));
         ::close(fd);
@@ -183,11 +179,11 @@ std::vector<Network::NetworkInterface> GetAvailableNetworkInterfaces() {
         return {};
     }
 
-    struct rt_msghdr const *rtm = NULL;
-    for (char *next = buf.data(); next < buf.data() + bufsz; next += rtm->rtm_msglen) {
-        rtm = (struct rt_msghdr const *)next;
+    struct rt_msghdr const* rtm = NULL;
+    for (char* next = buf.data(); next < buf.data() + bufsz; next += rtm->rtm_msglen) {
+        rtm = (struct rt_msghdr const*)next;
         if (rtm->rtm_type == RTM_IFINFO) {
-            struct if_msghdr const* ifm = (struct if_msghdr const *)rtm;
+            struct if_msghdr const* ifm = (struct if_msghdr const*)rtm;
             size_t msglen = rtm->rtm_msglen - sizeof(*ifm);
             char const* p = (char const*)(ifm + 1);
 
@@ -199,7 +195,8 @@ std::vector<Network::NetworkInterface> GetAvailableNetworkInterfaces() {
                         break;
                     if (i == RTA_NETMASK && sa->sa_family == AF_LINK) {
                         size_t namelen = 0;
-                        struct sockaddr_dl const* sdl = reinterpret_cast<struct sockaddr_dl const*>(sa);
+                        struct sockaddr_dl const* sdl =
+                            reinterpret_cast<struct sockaddr_dl const*>(sa);
                         ::link_ntoa_r(sdl, nullptr, &namelen);
                         iface.name = std::string(namelen, ' ');
                         ::link_ntoa_r(sdl, iface.name.data(), &namelen);
@@ -220,14 +217,15 @@ std::vector<Network::NetworkInterface> GetAvailableNetworkInterfaces() {
 
 #endif // _WIN32
 
-std::optional<Network::NetworkInterface> GetSelectedNetworkInterface() {
+std::optional<Network::NetworkInterface> GetSelectedNetworkInterface()
+{
     auto const& sel_if = Settings::values.network_interface.GetValue();
     if (auto const ifaces = Network::GetAvailableNetworkInterfaces(); ifaces.size() > 0) {
         if (sel_if.empty())
             return ifaces[0];
-        if (auto const res = std::ranges::find_if(ifaces, [&sel_if](const auto& iface) {
-            return iface.name == sel_if;
-        }); res != ifaces.end())
+        if (auto const res = std::ranges::find_if(
+                ifaces, [&sel_if](const auto& iface) { return iface.name == sel_if; });
+            res != ifaces.end())
             return *res;
         // Only print the error once to avoid log spam
         static bool print_error = true;
@@ -241,7 +239,8 @@ std::optional<Network::NetworkInterface> GetSelectedNetworkInterface() {
     return std::nullopt;
 }
 
-void SelectFirstNetworkInterface() {
+void SelectFirstNetworkInterface()
+{
     if (auto const ifaces = Network::GetAvailableNetworkInterfaces(); ifaces.size() > 0)
         Settings::values.network_interface.SetValue(ifaces[0].name);
 }

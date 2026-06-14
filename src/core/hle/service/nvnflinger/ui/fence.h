@@ -18,7 +18,8 @@ namespace Service::android {
 
 class Fence {
 public:
-    static constexpr Fence NoFence() {
+    static constexpr Fence NoFence()
+    {
         Fence fence{};
         fence.fences[0].id = -1;
         fence.fences[1].id = -1;

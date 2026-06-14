@@ -15,23 +15,16 @@ public:
     SteadyClockCore() = default;
     virtual ~SteadyClockCore() = default;
 
-    void SetInitialized() {
-        m_initialized = true;
-    }
+    void SetInitialized() { m_initialized = true; }
 
-    bool IsInitialized() const {
-        return m_initialized;
-    }
+    bool IsInitialized() const { return m_initialized; }
 
-    void SetResetDetected() {
-        m_reset_detected = true;
-    }
+    void SetResetDetected() { m_reset_detected = true; }
 
-    bool IsResetDetected() const {
-        return m_reset_detected;
-    }
+    bool IsResetDetected() const { return m_reset_detected; }
 
-    Result GetCurrentTimePoint(SteadyClockTimePoint& out_time_point) {
+    Result GetCurrentTimePoint(SteadyClockTimePoint& out_time_point)
+    {
         R_TRY(GetCurrentTimePointImpl(out_time_point));
 
         auto one_second_ns{
@@ -41,29 +34,20 @@ public:
         R_SUCCEED();
     }
 
-    s64 GetTestOffset() const {
-        return GetTestOffsetImpl();
-    }
+    s64 GetTestOffset() const { return GetTestOffsetImpl(); }
 
-    void SetTestOffset(s64 offset) {
-        SetTestOffsetImpl(offset);
-    }
+    void SetTestOffset(s64 offset) { SetTestOffsetImpl(offset); }
 
-    s64 GetInternalOffset() const {
-        return GetInternalOffsetImpl();
-    }
+    s64 GetInternalOffset() const { return GetInternalOffsetImpl(); }
 
-    s64 GetRawTime() {
+    s64 GetRawTime()
+    {
         return GetCurrentRawTimePointImpl() + GetTestOffsetImpl() + GetInternalOffsetImpl();
     }
 
-    Result GetRtcValue(s64& out_value) {
-        R_RETURN(GetRtcValueImpl(out_value));
-    }
+    Result GetRtcValue(s64& out_value) { R_RETURN(GetRtcValueImpl(out_value)); }
 
-    Result GetSetupResultValue() {
-        R_RETURN(GetSetupResultValueImpl());
-    }
+    Result GetSetupResultValue() { R_RETURN(GetSetupResultValueImpl()); }
 
 private:
     virtual Result GetCurrentTimePointImpl(SteadyClockTimePoint& out_time_point) = 0;

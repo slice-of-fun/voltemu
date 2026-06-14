@@ -3,6 +3,8 @@
 // SPDX-FileCopyrightText: Copyright 2021 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "yuzu/applets/qt_software_keyboard.h"
+
 #include <QCursor>
 #include <QKeyEvent>
 #include <QScreen>
@@ -16,7 +18,6 @@
 #include "hid_core/hid_core.h"
 #include "hid_core/hid_types.h"
 #include "ui_qt_software_keyboard.h"
-#include "yuzu/applets/qt_software_keyboard.h"
 #include "yuzu/main_window.h"
 #include "yuzu/util/overlay_dialog.h"
 
@@ -39,7 +40,8 @@ QtSoftwareKeyboardDialog::QtSoftwareKeyboardDialog(
     QWidget* parent, Core::System& system_, bool is_inline_,
     Core::Frontend::KeyboardInitializeParameters initialize_parameters_)
     : QDialog(parent), ui{std::make_unique<Ui::QtSoftwareKeyboardDialog>()}, system{system_},
-      is_inline{is_inline_}, initialize_parameters{std::move(initialize_parameters_)} {
+      is_inline{is_inline_}, initialize_parameters{std::move(initialize_parameters_)}
+{
     ui->setupUi(this);
 
     setWindowFlags(Qt::Dialog | Qt::FramelessWindowHint | Qt::WindowTitleHint |
@@ -370,11 +372,13 @@ QtSoftwareKeyboardDialog::QtSoftwareKeyboardDialog(
     }
 }
 
-QtSoftwareKeyboardDialog::~QtSoftwareKeyboardDialog() {
+QtSoftwareKeyboardDialog::~QtSoftwareKeyboardDialog()
+{
     StopInputThread();
 }
 
-void QtSoftwareKeyboardDialog::ShowNormalKeyboard(QPoint pos, QSize size) {
+void QtSoftwareKeyboardDialog::ShowNormalKeyboard(QPoint pos, QSize size)
+{
     if (isVisible()) {
         return;
     }
@@ -392,7 +396,8 @@ void QtSoftwareKeyboardDialog::ShowNormalKeyboard(QPoint pos, QSize size) {
 
 void QtSoftwareKeyboardDialog::ShowTextCheckDialog(
     Service::AM::Frontend::SwkbdTextCheckResult text_check_result,
-    std::u16string text_check_message) {
+    std::u16string text_check_message)
+{
     switch (text_check_result) {
     case SwkbdTextCheckResult::Success:
     case SwkbdTextCheckResult::Silent:
@@ -429,7 +434,8 @@ void QtSoftwareKeyboardDialog::ShowTextCheckDialog(
 }
 
 void QtSoftwareKeyboardDialog::ShowInlineKeyboard(
-    Core::Frontend::InlineAppearParameters appear_parameters, QPoint pos, QSize size) {
+    Core::Frontend::InlineAppearParameters appear_parameters, QPoint pos, QSize size)
+{
     MoveAndResizeWindow(pos, size);
 
     ui->topOSK->setStyleSheet(QStringLiteral("background: rgba(0, 0, 0, 0);"));
@@ -457,25 +463,29 @@ void QtSoftwareKeyboardDialog::ShowInlineKeyboard(
     open();
 }
 
-void QtSoftwareKeyboardDialog::HideInlineKeyboard() {
+void QtSoftwareKeyboardDialog::HideInlineKeyboard()
+{
     StopInputThread();
     QDialog::hide();
 }
 
 void QtSoftwareKeyboardDialog::InlineTextChanged(
-    Core::Frontend::InlineTextParameters text_parameters) {
+    Core::Frontend::InlineTextParameters text_parameters)
+{
     current_text = text_parameters.input_text;
     cursor_position = text_parameters.cursor_position;
 
     SetBackspaceOkEnabled();
 }
 
-void QtSoftwareKeyboardDialog::ExitKeyboard() {
+void QtSoftwareKeyboardDialog::ExitKeyboard()
+{
     StopInputThread();
     QDialog::done(QDialog::Accepted);
 }
 
-void QtSoftwareKeyboardDialog::open() {
+void QtSoftwareKeyboardDialog::open()
+{
     QDialog::open();
 
     row = 0;
@@ -505,13 +515,15 @@ void QtSoftwareKeyboardDialog::open() {
     StartInputThread();
 }
 
-void QtSoftwareKeyboardDialog::reject() {
+void QtSoftwareKeyboardDialog::reject()
+{
     // Pressing the ESC key in a dialog calls QDialog::reject().
     // We will override this behavior to the "Cancel" action on the software keyboard.
     TranslateButtonPress(Core::HID::NpadButton::X);
 }
 
-void QtSoftwareKeyboardDialog::keyPressEvent(QKeyEvent* event) {
+void QtSoftwareKeyboardDialog::keyPressEvent(QKeyEvent* event)
+{
     if (!is_inline) {
         QDialog::keyPressEvent(event);
         return;
@@ -572,7 +584,8 @@ void QtSoftwareKeyboardDialog::keyPressEvent(QKeyEvent* event) {
     InlineTextInsertString(Common::U16StringFromBuffer(entered_text.utf16(), entered_text.size()));
 }
 
-void QtSoftwareKeyboardDialog::MoveAndResizeWindow(QPoint pos, QSize size) {
+void QtSoftwareKeyboardDialog::MoveAndResizeWindow(QPoint pos, QSize size)
+{
     QDialog::move(pos);
     QDialog::resize(size);
 
@@ -582,7 +595,8 @@ void QtSoftwareKeyboardDialog::MoveAndResizeWindow(QPoint pos, QSize size) {
     RescaleKeyboardElements(size.width(), size.height(), dpi_scale);
 }
 
-void QtSoftwareKeyboardDialog::RescaleKeyboardElements(float width, float height, float dpi_scale) {
+void QtSoftwareKeyboardDialog::RescaleKeyboardElements(float width, float height, float dpi_scale)
+{
     const auto header_font_size = BASE_HEADER_FONT_SIZE * (height / BASE_HEIGHT) / dpi_scale;
     const auto sub_font_size = BASE_SUB_FONT_SIZE * (height / BASE_HEIGHT) / dpi_scale;
     const auto editor_font_size = BASE_EDITOR_FONT_SIZE * (height / BASE_HEIGHT) / dpi_scale;
@@ -650,7 +664,8 @@ void QtSoftwareKeyboardDialog::RescaleKeyboardElements(float width, float height
     }
 }
 
-void QtSoftwareKeyboardDialog::SetKeyboardType() {
+void QtSoftwareKeyboardDialog::SetKeyboardType()
+{
     switch (initialize_parameters.type) {
     case SwkbdType::Normal:
     case SwkbdType::Qwerty:
@@ -684,7 +699,8 @@ void QtSoftwareKeyboardDialog::SetKeyboardType() {
     }
 }
 
-void QtSoftwareKeyboardDialog::SetPasswordMode() {
+void QtSoftwareKeyboardDialog::SetPasswordMode()
+{
     switch (initialize_parameters.password_mode) {
     case SwkbdPasswordMode::Disabled:
     default:
@@ -696,7 +712,8 @@ void QtSoftwareKeyboardDialog::SetPasswordMode() {
     }
 }
 
-void QtSoftwareKeyboardDialog::SetTextDrawType() {
+void QtSoftwareKeyboardDialog::SetTextDrawType()
+{
     switch (initialize_parameters.text_draw_type) {
     case SwkbdTextDrawType::Line:
     case SwkbdTextDrawType::DownloadCode: {
@@ -818,7 +835,8 @@ void QtSoftwareKeyboardDialog::SetTextDrawType() {
     }
 }
 
-void QtSoftwareKeyboardDialog::SetControllerImage() {
+void QtSoftwareKeyboardDialog::SetControllerImage()
+{
     const auto* handheld = system.HIDCore().GetEmulatedController(Core::HID::NpadIdType::Handheld);
     const auto* player_1 = system.HIDCore().GetEmulatedController(Core::HID::NpadIdType::Player1);
     const auto controller_type =
@@ -886,7 +904,8 @@ void QtSoftwareKeyboardDialog::SetControllerImage() {
     }
 }
 
-void QtSoftwareKeyboardDialog::DisableKeyboardButtons() {
+void QtSoftwareKeyboardDialog::DisableKeyboardButtons()
+{
     switch (bottom_osk_index) {
     case BottomOSKIndex::LowerCase:
     case BottomOSKIndex::UpperCase:
@@ -953,7 +972,8 @@ void QtSoftwareKeyboardDialog::DisableKeyboardButtons() {
     }
 }
 
-void QtSoftwareKeyboardDialog::SetBackspaceOkEnabled() {
+void QtSoftwareKeyboardDialog::SetBackspaceOkEnabled()
+{
     if (is_inline) {
         ui->button_ok->setEnabled(current_text.size() >= initialize_parameters.min_text_length);
         ui->button_ok_shift->setEnabled(current_text.size() >=
@@ -996,7 +1016,8 @@ void QtSoftwareKeyboardDialog::SetBackspaceOkEnabled() {
     }
 }
 
-bool QtSoftwareKeyboardDialog::ValidateInputText(const QString& input_text) {
+bool QtSoftwareKeyboardDialog::ValidateInputText(const QString& input_text)
+{
     const auto& key_disable_flags = initialize_parameters.key_disable_flags;
 
     const auto input_text_length = static_cast<u32>(input_text.length());
@@ -1045,7 +1066,8 @@ bool QtSoftwareKeyboardDialog::ValidateInputText(const QString& input_text) {
     return true;
 }
 
-void QtSoftwareKeyboardDialog::ChangeBottomOSKIndex() {
+void QtSoftwareKeyboardDialog::ChangeBottomOSKIndex()
+{
     switch (bottom_osk_index) {
     case BottomOSKIndex::LowerCase:
         bottom_osk_index = BottomOSKIndex::UpperCase;
@@ -1092,7 +1114,8 @@ void QtSoftwareKeyboardDialog::ChangeBottomOSKIndex() {
     }
 }
 
-void QtSoftwareKeyboardDialog::NormalKeyboardButtonClicked(QPushButton* button) {
+void QtSoftwareKeyboardDialog::NormalKeyboardButtonClicked(QPushButton* button)
+{
     if (button == ui->button_ampersand) {
         if (ui->topOSK->currentIndex() == 1) {
             ui->text_edit_osk->insertPlainText(QStringLiteral("&"));
@@ -1161,7 +1184,8 @@ void QtSoftwareKeyboardDialog::NormalKeyboardButtonClicked(QPushButton* button) 
     }
 }
 
-void QtSoftwareKeyboardDialog::InlineKeyboardButtonClicked(QPushButton* button) {
+void QtSoftwareKeyboardDialog::InlineKeyboardButtonClicked(QPushButton* button)
+{
     if (!button->isEnabled()) {
         return;
     }
@@ -1220,7 +1244,8 @@ void QtSoftwareKeyboardDialog::InlineKeyboardButtonClicked(QPushButton* button) 
     }
 }
 
-void QtSoftwareKeyboardDialog::InlineTextInsertString(std::u16string_view string) {
+void QtSoftwareKeyboardDialog::InlineTextInsertString(std::u16string_view string)
+{
     if ((current_text.size() + string.size()) > initialize_parameters.max_text_length) {
         return;
     }
@@ -1234,7 +1259,8 @@ void QtSoftwareKeyboardDialog::InlineTextInsertString(std::u16string_view string
     emit SubmitInlineText(SwkbdReplyType::ChangedString, current_text, cursor_position);
 }
 
-void QtSoftwareKeyboardDialog::SetupMouseHover() {
+void QtSoftwareKeyboardDialog::SetupMouseHover()
+{
     // setFocus() has a bug where continuously changing focus will cause the focus UI to
     // mysteriously disappear. A workaround we have found is using the mouse to hover over
     // the buttons to act in place of the button focus. As a result, we will have to set
@@ -1246,8 +1272,8 @@ void QtSoftwareKeyboardDialog::SetupMouseHover() {
     }
 }
 
-template <Core::HID::NpadButton... T>
-void QtSoftwareKeyboardDialog::HandleButtonPressedOnce() {
+template<Core::HID::NpadButton... T> void QtSoftwareKeyboardDialog::HandleButtonPressedOnce()
+{
     const auto f = [this](Core::HID::NpadButton button) {
         if (input_interpreter->IsButtonPressedOnce(button)) {
             TranslateButtonPress(button);
@@ -1257,8 +1283,8 @@ void QtSoftwareKeyboardDialog::HandleButtonPressedOnce() {
     (f(T), ...);
 }
 
-template <Core::HID::NpadButton... T>
-void QtSoftwareKeyboardDialog::HandleButtonHold() {
+template<Core::HID::NpadButton... T> void QtSoftwareKeyboardDialog::HandleButtonHold()
+{
     const auto f = [this](Core::HID::NpadButton button) {
         if (input_interpreter->IsButtonHeld(button)) {
             TranslateButtonPress(button);
@@ -1268,7 +1294,8 @@ void QtSoftwareKeyboardDialog::HandleButtonHold() {
     (f(T), ...);
 }
 
-void QtSoftwareKeyboardDialog::TranslateButtonPress(Core::HID::NpadButton button) {
+void QtSoftwareKeyboardDialog::TranslateButtonPress(Core::HID::NpadButton button)
+{
     switch (button) {
     case Core::HID::NpadButton::A:
         switch (bottom_osk_index) {
@@ -1382,7 +1409,8 @@ void QtSoftwareKeyboardDialog::TranslateButtonPress(Core::HID::NpadButton button
     }
 }
 
-void QtSoftwareKeyboardDialog::MoveButtonDirection(Direction direction) {
+void QtSoftwareKeyboardDialog::MoveButtonDirection(Direction direction)
+{
     // Changes the row or column index depending on the direction.
     auto move_direction = [this, direction](std::size_t max_rows, std::size_t max_columns) {
         switch (direction) {
@@ -1454,7 +1482,8 @@ void QtSoftwareKeyboardDialog::MoveButtonDirection(Direction direction) {
     }
 }
 
-void QtSoftwareKeyboardDialog::MoveTextCursorDirection(Direction direction) {
+void QtSoftwareKeyboardDialog::MoveTextCursorDirection(Direction direction)
+{
     switch (direction) {
     case Direction::Left:
         if (is_inline) {
@@ -1493,7 +1522,8 @@ void QtSoftwareKeyboardDialog::MoveTextCursorDirection(Direction direction) {
     }
 }
 
-void QtSoftwareKeyboardDialog::StartInputThread() {
+void QtSoftwareKeyboardDialog::StartInputThread()
+{
     input_thread = std::jthread([&](std::stop_token stoken) {
         while (!stoken.stop_requested()) {
             input_interpreter->PollInput();
@@ -1520,13 +1550,15 @@ void QtSoftwareKeyboardDialog::StartInputThread() {
     });
 }
 
-void QtSoftwareKeyboardDialog::StopInputThread() {
+void QtSoftwareKeyboardDialog::StopInputThread()
+{
     input_thread.request_stop();
     if (input_interpreter)
         input_interpreter->ResetButtonStates();
 }
 
-QtSoftwareKeyboard::QtSoftwareKeyboard(MainWindow& main_window) {
+QtSoftwareKeyboard::QtSoftwareKeyboard(MainWindow& main_window)
+{
     connect(this, &QtSoftwareKeyboard::MainWindowInitializeKeyboard, &main_window,
             &MainWindow::SoftwareKeyboardInitialize, Qt::QueuedConnection);
     connect(this, &QtSoftwareKeyboard::MainWindowShowNormalKeyboard, &main_window,
@@ -1551,7 +1583,8 @@ QtSoftwareKeyboard::~QtSoftwareKeyboard() = default;
 
 void QtSoftwareKeyboard::InitializeKeyboard(
     bool is_inline, Core::Frontend::KeyboardInitializeParameters initialize_parameters,
-    SubmitNormalCallback submit_normal_callback_, SubmitInlineCallback submit_inline_callback_) {
+    SubmitNormalCallback submit_normal_callback_, SubmitInlineCallback submit_inline_callback_)
+{
     if (is_inline) {
         submit_inline_callback = std::move(submit_inline_callback_);
     } else {
@@ -1592,18 +1625,21 @@ void QtSoftwareKeyboard::InitializeKeyboard(
     emit MainWindowInitializeKeyboard(is_inline, std::move(initialize_parameters));
 }
 
-void QtSoftwareKeyboard::ShowNormalKeyboard() const {
+void QtSoftwareKeyboard::ShowNormalKeyboard() const
+{
     emit MainWindowShowNormalKeyboard();
 }
 
 void QtSoftwareKeyboard::ShowTextCheckDialog(
     Service::AM::Frontend::SwkbdTextCheckResult text_check_result,
-    std::u16string text_check_message) const {
+    std::u16string text_check_message) const
+{
     emit MainWindowShowTextCheckDialog(text_check_result, std::move(text_check_message));
 }
 
 void QtSoftwareKeyboard::ShowInlineKeyboard(
-    Core::Frontend::InlineAppearParameters appear_parameters) const {
+    Core::Frontend::InlineAppearParameters appear_parameters) const
+{
     LOG_INFO(Service_AM,
              "\nInlineAppearParameters:"
              "\nmax_text_length={}"
@@ -1628,12 +1664,14 @@ void QtSoftwareKeyboard::ShowInlineKeyboard(
     emit MainWindowShowInlineKeyboard(std::move(appear_parameters));
 }
 
-void QtSoftwareKeyboard::HideInlineKeyboard() const {
+void QtSoftwareKeyboard::HideInlineKeyboard() const
+{
     emit MainWindowHideInlineKeyboard();
 }
 
 void QtSoftwareKeyboard::InlineTextChanged(
-    Core::Frontend::InlineTextParameters text_parameters) const {
+    Core::Frontend::InlineTextParameters text_parameters) const
+{
     LOG_INFO(Service_AM,
              "\nInlineTextParameters:"
              "\ninput_text={}"
@@ -1643,17 +1681,19 @@ void QtSoftwareKeyboard::InlineTextChanged(
     emit MainWindowInlineTextChanged(std::move(text_parameters));
 }
 
-void QtSoftwareKeyboard::ExitKeyboard() const {
+void QtSoftwareKeyboard::ExitKeyboard() const
+{
     emit MainWindowExitKeyboard();
 }
 
 void QtSoftwareKeyboard::SubmitNormalText(Service::AM::Frontend::SwkbdResult result,
-                                          std::u16string submitted_text, bool confirmed) const {
+                                          std::u16string submitted_text, bool confirmed) const
+{
     submit_normal_callback(result, submitted_text, confirmed);
 }
 
 void QtSoftwareKeyboard::SubmitInlineText(Service::AM::Frontend::SwkbdReplyType reply_type,
-                                          std::u16string submitted_text,
-                                          s32 cursor_position) const {
+                                          std::u16string submitted_text, s32 cursor_position) const
+{
     submit_inline_callback(reply_type, submitted_text, cursor_position);
 }

@@ -9,7 +9,8 @@
 namespace Shader::Maxwell {
 namespace {
 
-void DFMA(TranslatorVisitor& v, u64 insn, const IR::F64& src_b, const IR::F64& src_c) {
+void DFMA(TranslatorVisitor& v, u64 insn, const IR::F64& src_b, const IR::F64& src_c)
+{
     union {
         u64 raw;
         BitField<0, 8, IR::Reg> dest_reg;
@@ -38,19 +39,23 @@ void DFMA(TranslatorVisitor& v, u64 insn, const IR::F64& src_b, const IR::F64& s
 }
 } // Anonymous namespace
 
-void TranslatorVisitor::DFMA_reg(u64 insn) {
+void TranslatorVisitor::DFMA_reg(u64 insn)
+{
     DFMA(*this, insn, GetDoubleReg20(insn), GetDoubleReg39(insn));
 }
 
-void TranslatorVisitor::DFMA_cr(u64 insn) {
+void TranslatorVisitor::DFMA_cr(u64 insn)
+{
     DFMA(*this, insn, GetDoubleCbuf(insn), GetDoubleReg39(insn));
 }
 
-void TranslatorVisitor::DFMA_rc(u64 insn) {
+void TranslatorVisitor::DFMA_rc(u64 insn)
+{
     DFMA(*this, insn, GetDoubleReg39(insn), GetDoubleCbuf(insn));
 }
 
-void TranslatorVisitor::DFMA_imm(u64 insn) {
+void TranslatorVisitor::DFMA_imm(u64 insn)
+{
     DFMA(*this, insn, GetDoubleImm20(insn), GetDoubleReg39(insn));
 }
 

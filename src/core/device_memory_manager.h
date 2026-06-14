@@ -12,8 +12,8 @@
 #include <deque>
 #include <memory>
 #include <mutex>
-#include <vector>
 #include <span>
+#include <vector>
 
 #include "common/common_types.h"
 #include "common/range_mutex.h"
@@ -32,15 +32,13 @@ namespace Memory {
 class Memory;
 }
 
-template <typename DTraits>
-struct DeviceMemoryManagerAllocator;
+template<typename DTraits> struct DeviceMemoryManagerAllocator;
 
 struct Asid {
     size_t id;
 };
 
-template <typename Traits>
-class DeviceMemoryManager {
+template<typename Traits> class DeviceMemoryManager {
     using DeviceInterface = typename Traits::DeviceInterface;
     using DeviceMethods = typename Traits::DeviceMethods;
 
@@ -62,20 +60,20 @@ public:
     void Unmap(DAddr address, size_t size);
 
     void TrackContinuityImpl(DAddr address, VAddr virtual_address, size_t size, Asid asid);
-    void TrackContinuity(DAddr address, VAddr virtual_address, size_t size, Asid asid) {
+    void TrackContinuity(DAddr address, VAddr virtual_address, size_t size, Asid asid)
+    {
         std::scoped_lock lk(mapping_guard);
         TrackContinuityImpl(address, virtual_address, size, asid);
     }
 
     // Write / Read
-    template <typename T>
-    T* GetPointer(DAddr address);
+    template<typename T> T* GetPointer(DAddr address);
 
-    template <typename T>
-    const T* GetPointer(DAddr address) const;
+    template<typename T> const T* GetPointer(DAddr address) const;
 
-    template <typename Func>
-    void ApplyOpOnPAddr(PAddr address, Common::ScratchBuffer<u32>& buffer, Func&& operation) {
+    template<typename Func>
+    void ApplyOpOnPAddr(PAddr address, Common::ScratchBuffer<u32>& buffer, Func&& operation)
+    {
         DAddr subbits = DAddr(address & page_mask);
         const u32 base = compressed_device_addr[(address >> page_bits)];
         if ((base >> MULTI_FLAG_BITS) == 0) [[likely]] {
@@ -89,13 +87,15 @@ public:
         }
     }
 
-    template <typename Func>
-    void ApplyOpOnPointer(const u8* p, Common::ScratchBuffer<u32>& buffer, Func&& operation) {
+    template<typename Func>
+    void ApplyOpOnPointer(const u8* p, Common::ScratchBuffer<u32>& buffer, Func&& operation)
+    {
         PAddr address = GetRawPhysicalAddr<u8>(p);
         ApplyOpOnPAddr(address, buffer, operation);
     }
 
-    PAddr GetPhysicalRawAddressFromDAddr(DAddr address) const {
+    PAddr GetPhysicalRawAddressFromDAddr(DAddr address) const
+    {
         PAddr subbits = PAddr(address & page_mask);
         auto paddr = tracked_entries[(address >> page_bits)].compressed_physical_ptr;
         if (paddr == 0) {
@@ -104,11 +104,9 @@ public:
         return (PAddr(paddr - 1) << page_bits) + subbits;
     }
 
-    template <typename T>
-    void Write(DAddr address, T value);
+    template<typename T> void Write(DAddr address, T value);
 
-    template <typename T>
-    T Read(DAddr address) const;
+    template<typename T> T Read(DAddr address) const;
 
     u8* GetSpan(const DAddr src_addr, const std::size_t size);
     const u8* GetSpan(const DAddr src_addr, const std::size_t size) const;
@@ -132,7 +130,8 @@ private:
         u8* host_ptr{};
     };
 
-    // Internal helper that performs the update assuming the caller already holds the necessary lock.
+    // Internal helper that performs the update assuming the caller already holds the necessary
+    // lock.
     void UpdatePagesCachedCountNoLock(DAddr addr, size_t size, s32 delta);
 
 private:
@@ -148,18 +147,18 @@ private:
     static constexpr u32 MULTI_FLAG = 1U << MULTI_FLAG_BITS;
     static constexpr u32 MULTI_MASK = ~MULTI_FLAG;
 
-    template <typename T>
-    T* GetPointerFromRaw(PAddr addr) {
+    template<typename T> T* GetPointerFromRaw(PAddr addr)
+    {
         return reinterpret_cast<T*>(physical_base + addr);
     }
 
-    template <typename T>
-    const T* GetPointerFromRaw(PAddr addr) const {
+    template<typename T> const T* GetPointerFromRaw(PAddr addr) const
+    {
         return reinterpret_cast<T*>(physical_base + addr);
     }
 
-    template <typename T>
-    PAddr GetRawPhysicalAddr(const T* ptr) const {
+    template<typename T> PAddr GetRawPhysicalAddr(const T* ptr) const
+    {
         return static_cast<PAddr>(reinterpret_cast<uintptr_t>(ptr) - physical_base);
     }
 
@@ -193,14 +192,16 @@ private:
     static constexpr size_t guest_mask = guest_as_size - 1ULL;
     static constexpr size_t asid_start_bit = guest_max_as_bits;
 
-    std::pair<Asid, VAddr> ExtractCPUBacking(size_t page_index) {
+    std::pair<Asid, VAddr> ExtractCPUBacking(size_t page_index)
+    {
         auto content = tracked_entries[page_index].cpu_backing_address;
         const VAddr address = content & guest_mask;
         const Asid asid{static_cast<size_t>(content >> asid_start_bit)};
         return std::make_pair(asid, address);
     }
 
-    void InsertCPUBacking(size_t page_index, VAddr address, Asid asid) {
+    void InsertCPUBacking(size_t page_index, VAddr address, Asid asid)
+    {
         tracked_entries[page_index].cpu_backing_address = address | (asid.id << asid_start_bit);
     }
 
@@ -216,11 +217,10 @@ private:
     public:
         CounterEntry() = default;
 
-        CounterAtomicType& Count(std::size_t page) {
-            return values[page & subentries_mask];
-        }
+        CounterAtomicType& Count(std::size_t page) { return values[page & subentries_mask]; }
 
-        const CounterAtomicType& Count(std::size_t page) const {
+        const CounterAtomicType& Count(std::size_t page) const
+        {
             return values[page & subentries_mask];
         }
 
@@ -236,8 +236,6 @@ private:
     std::unique_ptr<CachedPages> cached_pages;
     Common::RangeMutex counter_guard;
     std::mutex mapping_guard;
-
-
 };
 
 } // namespace Core

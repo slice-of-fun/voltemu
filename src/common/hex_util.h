@@ -4,17 +4,20 @@
 
 #pragma once
 
+#include <fmt/ranges.h>
+
 #include <array>
 #include <cstddef>
 #include <string>
 #include <vector>
-#include <fmt/ranges.h>
+
 #include "common/assert.h"
 #include "common/common_types.h"
 
 namespace Common {
 
-[[nodiscard]] constexpr u8 ToHexNibble(char c) {
+[[nodiscard]] constexpr u8 ToHexNibble(char c)
+{
     if (c >= 65 && c <= 70) {
         return static_cast<u8>(c - 55);
     }
@@ -28,8 +31,9 @@ namespace Common {
 
 [[nodiscard]] std::vector<u8> HexStringToVector(std::string_view str, bool little_endian);
 
-template <std::size_t Size, bool le = false>
-[[nodiscard]] constexpr std::array<u8, Size> HexStringToArray(std::string_view str) {
+template<std::size_t Size, bool le = false>
+[[nodiscard]] constexpr std::array<u8, Size> HexStringToArray(std::string_view str)
+{
     ASSERT_MSG(Size * 2 <= str.size(), "Invalid string size");
 
     std::array<u8, Size> out{};
@@ -45,8 +49,9 @@ template <std::size_t Size, bool le = false>
     return out;
 }
 
-template <typename ContiguousContainer>
-[[nodiscard]] std::string HexToString(const ContiguousContainer& data, bool upper = true) {
+template<typename ContiguousContainer>
+[[nodiscard]] std::string HexToString(const ContiguousContainer& data, bool upper = true)
+{
     static_assert(std::is_same_v<typename ContiguousContainer::value_type, u8>,
                   "Underlying type within the contiguous container must be u8.");
 
@@ -63,11 +68,13 @@ template <typename ContiguousContainer>
     return out;
 }
 
-[[nodiscard]] constexpr std::array<u8, 16> AsArray(const char (&data)[33]) {
+[[nodiscard]] constexpr std::array<u8, 16> AsArray(const char (&data)[33])
+{
     return HexStringToArray<16>(data);
 }
 
-[[nodiscard]] constexpr std::array<u8, 32> AsArray(const char (&data)[65]) {
+[[nodiscard]] constexpr std::array<u8, 32> AsArray(const char (&data)[65])
+{
     return HexStringToArray<32>(data);
 }
 

@@ -1,6 +1,8 @@
 // SPDX-FileCopyrightText: Copyright 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+#include "hid_core/resources/six_axis/six_axis.h"
+
 #include "common/common_types.h"
 #include "core/core_timing.h"
 #include "hid_core/frontend/emulated_controller.h"
@@ -9,12 +11,12 @@
 #include "hid_core/hid_util.h"
 #include "hid_core/resources/npad/npad.h"
 #include "hid_core/resources/shared_memory_format.h"
-#include "hid_core/resources/six_axis/six_axis.h"
 
 namespace Service::HID {
 
 SixAxis::SixAxis(Core::HID::HIDCore& hid_core_, std::shared_ptr<NPad> npad_)
-    : ControllerBase{hid_core_}, npad{npad_} {
+    : ControllerBase{hid_core_}, npad{npad_}
+{
     for (std::size_t i = 0; i < controller_data.size(); ++i) {
         auto& controller = controller_data[i];
         controller.device = hid_core.GetEmulatedControllerByIndex(i);
@@ -23,10 +25,15 @@ SixAxis::SixAxis(Core::HID::HIDCore& hid_core_, std::shared_ptr<NPad> npad_)
 
 SixAxis::~SixAxis() = default;
 
-void SixAxis::OnInit() {}
-void SixAxis::OnRelease() {}
+void SixAxis::OnInit()
+{
+}
+void SixAxis::OnRelease()
+{
+}
 
-void SixAxis::OnUpdate(const Core::Timing::CoreTiming& core_timing) {
+void SixAxis::OnUpdate(const Core::Timing::CoreTiming& core_timing)
+{
     std::scoped_lock shared_lock{*shared_mutex};
 
     for (std::size_t aruid_index = 0; aruid_index < AruidIndexMax; ++aruid_index) {
@@ -174,7 +181,8 @@ void SixAxis::OnUpdate(const Core::Timing::CoreTiming& core_timing) {
 }
 
 Result SixAxis::SetGyroscopeZeroDriftMode(const Core::HID::SixAxisSensorHandle& sixaxis_handle,
-                                          Core::HID::GyroscopeZeroDriftMode drift_mode) {
+                                          Core::HID::GyroscopeZeroDriftMode drift_mode)
+{
     const auto is_valid = IsSixaxisHandleValid(sixaxis_handle);
     if (is_valid.IsError()) {
         LOG_ERROR(Service_HID, "Invalid handle, error_code={}", is_valid.raw);
@@ -190,7 +198,8 @@ Result SixAxis::SetGyroscopeZeroDriftMode(const Core::HID::SixAxisSensorHandle& 
 }
 
 Result SixAxis::GetGyroscopeZeroDriftMode(const Core::HID::SixAxisSensorHandle& sixaxis_handle,
-                                          Core::HID::GyroscopeZeroDriftMode& drift_mode) const {
+                                          Core::HID::GyroscopeZeroDriftMode& drift_mode) const
+{
     const auto is_valid = IsSixaxisHandleValid(sixaxis_handle);
     if (is_valid.IsError()) {
         LOG_ERROR(Service_HID, "Invalid handle, error_code={}", is_valid.raw);
@@ -204,7 +213,8 @@ Result SixAxis::GetGyroscopeZeroDriftMode(const Core::HID::SixAxisSensorHandle& 
 }
 
 Result SixAxis::IsSixAxisSensorAtRest(const Core::HID::SixAxisSensorHandle& sixaxis_handle,
-                                      bool& is_at_rest) const {
+                                      bool& is_at_rest) const
+{
     const auto is_valid = IsSixaxisHandleValid(sixaxis_handle);
     if (is_valid.IsError()) {
         LOG_ERROR(Service_HID, "Invalid handle, error_code={}", is_valid.raw);
@@ -218,7 +228,8 @@ Result SixAxis::IsSixAxisSensorAtRest(const Core::HID::SixAxisSensorHandle& sixa
 
 Result SixAxis::LoadSixAxisSensorCalibrationParameter(
     const Core::HID::SixAxisSensorHandle& sixaxis_handle,
-    Core::HID::SixAxisSensorCalibrationParameter& calibration) const {
+    Core::HID::SixAxisSensorCalibrationParameter& calibration) const
+{
     const auto is_valid = IsSixaxisHandleValid(sixaxis_handle);
     if (is_valid.IsError()) {
         LOG_ERROR(Service_HID, "Invalid handle, error_code={}", is_valid.raw);
@@ -231,9 +242,10 @@ Result SixAxis::LoadSixAxisSensorCalibrationParameter(
     return ResultSuccess;
 }
 
-Result SixAxis::GetSixAxisSensorIcInformation(
-    const Core::HID::SixAxisSensorHandle& sixaxis_handle,
-    Core::HID::SixAxisSensorIcInformation& ic_information) const {
+Result
+SixAxis::GetSixAxisSensorIcInformation(const Core::HID::SixAxisSensorHandle& sixaxis_handle,
+                                       Core::HID::SixAxisSensorIcInformation& ic_information) const
+{
     const auto is_valid = IsSixaxisHandleValid(sixaxis_handle);
     if (is_valid.IsError()) {
         LOG_ERROR(Service_HID, "Invalid handle, error_code={}", is_valid.raw);
@@ -247,7 +259,8 @@ Result SixAxis::GetSixAxisSensorIcInformation(
 }
 
 Result SixAxis::EnableSixAxisSensorUnalteredPassthrough(
-    const Core::HID::SixAxisSensorHandle& sixaxis_handle, bool is_enabled) {
+    const Core::HID::SixAxisSensorHandle& sixaxis_handle, bool is_enabled)
+{
     const auto is_valid = IsSixaxisHandleValid(sixaxis_handle);
     if (is_valid.IsError()) {
         LOG_ERROR(Service_HID, "Invalid handle, error_code={}", is_valid.raw);
@@ -260,7 +273,8 @@ Result SixAxis::EnableSixAxisSensorUnalteredPassthrough(
 }
 
 Result SixAxis::IsSixAxisSensorUnalteredPassthroughEnabled(
-    const Core::HID::SixAxisSensorHandle& sixaxis_handle, bool& is_enabled) const {
+    const Core::HID::SixAxisSensorHandle& sixaxis_handle, bool& is_enabled) const
+{
     const auto is_valid = IsSixaxisHandleValid(sixaxis_handle);
     if (is_valid.IsError()) {
         LOG_ERROR(Service_HID, "Invalid handle, error_code={}", is_valid.raw);
@@ -273,7 +287,8 @@ Result SixAxis::IsSixAxisSensorUnalteredPassthroughEnabled(
 }
 
 Result SixAxis::SetSixAxisEnabled(const Core::HID::SixAxisSensorHandle& sixaxis_handle,
-                                  bool sixaxis_status) {
+                                  bool sixaxis_status)
+{
     const auto is_valid = IsSixaxisHandleValid(sixaxis_handle);
     if (is_valid.IsError()) {
         LOG_ERROR(Service_HID, "Invalid handle, error_code={}", is_valid.raw);
@@ -286,7 +301,8 @@ Result SixAxis::SetSixAxisEnabled(const Core::HID::SixAxisSensorHandle& sixaxis_
 }
 
 Result SixAxis::IsSixAxisSensorFusionEnabled(const Core::HID::SixAxisSensorHandle& sixaxis_handle,
-                                             bool& is_fusion_enabled) const {
+                                             bool& is_fusion_enabled) const
+{
     const auto is_valid = IsSixaxisHandleValid(sixaxis_handle);
     if (is_valid.IsError()) {
         LOG_ERROR(Service_HID, "Invalid handle, error_code={}", is_valid.raw);
@@ -299,7 +315,8 @@ Result SixAxis::IsSixAxisSensorFusionEnabled(const Core::HID::SixAxisSensorHandl
     return ResultSuccess;
 }
 Result SixAxis::SetSixAxisFusionEnabled(const Core::HID::SixAxisSensorHandle& sixaxis_handle,
-                                        bool is_fusion_enabled) {
+                                        bool is_fusion_enabled)
+{
     const auto is_valid = IsSixaxisHandleValid(sixaxis_handle);
     if (is_valid.IsError()) {
         LOG_ERROR(Service_HID, "Invalid handle, error_code={}", is_valid.raw);
@@ -314,7 +331,8 @@ Result SixAxis::SetSixAxisFusionEnabled(const Core::HID::SixAxisSensorHandle& si
 
 Result SixAxis::SetSixAxisFusionParameters(
     const Core::HID::SixAxisSensorHandle& sixaxis_handle,
-    Core::HID::SixAxisSensorFusionParameters sixaxis_fusion_parameters) {
+    Core::HID::SixAxisSensorFusionParameters sixaxis_fusion_parameters)
+{
     const auto is_valid = IsSixaxisHandleValid(sixaxis_handle);
     if (is_valid.IsError()) {
         LOG_ERROR(Service_HID, "Invalid handle, error_code={}", is_valid.raw);
@@ -332,9 +350,10 @@ Result SixAxis::SetSixAxisFusionParameters(
     return ResultSuccess;
 }
 
-Result SixAxis::GetSixAxisFusionParameters(
-    const Core::HID::SixAxisSensorHandle& sixaxis_handle,
-    Core::HID::SixAxisSensorFusionParameters& parameters) const {
+Result
+SixAxis::GetSixAxisFusionParameters(const Core::HID::SixAxisSensorHandle& sixaxis_handle,
+                                    Core::HID::SixAxisSensorFusionParameters& parameters) const
+{
     const auto is_valid = IsSixaxisHandleValid(sixaxis_handle);
     if (is_valid.IsError()) {
         LOG_ERROR(Service_HID, "Invalid handle, error_code={}", is_valid.raw);
@@ -347,8 +366,9 @@ Result SixAxis::GetSixAxisFusionParameters(
     return ResultSuccess;
 }
 
-SixAxis::SixaxisParameters& SixAxis::GetSixaxisState(
-    const Core::HID::SixAxisSensorHandle& sixaxis_handle) {
+SixAxis::SixaxisParameters&
+SixAxis::GetSixaxisState(const Core::HID::SixAxisSensorHandle& sixaxis_handle)
+{
     auto& controller = GetControllerFromHandle(sixaxis_handle);
     switch (sixaxis_handle.npad_type) {
     case Core::HID::NpadStyleIndex::Fullkey:
@@ -370,8 +390,9 @@ SixAxis::SixaxisParameters& SixAxis::GetSixaxisState(
     }
 }
 
-const SixAxis::SixaxisParameters& SixAxis::GetSixaxisState(
-    const Core::HID::SixAxisSensorHandle& sixaxis_handle) const {
+const SixAxis::SixaxisParameters&
+SixAxis::GetSixaxisState(const Core::HID::SixAxisSensorHandle& sixaxis_handle) const
+{
     const auto& controller = GetControllerFromHandle(sixaxis_handle);
     switch (sixaxis_handle.npad_type) {
     case Core::HID::NpadStyleIndex::Fullkey:
@@ -393,19 +414,22 @@ const SixAxis::SixaxisParameters& SixAxis::GetSixaxisState(
     }
 }
 
-SixAxis::NpadControllerData& SixAxis::GetControllerFromHandle(
-    const Core::HID::SixAxisSensorHandle& device_handle) {
+SixAxis::NpadControllerData&
+SixAxis::GetControllerFromHandle(const Core::HID::SixAxisSensorHandle& device_handle)
+{
     const auto npad_id = static_cast<Core::HID::NpadIdType>(device_handle.npad_id);
     return GetControllerFromNpadIdType(npad_id);
 }
 
-const SixAxis::NpadControllerData& SixAxis::GetControllerFromHandle(
-    const Core::HID::SixAxisSensorHandle& device_handle) const {
+const SixAxis::NpadControllerData&
+SixAxis::GetControllerFromHandle(const Core::HID::SixAxisSensorHandle& device_handle) const
+{
     const auto npad_id = static_cast<Core::HID::NpadIdType>(device_handle.npad_id);
     return GetControllerFromNpadIdType(npad_id);
 }
 
-SixAxis::NpadControllerData& SixAxis::GetControllerFromNpadIdType(Core::HID::NpadIdType npad_id) {
+SixAxis::NpadControllerData& SixAxis::GetControllerFromNpadIdType(Core::HID::NpadIdType npad_id)
+{
     if (!IsNpadIdValid(npad_id)) {
         LOG_ERROR(Service_HID, "Invalid NpadIdType npad_id:{}", npad_id);
         npad_id = Core::HID::NpadIdType::Player1;
@@ -414,8 +438,9 @@ SixAxis::NpadControllerData& SixAxis::GetControllerFromNpadIdType(Core::HID::Npa
     return controller_data[npad_index];
 }
 
-const SixAxis::NpadControllerData& SixAxis::GetControllerFromNpadIdType(
-    Core::HID::NpadIdType npad_id) const {
+const SixAxis::NpadControllerData&
+SixAxis::GetControllerFromNpadIdType(Core::HID::NpadIdType npad_id) const
+{
     if (!IsNpadIdValid(npad_id)) {
         LOG_ERROR(Service_HID, "Invalid NpadIdType npad_id:{}", npad_id);
         npad_id = Core::HID::NpadIdType::Player1;

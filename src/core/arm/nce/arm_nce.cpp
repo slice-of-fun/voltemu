@@ -4,21 +4,21 @@
 // SPDX-FileCopyrightText: Copyright 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include <cinttypes>
-#include <memory>
-
-#include "common/signal_chain.h"
 #include "core/arm/nce/arm_nce.h"
-#include "core/arm/nce/interpreter_visitor.h"
-#include "core/arm/nce/patcher.h"
-#include "core/core.h"
-#include "core/memory.h"
-
-#include "core/hle/kernel/k_process.h"
 
 #include <signal.h>
 #include <sys/syscall.h>
 #include <unistd.h>
+
+#include <cinttypes>
+#include <memory>
+
+#include "common/signal_chain.h"
+#include "core/arm/nce/interpreter_visitor.h"
+#include "core/arm/nce/patcher.h"
+#include "core/core.h"
+#include "core/hle/kernel/k_process.h"
+#include "core/memory.h"
 
 namespace Core {
 
@@ -33,7 +33,8 @@ static_assert(offsetof(NativeExecutionParameters, native_context) == TpidrEl0Nat
 static_assert(offsetof(NativeExecutionParameters, lock) == TpidrEl0Lock);
 static_assert(offsetof(NativeExecutionParameters, magic) == TpidrEl0TlsMagic);
 
-fpsimd_context* GetFloatingPointState(mcontext_t& host_ctx) {
+fpsimd_context* GetFloatingPointState(mcontext_t& host_ctx)
+{
     _aarch64_ctx* header = reinterpret_cast<_aarch64_ctx*>(&host_ctx.__reserved);
     while (header->magic != FPSIMD_MAGIC) {
         header = reinterpret_cast<_aarch64_ctx*>(reinterpret_cast<char*>(header) + header->size);
@@ -46,7 +47,8 @@ constexpr u32 StackSize = 128_KiB;
 
 } // namespace
 
-void* ArmNce::RestoreGuestContext(void* raw_context) {
+void* ArmNce::RestoreGuestContext(void* raw_context)
+{
     // Retrieve the host context.
     auto& host_ctx = static_cast<ucontext_t*>(raw_context)->uc_mcontext;
 
@@ -79,7 +81,8 @@ void* ArmNce::RestoreGuestContext(void* raw_context) {
     return tpidr;
 }
 
-void ArmNce::SaveGuestContext(GuestContext* guest_ctx, void* raw_context) {
+void ArmNce::SaveGuestContext(GuestContext* guest_ctx, void* raw_context)
+{
     // Retrieve the host context.
     auto& host_ctx = static_cast<ucontext_t*>(raw_context)->uc_mcontext;
 
@@ -111,7 +114,8 @@ void ArmNce::SaveGuestContext(GuestContext* guest_ctx, void* raw_context) {
     host_ctx.regs[0] = guest_ctx->esr_el1.exchange(0);
 }
 
-bool ArmNce::HandleFailedGuestFault(GuestContext* guest_ctx, void* raw_info, void* raw_context) {
+bool ArmNce::HandleFailedGuestFault(GuestContext* guest_ctx, void* raw_info, void* raw_context)
+{
     auto& host_ctx = static_cast<ucontext_t*>(raw_context)->uc_mcontext;
     auto* info = static_cast<siginfo_t*>(raw_info);
 
@@ -141,7 +145,8 @@ bool ArmNce::HandleFailedGuestFault(GuestContext* guest_ctx, void* raw_info, voi
     return false;
 }
 
-bool ArmNce::HandleGuestAlignmentFault(GuestContext* guest_ctx, void* raw_info, void* raw_context) {
+bool ArmNce::HandleGuestAlignmentFault(GuestContext* guest_ctx, void* raw_info, void* raw_context)
+{
     auto& host_ctx = static_cast<ucontext_t*>(raw_context)->uc_mcontext;
     auto* fpctx = GetFloatingPointState(host_ctx);
     auto& memory = guest_ctx->parent->m_running_thread->GetOwnerProcess()->GetMemory();
@@ -157,7 +162,8 @@ bool ArmNce::HandleGuestAlignmentFault(GuestContext* guest_ctx, void* raw_info, 
     return HandleFailedGuestFault(guest_ctx, raw_info, raw_context);
 }
 
-bool ArmNce::HandleGuestAccessFault(GuestContext* guest_ctx, void* raw_info, void* raw_context) {
+bool ArmNce::HandleGuestAccessFault(GuestContext* guest_ctx, void* raw_info, void* raw_context)
+{
     auto* info = static_cast<siginfo_t*>(raw_info);
 
     // Try to handle an invalid access.
@@ -174,20 +180,24 @@ bool ArmNce::HandleGuestAccessFault(GuestContext* guest_ctx, void* raw_info, voi
     return HandleFailedGuestFault(guest_ctx, raw_info, raw_context);
 }
 
-void ArmNce::HandleHostAlignmentFault(int sig, void* raw_info, void* raw_context) {
+void ArmNce::HandleHostAlignmentFault(int sig, void* raw_info, void* raw_context)
+{
     return g_orig_bus_action.sa_sigaction(sig, static_cast<siginfo_t*>(raw_info), raw_context);
 }
 
-void ArmNce::HandleHostAccessFault(int sig, void* raw_info, void* raw_context) {
+void ArmNce::HandleHostAccessFault(int sig, void* raw_info, void* raw_context)
+{
     return g_orig_segv_action.sa_sigaction(sig, static_cast<siginfo_t*>(raw_info), raw_context);
 }
 
-void ArmNce::LockThread(Kernel::KThread* thread) {
+void ArmNce::LockThread(Kernel::KThread* thread)
+{
     auto* thread_params = &thread->GetNativeExecutionParameters();
     LockThreadParameters(thread_params);
 }
 
-void ArmNce::UnlockThread(Kernel::KThread* thread) {
+void ArmNce::UnlockThread(Kernel::KThread* thread)
+{
     auto* thread_params = &thread->GetNativeExecutionParameters();
     m_guest_ctx.tpidr_el0 = thread_params->tpidr_el0;
     m_guest_ctx.tpidrro_el0 = thread_params->tpidrro_el0;
@@ -195,7 +205,8 @@ void ArmNce::UnlockThread(Kernel::KThread* thread) {
     UnlockThreadParameters(thread_params);
 }
 
-HaltReason ArmNce::RunThread(Kernel::KThread* thread) {
+HaltReason ArmNce::RunThread(Kernel::KThread* thread)
+{
     // Check if we're already interrupted.
     // If we are, we can just return immediately.
     HaltReason hr = static_cast<HaltReason>(m_guest_ctx.esr_el1.exchange(0));
@@ -228,7 +239,9 @@ HaltReason ArmNce::RunThread(Kernel::KThread* thread) {
     if (auto it = post_handlers.find(m_guest_ctx.pc); it != post_handlers.end()) {
         hr = ReturnToRunCodeByTrampoline(thread_params, &m_guest_ctx, it->second);
     } else {
-        hr = ReturnToRunCodeByExceptionLevelChange(m_thread_id, thread_params);  // Android: Use "process handle SIGUSR2 -n true -p true -s false" (and SIGURG) in LLDB when debugging
+        hr = ReturnToRunCodeByExceptionLevelChange(
+            m_thread_id, thread_params); // Android: Use "process handle SIGUSR2 -n true -p true -s
+                                         // false" (and SIGURG) in LLDB when debugging
     }
 
     // Critical section for thread cleanup
@@ -249,34 +262,40 @@ HaltReason ArmNce::RunThread(Kernel::KThread* thread) {
     return hr;
 }
 
-HaltReason ArmNce::StepThread(Kernel::KThread* thread) {
+HaltReason ArmNce::StepThread(Kernel::KThread* thread)
+{
     return HaltReason::StepThread;
 }
 
-u32 ArmNce::GetSvcNumber() const {
+u32 ArmNce::GetSvcNumber() const
+{
     return m_guest_ctx.svc;
 }
 
-void ArmNce::GetSvcArguments(std::span<uint64_t, 8> args) const {
+void ArmNce::GetSvcArguments(std::span<uint64_t, 8> args) const
+{
     for (size_t i = 0; i < 8; i++) {
         args[i] = m_guest_ctx.cpu_registers[i];
     }
 }
 
-void ArmNce::SetSvcArguments(std::span<const uint64_t, 8> args) {
+void ArmNce::SetSvcArguments(std::span<const uint64_t, 8> args)
+{
     for (size_t i = 0; i < 8; i++) {
         m_guest_ctx.cpu_registers[i] = args[i];
     }
 }
 
 ArmNce::ArmNce(System& system, bool uses_wall_clock, std::size_t core_index)
-    : ArmInterface{uses_wall_clock}, m_system{system}, m_core_index{core_index} {
+    : ArmInterface{uses_wall_clock}, m_system{system}, m_core_index{core_index}
+{
     m_guest_ctx.system = &m_system;
 }
 
 ArmNce::~ArmNce() = default;
 
-void ArmNce::Initialize() {
+void ArmNce::Initialize()
+{
     if (m_thread_id == -1) {
         m_thread_id = gettid();
     }
@@ -334,11 +353,13 @@ void ArmNce::Initialize() {
     });
 }
 
-void ArmNce::SetTpidrroEl0(u64 value) {
+void ArmNce::SetTpidrroEl0(u64 value)
+{
     m_guest_ctx.tpidrro_el0 = value;
 }
 
-void ArmNce::GetContext(Kernel::Svc::ThreadContext& ctx) const {
+void ArmNce::GetContext(Kernel::Svc::ThreadContext& ctx) const
+{
     for (size_t i = 0; i < 29; i++) {
         ctx.r[i] = m_guest_ctx.cpu_registers[i];
     }
@@ -353,7 +374,8 @@ void ArmNce::GetContext(Kernel::Svc::ThreadContext& ctx) const {
     ctx.tpidr = m_guest_ctx.tpidr_el0;
 }
 
-void ArmNce::SetContext(const Kernel::Svc::ThreadContext& ctx) {
+void ArmNce::SetContext(const Kernel::Svc::ThreadContext& ctx)
+{
     for (size_t i = 0; i < 29; i++) {
         m_guest_ctx.cpu_registers[i] = ctx.r[i];
     }
@@ -368,7 +390,8 @@ void ArmNce::SetContext(const Kernel::Svc::ThreadContext& ctx) {
     m_guest_ctx.tpidr_el0 = ctx.tpidr;
 }
 
-void ArmNce::SignalInterrupt(Kernel::KThread* thread) {
+void ArmNce::SignalInterrupt(Kernel::KThread* thread)
+{
     // Add break loop condition.
     m_guest_ctx.esr_el1.fetch_or(static_cast<u64>(HaltReason::BreakLoop));
 
@@ -390,16 +413,19 @@ void ArmNce::SignalInterrupt(Kernel::KThread* thread) {
 
 [[maybe_unused]] const std::size_t CACHE_PAGE_SIZE = 4096;
 
-void ArmNce::ClearInstructionCache() {
+void ArmNce::ClearInstructionCache()
+{
 #ifdef __aarch64__
     // Ensure all previous memory operations complete
     asm volatile("dsb ish\n"
                  "dsb ish\n"
-                 "isb" ::: "memory");
+                 "isb" ::
+                     : "memory");
 #endif
 }
 
-void ArmNce::InvalidateCacheRange(u64 addr, std::size_t size) {
+void ArmNce::InvalidateCacheRange(u64 addr, std::size_t size)
+{
     this->ClearInstructionCache();
 }
 

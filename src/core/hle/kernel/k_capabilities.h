@@ -9,7 +9,6 @@
 
 #include "common/bit_field.h"
 #include "common/common_types.h"
-
 #include "core/hle/kernel/svc_types.h"
 #include "core/hle/result.h"
 
@@ -27,47 +26,43 @@ public:
 
     static Result CheckCapabilities(KernelCore& kernel, std::span<const u32> user_caps);
 
-    constexpr u64 GetCoreMask() const {
-        return m_core_mask;
-    }
+    constexpr u64 GetCoreMask() const { return m_core_mask; }
 
-    constexpr u64 GetPhysicalCoreMask() const {
-        return m_phys_core_mask;
-    }
+    constexpr u64 GetPhysicalCoreMask() const { return m_phys_core_mask; }
 
-    constexpr u64 GetPriorityMask() const {
-        return m_priority_mask;
-    }
+    constexpr u64 GetPriorityMask() const { return m_priority_mask; }
 
-    constexpr s32 GetHandleTableSize() const {
-        return m_handle_table_size;
-    }
+    constexpr s32 GetHandleTableSize() const { return m_handle_table_size; }
 
-    constexpr const Svc::SvcAccessFlagSet& GetSvcPermissions() const {
-        return m_svc_access_flags;
-    }
+    constexpr const Svc::SvcAccessFlagSet& GetSvcPermissions() const { return m_svc_access_flags; }
 
-    constexpr bool IsPermittedSvc(u32 id) const {
+    constexpr bool IsPermittedSvc(u32 id) const
+    {
         return (id < m_svc_access_flags.size()) && m_svc_access_flags[id];
     }
 
-    constexpr bool IsPermittedInterrupt(u32 id) const {
+    constexpr bool IsPermittedInterrupt(u32 id) const
+    {
         return (id < m_irq_access_flags.size()) && m_irq_access_flags[id];
     }
 
-    constexpr bool IsPermittedDebug() const {
+    constexpr bool IsPermittedDebug() const
+    {
         return DebugFlags{m_debug_capabilities}.allow_debug.Value() != 0;
     }
 
-    constexpr bool CanForceDebug() const {
+    constexpr bool CanForceDebug() const
+    {
         return DebugFlags{m_debug_capabilities}.force_debug.Value() != 0;
     }
 
-    constexpr u32 GetIntendedKernelMajorVersion() const {
+    constexpr u32 GetIntendedKernelMajorVersion() const
+    {
         return KernelVersion{m_intended_kernel_version}.major_version;
     }
 
-    constexpr u32 GetIntendedKernelMinorVersion() const {
+    constexpr u32 GetIntendedKernelMinorVersion() const
+    {
         return KernelVersion{m_intended_kernel_version}.minor_version;
     }
 
@@ -93,18 +88,20 @@ private:
 
     using RawCapabilityValue = u32;
 
-    static constexpr CapabilityType GetCapabilityType(const RawCapabilityValue value) {
+    static constexpr CapabilityType GetCapabilityType(const RawCapabilityValue value)
+    {
         return static_cast<CapabilityType>((~value & (value + 1)) - 1);
     }
 
-    static constexpr u32 GetCapabilityFlag(CapabilityType type) {
+    static constexpr u32 GetCapabilityFlag(CapabilityType type)
+    {
         return static_cast<u32>(type) + 1;
     }
 
-    template <CapabilityType Type>
+    template<CapabilityType Type>
     static constexpr inline u32 CapabilityFlag = static_cast<u32>(Type) + 1;
 
-    template <CapabilityType Type>
+    template<CapabilityType Type>
     static constexpr inline u32 CapabilityId = std::countr_zero(CapabilityFlag<Type>);
 
     union CorePriority {
@@ -244,7 +241,8 @@ private:
     static_assert(PaddingInterruptId < InterruptIdCount);
 
 private:
-    constexpr bool SetSvcAllowed(u32 id) {
+    constexpr bool SetSvcAllowed(u32 id)
+    {
         if (id < m_svc_access_flags.size()) [[likely]] {
             m_svc_access_flags[id] = true;
             return true;
@@ -253,7 +251,8 @@ private:
         }
     }
 
-    constexpr bool SetInterruptPermitted(u32 id) {
+    constexpr bool SetInterruptPermitted(u32 id)
+    {
         if (id < m_irq_access_flags.size()) [[likely]] {
             m_irq_access_flags[id] = true;
             return true;
@@ -273,8 +272,7 @@ private:
     Result SetHandleTableCapability(const u32 cap);
     Result SetDebugFlagsCapability(const u32 cap);
 
-    template <typename F>
-    static Result ProcessMapRegionCapability(const u32 cap, F f);
+    template<typename F> static Result ProcessMapRegionCapability(const u32 cap, F f);
     static Result CheckMapRegion(KernelCore& kernel, const u32 cap);
 
     Result SetCapability(const u32 cap, u32& set_flags, u32& set_svc,

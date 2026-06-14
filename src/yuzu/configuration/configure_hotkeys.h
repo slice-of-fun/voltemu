@@ -3,9 +3,9 @@
 
 #pragma once
 
-#include <memory>
 #include <QStandardItemModel>
 #include <QWidget>
+#include <memory>
 
 namespace Common {
 class ParamPackage;

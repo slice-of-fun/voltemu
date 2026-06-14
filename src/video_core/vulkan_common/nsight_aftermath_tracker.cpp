@@ -6,6 +6,10 @@
 
 #ifdef HAS_NSIGHT_AFTERMATH
 
+#include "video_core/vulkan_common/nsight_aftermath_tracker.h"
+
+#include <fmt/ranges.h>
+
 #include <mutex>
 #include <span>
 #include <string>
@@ -13,21 +17,19 @@
 #include <utility>
 #include <vector>
 
-#include <fmt/ranges.h>
-
 #include "common/common_types.h"
 #include "common/fs/file.h"
 #include "common/fs/fs.h"
 #include "common/fs/path_util.h"
 #include "common/logging.h"
 #include "common/scope_exit.h"
-#include "video_core/vulkan_common/nsight_aftermath_tracker.h"
 
 namespace Vulkan {
 
 static constexpr char AFTERMATH_LIB_NAME[] = "GFSDK_Aftermath_Lib.x64.dll";
 
-NsightAftermathTracker::NsightAftermathTracker() {
+NsightAftermathTracker::NsightAftermathTracker()
+{
     if (!dl.Open(AFTERMATH_LIB_NAME)) {
         LOG_ERROR(Render_Vulkan, "Failed to load Nsight Aftermath DLL");
         return;
@@ -69,13 +71,15 @@ NsightAftermathTracker::NsightAftermathTracker() {
     initialized = true;
 }
 
-NsightAftermathTracker::~NsightAftermathTracker() {
+NsightAftermathTracker::~NsightAftermathTracker()
+{
     if (initialized) {
         (void)GFSDK_Aftermath_DisableGpuCrashDumps();
     }
 }
 
-void NsightAftermathTracker::SaveShader(std::span<const u32> spirv) const {
+void NsightAftermathTracker::SaveShader(std::span<const u32> spirv) const
+{
     if (!initialized) {
         return;
     }
@@ -108,7 +112,8 @@ void NsightAftermathTracker::SaveShader(std::span<const u32> spirv) const {
 }
 
 void NsightAftermathTracker::OnGpuCrashDumpCallback(const void* gpu_crash_dump,
-                                                    u32 gpu_crash_dump_size) {
+                                                    u32 gpu_crash_dump_size)
+{
     std::scoped_lock lock{mutex};
 
     LOG_CRITICAL(Render_Vulkan, "called");
@@ -119,7 +124,8 @@ void NsightAftermathTracker::OnGpuCrashDumpCallback(const void* gpu_crash_dump,
         LOG_ERROR(Render_Vulkan, "Failed to create decoder");
         return;
     }
-    SCOPE_EXIT {
+    SCOPE_EXIT
+    {
         GFSDK_Aftermath_GpuCrashDump_DestroyDecoder(decoder);
     };
 
@@ -162,7 +168,8 @@ void NsightAftermathTracker::OnGpuCrashDumpCallback(const void* gpu_crash_dump,
 }
 
 void NsightAftermathTracker::OnShaderDebugInfoCallback(const void* shader_debug_info,
-                                                       u32 shader_debug_info_size) {
+                                                       u32 shader_debug_info_size)
+{
     std::scoped_lock lock{mutex};
 
     GFSDK_Aftermath_ShaderDebugInfoIdentifier identifier;
@@ -188,24 +195,28 @@ void NsightAftermathTracker::OnShaderDebugInfoCallback(const void* shader_debug_
 }
 
 void NsightAftermathTracker::OnCrashDumpDescriptionCallback(
-    PFN_GFSDK_Aftermath_AddGpuCrashDumpDescription add_description) {
+    PFN_GFSDK_Aftermath_AddGpuCrashDumpDescription add_description)
+{
     add_description(GFSDK_Aftermath_GpuCrashDumpDescriptionKey_ApplicationName, "Eden");
 }
 
 void NsightAftermathTracker::GpuCrashDumpCallback(const void* gpu_crash_dump,
-                                                  u32 gpu_crash_dump_size, void* user_data) {
+                                                  u32 gpu_crash_dump_size, void* user_data)
+{
     static_cast<NsightAftermathTracker*>(user_data)->OnGpuCrashDumpCallback(gpu_crash_dump,
                                                                             gpu_crash_dump_size);
 }
 
 void NsightAftermathTracker::ShaderDebugInfoCallback(const void* shader_debug_info,
-                                                     u32 shader_debug_info_size, void* user_data) {
+                                                     u32 shader_debug_info_size, void* user_data)
+{
     static_cast<NsightAftermathTracker*>(user_data)->OnShaderDebugInfoCallback(
         shader_debug_info, shader_debug_info_size);
 }
 
 void NsightAftermathTracker::CrashDumpDescriptionCallback(
-    PFN_GFSDK_Aftermath_AddGpuCrashDumpDescription add_description, void* user_data) {
+    PFN_GFSDK_Aftermath_AddGpuCrashDumpDescription add_description, void* user_data)
+{
     static_cast<NsightAftermathTracker*>(user_data)->OnCrashDumpDescriptionCallback(
         add_description);
 }

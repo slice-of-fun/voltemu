@@ -4,21 +4,24 @@
 // SPDX-FileCopyrightText: 2015 Citra Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "yuzu/debugger/controller.h"
+
 #include <QAction>
 #include <QLayout>
 #include <QString>
+
 #include "common/settings.h"
 #include "hid_core/frontend/emulated_controller.h"
 #include "hid_core/hid_core.h"
 #include "input_common/drivers/tas_input.h"
 #include "input_common/main.h"
 #include "yuzu/configuration/configure_input_player_widget.h"
-#include "yuzu/debugger/controller.h"
 
 ControllerDialog::ControllerDialog(Core::HID::HIDCore& hid_core_,
                                    std::shared_ptr<InputCommon::InputSubsystem> input_subsystem_,
                                    QWidget* parent)
-    : QWidget(parent, Qt::Dialog), hid_core{hid_core_}, input_subsystem{input_subsystem_} {
+    : QWidget(parent, Qt::Dialog), hid_core{hid_core_}, input_subsystem{input_subsystem_}
+{
     setObjectName(QStringLiteral("Controller"));
     setWindowTitle(tr("Controller P1"));
     resize(500, 350);
@@ -39,7 +42,8 @@ ControllerDialog::ControllerDialog(Core::HID::HIDCore& hid_core_,
     widget->setFocus();
 }
 
-void ControllerDialog::refreshConfiguration() {
+void ControllerDialog::refreshConfiguration()
+{
     UnloadController();
     auto* player_1 = hid_core.GetEmulatedController(Core::HID::NpadIdType::Player1);
     auto* handheld = hid_core.GetEmulatedController(Core::HID::NpadIdType::Handheld);
@@ -55,7 +59,8 @@ void ControllerDialog::refreshConfiguration() {
     is_controller_set = true;
 }
 
-QAction* ControllerDialog::toggleViewAction() {
+QAction* ControllerDialog::toggleViewAction()
+{
     if (toggle_view_action == nullptr) {
         toggle_view_action = new QAction(tr("&Controller P1"), this);
         toggle_view_action->setCheckable(true);
@@ -66,7 +71,8 @@ QAction* ControllerDialog::toggleViewAction() {
     return toggle_view_action;
 }
 
-void ControllerDialog::UnloadController() {
+void ControllerDialog::UnloadController()
+{
     widget->UnloadController();
     if (is_controller_set) {
         controller->DeleteCallback(callback_key);
@@ -74,21 +80,24 @@ void ControllerDialog::UnloadController() {
     }
 }
 
-void ControllerDialog::showEvent(QShowEvent* ev) {
+void ControllerDialog::showEvent(QShowEvent* ev)
+{
     if (toggle_view_action) {
         toggle_view_action->setChecked(isVisible());
     }
     QWidget::showEvent(ev);
 }
 
-void ControllerDialog::hideEvent(QHideEvent* ev) {
+void ControllerDialog::hideEvent(QHideEvent* ev)
+{
     if (toggle_view_action) {
         toggle_view_action->setChecked(isVisible());
     }
     QWidget::hideEvent(ev);
 }
 
-void ControllerDialog::ControllerUpdate(Core::HID::ControllerTriggerType type) {
+void ControllerDialog::ControllerUpdate(Core::HID::ControllerTriggerType type)
+{
     // TODO(german77): Remove TAS from here
     switch (type) {
     case Core::HID::ControllerTriggerType::Button:

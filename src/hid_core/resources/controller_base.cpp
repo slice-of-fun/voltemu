@@ -5,10 +5,13 @@
 
 namespace Service::HID {
 
-ControllerBase::ControllerBase(Core::HID::HIDCore& hid_core_) : hid_core(hid_core_) {}
+ControllerBase::ControllerBase(Core::HID::HIDCore& hid_core_) : hid_core(hid_core_)
+{
+}
 ControllerBase::~ControllerBase() = default;
 
-Result ControllerBase::Activate() {
+Result ControllerBase::Activate()
+{
     if (is_activated) {
         return ResultSuccess;
     }
@@ -17,23 +20,27 @@ Result ControllerBase::Activate() {
     return ResultSuccess;
 }
 
-Result ControllerBase::Activate(u64 aruid) {
+Result ControllerBase::Activate(u64 aruid)
+{
     return Activate();
 }
 
-void ControllerBase::DeactivateController() {
+void ControllerBase::DeactivateController()
+{
     if (is_activated) {
         OnRelease();
     }
     is_activated = false;
 }
 
-bool ControllerBase::IsControllerActivated() const {
+bool ControllerBase::IsControllerActivated() const
+{
     return is_activated;
 }
 
 void ControllerBase::SetAppletResource(std::shared_ptr<AppletResource> resource,
-                                       std::recursive_mutex* resource_mutex) {
+                                       std::recursive_mutex* resource_mutex)
+{
     applet_resource = resource;
     shared_mutex = resource_mutex;
 }

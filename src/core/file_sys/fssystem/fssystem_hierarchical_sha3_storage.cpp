@@ -1,16 +1,18 @@
 // SPDX-FileCopyrightText: Copyright 2025 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#include "common/alignment.h"
-#include "common/scope_exit.h"
 #include "core/file_sys/fssystem/fssystem_hierarchical_sha3_storage.h"
 
 #include <cmath>
 
+#include "common/alignment.h"
+#include "common/scope_exit.h"
+
 namespace FileSys {
 
 Result HierarchicalSha3Storage::Initialize(VirtualFile* base_storages, s32 layer_count, size_t htbs,
-                                           void* hash_buf, size_t hash_buf_size) {
+                                           void* hash_buf, size_t hash_buf_size)
+{
     ASSERT(layer_count == LayerCount);
     ASSERT(Common::IsPowerOfTwo(htbs));
     ASSERT(hash_buf != nullptr);
@@ -21,7 +23,8 @@ Result HierarchicalSha3Storage::Initialize(VirtualFile* base_storages, s32 layer
 
     m_base_storage_size = base_storages[2]->GetSize();
     {
-        auto size_guard = SCOPE_GUARD {
+        auto size_guard = SCOPE_GUARD
+        {
             m_base_storage_size = 0;
         };
         R_UNLESS(m_base_storage_size <= static_cast<s64>(HashSize)
@@ -47,7 +50,8 @@ Result HierarchicalSha3Storage::Initialize(VirtualFile* base_storages, s32 layer
     R_SUCCEED();
 }
 
-size_t HierarchicalSha3Storage::Read(u8* buffer, size_t size, size_t offset) const {
+size_t HierarchicalSha3Storage::Read(u8* buffer, size_t size, size_t offset) const
+{
     if (size == 0)
         return size;
     ASSERT(buffer != nullptr);

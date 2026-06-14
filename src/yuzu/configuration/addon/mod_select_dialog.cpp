@@ -1,13 +1,17 @@
 // SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#include <QFileInfo>
-#include <qnamespace.h>
 #include "mod_select_dialog.h"
+
+#include <qnamespace.h>
+
+#include <QFileInfo>
+
 #include "ui_mod_select_dialog.h"
 
 ModSelectDialog::ModSelectDialog(const QStringList& mods, QWidget* parent)
-    : QDialog(parent), ui(new Ui::ModSelectDialog) {
+    : QDialog(parent), ui(new Ui::ModSelectDialog)
+{
     ui->setupUi(this);
 
     item_model = new QStandardItemModel(ui->treeView);
@@ -61,6 +65,7 @@ ModSelectDialog::ModSelectDialog(const QStringList& mods, QWidget* parent)
     });
 }
 
-ModSelectDialog::~ModSelectDialog() {
+ModSelectDialog::~ModSelectDialog()
+{
     delete ui;
 }

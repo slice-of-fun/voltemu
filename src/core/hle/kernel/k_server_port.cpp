@@ -1,30 +1,37 @@
 // SPDX-FileCopyrightText: Copyright 2021 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/kernel/k_server_port.h"
+
 #include <tuple>
+
 #include "common/assert.h"
 #include "core/hle/kernel/k_client_port.h"
 #include "core/hle/kernel/k_port.h"
 #include "core/hle/kernel/k_scheduler.h"
-#include "core/hle/kernel/k_server_port.h"
 #include "core/hle/kernel/k_server_session.h"
 #include "core/hle/kernel/k_thread.h"
 
 namespace Kernel {
 
-KServerPort::KServerPort(KernelCore& kernel) : KSynchronizationObject{kernel} {}
+KServerPort::KServerPort(KernelCore& kernel) : KSynchronizationObject{kernel}
+{
+}
 KServerPort::~KServerPort() = default;
 
-void KServerPort::Initialize(KPort* parent) {
+void KServerPort::Initialize(KPort* parent)
+{
     // Set member variables.
     m_parent = parent;
 }
 
-bool KServerPort::IsLight() const {
+bool KServerPort::IsLight() const
+{
     return this->GetParent()->IsLight();
 }
 
-void KServerPort::CleanupSessions() {
+void KServerPort::CleanupSessions()
+{
     // Ensure our preconditions are met.
     if (this->IsLight()) {
         ASSERT(m_session_list.empty());
@@ -73,7 +80,8 @@ void KServerPort::CleanupSessions() {
     }
 }
 
-void KServerPort::Destroy() {
+void KServerPort::Destroy()
+{
     // Note with our parent that we're closed.
     m_parent->OnServerClosed();
 
@@ -84,7 +92,8 @@ void KServerPort::Destroy() {
     m_parent->Close();
 }
 
-bool KServerPort::IsSignaled() const {
+bool KServerPort::IsSignaled() const
+{
     if (this->IsLight()) {
         return !m_light_session_list.empty();
     } else {
@@ -92,7 +101,8 @@ bool KServerPort::IsSignaled() const {
     }
 }
 
-void KServerPort::EnqueueSession(KServerSession* session) {
+void KServerPort::EnqueueSession(KServerSession* session)
+{
     ASSERT(!this->IsLight());
 
     KScopedSchedulerLock sl{m_kernel};
@@ -104,7 +114,8 @@ void KServerPort::EnqueueSession(KServerSession* session) {
     }
 }
 
-void KServerPort::EnqueueSession(KLightServerSession* session) {
+void KServerPort::EnqueueSession(KLightServerSession* session)
+{
     ASSERT(this->IsLight());
 
     KScopedSchedulerLock sl{m_kernel};
@@ -116,7 +127,8 @@ void KServerPort::EnqueueSession(KLightServerSession* session) {
     }
 }
 
-KServerSession* KServerPort::AcceptSession() {
+KServerSession* KServerPort::AcceptSession()
+{
     ASSERT(!this->IsLight());
 
     KScopedSchedulerLock sl{m_kernel};
@@ -131,7 +143,8 @@ KServerSession* KServerPort::AcceptSession() {
     return session;
 }
 
-KLightServerSession* KServerPort::AcceptLightSession() {
+KLightServerSession* KServerPort::AcceptLightSession()
+{
     ASSERT(this->IsLight());
 
     KScopedSchedulerLock sl{m_kernel};

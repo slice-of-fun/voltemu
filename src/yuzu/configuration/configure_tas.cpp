@@ -4,17 +4,20 @@
 // SPDX-FileCopyrightText: Copyright 2021 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "yuzu/configuration/configure_tas.h"
+
 #include <QFileDialog>
 #include <QMessageBox>
+
 #include "common/fs/fs.h"
 #include "common/fs/path_util.h"
 #include "common/settings.h"
 #include "qt_common/config/uisettings.h"
 #include "ui_configure_tas.h"
-#include "yuzu/configuration/configure_tas.h"
 
 ConfigureTasDialog::ConfigureTasDialog(QWidget* parent)
-    : QDialog(parent), ui(std::make_unique<Ui::ConfigureTas>()) {
+    : QDialog(parent), ui(std::make_unique<Ui::ConfigureTas>())
+{
 
     ui->setupUi(this);
 
@@ -29,7 +32,8 @@ ConfigureTasDialog::ConfigureTasDialog(QWidget* parent)
 
 ConfigureTasDialog::~ConfigureTasDialog() = default;
 
-void ConfigureTasDialog::LoadConfiguration() {
+void ConfigureTasDialog::LoadConfiguration()
+{
     ui->tas_path_edit->setText(
         QString::fromStdString(Common::FS::GetVoltPathString(Common::FS::VoltPath::TASDir)));
     ui->tas_enable->setChecked(Settings::values.tas_enable.GetValue());
@@ -39,7 +43,8 @@ void ConfigureTasDialog::LoadConfiguration() {
         Settings::values.tas_show_recording_dialog.GetValue());
 }
 
-void ConfigureTasDialog::ApplyConfiguration() {
+void ConfigureTasDialog::ApplyConfiguration()
+{
     Common::FS::SetVoltPath(Common::FS::VoltPath::TASDir, ui->tas_path_edit->text().toStdString());
     Settings::values.tas_enable.SetValue(ui->tas_enable->isChecked());
     Settings::values.tas_loop.SetValue(ui->tas_loop_script->isChecked());
@@ -47,7 +52,8 @@ void ConfigureTasDialog::ApplyConfiguration() {
     Settings::values.tas_show_recording_dialog.SetValue(ui->tas_show_recording_dialog->isChecked());
 }
 
-void ConfigureTasDialog::SetDirectory(DirectoryTarget target, QLineEdit* edit) {
+void ConfigureTasDialog::SetDirectory(DirectoryTarget target, QLineEdit* edit)
+{
     QString caption;
 
     switch (target) {
@@ -69,7 +75,8 @@ void ConfigureTasDialog::SetDirectory(DirectoryTarget target, QLineEdit* edit) {
     edit->setText(str);
 }
 
-void ConfigureTasDialog::changeEvent(QEvent* event) {
+void ConfigureTasDialog::changeEvent(QEvent* event)
+{
     if (event->type() == QEvent::LanguageChange) {
         RetranslateUI();
     }
@@ -77,11 +84,13 @@ void ConfigureTasDialog::changeEvent(QEvent* event) {
     QDialog::changeEvent(event);
 }
 
-void ConfigureTasDialog::RetranslateUI() {
+void ConfigureTasDialog::RetranslateUI()
+{
     ui->retranslateUi(this);
 }
 
-void ConfigureTasDialog::HandleApplyButtonClicked() {
+void ConfigureTasDialog::HandleApplyButtonClicked()
+{
     UISettings::values.configuration_applied = true;
     ApplyConfiguration();
 }

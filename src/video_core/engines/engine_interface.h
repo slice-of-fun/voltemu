@@ -34,7 +34,8 @@ public:
     virtual void CallMultiMethod(u32 method, const u32* base_start, u32 amount,
                                  u32 methods_pending) = 0;
 
-    void ConsumeSink() {
+    void ConsumeSink()
+    {
         if (method_sink.empty()) {
             return;
         }
@@ -47,7 +48,8 @@ public:
     GPUVAddr current_dma_segment;
 
 protected:
-    virtual void ConsumeSinkImpl() {
+    virtual void ConsumeSinkImpl()
+    {
         for (auto [method, value] : method_sink) {
             CallMethod(method, value, true);
         }

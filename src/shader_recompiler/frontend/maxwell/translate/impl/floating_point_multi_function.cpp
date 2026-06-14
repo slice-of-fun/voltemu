@@ -21,7 +21,8 @@ enum class Operation : u64 {
 };
 } // Anonymous namespace
 
-void TranslatorVisitor::MUFU(u64 insn) {
+void TranslatorVisitor::MUFU(u64 insn)
+{
     // MUFU is used to implement a bunch of special functions. See Operation.
     union {
         u64 raw;

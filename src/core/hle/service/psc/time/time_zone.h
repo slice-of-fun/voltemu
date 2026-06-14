@@ -3,10 +3,11 @@
 
 #pragma once
 
+#include <tz/tz.h>
+
 #include <mutex>
 #include <span>
 
-#include <tz/tz.h>
 #include "core/hle/service/psc/time/common.h"
 
 namespace Service::PSC::Time {
@@ -15,13 +16,9 @@ class TimeZone {
 public:
     TimeZone() = default;
 
-    bool IsInitialized() const {
-        return m_initialized;
-    }
+    bool IsInitialized() const { return m_initialized; }
 
-    void SetInitialized() {
-        m_initialized = true;
-    }
+    void SetInitialized() { m_initialized = true; }
 
     void SetTimePoint(const SteadyClockTimePoint& time_point);
     void SetTotalLocationNameCount(u32 count);

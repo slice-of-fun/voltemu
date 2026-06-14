@@ -1,19 +1,21 @@
 // SPDX-FileCopyrightText: 2022 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "yuzu/configuration/configure_input_per_game.h"
+
 #include "common/settings.h"
 #include "core/core.h"
 #include "frontend_common/config.h"
 #include "hid_core/frontend/emulated_controller.h"
 #include "hid_core/hid_core.h"
 #include "ui_configure_input_per_game.h"
-#include "yuzu/configuration/configure_input_per_game.h"
 #include "yuzu/configuration/input_profiles.h"
 
 ConfigureInputPerGame::ConfigureInputPerGame(Core::System& system_, QtConfig* config_,
                                              QWidget* parent)
     : QWidget(parent), ui(std::make_unique<Ui::ConfigureInputPerGame>()),
-      profiles(std::make_unique<InputProfiles>()), system{system_}, config{config_} {
+      profiles(std::make_unique<InputProfiles>()), system{system_}, config{config_}
+{
     ui->setupUi(this);
     const std::array labels = {
         ui->label_player_1, ui->label_player_2, ui->label_player_3, ui->label_player_4,
@@ -51,12 +53,14 @@ ConfigureInputPerGame::ConfigureInputPerGame(Core::System& system_, QtConfig* co
     LoadConfiguration();
 }
 
-void ConfigureInputPerGame::ApplyConfiguration() {
+void ConfigureInputPerGame::ApplyConfiguration()
+{
     LoadConfiguration();
     SaveConfiguration();
 }
 
-void ConfigureInputPerGame::LoadConfiguration() {
+void ConfigureInputPerGame::LoadConfiguration()
+{
     static constexpr size_t HANDHELD_INDEX = 8;
 
     auto& hid_core = system.HIDCore();
@@ -104,7 +108,8 @@ void ConfigureInputPerGame::LoadConfiguration() {
     }
 }
 
-void ConfigureInputPerGame::SaveConfiguration() {
+void ConfigureInputPerGame::SaveConfiguration()
+{
     Settings::values.players.SetGlobal(false);
 
     // Clear all controls from the config in case the user reverted back to globals

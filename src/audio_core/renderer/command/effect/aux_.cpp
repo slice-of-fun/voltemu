@@ -4,8 +4,9 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include "audio_core/adsp/apps/audio_renderer/command_list_processor.h"
 #include "audio_core/renderer/command/effect/aux_.h"
+
+#include "audio_core/adsp/apps/audio_renderer/command_list_processor.h"
 #include "audio_core/renderer/effect/aux_.h"
 #include "core/core.h"
 #include "core/memory.h"
@@ -17,7 +18,8 @@ namespace AudioCore::Renderer {
  * @param memory   - Core memory for writing.
  * @param aux_info - Memory address pointing to the AuxInfo to reset.
  */
-static void ResetAuxBufferDsp(Core::Memory::Memory& memory, const CpuAddr aux_info) {
+static void ResetAuxBufferDsp(Core::Memory::Memory& memory, const CpuAddr aux_info)
+{
     if (aux_info == 0) {
         LOG_ERROR(Service_Audio, "Aux info is 0!");
         return;
@@ -51,7 +53,8 @@ static void ResetAuxBufferDsp(Core::Memory::Memory& memory, const CpuAddr aux_in
 static u32 WriteAuxBufferDsp(Core::Memory::Memory& memory, CpuAddr send_info_,
                              [[maybe_unused]] u32 sample_count, CpuAddr send_buffer, u32 count_max,
                              std::span<const s32> input, u32 write_count_, u32 write_offset,
-                             u32 update_count) {
+                             u32 update_count)
+{
     if (write_count_ > count_max) {
         LOG_ERROR(Service_Audio,
                   "write_count must be smaller than count_max! write_count {}, count_max {}",
@@ -123,7 +126,8 @@ static u32 WriteAuxBufferDsp(Core::Memory::Memory& memory, CpuAddr send_info_,
  */
 static u32 ReadAuxBufferDsp(Core::Memory::Memory& memory, CpuAddr return_info_,
                             CpuAddr return_buffer, u32 count_max, std::span<s32> output,
-                            u32 read_count_, u32 read_offset, u32 update_count) {
+                            u32 read_count_, u32 read_offset, u32 update_count)
+{
     if (count_max == 0) {
         return 0;
     }
@@ -179,12 +183,14 @@ static u32 ReadAuxBufferDsp(Core::Memory::Memory& memory, CpuAddr return_info_,
 }
 
 void AuxCommand::Dump([[maybe_unused]] const AudioRenderer::CommandListProcessor& processor,
-                      std::string& string) {
+                      std::string& string)
+{
     string += fmt::format("AuxCommand\n\tenabled {} input {:02X} output {:02X}\n", effect_enabled,
                           input, output);
 }
 
-void AuxCommand::Process(const AudioRenderer::CommandListProcessor& processor) {
+void AuxCommand::Process(const AudioRenderer::CommandListProcessor& processor)
+{
     auto input_buffer{
         processor.mix_buffers.subspan(input * processor.sample_count, processor.sample_count)};
     auto output_buffer{
@@ -211,7 +217,8 @@ void AuxCommand::Process(const AudioRenderer::CommandListProcessor& processor) {
     }
 }
 
-bool AuxCommand::Verify(const AudioRenderer::CommandListProcessor& processor) {
+bool AuxCommand::Verify(const AudioRenderer::CommandListProcessor& processor)
+{
     return true;
 }
 

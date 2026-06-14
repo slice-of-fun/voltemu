@@ -4,11 +4,13 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "yuzu/configuration/configure_audio.h"
+
+#include <QComboBox>
+#include <QPushButton>
 #include <map>
 #include <memory>
 #include <vector>
-#include <QComboBox>
-#include <QPushButton>
 
 #include "audio_core/sink/sink.h"
 #include "audio_core/sink/sink_details.h"
@@ -20,13 +22,13 @@
 #include "qt_common/config/uisettings.h"
 #include "ui_configure_audio.h"
 #include "yuzu/configuration/configuration_shared.h"
-#include "yuzu/configuration/configure_audio.h"
 #include "yuzu/configuration/shared_widget.h"
 
 ConfigureAudio::ConfigureAudio(const Core::System& system_,
                                std::shared_ptr<std::vector<ConfigurationShared::Tab*>> group_,
                                const ConfigurationShared::Builder& builder, QWidget* parent)
-    : Tab(group_, parent), ui(std::make_unique<Ui::ConfigureAudio>()), system{system_} {
+    : Tab(group_, parent), ui(std::make_unique<Ui::ConfigureAudio>()), system{system_}
+{
     ui->setupUi(this);
     Setup(builder);
 
@@ -35,7 +37,8 @@ ConfigureAudio::ConfigureAudio(const Core::System& system_,
 
 ConfigureAudio::~ConfigureAudio() = default;
 
-void ConfigureAudio::Setup(const ConfigurationShared::Builder& builder) {
+void ConfigureAudio::Setup(const ConfigurationShared::Builder& builder)
+{
     auto& layout = *ui->audio_widget->layout();
 
     std::vector<Settings::BasicSetting*> settings;
@@ -173,7 +176,8 @@ void ConfigureAudio::Setup(const ConfigurationShared::Builder& builder) {
     }
 }
 
-void ConfigureAudio::SetConfiguration() {
+void ConfigureAudio::SetConfiguration()
+{
     SetOutputSinkFromSinkID();
 
     // The device list cannot be pre-populated (nor listed) until the output sink is known.
@@ -183,7 +187,8 @@ void ConfigureAudio::SetConfiguration() {
     SetInputDevicesFromDeviceID();
 }
 
-void ConfigureAudio::SetOutputSinkFromSinkID() {
+void ConfigureAudio::SetOutputSinkFromSinkID()
+{
     [[maybe_unused]] const QSignalBlocker blocker(sink_combo_box);
 
     const std::string new_sink_id = []() -> const std::string {
@@ -205,7 +210,8 @@ void ConfigureAudio::SetOutputSinkFromSinkID() {
     sink_combo_box->setCurrentText(QString::fromStdString(new_sink_id));
 }
 
-void ConfigureAudio::SetOutputDevicesFromDeviceID() {
+void ConfigureAudio::SetOutputDevicesFromDeviceID()
+{
     int new_device_index = 0;
 
     const QString output_device_id =
@@ -220,7 +226,8 @@ void ConfigureAudio::SetOutputDevicesFromDeviceID() {
     output_device_combo_box->setCurrentIndex(new_device_index);
 }
 
-void ConfigureAudio::SetInputDevicesFromDeviceID() {
+void ConfigureAudio::SetInputDevicesFromDeviceID()
+{
     int new_device_index = 0;
     const QString input_device_id =
         QString::fromStdString(Settings::values.audio_input_device_id.GetValue());
@@ -234,7 +241,8 @@ void ConfigureAudio::SetInputDevicesFromDeviceID() {
     input_device_combo_box->setCurrentIndex(new_device_index);
 }
 
-void ConfigureAudio::ApplyConfiguration() {
+void ConfigureAudio::ApplyConfiguration()
+{
     const bool is_powered_on = system.IsPoweredOn();
     for (const auto& apply_func : apply_funcs) {
         apply_func(is_powered_on);
@@ -260,7 +268,8 @@ void ConfigureAudio::ApplyConfiguration() {
         input_device_combo_box->itemText(input_device_combo_box->currentIndex()).toStdString());
 }
 
-void ConfigureAudio::changeEvent(QEvent* event) {
+void ConfigureAudio::changeEvent(QEvent* event)
+{
     if (event->type() == QEvent::LanguageChange) {
         RetranslateUI();
     }
@@ -268,7 +277,8 @@ void ConfigureAudio::changeEvent(QEvent* event) {
     QWidget::changeEvent(event);
 }
 
-void ConfigureAudio::UpdateAudioDevices(int sink_index) {
+void ConfigureAudio::UpdateAudioDevices(int sink_index)
+{
     updating_devices = true;
     output_device_combo_box->clear();
     output_device_combo_box->addItem(QString::fromUtf8(AudioCore::Sink::auto_device_name));
@@ -287,7 +297,8 @@ void ConfigureAudio::UpdateAudioDevices(int sink_index) {
     updating_devices = false;
 }
 
-void ConfigureAudio::InitializeAudioSinkComboBox() {
+void ConfigureAudio::InitializeAudioSinkComboBox()
+{
     sink_combo_box->clear();
     sink_combo_box->addItem(QString::fromUtf8(AudioCore::Sink::auto_device_name));
     for (const auto& id : AudioCore::Sink::GetSinkIDs())
@@ -295,6 +306,7 @@ void ConfigureAudio::InitializeAudioSinkComboBox() {
             QString::fromStdString(std::string{Settings::CanonicalizeEnum(id)}));
 }
 
-void ConfigureAudio::RetranslateUI() {
+void ConfigureAudio::RetranslateUI()
+{
     ui->retranslateUi(this);
 }

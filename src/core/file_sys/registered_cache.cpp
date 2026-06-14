@@ -4,10 +4,14 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/file_sys/registered_cache.h"
+
+#include <openssl/evp.h>
+
 #include <algorithm>
 #include <random>
 #include <regex>
-#include <openssl/evp.h>
+
 #include "common/assert.h"
 #include "common/fs/path_util.h"
 #include "common/hex_util.h"
@@ -20,7 +24,6 @@
 #include "core/file_sys/content_archive.h"
 #include "core/file_sys/control_metadata.h"
 #include "core/file_sys/nca_metadata.h"
-#include "core/file_sys/registered_cache.h"
 #include "core/file_sys/romfs.h"
 #include "core/file_sys/submission_package.h"
 #include "core/file_sys/vfs/vfs_concat.h"
@@ -31,29 +34,35 @@ namespace FileSys {
 // The size of blocks to use when vfs raw copying into nand.
 constexpr size_t VFS_RC_LARGE_COPY_BLOCK = 0x400000;
 
-std::string ContentProviderEntry::DebugInfo() const {
+std::string ContentProviderEntry::DebugInfo() const
+{
     return fmt::format("title_id={:016X}, content_type={:02X}", title_id, static_cast<u8>(type));
 }
 
-bool operator<(const ContentProviderEntry& lhs, const ContentProviderEntry& rhs) {
+bool operator<(const ContentProviderEntry& lhs, const ContentProviderEntry& rhs)
+{
     return (lhs.title_id < rhs.title_id) || (lhs.title_id == rhs.title_id && lhs.type < rhs.type);
 }
 
-bool operator==(const ContentProviderEntry& lhs, const ContentProviderEntry& rhs) {
+bool operator==(const ContentProviderEntry& lhs, const ContentProviderEntry& rhs)
+{
     return std::tie(lhs.title_id, lhs.type) == std::tie(rhs.title_id, rhs.type);
 }
 
-bool operator!=(const ContentProviderEntry& lhs, const ContentProviderEntry& rhs) {
+bool operator!=(const ContentProviderEntry& lhs, const ContentProviderEntry& rhs)
+{
     return !operator==(lhs, rhs);
 }
 
-static bool FollowsTwoDigitDirFormat(std::string_view name) {
+static bool FollowsTwoDigitDirFormat(std::string_view name)
+{
     static const std::regex two_digit_regex("000000[0-9A-F]{2}", std::regex_constants::ECMAScript |
                                                                      std::regex_constants::icase);
     return std::regex_match(name.begin(), name.end(), two_digit_regex);
 }
 
-static bool FollowsNcaIdFormat(std::string_view name) {
+static bool FollowsNcaIdFormat(std::string_view name)
+{
     static const std::regex nca_id_regex("[0-9A-F]{32}\\.nca", std::regex_constants::ECMAScript |
                                                                    std::regex_constants::icase);
     static const std::regex nca_id_cnmt_regex(
@@ -63,7 +72,8 @@ static bool FollowsNcaIdFormat(std::string_view name) {
 }
 
 static std::string GetRelativePathFromNcaID(const std::array<u8, 16>& nca_id, bool second_hex_upper,
-                                            bool within_two_digit, bool cnmt_suffix) {
+                                            bool within_two_digit, bool cnmt_suffix)
+{
     const auto nca_str = Common::HexToString(nca_id, second_hex_upper);
 
     if (!within_two_digit) {
@@ -83,7 +93,8 @@ static std::string GetRelativePathFromNcaID(const std::array<u8, 16>& nca_id, bo
     return fmt::format(format_str, hash[0], nca_str);
 }
 
-static std::string GetCNMTName(TitleType type, u64 title_id) {
+static std::string GetCNMTName(TitleType type, u64 title_id)
+{
     static constexpr std::array<const char*, 9> TITLE_TYPE_NAMES{
         "SystemProgram",
         "SystemData",
@@ -105,7 +116,8 @@ static std::string GetCNMTName(TitleType type, u64 title_id) {
     return fmt::format("{}_{:016x}.cnmt", TITLE_TYPE_NAMES[index], title_id);
 }
 
-static std::shared_ptr<NSP> OpenContainerAsNsp(const VirtualFile& file, Loader::FileType type) {
+static std::shared_ptr<NSP> OpenContainerAsNsp(const VirtualFile& file, Loader::FileType type)
+{
     if (!file) {
         return nullptr;
     }
@@ -157,9 +169,10 @@ static std::shared_ptr<NSP> OpenContainerAsNsp(const VirtualFile& file, Loader::
     return nullptr;
 }
 
-template <typename Callback>
+template<typename Callback>
 bool ForEachContainerEntry(const std::shared_ptr<NSP>& nsp, bool only_content,
-                           std::optional<u64> base_program_id, Callback&& on_entry) {
+                           std::optional<u64> base_program_id, Callback&& on_entry)
+{
     if (!nsp) {
         return false;
     }
@@ -261,9 +274,9 @@ bool ForEachContainerEntry(const std::shared_ptr<NSP>& nsp, bool only_content,
 }
 
 static void UpsertExternalVersionEntry(std::vector<ExternalUpdateEntry>& multi_version_entries,
-                                       u64 title_id, u32 version,
-                                       const std::string& version_string,
-                                       ContentRecordType content_type, const VirtualFile& file) {
+                                       u64 title_id, u32 version, const std::string& version_string,
+                                       ContentRecordType content_type, const VirtualFile& file)
+{
     auto it = std::find_if(multi_version_entries.begin(), multi_version_entries.end(),
                            [title_id, version](const ExternalUpdateEntry& entry) {
                                return entry.title_id == title_id && entry.version == version;
@@ -285,16 +298,16 @@ static void UpsertExternalVersionEntry(std::vector<ExternalUpdateEntry>& multi_v
     }
 }
 
-template <typename EntryMap, typename VersionMap>
+template<typename EntryMap, typename VersionMap>
 static bool AddExternalEntriesFromContainer(const std::shared_ptr<NSP>& nsp, EntryMap& entries,
                                             VersionMap& versions,
-                                            std::vector<ExternalUpdateEntry>& multi_version_entries) {
+                                            std::vector<ExternalUpdateEntry>& multi_version_entries)
+{
     return ForEachContainerEntry(
         nsp, true, std::nullopt,
-        [&entries, &versions,
-         &multi_version_entries](TitleType title_type, ContentRecordType content_type, u64 title_id,
-                                 const VirtualFile& file, u32 version,
-                                 const std::string& version_string) {
+        [&entries, &versions, &multi_version_entries](
+            TitleType title_type, ContentRecordType content_type, u64 title_id,
+            const VirtualFile& file, u32 version, const std::string& version_string) {
             entries[{title_id, content_type, title_type}] = file;
 
             if (title_type == TitleType::Update) {
@@ -305,7 +318,8 @@ static bool AddExternalEntriesFromContainer(const std::shared_ptr<NSP>& nsp, Ent
         });
 }
 
-ContentRecordType GetCRTypeFromNCAType(NCAContentType type) {
+ContentRecordType GetCRTypeFromNCAType(NCAContentType type)
+{
     switch (type) {
     case NCAContentType::Program:
         // TODO(DarkLordZach): Differentiate between Program and Patch
@@ -328,29 +342,37 @@ ContentRecordType GetCRTypeFromNCAType(NCAContentType type) {
 
 ContentProvider::~ContentProvider() = default;
 
-bool ContentProvider::HasEntry(ContentProviderEntry entry) const {
+bool ContentProvider::HasEntry(ContentProviderEntry entry) const
+{
     return HasEntry(entry.title_id, entry.type);
 }
 
-VirtualFile ContentProvider::GetEntryUnparsed(ContentProviderEntry entry) const {
+VirtualFile ContentProvider::GetEntryUnparsed(ContentProviderEntry entry) const
+{
     return GetEntryUnparsed(entry.title_id, entry.type);
 }
 
-VirtualFile ContentProvider::GetEntryRaw(ContentProviderEntry entry) const {
+VirtualFile ContentProvider::GetEntryRaw(ContentProviderEntry entry) const
+{
     return GetEntryRaw(entry.title_id, entry.type);
 }
 
-std::unique_ptr<NCA> ContentProvider::GetEntry(ContentProviderEntry entry) const {
+std::unique_ptr<NCA> ContentProvider::GetEntry(ContentProviderEntry entry) const
+{
     return GetEntry(entry.title_id, entry.type);
 }
 
-std::vector<ContentProviderEntry> ContentProvider::ListEntries() const {
+std::vector<ContentProviderEntry> ContentProvider::ListEntries() const
+{
     return ListEntriesFilter(std::nullopt, std::nullopt, std::nullopt);
 }
 
-PlaceholderCache::PlaceholderCache(VirtualDir dir_) : dir(std::move(dir_)) {}
+PlaceholderCache::PlaceholderCache(VirtualDir dir_) : dir(std::move(dir_))
+{
+}
 
-bool PlaceholderCache::Create(const NcaID& id, u64 size) const {
+bool PlaceholderCache::Create(const NcaID& id, u64 size) const
+{
     const auto path = GetRelativePathFromNcaID(id, false, true, false);
 
     if (dir->GetFileRelative(path) != nullptr) {
@@ -378,7 +400,8 @@ bool PlaceholderCache::Create(const NcaID& id, u64 size) const {
     return file->Resize(size);
 }
 
-bool PlaceholderCache::Delete(const NcaID& id) const {
+bool PlaceholderCache::Delete(const NcaID& id) const
+{
     const auto path = GetRelativePathFromNcaID(id, false, true, false);
 
     if (dir->GetFileRelative(path) == nullptr) {
@@ -400,13 +423,15 @@ bool PlaceholderCache::Delete(const NcaID& id) const {
     return res;
 }
 
-bool PlaceholderCache::Exists(const NcaID& id) const {
+bool PlaceholderCache::Exists(const NcaID& id) const
+{
     const auto path = GetRelativePathFromNcaID(id, false, true, false);
 
     return dir->GetFileRelative(path) != nullptr;
 }
 
-bool PlaceholderCache::Write(const NcaID& id, u64 offset, const std::vector<u8>& data) const {
+bool PlaceholderCache::Write(const NcaID& id, u64 offset, const std::vector<u8>& data) const
+{
     const auto path = GetRelativePathFromNcaID(id, false, true, false);
     const auto file = dir->GetFileRelative(path);
 
@@ -417,7 +442,8 @@ bool PlaceholderCache::Write(const NcaID& id, u64 offset, const std::vector<u8>&
 }
 
 bool PlaceholderCache::Register(RegisteredCache* cache, const NcaID& placeholder,
-                                const NcaID& install) const {
+                                const NcaID& install) const
+{
     const auto path = GetRelativePathFromNcaID(placeholder, false, true, false);
     const auto file = dir->GetFileRelative(path);
 
@@ -432,11 +458,13 @@ bool PlaceholderCache::Register(RegisteredCache* cache, const NcaID& placeholder
     return Delete(placeholder);
 }
 
-bool PlaceholderCache::CleanAll() const {
+bool PlaceholderCache::CleanAll() const
+{
     return dir->GetParentDirectory()->CleanSubdirectoryRecursive(dir->GetName());
 }
 
-std::optional<std::array<u8, 0x10>> PlaceholderCache::GetRightsID(const NcaID& id) const {
+std::optional<std::array<u8, 0x10>> PlaceholderCache::GetRightsID(const NcaID& id) const
+{
     const auto path = GetRelativePathFromNcaID(id, false, true, false);
     const auto file = dir->GetFileRelative(path);
 
@@ -457,7 +485,8 @@ std::optional<std::array<u8, 0x10>> PlaceholderCache::GetRightsID(const NcaID& i
     return rights_id;
 }
 
-u64 PlaceholderCache::Size(const NcaID& id) const {
+u64 PlaceholderCache::Size(const NcaID& id) const
+{
     const auto path = GetRelativePathFromNcaID(id, false, true, false);
     const auto file = dir->GetFileRelative(path);
 
@@ -467,7 +496,8 @@ u64 PlaceholderCache::Size(const NcaID& id) const {
     return file->GetSize();
 }
 
-bool PlaceholderCache::SetSize(const NcaID& id, u64 new_size) const {
+bool PlaceholderCache::SetSize(const NcaID& id, u64 new_size) const
+{
     const auto path = GetRelativePathFromNcaID(id, false, true, false);
     const auto file = dir->GetFileRelative(path);
 
@@ -477,7 +507,8 @@ bool PlaceholderCache::SetSize(const NcaID& id, u64 new_size) const {
     return file->Resize(new_size);
 }
 
-std::vector<NcaID> PlaceholderCache::List() const {
+std::vector<NcaID> PlaceholderCache::List() const
+{
     std::vector<NcaID> out;
     for (const auto& sdir : dir->GetSubdirectories()) {
         for (const auto& file : sdir->GetFiles()) {
@@ -490,7 +521,8 @@ std::vector<NcaID> PlaceholderCache::List() const {
     return out;
 }
 
-NcaID PlaceholderCache::Generate() {
+NcaID PlaceholderCache::Generate()
+{
     auto gen = Common::Random::GetMT19937();
     std::uniform_int_distribution<u64> distribution(1, (std::numeric_limits<u64>::max)());
     NcaID out{};
@@ -502,7 +534,8 @@ NcaID PlaceholderCache::Generate() {
 }
 
 VirtualFile RegisteredCache::OpenFileOrDirectoryConcat(const VirtualDir& open_dir,
-                                                       std::string_view path) const {
+                                                       std::string_view path) const
+{
     const auto file = open_dir->GetFileRelative(path);
     if (file != nullptr) {
         return file;
@@ -542,7 +575,8 @@ VirtualFile RegisteredCache::OpenFileOrDirectoryConcat(const VirtualDir& open_di
     return ConcatenatedVfsFile::MakeConcatenatedFile(std::move(name), std::move(concat));
 }
 
-VirtualFile RegisteredCache::GetFileAtID(NcaID id) const {
+VirtualFile RegisteredCache::GetFileAtID(NcaID id) const
+{
     VirtualFile file;
     // Try all five relevant modes of file storage:
     // (bit 2 = uppercase/lower, bit 1 = within a two-digit dir, bit 0 = .cnmt suffix)
@@ -563,7 +597,10 @@ VirtualFile RegisteredCache::GetFileAtID(NcaID id) const {
     return file;
 }
 
-static std::optional<NcaID> CheckMapForContentRecord(const ankerl::unordered_dense::map<u64, CNMT>& map, u64 title_id, ContentRecordType type) {
+static std::optional<NcaID>
+CheckMapForContentRecord(const ankerl::unordered_dense::map<u64, CNMT>& map, u64 title_id,
+                         ContentRecordType type)
+{
     const auto cmnt_iter = map.find(title_id);
     if (cmnt_iter == map.cend()) {
         return std::nullopt;
@@ -581,7 +618,8 @@ static std::optional<NcaID> CheckMapForContentRecord(const ankerl::unordered_den
 }
 
 std::optional<NcaID> RegisteredCache::GetNcaIDFromMetadata(u64 title_id,
-                                                           ContentRecordType type) const {
+                                                           ContentRecordType type) const
+{
     if (type == ContentRecordType::Meta && meta_id.find(title_id) != meta_id.end())
         return meta_id.at(title_id);
 
@@ -591,7 +629,8 @@ std::optional<NcaID> RegisteredCache::GetNcaIDFromMetadata(u64 title_id,
     return CheckMapForContentRecord(meta, title_id, type);
 }
 
-std::vector<NcaID> RegisteredCache::AccumulateFiles() const {
+std::vector<NcaID> RegisteredCache::AccumulateFiles() const
+{
     std::vector<NcaID> ids;
     for (const auto& d2_dir : dir->GetSubdirectories()) {
         if (FollowsNcaIdFormat(d2_dir->GetName())) {
@@ -627,7 +666,8 @@ std::vector<NcaID> RegisteredCache::AccumulateFiles() const {
     return ids;
 }
 
-void RegisteredCache::ProcessFiles(const std::vector<NcaID>& ids) {
+void RegisteredCache::ProcessFiles(const std::vector<NcaID>& ids)
+{
     for (const auto& id : ids) {
         const auto file = GetFileAtID(id);
 
@@ -652,7 +692,8 @@ void RegisteredCache::ProcessFiles(const std::vector<NcaID>& ids) {
     }
 }
 
-void RegisteredCache::AccumulateYuzuMeta() {
+void RegisteredCache::AccumulateYuzuMeta()
+{
     const auto meta_dir = dir->GetSubdirectory("yuzu_meta");
     if (meta_dir == nullptr) {
         return;
@@ -668,7 +709,8 @@ void RegisteredCache::AccumulateYuzuMeta() {
     }
 }
 
-void RegisteredCache::Refresh() {
+void RegisteredCache::Refresh()
+{
     if (dir == nullptr) {
         return;
     }
@@ -679,22 +721,26 @@ void RegisteredCache::Refresh() {
 }
 
 RegisteredCache::RegisteredCache(VirtualDir dir_, ContentProviderParsingFunction parsing_function)
-    : dir(std::move(dir_)), parser(std::move(parsing_function)) {
+    : dir(std::move(dir_)), parser(std::move(parsing_function))
+{
     Refresh();
 }
 
 RegisteredCache::~RegisteredCache() = default;
 
-bool RegisteredCache::HasEntry(u64 title_id, ContentRecordType type) const {
+bool RegisteredCache::HasEntry(u64 title_id, ContentRecordType type) const
+{
     return GetEntryRaw(title_id, type) != nullptr;
 }
 
-VirtualFile RegisteredCache::GetEntryUnparsed(u64 title_id, ContentRecordType type) const {
+VirtualFile RegisteredCache::GetEntryUnparsed(u64 title_id, ContentRecordType type) const
+{
     const auto id = GetNcaIDFromMetadata(title_id, type);
     return id ? GetFileAtID(*id) : nullptr;
 }
 
-std::optional<u32> RegisteredCache::GetEntryVersion(u64 title_id) const {
+std::optional<u32> RegisteredCache::GetEntryVersion(u64 title_id) const
+{
     const auto meta_iter = meta.find(title_id);
     if (meta_iter != meta.cend()) {
         return meta_iter->second.GetTitleVersion();
@@ -708,22 +754,25 @@ std::optional<u32> RegisteredCache::GetEntryVersion(u64 title_id) const {
     return std::nullopt;
 }
 
-VirtualFile RegisteredCache::GetEntryRaw(u64 title_id, ContentRecordType type) const {
+VirtualFile RegisteredCache::GetEntryRaw(u64 title_id, ContentRecordType type) const
+{
     const auto id = GetNcaIDFromMetadata(title_id, type);
     return id ? parser(GetFileAtID(*id), *id) : nullptr;
 }
 
-std::unique_ptr<NCA> RegisteredCache::GetEntry(u64 title_id, ContentRecordType type) const {
+std::unique_ptr<NCA> RegisteredCache::GetEntry(u64 title_id, ContentRecordType type) const
+{
     const auto raw = GetEntryRaw(title_id, type);
     if (raw == nullptr)
         return nullptr;
     return std::make_unique<NCA>(raw);
 }
 
-template <typename T>
+template<typename T>
 void RegisteredCache::IterateAllMetadata(
     std::vector<T>& out, std::function<T(const CNMT&, const ContentRecord&)> proc,
-    std::function<bool(const CNMT&, const ContentRecord&)> filter) const {
+    std::function<bool(const CNMT&, const ContentRecord&)> filter) const
+{
     for (const auto& kv : meta) {
         const auto& cnmt = kv.second;
         if (filter(cnmt, EMPTY_META_CONTENT_RECORD))
@@ -744,9 +793,11 @@ void RegisteredCache::IterateAllMetadata(
     }
 }
 
-std::vector<ContentProviderEntry> RegisteredCache::ListEntriesFilter(
-    std::optional<TitleType> title_type, std::optional<ContentRecordType> record_type,
-    std::optional<u64> title_id) const {
+std::vector<ContentProviderEntry>
+RegisteredCache::ListEntriesFilter(std::optional<TitleType> title_type,
+                                   std::optional<ContentRecordType> record_type,
+                                   std::optional<u64> title_id) const
+{
     std::vector<ContentProviderEntry> out;
     IterateAllMetadata<ContentProviderEntry>(
         out,
@@ -765,7 +816,8 @@ std::vector<ContentProviderEntry> RegisteredCache::ListEntriesFilter(
     return out;
 }
 
-static std::shared_ptr<NCA> GetNCAFromNSPForID(const NSP& nsp, const NcaID& id) {
+static std::shared_ptr<NCA> GetNCAFromNSPForID(const NSP& nsp, const NcaID& id)
+{
     auto file = nsp.GetFile(fmt::format("{}.nca", Common::HexToString(id, false)));
     if (file == nullptr) {
         return nullptr;
@@ -774,12 +826,14 @@ static std::shared_ptr<NCA> GetNCAFromNSPForID(const NSP& nsp, const NcaID& id) 
 }
 
 InstallResult RegisteredCache::InstallEntry(const XCI& xci, bool overwrite_if_exists,
-                                            const VfsCopyFunction& copy) {
+                                            const VfsCopyFunction& copy)
+{
     return InstallEntry(*xci.GetSecurePartitionNSP(), overwrite_if_exists, copy);
 }
 
 InstallResult RegisteredCache::InstallEntry(const NSP& nsp, bool overwrite_if_exists,
-                                            const VfsCopyFunction& copy) {
+                                            const VfsCopyFunction& copy)
+{
     const auto ncas = nsp.GetNCAsCollapsed();
     const auto meta_iter = std::find_if(ncas.begin(), ncas.end(), [](const auto& nca) {
         return nca->GetType() == NCAContentType::Meta;
@@ -862,7 +916,8 @@ InstallResult RegisteredCache::InstallEntry(const NSP& nsp, bool overwrite_if_ex
 }
 
 InstallResult RegisteredCache::InstallEntry(const NCA& nca, TitleType type,
-                                            bool overwrite_if_exists, const VfsCopyFunction& copy) {
+                                            bool overwrite_if_exists, const VfsCopyFunction& copy)
+{
     const CNMTHeader header{
         .title_id = nca.GetTitleId(),
         .title_version = 0,
@@ -896,7 +951,8 @@ InstallResult RegisteredCache::InstallEntry(const NCA& nca, TitleType type,
 
 InstallResult RegisteredCache::InstallEntry(const NCA& nca, const CNMTHeader& base_header,
                                             const ContentRecord& base_record,
-                                            bool overwrite_if_exists, const VfsCopyFunction& copy) {
+                                            bool overwrite_if_exists, const VfsCopyFunction& copy)
+{
     const CNMTHeader header{
         .title_id = nca.GetTitleId(),
         .title_version = base_header.title_version,
@@ -919,7 +975,8 @@ InstallResult RegisteredCache::InstallEntry(const NCA& nca, const CNMTHeader& ba
     return RawInstallNCA(nca, copy, overwrite_if_exists, base_record.nca_id);
 }
 
-bool RegisteredCache::RemoveExistingEntry(u64 title_id) const {
+bool RegisteredCache::RemoveExistingEntry(u64 title_id) const
+{
     bool removed_data = false;
 
     const auto delete_nca = [this](const NcaID& id) {
@@ -983,7 +1040,8 @@ bool RegisteredCache::RemoveExistingEntry(u64 title_id) const {
 
 InstallResult RegisteredCache::RawInstallNCA(const NCA& nca, const VfsCopyFunction& copy,
                                              bool overwrite_if_exists,
-                                             std::optional<NcaID> override_id) {
+                                             std::optional<NcaID> override_id)
+{
     const auto in = nca.GetBaseFile();
     Core::Crypto::SHA256Hash hash{};
 
@@ -1015,7 +1073,9 @@ InstallResult RegisteredCache::RawInstallNCA(const NCA& nca, const VfsCopyFuncti
     if (GetFileAtID(id) != nullptr) {
         LOG_WARNING(Loader, "Overwriting existing NCA...");
         VirtualDir c_dir;
-        { c_dir = dir->GetFileRelative(path)->GetContainingDirectory(); }
+        {
+            c_dir = dir->GetFileRelative(path)->GetContainingDirectory();
+        }
         c_dir->DeleteFile(Common::FS::GetFilename(path));
     }
 
@@ -1027,7 +1087,8 @@ InstallResult RegisteredCache::RawInstallNCA(const NCA& nca, const VfsCopyFuncti
                                                   : InstallResult::ErrorCopyFailed;
 }
 
-bool RegisteredCache::RawInstallYuzuMeta(const CNMT& cnmt) {
+bool RegisteredCache::RawInstallYuzuMeta(const CNMT& cnmt)
+{
     // Reasoning behind this method can be found in the comment for InstallEntry, NCA overload.
     const auto meta_dir = dir->CreateDirectoryRelative("yuzu_meta");
     const auto filename = GetCNMTName(cnmt.GetType(), cnmt.GetTitleID());
@@ -1048,31 +1109,37 @@ bool RegisteredCache::RawInstallYuzuMeta(const CNMT& cnmt) {
         }
     }
     Refresh();
-    return std::find_if(yuzu_meta.begin(), yuzu_meta.end(), [&cnmt](const std::pair<u64, CNMT>& kv) {
-        return kv.second.GetType() == cnmt.GetType() && kv.second.GetTitleID() == cnmt.GetTitleID();
-    }) != yuzu_meta.end();
+    return std::find_if(yuzu_meta.begin(), yuzu_meta.end(),
+                        [&cnmt](const std::pair<u64, CNMT>& kv) {
+                            return kv.second.GetType() == cnmt.GetType() &&
+                                   kv.second.GetTitleID() == cnmt.GetTitleID();
+                        }) != yuzu_meta.end();
 }
 
 ContentProviderUnion::~ContentProviderUnion() = default;
 
-void ContentProviderUnion::SetSlot(ContentProviderUnionSlot slot, ContentProvider* provider) {
+void ContentProviderUnion::SetSlot(ContentProviderUnionSlot slot, ContentProvider* provider)
+{
     providers[size_t(slot)] = provider;
 }
 
-void ContentProviderUnion::Refresh() {
+void ContentProviderUnion::Refresh()
+{
     for (auto e : providers)
         if (e != nullptr)
             e->Refresh();
 }
 
-bool ContentProviderUnion::HasEntry(u64 title_id, ContentRecordType type) const {
+bool ContentProviderUnion::HasEntry(u64 title_id, ContentRecordType type) const
+{
     for (auto const e : providers)
         if (e && e->HasEntry(title_id, type))
             return true;
     return false;
 }
 
-std::optional<u32> ContentProviderUnion::GetEntryVersion(u64 title_id) const {
+std::optional<u32> ContentProviderUnion::GetEntryVersion(u64 title_id) const
+{
     for (auto const e : providers) {
         if (e == nullptr)
             continue;
@@ -1082,7 +1149,8 @@ std::optional<u32> ContentProviderUnion::GetEntryVersion(u64 title_id) const {
     return std::nullopt;
 }
 
-VirtualFile ContentProviderUnion::GetEntryUnparsed(u64 title_id, ContentRecordType type) const {
+VirtualFile ContentProviderUnion::GetEntryUnparsed(u64 title_id, ContentRecordType type) const
+{
     for (auto const e : providers) {
         if (e == nullptr)
             continue;
@@ -1092,7 +1160,8 @@ VirtualFile ContentProviderUnion::GetEntryUnparsed(u64 title_id, ContentRecordTy
     return nullptr;
 }
 
-VirtualFile ContentProviderUnion::GetEntryRaw(u64 title_id, ContentRecordType type) const {
+VirtualFile ContentProviderUnion::GetEntryRaw(u64 title_id, ContentRecordType type) const
+{
     for (auto const e : providers) {
         if (e == nullptr)
             continue;
@@ -1102,7 +1171,8 @@ VirtualFile ContentProviderUnion::GetEntryRaw(u64 title_id, ContentRecordType ty
     return nullptr;
 }
 
-std::unique_ptr<NCA> ContentProviderUnion::GetEntry(u64 title_id, ContentRecordType type) const {
+std::unique_ptr<NCA> ContentProviderUnion::GetEntry(u64 title_id, ContentRecordType type) const
+{
     for (auto const e : providers) {
         if (e == nullptr)
             continue;
@@ -1112,7 +1182,11 @@ std::unique_ptr<NCA> ContentProviderUnion::GetEntry(u64 title_id, ContentRecordT
     return nullptr;
 }
 
-std::vector<ContentProviderEntry> ContentProviderUnion::ListEntriesFilter(std::optional<TitleType> title_type, std::optional<ContentRecordType> record_type, std::optional<u64> title_id) const {
+std::vector<ContentProviderEntry>
+ContentProviderUnion::ListEntriesFilter(std::optional<TitleType> title_type,
+                                        std::optional<ContentRecordType> record_type,
+                                        std::optional<u64> title_id) const
+{
     std::vector<ContentProviderEntry> out;
     for (auto const& e : providers) {
         if (e != nullptr) {
@@ -1125,7 +1199,12 @@ std::vector<ContentProviderEntry> ContentProviderUnion::ListEntriesFilter(std::o
     return out;
 }
 
-std::vector<std::pair<ContentProviderUnionSlot, ContentProviderEntry>> ContentProviderUnion::ListEntriesFilterOrigin(std::optional<ContentProviderUnionSlot> origin, std::optional<TitleType> title_type, std::optional<ContentRecordType> record_type, std::optional<u64> title_id) const {
+std::vector<std::pair<ContentProviderUnionSlot, ContentProviderEntry>>
+ContentProviderUnion::ListEntriesFilterOrigin(std::optional<ContentProviderUnionSlot> origin,
+                                              std::optional<TitleType> title_type,
+                                              std::optional<ContentRecordType> record_type,
+                                              std::optional<u64> title_id) const
+{
     std::vector<std::pair<ContentProviderUnionSlot, ContentProviderEntry>> out;
 
     for (size_t i = 0; i < providers.size(); ++i) {
@@ -1135,9 +1214,10 @@ std::vector<std::pair<ContentProviderUnionSlot, ContentProviderEntry>> ContentPr
         if (origin.has_value() && *origin != ContentProviderUnionSlot(i))
             continue;
         auto const vec = e->ListEntriesFilter(title_type, record_type, title_id);
-        std::transform(vec.begin(), vec.end(), std::back_inserter(out), [i](const ContentProviderEntry& entry) {
-            return std::make_pair(ContentProviderUnionSlot(i), entry);
-        });
+        std::transform(vec.begin(), vec.end(), std::back_inserter(out),
+                       [i](const ContentProviderEntry& entry) {
+                           return std::make_pair(ContentProviderUnionSlot(i), entry);
+                       });
     }
 
     std::sort(out.begin(), out.end());
@@ -1145,7 +1225,9 @@ std::vector<std::pair<ContentProviderUnionSlot, ContentProviderEntry>> ContentPr
     return out;
 }
 
-std::optional<ContentProviderUnionSlot> ContentProviderUnion::GetSlotForEntry(u64 title_id, ContentRecordType type) const {
+std::optional<ContentProviderUnionSlot>
+ContentProviderUnion::GetSlotForEntry(u64 title_id, ContentRecordType type) const
+{
     for (size_t i = 0; i < providers.size(); ++i) {
         auto const& e = providers[i];
         if (e != nullptr && e->HasEntry(title_id, type))
@@ -1154,23 +1236,30 @@ std::optional<ContentProviderUnionSlot> ContentProviderUnion::GetSlotForEntry(u6
     return std::nullopt;
 }
 
-const ExternalContentProvider* ContentProviderUnion::GetExternalProvider() const {
-    return static_cast<const ExternalContentProvider*>(providers[size_t(ContentProviderUnionSlot::External)]);
+const ExternalContentProvider* ContentProviderUnion::GetExternalProvider() const
+{
+    return static_cast<const ExternalContentProvider*>(
+        providers[size_t(ContentProviderUnionSlot::External)]);
 }
 
 ManualContentProvider::~ManualContentProvider() = default;
 
-void ManualContentProvider::AddEntry(TitleType title_type, ContentRecordType content_type, u64 title_id, VirtualFile file) {
+void ManualContentProvider::AddEntry(TitleType title_type, ContentRecordType content_type,
+                                     u64 title_id, VirtualFile file)
+{
     entries.insert_or_assign({title_type, content_type, title_id}, file);
 }
 
-void ManualContentProvider::AddEntryWithVersion(TitleType title_type, ContentRecordType content_type,
-                                                u64 title_id, u32 version,
-                                                const std::string& version_string, VirtualFile file) {
+void ManualContentProvider::AddEntryWithVersion(TitleType title_type,
+                                                ContentRecordType content_type, u64 title_id,
+                                                u32 version, const std::string& version_string,
+                                                VirtualFile file)
+{
     if (title_type == TitleType::Update) {
-        auto it = std::find_if(multi_version_entries.begin(), multi_version_entries.end(), [title_id, version](const ExternalUpdateEntry& entry) {
-            return entry.title_id == title_id && entry.version == version;
-        });
+        auto it = std::find_if(multi_version_entries.begin(), multi_version_entries.end(),
+                               [title_id, version](const ExternalUpdateEntry& entry) {
+                                   return entry.title_id == title_id && entry.version == version;
+                               });
 
         if (it != multi_version_entries.end()) {
             // Update existing entry
@@ -1206,45 +1295,53 @@ void ManualContentProvider::AddEntryWithVersion(TitleType title_type, ContentRec
 }
 
 bool ManualContentProvider::AddEntriesFromContainer(VirtualFile file, bool only_content,
-                                                    std::optional<u64> base_program_id) {
+                                                    std::optional<u64> base_program_id)
+{
     const auto nsp = OpenContainerAsNsp(file, Loader::FileType::Unknown);
     if (!nsp) {
         return false;
     }
 
-    return ForEachContainerEntry(
-        nsp, only_content, base_program_id,
-        [this](TitleType title_type, ContentRecordType content_type, u64 title_id,
-               const VirtualFile& entry_file, u32 version, const std::string& version_string) {
-            if (title_type == TitleType::Update) {
-                AddEntryWithVersion(title_type, content_type, title_id, version, version_string,
-                                    entry_file);
-            } else {
-                AddEntry(title_type, content_type, title_id, entry_file);
-            }
-        });
+    return ForEachContainerEntry(nsp, only_content, base_program_id,
+                                 [this](TitleType title_type, ContentRecordType content_type,
+                                        u64 title_id, const VirtualFile& entry_file, u32 version,
+                                        const std::string& version_string) {
+                                     if (title_type == TitleType::Update) {
+                                         AddEntryWithVersion(title_type, content_type, title_id,
+                                                             version, version_string, entry_file);
+                                     } else {
+                                         AddEntry(title_type, content_type, title_id, entry_file);
+                                     }
+                                 });
 }
 
-void ManualContentProvider::ClearAllEntries() {
+void ManualContentProvider::ClearAllEntries()
+{
     entries.clear();
     multi_version_entries.clear();
 }
 
-void ManualContentProvider::Refresh() {}
+void ManualContentProvider::Refresh()
+{
+}
 
-bool ManualContentProvider::HasEntry(u64 title_id, ContentRecordType type) const {
+bool ManualContentProvider::HasEntry(u64 title_id, ContentRecordType type) const
+{
     return GetEntryRaw(title_id, type) != nullptr;
 }
 
-std::optional<u32> ManualContentProvider::GetEntryVersion(u64 title_id) const {
+std::optional<u32> ManualContentProvider::GetEntryVersion(u64 title_id) const
+{
     return std::nullopt;
 }
 
-VirtualFile ManualContentProvider::GetEntryUnparsed(u64 title_id, ContentRecordType type) const {
+VirtualFile ManualContentProvider::GetEntryUnparsed(u64 title_id, ContentRecordType type) const
+{
     return GetEntryRaw(title_id, type);
 }
 
-VirtualFile ManualContentProvider::GetEntryRaw(u64 title_id, ContentRecordType type) const {
+VirtualFile ManualContentProvider::GetEntryRaw(u64 title_id, ContentRecordType type) const
+{
     const auto iter =
         std::find_if(entries.begin(), entries.end(), [title_id, type](const auto& entry) {
             const auto content_type = std::get<1>(entry.first);
@@ -1256,16 +1353,19 @@ VirtualFile ManualContentProvider::GetEntryRaw(u64 title_id, ContentRecordType t
     return iter->second;
 }
 
-std::unique_ptr<NCA> ManualContentProvider::GetEntry(u64 title_id, ContentRecordType type) const {
+std::unique_ptr<NCA> ManualContentProvider::GetEntry(u64 title_id, ContentRecordType type) const
+{
     const auto res = GetEntryRaw(title_id, type);
     if (res == nullptr)
         return nullptr;
     return std::make_unique<NCA>(res);
 }
 
-std::vector<ContentProviderEntry> ManualContentProvider::ListEntriesFilter(
-    std::optional<TitleType> title_type, std::optional<ContentRecordType> record_type,
-    std::optional<u64> title_id) const {
+std::vector<ContentProviderEntry>
+ManualContentProvider::ListEntriesFilter(std::optional<TitleType> title_type,
+                                         std::optional<ContentRecordType> record_type,
+                                         std::optional<u64> title_id) const
+{
     std::vector<ContentProviderEntry> out;
 
     for (const auto& entry : entries) {
@@ -1282,7 +1382,8 @@ std::vector<ContentProviderEntry> ManualContentProvider::ListEntriesFilter(
     return out;
 }
 
-std::vector<ExternalUpdateEntry> ManualContentProvider::ListUpdateVersions(u64 title_id) const {
+std::vector<ExternalUpdateEntry> ManualContentProvider::ListUpdateVersions(u64 title_id) const
+{
     std::vector<ExternalUpdateEntry> out;
 
     for (const auto& entry : multi_version_entries) {
@@ -1291,14 +1392,17 @@ std::vector<ExternalUpdateEntry> ManualContentProvider::ListUpdateVersions(u64 t
         }
     }
 
-    std::sort(out.begin(), out.end(), [](const ExternalUpdateEntry& a, const ExternalUpdateEntry& b) {
-        return a.version > b.version;
-    });
+    std::sort(out.begin(), out.end(),
+              [](const ExternalUpdateEntry& a, const ExternalUpdateEntry& b) {
+                  return a.version > b.version;
+              });
 
     return out;
 }
 
-VirtualFile ManualContentProvider::GetEntryForVersion(u64 title_id, ContentRecordType type, u32 version) const {
+VirtualFile ManualContentProvider::GetEntryForVersion(u64 title_id, ContentRecordType type,
+                                                      u32 version) const
+{
     for (const auto& entry : multi_version_entries) {
         if (entry.title_id == title_id && entry.version == version) {
             if (auto const p = entry.files[size_t(type)])
@@ -1309,27 +1413,31 @@ VirtualFile ManualContentProvider::GetEntryForVersion(u64 title_id, ContentRecor
 }
 
 ExternalContentProvider::ExternalContentProvider(std::vector<VirtualDir> load_directories)
-    : load_dirs(std::move(load_directories)) {
+    : load_dirs(std::move(load_directories))
+{
     ExternalContentProvider::Refresh();
 }
 
 ExternalContentProvider::~ExternalContentProvider() = default;
 
-void ExternalContentProvider::AddDirectory(VirtualDir directory) {
+void ExternalContentProvider::AddDirectory(VirtualDir directory)
+{
     if (directory != nullptr) {
         load_dirs.push_back(std::move(directory));
         ScanDirectory(load_dirs.back());
     }
 }
 
-void ExternalContentProvider::ClearDirectories() {
+void ExternalContentProvider::ClearDirectories()
+{
     load_dirs.clear();
     entries.clear();
     versions.clear();
     multi_version_entries.clear();
 }
 
-void ExternalContentProvider::Refresh() {
+void ExternalContentProvider::Refresh()
+{
     entries.clear();
     versions.clear();
     multi_version_entries.clear();
@@ -1340,7 +1448,8 @@ void ExternalContentProvider::Refresh() {
     }
 }
 
-void ExternalContentProvider::ScanDirectory(const VirtualDir& dir) {
+void ExternalContentProvider::ScanDirectory(const VirtualDir& dir)
+{
     if (dir == nullptr) {
         return;
     }
@@ -1367,7 +1476,8 @@ void ExternalContentProvider::ScanDirectory(const VirtualDir& dir) {
     }
 }
 
-void ExternalContentProvider::ProcessNSP(const VirtualFile& file) {
+void ExternalContentProvider::ProcessNSP(const VirtualFile& file)
+{
     const auto nsp = OpenContainerAsNsp(file, Loader::FileType::NSP);
     if (!nsp) {
         return;
@@ -1377,7 +1487,8 @@ void ExternalContentProvider::ProcessNSP(const VirtualFile& file) {
     AddExternalEntriesFromContainer(nsp, entries, versions, multi_version_entries);
 }
 
-void ExternalContentProvider::ProcessXCI(const VirtualFile& file) {
+void ExternalContentProvider::ProcessXCI(const VirtualFile& file)
+{
     const auto nsp = OpenContainerAsNsp(file, Loader::FileType::XCI);
     if (!nsp) {
         return;
@@ -1386,11 +1497,13 @@ void ExternalContentProvider::ProcessXCI(const VirtualFile& file) {
     AddExternalEntriesFromContainer(nsp, entries, versions, multi_version_entries);
 }
 
-bool ExternalContentProvider::HasEntry(u64 title_id, ContentRecordType type) const {
+bool ExternalContentProvider::HasEntry(u64 title_id, ContentRecordType type) const
+{
     return GetEntryRaw(title_id, type) != nullptr;
 }
 
-std::optional<u32> ExternalContentProvider::GetEntryVersion(u64 title_id) const {
+std::optional<u32> ExternalContentProvider::GetEntryVersion(u64 title_id) const
+{
     const auto it = versions.find(title_id);
     if (it != versions.end()) {
         return it->second;
@@ -1398,11 +1511,13 @@ std::optional<u32> ExternalContentProvider::GetEntryVersion(u64 title_id) const 
     return std::nullopt;
 }
 
-VirtualFile ExternalContentProvider::GetEntryUnparsed(u64 title_id, ContentRecordType type) const {
+VirtualFile ExternalContentProvider::GetEntryUnparsed(u64 title_id, ContentRecordType type) const
+{
     return GetEntryRaw(title_id, type);
 }
 
-VirtualFile ExternalContentProvider::GetEntryRaw(u64 title_id, ContentRecordType type) const {
+VirtualFile ExternalContentProvider::GetEntryRaw(u64 title_id, ContentRecordType type) const
+{
     // Try to find in AOC (DLC) entries
     {
         const auto it = entries.find({title_id, type, TitleType::AOC});
@@ -1422,8 +1537,8 @@ VirtualFile ExternalContentProvider::GetEntryRaw(u64 title_id, ContentRecordType
     return nullptr;
 }
 
-std::unique_ptr<NCA> ExternalContentProvider::GetEntry(u64 title_id,
-                                                        ContentRecordType type) const {
+std::unique_ptr<NCA> ExternalContentProvider::GetEntry(u64 title_id, ContentRecordType type) const
+{
     const auto file = GetEntryRaw(title_id, type);
     if (file == nullptr) {
         return nullptr;
@@ -1431,9 +1546,11 @@ std::unique_ptr<NCA> ExternalContentProvider::GetEntry(u64 title_id,
     return std::make_unique<NCA>(file);
 }
 
-std::vector<ContentProviderEntry> ExternalContentProvider::ListEntriesFilter(
-    std::optional<TitleType> title_type, std::optional<ContentRecordType> record_type,
-    std::optional<u64> title_id) const {
+std::vector<ContentProviderEntry>
+ExternalContentProvider::ListEntriesFilter(std::optional<TitleType> title_type,
+                                           std::optional<ContentRecordType> record_type,
+                                           std::optional<u64> title_id) const
+{
     std::vector<ContentProviderEntry> out;
 
     for (const auto& [key, file] : entries) {
@@ -1451,7 +1568,8 @@ std::vector<ContentProviderEntry> ExternalContentProvider::ListEntriesFilter(
     return out;
 }
 
-std::vector<ExternalUpdateEntry> ExternalContentProvider::ListUpdateVersions(u64 title_id) const {
+std::vector<ExternalUpdateEntry> ExternalContentProvider::ListUpdateVersions(u64 title_id) const
+{
     std::vector<ExternalUpdateEntry> out;
 
     for (const auto& entry : multi_version_entries) {
@@ -1460,14 +1578,17 @@ std::vector<ExternalUpdateEntry> ExternalContentProvider::ListUpdateVersions(u64
         }
     }
 
-    std::sort(out.begin(), out.end(), [](const ExternalUpdateEntry& a, const ExternalUpdateEntry& b) {
-        return a.version > b.version;
-    });
+    std::sort(out.begin(), out.end(),
+              [](const ExternalUpdateEntry& a, const ExternalUpdateEntry& b) {
+                  return a.version > b.version;
+              });
 
     return out;
 }
 
-VirtualFile ExternalContentProvider::GetEntryForVersion(u64 title_id, ContentRecordType type, u32 version) const {
+VirtualFile ExternalContentProvider::GetEntryForVersion(u64 title_id, ContentRecordType type,
+                                                        u32 version) const
+{
     for (const auto& entry : multi_version_entries)
         if (entry.title_id == title_id && entry.version == version)
             if (auto const p = entry.files[size_t(type)])

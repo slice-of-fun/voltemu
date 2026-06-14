@@ -4,6 +4,8 @@
 // SPDX-FileCopyrightText: Copyright 2024 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/am/service/library_applet_accessor.h"
+
 #include "common/settings.h"
 #include "core/hle/service/acc/profile_manager.h"
 #include "core/hle/service/am/applet_data_broker.h"
@@ -11,7 +13,6 @@
 #include "core/hle/service/am/frontend/applet_profile_select.h"
 #include "core/hle/service/am/frontend/applets.h"
 #include "core/hle/service/am/library_applet_storage.h"
-#include "core/hle/service/am/service/library_applet_accessor.h"
 #include "core/hle/service/am/service/storage.h"
 #include "core/hle/service/cmif_serialization.h"
 
@@ -19,7 +20,8 @@ namespace Service::AM {
 
 namespace {
 
-void EnableSingleUserPlay(const std::shared_ptr<LibraryAppletStorage>& impl) {
+void EnableSingleUserPlay(const std::shared_ptr<LibraryAppletStorage>& impl)
+{
     constexpr s64 DisplayOptionsOffset = 0x90;
     constexpr s64 IsSkipEnabledOffset = 1;
     constexpr s64 ShowSkipButtonOffset = 4;
@@ -29,7 +31,8 @@ void EnableSingleUserPlay(const std::shared_ptr<LibraryAppletStorage>& impl) {
     impl->Write(DisplayOptionsOffset + ShowSkipButtonOffset, &enabled, sizeof(enabled));
 }
 
-void ReplaceEmptyUuidWithCurrentUser(const std::shared_ptr<LibraryAppletStorage>& impl) {
+void ReplaceEmptyUuidWithCurrentUser(const std::shared_ptr<LibraryAppletStorage>& impl)
+{
     Frontend::UiReturnArg return_arg{};
     impl->Read(0, &return_arg, sizeof(return_arg));
 
@@ -53,7 +56,8 @@ ILibraryAppletAccessor::ILibraryAppletAccessor(Core::System& system_,
                                                std::shared_ptr<AppletDataBroker> broker,
                                                std::shared_ptr<Applet> applet)
     : ServiceFramework{system_, "ILibraryAppletAccessor"}, m_broker{std::move(broker)},
-      m_applet{std::move(applet)} {
+      m_applet{std::move(applet)}
+{
     // clang-format off
     static const FunctionInfo functions[] = {
         {0, D<&ILibraryAppletAccessor::GetAppletStateChangedEvent>, "GetAppletStateChangedEvent"},
@@ -87,39 +91,45 @@ ILibraryAppletAccessor::ILibraryAppletAccessor(Core::System& system_,
 
 ILibraryAppletAccessor::~ILibraryAppletAccessor() = default;
 
-Result ILibraryAppletAccessor::GetAppletStateChangedEvent(
-    OutCopyHandle<Kernel::KReadableEvent> out_event) {
+Result
+ILibraryAppletAccessor::GetAppletStateChangedEvent(OutCopyHandle<Kernel::KReadableEvent> out_event)
+{
     LOG_DEBUG(Service_AM, "called");
     *out_event = m_applet->state_changed_event.GetHandle();
     R_SUCCEED();
 }
 
-Result ILibraryAppletAccessor::IsCompleted(Out<bool> out_is_completed) {
+Result ILibraryAppletAccessor::IsCompleted(Out<bool> out_is_completed)
+{
     LOG_DEBUG(Service_AM, "called");
     std::scoped_lock lk{m_applet->lock};
     *out_is_completed = m_applet->is_completed;
     R_SUCCEED();
 }
 
-Result ILibraryAppletAccessor::GetResult() {
+Result ILibraryAppletAccessor::GetResult()
+{
     LOG_DEBUG(Service_AM, "called");
     std::scoped_lock lk{m_applet->lock};
     R_RETURN(m_applet->terminate_result);
 }
 
-Result ILibraryAppletAccessor::PresetLibraryAppletGpuTimeSliceZero() {
+Result ILibraryAppletAccessor::PresetLibraryAppletGpuTimeSliceZero()
+{
     LOG_INFO(Service_AM, "(STUBBED) called");
     R_SUCCEED();
 }
 
-Result ILibraryAppletAccessor::Start() {
+Result ILibraryAppletAccessor::Start()
+{
     LOG_DEBUG(Service_AM, "called");
     m_applet->process->Run();
     FrontendExecute();
     R_SUCCEED();
 }
 
-Result ILibraryAppletAccessor::RequestExit() {
+Result ILibraryAppletAccessor::RequestExit()
+{
     LOG_DEBUG(Service_AM, "called");
     {
         std::scoped_lock lk{m_applet->lock};
@@ -129,19 +139,22 @@ Result ILibraryAppletAccessor::RequestExit() {
     R_SUCCEED();
 }
 
-Result ILibraryAppletAccessor::Terminate() {
+Result ILibraryAppletAccessor::Terminate()
+{
     LOG_DEBUG(Service_AM, "called");
     m_applet->process->Terminate();
     FrontendRequestExit();
     R_SUCCEED();
 }
 
-Result ILibraryAppletAccessor::Unknown90() {
+Result ILibraryAppletAccessor::Unknown90()
+{
     LOG_WARNING(Service_AM, "(STUBBED) called");
     R_SUCCEED();
 }
 
-Result ILibraryAppletAccessor::PushInData(SharedPointer<IStorage> storage) {
+Result ILibraryAppletAccessor::PushInData(SharedPointer<IStorage> storage)
+{
     LOG_DEBUG(Service_AM, "called");
 
     // Special case for ProfileSelect applet, to enable single user play as
@@ -150,8 +163,8 @@ Result ILibraryAppletAccessor::PushInData(SharedPointer<IStorage> storage) {
         auto impl = storage->GetImpl();
         const s64 size = impl->GetSize();
 
-        const bool is_ui_settings = size == sizeof(Frontend::UiSettings) ||
-                                    size == sizeof(Frontend::UiSettingsV1);
+        const bool is_ui_settings =
+            size == sizeof(Frontend::UiSettings) || size == sizeof(Frontend::UiSettingsV1);
         if (is_ui_settings) {
             EnableSingleUserPlay(impl);
         }
@@ -161,7 +174,8 @@ Result ILibraryAppletAccessor::PushInData(SharedPointer<IStorage> storage) {
     R_SUCCEED();
 }
 
-Result ILibraryAppletAccessor::PopOutData(Out<SharedPointer<IStorage>> out_storage) {
+Result ILibraryAppletAccessor::PopOutData(Out<SharedPointer<IStorage>> out_storage)
+{
     LOG_DEBUG(Service_AM, "called");
 
     if (auto caller_applet = m_applet->caller_applet.lock(); caller_applet) {
@@ -184,32 +198,37 @@ Result ILibraryAppletAccessor::PopOutData(Out<SharedPointer<IStorage>> out_stora
     R_SUCCEED();
 }
 
-Result ILibraryAppletAccessor::PushInteractiveInData(SharedPointer<IStorage> storage) {
+Result ILibraryAppletAccessor::PushInteractiveInData(SharedPointer<IStorage> storage)
+{
     LOG_DEBUG(Service_AM, "called");
     m_broker->GetInteractiveInData().Push(storage);
     FrontendExecuteInteractive();
     R_SUCCEED();
 }
 
-Result ILibraryAppletAccessor::PopInteractiveOutData(Out<SharedPointer<IStorage>> out_storage) {
+Result ILibraryAppletAccessor::PopInteractiveOutData(Out<SharedPointer<IStorage>> out_storage)
+{
     LOG_DEBUG(Service_AM, "called");
     R_RETURN(m_broker->GetInteractiveOutData().Pop(out_storage.Get()));
 }
 
-Result ILibraryAppletAccessor::GetPopOutDataEvent(OutCopyHandle<Kernel::KReadableEvent> out_event) {
+Result ILibraryAppletAccessor::GetPopOutDataEvent(OutCopyHandle<Kernel::KReadableEvent> out_event)
+{
     LOG_DEBUG(Service_AM, "called");
     *out_event = m_broker->GetOutData().GetEvent();
     R_SUCCEED();
 }
 
 Result ILibraryAppletAccessor::GetPopInteractiveOutDataEvent(
-    OutCopyHandle<Kernel::KReadableEvent> out_event) {
+    OutCopyHandle<Kernel::KReadableEvent> out_event)
+{
     LOG_DEBUG(Service_AM, "called");
     *out_event = m_broker->GetInteractiveOutData().GetEvent();
     R_SUCCEED();
 }
 
-Result ILibraryAppletAccessor::GetIndirectLayerConsumerHandle(Out<u64> out_handle) {
+Result ILibraryAppletAccessor::GetIndirectLayerConsumerHandle(Out<u64> out_handle)
+{
     LOG_WARNING(Service_AM, "(STUBBED) called");
 
     // We require a non-zero handle to be valid. Using 0xdeadbeef allows us to trace if this is
@@ -218,27 +237,31 @@ Result ILibraryAppletAccessor::GetIndirectLayerConsumerHandle(Out<u64> out_handl
     R_SUCCEED();
 }
 
-Result ILibraryAppletAccessor::Unknown170(OutCopyHandle<Kernel::KReadableEvent> out_event) {
+Result ILibraryAppletAccessor::Unknown170(OutCopyHandle<Kernel::KReadableEvent> out_event)
+{
     LOG_WARNING(Service_AM, "(STUBBED) called");
     *out_event = m_applet->unknown_event.GetHandle();
     R_SUCCEED();
 }
 
-void ILibraryAppletAccessor::FrontendExecute() {
+void ILibraryAppletAccessor::FrontendExecute()
+{
     if (m_applet->frontend) {
         m_applet->frontend->Initialize();
         m_applet->frontend->Execute();
     }
 }
 
-void ILibraryAppletAccessor::FrontendExecuteInteractive() {
+void ILibraryAppletAccessor::FrontendExecuteInteractive()
+{
     if (m_applet->frontend) {
         m_applet->frontend->ExecuteInteractive();
         m_applet->frontend->Execute();
     }
 }
 
-void ILibraryAppletAccessor::FrontendRequestExit() {
+void ILibraryAppletAccessor::FrontendRequestExit()
+{
     if (m_applet->frontend) {
         m_applet->frontend->RequestExit();
     }

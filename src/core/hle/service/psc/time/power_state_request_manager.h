@@ -19,9 +19,7 @@ public:
     explicit PowerStateRequestManager(Core::System& system);
     ~PowerStateRequestManager();
 
-    Kernel::KReadableEvent& GetReadableEvent() {
-        return m_event->GetReadableEvent();
-    }
+    Kernel::KReadableEvent& GetReadableEvent() { return m_event->GetReadableEvent(); }
 
     void UpdatePendingPowerStateRequestPriority(u32 priority);
     void SignalPowerStateRequestAvailability();

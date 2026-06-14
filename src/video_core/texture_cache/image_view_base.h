@@ -29,9 +29,7 @@ struct ImageViewBase {
     explicit ImageViewBase(const ImageInfo& info, const ImageViewInfo& view_info, GPUVAddr addr);
     explicit ImageViewBase(const NullImageViewParams&);
 
-    [[nodiscard]] bool IsBuffer() const noexcept {
-        return type == ImageViewType::Buffer;
-    }
+    [[nodiscard]] bool IsBuffer() const noexcept { return type == ImageViewType::Buffer; }
 
     [[nodiscard]] bool SupportsAnisotropy() const noexcept;
 

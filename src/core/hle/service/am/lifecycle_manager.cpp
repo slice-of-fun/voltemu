@@ -4,36 +4,44 @@
 // SPDX-FileCopyrightText: Copyright 2024 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include "common/assert.h"
 #include "core/hle/service/am/lifecycle_manager.h"
+
+#include "common/assert.h"
 
 namespace Service::AM {
 
 LifecycleManager::LifecycleManager(Core::System& system, KernelHelpers::ServiceContext& context,
                                    bool is_application)
     : m_system_event(context), m_operation_mode_changed_system_event(context),
-      m_hdcp_state_changed_event(context), m_is_application(is_application) {}
+      m_hdcp_state_changed_event(context), m_is_application(is_application)
+{
+}
 
 LifecycleManager::~LifecycleManager() = default;
 
-Event& LifecycleManager::GetSystemEvent() {
+Event& LifecycleManager::GetSystemEvent()
+{
     return m_system_event;
 }
 
-Event& LifecycleManager::GetOperationModeChangedSystemEvent() {
+Event& LifecycleManager::GetOperationModeChangedSystemEvent()
+{
     return m_operation_mode_changed_system_event;
 }
 
-Event& LifecycleManager::GetHDCPStateChangedEvent() {
+Event& LifecycleManager::GetHDCPStateChangedEvent()
+{
     return m_hdcp_state_changed_event;
 }
 
-void LifecycleManager::PushUnorderedMessage(AppletMessage message) {
+void LifecycleManager::PushUnorderedMessage(AppletMessage message)
+{
     m_unordered_messages.push_back(message);
     this->SignalSystemEventIfNeeded();
 }
 
-AppletMessage LifecycleManager::PopMessageInOrderOfPriority() {
+AppletMessage LifecycleManager::PopMessageInOrderOfPriority()
+{
     if (m_has_resume) {
         m_has_resume = false;
         return AppletMessage::Resume;
@@ -122,7 +130,8 @@ AppletMessage LifecycleManager::PopMessageInOrderOfPriority() {
     return AppletMessage::None;
 }
 
-bool LifecycleManager::ShouldSignalSystemEvent() {
+bool LifecycleManager::ShouldSignalSystemEvent()
+{
     if (m_focus_state_changed_notification_enabled) {
         if (!m_is_application) {
             if (m_requested_focus_state != m_acknowledged_focus_state) {
@@ -144,7 +153,8 @@ bool LifecycleManager::ShouldSignalSystemEvent() {
            m_has_album_screen_shot_taken || m_has_album_recording_saved;
 }
 
-void LifecycleManager::OnOperationAndPerformanceModeChanged() {
+void LifecycleManager::OnOperationAndPerformanceModeChanged()
+{
     if (m_operation_mode_changed_notification_enabled) {
         m_has_operation_mode_changed = true;
     }
@@ -155,7 +165,8 @@ void LifecycleManager::OnOperationAndPerformanceModeChanged() {
     this->SignalSystemEventIfNeeded();
 }
 
-void LifecycleManager::SignalSystemEventIfNeeded() {
+void LifecycleManager::SignalSystemEventIfNeeded()
+{
     // Check our cached value for the system event.
     const bool applet_message_available = m_applet_message_available;
 
@@ -171,7 +182,8 @@ void LifecycleManager::SignalSystemEventIfNeeded() {
     }
 }
 
-bool LifecycleManager::PopMessage(AppletMessage* out_message) {
+bool LifecycleManager::PopMessage(AppletMessage* out_message)
+{
     const auto message = this->PopMessageInOrderOfPriority();
     this->SignalSystemEventIfNeeded();
 
@@ -179,7 +191,8 @@ bool LifecycleManager::PopMessage(AppletMessage* out_message) {
     return message != AppletMessage::None;
 }
 
-void LifecycleManager::SetFocusHandlingMode(bool suspend) {
+void LifecycleManager::SetFocusHandlingMode(bool suspend)
+{
     switch (m_focus_handling_mode) {
     case FocusHandlingMode::AlwaysSuspend:
     case FocusHandlingMode::SuspendHomeSleep:
@@ -197,7 +210,8 @@ void LifecycleManager::SetFocusHandlingMode(bool suspend) {
     }
 }
 
-void LifecycleManager::SetOutOfFocusSuspendingEnabled(bool enabled) {
+void LifecycleManager::SetOutOfFocusSuspendingEnabled(bool enabled)
+{
     switch (m_focus_handling_mode) {
     case FocusHandlingMode::AlwaysSuspend:
         if (!enabled) {
@@ -215,7 +229,8 @@ void LifecycleManager::SetOutOfFocusSuspendingEnabled(bool enabled) {
     }
 }
 
-void LifecycleManager::RemoveForceResumeIfPossible() {
+void LifecycleManager::RemoveForceResumeIfPossible()
+{
     // If resume is not forced, we have nothing to do.
     if (m_suspend_mode != SuspendMode::ForceResume) {
         return;
@@ -250,7 +265,8 @@ void LifecycleManager::RemoveForceResumeIfPossible() {
     }
 }
 
-bool LifecycleManager::IsRunnable() const {
+bool LifecycleManager::IsRunnable() const
+{
     // If suspend is forced, return that.
     if (m_forced_suspend) {
         return false;
@@ -302,7 +318,8 @@ bool LifecycleManager::IsRunnable() const {
     return m_focus_handling_mode == FocusHandlingMode::NoSuspend;
 }
 
-FocusState LifecycleManager::GetFocusStateWhileForegroundObscured() const {
+FocusState LifecycleManager::GetFocusStateWhileForegroundObscured() const
+{
     switch (m_focus_handling_mode) {
     case FocusHandlingMode::AlwaysSuspend:
         // The applet never learns it has lost focus.
@@ -321,7 +338,8 @@ FocusState LifecycleManager::GetFocusStateWhileForegroundObscured() const {
     }
 }
 
-FocusState LifecycleManager::GetFocusStateWhileBackground(bool is_obscured) const {
+FocusState LifecycleManager::GetFocusStateWhileBackground(bool is_obscured) const
+{
     switch (m_focus_handling_mode) {
     case FocusHandlingMode::AlwaysSuspend:
         // The applet never learns it has lost focus.
@@ -340,7 +358,8 @@ FocusState LifecycleManager::GetFocusStateWhileBackground(bool is_obscured) cons
     }
 }
 
-bool LifecycleManager::UpdateRequestedFocusState() {
+bool LifecycleManager::UpdateRequestedFocusState()
+{
     FocusState new_state{};
 
     if (m_suspend_mode == SuspendMode::NoOverride) {

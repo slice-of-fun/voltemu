@@ -4,10 +4,11 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "audio_core/renderer/command/resample/upsample.h"
+
 #include <array>
 
 #include "audio_core/adsp/apps/audio_renderer/command_list_processor.h"
-#include "audio_core/renderer/command/resample/upsample.h"
 #include "audio_core/renderer/upsampler/upsampler_info.h"
 
 namespace AudioCore::Renderer {
@@ -21,7 +22,8 @@ namespace AudioCore::Renderer {
  */
 static void SrcProcessFrame(std::span<s32> output, std::span<const s32> input,
                             const u32 target_sample_count, const u32 source_sample_count,
-                            UpsamplerState* state) {
+                            UpsamplerState* state)
+{
     static constexpr u32 WindowSize = 10;
     static constexpr std::array<Common::FixedPoint<17, 15>, WindowSize> WindowedSinc1{
         0.95376587f,   -0.12872314f, 0.060028076f,  -0.032470703f, 0.017669678f,
@@ -202,7 +204,8 @@ static void SrcProcessFrame(std::span<s32> output, std::span<const s32> input,
 }
 
 auto UpsampleCommand::Dump([[maybe_unused]] const AudioRenderer::CommandListProcessor& processor,
-                           std::string& string) -> void {
+                           std::string& string) -> void
+{
     string += fmt::format("UpsampleCommand\n\tsource_sample_count {} source_sample_rate {}",
                           source_sample_count, source_sample_rate);
     const auto upsampler{reinterpret_cast<UpsamplerInfo*>(upsampler_info)};
@@ -216,7 +219,8 @@ auto UpsampleCommand::Dump([[maybe_unused]] const AudioRenderer::CommandListProc
     string += "\n";
 }
 
-void UpsampleCommand::Process(const AudioRenderer::CommandListProcessor& processor) {
+void UpsampleCommand::Process(const AudioRenderer::CommandListProcessor& processor)
+{
     const auto info{reinterpret_cast<UpsamplerInfo*>(upsampler_info)};
     const auto input_count{(std::min)(info->input_count, buffer_count)};
     const std::span<const s16> inputs_{reinterpret_cast<const s16*>(inputs), input_count};
@@ -237,7 +241,8 @@ void UpsampleCommand::Process(const AudioRenderer::CommandListProcessor& process
     }
 }
 
-bool UpsampleCommand::Verify(const AudioRenderer::CommandListProcessor& processor) {
+bool UpsampleCommand::Verify(const AudioRenderer::CommandListProcessor& processor)
+{
     return true;
 }
 

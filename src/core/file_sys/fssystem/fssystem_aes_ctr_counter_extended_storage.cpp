@@ -5,6 +5,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include "core/file_sys/fssystem/fssystem_aes_ctr_counter_extended_storage.h"
+
 #include "core/file_sys/fssystem/fssystem_aes_ctr_storage.h"
 #include "core/file_sys/fssystem/fssystem_nca_header.h"
 #include "core/file_sys/vfs/vfs_offset.h"
@@ -15,14 +16,16 @@ namespace {
 
 class SoftwareDecryptor final : public AesCtrCounterExtendedStorage::IDecryptor {
 public:
-    virtual void Decrypt(
-        u8* buf, size_t buf_size, const std::array<u8, AesCtrCounterExtendedStorage::KeySize>& key,
-        const std::array<u8, AesCtrCounterExtendedStorage::IvSize>& iv) override final;
+    virtual void
+    Decrypt(u8* buf, size_t buf_size,
+            const std::array<u8, AesCtrCounterExtendedStorage::KeySize>& key,
+            const std::array<u8, AesCtrCounterExtendedStorage::IvSize>& iv) override final;
 };
 
 } // namespace
 
-Result AesCtrCounterExtendedStorage::CreateSoftwareDecryptor(std::unique_ptr<IDecryptor>* out) {
+Result AesCtrCounterExtendedStorage::CreateSoftwareDecryptor(std::unique_ptr<IDecryptor>* out)
+{
     std::unique_ptr<IDecryptor> decryptor = std::make_unique<SoftwareDecryptor>();
     R_UNLESS(decryptor != nullptr, ResultAllocationMemoryFailedInAesCtrCounterExtendedStorageA);
     *out = std::move(decryptor);
@@ -30,8 +33,8 @@ Result AesCtrCounterExtendedStorage::CreateSoftwareDecryptor(std::unique_ptr<IDe
 }
 
 Result AesCtrCounterExtendedStorage::Initialize(const void* key, size_t key_size, u32 secure_value,
-                                                VirtualFile data_storage,
-                                                VirtualFile table_storage) {
+                                                VirtualFile data_storage, VirtualFile table_storage)
+{
     // Read and verify the bucket tree header.
     BucketTree::Header header;
     table_storage->ReadObject(std::addressof(header), 0);
@@ -59,7 +62,8 @@ Result AesCtrCounterExtendedStorage::Initialize(const void* key, size_t key_size
                                                 s64 counter_offset, VirtualFile data_storage,
                                                 VirtualFile node_storage, VirtualFile entry_storage,
                                                 s32 entry_count,
-                                                std::unique_ptr<IDecryptor>&& decryptor) {
+                                                std::unique_ptr<IDecryptor>&& decryptor)
+{
     // Validate preconditions.
     ASSERT(key != nullptr);
     ASSERT(key_size == KeySize);
@@ -84,7 +88,8 @@ Result AesCtrCounterExtendedStorage::Initialize(const void* key, size_t key_size
     R_SUCCEED();
 }
 
-void AesCtrCounterExtendedStorage::Finalize() {
+void AesCtrCounterExtendedStorage::Finalize()
+{
     if (this->IsInitialized()) {
         m_table.Finalize();
         m_data_storage = VirtualFile();
@@ -92,7 +97,8 @@ void AesCtrCounterExtendedStorage::Finalize() {
 }
 
 Result AesCtrCounterExtendedStorage::GetEntryList(Entry* out_entries, s32* out_entry_count,
-                                                  s32 entry_count, s64 offset, s64 size) {
+                                                  s32 entry_count, s64 offset, s64 size)
+{
     // Validate pre-conditions.
     ASSERT(offset >= 0);
     ASSERT(size >= 0);
@@ -153,7 +159,8 @@ Result AesCtrCounterExtendedStorage::GetEntryList(Entry* out_entries, s32* out_e
     R_SUCCEED();
 }
 
-size_t AesCtrCounterExtendedStorage::Read(u8* buffer, size_t size, size_t offset) const {
+size_t AesCtrCounterExtendedStorage::Read(u8* buffer, size_t size, size_t offset) const
+{
     // Validate preconditions.
     ASSERT(this->IsInitialized());
 
@@ -244,7 +251,8 @@ size_t AesCtrCounterExtendedStorage::Read(u8* buffer, size_t size, size_t offset
 
 void SoftwareDecryptor::Decrypt(u8* buf, size_t buf_size,
                                 const std::array<u8, AesCtrCounterExtendedStorage::KeySize>& key,
-                                const std::array<u8, AesCtrCounterExtendedStorage::IvSize>& iv) {
+                                const std::array<u8, AesCtrCounterExtendedStorage::IvSize>& iv)
+{
     Core::Crypto::AESCipher<Core::Crypto::Key128, AesCtrCounterExtendedStorage::KeySize> cipher(
         key, Core::Crypto::Mode::CTR);
     cipher.SetIV(iv);

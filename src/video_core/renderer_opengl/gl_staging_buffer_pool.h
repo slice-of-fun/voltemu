@@ -3,13 +3,13 @@
 
 #pragma once
 
+#include <glad/glad.h>
+
 #include <array>
 #include <optional>
 #include <span>
 #include <utility>
 #include <vector>
-
-#include <glad/glad.h>
 
 #include "common/common_types.h"
 #include "common/literals.h"
@@ -69,14 +69,10 @@ public:
 
     [[nodiscard]] std::pair<std::span<u8>, size_t> Request(size_t size) noexcept;
 
-    [[nodiscard]] GLuint Handle() const noexcept {
-        return buffer.handle;
-    }
+    [[nodiscard]] GLuint Handle() const noexcept { return buffer.handle; }
 
 private:
-    [[nodiscard]] static size_t Region(size_t offset) noexcept {
-        return offset / REGION_SIZE;
-    }
+    [[nodiscard]] static size_t Region(size_t offset) noexcept { return offset / REGION_SIZE; }
 
     size_t iterator = 0;
     size_t used_iterator = 0;

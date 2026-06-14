@@ -4,18 +4,20 @@
 // SPDX-FileCopyrightText: Copyright 2021 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include <string>
-#include <string_view>
+#include "shader_recompiler/backend/glsl/var_alloc.h"
 
 #include <fmt/ranges.h>
 
-#include "shader_recompiler/backend/glsl/var_alloc.h"
+#include <string>
+#include <string_view>
+
 #include "shader_recompiler/exception.h"
 #include "shader_recompiler/frontend/ir/value.h"
 
 namespace Shader::Backend::GLSL {
 namespace {
-std::string TypePrefix(GlslVarType type) {
+std::string TypePrefix(GlslVarType type)
+{
     switch (type) {
     case GlslVarType::U1:
         return "b_";
@@ -52,7 +54,8 @@ std::string TypePrefix(GlslVarType type) {
     }
 }
 
-std::string FormatFloat(std::string_view value, IR::Type type) {
+std::string FormatFloat(std::string_view value, IR::Type type)
+{
     // TODO: Confirm FP64 nan/inf
     if (type == IR::Type::F32) {
         if (value == "nan") {
@@ -76,7 +79,8 @@ std::string FormatFloat(std::string_view value, IR::Type type) {
     return fmt::format("{}{}{}", value, needs_dot ? "." : "", needs_suffix ? suffix : "");
 }
 
-std::string MakeImm(const IR::Value& value) {
+std::string MakeImm(const IR::Value& value)
+{
     switch (value.Type()) {
     case IR::Type::U1:
         return fmt::format("{}", value.U1() ? "true" : "false");
@@ -96,16 +100,19 @@ std::string MakeImm(const IR::Value& value) {
 }
 } // Anonymous namespace
 
-std::string VarAlloc::Representation(u32 index, GlslVarType type) const {
+std::string VarAlloc::Representation(u32 index, GlslVarType type) const
+{
     const auto prefix{TypePrefix(type)};
     return fmt::format("{}{}", prefix, index);
 }
 
-std::string VarAlloc::Representation(Id id) const {
+std::string VarAlloc::Representation(Id id) const
+{
     return Representation(id.index, id.type);
 }
 
-std::string VarAlloc::Define(IR::Inst& inst, GlslVarType type) {
+std::string VarAlloc::Define(IR::Inst& inst, GlslVarType type)
+{
     if (inst.HasUses()) {
         inst.SetDefinition<Id>(Alloc(type));
         return Representation(inst.Definition<Id>());
@@ -118,15 +125,18 @@ std::string VarAlloc::Define(IR::Inst& inst, GlslVarType type) {
     }
 }
 
-std::string VarAlloc::Define(IR::Inst& inst, IR::Type type) {
+std::string VarAlloc::Define(IR::Inst& inst, IR::Type type)
+{
     return Define(inst, RegType(type));
 }
 
-std::string VarAlloc::PhiDefine(IR::Inst& inst, IR::Type type) {
+std::string VarAlloc::PhiDefine(IR::Inst& inst, IR::Type type)
+{
     return AddDefine(inst, RegType(type));
 }
 
-std::string VarAlloc::AddDefine(IR::Inst& inst, GlslVarType type) {
+std::string VarAlloc::AddDefine(IR::Inst& inst, GlslVarType type)
+{
     if (inst.HasUses()) {
         inst.SetDefinition<Id>(Alloc(type));
         return Representation(inst.Definition<Id>());
@@ -135,11 +145,13 @@ std::string VarAlloc::AddDefine(IR::Inst& inst, GlslVarType type) {
     }
 }
 
-std::string VarAlloc::Consume(const IR::Value& value) {
+std::string VarAlloc::Consume(const IR::Value& value)
+{
     return value.IsImmediate() ? MakeImm(value) : ConsumeInst(*value.InstRecursive());
 }
 
-std::string VarAlloc::ConsumeInst(IR::Inst& inst) {
+std::string VarAlloc::ConsumeInst(IR::Inst& inst)
+{
     inst.DestructiveRemoveUsage();
     if (!inst.HasUses()) {
         Free(inst.Definition<Id>());
@@ -147,11 +159,13 @@ std::string VarAlloc::ConsumeInst(IR::Inst& inst) {
     return Representation(inst.Definition<Id>());
 }
 
-std::string VarAlloc::GetGlslType(IR::Type type) const {
+std::string VarAlloc::GetGlslType(IR::Type type) const
+{
     return GetGlslType(RegType(type));
 }
 
-Id VarAlloc::Alloc(GlslVarType type) {
+Id VarAlloc::Alloc(GlslVarType type)
+{
     auto& use_tracker{GetUseTracker(type)};
     const auto num_vars{use_tracker.var_use.size()};
     for (size_t var = 0; var < num_vars; ++var) {
@@ -176,7 +190,8 @@ Id VarAlloc::Alloc(GlslVarType type) {
     return ret;
 }
 
-void VarAlloc::Free(Id id) {
+void VarAlloc::Free(Id id)
+{
     if (id.is_valid == 0) {
         throw LogicError("Freeing invalid variable");
     }
@@ -184,7 +199,8 @@ void VarAlloc::Free(Id id) {
     use_tracker.var_use[id.index] = false;
 }
 
-GlslVarType VarAlloc::RegType(IR::Type type) const {
+GlslVarType VarAlloc::RegType(IR::Type type) const
+{
     switch (type) {
     case IR::Type::U1:
         return GlslVarType::U1;
@@ -201,7 +217,8 @@ GlslVarType VarAlloc::RegType(IR::Type type) const {
     }
 }
 
-std::string VarAlloc::GetGlslType(GlslVarType type) const {
+std::string VarAlloc::GetGlslType(GlslVarType type) const
+{
     switch (type) {
     case GlslVarType::U1:
         return "bool";
@@ -236,7 +253,8 @@ std::string VarAlloc::GetGlslType(GlslVarType type) const {
     }
 }
 
-VarAlloc::UseTracker& VarAlloc::GetUseTracker(GlslVarType type) {
+VarAlloc::UseTracker& VarAlloc::GetUseTracker(GlslVarType type)
+{
     switch (type) {
     case GlslVarType::U1:
         return var_bool;
@@ -271,7 +289,8 @@ VarAlloc::UseTracker& VarAlloc::GetUseTracker(GlslVarType type) {
     }
 }
 
-const VarAlloc::UseTracker& VarAlloc::GetUseTracker(GlslVarType type) const {
+const VarAlloc::UseTracker& VarAlloc::GetUseTracker(GlslVarType type) const
+{
     switch (type) {
     case GlslVarType::U1:
         return var_bool;

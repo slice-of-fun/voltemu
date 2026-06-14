@@ -1,12 +1,13 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "audio_core/renderer/command/mix/mix.h"
+
 #include <algorithm>
 #include <limits>
 #include <span>
 
 #include "audio_core/adsp/apps/audio_renderer/command_list_processor.h"
-#include "audio_core/renderer/command/mix/mix.h"
 #include "common/fixed_point.h"
 
 namespace AudioCore::Renderer {
@@ -19,9 +20,10 @@ namespace AudioCore::Renderer {
  * @param volume       - Volume applied to the input.
  * @param sample_count - Number of samples to process.
  */
-template <size_t Q>
+template<size_t Q>
 static void ApplyMix(std::span<s32> output, std::span<const s32> input, const f32 volume_,
-                     const u32 sample_count) {
+                     const u32 sample_count)
+{
     const Common::FixedPoint<64 - Q, Q> volume{volume_};
     for (u32 i = 0; i < sample_count; i++) {
         output[i] = (output[i] + input[i] * volume).to_int();
@@ -29,7 +31,8 @@ static void ApplyMix(std::span<s32> output, std::span<const s32> input, const f3
 }
 
 void MixCommand::Dump([[maybe_unused]] const AudioRenderer::CommandListProcessor& processor,
-                      std::string& string) {
+                      std::string& string)
+{
     string += fmt::format("MixCommand");
     string += fmt::format("\n\tinput {:02X}", input_index);
     string += fmt::format("\n\toutput {:02X}", output_index);
@@ -37,7 +40,8 @@ void MixCommand::Dump([[maybe_unused]] const AudioRenderer::CommandListProcessor
     string += "\n";
 }
 
-void MixCommand::Process(const AudioRenderer::CommandListProcessor& processor) {
+void MixCommand::Process(const AudioRenderer::CommandListProcessor& processor)
+{
     auto output{processor.mix_buffers.subspan(output_index * processor.sample_count,
                                               processor.sample_count)};
     auto input{processor.mix_buffers.subspan(input_index * processor.sample_count,
@@ -63,7 +67,8 @@ void MixCommand::Process(const AudioRenderer::CommandListProcessor& processor) {
     }
 }
 
-bool MixCommand::Verify(const AudioRenderer::CommandListProcessor& processor) {
+bool MixCommand::Verify(const AudioRenderer::CommandListProcessor& processor)
+{
     return true;
 }
 

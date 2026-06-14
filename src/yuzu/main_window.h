@@ -6,16 +6,16 @@
 
 #pragma once
 
-#include <memory>
-#include <optional>
+#include <qaction.h>
 
-#include <filesystem>
 #include <QMainWindow>
 #include <QMessageBox>
 #include <QPushButton>
 #include <QTimer>
 #include <QTranslator>
-#include <qaction.h>
+#include <filesystem>
+#include <memory>
+#include <optional>
 
 #include "common/common_types.h"
 #include "common/settings_enums.h"
@@ -38,6 +38,7 @@
 #ifdef ENABLE_UPDATE_CHECKER
 #include <QFuture>
 #include <QFutureWatcher>
+
 #include "common/net/net.h"
 #endif
 
@@ -138,7 +139,8 @@ class Record;
 class VolumeButton : public QPushButton {
     Q_OBJECT
 public:
-    explicit VolumeButton(QWidget* parent = nullptr) : QPushButton(parent), scroll_multiplier(1) {
+    explicit VolumeButton(QWidget* parent = nullptr) : QPushButton(parent), scroll_multiplier(1)
+    {
         connect(&scroll_timer, &QTimer::timeout, this, &VolumeButton::ResetMultiplier);
     }
 
@@ -227,12 +229,13 @@ public slots:
     void ControllerSelectorReconfigureControllers(
         const Core::Frontend::ControllerParameters& parameters);
     void ControllerSelectorRequestExit();
-    void SoftwareKeyboardInitialize(
-        bool is_inline, Core::Frontend::KeyboardInitializeParameters initialize_parameters);
+    void
+    SoftwareKeyboardInitialize(bool is_inline,
+                               Core::Frontend::KeyboardInitializeParameters initialize_parameters);
     void SoftwareKeyboardShowNormal();
-    void SoftwareKeyboardShowTextCheck(
-        Service::AM::Frontend::SwkbdTextCheckResult text_check_result,
-        std::u16string text_check_message);
+    void
+    SoftwareKeyboardShowTextCheck(Service::AM::Frontend::SwkbdTextCheckResult text_check_result,
+                                  std::u16string text_check_message);
     void SoftwareKeyboardShowInline(Core::Frontend::InlineAppearParameters appear_parameters);
     void SoftwareKeyboardHideInline();
     void SoftwareKeyboardInlineTextChanged(Core::Frontend::InlineTextParameters text_parameters);
@@ -314,8 +317,8 @@ private:
     void resizeEvent(QResizeEvent* event) override;
     void moveEvent(QMoveEvent* event) override;
 
-    std::string CreateTASFramesString(
-        std::array<size_t, InputCommon::TasInput::PLAYER_NUMBER> frames) const;
+    std::string
+    CreateTASFramesString(std::array<size_t, InputCommon::TasInput::PLAYER_NUMBER> frames) const;
 
 #ifdef __unix__
     void SetupSigInterrupts();

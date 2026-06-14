@@ -1,10 +1,9 @@
 // SPDX-FileCopyrightText: Copyright 2021 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include <optional>
-
 #include <boost/container/flat_set.hpp>
 #include <boost/container/small_vector.hpp>
+#include <optional>
 
 #include "common/alignment.h"
 #include "shader_recompiler/frontend/ir/basic_block.h"
@@ -54,7 +53,8 @@ struct StorageInfo {
 };
 
 /// Returns true when the instruction is a global memory instruction
-bool IsGlobalMemory(const IR::Inst& inst) {
+bool IsGlobalMemory(const IR::Inst& inst)
+{
     switch (inst.GetOpcode()) {
     case IR::Opcode::LoadGlobalS8:
     case IR::Opcode::LoadGlobalU8:
@@ -113,7 +113,8 @@ bool IsGlobalMemory(const IR::Inst& inst) {
 }
 
 /// Returns true when the instruction is a global memory instruction
-bool IsGlobalMemoryWrite(const IR::Inst& inst) {
+bool IsGlobalMemoryWrite(const IR::Inst& inst)
+{
     switch (inst.GetOpcode()) {
     case IR::Opcode::WriteGlobalS8:
     case IR::Opcode::WriteGlobalU8:
@@ -165,7 +166,8 @@ bool IsGlobalMemoryWrite(const IR::Inst& inst) {
 }
 
 /// Converts a global memory opcode to its storage buffer equivalent
-IR::Opcode GlobalToStorage(IR::Opcode opcode) {
+IR::Opcode GlobalToStorage(IR::Opcode opcode)
+{
     switch (opcode) {
     case IR::Opcode::LoadGlobalS8:
         return IR::Opcode::LoadStorageS8;
@@ -273,7 +275,8 @@ IR::Opcode GlobalToStorage(IR::Opcode opcode) {
 }
 
 /// Returns true when a storage buffer address satisfies a bias
-bool MeetsBias(const StorageBufferAddr& storage_buffer, const Bias& bias) noexcept {
+bool MeetsBias(const StorageBufferAddr& storage_buffer, const Bias& bias) noexcept
+{
     return storage_buffer.index == bias.index && storage_buffer.offset >= bias.offset_begin &&
            storage_buffer.offset < bias.offset_end;
 }
@@ -284,7 +287,8 @@ struct LowAddrInfo {
 };
 
 /// Tries to track the first 32-bits of a global memory instruction
-std::optional<LowAddrInfo> TrackLowAddress(IR::Inst* inst) {
+std::optional<LowAddrInfo> TrackLowAddress(IR::Inst* inst)
+{
     // The first argument is the low level GPU pointer to the global memory instruction
     const IR::Value addr{inst->Arg(0)};
     if (addr.IsImmediate()) {
@@ -330,7 +334,8 @@ std::optional<LowAddrInfo> TrackLowAddress(IR::Inst* inst) {
 }
 
 /// Tries to track the storage buffer address used by a global memory instruction
-std::optional<StorageBufferAddr> Track(const IR::Value& value, const Bias* bias) {
+std::optional<StorageBufferAddr> Track(const IR::Value& value, const Bias* bias)
+{
     const auto pred{[bias](const IR::Inst* inst) -> std::optional<StorageBufferAddr> {
         if (inst->GetOpcode() != IR::Opcode::GetCbufU32 &&
             inst->GetOpcode() != IR::Opcode::GetCbufU32x2) {
@@ -367,7 +372,8 @@ std::optional<StorageBufferAddr> Track(const IR::Value& value, const Bias* bias)
 }
 
 /// Collects the storage buffer used by a global memory instruction and the instruction itself
-void CollectStorageBuffers(IR::Block& block, IR::Inst& inst, StorageInfo& info) {
+void CollectStorageBuffers(IR::Block& block, IR::Inst& inst, StorageInfo& info)
+{
     // NVN puts storage buffers in a specific range, we have to bias towards these addresses to
     // avoid getting false positives
     static constexpr Bias nvn_bias{
@@ -409,7 +415,8 @@ void CollectStorageBuffers(IR::Block& block, IR::Inst& inst, StorageInfo& info) 
 }
 
 /// Returns the offset in indices (not bytes) for an equivalent storage instruction
-IR::U32 StorageOffset(IR::Block& block, IR::Inst& inst, StorageBufferAddr buffer, u32 alignment) {
+IR::U32 StorageOffset(IR::Block& block, IR::Inst& inst, StorageBufferAddr buffer, u32 alignment)
+{
     IR::IREmitter ir{block, IR::Block::InstructionList::s_iterator_to(inst)};
     IR::U32 offset;
     if (const std::optional<LowAddrInfo> low_addr{TrackLowAddress(&inst)}) {
@@ -431,7 +438,8 @@ IR::U32 StorageOffset(IR::Block& block, IR::Inst& inst, StorageBufferAddr buffer
 
 /// Replace a global memory load instruction with its storage buffer equivalent
 void ReplaceLoad(IR::Block& block, IR::Inst& inst, const IR::U32& storage_index,
-                 const IR::U32& offset) {
+                 const IR::U32& offset)
+{
     const IR::Opcode new_opcode{GlobalToStorage(inst.GetOpcode())};
     const auto it{IR::Block::InstructionList::s_iterator_to(inst)};
     const IR::Value value{&*block.PrependNewInst(it, new_opcode, {storage_index, offset})};
@@ -440,7 +448,8 @@ void ReplaceLoad(IR::Block& block, IR::Inst& inst, const IR::U32& storage_index,
 
 /// Replace a global memory write instruction with its storage buffer equivalent
 void ReplaceWrite(IR::Block& block, IR::Inst& inst, const IR::U32& storage_index,
-                  const IR::U32& offset) {
+                  const IR::U32& offset)
+{
     const IR::Opcode new_opcode{GlobalToStorage(inst.GetOpcode())};
     const auto it{IR::Block::InstructionList::s_iterator_to(inst)};
     block.PrependNewInst(it, new_opcode, {storage_index, offset, inst.Arg(1)});
@@ -449,7 +458,8 @@ void ReplaceWrite(IR::Block& block, IR::Inst& inst, const IR::U32& storage_index
 
 /// Replace an atomic operation on global memory instruction with its storage buffer equivalent
 void ReplaceAtomic(IR::Block& block, IR::Inst& inst, const IR::U32& storage_index,
-                   const IR::U32& offset) {
+                   const IR::U32& offset)
+{
     const IR::Opcode new_opcode{GlobalToStorage(inst.GetOpcode())};
     const auto it{IR::Block::InstructionList::s_iterator_to(inst)};
     const IR::Value value{
@@ -458,8 +468,8 @@ void ReplaceAtomic(IR::Block& block, IR::Inst& inst, const IR::U32& storage_inde
 }
 
 /// Replace a global memory instruction with its storage buffer equivalent
-void Replace(IR::Block& block, IR::Inst& inst, const IR::U32& storage_index,
-             const IR::U32& offset) {
+void Replace(IR::Block& block, IR::Inst& inst, const IR::U32& storage_index, const IR::U32& offset)
+{
     switch (inst.GetOpcode()) {
     case IR::Opcode::LoadGlobalS8:
     case IR::Opcode::LoadGlobalU8:
@@ -520,7 +530,8 @@ void Replace(IR::Block& block, IR::Inst& inst, const IR::U32& storage_index,
 }
 } // Anonymous namespace
 
-void GlobalMemoryToStorageBufferPass(IR::Program& program, const HostTranslateInfo& host_info) {
+void GlobalMemoryToStorageBufferPass(IR::Program& program, const HostTranslateInfo& host_info)
+{
     StorageInfo info;
     for (IR::Block* const block : program.post_order_blocks) {
         for (IR::Inst& inst : block->Instructions()) {
@@ -550,8 +561,9 @@ void GlobalMemoryToStorageBufferPass(IR::Program& program, const HostTranslateIn
     }
 }
 
-template <typename Descriptors, typename Descriptor, typename Func>
-static u32 Add(Descriptors& descriptors, const Descriptor& desc, Func&& pred) {
+template<typename Descriptors, typename Descriptor, typename Func>
+static u32 Add(Descriptors& descriptors, const Descriptor& desc, Func&& pred)
+{
     // TODO: Handle arrays
     const auto it{std::ranges::find_if(descriptors, pred)};
     if (it != descriptors.end()) {
@@ -561,7 +573,8 @@ static u32 Add(Descriptors& descriptors, const Descriptor& desc, Func&& pred) {
     return static_cast<u32>(descriptors.size()) - 1;
 }
 
-void JoinStorageInfo(Info& base, Info& source) {
+void JoinStorageInfo(Info& base, Info& source)
+{
     auto& descriptors = base.storage_buffers_descriptors;
     for (auto& desc : source.storage_buffers_descriptors) {
         auto it{std::ranges::find_if(descriptors, [&desc](const auto& existing) {

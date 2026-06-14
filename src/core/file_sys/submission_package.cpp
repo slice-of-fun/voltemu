@@ -4,10 +4,12 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include <algorithm>
-#include <cstring>
+#include "core/file_sys/submission_package.h"
 
 #include <fmt/ostream.h>
+
+#include <algorithm>
+#include <cstring>
 
 #include "common/hex_util.h"
 #include "common/logging.h"
@@ -16,7 +18,6 @@
 #include "core/file_sys/nca_metadata.h"
 #include "core/file_sys/partition_filesystem.h"
 #include "core/file_sys/program_metadata.h"
-#include "core/file_sys/submission_package.h"
 #include "core/loader/loader.h"
 
 namespace FileSys {
@@ -24,7 +25,8 @@ namespace FileSys {
 NSP::NSP(VirtualFile file_, u64 title_id_, std::size_t program_index_)
     : file(std::move(file_)), expected_program_id(title_id_),
       program_index(program_index_), status{Loader::ResultStatus::Success},
-      pfs(std::make_shared<PartitionFilesystem>(file)), keys{Core::Crypto::KeyManager::Instance()} {
+      pfs(std::make_shared<PartitionFilesystem>(file)), keys{Core::Crypto::KeyManager::Instance()}
+{
     if (pfs->GetStatus() != Loader::ResultStatus::Success) {
         status = pfs->GetStatus();
         return;
@@ -44,11 +46,13 @@ NSP::NSP(VirtualFile file_, u64 title_id_, std::size_t program_index_)
 
 NSP::~NSP() = default;
 
-Loader::ResultStatus NSP::GetStatus() const {
+Loader::ResultStatus NSP::GetStatus() const
+{
     return status;
 }
 
-Loader::ResultStatus NSP::GetProgramStatus() const {
+Loader::ResultStatus NSP::GetProgramStatus() const
+{
     if (IsExtractedType() && GetExeFS() != nullptr && FileSys::IsDirectoryExeFS(GetExeFS())) {
         return Loader::ResultStatus::Success;
     }
@@ -59,7 +63,8 @@ Loader::ResultStatus NSP::GetProgramStatus() const {
     return iter->second;
 }
 
-u64 NSP::GetProgramTitleID() const {
+u64 NSP::GetProgramTitleID() const
+{
     if (IsExtractedType()) {
         return GetExtractedTitleID() + program_index;
     }
@@ -82,7 +87,8 @@ u64 NSP::GetProgramTitleID() const {
     return iter == ids.end() ? 0 : *iter;
 }
 
-u64 NSP::GetExtractedTitleID() const {
+u64 NSP::GetExtractedTitleID() const
+{
     if (GetExeFS() == nullptr || !IsDirectoryExeFS(GetExeFS())) {
         return 0;
     }
@@ -95,7 +101,8 @@ u64 NSP::GetExtractedTitleID() const {
     }
 }
 
-std::vector<u64> NSP::GetProgramTitleIDs() const {
+std::vector<u64> NSP::GetProgramTitleIDs() const
+{
     if (IsExtractedType()) {
         return {GetExtractedTitleID()};
     }
@@ -104,19 +111,23 @@ std::vector<u64> NSP::GetProgramTitleIDs() const {
     return out;
 }
 
-bool NSP::IsExtractedType() const {
+bool NSP::IsExtractedType() const
+{
     return extracted;
 }
 
-VirtualFile NSP::GetRomFS() const {
+VirtualFile NSP::GetRomFS() const
+{
     return romfs;
 }
 
-VirtualDir NSP::GetExeFS() const {
+VirtualDir NSP::GetExeFS() const
+{
     return exefs;
 }
 
-std::vector<std::shared_ptr<NCA>> NSP::GetNCAsCollapsed() const {
+std::vector<std::shared_ptr<NCA>> NSP::GetNCAsCollapsed() const
+{
     if (extracted)
         LOG_WARNING(Service_FS, "called on an NSP that is of type extracted.");
     std::vector<std::shared_ptr<NCA>> out;
@@ -127,7 +138,8 @@ std::vector<std::shared_ptr<NCA>> NSP::GetNCAsCollapsed() const {
     return out;
 }
 
-std::multimap<u64, std::shared_ptr<NCA>> NSP::GetNCAsByTitleID() const {
+std::multimap<u64, std::shared_ptr<NCA>> NSP::GetNCAsByTitleID() const
+{
     if (extracted)
         LOG_WARNING(Service_FS, "called on an NSP that is of type extracted.");
     std::multimap<u64, std::shared_ptr<NCA>> out;
@@ -139,11 +151,13 @@ std::multimap<u64, std::shared_ptr<NCA>> NSP::GetNCAsByTitleID() const {
 }
 
 std::map<u64, std::map<std::pair<TitleType, ContentRecordType>, std::shared_ptr<NCA>>>
-NSP::GetNCAs() const {
+NSP::GetNCAs() const
+{
     return ncas;
 }
 
-std::shared_ptr<NCA> NSP::GetNCA(u64 title_id, ContentRecordType type, TitleType title_type) const {
+std::shared_ptr<NCA> NSP::GetNCA(u64 title_id, ContentRecordType type, TitleType title_type) const
+{
     if (extracted)
         LOG_WARNING(Service_FS, "called on an NSP that is of type extracted.");
 
@@ -158,7 +172,8 @@ std::shared_ptr<NCA> NSP::GetNCA(u64 title_id, ContentRecordType type, TitleType
     return type_iter->second;
 }
 
-VirtualFile NSP::GetNCAFile(u64 title_id, ContentRecordType type, TitleType title_type) const {
+VirtualFile NSP::GetNCAFile(u64 title_id, ContentRecordType type, TitleType title_type) const
+{
     if (extracted)
         LOG_WARNING(Service_FS, "called on an NSP that is of type extracted.");
     const auto nca = GetNCA(title_id, type, title_type);
@@ -167,23 +182,28 @@ VirtualFile NSP::GetNCAFile(u64 title_id, ContentRecordType type, TitleType titl
     return nullptr;
 }
 
-std::vector<VirtualFile> NSP::GetFiles() const {
+std::vector<VirtualFile> NSP::GetFiles() const
+{
     return pfs->GetFiles();
 }
 
-std::vector<VirtualDir> NSP::GetSubdirectories() const {
+std::vector<VirtualDir> NSP::GetSubdirectories() const
+{
     return pfs->GetSubdirectories();
 }
 
-std::string NSP::GetName() const {
+std::string NSP::GetName() const
+{
     return file->GetName();
 }
 
-VirtualDir NSP::GetParentDirectory() const {
+VirtualDir NSP::GetParentDirectory() const
+{
     return file->GetContainingDirectory();
 }
 
-void NSP::SetTicketKeys(const std::vector<VirtualFile>& files) {
+void NSP::SetTicketKeys(const std::vector<VirtualFile>& files)
+{
     for (const auto& ticket_file : files) {
         if (ticket_file == nullptr) {
             continue;
@@ -201,7 +221,8 @@ void NSP::SetTicketKeys(const std::vector<VirtualFile>& files) {
     }
 }
 
-void NSP::InitializeExeFSAndRomFS(const std::vector<VirtualFile>& files) {
+void NSP::InitializeExeFSAndRomFS(const std::vector<VirtualFile>& files)
+{
     exefs = pfs;
 
     const auto iter = std::find_if(files.begin(), files.end(), [](const VirtualFile& entry) {
@@ -215,7 +236,8 @@ void NSP::InitializeExeFSAndRomFS(const std::vector<VirtualFile>& files) {
     romfs = *iter;
 }
 
-void NSP::ReadNCAs(const std::vector<VirtualFile>& files) {
+void NSP::ReadNCAs(const std::vector<VirtualFile>& files)
+{
     for (const auto& outer_file : files) {
         if (outer_file->GetName().size() < 9 ||
             outer_file->GetName().substr(outer_file->GetName().size() - 9) != ".cnmt.nca") {
@@ -283,7 +305,8 @@ void NSP::ReadNCAs(const std::vector<VirtualFile>& files) {
                         auto& target_map = ncas[cnmt.GetTitleID()];
                         auto existing = target_map.find({cnmt.GetType(), rec.type});
 
-                        if (existing != target_map.end() && rec.type == ContentRecordType::Program) {
+                        if (existing != target_map.end() &&
+                            rec.type == ContentRecordType::Program) {
                             continue;
                         }
                         ncas[cnmt.GetTitleID()][{cnmt.GetType(), rec.type}] = std::move(next_nca);

@@ -6,10 +6,9 @@
 
 #pragma once
 
+#include "core/hle/service/bcat/news/news_storage.h"
 #include "core/hle/service/cmif_types.h"
 #include "core/hle/service/service.h"
-
-#include "core/hle/service/bcat/news/news_storage.h"
 
 namespace Core {
 class System;
@@ -38,17 +37,13 @@ private:
                              InBuffer<BufferAttr_HipcPointer> value,
                              InBuffer<BufferAttr_HipcPointer> where);
 
-    Result GetListV1(Out<s32> out_count,
-                     OutBuffer<BufferAttr_HipcMapAlias> out_buffer_data,
+    Result GetListV1(Out<s32> out_count, OutBuffer<BufferAttr_HipcMapAlias> out_buffer_data,
                      InBuffer<BufferAttr_HipcPointer> where_phrase,
-                     InBuffer<BufferAttr_HipcPointer> order_by_phrase,
-                     s32 offset);
+                     InBuffer<BufferAttr_HipcPointer> order_by_phrase, s32 offset);
 
-    Result GetList(Out<s32> out_count,
-                   OutBuffer<BufferAttr_HipcMapAlias> out_buffer_data,
+    Result GetList(Out<s32> out_count, OutBuffer<BufferAttr_HipcMapAlias> out_buffer_data,
                    InBuffer<BufferAttr_HipcPointer> where_phrase,
-                   InBuffer<BufferAttr_HipcPointer> order_by_phrase,
-                   s32 offset);
+                   InBuffer<BufferAttr_HipcPointer> order_by_phrase, s32 offset);
 };
 
 } // namespace Service::News

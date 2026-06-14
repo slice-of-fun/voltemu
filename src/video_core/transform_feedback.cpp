@@ -4,20 +4,22 @@
 // SPDX-FileCopyrightText: Copyright 2021 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "video_core/transform_feedback.h"
+
 #include <algorithm>
 #include <array>
+#include <ranges>
 #include <vector>
 
 #include "common/alignment.h"
 #include "common/assert.h"
-#include <ranges>
 #include "shader_recompiler/shader_info.h"
-#include "video_core/transform_feedback.h"
 
 namespace VideoCommon {
 
-std::pair<std::array<Shader::TransformFeedbackVarying, 256>, u32> MakeTransformFeedbackVaryings(
-    const TransformFeedbackState& state) {
+std::pair<std::array<Shader::TransformFeedbackVarying, 256>, u32>
+MakeTransformFeedbackVaryings(const TransformFeedbackState& state)
+{
     static constexpr std::array VECTORS{
         28U,  // gl_Position
         32U,  // Generic 0
@@ -94,7 +96,7 @@ std::pair<std::array<Shader::TransformFeedbackVarying, 256>, u32> MakeTransformF
                 .offset = offset * 4,
                 .components = 1,
             };
-                varying.stream = layout.stream;
+            varying.stream = layout.stream;
             const u32 base_offset = offset;
             const auto attribute{get_attribute(offset)};
             if (std::ranges::find(VECTORS, Common::AlignDown(attribute, 4)) != VECTORS.end()) {

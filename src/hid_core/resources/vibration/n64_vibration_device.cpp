@@ -1,17 +1,21 @@
 // SPDX-FileCopyrightText: Copyright 2024 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+#include "hid_core/resources/vibration/n64_vibration_device.h"
+
 #include "hid_core/frontend/emulated_controller.h"
 #include "hid_core/hid_result.h"
 #include "hid_core/resources/npad/npad_types.h"
 #include "hid_core/resources/npad/npad_vibration.h"
-#include "hid_core/resources/vibration/n64_vibration_device.h"
 
 namespace Service::HID {
 
-NpadN64VibrationDevice::NpadN64VibrationDevice() {}
+NpadN64VibrationDevice::NpadN64VibrationDevice()
+{
+}
 
-Result NpadN64VibrationDevice::Activate() {
+Result NpadN64VibrationDevice::Activate()
+{
     if (ref_counter == 0 && is_mounted) {
         f32 volume = 1.0f;
         const auto result = vibration_handler->GetVibrationVolume(volume);
@@ -24,7 +28,8 @@ Result NpadN64VibrationDevice::Activate() {
     return ResultSuccess;
 }
 
-Result NpadN64VibrationDevice::Deactivate() {
+Result NpadN64VibrationDevice::Deactivate()
+{
     if (ref_counter == 1 && is_mounted) {
         f32 volume = 1.0f;
         const auto result = vibration_handler->GetVibrationVolume(volume);
@@ -40,7 +45,8 @@ Result NpadN64VibrationDevice::Deactivate() {
     return ResultSuccess;
 }
 
-Result NpadN64VibrationDevice::Mount(IAbstractedPad& abstracted_pad, NpadVibration* handler) {
+Result NpadN64VibrationDevice::Mount(IAbstractedPad& abstracted_pad, NpadVibration* handler)
+{
     if (!abstracted_pad.internal_flags.is_connected) {
         return ResultSuccess;
     }
@@ -61,7 +67,8 @@ Result NpadN64VibrationDevice::Mount(IAbstractedPad& abstracted_pad, NpadVibrati
     return ResultSuccess;
 }
 
-Result NpadN64VibrationDevice::Unmount() {
+Result NpadN64VibrationDevice::Unmount()
+{
     if (ref_counter == 0 || !is_mounted) {
         is_mounted = false;
         return ResultSuccess;
@@ -77,7 +84,8 @@ Result NpadN64VibrationDevice::Unmount() {
     return ResultSuccess;
 }
 
-Result NpadN64VibrationDevice::SendValueInBool(bool is_vibrating) {
+Result NpadN64VibrationDevice::SendValueInBool(bool is_vibrating)
+{
     if (ref_counter < 1) {
         return ResultVibrationNotInitialized;
     }
@@ -92,7 +100,8 @@ Result NpadN64VibrationDevice::SendValueInBool(bool is_vibrating) {
     return ResultSuccess;
 }
 
-Result NpadN64VibrationDevice::SendVibrationNotificationPattern([[maybe_unused]] u32 pattern) {
+Result NpadN64VibrationDevice::SendVibrationNotificationPattern([[maybe_unused]] u32 pattern)
+{
     if (!is_mounted) {
         return ResultSuccess;
     }

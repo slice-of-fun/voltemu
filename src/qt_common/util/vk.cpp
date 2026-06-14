@@ -4,14 +4,14 @@
 // SPDX-FileCopyrightText: 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "qt_common/util/vk.h"
+
 #include <utility>
 #include <vector>
 
-#include "qt_common/qt_common.h"
-
 #include "common/dynamic_library.h"
 #include "common/logging.h"
-#include "qt_common/util/vk.h"
+#include "qt_common/qt_common.h"
 #include "video_core/vulkan_common/vulkan_device.h"
 #include "video_core/vulkan_common/vulkan_instance.h"
 #include "video_core/vulkan_common/vulkan_library.h"
@@ -24,11 +24,14 @@ class QWindow;
 namespace VkDeviceInfo {
 Record::Record(std::string_view name_, const std::vector<VkPresentModeKHR>& vsync_modes_,
                bool has_broken_compute_)
-    : name{name_}, vsync_support{vsync_modes_}, has_broken_compute{has_broken_compute_} {}
+    : name{name_}, vsync_support{vsync_modes_}, has_broken_compute{has_broken_compute_}
+{
+}
 
 Record::~Record() = default;
 
-void PopulateRecords(std::vector<Record>& records, QWindow* window) try {
+void PopulateRecords(std::vector<Record>& records, QWindow* window)
+try {
     using namespace Vulkan;
 
     // Create a test window with a Vulkan surface type for checking present modes.

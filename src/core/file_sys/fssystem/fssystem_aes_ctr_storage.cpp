@@ -4,15 +4,18 @@
 // SPDX-FileCopyrightText: Copyright 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/file_sys/fssystem/fssystem_aes_ctr_storage.h"
+
 #include <boost/container/static_vector.hpp>
+
 #include "common/alignment.h"
 #include "common/swap.h"
-#include "core/file_sys/fssystem/fssystem_aes_ctr_storage.h"
 #include "core/file_sys/fssystem/fssystem_utility.h"
 
 namespace FileSys {
 
-void AesCtrStorage::MakeIv(void* dst, size_t dst_size, u64 upper, s64 offset) {
+void AesCtrStorage::MakeIv(void* dst, size_t dst_size, u64 upper, s64 offset)
+{
     ASSERT(dst != nullptr);
     ASSERT(dst_size == IvSize);
     ASSERT(offset >= 0);
@@ -25,7 +28,8 @@ void AesCtrStorage::MakeIv(void* dst, size_t dst_size, u64 upper, s64 offset) {
 
 AesCtrStorage::AesCtrStorage(VirtualFile base, const void* key, size_t key_size, const void* iv,
                              size_t iv_size)
-    : m_base_storage(std::move(base)) {
+    : m_base_storage(std::move(base))
+{
     ASSERT(m_base_storage != nullptr);
     ASSERT(key != nullptr);
     ASSERT(iv != nullptr);
@@ -38,7 +42,8 @@ AesCtrStorage::AesCtrStorage(VirtualFile base, const void* key, size_t key_size,
     m_cipher.emplace(m_key, Core::Crypto::Mode::CTR);
 }
 
-size_t AesCtrStorage::Read(u8* buffer, size_t size, size_t offset) const {
+size_t AesCtrStorage::Read(u8* buffer, size_t size, size_t offset) const
+{
     // Allow zero-size reads.
     if (size == 0) {
         return size;
@@ -66,7 +71,8 @@ size_t AesCtrStorage::Read(u8* buffer, size_t size, size_t offset) const {
     return size;
 }
 
-size_t AesCtrStorage::Write(const u8* buffer, size_t size, size_t offset) {
+size_t AesCtrStorage::Write(const u8* buffer, size_t size, size_t offset)
+{
     // Allow zero-size writes.
     if (size == 0) {
         return size;
@@ -108,7 +114,8 @@ size_t AesCtrStorage::Write(const u8* buffer, size_t size, size_t offset) {
     return size;
 }
 
-size_t AesCtrStorage::GetSize() const {
+size_t AesCtrStorage::GetSize() const
+{
     return m_base_storage->GetSize();
 }
 

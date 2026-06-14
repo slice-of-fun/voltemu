@@ -13,19 +13,20 @@
 
 namespace Common {
 
-template <typename KeyTBase, typename ValueT>
-class RangeMap {
+template<typename KeyTBase, typename ValueT> class RangeMap {
 private:
     using KeyT =
         std::conditional_t<std::is_signed_v<KeyTBase>, KeyTBase, std::make_signed_t<KeyTBase>>;
 
 public:
-    explicit RangeMap(ValueT null_value_) : null_value{null_value_} {
+    explicit RangeMap(ValueT null_value_) : null_value{null_value_}
+    {
         container.emplace((std::numeric_limits<KeyT>::min)(), null_value);
     };
     ~RangeMap() = default;
 
-    void Map(KeyTBase address, KeyTBase address_end, ValueT value) {
+    void Map(KeyTBase address, KeyTBase address_end, ValueT value)
+    {
         KeyT new_address = static_cast<KeyT>(address);
         KeyT new_address_end = static_cast<KeyT>(address_end);
         if (new_address < 0) {
@@ -37,11 +38,10 @@ public:
         InternalMap(new_address, new_address_end, value);
     }
 
-    void Unmap(KeyTBase address, KeyTBase address_end) {
-        Map(address, address_end, null_value);
-    }
+    void Unmap(KeyTBase address, KeyTBase address_end) { Map(address, address_end, null_value); }
 
-    [[nodiscard]] size_t GetContinuousSizeFrom(KeyTBase address) const {
+    [[nodiscard]] size_t GetContinuousSizeFrom(KeyTBase address) const
+    {
         const KeyT new_address = static_cast<KeyT>(address);
         if (new_address < 0) {
             return 0;
@@ -49,7 +49,8 @@ public:
         return ContinuousSizeInternal(new_address);
     }
 
-    [[nodiscard]] ValueT GetValueAt(KeyT address) const {
+    [[nodiscard]] ValueT GetValueAt(KeyT address) const
+    {
         const KeyT new_address = static_cast<KeyT>(address);
         if (new_address < 0) {
             return null_value;
@@ -62,7 +63,8 @@ private:
     using IteratorType = typename MapType::iterator;
     using ConstIteratorType = typename MapType::const_iterator;
 
-    size_t ContinuousSizeInternal(KeyT address) const {
+    size_t ContinuousSizeInternal(KeyT address) const
+    {
         const auto it = GetFirstElementBeforeOrOn(address);
         if (it == container.end() || it->second == null_value) {
             return 0;
@@ -74,7 +76,8 @@ private:
         return it_end->first - address;
     }
 
-    ValueT GetValueInternal(KeyT address) const {
+    ValueT GetValueInternal(KeyT address) const
+    {
         const auto it = GetFirstElementBeforeOrOn(address);
         if (it == container.end()) {
             return null_value;
@@ -82,7 +85,8 @@ private:
         return it->second;
     }
 
-    ConstIteratorType GetFirstElementBeforeOrOn(KeyT address) const {
+    ConstIteratorType GetFirstElementBeforeOrOn(KeyT address) const
+    {
         auto it = container.lower_bound(address);
         if (it == container.begin()) {
             return it;
@@ -94,7 +98,8 @@ private:
         return it;
     }
 
-    ValueT GetFirstValueWithin(KeyT address) {
+    ValueT GetFirstValueWithin(KeyT address)
+    {
         auto it = container.lower_bound(address);
         if (it == container.begin()) {
             return it->second;
@@ -106,7 +111,8 @@ private:
         return it->second;
     }
 
-    ValueT GetLastValueWithin(KeyT address) {
+    ValueT GetLastValueWithin(KeyT address)
+    {
         auto it = container.upper_bound(address);
         if (it == container.end()) {
             return null_value;
@@ -118,7 +124,8 @@ private:
         return it->second;
     }
 
-    void InternalMap(KeyT address, KeyT address_end, ValueT value) {
+    void InternalMap(KeyT address, KeyT address_end, ValueT value)
+    {
         const bool must_add_start = GetFirstValueWithin(address) != value;
         const ValueT last_value = GetLastValueWithin(address_end);
         const bool must_add_end = last_value != value;

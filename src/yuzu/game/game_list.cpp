@@ -4,6 +4,8 @@
 // SPDX-FileCopyrightText: 2015 Citra Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "yuzu/game/game_list.h"
+
 #include <QAbstractItemView>
 #include <QApplication>
 #include <QDir>
@@ -27,23 +29,23 @@
 #include "core/file_sys/patch_manager.h"
 #include "core/file_sys/registered_cache.h"
 #include "qt_common/config/uisettings.h"
+#include "qt_common/game_list/game_list_p.h"
+#include "qt_common/game_list/model.h"
 #include "qt_common/qt_common.h"
 #include "qt_common/util/game.h"
 #include "yuzu/compatibility_list.h"
-#include "yuzu/game/game_list.h"
-#include "qt_common/game_list/game_list_p.h"
 #include "yuzu/game/game_grid.h"
 #include "yuzu/game/game_tree.h"
-#include "qt_common/game_list/model.h"
+#include "yuzu/game/search_field.h"
 #include "yuzu/main_window.h"
 #include "yuzu/util/controller_navigation.h"
-#include "yuzu/game/search_field.h"
 
 GameList::GameList(FileSys::VirtualFilesystem vfs_, FileSys::ManualContentProvider* provider_,
                    PlayTime::PlayTimeManager& play_time_manager_, Core::System& system_,
                    MainWindow* parent)
     : QWidget{parent}, vfs{std::move(vfs_)}, provider{provider_},
-      play_time_manager{play_time_manager_}, system{system_} {
+      play_time_manager{play_time_manager_}, system{system_}
+{
 
     this->main_window = parent;
     layout = new QVBoxLayout;
@@ -96,11 +98,13 @@ GameList::GameList(FileSys::VirtualFilesystem vfs_, FileSys::ManualContentProvid
     ResetViewMode();
 }
 
-GameList::~GameList() {
+GameList::~GameList()
+{
     UnloadController();
 }
 
-void GameList::SetupViews() {
+void GameList::SetupViews()
+{
     tree_view = new GameTree(this);
     grid_view = new GameGrid(this);
 
@@ -111,33 +115,40 @@ void GameList::SetupViews() {
     layout->addWidget(grid_view);
 }
 
-QString GameList::GetLastFilterResultItem() const {
+QString GameList::GetLastFilterResultItem() const
+{
     return tree_view->GetLastFilterResultItem();
 }
 
-void GameList::ClearFilter() {
+void GameList::ClearFilter()
+{
     search_field->clear();
 }
 
-void GameList::SetFilterFocus() {
+void GameList::SetFilterFocus()
+{
     if (item_model->rowCount() > 0) {
         search_field->setFocus();
     }
 }
 
-void GameList::SetFilterVisible(bool visibility) {
+void GameList::SetFilterVisible(bool visibility)
+{
     search_field->setVisible(visibility);
 }
 
-bool GameList::IsEmpty() const {
+bool GameList::IsEmpty() const
+{
     return item_model->IsEmpty();
 }
 
-void GameList::LoadCompatibilityList() {
+void GameList::LoadCompatibilityList()
+{
     item_model->LoadCompatibilityList();
 }
 
-void GameList::PopulateAsync(QVector<UISettings::GameDir>& game_dirs) {
+void GameList::PopulateAsync(QVector<UISettings::GameDir>& game_dirs)
+{
     m_currentView->setEnabled(false);
 
     tree_view->UpdateColumnVisibility(item_model);
@@ -149,23 +160,28 @@ void GameList::PopulateAsync(QVector<UISettings::GameDir>& game_dirs) {
     item_model->PopulateAsync(game_dirs);
 }
 
-void GameList::SaveInterfaceLayout() {
+void GameList::SaveInterfaceLayout()
+{
     tree_view->SaveInterfaceLayout();
 }
 
-void GameList::LoadInterfaceLayout() {
+void GameList::LoadInterfaceLayout()
+{
     tree_view->LoadInterfaceLayout();
 }
 
-QStandardItemModel* GameList::GetModel() const {
+QStandardItemModel* GameList::GetModel() const
+{
     return item_model;
 }
 
-void GameList::UnloadController() {
+void GameList::UnloadController()
+{
     controller_navigation->UnloadController();
 }
 
-void GameList::ResetViewMode() {
+void GameList::ResetViewMode()
+{
     auto& setting = UISettings::values.game_list_mode;
     bool newTreeMode = false;
 
@@ -196,8 +212,10 @@ void GameList::ResetViewMode() {
 
     auto scroller = QScroller::scroller(view);
     QScrollerProperties props;
-    props.setScrollMetric(QScrollerProperties::HorizontalOvershootPolicy, QScrollerProperties::OvershootAlwaysOff);
-    props.setScrollMetric(QScrollerProperties::VerticalOvershootPolicy, QScrollerProperties::OvershootAlwaysOff);
+    props.setScrollMetric(QScrollerProperties::HorizontalOvershootPolicy,
+                          QScrollerProperties::OvershootAlwaysOff);
+    props.setScrollMetric(QScrollerProperties::VerticalOvershootPolicy,
+                          QScrollerProperties::OvershootAlwaysOff);
     scroller->setScrollerProperties(props);
 
     if (m_isTreeMode != newTreeMode) {
@@ -209,7 +227,8 @@ void GameList::ResetViewMode() {
     }
 }
 
-void GameList::OnTextChanged(const QString& new_text) {
+void GameList::OnTextChanged(const QString& new_text)
+{
     const QString edit_filter_text = new_text.toLower();
 
     if (m_isTreeMode) {
@@ -219,15 +238,18 @@ void GameList::OnTextChanged(const QString& new_text) {
     }
 }
 
-void GameList::OnFilterCloseClicked() {
+void GameList::OnFilterCloseClicked()
+{
     main_window->filterBarSetChecked(false);
 }
 
-void GameList::OnUpdateThemedIcons() {
+void GameList::OnUpdateThemedIcons()
+{
     item_model->OnUpdateThemedIcons();
 }
 
-void GameList::OnPopulatingCompleted(const QStringList& watch_list) {
+void GameList::OnPopulatingCompleted(const QStringList& watch_list)
+{
     emit ShowList(!item_model->IsEmpty());
 
     // favorites row
@@ -299,7 +321,8 @@ void GameList::OnPopulatingCompleted(const QStringList& watch_list) {
     emit PopulatingCompleted();
 }
 
-void GameList::RefreshGameDirectory() {
+void GameList::RefreshGameDirectory()
+{
     item_model->ResetExternalWatcher();
 
     if (!UISettings::values.game_dirs.empty()) {
@@ -309,7 +332,8 @@ void GameList::RefreshGameDirectory() {
     }
 }
 
-void GameList::RefreshExternalContent() {
+void GameList::RefreshExternalContent()
+{
     if (!UISettings::values.game_dirs.empty()) {
         LOG_INFO(Frontend, "External content directory changed. Clearing metadata cache.");
         QtCommon::Game::ResetMetadata(false);
@@ -318,7 +342,8 @@ void GameList::RefreshExternalContent() {
     }
 }
 
-void GameList::ValidateEntry(const QModelIndex& item) {
+void GameList::ValidateEntry(const QModelIndex& item)
+{
     const auto selected = item.sibling(item.row(), 0);
 
     switch (selected.data(GameListItem::TypeRole).value<GameListItemType>()) {
@@ -353,7 +378,8 @@ void GameList::ValidateEntry(const QModelIndex& item) {
     }
 }
 
-void GameList::ToggleFavorite(u64 program_id) {
+void GameList::ToggleFavorite(u64 program_id)
+{
     item_model->ToggleFavorite(program_id);
 
     if (UISettings::values.favorited_ids.contains(program_id)) {
@@ -368,7 +394,8 @@ void GameList::ToggleFavorite(u64 program_id) {
     }
 }
 
-void GameList::PopupContextMenu(const QPoint& menu_location) {
+void GameList::PopupContextMenu(const QPoint& menu_location)
+{
     QModelIndex item = m_currentView->indexAt(menu_location);
     if (!item.isValid()) {
         if (m_isTreeMode)
@@ -407,7 +434,8 @@ void GameList::PopupContextMenu(const QPoint& menu_location) {
     context_menu.exec(m_currentView->viewport()->mapToGlobal(menu_location));
 }
 
-void GameList::AddGamePopup(QMenu& context_menu, u64 program_id, const std::string& path) {
+void GameList::AddGamePopup(QMenu& context_menu, u64 program_id, const std::string& path)
+{
     // TODO(crueter): Refactor this and make it less bad
     QAction* favorite = context_menu.addAction(tr("Favorite"));
     context_menu.addSeparator();
@@ -472,9 +500,8 @@ void GameList::AddGamePopup(QMenu& context_menu, u64 program_id, const std::stri
     });
     connect(start_game, &QAction::triggered, this,
             [this, path]() { emit BootGame(QString::fromStdString(path), StartGameType::Normal); });
-    connect(start_game_global, &QAction::triggered, this, [this, path]() {
-        emit BootGame(QString::fromStdString(path), StartGameType::Global);
-    });
+    connect(start_game_global, &QAction::triggered, this,
+            [this, path]() { emit BootGame(QString::fromStdString(path), StartGameType::Global); });
     connect(open_mod_location, &QAction::triggered, this, [this, program_id, path]() {
         emit OpenFolderRequested(program_id, GameListOpenTarget::ModData, path);
     });
@@ -543,7 +570,8 @@ void GameList::AddGamePopup(QMenu& context_menu, u64 program_id, const std::stri
             [this, program_id]() { emit LinkToRyujinxRequested(program_id); });
 };
 
-void GameList::AddCustomDirPopup(QMenu& context_menu, QModelIndex selected) {
+void GameList::AddCustomDirPopup(QMenu& context_menu, QModelIndex selected)
+{
     UISettings::GameDir& game_dir =
         UISettings::values.game_dirs[selected.data(GameListDir::GameDirRole).toInt()];
 
@@ -564,7 +592,8 @@ void GameList::AddCustomDirPopup(QMenu& context_menu, QModelIndex selected) {
     });
 }
 
-void GameList::AddPermDirPopup(QMenu& context_menu, QModelIndex selected) {
+void GameList::AddPermDirPopup(QMenu& context_menu, QModelIndex selected)
+{
     const int game_dir_index = selected.data(GameListDir::GameDirRole).toInt();
 
     QAction* move_up = context_menu.addAction(tr("\u25B2 Move Up"));
@@ -608,17 +637,20 @@ void GameList::AddPermDirPopup(QMenu& context_menu, QModelIndex selected) {
     });
 }
 
-void GameList::AddFavoritesPopup(QMenu& context_menu) {
+void GameList::AddFavoritesPopup(QMenu& context_menu)
+{
     QAction* clear = context_menu.addAction(tr("Clear"));
 
     connect(clear, &QAction::triggered, this, [this] {
         UISettings::values.favorited_ids.clear();
-        item_model->invisibleRootItem()->child(0)->removeRows(0, item_model->invisibleRootItem()->child(0)->rowCount());
+        item_model->invisibleRootItem()->child(0)->removeRows(
+            0, item_model->invisibleRootItem()->child(0)->rowCount());
         tree_view->setRowHidden(0, item_model->invisibleRootItem()->index(), true);
     });
 }
 
-void GameList::changeEvent(QEvent* event) {
+void GameList::changeEvent(QEvent* event)
+{
     if (event->type() == QEvent::LanguageChange) {
         RetranslateUI();
     }
@@ -626,11 +658,13 @@ void GameList::changeEvent(QEvent* event) {
     QWidget::changeEvent(event);
 }
 
-void GameList::RetranslateUI() {
+void GameList::RetranslateUI()
+{
     item_model->RetranslateUI();
 }
 
-void GameList::SetupScrollAnimation() {
+void GameList::SetupScrollAnimation()
+{
     auto setup = [this](QVariantAnimation* anim, QScrollBar* bar) {
         anim->setEasingCurve(QEasingCurve::OutCubic);
         anim->setDuration(200);
@@ -648,7 +682,8 @@ void GameList::SetupScrollAnimation() {
     setup(horizontal_scroll, grid_view->horizontalScrollBar());
 }
 
-bool GameList::eventFilter(QObject* obj, QEvent* event) {
+bool GameList::eventFilter(QObject* obj, QEvent* event)
+{
     if (obj == m_currentView->viewport() && event->type() == QEvent::Wheel) {
         QWheelEvent* wheelEvent = static_cast<QWheelEvent*>(event);
 
@@ -711,7 +746,8 @@ bool GameList::eventFilter(QObject* obj, QEvent* event) {
     return QWidget::eventFilter(obj, event);
 }
 
-GameListPlaceholder::GameListPlaceholder(MainWindow* parent) : QWidget{parent} {
+GameListPlaceholder::GameListPlaceholder(MainWindow* parent) : QWidget{parent}
+{
     connect(parent, &MainWindow::UpdateThemedIcons, this,
             &GameListPlaceholder::onUpdateThemedIcons);
 
@@ -735,15 +771,18 @@ GameListPlaceholder::GameListPlaceholder(MainWindow* parent) : QWidget{parent} {
 
 GameListPlaceholder::~GameListPlaceholder() = default;
 
-void GameListPlaceholder::onUpdateThemedIcons() {
+void GameListPlaceholder::onUpdateThemedIcons()
+{
     image->setPixmap(QIcon::fromTheme(QStringLiteral("plus_folder")).pixmap(200));
 }
 
-void GameListPlaceholder::mouseDoubleClickEvent(QMouseEvent* event) {
+void GameListPlaceholder::mouseDoubleClickEvent(QMouseEvent* event)
+{
     emit GameListPlaceholder::AddDirectory();
 }
 
-void GameListPlaceholder::changeEvent(QEvent* event) {
+void GameListPlaceholder::changeEvent(QEvent* event)
+{
     if (event->type() == QEvent::LanguageChange) {
         RetranslateUI();
     }
@@ -751,6 +790,7 @@ void GameListPlaceholder::changeEvent(QEvent* event) {
     QWidget::changeEvent(event);
 }
 
-void GameListPlaceholder::RetranslateUI() {
+void GameListPlaceholder::RetranslateUI()
+{
     text->setText(tr("Double-click to add a new folder to the game list"));
 }

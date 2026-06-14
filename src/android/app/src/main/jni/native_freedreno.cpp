@@ -11,6 +11,9 @@
  * @see https://docs.mesa3d.org/drivers/freedreno.html
  */
 
+#include <jni.h>
+#include <sys/stat.h>
+
 #include <algorithm>
 #include <cerrno>
 #include <cstdio>
@@ -18,9 +21,6 @@
 #include <map>
 #include <memory>
 #include <string>
-#include <sys/stat.h>
-
-#include <jni.h>
 
 #include "common/android/android_common.h"
 #include "common/logging.h"
@@ -40,7 +40,8 @@ std::string g_current_program_id;
 constexpr const char* kConfigFileName = ".freedreno.conf";
 constexpr const char* kPerGameConfigDir = "freedreno_games";
 
-void LogActiveVariables() {
+void LogActiveVariables()
+{
     if (!g_config || g_config->env_vars.empty()) {
         return;
     }
@@ -49,7 +50,8 @@ void LogActiveVariables() {
     }
 }
 
-bool ApplyEnvironmentVariable(const std::string& key, const std::string& value) {
+bool ApplyEnvironmentVariable(const std::string& key, const std::string& value)
+{
     if (setenv(key.c_str(), value.c_str(), 1) != 0) {
         LOG_ERROR(Frontend, "[Freedreno] Failed to set {}={} (errno: {})", key, value, errno);
         return false;
@@ -57,29 +59,36 @@ bool ApplyEnvironmentVariable(const std::string& key, const std::string& value) 
     return true;
 }
 
-void ClearAllEnvironmentVariables() {
-    if (!g_config) return;
+void ClearAllEnvironmentVariables()
+{
+    if (!g_config)
+        return;
     for (const auto& [key, value] : g_config->env_vars) {
         unsetenv(key.c_str());
     }
     g_config->env_vars.clear();
 }
 
-std::string GetConfigPath() {
+std::string GetConfigPath()
+{
     return g_base_path + "/" + kConfigFileName;
 }
 
-std::string GetPerGameConfigPath(const std::string& program_id) {
+std::string GetPerGameConfigPath(const std::string& program_id)
+{
     return g_base_path + "/" + kPerGameConfigDir + "/" + program_id + ".conf";
 }
 
-void EnsurePerGameConfigDir() {
+void EnsurePerGameConfigDir()
+{
     std::string dir_path = g_base_path + "/" + kPerGameConfigDir;
     mkdir(dir_path.c_str(), 0755);
 }
 
-bool LoadConfigFromFile(const std::string& config_path) {
-    if (!g_config) return false;
+bool LoadConfigFromFile(const std::string& config_path)
+{
+    if (!g_config)
+        return false;
 
     FILE* file = fopen(config_path.c_str(), "r");
     if (!file) {
@@ -116,8 +125,10 @@ bool LoadConfigFromFile(const std::string& config_path) {
     return count > 0;
 }
 
-bool SaveConfigToFile(const std::string& config_path) {
-    if (!g_config) return false;
+bool SaveConfigToFile(const std::string& config_path)
+{
+    if (!g_config)
+        return false;
 
     FILE* file = fopen(config_path.c_str(), "w");
     if (!file) {
@@ -140,24 +151,25 @@ bool SaveConfigToFile(const std::string& config_path) {
 
 extern "C" {
 
-JNIEXPORT void JNICALL
-Java_org_yuzu_yuzu_1emu_utils_NativeFreedrenoConfig_setFreedrenoBasePath(
-    JNIEnv* env, [[maybe_unused]] jobject obj, jstring jbasePath) {
+JNIEXPORT void JNICALL Java_org_yuzu_yuzu_1emu_utils_NativeFreedrenoConfig_setFreedrenoBasePath(
+    JNIEnv* env, [[maybe_unused]] jobject obj, jstring jbasePath)
+{
     g_base_path = Common::Android::GetJString(env, jbasePath);
 }
 
 JNIEXPORT void JNICALL
 Java_org_yuzu_yuzu_1emu_utils_NativeFreedrenoConfig_initializeFreedrenoConfig(
-    [[maybe_unused]] JNIEnv* env, [[maybe_unused]] jobject obj) {
+    [[maybe_unused]] JNIEnv* env, [[maybe_unused]] jobject obj)
+{
     if (!g_config) {
         g_config = std::make_unique<FreedrenoConfig>();
         LOG_INFO(Frontend, "[Freedreno] Configuration system initialized");
     }
 }
 
-JNIEXPORT void JNICALL
-Java_org_yuzu_yuzu_1emu_utils_NativeFreedrenoConfig_saveFreedrenoConfig(
-    [[maybe_unused]] JNIEnv* env, [[maybe_unused]] jobject obj) {
+JNIEXPORT void JNICALL Java_org_yuzu_yuzu_1emu_utils_NativeFreedrenoConfig_saveFreedrenoConfig(
+    [[maybe_unused]] JNIEnv* env, [[maybe_unused]] jobject obj)
+{
     if (!g_config) {
         LOG_WARNING(Frontend, "[Freedreno] Cannot save: not initialized");
         return;
@@ -180,13 +192,13 @@ Java_org_yuzu_yuzu_1emu_utils_NativeFreedrenoConfig_saveFreedrenoConfig(
     fclose(file);
     g_config->config_file_path = config_path;
 
-    LOG_INFO(Frontend, "[Freedreno] Saved {} variables to {}",
-             g_config->env_vars.size(), config_path);
+    LOG_INFO(Frontend, "[Freedreno] Saved {} variables to {}", g_config->env_vars.size(),
+             config_path);
 }
 
-JNIEXPORT void JNICALL
-Java_org_yuzu_yuzu_1emu_utils_NativeFreedrenoConfig_reloadFreedrenoConfig(
-    [[maybe_unused]] JNIEnv* env, [[maybe_unused]] jobject obj) {
+JNIEXPORT void JNICALL Java_org_yuzu_yuzu_1emu_utils_NativeFreedrenoConfig_reloadFreedrenoConfig(
+    [[maybe_unused]] JNIEnv* env, [[maybe_unused]] jobject obj)
+{
     if (!g_config) {
         LOG_WARNING(Frontend, "[Freedreno] Cannot reload: not initialized");
         return;
@@ -237,9 +249,9 @@ Java_org_yuzu_yuzu_1emu_utils_NativeFreedrenoConfig_reloadFreedrenoConfig(
     }
 }
 
-JNIEXPORT jboolean JNICALL
-Java_org_yuzu_yuzu_1emu_utils_NativeFreedrenoConfig_setFreedrenoEnv(
-    JNIEnv* env, [[maybe_unused]] jobject obj, jstring jvarName, jstring jvalue) {
+JNIEXPORT jboolean JNICALL Java_org_yuzu_yuzu_1emu_utils_NativeFreedrenoConfig_setFreedrenoEnv(
+    JNIEnv* env, [[maybe_unused]] jobject obj, jstring jvarName, jstring jvalue)
+{
     if (!g_config) {
         return JNI_FALSE;
     }
@@ -266,9 +278,9 @@ Java_org_yuzu_yuzu_1emu_utils_NativeFreedrenoConfig_setFreedrenoEnv(
     return JNI_TRUE;
 }
 
-JNIEXPORT jstring JNICALL
-Java_org_yuzu_yuzu_1emu_utils_NativeFreedrenoConfig_getFreedrenoEnv(
-    JNIEnv* env, [[maybe_unused]] jobject obj, jstring jvarName) {
+JNIEXPORT jstring JNICALL Java_org_yuzu_yuzu_1emu_utils_NativeFreedrenoConfig_getFreedrenoEnv(
+    JNIEnv* env, [[maybe_unused]] jobject obj, jstring jvarName)
+{
     if (!g_config) {
         return env->NewStringUTF("");
     }
@@ -283,9 +295,9 @@ Java_org_yuzu_yuzu_1emu_utils_NativeFreedrenoConfig_getFreedrenoEnv(
     return env->NewStringUTF("");
 }
 
-JNIEXPORT jboolean JNICALL
-Java_org_yuzu_yuzu_1emu_utils_NativeFreedrenoConfig_isFreedrenoEnvSet(
-    JNIEnv* env, [[maybe_unused]] jobject obj, jstring jvarName) {
+JNIEXPORT jboolean JNICALL Java_org_yuzu_yuzu_1emu_utils_NativeFreedrenoConfig_isFreedrenoEnvSet(
+    JNIEnv* env, [[maybe_unused]] jobject obj, jstring jvarName)
+{
     if (!g_config) {
         return JNI_FALSE;
     }
@@ -296,9 +308,9 @@ Java_org_yuzu_yuzu_1emu_utils_NativeFreedrenoConfig_isFreedrenoEnvSet(
     return (it != g_config->env_vars.end() && !it->second.empty()) ? JNI_TRUE : JNI_FALSE;
 }
 
-JNIEXPORT jboolean JNICALL
-Java_org_yuzu_yuzu_1emu_utils_NativeFreedrenoConfig_clearFreedrenoEnv(
-    JNIEnv* env, [[maybe_unused]] jobject obj, jstring jvarName) {
+JNIEXPORT jboolean JNICALL Java_org_yuzu_yuzu_1emu_utils_NativeFreedrenoConfig_clearFreedrenoEnv(
+    JNIEnv* env, [[maybe_unused]] jobject obj, jstring jvarName)
+{
     if (!g_config) {
         return JNI_FALSE;
     }
@@ -316,9 +328,9 @@ Java_org_yuzu_yuzu_1emu_utils_NativeFreedrenoConfig_clearFreedrenoEnv(
     return JNI_FALSE;
 }
 
-JNIEXPORT void JNICALL
-Java_org_yuzu_yuzu_1emu_utils_NativeFreedrenoConfig_clearAllFreedrenoEnv(
-    [[maybe_unused]] JNIEnv* env, [[maybe_unused]] jobject obj) {
+JNIEXPORT void JNICALL Java_org_yuzu_yuzu_1emu_utils_NativeFreedrenoConfig_clearAllFreedrenoEnv(
+    [[maybe_unused]] JNIEnv* env, [[maybe_unused]] jobject obj)
+{
     if (!g_config) {
         return;
     }
@@ -337,7 +349,8 @@ Java_org_yuzu_yuzu_1emu_utils_NativeFreedrenoConfig_clearAllFreedrenoEnv(
 
 JNIEXPORT jstring JNICALL
 Java_org_yuzu_yuzu_1emu_utils_NativeFreedrenoConfig_getFreedrenoEnvSummary(
-    JNIEnv* env, [[maybe_unused]] jobject obj) {
+    JNIEnv* env, [[maybe_unused]] jobject obj)
+{
     if (!g_config || g_config->env_vars.empty()) {
         return env->NewStringUTF("");
     }
@@ -353,15 +366,15 @@ Java_org_yuzu_yuzu_1emu_utils_NativeFreedrenoConfig_getFreedrenoEnvSummary(
     return env->NewStringUTF(summary.c_str());
 }
 
-JNIEXPORT void JNICALL
-Java_org_yuzu_yuzu_1emu_utils_NativeFreedrenoConfig_setCurrentProgramId(
-    JNIEnv* env, [[maybe_unused]] jobject obj, jstring jprogramId) {
+JNIEXPORT void JNICALL Java_org_yuzu_yuzu_1emu_utils_NativeFreedrenoConfig_setCurrentProgramId(
+    JNIEnv* env, [[maybe_unused]] jobject obj, jstring jprogramId)
+{
     g_current_program_id = Common::Android::GetJString(env, jprogramId);
 }
 
-JNIEXPORT jboolean JNICALL
-Java_org_yuzu_yuzu_1emu_utils_NativeFreedrenoConfig_loadPerGameConfig(
-    JNIEnv* env, [[maybe_unused]] jobject obj, jstring jprogramId) {
+JNIEXPORT jboolean JNICALL Java_org_yuzu_yuzu_1emu_utils_NativeFreedrenoConfig_loadPerGameConfig(
+    JNIEnv* env, [[maybe_unused]] jobject obj, jstring jprogramId)
+{
     if (!g_config) {
         return JNI_FALSE;
     }
@@ -391,7 +404,8 @@ Java_org_yuzu_yuzu_1emu_utils_NativeFreedrenoConfig_loadPerGameConfig(
 
 JNIEXPORT jboolean JNICALL
 Java_org_yuzu_yuzu_1emu_utils_NativeFreedrenoConfig_loadPerGameConfigWithGlobalFallback(
-    JNIEnv* env, [[maybe_unused]] jobject obj, jstring jprogramId) {
+    JNIEnv* env, [[maybe_unused]] jobject obj, jstring jprogramId)
+{
     if (!g_config) {
         return JNI_FALSE;
     }
@@ -416,16 +430,17 @@ Java_org_yuzu_yuzu_1emu_utils_NativeFreedrenoConfig_loadPerGameConfigWithGlobalF
     // Fall back to global config for emulation
     std::string global_path = GetConfigPath();
     if (LoadConfigFromFile(global_path)) {
-        LOG_INFO(Frontend, "[Freedreno] No per-game config for {}, using global for emulation", program_id);
+        LOG_INFO(Frontend, "[Freedreno] No per-game config for {}, using global for emulation",
+                 program_id);
         LogActiveVariables();
     }
 
     return JNI_FALSE;
 }
 
-JNIEXPORT jboolean JNICALL
-Java_org_yuzu_yuzu_1emu_utils_NativeFreedrenoConfig_savePerGameConfig(
-    JNIEnv* env, [[maybe_unused]] jobject obj, jstring jprogramId) {
+JNIEXPORT jboolean JNICALL Java_org_yuzu_yuzu_1emu_utils_NativeFreedrenoConfig_savePerGameConfig(
+    JNIEnv* env, [[maybe_unused]] jobject obj, jstring jprogramId)
+{
     if (!g_config) {
         return JNI_FALSE;
     }
@@ -446,9 +461,9 @@ Java_org_yuzu_yuzu_1emu_utils_NativeFreedrenoConfig_savePerGameConfig(
     return JNI_FALSE;
 }
 
-JNIEXPORT jboolean JNICALL
-Java_org_yuzu_yuzu_1emu_utils_NativeFreedrenoConfig_hasPerGameConfig(
-    JNIEnv* env, [[maybe_unused]] jobject obj, jstring jprogramId) {
+JNIEXPORT jboolean JNICALL Java_org_yuzu_yuzu_1emu_utils_NativeFreedrenoConfig_hasPerGameConfig(
+    JNIEnv* env, [[maybe_unused]] jobject obj, jstring jprogramId)
+{
     auto program_id = Common::Android::GetJString(env, jprogramId);
     if (program_id.empty()) {
         return JNI_FALSE;
@@ -463,9 +478,9 @@ Java_org_yuzu_yuzu_1emu_utils_NativeFreedrenoConfig_hasPerGameConfig(
     return JNI_FALSE;
 }
 
-JNIEXPORT jboolean JNICALL
-Java_org_yuzu_yuzu_1emu_utils_NativeFreedrenoConfig_deletePerGameConfig(
-    JNIEnv* env, [[maybe_unused]] jobject obj, jstring jprogramId) {
+JNIEXPORT jboolean JNICALL Java_org_yuzu_yuzu_1emu_utils_NativeFreedrenoConfig_deletePerGameConfig(
+    JNIEnv* env, [[maybe_unused]] jobject obj, jstring jprogramId)
+{
     auto program_id = Common::Android::GetJString(env, jprogramId);
     if (program_id.empty()) {
         return JNI_FALSE;

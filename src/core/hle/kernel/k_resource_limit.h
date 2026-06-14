@@ -4,6 +4,7 @@
 #pragma once
 
 #include <array>
+
 #include "common/common_types.h"
 #include "core/hle/kernel/k_light_condition_variable.h"
 #include "core/hle/kernel/k_light_lock.h"
@@ -19,7 +20,8 @@ class KernelCore;
 
 using LimitableResource = Svc::LimitableResource;
 
-constexpr bool IsValidResourceType(LimitableResource type) {
+constexpr bool IsValidResourceType(LimitableResource type)
+{
     return type < LimitableResource::Count;
 }
 

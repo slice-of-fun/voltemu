@@ -16,7 +16,8 @@
 namespace Kernel::Svc {
 namespace {
 
-constexpr bool IsValidSignalType(Svc::SignalType type) {
+constexpr bool IsValidSignalType(Svc::SignalType type)
+{
     switch (type) {
     case Svc::SignalType::Signal:
     case Svc::SignalType::SignalAndIncrementIfEqual:
@@ -27,7 +28,8 @@ constexpr bool IsValidSignalType(Svc::SignalType type) {
     }
 }
 
-constexpr bool IsValidArbitrationType(Svc::ArbitrationType type) {
+constexpr bool IsValidArbitrationType(Svc::ArbitrationType type)
+{
     switch (type) {
     case Svc::ArbitrationType::WaitIfLessThan:
     case Svc::ArbitrationType::DecrementAndWaitIfLessThan:
@@ -42,7 +44,8 @@ constexpr bool IsValidArbitrationType(Svc::ArbitrationType type) {
 
 // Wait for an address (via Address Arbiter)
 Result WaitForAddress(Core::System& system, u64 address, ArbitrationType arb_type, s32 value,
-                      s64 timeout_ns) {
+                      s64 timeout_ns)
+{
     LOG_TRACE(Kernel_SVC, "called, address={:#X}, arb_type=0x{:X}, value=0x{:X}, timeout_ns={}",
               address, arb_type, value, timeout_ns);
 
@@ -73,7 +76,8 @@ Result WaitForAddress(Core::System& system, u64 address, ArbitrationType arb_typ
 
 // Signals to an address (via Address Arbiter)
 Result SignalToAddress(Core::System& system, u64 address, SignalType signal_type, s32 value,
-                       s32 count) {
+                       s32 count)
+{
     LOG_TRACE(Kernel_SVC, "called, address={:#X}, signal_type=0x{:X}, value=0x{:X}, count=0x{:X}",
               address, signal_type, value, count);
 
@@ -87,22 +91,26 @@ Result SignalToAddress(Core::System& system, u64 address, SignalType signal_type
 }
 
 Result WaitForAddress64(Core::System& system, u64 address, ArbitrationType arb_type, s32 value,
-                        s64 timeout_ns) {
+                        s64 timeout_ns)
+{
     R_RETURN(WaitForAddress(system, address, arb_type, value, timeout_ns));
 }
 
 Result SignalToAddress64(Core::System& system, u64 address, SignalType signal_type, s32 value,
-                         s32 count) {
+                         s32 count)
+{
     R_RETURN(SignalToAddress(system, address, signal_type, value, count));
 }
 
 Result WaitForAddress64From32(Core::System& system, u32 address, ArbitrationType arb_type,
-                              s32 value, s64 timeout_ns) {
+                              s32 value, s64 timeout_ns)
+{
     R_RETURN(WaitForAddress(system, address, arb_type, value, timeout_ns));
 }
 
 Result SignalToAddress64From32(Core::System& system, u32 address, SignalType signal_type, s32 value,
-                               s32 count) {
+                               s32 count)
+{
     R_RETURN(SignalToAddress(system, address, signal_type, value, count));
 }
 

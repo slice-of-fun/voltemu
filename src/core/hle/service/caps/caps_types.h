@@ -56,7 +56,8 @@ struct AlbumFileDateTime {
     s8 unique_id{};
 
     friend constexpr bool operator==(const AlbumFileDateTime&, const AlbumFileDateTime&) = default;
-    friend constexpr bool operator>(const AlbumFileDateTime& a, const AlbumFileDateTime& b) {
+    friend constexpr bool operator>(const AlbumFileDateTime& a, const AlbumFileDateTime& b)
+    {
         if (a.year > b.year) {
             return true;
         }
@@ -74,7 +75,8 @@ struct AlbumFileDateTime {
         }
         return a.second > b.second;
     };
-    friend constexpr bool operator<(const AlbumFileDateTime& a, const AlbumFileDateTime& b) {
+    friend constexpr bool operator<(const AlbumFileDateTime& a, const AlbumFileDateTime& b)
+    {
         if (a.year < b.year) {
             return true;
         }

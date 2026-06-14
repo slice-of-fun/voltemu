@@ -4,9 +4,12 @@
 // SPDX-FileCopyrightText: Copyright 2017 Citra Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "yuzu/multiplayer/lobby.h"
+
 #include <QInputDialog>
 #include <QList>
 #include <QtConcurrentRun>
+
 #include "common/logging.h"
 #include "common/settings.h"
 #include "core/core.h"
@@ -14,11 +17,10 @@
 #include "core/internal_network/network_interface.h"
 #include "network/network.h"
 #include "qt_common/config/uisettings.h"
-#include "ui_lobby.h"
 #include "qt_common/game_list/game_list_p.h"
+#include "ui_lobby.h"
 #include "yuzu/main_window.h"
 #include "yuzu/multiplayer/client_room.h"
-#include "yuzu/multiplayer/lobby.h"
 #include "yuzu/multiplayer/lobby_p.h"
 #include "yuzu/multiplayer/message.h"
 #include "yuzu/multiplayer/state.h"
@@ -30,7 +32,8 @@
 Lobby::Lobby(QWidget* parent, QStandardItemModel* list,
              std::shared_ptr<Core::AnnounceMultiplayerSession> session, Core::System& system_)
     : QDialog(parent, Qt::WindowTitleHint | Qt::WindowCloseButtonHint | Qt::WindowSystemMenuHint),
-      ui(std::make_unique<Ui::Lobby>()), announce_multiplayer_session(session), system{system_} {
+      ui(std::make_unique<Ui::Lobby>()), announce_multiplayer_session(session), system{system_}
+{
     ui->setupUi(this);
 
     // setup the watcher for background connections
@@ -99,7 +102,8 @@ Lobby::Lobby(QWidget* parent, QStandardItemModel* list,
 
 Lobby::~Lobby() = default;
 
-void Lobby::UpdateGameList(QStandardItemModel* list) {
+void Lobby::UpdateGameList(QStandardItemModel* list)
+{
     game_list->clear();
     for (int i = 0; i < list->rowCount(); i++) {
         auto parent = list->item(i, 0);
@@ -112,11 +116,13 @@ void Lobby::UpdateGameList(QStandardItemModel* list) {
     ui->room_list->sortByColumn(Column::GAME_NAME, Qt::AscendingOrder);
 }
 
-void Lobby::RetranslateUi() {
+void Lobby::RetranslateUi()
+{
     ui->retranslateUi(this);
 }
 
-QString Lobby::PasswordPrompt() {
+QString Lobby::PasswordPrompt()
+{
     bool ok;
     const QString text =
         QInputDialog::getText(this, tr("Password Required to Join"), tr("Password:"),
@@ -124,12 +130,14 @@ QString Lobby::PasswordPrompt() {
     return ok ? text : QString();
 }
 
-void Lobby::OnExpandRoom(const QModelIndex& index) {
+void Lobby::OnExpandRoom(const QModelIndex& index)
+{
     QModelIndex member_index = proxy->index(index.row(), Column::MEMBER);
     auto member_list = proxy->data(member_index, LobbyItemMemberList::MemberListRole).toList();
 }
 
-void Lobby::OnJoinRoom(const QModelIndex& source) {
+void Lobby::OnJoinRoom(const QModelIndex& source)
+{
     if (!Network::GetSelectedNetworkInterface()) {
         LOG_INFO(WebService, "Automatically selected network interface for room network.");
         Network::SelectFirstNetworkInterface();
@@ -223,7 +231,8 @@ void Lobby::OnJoinRoom(const QModelIndex& source) {
     emit SaveConfig();
 }
 
-void Lobby::ResetModel() {
+void Lobby::ResetModel()
+{
     model->clear();
     model->insertColumns(0, Column::TOTAL);
     model->setHeaderData(Column::MEMBER, Qt::Horizontal, tr("Players"), Qt::DisplayRole);
@@ -232,7 +241,8 @@ void Lobby::ResetModel() {
     model->setHeaderData(Column::HOST, Qt::Horizontal, tr("Host"), Qt::DisplayRole);
 }
 
-void Lobby::RefreshLobby() {
+void Lobby::RefreshLobby()
+{
     if (auto session = announce_multiplayer_session.lock()) {
         ResetModel();
         ui->refresh_list->setEnabled(false);
@@ -244,7 +254,8 @@ void Lobby::RefreshLobby() {
     }
 }
 
-void Lobby::OnRefreshLobby() {
+void Lobby::OnRefreshLobby()
+{
     AnnounceMultiplayerRoom::RoomList new_room_list = room_list_watcher.result();
     for (auto room : new_room_list) {
         // find the icon for the game if this person owns that game.
@@ -310,7 +321,8 @@ void Lobby::OnRefreshLobby() {
     ui->room_list->sortByColumn(Column::GAME_NAME, Qt::AscendingOrder);
 }
 
-std::string Lobby::GetProfileUsername() {
+std::string Lobby::GetProfileUsername()
+{
     const auto& current_user =
         system.GetProfileManager().GetUser(Settings::values.current_user.GetValue());
     Service::Account::ProfileBase profile{};
@@ -330,13 +342,17 @@ std::string Lobby::GetProfileUsername() {
 }
 
 LobbyFilterProxyModel::LobbyFilterProxyModel(QWidget* parent, QStandardItemModel* list)
-    : QSortFilterProxyModel(parent), game_list(list) {}
+    : QSortFilterProxyModel(parent), game_list(list)
+{
+}
 
-void LobbyFilterProxyModel::UpdateGameList(QStandardItemModel* list) {
+void LobbyFilterProxyModel::UpdateGameList(QStandardItemModel* list)
+{
     game_list = list;
 }
 
-bool LobbyFilterProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const {
+bool LobbyFilterProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const
+{
     // Prioritize filters by fastest to compute
 
     // pass over any child rows (aka row that shows the players in the room)
@@ -415,26 +431,31 @@ bool LobbyFilterProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex& s
     return true;
 }
 
-void LobbyFilterProxyModel::sort(int column, Qt::SortOrder order) {
+void LobbyFilterProxyModel::sort(int column, Qt::SortOrder order)
+{
     sourceModel()->sort(column, order);
 }
 
-void LobbyFilterProxyModel::SetFilterOwned(bool filter) {
+void LobbyFilterProxyModel::SetFilterOwned(bool filter)
+{
     filter_owned = filter;
     invalidate();
 }
 
-void LobbyFilterProxyModel::SetFilterEmpty(bool filter) {
+void LobbyFilterProxyModel::SetFilterEmpty(bool filter)
+{
     filter_empty = filter;
     invalidate();
 }
 
-void LobbyFilterProxyModel::SetFilterFull(bool filter) {
+void LobbyFilterProxyModel::SetFilterFull(bool filter)
+{
     filter_full = filter;
     invalidate();
 }
 
-void LobbyFilterProxyModel::SetFilterSearch(const QString& filter) {
+void LobbyFilterProxyModel::SetFilterSearch(const QString& filter)
+{
     filter_search = filter;
     invalidate();
 }

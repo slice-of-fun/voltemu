@@ -12,7 +12,7 @@
 
 namespace Common::FS {
 
-template <typename T>
+template<typename T>
 concept IsChar = std::same_as<T, char>;
 
 /**

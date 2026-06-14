@@ -4,37 +4,42 @@
 // SPDX-FileCopyrightText: Copyright 2021 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "hid_core/hidbus/ringcon.h"
+
 #include "core/core.h"
 #include "core/hle/kernel/k_event.h"
 #include "core/hle/kernel/k_readable_event.h"
 #include "core/memory.h"
 #include "hid_core/frontend/emulated_controller.h"
 #include "hid_core/hid_core.h"
-#include "hid_core/hidbus/ringcon.h"
 
 namespace Service::HID {
 
 RingController::RingController(Core::System& system_,
                                KernelHelpers::ServiceContext& service_context_)
-    : HidbusBase(system_, service_context_) {
+    : HidbusBase(system_, service_context_)
+{
     input = system.HIDCore().GetEmulatedController(Core::HID::NpadIdType::Player1);
 }
 
 RingController::~RingController() = default;
 
-void RingController::OnInit() {
+void RingController::OnInit()
+{
     input->SetPollingMode(Core::HID::EmulatedDeviceIndex::RightIndex,
                           Common::Input::PollingMode::Ring);
     return;
 }
 
-void RingController::OnRelease() {
+void RingController::OnRelease()
+{
     input->SetPollingMode(Core::HID::EmulatedDeviceIndex::RightIndex,
                           Common::Input::PollingMode::Active);
     return;
 };
 
-void RingController::OnUpdate() {
+void RingController::OnUpdate()
+{
     if (!is_activated) {
         return;
     }
@@ -77,7 +82,8 @@ void RingController::OnUpdate() {
     }
 }
 
-RingController::RingConData RingController::GetSensorValue() const {
+RingController::RingConData RingController::GetSensorValue() const
+{
     RingConData ringcon_sensor_value{
         .status = DataValid::Valid,
         .data = 0,
@@ -89,11 +95,13 @@ RingController::RingConData RingController::GetSensorValue() const {
     return ringcon_sensor_value;
 }
 
-u8 RingController::GetDeviceId() const {
+u8 RingController::GetDeviceId() const
+{
     return device_id;
 }
 
-u64 RingController::GetReply(std::span<u8> out_data) const {
+u64 RingController::GetReply(std::span<u8> out_data) const
+{
     const RingConCommands current_command = command;
 
     switch (current_command) {
@@ -122,7 +130,8 @@ u64 RingController::GetReply(std::span<u8> out_data) const {
     }
 }
 
-bool RingController::SetCommand(std::span<const u8> data) {
+bool RingController::SetCommand(std::span<const u8> data)
+{
     if (data.size() < 4) {
         LOG_ERROR(Service_HID, "Command size not supported {}", data.size());
         command = RingConCommands::Error;
@@ -166,7 +175,8 @@ bool RingController::SetCommand(std::span<const u8> data) {
     }
 }
 
-u64 RingController::GetFirmwareVersionReply(std::span<u8> out_data) const {
+u64 RingController::GetFirmwareVersionReply(std::span<u8> out_data) const
+{
     const FirmwareVersionReply reply{
         .status = DataValid::Valid,
         .firmware = version,
@@ -175,7 +185,8 @@ u64 RingController::GetFirmwareVersionReply(std::span<u8> out_data) const {
     return GetData(reply, out_data);
 }
 
-u64 RingController::GetReadIdReply(std::span<u8> out_data) const {
+u64 RingController::GetReadIdReply(std::span<u8> out_data) const
+{
     // The values are hardcoded from a real joycon
     const ReadIdReply reply{
         .status = DataValid::Valid,
@@ -190,7 +201,8 @@ u64 RingController::GetReadIdReply(std::span<u8> out_data) const {
     return GetData(reply, out_data);
 }
 
-u64 RingController::GetC020105Reply(std::span<u8> out_data) const {
+u64 RingController::GetC020105Reply(std::span<u8> out_data) const
+{
     const Cmd020105Reply reply{
         .status = DataValid::Valid,
         .data = 1,
@@ -199,7 +211,8 @@ u64 RingController::GetC020105Reply(std::span<u8> out_data) const {
     return GetData(reply, out_data);
 }
 
-u64 RingController::GetReadUnkCalReply(std::span<u8> out_data) const {
+u64 RingController::GetReadUnkCalReply(std::span<u8> out_data) const
+{
     const ReadUnkCalReply reply{
         .status = DataValid::Valid,
         .data = 0,
@@ -208,7 +221,8 @@ u64 RingController::GetReadUnkCalReply(std::span<u8> out_data) const {
     return GetData(reply, out_data);
 }
 
-u64 RingController::GetReadFactoryCalReply(std::span<u8> out_data) const {
+u64 RingController::GetReadFactoryCalReply(std::span<u8> out_data) const
+{
     const ReadFactoryCalReply reply{
         .status = DataValid::Valid,
         .calibration = factory_calibration,
@@ -217,7 +231,8 @@ u64 RingController::GetReadFactoryCalReply(std::span<u8> out_data) const {
     return GetData(reply, out_data);
 }
 
-u64 RingController::GetReadUserCalReply(std::span<u8> out_data) const {
+u64 RingController::GetReadUserCalReply(std::span<u8> out_data) const
+{
     const ReadUserCalReply reply{
         .status = DataValid::Valid,
         .calibration = user_calibration,
@@ -226,7 +241,8 @@ u64 RingController::GetReadUserCalReply(std::span<u8> out_data) const {
     return GetData(reply, out_data);
 }
 
-u64 RingController::GetReadRepCountReply(std::span<u8> out_data) const {
+u64 RingController::GetReadRepCountReply(std::span<u8> out_data) const
+{
     const GetThreeByteReply reply{
         .status = DataValid::Valid,
         .data = {total_rep_count, 0, 0},
@@ -236,7 +252,8 @@ u64 RingController::GetReadRepCountReply(std::span<u8> out_data) const {
     return GetData(reply, out_data);
 }
 
-u64 RingController::GetReadTotalPushCountReply(std::span<u8> out_data) const {
+u64 RingController::GetReadTotalPushCountReply(std::span<u8> out_data) const
+{
     const GetThreeByteReply reply{
         .status = DataValid::Valid,
         .data = {total_push_count, 0, 0},
@@ -246,11 +263,13 @@ u64 RingController::GetReadTotalPushCountReply(std::span<u8> out_data) const {
     return GetData(reply, out_data);
 }
 
-u64 RingController::GetResetRepCountReply(std::span<u8> out_data) const {
+u64 RingController::GetResetRepCountReply(std::span<u8> out_data) const
+{
     return GetReadRepCountReply(out_data);
 }
 
-u64 RingController::GetSaveDataReply(std::span<u8> out_data) const {
+u64 RingController::GetSaveDataReply(std::span<u8> out_data) const
+{
     const StatusReply reply{
         .status = DataValid::Valid,
     };
@@ -258,7 +277,8 @@ u64 RingController::GetSaveDataReply(std::span<u8> out_data) const {
     return GetData(reply, out_data);
 }
 
-u64 RingController::GetErrorReply(std::span<u8> out_data) const {
+u64 RingController::GetErrorReply(std::span<u8> out_data) const
+{
     const ErrorReply reply{
         .status = DataValid::BadCRC,
     };
@@ -266,7 +286,8 @@ u64 RingController::GetErrorReply(std::span<u8> out_data) const {
     return GetData(reply, out_data);
 }
 
-u8 RingController::GetCrcValue(const std::vector<u8>& data) const {
+u8 RingController::GetCrcValue(const std::vector<u8>& data) const
+{
     u8 crc = 0;
     for (std::size_t index = 0; index < data.size(); index++) {
         for (u8 i = 0x80; i > 0; i >>= 1) {
@@ -283,8 +304,8 @@ u8 RingController::GetCrcValue(const std::vector<u8>& data) const {
     return crc;
 }
 
-template <typename T>
-u64 RingController::GetData(const T& reply, std::span<u8> out_data) const {
+template<typename T> u64 RingController::GetData(const T& reply, std::span<u8> out_data) const
+{
     static_assert(std::is_trivially_copyable_v<T>);
     const auto data_size = static_cast<u64>((std::min)(sizeof(reply), out_data.size()));
     std::memcpy(out_data.data(), &reply, data_size);

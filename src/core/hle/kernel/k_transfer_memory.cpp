@@ -1,21 +1,25 @@
 // SPDX-FileCopyrightText: Copyright 2021 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/kernel/k_transfer_memory.h"
+
 #include "common/scope_exit.h"
 #include "core/hle/kernel/k_process.h"
 #include "core/hle/kernel/k_resource_limit.h"
-#include "core/hle/kernel/k_transfer_memory.h"
 #include "core/hle/kernel/kernel.h"
 
 namespace Kernel {
 
 KTransferMemory::KTransferMemory(KernelCore& kernel)
-    : KAutoObjectWithSlabHeapAndContainer{kernel}, m_lock{kernel} {}
+    : KAutoObjectWithSlabHeapAndContainer{kernel}, m_lock{kernel}
+{
+}
 
 KTransferMemory::~KTransferMemory() = default;
 
 Result KTransferMemory::Initialize(KProcessAddress addr, std::size_t size,
-                                   Svc::MemoryPermission own_perm) {
+                                   Svc::MemoryPermission own_perm)
+{
     // Set members.
     m_owner = GetCurrentProcessPointer(m_kernel);
 
@@ -24,7 +28,8 @@ Result KTransferMemory::Initialize(KProcessAddress addr, std::size_t size,
 
     // Construct the page group, guarding to make sure our state is valid on exit.
     m_page_group.emplace(m_kernel, page_table.GetBlockInfoManager());
-    auto pg_guard = SCOPE_GUARD {
+    auto pg_guard = SCOPE_GUARD
+    {
         m_page_group.reset();
     };
 
@@ -44,7 +49,8 @@ Result KTransferMemory::Initialize(KProcessAddress addr, std::size_t size,
     R_SUCCEED();
 }
 
-void KTransferMemory::Finalize() {
+void KTransferMemory::Finalize()
+{
     // Unlock.
     if (!m_is_mapped) {
         const size_t size = m_page_group->GetNumPages() * PageSize;
@@ -57,13 +63,15 @@ void KTransferMemory::Finalize() {
     m_page_group->Finalize();
 }
 
-void KTransferMemory::PostDestroy(uintptr_t arg) {
+void KTransferMemory::PostDestroy(uintptr_t arg)
+{
     KProcess* owner = reinterpret_cast<KProcess*>(arg);
     owner->GetResourceLimit()->Release(LimitableResource::TransferMemoryCountMax, 1);
     owner->Close();
 }
 
-Result KTransferMemory::Map(KProcessAddress address, size_t size, Svc::MemoryPermission map_perm) {
+Result KTransferMemory::Map(KProcessAddress address, size_t size, Svc::MemoryPermission map_perm)
+{
     // Validate the size.
     R_UNLESS(m_page_group->GetNumPages() == Common::DivideUp(size, PageSize), ResultInvalidSize);
 
@@ -89,7 +97,8 @@ Result KTransferMemory::Map(KProcessAddress address, size_t size, Svc::MemoryPer
     R_SUCCEED();
 }
 
-Result KTransferMemory::Unmap(KProcessAddress address, size_t size) {
+Result KTransferMemory::Unmap(KProcessAddress address, size_t size)
+{
     // Validate the size.
     R_UNLESS(m_page_group->GetNumPages() == Common::DivideUp(size, PageSize), ResultInvalidSize);
 
@@ -109,7 +118,8 @@ Result KTransferMemory::Unmap(KProcessAddress address, size_t size) {
     R_SUCCEED();
 }
 
-size_t KTransferMemory::GetSize() const {
+size_t KTransferMemory::GetSize() const
+{
     return m_is_initialized ? m_page_group->GetNumPages() * PageSize : 0;
 }
 

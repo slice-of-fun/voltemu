@@ -3,11 +3,11 @@
 
 #pragma once
 
+#include <QWidget>
 #include <functional>
 #include <memory>
 #include <vector>
 
-#include <QWidget>
 #include "yuzu/configuration/configuration_shared.h"
 
 class QCheckBox;

@@ -3,11 +3,11 @@
 
 #pragma once
 
+#include <fmt/ranges.h>
+
 #include <string>
 #include <utility>
 #include <vector>
-
-#include <fmt/ranges.h>
 
 #include "shader_recompiler/backend/glasm/reg_alloc.h"
 #include "shader_recompiler/stage.h"
@@ -34,24 +34,24 @@ public:
     explicit EmitContext(IR::Program& program, Bindings& bindings, const Profile& profile_,
                          const RuntimeInfo& runtime_info_);
 
-    template <typename... Args>
-    void Add(const char* format_str, IR::Inst& inst, Args&&... args) {
+    template<typename... Args> void Add(const char* format_str, IR::Inst& inst, Args&&... args)
+    {
         code += fmt::format(fmt::runtime(format_str), reg_alloc.Define(inst),
                             std::forward<Args>(args)...);
         // TODO: Remove this
         code += '\n';
     }
 
-    template <typename... Args>
-    void LongAdd(const char* format_str, IR::Inst& inst, Args&&... args) {
+    template<typename... Args> void LongAdd(const char* format_str, IR::Inst& inst, Args&&... args)
+    {
         code += fmt::format(fmt::runtime(format_str), reg_alloc.LongDefine(inst),
                             std::forward<Args>(args)...);
         // TODO: Remove this
         code += '\n';
     }
 
-    template <typename... Args>
-    void Add(const char* format_str, Args&&... args) {
+    template<typename... Args> void Add(const char* format_str, Args&&... args)
+    {
         code += fmt::format(fmt::runtime(format_str), std::forward<Args>(args)...);
         // TODO: Remove this
         code += '\n';

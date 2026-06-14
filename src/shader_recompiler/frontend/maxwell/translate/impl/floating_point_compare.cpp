@@ -8,7 +8,8 @@
 
 namespace Shader::Maxwell {
 namespace {
-void FCMP(TranslatorVisitor& v, u64 insn, const IR::U32& src_a, const IR::F32& operand) {
+void FCMP(TranslatorVisitor& v, u64 insn, const IR::U32& src_a, const IR::F32& operand)
+{
     union {
         u64 insn;
         BitField<0, 8, IR::Reg> dest_reg;
@@ -27,19 +28,23 @@ void FCMP(TranslatorVisitor& v, u64 insn, const IR::U32& src_a, const IR::F32& o
 }
 } // Anonymous namespace
 
-void TranslatorVisitor::FCMP_reg(u64 insn) {
+void TranslatorVisitor::FCMP_reg(u64 insn)
+{
     FCMP(*this, insn, GetReg20(insn), GetFloatReg39(insn));
 }
 
-void TranslatorVisitor::FCMP_rc(u64 insn) {
+void TranslatorVisitor::FCMP_rc(u64 insn)
+{
     FCMP(*this, insn, GetReg39(insn), GetFloatCbuf(insn));
 }
 
-void TranslatorVisitor::FCMP_cr(u64 insn) {
+void TranslatorVisitor::FCMP_cr(u64 insn)
+{
     FCMP(*this, insn, GetCbuf(insn), GetFloatReg39(insn));
 }
 
-void TranslatorVisitor::FCMP_imm(u64 insn) {
+void TranslatorVisitor::FCMP_imm(u64 insn)
+{
     union {
         u64 raw;
         BitField<20, 19, u64> value;

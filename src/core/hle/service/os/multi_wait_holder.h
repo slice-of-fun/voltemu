@@ -16,22 +16,18 @@ class MultiWait;
 class MultiWaitHolder {
 public:
     explicit MultiWaitHolder(Kernel::KSynchronizationObject* native_handle)
-        : m_native_handle(native_handle) {}
+        : m_native_handle(native_handle)
+    {
+    }
 
     void LinkToMultiWait(MultiWait* multi_wait);
     void UnlinkFromMultiWait();
 
-    void SetUserData(uintptr_t user_data) {
-        m_user_data = user_data;
-    }
+    void SetUserData(uintptr_t user_data) { m_user_data = user_data; }
 
-    uintptr_t GetUserData() const {
-        return m_user_data;
-    }
+    uintptr_t GetUserData() const { return m_user_data; }
 
-    Kernel::KSynchronizationObject* GetNativeHandle() const {
-        return m_native_handle;
-    }
+    Kernel::KSynchronizationObject* GetNativeHandle() const { return m_native_handle; }
 
 private:
     friend class MultiWait;

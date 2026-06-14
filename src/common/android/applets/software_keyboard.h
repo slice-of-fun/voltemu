@@ -13,9 +13,7 @@ class AndroidKeyboard final : public Core::Frontend::SoftwareKeyboardApplet {
 public:
     ~AndroidKeyboard() override;
 
-    void Close() const override {
-        ExitKeyboard();
-    }
+    void Close() const override { ExitKeyboard(); }
 
     void InitializeKeyboard(bool is_inline,
                             Core::Frontend::KeyboardInitializeParameters initialize_parameters,
@@ -27,8 +25,8 @@ public:
     void ShowTextCheckDialog(Service::AM::Frontend::SwkbdTextCheckResult text_check_result,
                              std::u16string text_check_message) const override;
 
-    void ShowInlineKeyboard(
-        Core::Frontend::InlineAppearParameters appear_parameters) const override;
+    void
+    ShowInlineKeyboard(Core::Frontend::InlineAppearParameters appear_parameters) const override;
 
     void HideInlineKeyboard() const override;
 

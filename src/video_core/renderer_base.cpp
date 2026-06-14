@@ -4,39 +4,45 @@
 // SPDX-FileCopyrightText: 2015 Citra Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "video_core/renderer_base.h"
+
 #include <thread>
 
 #include "common/logging.h"
 #include "core/frontend/emu_window.h"
 #include "core/frontend/graphics_context.h"
-#include "video_core/renderer_base.h"
 
 namespace VideoCore {
 
 RendererBase::RendererBase(Core::Frontend::EmuWindow& window_,
                            std::unique_ptr<Core::Frontend::GraphicsContext> context_)
-    : render_window{window_}, context{std::move(context_)} {
+    : render_window{window_}, context{std::move(context_)}
+{
     RefreshBaseSettings();
 }
 
 RendererBase::~RendererBase() = default;
 
-void RendererBase::RefreshBaseSettings() {
+void RendererBase::RefreshBaseSettings()
+{
     UpdateCurrentFramebufferLayout();
 }
 
-void RendererBase::UpdateCurrentFramebufferLayout() {
+void RendererBase::UpdateCurrentFramebufferLayout()
+{
     const Layout::FramebufferLayout& layout = render_window.GetFramebufferLayout();
 
     render_window.UpdateCurrentFramebufferLayout(layout.width, layout.height);
 }
 
-bool RendererBase::IsScreenshotPending() const {
+bool RendererBase::IsScreenshotPending() const
+{
     return renderer_settings.screenshot_requested;
 }
 
 void RendererBase::RequestScreenshot(void* data, std::function<void(bool)> callback,
-                                     const Layout::FramebufferLayout& layout) {
+                                     const Layout::FramebufferLayout& layout)
+{
     if (renderer_settings.screenshot_requested) {
         LOG_ERROR(Render, "A screenshot is already requested or in progress, ignoring the request");
         return;

@@ -4,12 +4,13 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/npns/npns.h"
+
 #include <memory>
 
 #include "core/hle/kernel/k_event.h"
 #include "core/hle/service/cmif_serialization.h"
 #include "core/hle/service/kernel_helpers.h"
-#include "core/hle/service/npns/npns.h"
 #include "core/hle/service/server_manager.h"
 #include "core/hle/service/service.h"
 
@@ -19,7 +20,8 @@ class INpnsSystem final : public ServiceFramework<INpnsSystem> {
 public:
     explicit INpnsSystem(Core::System& system_)
         : ServiceFramework{system_, "npns:s"}, service_context{system, "npns:s"},
-          get_receive_event{service_context}, get_request_change_state_cancel_event{service_context} {
+          get_receive_event{service_context}, get_request_change_state_cancel_event{service_context}
+    {
         // clang-format off
         static const FunctionInfo functions[] = {
             {1, nullptr, "ListenAll"},
@@ -97,19 +99,22 @@ public:
     ~INpnsSystem() override = default;
 
 private:
-    Result ListenTo(u32 program_id) {
+    Result ListenTo(u32 program_id)
+    {
         LOG_WARNING(Service_NPNS, "(STUBBED) called, program_id={}", program_id);
         R_SUCCEED();
     }
 
-    Result GetReceiveEvent(OutCopyHandle<Kernel::KReadableEvent> out_event) {
+    Result GetReceiveEvent(OutCopyHandle<Kernel::KReadableEvent> out_event)
+    {
         LOG_WARNING(Service_NPNS, "(STUBBED) called");
 
         *out_event = get_receive_event.GetHandle();
         R_SUCCEED();
     }
 
-    Result ListenToByName() {
+    Result ListenToByName()
+    {
         LOG_DEBUG(Service_NPNS, "(STUBBED) called.");
 
         // TODO (jarrodnorwell)
@@ -117,20 +122,23 @@ private:
         R_SUCCEED();
     }
 
-    Result GetState(Out<u32> out_state) {
+    Result GetState(Out<u32> out_state)
+    {
         LOG_WARNING(Service_NPNS, "(STUBBED) called");
         *out_state = 0;
         R_SUCCEED();
     }
 
-    Result GetLastNotifiedTime(Out<s64> out_last_notified_time) {
+    Result GetLastNotifiedTime(Out<s64> out_last_notified_time)
+    {
         LOG_WARNING(Service_NPNS, "(STUBBED) called");
 
         *out_last_notified_time = 0;
         R_SUCCEED();
     }
 
-    Result GetRequestChangeStateCancelEvent(OutCopyHandle<Kernel::KReadableEvent> out_event) {
+    Result GetRequestChangeStateCancelEvent(OutCopyHandle<Kernel::KReadableEvent> out_event)
+    {
         LOG_DEBUG(Service_NPNS, "(STUBBED) called.");
 
         // TODO (jarrodnorwell)
@@ -148,7 +156,9 @@ private:
 class INpnsUser final : public ServiceFramework<INpnsUser> {
 public:
     explicit INpnsUser(Core::System& system_)
-        : ServiceFramework{system_, "npns:u"}, service_context{system, "npns:u"}, get_receive_event{service_context} {
+        : ServiceFramework{system_, "npns:u"}, service_context{system, "npns:u"},
+          get_receive_event{service_context}
+    {
         // clang-format off
         static const FunctionInfo functions[] = {
             {1, nullptr, "ListenAll"},
@@ -179,8 +189,10 @@ public:
     }
 
 private:
-    Result ListenToByName(InBuffer<BufferAttr_HipcMapAlias> name_buffer) {
-        const std::string name(reinterpret_cast<const char*>(name_buffer.data()), name_buffer.size());
+    Result ListenToByName(InBuffer<BufferAttr_HipcMapAlias> name_buffer)
+    {
+        const std::string name(reinterpret_cast<const char*>(name_buffer.data()),
+                               name_buffer.size());
         LOG_DEBUG(Service_NPNS, "called, name={}", name);
 
         // Store the name for future use if needed
@@ -188,7 +200,8 @@ private:
         R_SUCCEED();
     }
 
-    Result GetReceiveEvent(OutCopyHandle<Kernel::KReadableEvent> out_event) {
+    Result GetReceiveEvent(OutCopyHandle<Kernel::KReadableEvent> out_event)
+    {
         LOG_DEBUG(Service_NPNS, "called");
 
         *out_event = get_receive_event.GetHandle();
@@ -199,7 +212,8 @@ private:
     Event get_receive_event;
 };
 
-void LoopProcess(Core::System& system) {
+void LoopProcess(Core::System& system)
+{
     auto server_manager = std::make_unique<ServerManager>(system);
 
     server_manager->RegisterNamedService("npns:s", std::make_shared<INpnsSystem>(system));

@@ -12,7 +12,8 @@ namespace Core {
 ExclusiveMonitor::~ExclusiveMonitor() = default;
 
 std::unique_ptr<Core::ExclusiveMonitor> MakeExclusiveMonitor(Memory::Memory& memory,
-                                                             std::size_t num_cores) {
+                                                             std::size_t num_cores)
+{
 #if defined(ARCHITECTURE_x86_64) || defined(ARCHITECTURE_arm64)
     return std::make_unique<Core::DynarmicExclusiveMonitor>(memory, num_cores);
 #else

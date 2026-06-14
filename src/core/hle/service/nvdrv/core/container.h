@@ -7,9 +7,10 @@
 
 #pragma once
 
+#include <ankerl/unordered_dense.h>
+
 #include <deque>
 #include <memory>
-#include <ankerl/unordered_dense.h>
 
 #include "core/device_memory_manager.h"
 #include "core/hle/service/nvdrv/nvdata.h"

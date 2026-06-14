@@ -4,18 +4,21 @@
 // SPDX-FileCopyrightText: Copyright 2021 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/ns/query_service.h"
+
 #include "common/logging.h"
 #include "common/uuid.h"
 #include "core/hle/service/cmif_serialization.h"
-#include "core/hle/service/ns/query_service.h"
 #include "core/hle/service/service.h"
 #include "core/launch_timestamp_cache.h"
 #include "frontend_common/play_time_manager.h"
 
 namespace Service::NS {
 
-IQueryService::IQueryService(Core::System& system_) : ServiceFramework{system_, "pdm:qry"},
-    play_time_manager{std::make_unique<PlayTime::PlayTimeManager>()} {
+IQueryService::IQueryService(Core::System& system_)
+    : ServiceFramework{system_, "pdm:qry"}, play_time_manager{
+                                                std::make_unique<PlayTime::PlayTimeManager>()}
+{
     // clang-format off
     static const FunctionInfo functions[] = {
         {0, nullptr, "QueryAppletEvent"},
@@ -47,7 +50,8 @@ IQueryService::IQueryService(Core::System& system_) : ServiceFramework{system_, 
 IQueryService::~IQueryService() = default;
 
 Result IQueryService::QueryPlayStatisticsByApplicationIdAndUserAccountId(
-    Out<PlayStatistics> out_play_statistics, bool unknown, u64 application_id, Uid account_id) {
+    Out<PlayStatistics> out_play_statistics, bool unknown, u64 application_id, Uid account_id)
+{
     // TODO(German77): Read statistics of the game
     *out_play_statistics = {
         .application_id = application_id,
@@ -62,7 +66,8 @@ Result IQueryService::QueryPlayStatisticsByApplicationIdAndUserAccountId(
 Result IQueryService::QueryLastPlayTime(
     Out<s32> out_entries, u8 unknown,
     OutArray<LastPlayTime, BufferAttr_HipcMapAlias> out_last_play_times,
-    InArray<s32, BufferAttr_HipcMapAlias> application_ids) {
+    InArray<s32, BufferAttr_HipcMapAlias> application_ids)
+{
     *out_entries = 1;
     *out_last_play_times = {};
     R_SUCCEED();
@@ -71,7 +76,8 @@ Result IQueryService::QueryLastPlayTime(
 Result IQueryService::QueryApplicationPlayStatisticsForSystem(
     Out<s32> out_entries, u8 flag,
     OutArray<ApplicationPlayStatistics, BufferAttr_HipcMapAlias> out_stats,
-    InArray<u64, BufferAttr_HipcMapAlias> application_ids) {
+    InArray<u64, BufferAttr_HipcMapAlias> application_ids)
+{
     const size_t count = std::min(out_stats.size(), application_ids.size());
     s32 written = 0;
     for (size_t i = 0; i < count; ++i) {
@@ -91,7 +97,8 @@ Result IQueryService::QueryApplicationPlayStatisticsForSystem(
 Result IQueryService::QueryApplicationPlayStatisticsByUserAccountIdForSystem(
     Out<s32> out_entries, u8 flag, Common::UUID user_id,
     OutArray<ApplicationPlayStatistics, BufferAttr_HipcMapAlias> out_stats,
-    InArray<u64, BufferAttr_HipcMapAlias> application_ids) {
+    InArray<u64, BufferAttr_HipcMapAlias> application_ids)
+{
     // well we don't do per-user tracking :>
     return QueryApplicationPlayStatisticsForSystem(out_entries, flag, out_stats, application_ids);
 }

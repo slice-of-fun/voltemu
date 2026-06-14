@@ -23,46 +23,30 @@ struct NvGraphicBuffer {
 
     constexpr NvGraphicBuffer(u32 width_, u32 height_, PixelFormat format_, u32 usage_)
         : width{static_cast<s32>(width_)}, height{static_cast<s32>(height_)}, format{format_},
-          usage{static_cast<s32>(usage_)} {}
-
-    constexpr u32 Width() const {
-        return static_cast<u32>(width);
+          usage{static_cast<s32>(usage_)}
+    {
     }
 
-    constexpr u32 Height() const {
-        return static_cast<u32>(height);
-    }
+    constexpr u32 Width() const { return static_cast<u32>(width); }
 
-    constexpr u32 Stride() const {
-        return static_cast<u32>(stride);
-    }
+    constexpr u32 Height() const { return static_cast<u32>(height); }
 
-    constexpr u32 Usage() const {
-        return static_cast<u32>(usage);
-    }
+    constexpr u32 Stride() const { return static_cast<u32>(stride); }
 
-    constexpr PixelFormat Format() const {
-        return format;
-    }
+    constexpr u32 Usage() const { return static_cast<u32>(usage); }
 
-    constexpr u32 BufferId() const {
-        return buffer_id;
-    }
+    constexpr PixelFormat Format() const { return format; }
 
-    constexpr PixelFormat ExternalFormat() const {
-        return external_format;
-    }
+    constexpr u32 BufferId() const { return buffer_id; }
 
-    constexpr u32 Handle() const {
-        return handle;
-    }
+    constexpr PixelFormat ExternalFormat() const { return external_format; }
 
-    constexpr u32 Offset() const {
-        return offset;
-    }
+    constexpr u32 Handle() const { return handle; }
 
-    constexpr bool NeedsReallocation(u32 width_, u32 height_, PixelFormat format_,
-                                     u32 usage_) const {
+    constexpr u32 Offset() const { return offset; }
+
+    constexpr bool NeedsReallocation(u32 width_, u32 height_, PixelFormat format_, u32 usage_) const
+    {
         if (static_cast<s32>(width_) != width) {
             return true;
         }

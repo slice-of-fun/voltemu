@@ -1,9 +1,10 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/eupld/eupld.h"
+
 #include <memory>
 
-#include "core/hle/service/eupld/eupld.h"
 #include "core/hle/service/server_manager.h"
 #include "core/hle/service/service.h"
 
@@ -11,7 +12,8 @@ namespace Service::EUPLD {
 
 class ErrorUploadContext final : public ServiceFramework<ErrorUploadContext> {
 public:
-    explicit ErrorUploadContext(Core::System& system_) : ServiceFramework{system_, "eupld:c"} {
+    explicit ErrorUploadContext(Core::System& system_) : ServiceFramework{system_, "eupld:c"}
+    {
         // clang-format off
         static const FunctionInfo functions[] = {
             {0, nullptr, "SetUrl"},
@@ -28,7 +30,8 @@ public:
 
 class ErrorUploadRequest final : public ServiceFramework<ErrorUploadRequest> {
 public:
-    explicit ErrorUploadRequest(Core::System& system_) : ServiceFramework{system_, "eupld:r"} {
+    explicit ErrorUploadRequest(Core::System& system_) : ServiceFramework{system_, "eupld:r"}
+    {
         // clang-format off
         static const FunctionInfo functions[] = {
             {0, nullptr, "Initialize"},
@@ -44,7 +47,8 @@ public:
     }
 };
 
-void LoopProcess(Core::System& system) {
+void LoopProcess(Core::System& system)
+{
     auto server_manager = std::make_unique<ServerManager>(system);
 
     server_manager->RegisterNamedService("eupld:c", std::make_shared<ErrorUploadContext>(system));

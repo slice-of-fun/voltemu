@@ -1,26 +1,33 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "hid_core/resources/mouse/debug_mouse.h"
+
 #include "core/core_timing.h"
 #include "core/frontend/emu_window.h"
 #include "hid_core/frontend/emulated_devices.h"
 #include "hid_core/hid_core.h"
 #include "hid_core/resources/applet_resource.h"
-#include "hid_core/resources/mouse/debug_mouse.h"
 #include "hid_core/resources/shared_memory_format.h"
 
 namespace Service::HID {
 
-DebugMouse::DebugMouse(Core::HID::HIDCore& hid_core_) : ControllerBase{hid_core_} {
+DebugMouse::DebugMouse(Core::HID::HIDCore& hid_core_) : ControllerBase{hid_core_}
+{
     emulated_devices = hid_core.GetEmulatedDevices();
 }
 
 DebugMouse::~DebugMouse() = default;
 
-void DebugMouse::OnInit() {}
-void DebugMouse::OnRelease() {}
+void DebugMouse::OnInit()
+{
+}
+void DebugMouse::OnRelease()
+{
+}
 
-void DebugMouse::OnUpdate(const Core::Timing::CoreTiming& core_timing) {
+void DebugMouse::OnUpdate(const Core::Timing::CoreTiming& core_timing)
+{
     std::scoped_lock shared_lock{*shared_mutex};
     const u64 aruid = applet_resource->GetActiveAruid();
     auto* data = applet_resource->GetAruidData(aruid);

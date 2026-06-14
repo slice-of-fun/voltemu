@@ -3,13 +3,12 @@
 
 #pragma once
 
+#include <glad/glad.h>
+
 #include <array>
+#include <boost/container/static_vector.hpp>
 #include <cstddef>
 #include <optional>
-
-#include <boost/container/static_vector.hpp>
-
-#include <glad/glad.h>
 
 #include "common/common_types.h"
 #include "video_core/control/channel_state_cache.h"
@@ -63,7 +62,7 @@ public:
                        const Tegra::DMA::ImageOperand& dst) override;
 
 private:
-    template <bool IS_IMAGE_UPLOAD>
+    template<bool IS_IMAGE_UPLOAD>
     bool DmaBufferImageCopy(const Tegra::DMA::ImageCopy& copy_info,
                             const Tegra::DMA::BufferOperand& src,
                             const Tegra::DMA::ImageOperand& dst);
@@ -109,8 +108,9 @@ public:
     void SignalSyncPoint(u32 value) override;
     void SignalReference() override;
     void ReleaseFences(bool force = true) override;
-    void FlushAndInvalidateRegion(
-        DAddr addr, u64 size, VideoCommon::CacheType which = VideoCommon::CacheType::All) override;
+    void
+    FlushAndInvalidateRegion(DAddr addr, u64 size,
+                             VideoCommon::CacheType which = VideoCommon::CacheType::All) override;
     void WaitForIdle() override;
     void FragmentBarrier() override;
     void TiledCacheBarrier() override;
@@ -127,9 +127,7 @@ public:
                            const VideoCore::DiskResourceLoadCallback& callback) override;
 
     /// Returns true when there are commands queued to the OpenGL server.
-    bool AnyCommandQueued() const {
-        return num_queued_commands > 0;
-    }
+    bool AnyCommandQueued() const { return num_queued_commands > 0; }
 
     void InitializeChannel(Tegra::Control::ChannelState& channel) override;
 
@@ -139,9 +137,7 @@ public:
 
     void RegisterTransformFeedback(GPUVAddr tfb_object_addr) override;
 
-    bool HasDrawTransformFeedback() override {
-        return true;
-    }
+    bool HasDrawTransformFeedback() override { return true; }
 
     std::optional<FramebufferTextureInfo> AccelerateDisplay(const Tegra::FramebufferConfig& config,
                                                             VAddr framebuffer_addr,
@@ -152,8 +148,7 @@ private:
     static constexpr size_t MAX_IMAGES = 48;
     static constexpr size_t MAX_IMAGE_VIEWS = MAX_TEXTURES + MAX_IMAGES;
 
-    template <typename Func>
-    void PrepareDraw(bool is_indexed, Func&&);
+    template<typename Func> void PrepareDraw(bool is_indexed, Func&&);
 
     /// Syncs state to match guest's
     void SyncState();

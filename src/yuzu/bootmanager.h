@@ -6,9 +6,9 @@
 
 #pragma once
 
-#include <cstddef>
-#include <memory>
-#include <utility>
+#include <qglobal.h>
+#include <qnamespace.h>
+#include <qobjectdefs.h>
 
 #include <QByteArray>
 #include <QImage>
@@ -19,9 +19,9 @@
 #include <QThread>
 #include <QTimer>
 #include <QWidget>
-#include <qglobal.h>
-#include <qnamespace.h>
-#include <qobjectdefs.h>
+#include <cstddef>
+#include <memory>
+#include <utility>
 
 #include "common/common_types.h"
 #include "core/frontend/emu_window.h"

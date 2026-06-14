@@ -68,23 +68,20 @@ public:
 
     public:
         explicit MemoryRange(KernelCore& kernel)
-            : m_kernel(kernel), m_address(0), m_size(0), m_heap(false) {}
+            : m_kernel(kernel), m_address(0), m_size(0), m_heap(false)
+        {
+        }
 
-        void Set(KPhysicalAddress address, size_t size, bool heap) {
+        void Set(KPhysicalAddress address, size_t size, bool heap)
+        {
             m_address = address;
             m_size = size;
             m_heap = heap;
         }
 
-        KPhysicalAddress GetAddress() const {
-            return m_address;
-        }
-        size_t GetSize() const {
-            return m_size;
-        }
-        bool IsHeap() const {
-            return m_heap;
-        }
+        KPhysicalAddress GetAddress() const { return m_address; }
+        size_t GetSize() const { return m_size; }
+        bool IsHeap() const { return m_heap; }
 
         void Open();
         void Close();
@@ -130,17 +127,17 @@ protected:
     public:
         constexpr PageLinkedList() : m_root(nullptr) {}
 
-        void Push(Node* n) {
+        void Push(Node* n)
+        {
             ASSERT(Common::IsAligned(reinterpret_cast<uintptr_t>(n), PageSize));
             n->m_next = m_root;
             m_root = n;
         }
 
-        Node* Peek() const {
-            return m_root;
-        }
+        Node* Peek() const { return m_root; }
 
-        Node* Pop() {
+        Node* Pop()
+        {
             Node* const r = m_root;
 
             m_root = r->m_next;
@@ -154,7 +151,8 @@ protected:
     static constexpr auto DefaultMemoryIgnoreAttr =
         KMemoryAttribute::IpcLocked | KMemoryAttribute::DeviceShared;
 
-    static constexpr size_t GetAddressSpaceWidth(Svc::CreateProcessFlag as_type) {
+    static constexpr size_t GetAddressSpaceWidth(Svc::CreateProcessFlag as_type)
+    {
         switch (static_cast<Svc::CreateProcessFlag>(as_type &
                                                     Svc::CreateProcessFlag::AddressSpaceMask)) {
         case Svc::CreateProcessFlag::AddressSpace64Bit:
@@ -178,14 +176,12 @@ private:
     public:
         explicit KScopedPageTableUpdater(KPageTableBase* pt) : m_pt(pt), m_ll() {}
         explicit KScopedPageTableUpdater(KPageTableBase& pt)
-            : KScopedPageTableUpdater(std::addressof(pt)) {}
-        ~KScopedPageTableUpdater() {
-            m_pt->FinalizeUpdate(this->GetPageList());
+            : KScopedPageTableUpdater(std::addressof(pt))
+        {
         }
+        ~KScopedPageTableUpdater() { m_pt->FinalizeUpdate(this->GetPageList()); }
 
-        PageLinkedList* GetPageList() {
-            return std::addressof(m_ll);
-        }
+        PageLinkedList* GetPageList() { return std::addressof(m_ll); }
     };
 
 private:
@@ -249,57 +245,57 @@ public:
     Result FinalizeProcess();
     void Finalize();
 
-    bool IsKernel() const {
-        return m_is_kernel;
-    }
-    bool IsAslrEnabled() const {
-        return m_enable_aslr;
-    }
+    bool IsKernel() const { return m_is_kernel; }
+    bool IsAslrEnabled() const { return m_enable_aslr; }
 
-    void AllowDeviceMappingOfExecPages() {
-        m_allowed_exec_device_mapping = true;
-    }
+    void AllowDeviceMappingOfExecPages() { m_allowed_exec_device_mapping = true; }
 
-    bool Contains(KProcessAddress addr) const {
+    bool Contains(KProcessAddress addr) const
+    {
         return m_address_space_start <= addr && addr <= m_address_space_end - 1;
     }
 
-    bool Contains(KProcessAddress addr, size_t size) const {
+    bool Contains(KProcessAddress addr, size_t size) const
+    {
         return m_address_space_start <= addr && addr < addr + size &&
                addr + size - 1 <= m_address_space_end - 1;
     }
 
-    bool IsInAliasRegion(KProcessAddress addr, size_t size) const {
+    bool IsInAliasRegion(KProcessAddress addr, size_t size) const
+    {
         return this->Contains(addr, size) && m_alias_region_start <= addr &&
                addr + size - 1 <= m_alias_region_end - 1;
     }
 
-    bool IsInHeapRegion(KProcessAddress addr, size_t size) const {
+    bool IsInHeapRegion(KProcessAddress addr, size_t size) const
+    {
         return this->Contains(addr, size) && m_heap_region_start <= addr &&
                addr + size - 1 <= m_heap_region_end - 1;
     }
 
-    bool IsInUnsafeAliasRegion(KProcessAddress addr, size_t size) const {
+    bool IsInUnsafeAliasRegion(KProcessAddress addr, size_t size) const
+    {
         // Even though Unsafe physical memory is KMemoryState_Normal, it must be mapped inside the
         // alias code region.
         return this->CanContain(addr, size, Svc::MemoryState::AliasCode);
     }
 
-    KScopedLightLock AcquireDeviceMapLock() {
-        return KScopedLightLock(m_device_map_lock);
-    }
+    KScopedLightLock AcquireDeviceMapLock() { return KScopedLightLock(m_device_map_lock); }
 
     KProcessAddress GetRegionAddress(Svc::MemoryState state) const;
     size_t GetRegionSize(Svc::MemoryState state) const;
     bool CanContain(KProcessAddress addr, size_t size, Svc::MemoryState state) const;
 
-    KProcessAddress GetRegionAddress(KMemoryState state) const {
+    KProcessAddress GetRegionAddress(KMemoryState state) const
+    {
         return this->GetRegionAddress(static_cast<Svc::MemoryState>(state & KMemoryState::Mask));
     }
-    size_t GetRegionSize(KMemoryState state) const {
+    size_t GetRegionSize(KMemoryState state) const
+    {
         return this->GetRegionSize(static_cast<Svc::MemoryState>(state & KMemoryState::Mask));
     }
-    bool CanContain(KProcessAddress addr, size_t size, KMemoryState state) const {
+    bool CanContain(KProcessAddress addr, size_t size, KMemoryState state) const
+    {
         return this->CanContain(addr, size,
                                 static_cast<Svc::MemoryState>(state & KMemoryState::Mask));
     }
@@ -310,6 +306,7 @@ public:
     [[nodiscard]] Common::PageTable& GetImpl() noexcept { return m_impl; }
     [[nodiscard]] Common::PageTable const& GetImpl() const noexcept { return m_impl; }
     [[nodiscard]] size_t GetNumGuardPages() const noexcept { return this->IsKernel() ? 1 : 4; }
+
 protected:
     // NOTE: These three functions (Operate, Operate, FinalizeUpdate) are virtual functions
     // in Nintendo's kernel. We devirtualize them, since KPageTable is the only derived
@@ -322,46 +319,50 @@ protected:
                    OperationType operation, bool reuse_ll);
     void FinalizeUpdate(PageLinkedList* page_list);
 
-    bool IsLockedByCurrentThread() const {
-        return m_general_lock.IsLockedByCurrentThread();
-    }
+    bool IsLockedByCurrentThread() const { return m_general_lock.IsLockedByCurrentThread(); }
 
-    bool IsLinearMappedPhysicalAddress(KPhysicalAddress phys_addr) {
+    bool IsLinearMappedPhysicalAddress(KPhysicalAddress phys_addr)
+    {
         ASSERT(this->IsLockedByCurrentThread());
 
         return m_kernel.MemoryLayout().IsLinearMappedPhysicalAddress(
             m_cached_physical_linear_region, phys_addr);
     }
 
-    bool IsLinearMappedPhysicalAddress(KPhysicalAddress phys_addr, size_t size) {
+    bool IsLinearMappedPhysicalAddress(KPhysicalAddress phys_addr, size_t size)
+    {
         ASSERT(this->IsLockedByCurrentThread());
 
         return m_kernel.MemoryLayout().IsLinearMappedPhysicalAddress(
             m_cached_physical_linear_region, phys_addr, size);
     }
 
-    bool IsHeapPhysicalAddress(KPhysicalAddress phys_addr) {
+    bool IsHeapPhysicalAddress(KPhysicalAddress phys_addr)
+    {
         ASSERT(this->IsLockedByCurrentThread());
 
         return m_kernel.MemoryLayout().IsHeapPhysicalAddress(m_cached_physical_heap_region,
                                                              phys_addr);
     }
 
-    bool IsHeapPhysicalAddress(KPhysicalAddress phys_addr, size_t size) {
+    bool IsHeapPhysicalAddress(KPhysicalAddress phys_addr, size_t size)
+    {
         ASSERT(this->IsLockedByCurrentThread());
 
         return m_kernel.MemoryLayout().IsHeapPhysicalAddress(m_cached_physical_heap_region,
                                                              phys_addr, size);
     }
 
-    bool IsHeapPhysicalAddressForFinalize(KPhysicalAddress phys_addr) {
+    bool IsHeapPhysicalAddressForFinalize(KPhysicalAddress phys_addr)
+    {
         ASSERT(!this->IsLockedByCurrentThread());
 
         return m_kernel.MemoryLayout().IsHeapPhysicalAddress(m_cached_physical_heap_region,
                                                              phys_addr);
     }
 
-    bool ContainsPages(KProcessAddress addr, size_t num_pages) const {
+    bool ContainsPages(KProcessAddress addr, size_t num_pages) const
+    {
         return (m_address_space_start <= addr) &&
                (num_pages <= (m_address_space_end - m_address_space_start) / PageSize) &&
                (addr + num_pages * PageSize - 1 <= m_address_space_end - 1);
@@ -379,7 +380,8 @@ private:
     Result CheckMemoryStateContiguous(KProcessAddress addr, size_t size, KMemoryState state_mask,
                                       KMemoryState state, KMemoryPermission perm_mask,
                                       KMemoryPermission perm, KMemoryAttribute attr_mask,
-                                      KMemoryAttribute attr) const {
+                                      KMemoryAttribute attr) const
+    {
         R_RETURN(this->CheckMemoryStateContiguous(nullptr, addr, size, state_mask, state, perm_mask,
                                                   perm, attr_mask, attr));
     }
@@ -404,7 +406,8 @@ private:
                             KMemoryState state_mask, KMemoryState state,
                             KMemoryPermission perm_mask, KMemoryPermission perm,
                             KMemoryAttribute attr_mask, KMemoryAttribute attr,
-                            KMemoryAttribute ignore_attr = DefaultMemoryIgnoreAttr) const {
+                            KMemoryAttribute ignore_attr = DefaultMemoryIgnoreAttr) const
+    {
         R_RETURN(this->CheckMemoryState(nullptr, nullptr, nullptr, out_blocks_needed, addr, size,
                                         state_mask, state, perm_mask, perm, attr_mask, attr,
                                         ignore_attr));
@@ -412,7 +415,8 @@ private:
     Result CheckMemoryState(KProcessAddress addr, size_t size, KMemoryState state_mask,
                             KMemoryState state, KMemoryPermission perm_mask, KMemoryPermission perm,
                             KMemoryAttribute attr_mask, KMemoryAttribute attr,
-                            KMemoryAttribute ignore_attr = DefaultMemoryIgnoreAttr) const {
+                            KMemoryAttribute ignore_attr = DefaultMemoryIgnoreAttr) const
+    {
         R_RETURN(this->CheckMemoryState(nullptr, addr, size, state_mask, state, perm_mask, perm,
                                         attr_mask, attr, ignore_attr));
     }
@@ -472,7 +476,8 @@ private:
 
     size_t GetSize(KMemoryState state) const;
 
-    bool GetPhysicalAddressLocked(KPhysicalAddress* out, KProcessAddress virt_addr) const {
+    bool GetPhysicalAddressLocked(KPhysicalAddress* out, KProcessAddress virt_addr) const
+    {
         // Validate pre-conditions.
         ASSERT(this->IsLockedByCurrentThread());
 
@@ -480,7 +485,8 @@ private:
     }
 
 public:
-    bool GetPhysicalAddress(KPhysicalAddress* out, KProcessAddress virt_addr) const {
+    bool GetPhysicalAddress(KPhysicalAddress* out, KProcessAddress virt_addr) const
+    {
         // Validate pre-conditions.
         ASSERT(!this->IsLockedByCurrentThread());
 
@@ -490,9 +496,7 @@ public:
         return this->GetPhysicalAddressLocked(out, virt_addr);
     }
 
-    KBlockInfoManager* GetBlockInfoManager() const {
-        return m_block_info_manager;
-    }
+    KBlockInfoManager* GetBlockInfoManager() const { return m_block_info_manager; }
 
     Result SetMemoryPermission(KProcessAddress addr, size_t size, Svc::MemoryPermission perm);
     Result SetProcessMemoryPermission(KProcessAddress addr, size_t size,
@@ -504,10 +508,12 @@ public:
     Result QueryInfo(KMemoryInfo* out_info, Svc::PageInfo* out_page_info,
                      KProcessAddress addr) const;
     Result QueryPhysicalAddress(Svc::lp64::PhysicalMemoryInfo* out, KProcessAddress address) const;
-    Result QueryStaticMapping(KProcessAddress* out, KPhysicalAddress address, size_t size) const {
+    Result QueryStaticMapping(KProcessAddress* out, KPhysicalAddress address, size_t size) const
+    {
         R_RETURN(this->QueryMappingImpl(out, address, size, Svc::MemoryState::Static));
     }
-    Result QueryIoMapping(KProcessAddress* out, KPhysicalAddress address, size_t size) const {
+    Result QueryIoMapping(KProcessAddress* out, KPhysicalAddress address, size_t size) const
+    {
         R_RETURN(this->QueryMappingImpl(out, address, size, Svc::MemoryState::Io));
     }
     Result MapMemory(KProcessAddress dst_address, KProcessAddress src_address, size_t size);
@@ -526,20 +532,23 @@ public:
 
     Result MapPages(KProcessAddress* out_addr, size_t num_pages, size_t alignment,
                     KPhysicalAddress phys_addr, KProcessAddress region_start,
-                    size_t region_num_pages, KMemoryState state, KMemoryPermission perm) {
+                    size_t region_num_pages, KMemoryState state, KMemoryPermission perm)
+    {
         R_RETURN(this->MapPages(out_addr, num_pages, alignment, phys_addr, true, region_start,
                                 region_num_pages, state, perm));
     }
 
     Result MapPages(KProcessAddress* out_addr, size_t num_pages, size_t alignment,
-                    KPhysicalAddress phys_addr, KMemoryState state, KMemoryPermission perm) {
+                    KPhysicalAddress phys_addr, KMemoryState state, KMemoryPermission perm)
+    {
         R_RETURN(this->MapPages(out_addr, num_pages, alignment, phys_addr, true,
                                 this->GetRegionAddress(state),
                                 this->GetRegionSize(state) / PageSize, state, perm));
     }
 
     Result MapPages(KProcessAddress* out_addr, size_t num_pages, KMemoryState state,
-                    KMemoryPermission perm) {
+                    KMemoryPermission perm)
+    {
         R_RETURN(this->MapPages(out_addr, num_pages, PageSize, 0, false,
                                 this->GetRegionAddress(state),
                                 this->GetRegionSize(state) / PageSize, state, perm));
@@ -645,55 +654,32 @@ public:
                               KProcessAddress src_address);
 
 public:
-    KProcessAddress GetAddressSpaceStart() const {
-        return m_address_space_start;
-    }
-    KProcessAddress GetHeapRegionStart() const {
-        return m_heap_region_start;
-    }
-    KProcessAddress GetAliasRegionStart() const {
-        return m_alias_region_start;
-    }
-    KProcessAddress GetStackRegionStart() const {
-        return m_stack_region_start;
-    }
-    KProcessAddress GetKernelMapRegionStart() const {
-        return m_kernel_map_region_start;
-    }
-    KProcessAddress GetCodeRegionStart() const {
-        return m_code_region_start;
-    }
-    KProcessAddress GetAliasCodeRegionStart() const {
-        return m_alias_code_region_start;
-    }
+    KProcessAddress GetAddressSpaceStart() const { return m_address_space_start; }
+    KProcessAddress GetHeapRegionStart() const { return m_heap_region_start; }
+    KProcessAddress GetAliasRegionStart() const { return m_alias_region_start; }
+    KProcessAddress GetStackRegionStart() const { return m_stack_region_start; }
+    KProcessAddress GetKernelMapRegionStart() const { return m_kernel_map_region_start; }
+    KProcessAddress GetCodeRegionStart() const { return m_code_region_start; }
+    KProcessAddress GetAliasCodeRegionStart() const { return m_alias_code_region_start; }
 
-    size_t GetAddressSpaceSize() const {
-        return m_address_space_end - m_address_space_start;
-    }
-    size_t GetHeapRegionSize() const {
-        return m_heap_region_end - m_heap_region_start;
-    }
-    size_t GetAliasRegionSize() const {
-        return m_alias_region_end - m_alias_region_start;
-    }
-    size_t GetStackRegionSize() const {
-        return m_stack_region_end - m_stack_region_start;
-    }
-    size_t GetKernelMapRegionSize() const {
+    size_t GetAddressSpaceSize() const { return m_address_space_end - m_address_space_start; }
+    size_t GetHeapRegionSize() const { return m_heap_region_end - m_heap_region_start; }
+    size_t GetAliasRegionSize() const { return m_alias_region_end - m_alias_region_start; }
+    size_t GetStackRegionSize() const { return m_stack_region_end - m_stack_region_start; }
+    size_t GetKernelMapRegionSize() const
+    {
         return m_kernel_map_region_end - m_kernel_map_region_start;
     }
-    size_t GetCodeRegionSize() const {
-        return m_code_region_end - m_code_region_start;
-    }
-    size_t GetAliasCodeRegionSize() const {
+    size_t GetCodeRegionSize() const { return m_code_region_end - m_code_region_start; }
+    size_t GetAliasCodeRegionSize() const
+    {
         return m_alias_code_region_end - m_alias_code_region_start;
     }
 
-    size_t GetAliasRegionExtraSize() const {
-        return m_alias_region_extra_size;
-    }
+    size_t GetAliasRegionExtraSize() const { return m_alias_region_extra_size; }
 
-    size_t GetNormalMemorySize() const {
+    size_t GetNormalMemorySize() const
+    {
         // Lock the table.
         KScopedLightLock lk(m_general_lock);
 
@@ -705,53 +691,56 @@ public:
     size_t GetAliasCodeSize() const;
     size_t GetAliasCodeDataSize() const;
 
-    u32 GetAllocateOption() const {
-        return m_allocate_option;
-    }
+    u32 GetAllocateOption() const { return m_allocate_option; }
 
-    u32 GetAddressSpaceWidth() const {
-        return m_address_space_width;
-    }
+    u32 GetAddressSpaceWidth() const { return m_address_space_width; }
 
 public:
     // Linear mapped
-    static u8* GetLinearMappedVirtualPointer(KernelCore& kernel, KPhysicalAddress addr) {
+    static u8* GetLinearMappedVirtualPointer(KernelCore& kernel, KPhysicalAddress addr)
+    {
         return kernel.System().DeviceMemory().GetPointer<u8>(addr);
     }
 
-    static KPhysicalAddress GetLinearMappedPhysicalAddress(KernelCore& kernel,
-                                                           KVirtualAddress addr) {
+    static KPhysicalAddress GetLinearMappedPhysicalAddress(KernelCore& kernel, KVirtualAddress addr)
+    {
         return kernel.MemoryLayout().GetLinearPhysicalAddress(addr);
     }
 
-    static KVirtualAddress GetLinearMappedVirtualAddress(KernelCore& kernel,
-                                                         KPhysicalAddress addr) {
+    static KVirtualAddress GetLinearMappedVirtualAddress(KernelCore& kernel, KPhysicalAddress addr)
+    {
         return kernel.MemoryLayout().GetLinearVirtualAddress(addr);
     }
 
     // Heap
-    static u8* GetHeapVirtualPointer(KernelCore& kernel, KPhysicalAddress addr) {
+    static u8* GetHeapVirtualPointer(KernelCore& kernel, KPhysicalAddress addr)
+    {
         return kernel.System().DeviceMemory().GetPointer<u8>(addr);
     }
 
-    static KPhysicalAddress GetHeapPhysicalAddress(KernelCore& kernel, KVirtualAddress addr) {
+    static KPhysicalAddress GetHeapPhysicalAddress(KernelCore& kernel, KVirtualAddress addr)
+    {
         return GetLinearMappedPhysicalAddress(kernel, addr);
     }
 
-    static KVirtualAddress GetHeapVirtualAddress(KernelCore& kernel, KPhysicalAddress addr) {
+    static KVirtualAddress GetHeapVirtualAddress(KernelCore& kernel, KPhysicalAddress addr)
+    {
         return GetLinearMappedVirtualAddress(kernel, addr);
     }
 
     // Member heap
-    u8* GetHeapVirtualPointer(KPhysicalAddress addr) {
+    u8* GetHeapVirtualPointer(KPhysicalAddress addr)
+    {
         return GetHeapVirtualPointer(m_kernel, addr);
     }
 
-    KPhysicalAddress GetHeapPhysicalAddress(KVirtualAddress addr) {
+    KPhysicalAddress GetHeapPhysicalAddress(KVirtualAddress addr)
+    {
         return GetHeapPhysicalAddress(m_kernel, addr);
     }
 
-    KVirtualAddress GetHeapVirtualAddress(KPhysicalAddress addr) {
+    KVirtualAddress GetHeapVirtualAddress(KPhysicalAddress addr)
+    {
         return GetHeapVirtualAddress(m_kernel, addr);
     }
 

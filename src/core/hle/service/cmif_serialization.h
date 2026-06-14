@@ -6,12 +6,12 @@
 
 #pragma once
 
-#include "common/div_ceil.h"
+#include <typeinfo>
 
+#include "common/div_ceil.h"
 #include "core/hle/service/cmif_types.h"
 #include "core/hle/service/ipc_helpers.h"
 #include "core/hle/service/service.h"
-#include <typeinfo>
 
 namespace Service {
 
@@ -479,9 +479,10 @@ void CmifReplyWrapImpl(HLERequestContext& ctx, T& t, Result (T::*f)(A...)) {
 }
 // clang-format on
 
-template <typename Self>
-template <bool Domain, auto F>
-inline void ServiceFramework<Self>::CmifReplyWrap(HLERequestContext& ctx) {
+template<typename Self>
+template<bool Domain, auto F>
+inline void ServiceFramework<Self>::CmifReplyWrap(HLERequestContext& ctx)
+{
     return CmifReplyWrapImpl<Domain>(ctx, *static_cast<Self*>(this), F);
 }
 

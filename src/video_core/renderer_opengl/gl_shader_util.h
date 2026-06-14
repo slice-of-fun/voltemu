@@ -3,10 +3,10 @@
 
 #pragma once
 
+#include <glad/glad.h>
+
 #include <span>
 #include <string_view>
-
-#include <glad/glad.h>
 
 #include "video_core/renderer_opengl/gl_resource_manager.h"
 

@@ -12,13 +12,15 @@ namespace Kernel::Svc {
 
 constexpr inline u64 DeviceAddressSpaceAlignMask = (1ULL << 22) - 1;
 
-constexpr bool IsProcessAndDeviceAligned(uint64_t process_address, uint64_t device_address) {
+constexpr bool IsProcessAndDeviceAligned(uint64_t process_address, uint64_t device_address)
+{
     return (process_address & DeviceAddressSpaceAlignMask) ==
            (device_address & DeviceAddressSpaceAlignMask);
 }
 
 Result CreateDeviceAddressSpace(Core::System& system, Handle* out, uint64_t das_address,
-                                uint64_t das_size) {
+                                uint64_t das_size)
+{
     // Validate input.
     R_UNLESS(Common::IsAligned(das_address, PageSize), ResultInvalidMemoryRegion);
     R_UNLESS(Common::IsAligned(das_size, PageSize), ResultInvalidMemoryRegion);
@@ -28,7 +30,8 @@ Result CreateDeviceAddressSpace(Core::System& system, Handle* out, uint64_t das_
     // Create the device address space.
     KDeviceAddressSpace* das = KDeviceAddressSpace::Create(system.Kernel());
     R_UNLESS(das != nullptr, ResultOutOfResource);
-    SCOPE_EXIT {
+    SCOPE_EXIT
+    {
         das->Close();
     };
 
@@ -44,7 +47,8 @@ Result CreateDeviceAddressSpace(Core::System& system, Handle* out, uint64_t das_
     R_SUCCEED();
 }
 
-Result AttachDeviceAddressSpace(Core::System& system, DeviceName device_name, Handle das_handle) {
+Result AttachDeviceAddressSpace(Core::System& system, DeviceName device_name, Handle das_handle)
+{
     // Get the device address space.
     KScopedAutoObject das = GetCurrentProcess(system.Kernel())
                                 .GetHandleTable()
@@ -55,7 +59,8 @@ Result AttachDeviceAddressSpace(Core::System& system, DeviceName device_name, Ha
     R_RETURN(das->Attach(device_name));
 }
 
-Result DetachDeviceAddressSpace(Core::System& system, DeviceName device_name, Handle das_handle) {
+Result DetachDeviceAddressSpace(Core::System& system, DeviceName device_name, Handle das_handle)
+{
     // Get the device address space.
     KScopedAutoObject das = GetCurrentProcess(system.Kernel())
                                 .GetHandleTable()
@@ -66,7 +71,8 @@ Result DetachDeviceAddressSpace(Core::System& system, DeviceName device_name, Ha
     R_RETURN(das->Detach(device_name));
 }
 
-constexpr bool IsValidDeviceMemoryPermission(MemoryPermission device_perm) {
+constexpr bool IsValidDeviceMemoryPermission(MemoryPermission device_perm)
+{
     switch (device_perm) {
     case MemoryPermission::Read:
     case MemoryPermission::Write:
@@ -79,7 +85,8 @@ constexpr bool IsValidDeviceMemoryPermission(MemoryPermission device_perm) {
 
 Result MapDeviceAddressSpaceByForce(Core::System& system, Handle das_handle, Handle process_handle,
                                     uint64_t process_address, uint64_t size,
-                                    uint64_t device_address, u32 option) {
+                                    uint64_t device_address, u32 option)
+{
     // Decode the option.
     const MapDeviceAddressSpaceOption option_pack{option};
     const auto device_perm = option_pack.permission;
@@ -119,7 +126,8 @@ Result MapDeviceAddressSpaceByForce(Core::System& system, Handle das_handle, Han
 
 Result MapDeviceAddressSpaceAligned(Core::System& system, Handle das_handle, Handle process_handle,
                                     uint64_t process_address, uint64_t size,
-                                    uint64_t device_address, u32 option) {
+                                    uint64_t device_address, u32 option)
+{
     // Decode the option.
     const MapDeviceAddressSpaceOption option_pack{option};
     const auto device_perm = option_pack.permission;
@@ -159,7 +167,8 @@ Result MapDeviceAddressSpaceAligned(Core::System& system, Handle das_handle, Han
 }
 
 Result UnmapDeviceAddressSpace(Core::System& system, Handle das_handle, Handle process_handle,
-                               uint64_t process_address, uint64_t size, uint64_t device_address) {
+                               uint64_t process_address, uint64_t size, uint64_t device_address)
+{
     // Validate input.
     R_UNLESS(Common::IsAligned(process_address, PageSize), ResultInvalidAddress);
     R_UNLESS(Common::IsAligned(device_address, PageSize), ResultInvalidAddress);
@@ -189,70 +198,82 @@ Result UnmapDeviceAddressSpace(Core::System& system, Handle das_handle, Handle p
 }
 
 Result CreateDeviceAddressSpace64(Core::System& system, Handle* out_handle, uint64_t das_address,
-                                  uint64_t das_size) {
+                                  uint64_t das_size)
+{
     R_RETURN(CreateDeviceAddressSpace(system, out_handle, das_address, das_size));
 }
 
-Result AttachDeviceAddressSpace64(Core::System& system, DeviceName device_name, Handle das_handle) {
+Result AttachDeviceAddressSpace64(Core::System& system, DeviceName device_name, Handle das_handle)
+{
     R_RETURN(AttachDeviceAddressSpace(system, device_name, das_handle));
 }
 
-Result DetachDeviceAddressSpace64(Core::System& system, DeviceName device_name, Handle das_handle) {
+Result DetachDeviceAddressSpace64(Core::System& system, DeviceName device_name, Handle das_handle)
+{
     R_RETURN(DetachDeviceAddressSpace(system, device_name, das_handle));
 }
 
 Result MapDeviceAddressSpaceByForce64(Core::System& system, Handle das_handle,
                                       Handle process_handle, uint64_t process_address,
-                                      uint64_t size, uint64_t device_address, u32 option) {
+                                      uint64_t size, uint64_t device_address, u32 option)
+{
     R_RETURN(MapDeviceAddressSpaceByForce(system, das_handle, process_handle, process_address, size,
                                           device_address, option));
 }
 
 Result MapDeviceAddressSpaceAligned64(Core::System& system, Handle das_handle,
                                       Handle process_handle, uint64_t process_address,
-                                      uint64_t size, uint64_t device_address, u32 option) {
+                                      uint64_t size, uint64_t device_address, u32 option)
+{
     R_RETURN(MapDeviceAddressSpaceAligned(system, das_handle, process_handle, process_address, size,
                                           device_address, option));
 }
 
 Result UnmapDeviceAddressSpace64(Core::System& system, Handle das_handle, Handle process_handle,
-                                 uint64_t process_address, uint64_t size, uint64_t device_address) {
+                                 uint64_t process_address, uint64_t size, uint64_t device_address)
+{
     R_RETURN(UnmapDeviceAddressSpace(system, das_handle, process_handle, process_address, size,
                                      device_address));
 }
 
 Result CreateDeviceAddressSpace64From32(Core::System& system, Handle* out_handle,
-                                        uint64_t das_address, uint64_t das_size) {
+                                        uint64_t das_address, uint64_t das_size)
+{
     R_RETURN(CreateDeviceAddressSpace(system, out_handle, das_address, das_size));
 }
 
 Result AttachDeviceAddressSpace64From32(Core::System& system, DeviceName device_name,
-                                        Handle das_handle) {
+                                        Handle das_handle)
+{
     R_RETURN(AttachDeviceAddressSpace(system, device_name, das_handle));
 }
 
 Result DetachDeviceAddressSpace64From32(Core::System& system, DeviceName device_name,
-                                        Handle das_handle) {
+                                        Handle das_handle)
+{
     R_RETURN(DetachDeviceAddressSpace(system, device_name, das_handle));
 }
 
 Result MapDeviceAddressSpaceByForce64From32(Core::System& system, Handle das_handle,
                                             Handle process_handle, uint64_t process_address,
-                                            uint32_t size, uint64_t device_address, u32 option) {
+                                            uint32_t size, uint64_t device_address, u32 option)
+{
     R_RETURN(MapDeviceAddressSpaceByForce(system, das_handle, process_handle, process_address, size,
                                           device_address, option));
 }
 
 Result MapDeviceAddressSpaceAligned64From32(Core::System& system, Handle das_handle,
                                             Handle process_handle, uint64_t process_address,
-                                            uint32_t size, uint64_t device_address, u32 option) {
+                                            uint32_t size, uint64_t device_address, u32 option)
+{
     R_RETURN(MapDeviceAddressSpaceAligned(system, das_handle, process_handle, process_address, size,
                                           device_address, option));
 }
 
 Result UnmapDeviceAddressSpace64From32(Core::System& system, Handle das_handle,
                                        Handle process_handle, uint64_t process_address,
-                                       uint32_t size, uint64_t device_address) {
+                                       uint32_t size, uint64_t device_address)
+{
     R_RETURN(UnmapDeviceAddressSpace(system, das_handle, process_handle, process_address, size,
                                      device_address));
 }

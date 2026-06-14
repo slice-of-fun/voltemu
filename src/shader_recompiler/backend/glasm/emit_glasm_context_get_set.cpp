@@ -6,14 +6,15 @@
 #include "shader_recompiler/backend/glasm/emit_glasm_instructions.h"
 #include "shader_recompiler/backend/glasm/glasm_emit_context.h"
 #include "shader_recompiler/frontend/ir/value.h"
-#include "shader_recompiler/runtime_info.h"
 #include "shader_recompiler/profile.h"
+#include "shader_recompiler/runtime_info.h"
 #include "shader_recompiler/shader_info.h"
 
 namespace Shader::Backend::GLASM {
 namespace {
 void GetCbuf(EmitContext& ctx, IR::Inst& inst, const IR::Value& binding, ScalarU32 offset,
-             std::string_view size) {
+             std::string_view size)
+{
     const Register ret{ctx.reg_alloc.Define(inst)};
     if (offset.type == Type::U32) {
         // Avoid reading arrays out of bounds, matching hardware's behavior
@@ -45,50 +46,60 @@ void GetCbuf(EmitContext& ctx, IR::Inst& inst, const IR::Value& binding, ScalarU
     }
 }
 
-bool IsInputArray(Stage stage) {
+bool IsInputArray(Stage stage)
+{
     return stage == Stage::Geometry || stage == Stage::TessellationControl ||
            stage == Stage::TessellationEval;
 }
 
-std::string VertexIndex(EmitContext& ctx, ScalarU32 vertex) {
+std::string VertexIndex(EmitContext& ctx, ScalarU32 vertex)
+{
     return IsInputArray(ctx.stage) ? fmt::format("[{}]", vertex) : "";
 }
 
-u32 TexCoordIndex(IR::Attribute attr) {
+u32 TexCoordIndex(IR::Attribute attr)
+{
     return (static_cast<u32>(attr) - static_cast<u32>(IR::Attribute::FixedFncTexture0S)) / 4;
 }
 } // Anonymous namespace
 
-void EmitGetCbufU8(EmitContext& ctx, IR::Inst& inst, const IR::Value& binding, ScalarU32 offset) {
+void EmitGetCbufU8(EmitContext& ctx, IR::Inst& inst, const IR::Value& binding, ScalarU32 offset)
+{
     GetCbuf(ctx, inst, binding, offset, "U8");
 }
 
-void EmitGetCbufS8(EmitContext& ctx, IR::Inst& inst, const IR::Value& binding, ScalarU32 offset) {
+void EmitGetCbufS8(EmitContext& ctx, IR::Inst& inst, const IR::Value& binding, ScalarU32 offset)
+{
     GetCbuf(ctx, inst, binding, offset, "S8");
 }
 
-void EmitGetCbufU16(EmitContext& ctx, IR::Inst& inst, const IR::Value& binding, ScalarU32 offset) {
+void EmitGetCbufU16(EmitContext& ctx, IR::Inst& inst, const IR::Value& binding, ScalarU32 offset)
+{
     GetCbuf(ctx, inst, binding, offset, "U16");
 }
 
-void EmitGetCbufS16(EmitContext& ctx, IR::Inst& inst, const IR::Value& binding, ScalarU32 offset) {
+void EmitGetCbufS16(EmitContext& ctx, IR::Inst& inst, const IR::Value& binding, ScalarU32 offset)
+{
     GetCbuf(ctx, inst, binding, offset, "S16");
 }
 
-void EmitGetCbufU32(EmitContext& ctx, IR::Inst& inst, const IR::Value& binding, ScalarU32 offset) {
+void EmitGetCbufU32(EmitContext& ctx, IR::Inst& inst, const IR::Value& binding, ScalarU32 offset)
+{
     GetCbuf(ctx, inst, binding, offset, "U32");
 }
 
-void EmitGetCbufF32(EmitContext& ctx, IR::Inst& inst, const IR::Value& binding, ScalarU32 offset) {
+void EmitGetCbufF32(EmitContext& ctx, IR::Inst& inst, const IR::Value& binding, ScalarU32 offset)
+{
     GetCbuf(ctx, inst, binding, offset, "F32");
 }
 
-void EmitGetCbufU32x2(EmitContext& ctx, IR::Inst& inst, const IR::Value& binding,
-                      ScalarU32 offset) {
+void EmitGetCbufU32x2(EmitContext& ctx, IR::Inst& inst, const IR::Value& binding, ScalarU32 offset)
+{
     GetCbuf(ctx, inst, binding, offset, "U32X2");
 }
 
-void EmitGetAttribute(EmitContext& ctx, IR::Inst& inst, IR::Attribute attr, ScalarU32 vertex) {
+void EmitGetAttribute(EmitContext& ctx, IR::Inst& inst, IR::Attribute attr, ScalarU32 vertex)
+{
     const u32 element{static_cast<u32>(attr) % 4};
     const char swizzle{"xyzw"[element]};
     if (IR::IsGeneric(attr)) {
@@ -155,7 +166,8 @@ void EmitGetAttribute(EmitContext& ctx, IR::Inst& inst, IR::Attribute attr, Scal
     }
 }
 
-void EmitGetAttributeU32(EmitContext& ctx, IR::Inst& inst, IR::Attribute attr, ScalarU32) {
+void EmitGetAttributeU32(EmitContext& ctx, IR::Inst& inst, IR::Attribute attr, ScalarU32)
+{
     switch (attr) {
     case IR::Attribute::PrimitiveId:
         ctx.Add("MOV.S {}.x,primitive.id;", inst);
@@ -181,7 +193,8 @@ void EmitGetAttributeU32(EmitContext& ctx, IR::Inst& inst, IR::Attribute attr, S
 }
 
 void EmitSetAttribute(EmitContext& ctx, IR::Attribute attr, ScalarF32 value,
-                      [[maybe_unused]] ScalarU32 vertex) {
+                      [[maybe_unused]] ScalarU32 vertex)
+{
     const u32 element{static_cast<u32>(attr) % 4};
     const char swizzle{"xyzw"[element]};
     if (IR::IsGeneric(attr)) {
@@ -272,7 +285,8 @@ void EmitSetAttribute(EmitContext& ctx, IR::Attribute attr, ScalarF32 value,
     }
 }
 
-void EmitGetAttributeIndexed(EmitContext& ctx, IR::Inst& inst, ScalarS32 offset, ScalarU32 vertex) {
+void EmitGetAttributeIndexed(EmitContext& ctx, IR::Inst& inst, ScalarS32 offset, ScalarU32 vertex)
+{
     // RC.x = base_index
     // RC.y = masked_index
     // RC.z = compare_index
@@ -335,11 +349,13 @@ void EmitGetAttributeIndexed(EmitContext& ctx, IR::Inst& inst, ScalarS32 offset,
 }
 
 void EmitSetAttributeIndexed([[maybe_unused]] EmitContext& ctx, [[maybe_unused]] ScalarU32 offset,
-                             [[maybe_unused]] ScalarF32 value, [[maybe_unused]] ScalarU32 vertex) {
+                             [[maybe_unused]] ScalarF32 value, [[maybe_unused]] ScalarU32 vertex)
+{
     throw NotImplementedException("GLASM instruction");
 }
 
-void EmitGetPatch(EmitContext& ctx, IR::Inst& inst, IR::Patch patch) {
+void EmitGetPatch(EmitContext& ctx, IR::Inst& inst, IR::Patch patch)
+{
     if (!IR::IsGeneric(patch)) {
         throw NotImplementedException("Non-generic patch load");
     }
@@ -350,7 +366,8 @@ void EmitGetPatch(EmitContext& ctx, IR::Inst& inst, IR::Patch patch) {
     ctx.Add("MOV.F {},primitive{}.patch.attrib[{}].{};", inst, out, index, swizzle);
 }
 
-void EmitSetPatch(EmitContext& ctx, IR::Patch patch, ScalarF32 value) {
+void EmitSetPatch(EmitContext& ctx, IR::Patch patch, ScalarF32 value)
+{
     if (IR::IsGeneric(patch)) {
         const u32 index{IR::GenericPatchIndex(patch)};
         const u32 element{IR::GenericPatchElement(patch)};
@@ -377,31 +394,38 @@ void EmitSetPatch(EmitContext& ctx, IR::Patch patch, ScalarF32 value) {
     }
 }
 
-void EmitSetFragColor(EmitContext& ctx, u32 index, u32 component, ScalarF32 value) {
+void EmitSetFragColor(EmitContext& ctx, u32 index, u32 component, ScalarF32 value)
+{
     ctx.Add("MOV.F frag_color{}.{},{};", index, "xyzw"[component], value);
 }
 
-void EmitSetSampleMask(EmitContext& ctx, ScalarS32 value) {
+void EmitSetSampleMask(EmitContext& ctx, ScalarS32 value)
+{
     ctx.Add("MOV.S result.samplemask.x,{};", value);
 }
 
-void EmitSetFragDepth(EmitContext& ctx, ScalarF32 value) {
+void EmitSetFragDepth(EmitContext& ctx, ScalarF32 value)
+{
     ctx.Add("MOV.F result.depth.z,{};", value);
 }
 
-void EmitWorkgroupId(EmitContext& ctx, IR::Inst& inst) {
+void EmitWorkgroupId(EmitContext& ctx, IR::Inst& inst)
+{
     ctx.Add("MOV.S {},invocation.groupid;", inst);
 }
 
-void EmitLocalInvocationId(EmitContext& ctx, IR::Inst& inst) {
+void EmitLocalInvocationId(EmitContext& ctx, IR::Inst& inst)
+{
     ctx.Add("MOV.S {},invocation.localid;", inst);
 }
 
-void EmitInvocationId(EmitContext& ctx, IR::Inst& inst) {
+void EmitInvocationId(EmitContext& ctx, IR::Inst& inst)
+{
     ctx.Add("MOV.S {}.x,primitive_invocation.x;", inst);
 }
 
-void EmitInvocationInfo(EmitContext& ctx, IR::Inst& inst) {
+void EmitInvocationInfo(EmitContext& ctx, IR::Inst& inst)
+{
     switch (ctx.stage) {
     case Stage::TessellationControl:
     case Stage::TessellationEval:
@@ -417,40 +441,49 @@ void EmitInvocationInfo(EmitContext& ctx, IR::Inst& inst) {
     }
 }
 
-void EmitSampleId(EmitContext& ctx, IR::Inst& inst) {
+void EmitSampleId(EmitContext& ctx, IR::Inst& inst)
+{
     ctx.Add("MOV.S {}.x,fragment.sampleid.x;", inst);
 }
 
-void EmitIsHelperInvocation(EmitContext& ctx, IR::Inst& inst) {
+void EmitIsHelperInvocation(EmitContext& ctx, IR::Inst& inst)
+{
     ctx.Add("MOV.S {}.x,fragment.helperthread.x;", inst);
 }
 
-void EmitSR_WScaleFactorXY(EmitContext& ctx, IR::Inst& inst) {
+void EmitSR_WScaleFactorXY(EmitContext& ctx, IR::Inst& inst)
+{
     LOG_WARNING(Shader, "(STUBBED) called");
 }
 
-void EmitSR_WScaleFactorZ(EmitContext& ctx, IR::Inst& inst) {
+void EmitSR_WScaleFactorZ(EmitContext& ctx, IR::Inst& inst)
+{
     LOG_WARNING(Shader, "(STUBBED) called");
 }
 
-void EmitYDirection(EmitContext& ctx, IR::Inst& inst) {
+void EmitYDirection(EmitContext& ctx, IR::Inst& inst)
+{
     ctx.uses_y_direction = true;
     ctx.Add("MOV.F {}.x,y_direction[0].w;", inst);
 }
 
-void EmitResolutionDownFactor(EmitContext& ctx, IR::Inst& inst) {
+void EmitResolutionDownFactor(EmitContext& ctx, IR::Inst& inst)
+{
     ctx.Add("MOV.F {}.x,scaling[0].z;", inst);
 }
 
-void EmitRenderArea(EmitContext& ctx, IR::Inst& inst) {
+void EmitRenderArea(EmitContext& ctx, IR::Inst& inst)
+{
     ctx.Add("MOV.F {},render_area[0];", inst);
 }
 
-void EmitLoadLocal(EmitContext& ctx, IR::Inst& inst, ScalarU32 word_offset) {
+void EmitLoadLocal(EmitContext& ctx, IR::Inst& inst, ScalarU32 word_offset)
+{
     ctx.Add("MOV.U {},lmem[{}].x;", inst, word_offset);
 }
 
-void EmitWriteLocal(EmitContext& ctx, ScalarU32 word_offset, ScalarU32 value) {
+void EmitWriteLocal(EmitContext& ctx, ScalarU32 word_offset, ScalarU32 value)
+{
     ctx.Add("MOV.U lmem[{}].x,{};", word_offset, value);
 }
 

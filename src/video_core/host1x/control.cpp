@@ -4,17 +4,21 @@
 // SPDX-FileCopyrightText: 2021 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#include "common/assert.h"
 #include "video_core/host1x/control.h"
+
+#include "common/assert.h"
 #include "video_core/host1x/host1x.h"
 
 namespace Tegra::Host1x {
 
-Control::Control(Host1x& host1x_) : host1x(host1x_) {}
+Control::Control(Host1x& host1x_) : host1x(host1x_)
+{
+}
 
 Control::~Control() = default;
 
-void Control::ProcessMethod(Method method, u32 argument) {
+void Control::ProcessMethod(Method method, u32 argument)
+{
     switch (method) {
     case Method::LoadSyncptPayload32:
         syncpoint_value = argument;
@@ -29,7 +33,8 @@ void Control::ProcessMethod(Method method, u32 argument) {
     }
 }
 
-void Control::Execute(u32 data) {
+void Control::Execute(u32 data)
+{
     LOG_TRACE(Service_NVDRV, "Control wait syncpt {} value {}", data, syncpoint_value);
     host1x.GetSyncpointManager().WaitHost(data, syncpoint_value);
 }

@@ -4,11 +4,12 @@
 // SPDX-FileCopyrightText: Copyright 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "video_core/renderer_opengl/blit_image.h"
+
 #include <algorithm>
 
 #include "video_core/host_shaders/blit_color_float_frag.h"
 #include "video_core/host_shaders/full_screen_triangle_vert.h"
-#include "video_core/renderer_opengl/blit_image.h"
 #include "video_core/renderer_opengl/gl_shader_manager.h"
 #include "video_core/renderer_opengl/gl_shader_util.h"
 
@@ -18,13 +19,16 @@ BlitImageHelper::BlitImageHelper(ProgramManager& program_manager_)
     : program_manager(program_manager_),
       full_screen_vert(CreateProgram(HostShaders::FULL_SCREEN_TRIANGLE_VERT, GL_VERTEX_SHADER)),
       blit_color_to_color_frag(
-          CreateProgram(HostShaders::BLIT_COLOR_FLOAT_FRAG, GL_FRAGMENT_SHADER)) {}
+          CreateProgram(HostShaders::BLIT_COLOR_FLOAT_FRAG, GL_FRAGMENT_SHADER))
+{
+}
 
 BlitImageHelper::~BlitImageHelper() = default;
 
 void BlitImageHelper::BlitColor(GLuint dst_framebuffer, GLuint src_image_view, GLuint src_sampler,
                                 const Region2D& dst_region, const Region2D& src_region,
-                                const Extent3D& src_size) {
+                                const Extent3D& src_size)
+{
     glDisable(GL_CULL_FACE);
     glDisable(GL_COLOR_LOGIC_OP);
     glDisable(GL_DEPTH_TEST);

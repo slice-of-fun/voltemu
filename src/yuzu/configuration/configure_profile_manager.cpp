@@ -4,9 +4,11 @@
 // SPDX-FileCopyrightText: 2016 Citra Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include <algorithm>
-#include <functional>
-#include <iterator>
+#include "yuzu/configuration/configure_profile_manager.h"
+
+#include <qnamespace.h>
+#include <qtreeview.h>
+
 #include <QColorDialog>
 #include <QDialog>
 #include <QDialogButtonBox>
@@ -18,8 +20,9 @@
 #include <QMessageBox>
 #include <QStandardItemModel>
 #include <QTreeView>
-#include <qnamespace.h>
-#include <qtreeview.h>
+#include <algorithm>
+#include <functional>
+#include <iterator>
 
 #include "common/assert.h"
 #include "common/fs/path_util.h"
@@ -31,19 +34,20 @@
 #include "core/hle/service/acc/profile_manager.h"
 #include "core/hle/service/filesystem/filesystem.h"
 #include "ui_configure_profile_manager.h"
-#include "yuzu/configuration/configure_profile_manager.h"
 #include "yuzu/util/limitable_input_dialog.h"
 
 namespace {
 
-QString GetImagePath(const Common::UUID& uuid) {
+QString GetImagePath(const Common::UUID& uuid)
+{
     const auto path =
         Common::FS::GetVoltPath(Common::FS::VoltPath::NANDDir) /
         fmt::format("system/save/8000000000000010/su/avators/{}.jpg", uuid.FormattedString());
     return QString::fromStdString(Common::FS::PathToUTF8String(path));
 }
 
-QString GetAccountUsername(const Service::Account::ProfileManager& manager, Common::UUID uuid) {
+QString GetAccountUsername(const Service::Account::ProfileManager& manager, Common::UUID uuid)
+{
     Service::Account::ProfileBase profile{};
     if (!manager.GetProfileBase(uuid, profile)) {
         return {};
@@ -54,14 +58,16 @@ QString GetAccountUsername(const Service::Account::ProfileManager& manager, Comm
     return QString::fromStdString(text);
 }
 
-QString FormatUserEntryText(const QString& username, Common::UUID uuid) {
+QString FormatUserEntryText(const QString& username, Common::UUID uuid)
+{
     return ConfigureProfileManager::tr("%1\n%2",
                                        "%1 is the profile username, %2 is the formatted UUID (e.g. "
                                        "00112233-4455-6677-8899-AABBCCDDEEFF))")
         .arg(username, QString::fromStdString(uuid.FormattedString()));
 }
 
-QPixmap GetIcon(const Common::UUID& uuid) {
+QPixmap GetIcon(const Common::UUID& uuid)
+{
     QPixmap icon{GetImagePath(uuid)};
 
     if (!icon) {
@@ -77,7 +83,8 @@ QPixmap GetIcon(const Common::UUID& uuid) {
 
 ConfigureProfileManager::ConfigureProfileManager(Core::System& system_, QWidget* parent)
     : QWidget(parent), ui{std::make_unique<Ui::ConfigureProfileManager>()},
-      profile_manager{system_.GetProfileManager()}, system{system_} {
+      profile_manager{system_.GetProfileManager()}, system{system_}
+{
     ui->setupUi(this);
 
     tree_view = new QTreeView;
@@ -126,7 +133,8 @@ ConfigureProfileManager::ConfigureProfileManager(Core::System& system_, QWidget*
 
 ConfigureProfileManager::~ConfigureProfileManager() = default;
 
-void ConfigureProfileManager::changeEvent(QEvent* event) {
+void ConfigureProfileManager::changeEvent(QEvent* event)
+{
     if (event->type() == QEvent::LanguageChange) {
         RetranslateUI();
     }
@@ -134,12 +142,14 @@ void ConfigureProfileManager::changeEvent(QEvent* event) {
     QWidget::changeEvent(event);
 }
 
-void ConfigureProfileManager::RetranslateUI() {
+void ConfigureProfileManager::RetranslateUI()
+{
     ui->retranslateUi(this);
     item_model->setHeaderData(0, Qt::Horizontal, tr("Users"));
 }
 
-void ConfigureProfileManager::SetConfiguration() {
+void ConfigureProfileManager::SetConfiguration()
+{
     enabled = !system.IsPoweredOn();
     item_model->removeRows(0, item_model->rowCount());
     list_items.clear();
@@ -148,7 +158,8 @@ void ConfigureProfileManager::SetConfiguration() {
     UpdateCurrentUser();
 }
 
-void ConfigureProfileManager::PopulateUserList() {
+void ConfigureProfileManager::PopulateUserList()
+{
     profile_manager.ResetUserSaveFile();
     const auto& profiles = profile_manager.GetAllUsers();
     for (const auto& user : profiles) {
@@ -168,7 +179,8 @@ void ConfigureProfileManager::PopulateUserList() {
         item_model->appendRow(item);
 }
 
-void ConfigureProfileManager::UpdateCurrentUser() {
+void ConfigureProfileManager::UpdateCurrentUser()
+{
     ui->pm_add->setEnabled(profile_manager.GetUserCount() < Service::Account::MAX_USERS);
 
     const auto& current_user = profile_manager.GetUser(Settings::values.current_user.GetValue());
@@ -181,13 +193,15 @@ void ConfigureProfileManager::UpdateCurrentUser() {
     ui->current_user_username->setText(username);
 }
 
-void ConfigureProfileManager::ApplyConfiguration() {
+void ConfigureProfileManager::ApplyConfiguration()
+{
     if (!enabled) {
         return;
     }
 }
 
-void ConfigureProfileManager::saveImage(QPixmap pixmap, Common::UUID uuid) {
+void ConfigureProfileManager::saveImage(QPixmap pixmap, Common::UUID uuid)
+{
     const auto image_path = GetImagePath(uuid);
     if (QFile::exists(image_path) && !QFile::remove(image_path)) {
         QMessageBox::warning(
@@ -220,7 +234,8 @@ void ConfigureProfileManager::saveImage(QPixmap pixmap, Common::UUID uuid) {
     }
 }
 
-void ConfigureProfileManager::showContextMenu(const QPoint& pos) {
+void ConfigureProfileManager::showContextMenu(const QPoint& pos)
+{
     const QModelIndex index = tree_view->indexAt(pos);
     if (!index.isValid())
         return;
@@ -242,14 +257,16 @@ void ConfigureProfileManager::showContextMenu(const QPoint& pos) {
     }
 }
 
-void ConfigureProfileManager::SelectUser(const QModelIndex& index) {
+void ConfigureProfileManager::SelectUser(const QModelIndex& index)
+{
     Settings::values.current_user =
         std::clamp<s32>(index.row(), 0, static_cast<s32>(profile_manager.GetUserCount() - 1));
 
     UpdateCurrentUser();
 }
 
-void ConfigureProfileManager::AddUser() {
+void ConfigureProfileManager::AddUser()
+{
     NewUserDialog* dialog = new NewUserDialog(this);
 
     connect(dialog, &NewUserDialog::userAdded, this, [dialog, this](User user) {
@@ -272,7 +289,8 @@ void ConfigureProfileManager::AddUser() {
     dialog->show();
 }
 
-void ConfigureProfileManager::EditUser() {
+void ConfigureProfileManager::EditUser()
+{
     const auto user_data = tree_view->currentIndex();
     const auto user_idx = user_data.row();
     const auto uuid = profile_manager.GetUser(user_idx);
@@ -322,7 +340,8 @@ void ConfigureProfileManager::EditUser() {
     dialog->show();
 }
 
-void ConfigureProfileManager::ConfirmDeleteUser() {
+void ConfigureProfileManager::ConfirmDeleteUser()
+{
     const auto index = tree_view->currentIndex().row();
     const auto uuid = profile_manager.GetUser(index);
     ASSERT(uuid);
@@ -332,7 +351,8 @@ void ConfigureProfileManager::ConfirmDeleteUser() {
     confirm_dialog->show();
 }
 
-void ConfigureProfileManager::DeleteUser(const int index) {
+void ConfigureProfileManager::DeleteUser(const int index)
+{
     if (Settings::values.current_user.GetValue() == tree_view->currentIndex().row()) {
         Settings::values.current_user = 0;
     }
@@ -351,7 +371,8 @@ void ConfigureProfileManager::DeleteUser(const int index) {
 }
 
 ConfigureProfileManagerDeleteDialog::ConfigureProfileManagerDeleteDialog(QWidget* parent)
-    : QDialog{parent} {
+    : QDialog{parent}
+{
     auto dialog_vbox_layout = new QVBoxLayout(this);
     dialog_button_box =
         new QDialogButtonBox(QDialogButtonBox::Yes | QDialogButtonBox::No, Qt::Horizontal, parent);
@@ -392,7 +413,8 @@ ConfigureProfileManagerDeleteDialog::ConfigureProfileManagerDeleteDialog(QWidget
 ConfigureProfileManagerDeleteDialog::~ConfigureProfileManagerDeleteDialog() = default;
 
 void ConfigureProfileManagerDeleteDialog::SetInfo(const QString& username, const Common::UUID& uuid,
-                                                  int index) {
+                                                  int index)
+{
     label_info->setText(
         tr("Name: %1\nUUID: %2").arg(username, QString::fromStdString(uuid.FormattedString())));
     icon_scene->clear();

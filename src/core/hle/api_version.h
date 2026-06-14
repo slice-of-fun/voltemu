@@ -34,15 +34,18 @@ constexpr u8 ATMOSPHERE_RELEASE_VERSION_MAJOR = 1;
 constexpr u8 ATMOSPHERE_RELEASE_VERSION_MINOR = 10;
 constexpr u8 ATMOSPHERE_RELEASE_VERSION_MICRO = 2;
 
-constexpr u32 AtmosphereTargetFirmwareWithRevision(u8 major, u8 minor, u8 micro, u8 rev) {
+constexpr u32 AtmosphereTargetFirmwareWithRevision(u8 major, u8 minor, u8 micro, u8 rev)
+{
     return u32{major} << 24 | u32{minor} << 16 | u32{micro} << 8 | u32{rev};
 }
 
-constexpr u32 AtmosphereTargetFirmware(u8 major, u8 minor, u8 micro) {
+constexpr u32 AtmosphereTargetFirmware(u8 major, u8 minor, u8 micro)
+{
     return AtmosphereTargetFirmwareWithRevision(major, minor, micro, 0);
 }
 
-constexpr u32 GetTargetFirmware() {
+constexpr u32 GetTargetFirmware()
+{
     return AtmosphereTargetFirmware(HOS_VERSION_MAJOR, HOS_VERSION_MINOR, HOS_VERSION_MICRO);
 }
 

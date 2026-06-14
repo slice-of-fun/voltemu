@@ -4,11 +4,12 @@
 // SPDX-FileCopyrightText: Copyright 2019 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "video_core/engines/engine_upload.h"
+
 #include <cstring>
 
 #include "common/algorithm.h"
 #include "common/assert.h"
-#include "video_core/engines/engine_upload.h"
 #include "video_core/guest_memory.h"
 #include "video_core/memory_manager.h"
 #include "video_core/rasterizer_interface.h"
@@ -17,22 +18,27 @@
 namespace Tegra::Engines::Upload {
 
 State::State(MemoryManager& memory_manager_, Registers& regs_)
-    : regs{regs_}, memory_manager{memory_manager_} {}
+    : regs{regs_}, memory_manager{memory_manager_}
+{
+}
 
 State::~State() = default;
 
-void State::BindRasterizer(VideoCore::RasterizerInterface* rasterizer_) {
+void State::BindRasterizer(VideoCore::RasterizerInterface* rasterizer_)
+{
     rasterizer = rasterizer_;
 }
 
-void State::ProcessExec(const bool is_linear_) {
+void State::ProcessExec(const bool is_linear_)
+{
     write_offset = 0;
     copy_size = regs.line_length_in * regs.line_count;
     inner_buffer.resize_destructive(copy_size);
     is_linear = is_linear_;
 }
 
-void State::ProcessData(const u32 data, const bool is_last_call) {
+void State::ProcessData(const u32 data, const bool is_last_call)
+{
     const u32 sub_copy_size = (std::min)(4U, copy_size - write_offset);
     std::memcpy(&inner_buffer[write_offset], &data, sub_copy_size);
     write_offset += sub_copy_size;
@@ -42,12 +48,14 @@ void State::ProcessData(const u32 data, const bool is_last_call) {
     ProcessData(inner_buffer);
 }
 
-void State::ProcessData(const u32* data, size_t num_data) {
+void State::ProcessData(const u32* data, size_t num_data)
+{
     std::span<const u8> read_buffer(reinterpret_cast<const u8*>(data), num_data * sizeof(u32));
     ProcessData(read_buffer);
 }
 
-void State::ProcessData(std::span<const u8> read_buffer) {
+void State::ProcessData(std::span<const u8> read_buffer)
+{
     const GPUVAddr address{regs.dest.Address()};
     if (is_linear) {
         for (size_t line = 0; line < regs.line_count; ++line) {

@@ -4,10 +4,11 @@
 // SPDX-FileCopyrightText: Copyright 2024 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+#include "hid_core/resources/abstracted_pad/abstract_led_handler.h"
+
 #include "core/core_timing.h"
 #include "hid_core/hid_result.h"
 #include "hid_core/hid_util.h"
-#include "hid_core/resources/abstracted_pad/abstract_led_handler.h"
 #include "hid_core/resources/abstracted_pad/abstract_pad_holder.h"
 #include "hid_core/resources/abstracted_pad/abstract_properties_handler.h"
 #include "hid_core/resources/applet_resource.h"
@@ -15,23 +16,29 @@
 
 namespace Service::HID {
 
-NpadAbstractLedHandler::NpadAbstractLedHandler() {}
+NpadAbstractLedHandler::NpadAbstractLedHandler()
+{
+}
 
 NpadAbstractLedHandler::~NpadAbstractLedHandler() = default;
 
-void NpadAbstractLedHandler::SetAbstractPadHolder(NpadAbstractedPadHolder* holder) {
+void NpadAbstractLedHandler::SetAbstractPadHolder(NpadAbstractedPadHolder* holder)
+{
     abstract_pad_holder = holder;
 }
 
-void NpadAbstractLedHandler::SetAppletResource(AppletResourceHolder* applet_resource) {
+void NpadAbstractLedHandler::SetAppletResource(AppletResourceHolder* applet_resource)
+{
     applet_resource_holder = applet_resource;
 }
 
-void NpadAbstractLedHandler::SetPropertiesHandler(NpadAbstractPropertiesHandler* handler) {
+void NpadAbstractLedHandler::SetPropertiesHandler(NpadAbstractPropertiesHandler* handler)
+{
     properties_handler = handler;
 }
 
-Result NpadAbstractLedHandler::IncrementRefCounter() {
+Result NpadAbstractLedHandler::IncrementRefCounter()
+{
     if (ref_counter == (std::numeric_limits<s32>::max)() - 1) {
         return ResultNpadHandlerOverflow;
     }
@@ -39,7 +46,8 @@ Result NpadAbstractLedHandler::IncrementRefCounter() {
     return ResultSuccess;
 }
 
-Result NpadAbstractLedHandler::DecrementRefCounter() {
+Result NpadAbstractLedHandler::DecrementRefCounter()
+{
     if (ref_counter == 0) {
         return ResultNpadHandlerNotInitialized;
     }
@@ -47,7 +55,8 @@ Result NpadAbstractLedHandler::DecrementRefCounter() {
     return ResultSuccess;
 }
 
-void NpadAbstractLedHandler::SetNpadLedHandlerLedPattern() {
+void NpadAbstractLedHandler::SetNpadLedHandlerLedPattern()
+{
     const auto npad_id = properties_handler->GetNpadId();
 
     switch (npad_id) {
@@ -119,7 +128,8 @@ void NpadAbstractLedHandler::SetNpadLedHandlerLedPattern() {
     }
 }
 
-void NpadAbstractLedHandler::SetLedBlinkingDevice(Core::HID::LedPattern pattern) {
+void NpadAbstractLedHandler::SetLedBlinkingDevice(Core::HID::LedPattern pattern)
+{
     led_blinking = pattern;
 }
 

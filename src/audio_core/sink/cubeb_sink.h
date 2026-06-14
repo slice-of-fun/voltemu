@@ -6,10 +6,10 @@
 
 #pragma once
 
+#include <cubeb/cubeb.h>
+
 #include <string>
 #include <vector>
-
-#include <cubeb/cubeb.h>
 
 #include "audio_core/sink/sink.h"
 

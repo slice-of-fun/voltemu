@@ -4,16 +4,19 @@
 // SPDX-FileCopyrightText: Copyright 2020 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "yuzu/install_dialog.h"
+
 #include <QCheckBox>
 #include <QDialogButtonBox>
 #include <QFileInfo>
 #include <QLabel>
 #include <QListWidget>
 #include <QVBoxLayout>
-#include "qt_common/config/uisettings.h"
-#include "yuzu/install_dialog.h"
 
-InstallDialog::InstallDialog(QWidget* parent, const QStringList& files) : QDialog(parent) {
+#include "qt_common/config/uisettings.h"
+
+InstallDialog::InstallDialog(QWidget* parent, const QStringList& files) : QDialog(parent)
+{
     file_list = new QListWidget(this);
 
     for (const QString& file : files) {
@@ -54,7 +57,8 @@ InstallDialog::InstallDialog(QWidget* parent, const QStringList& files) : QDialo
 
 InstallDialog::~InstallDialog() = default;
 
-QStringList InstallDialog::GetFiles() const {
+QStringList InstallDialog::GetFiles() const
+{
     QStringList files;
 
     for (int i = 0; i < file_list->count(); ++i) {
@@ -67,6 +71,7 @@ QStringList InstallDialog::GetFiles() const {
     return files;
 }
 
-int InstallDialog::GetMinimumWidth() const {
+int InstallDialog::GetMinimumWidth() const
+{
     return file_list->width();
 }

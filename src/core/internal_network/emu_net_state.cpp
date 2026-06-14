@@ -1,8 +1,9 @@
 // SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#include "common/logging.h"
 #include "core/internal_network/emu_net_state.h"
+
+#include "common/logging.h"
 #include "core/internal_network/network.h"
 #include "core/internal_network/network_interface.h"
 
@@ -20,12 +21,14 @@
 
 namespace Network {
 
-EmuNetState& EmuNetState::Get() {
+EmuNetState& EmuNetState::Get()
+{
     static EmuNetState instance;
     return instance;
 }
 
-u8 QualityToBars(u8 q) {
+u8 QualityToBars(u8 q)
+{
     if (q == 0)
         return 0;
     else if (q < 34)
@@ -36,7 +39,8 @@ u8 QualityToBars(u8 q) {
         return 3;
 }
 
-void RefreshFromHost() {
+void RefreshFromHost()
+{
     auto& st = Network::EmuNetState::Get();
     std::scoped_lock lk{st.mtx};
 

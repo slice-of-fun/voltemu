@@ -3,17 +3,21 @@
 // SPDX-FileCopyrightText: Copyright 2024 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+#include "hid_core/resources/npad/npad_vibration.h"
+
 #include "core/hle/service/set/system_settings_server.h"
 #include "hid_core/hid_result.h"
-#include "hid_core/resources/npad/npad_vibration.h"
 
 namespace Service::HID {
 
-NpadVibration::NpadVibration() {}
+NpadVibration::NpadVibration()
+{
+}
 
 NpadVibration::~NpadVibration() = default;
 
-Result NpadVibration::Activate() {
+Result NpadVibration::Activate()
+{
     std::scoped_lock lock{mutex};
 
     f32 master_volume = 1.0f;
@@ -26,17 +30,20 @@ Result NpadVibration::Activate() {
     return ResultSuccess;
 }
 
-Result NpadVibration::Deactivate() {
+Result NpadVibration::Deactivate()
+{
     return ResultSuccess;
 }
 
-Result NpadVibration::SetSettingsService(
-    std::shared_ptr<Service::Set::ISystemSettingsServer> settings) {
+Result
+NpadVibration::SetSettingsService(std::shared_ptr<Service::Set::ISystemSettingsServer> settings)
+{
     m_set_sys = settings;
     return ResultSuccess;
 }
 
-Result NpadVibration::SetVibrationMasterVolume(f32 master_volume) {
+Result NpadVibration::SetVibrationMasterVolume(f32 master_volume)
+{
     std::scoped_lock lock{mutex};
 
     if (master_volume < 0.0f || master_volume > 1.0f) {
@@ -49,13 +56,15 @@ Result NpadVibration::SetVibrationMasterVolume(f32 master_volume) {
     return ResultSuccess;
 }
 
-Result NpadVibration::GetVibrationVolume(f32& out_volume) const {
+Result NpadVibration::GetVibrationVolume(f32& out_volume) const
+{
     std::scoped_lock lock{mutex};
     out_volume = volume;
     return ResultSuccess;
 }
 
-Result NpadVibration::GetVibrationMasterVolume(f32& out_volume) const {
+Result NpadVibration::GetVibrationMasterVolume(f32& out_volume) const
+{
     std::scoped_lock lock{mutex};
 
     f32 master_volume = 1.0f;
@@ -68,14 +77,16 @@ Result NpadVibration::GetVibrationMasterVolume(f32& out_volume) const {
     return ResultSuccess;
 }
 
-Result NpadVibration::BeginPermitVibrationSession(u64 aruid) {
+Result NpadVibration::BeginPermitVibrationSession(u64 aruid)
+{
     std::scoped_lock lock{mutex};
     session_aruid = aruid;
     volume = 1.0f;
     return ResultSuccess;
 }
 
-Result NpadVibration::EndPermitVibrationSession() {
+Result NpadVibration::EndPermitVibrationSession()
+{
     std::scoped_lock lock{mutex};
 
     f32 master_volume = 1.0f;
@@ -89,7 +100,8 @@ Result NpadVibration::EndPermitVibrationSession() {
     return ResultSuccess;
 }
 
-u64 NpadVibration::GetSessionAruid() const {
+u64 NpadVibration::GetSessionAruid() const
+{
     return session_aruid;
 }
 

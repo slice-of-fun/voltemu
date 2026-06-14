@@ -6,11 +6,12 @@
 
 #pragma once
 
+#include <ankerl/unordered_dense.h>
+
 #include <array>
 #include <deque>
 #include <memory>
 #include <mutex>
-#include <ankerl/unordered_dense.h>
 #include <utility>
 
 #include "common/assert.h"
@@ -40,28 +41,29 @@ struct SyncValuesStruct {
     static constexpr bool GeneratesBaseBuffer = true;
 };
 
-template <typename Traits>
-class GuestStreamer : public SimpleStreamer<GuestQuery> {
+template<typename Traits> class GuestStreamer : public SimpleStreamer<GuestQuery> {
 public:
     using RuntimeType = typename Traits::RuntimeType;
 
     GuestStreamer(size_t id_, RuntimeType& runtime_)
-        : SimpleStreamer<GuestQuery>(id_), runtime{runtime_} {}
+        : SimpleStreamer<GuestQuery>(id_), runtime{runtime_}
+    {
+    }
 
     virtual ~GuestStreamer() = default;
 
     size_t WriteCounter(VAddr address, bool has_timestamp, u32 value,
-                        std::optional<u32> subreport = std::nullopt) override {
+                        std::optional<u32> subreport = std::nullopt) override
+    {
         auto new_id = BuildQuery(has_timestamp, address, static_cast<u64>(value));
         pending_sync.push_back(new_id);
         return new_id;
     }
 
-    bool HasPendingSync() const override {
-        return !pending_sync.empty();
-    }
+    bool HasPendingSync() const override { return !pending_sync.empty(); }
 
-    void SyncWrites() override {
+    void SyncWrites() override
+    {
         if (pending_sync.empty()) {
             return;
         }
@@ -90,18 +92,20 @@ private:
     std::deque<size_t> pending_sync;
 };
 
-template <typename Traits>
-class StubStreamer : public GuestStreamer<Traits> {
+template<typename Traits> class StubStreamer : public GuestStreamer<Traits> {
 public:
     using RuntimeType = typename Traits::RuntimeType;
 
     StubStreamer(size_t id_, RuntimeType& runtime_, u32 stub_value_)
-        : GuestStreamer<Traits>(id_, runtime_), stub_value{stub_value_} {}
+        : GuestStreamer<Traits>(id_, runtime_), stub_value{stub_value_}
+    {
+    }
 
     ~StubStreamer() override = default;
 
     size_t WriteCounter(VAddr address, bool has_timestamp, [[maybe_unused]] u32 value,
-                        std::optional<u32> subreport = std::nullopt) override {
+                        std::optional<u32> subreport = std::nullopt) override
+    {
         size_t new_id =
             GuestStreamer<Traits>::WriteCounter(address, has_timestamp, stub_value, subreport);
         return new_id;
@@ -111,15 +115,15 @@ private:
     u32 stub_value;
 };
 
-template <typename Traits>
-struct QueryCacheBase<Traits>::QueryCacheBaseImpl {
+template<typename Traits> struct QueryCacheBase<Traits>::QueryCacheBaseImpl {
     using RuntimeType = typename Traits::RuntimeType;
 
     QueryCacheBaseImpl(QueryCacheBase<Traits>* owner_, VideoCore::RasterizerInterface& rasterizer_,
                        Tegra::MaxwellDeviceMemoryManager& device_memory_, RuntimeType& runtime_,
                        Tegra::GPU& gpu_)
-        : owner{owner_}, rasterizer{rasterizer_}, device_memory{device_memory_}, runtime{runtime_},
-          gpu{gpu_} {
+        : owner{owner_}, rasterizer{rasterizer_},
+          device_memory{device_memory_}, runtime{runtime_}, gpu{gpu_}
+    {
         streamer_mask = 0;
         for (size_t i = 0; i < static_cast<size_t>(QueryType::MaxQueryTypes); i++) {
             streamers[i] = runtime.GetStreamerInterface(static_cast<QueryType>(i));
@@ -129,8 +133,8 @@ struct QueryCacheBase<Traits>::QueryCacheBaseImpl {
         }
     }
 
-    template <typename Func>
-    void ForEachStreamerIn(u64 mask, Func&& func) {
+    template<typename Func> void ForEachStreamerIn(u64 mask, Func&& func)
+    {
         static constexpr bool RETURNS_BOOL =
             std::is_same_v<std::invoke_result<Func, StreamerInterface*>, bool>;
         while (mask != 0) {
@@ -146,12 +150,13 @@ struct QueryCacheBase<Traits>::QueryCacheBaseImpl {
         }
     }
 
-    template <typename Func>
-    void ForEachStreamer(Func&& func) {
+    template<typename Func> void ForEachStreamer(Func&& func)
+    {
         ForEachStreamerIn(streamer_mask, func);
     }
 
-    QueryBase* ObtainQuery(QueryCacheBase<Traits>::QueryLocation location) {
+    QueryBase* ObtainQuery(QueryCacheBase<Traits>::QueryLocation location)
+    {
         size_t which_stream = location.stream_id.Value();
         auto* streamer = streamers[which_stream];
         if (!streamer) {
@@ -172,21 +177,22 @@ struct QueryCacheBase<Traits>::QueryCacheBaseImpl {
     std::vector<QueryCacheBase<Traits>::QueryLocation> pending_unregister;
 };
 
-template <typename Traits>
+template<typename Traits>
 QueryCacheBase<Traits>::QueryCacheBase(Tegra::GPU& gpu_,
                                        VideoCore::RasterizerInterface& rasterizer_,
                                        Tegra::MaxwellDeviceMemoryManager& device_memory_,
                                        RuntimeType& runtime_)
-    : cached_queries{} {
+    : cached_queries{}
+{
     impl = std::make_unique<QueryCacheBase<Traits>::QueryCacheBaseImpl>(
         this, rasterizer_, device_memory_, runtime_, gpu_);
 }
 
-template <typename Traits>
-QueryCacheBase<Traits>::~QueryCacheBase() = default;
+template<typename Traits> QueryCacheBase<Traits>::~QueryCacheBase() = default;
 
-template <typename Traits>
-void QueryCacheBase<Traits>::CounterEnable(QueryType counter_type, bool is_enabled) {
+template<typename Traits>
+void QueryCacheBase<Traits>::CounterEnable(QueryType counter_type, bool is_enabled)
+{
     size_t index = static_cast<size_t>(counter_type);
     StreamerInterface* streamer = impl->streamers[index];
     if (!streamer) [[unlikely]] {
@@ -200,8 +206,8 @@ void QueryCacheBase<Traits>::CounterEnable(QueryType counter_type, bool is_enabl
     }
 }
 
-template <typename Traits>
-void QueryCacheBase<Traits>::CounterClose(QueryType counter_type) {
+template<typename Traits> void QueryCacheBase<Traits>::CounterClose(QueryType counter_type)
+{
     size_t index = static_cast<size_t>(counter_type);
     StreamerInterface* streamer = impl->streamers[index];
     if (!streamer) [[unlikely]] {
@@ -211,8 +217,8 @@ void QueryCacheBase<Traits>::CounterClose(QueryType counter_type) {
     streamer->CloseCounter();
 }
 
-template <typename Traits>
-void QueryCacheBase<Traits>::CounterReset(QueryType counter_type) {
+template<typename Traits> void QueryCacheBase<Traits>::CounterReset(QueryType counter_type)
+{
     size_t index = static_cast<size_t>(counter_type);
     StreamerInterface* streamer = impl->streamers[index];
     if (!streamer) [[unlikely]] {
@@ -222,15 +228,16 @@ void QueryCacheBase<Traits>::CounterReset(QueryType counter_type) {
     streamer->ResetCounter();
 }
 
-template <typename Traits>
-void QueryCacheBase<Traits>::BindToChannel(s32 id) {
+template<typename Traits> void QueryCacheBase<Traits>::BindToChannel(s32 id)
+{
     VideoCommon::ChannelSetupCaches<VideoCommon::ChannelInfo>::BindToChannel(id);
     impl->runtime.Bind3DEngine(maxwell3d);
 }
 
-template <typename Traits>
+template<typename Traits>
 void QueryCacheBase<Traits>::CounterReport(GPUVAddr addr, QueryType counter_type,
-                                           QueryPropertiesFlags flags, u32 payload, u32 subreport) {
+                                           QueryPropertiesFlags flags, u32 payload, u32 subreport)
+{
     const bool has_timestamp = True(flags & QueryPropertiesFlags::HasTimeout);
     const bool is_fence = True(flags & QueryPropertiesFlags::IsAFence);
     size_t streamer_id = static_cast<size_t>(counter_type);
@@ -328,8 +335,8 @@ void QueryCacheBase<Traits>::CounterReport(GPUVAddr addr, QueryType counter_type
     }
 }
 
-template <typename Traits>
-void QueryCacheBase<Traits>::UnregisterPending() {
+template<typename Traits> void QueryCacheBase<Traits>::UnregisterPending()
+{
     const auto gen_caching_indexing = [](VAddr cur_addr) {
         return std::make_pair<u64, u32>(cur_addr >> Core::DEVICE_PAGEBITS,
                                         static_cast<u32>(cur_addr & Core::DEVICE_PAGEMASK));
@@ -357,8 +364,8 @@ void QueryCacheBase<Traits>::UnregisterPending() {
     impl->pending_unregister.clear();
 }
 
-template <typename Traits>
-void QueryCacheBase<Traits>::NotifyWFI() {
+template<typename Traits> void QueryCacheBase<Traits>::NotifyWFI()
+{
     bool should_sync = false;
     impl->ForEachStreamer(
         [&should_sync](StreamerInterface* streamer) { should_sync |= streamer->HasPendingSync(); });
@@ -372,8 +379,8 @@ void QueryCacheBase<Traits>::NotifyWFI() {
     impl->runtime.Barriers(false);
 }
 
-template <typename Traits>
-void QueryCacheBase<Traits>::NotifySegment(bool resume) {
+template<typename Traits> void QueryCacheBase<Traits>::NotifySegment(bool resume)
+{
     if (resume) {
         impl->runtime.ResumeHostConditionalRendering();
     } else {
@@ -381,8 +388,8 @@ void QueryCacheBase<Traits>::NotifySegment(bool resume) {
     }
 }
 
-template <typename Traits>
-bool QueryCacheBase<Traits>::AccelerateHostConditionalRendering() {
+template<typename Traits> bool QueryCacheBase<Traits>::AccelerateHostConditionalRendering()
+{
     bool qc_dirty = false;
     const auto gen_lookup = [this, &qc_dirty](GPUVAddr address) -> VideoCommon::LookupData {
         auto cpu_addr_opt = gpu_memory->GpuToCpuAddress(address);
@@ -459,8 +466,8 @@ bool QueryCacheBase<Traits>::AccelerateHostConditionalRendering() {
 }
 
 // Async downloads
-template <typename Traits>
-void QueryCacheBase<Traits>::CommitAsyncFlushes() {
+template<typename Traits> void QueryCacheBase<Traits>::CommitAsyncFlushes()
+{
     // Make sure to have the results synced in Host.
     NotifyWFI();
 
@@ -495,8 +502,8 @@ void QueryCacheBase<Traits>::CommitAsyncFlushes() {
     }
 }
 
-template <typename Traits>
-bool QueryCacheBase<Traits>::HasUncommittedFlushes() const {
+template<typename Traits> bool QueryCacheBase<Traits>::HasUncommittedFlushes() const
+{
     bool result = false;
     impl->ForEachStreamer([&result](StreamerInterface* streamer) {
         result |= streamer->HasUnsyncedQueries();
@@ -505,14 +512,14 @@ bool QueryCacheBase<Traits>::HasUncommittedFlushes() const {
     return result;
 }
 
-template <typename Traits>
-bool QueryCacheBase<Traits>::ShouldWaitAsyncFlushes() {
+template<typename Traits> bool QueryCacheBase<Traits>::ShouldWaitAsyncFlushes()
+{
     std::scoped_lock lk(impl->flush_guard);
     return !impl->flushes_pending.empty() && impl->flushes_pending.front() != 0ULL;
 }
 
-template <typename Traits>
-void QueryCacheBase<Traits>::PopAsyncFlushes() {
+template<typename Traits> void QueryCacheBase<Traits>::PopAsyncFlushes()
+{
     u64 mask;
     {
         std::scoped_lock lk(impl->flush_guard);
@@ -539,8 +546,9 @@ void QueryCacheBase<Traits>::PopAsyncFlushes() {
 
 // Invalidation
 
-template <typename Traits>
-void QueryCacheBase<Traits>::InvalidateQuery(QueryCacheBase<Traits>::QueryLocation location) {
+template<typename Traits>
+void QueryCacheBase<Traits>::InvalidateQuery(QueryCacheBase<Traits>::QueryLocation location)
+{
     auto* query_base = impl->ObtainQuery(location);
     if (!query_base) {
         return;
@@ -548,8 +556,9 @@ void QueryCacheBase<Traits>::InvalidateQuery(QueryCacheBase<Traits>::QueryLocati
     query_base->flags |= QueryFlagBits::IsInvalidated;
 }
 
-template <typename Traits>
-bool QueryCacheBase<Traits>::IsQueryDirty(QueryCacheBase<Traits>::QueryLocation location) {
+template<typename Traits>
+bool QueryCacheBase<Traits>::IsQueryDirty(QueryCacheBase<Traits>::QueryLocation location)
+{
     auto* query_base = impl->ObtainQuery(location);
     if (!query_base) {
         return false;
@@ -558,8 +567,9 @@ bool QueryCacheBase<Traits>::IsQueryDirty(QueryCacheBase<Traits>::QueryLocation 
            False(query_base->flags & QueryFlagBits::IsGuestSynced);
 }
 
-template <typename Traits>
-bool QueryCacheBase<Traits>::SemiFlushQueryDirty(QueryCacheBase<Traits>::QueryLocation location) {
+template<typename Traits>
+bool QueryCacheBase<Traits>::SemiFlushQueryDirty(QueryCacheBase<Traits>::QueryLocation location)
+{
     auto* query_base = impl->ObtainQuery(location);
     if (!query_base) {
         return false;
@@ -579,8 +589,8 @@ bool QueryCacheBase<Traits>::SemiFlushQueryDirty(QueryCacheBase<Traits>::QueryLo
            False(query_base->flags & QueryFlagBits::IsGuestSynced);
 }
 
-template <typename Traits>
-void QueryCacheBase<Traits>::RequestGuestHostSync() {
+template<typename Traits> void QueryCacheBase<Traits>::RequestGuestHostSync()
+{
     impl->rasterizer.ReleaseFences();
 }
 

@@ -3,9 +3,9 @@
 
 #pragma once
 
+#include <QDialog>
 #include <functional>
 #include <memory>
-#include <QDialog>
 
 namespace InputCommon {
 class InputSubsystem;

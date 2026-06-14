@@ -1,14 +1,16 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/kernel/k_system_resource.h"
+
 #include "core/core.h"
 #include "core/hle/kernel/k_scoped_resource_reservation.h"
-#include "core/hle/kernel/k_system_resource.h"
 
 namespace Kernel {
 
 Result KSecureSystemResource::Initialize(size_t size, KResourceLimit* resource_limit,
-                                         KMemoryManager::Pool pool) {
+                                         KMemoryManager::Pool pool)
+{
     // Set members.
     m_resource_limit = resource_limit;
     m_resource_size = size;
@@ -28,7 +30,8 @@ Result KSecureSystemResource::Initialize(size_t size, KResourceLimit* resource_l
     ASSERT(m_resource_address != 0);
 
     // Ensure we clean up the secure memory, if we fail past this point.
-    ON_RESULT_FAILURE {
+    ON_RESULT_FAILURE
+    {
         KSystemControl::FreeSecureMemory(m_kernel, m_resource_address, m_resource_size,
                                          static_cast<u32>(m_resource_pool));
     };
@@ -74,7 +77,8 @@ Result KSecureSystemResource::Initialize(size_t size, KResourceLimit* resource_l
     R_SUCCEED();
 }
 
-void KSecureSystemResource::Finalize() {
+void KSecureSystemResource::Finalize()
+{
     // Check that we have no outstanding allocations.
     ASSERT(m_memory_block_slab_manager.GetUsed() == 0);
     ASSERT(m_block_info_manager.GetUsed() == 0);
@@ -93,7 +97,8 @@ void KSecureSystemResource::Finalize() {
 }
 
 size_t KSecureSystemResource::CalculateRequiredSecureMemorySize(size_t size,
-                                                                KMemoryManager::Pool pool) {
+                                                                KMemoryManager::Pool pool)
+{
     return KSystemControl::CalculateRequiredSecureMemorySize(size, static_cast<u32>(pool));
 }
 

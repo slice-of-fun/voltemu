@@ -37,8 +37,9 @@ vk::DescriptorPool CreateWrappedDescriptorPool(const Device& device, size_t max_
                                                size_t max_sets,
                                                std::initializer_list<VkDescriptorType> types = {
                                                    VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER});
-vk::DescriptorSetLayout CreateWrappedDescriptorSetLayout(
-    const Device& device, std::initializer_list<VkDescriptorType> types);
+vk::DescriptorSetLayout
+CreateWrappedDescriptorSetLayout(const Device& device,
+                                 std::initializer_list<VkDescriptorType> types);
 vk::DescriptorSets CreateWrappedDescriptorSets(vk::DescriptorPool& pool,
                                                vk::Span<VkDescriptorSetLayout> layouts);
 vk::PipelineLayout CreateWrappedPipelineLayout(const Device& device,
@@ -49,9 +50,10 @@ vk::Pipeline CreateWrappedPipeline(const Device& device, vk::RenderPass& renderp
 vk::Pipeline CreateWrappedPremultipliedBlendingPipeline(
     const Device& device, vk::RenderPass& renderpass, vk::PipelineLayout& layout,
     std::tuple<vk::ShaderModule&, vk::ShaderModule&> shaders);
-vk::Pipeline CreateWrappedCoverageBlendingPipeline(
-    const Device& device, vk::RenderPass& renderpass, vk::PipelineLayout& layout,
-    std::tuple<vk::ShaderModule&, vk::ShaderModule&> shaders);
+vk::Pipeline
+CreateWrappedCoverageBlendingPipeline(const Device& device, vk::RenderPass& renderpass,
+                                      vk::PipelineLayout& layout,
+                                      std::tuple<vk::ShaderModule&, vk::ShaderModule&> shaders);
 VkWriteDescriptorSet CreateWriteDescriptorSet(std::vector<VkDescriptorImageInfo>& images,
                                               VkSampler sampler, VkImageView view,
                                               VkDescriptorSet set, u32 binding);

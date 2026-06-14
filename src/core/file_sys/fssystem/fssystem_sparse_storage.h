@@ -20,11 +20,10 @@ private:
         ZeroStorage() {}
         virtual ~ZeroStorage() {}
 
-        virtual size_t GetSize() const override {
-            return (std::numeric_limits<size_t>::max)();
-        }
+        virtual size_t GetSize() const override { return (std::numeric_limits<size_t>::max)(); }
 
-        virtual size_t Read(u8* buffer, size_t size, size_t offset) const override {
+        virtual size_t Read(u8* buffer, size_t size, size_t offset) const override
+        {
             ASSERT(buffer != nullptr || size == 0);
 
             if (size > 0) {
@@ -41,20 +40,22 @@ public:
 
     using IndirectStorage::Initialize;
 
-    void Initialize(s64 end_offset) {
+    void Initialize(s64 end_offset)
+    {
         this->GetEntryTable().Initialize(NodeSize, end_offset);
         this->SetZeroStorage();
     }
 
-    void SetDataStorage(VirtualFile storage) {
+    void SetDataStorage(VirtualFile storage)
+    {
         ASSERT(this->IsInitialized());
 
         this->SetStorage(0, storage);
         this->SetZeroStorage();
     }
 
-    template <typename T>
-    void SetDataStorage(T storage, s64 offset, s64 size) {
+    template<typename T> void SetDataStorage(T storage, s64 offset, s64 size)
+    {
         ASSERT(this->IsInitialized());
 
         this->SetStorage(0, storage, offset, size);
@@ -64,7 +65,8 @@ public:
     virtual size_t Read(u8* buffer, size_t size, size_t offset) const override;
 
 private:
-    void SetZeroStorage() {
+    void SetZeroStorage()
+    {
         return this->SetStorage(1, m_zero_storage, 0, (std::numeric_limits<s64>::max)());
     }
 

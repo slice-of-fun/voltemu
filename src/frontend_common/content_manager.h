@@ -7,6 +7,7 @@
 #pragma once
 
 #include <boost/algorithm/string.hpp>
+
 #include "common/common_types.h"
 #include "common/literals.h"
 #include "core/core.h"
@@ -43,7 +44,8 @@ enum class GameVerificationResult {
  * \return 'true' if successful
  */
 inline bool RemoveDLC(const Service::FileSystem::FileSystemController& fs_controller,
-                      const u64 title_id) {
+                      const u64 title_id)
+{
     return fs_controller.GetUserNANDContents()->RemoveExistingEntry(title_id) ||
            fs_controller.GetSDMCContents()->RemoveExistingEntry(title_id);
 }
@@ -54,7 +56,8 @@ inline bool RemoveDLC(const Service::FileSystem::FileSystemController& fs_contro
  * \param program_id Program ID for the game that will have all of its DLC removed
  * \return Number of DLC removed
  */
-inline size_t RemoveAllDLC(Core::System& system, const u64 program_id) {
+inline size_t RemoveAllDLC(Core::System& system, const u64 program_id)
+{
     size_t count{};
     const auto& fs_controller = system.GetFileSystemController();
     const auto dlc_entries = system.GetContentProvider().ListEntriesFilter(
@@ -82,7 +85,8 @@ inline size_t RemoveAllDLC(Core::System& system, const u64 program_id) {
  * \return 'true' if successful
  */
 inline bool RemoveUpdate(const Service::FileSystem::FileSystemController& fs_controller,
-                         const u64 program_id) {
+                         const u64 program_id)
+{
     const auto update_id = program_id | 0x800;
     return fs_controller.GetUserNANDContents()->RemoveExistingEntry(update_id) ||
            fs_controller.GetSDMCContents()->RemoveExistingEntry(update_id);
@@ -95,7 +99,8 @@ inline bool RemoveUpdate(const Service::FileSystem::FileSystemController& fs_con
  * \return 'true' if successful
  */
 inline bool RemoveBaseContent(const Service::FileSystem::FileSystemController& fs_controller,
-                              const u64 program_id) {
+                              const u64 program_id)
+{
     return fs_controller.GetUserNANDContents()->RemoveExistingEntry(program_id) ||
            fs_controller.GetSDMCContents()->RemoveExistingEntry(program_id);
 }
@@ -109,7 +114,8 @@ inline bool RemoveBaseContent(const Service::FileSystem::FileSystemController& f
  * \return 'true' if successful
  */
 inline bool RemoveMod(const Service::FileSystem::FileSystemController& fs_controller,
-                      const u64 program_id, const std::string& mod_name) {
+                      const u64 program_id, const std::string& mod_name)
+{
     // Check general Mods (LayeredFS and IPS)
     const auto mod_dir = fs_controller.GetModificationLoadRoot(program_id);
     if (mod_dir != nullptr) {
@@ -137,7 +143,8 @@ inline bool RemoveMod(const Service::FileSystem::FileSystemController& fs_contro
  */
 inline InstallResult InstallNSP(Core::System& system, FileSys::VfsFilesystem& vfs,
                                 const std::string& filename,
-                                const std::function<bool(size_t, size_t)>& callback) {
+                                const std::function<bool(size_t, size_t)>& callback)
+{
     const auto copy = [callback](const FileSys::VirtualFile& src, const FileSys::VirtualFile& dest,
                                  std::size_t block_size) {
         if (src == nullptr || dest == nullptr) {
@@ -203,7 +210,8 @@ inline InstallResult InstallNSP(Core::System& system, FileSys::VfsFilesystem& vf
 inline InstallResult InstallNCA(FileSys::VfsFilesystem& vfs, const std::string& filename,
                                 FileSys::RegisteredCache& registered_cache,
                                 const FileSys::TitleType title_type,
-                                const std::function<bool(size_t, size_t)>& callback) {
+                                const std::function<bool(size_t, size_t)>& callback)
+{
     const auto copy = [callback](const FileSys::VirtualFile& src, const FileSys::VirtualFile& dest,
                                  std::size_t block_size) {
         if (src == nullptr || dest == nullptr) {
@@ -257,9 +265,11 @@ inline InstallResult InstallNCA(FileSys::VfsFilesystem& vfs, const std::string& 
  * \param firmware_only Set to true to only scan system nand NCAs (firmware), post firmware install.
  * \return A list of entries that failed to install. Returns an empty vector if successful.
  */
-inline std::vector<std::string> VerifyInstalledContents(
-    Core::System& system, FileSys::ManualContentProvider& provider,
-    const std::function<bool(size_t, size_t)>& callback, bool firmware_only = false) {
+inline std::vector<std::string>
+VerifyInstalledContents(Core::System& system, FileSys::ManualContentProvider& provider,
+                        const std::function<bool(size_t, size_t)>& callback,
+                        bool firmware_only = false)
+{
     // Get content registries.
     auto bis_contents = system.GetFileSystemController().GetSystemNANDContents();
     auto user_contents = system.GetFileSystemController().GetUserNANDContents();
@@ -347,9 +357,10 @@ inline std::vector<std::string> VerifyInstalledContents(
  * you return true to the callback, it will cancel the installation as soon as possible.
  * \return GameVerificationResult representing how the verification process finished
  */
-inline GameVerificationResult VerifyGameContents(
-    Core::System& system, const std::string& game_path,
-    const std::function<bool(size_t, size_t)>& callback) {
+inline GameVerificationResult
+VerifyGameContents(Core::System& system, const std::string& game_path,
+                   const std::function<bool(size_t, size_t)>& callback)
+{
     const auto loader = Loader::GetLoader(
         system, system.GetFilesystem()->OpenFile(game_path, FileSys::OpenMode::Read));
     if (loader == nullptr) {
@@ -376,7 +387,8 @@ inline GameVerificationResult VerifyGameContents(
 /**
  * Checks if the keys required for decrypting firmware and games are available
  */
-inline bool AreKeysPresent() {
+inline bool AreKeysPresent()
+{
     return !Core::Crypto::KeyManager::Instance().BaseDeriveNecessary();
 }
 

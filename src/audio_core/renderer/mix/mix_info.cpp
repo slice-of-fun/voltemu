@@ -1,9 +1,10 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "audio_core/renderer/mix/mix_info.h"
+
 #include "audio_core/renderer/behavior/behavior_info.h"
 #include "audio_core/renderer/effect/effect_context.h"
-#include "audio_core/renderer/mix/mix_info.h"
 #include "audio_core/renderer/nodes/edge_matrix.h"
 #include "audio_core/renderer/splitter/splitter_context.h"
 
@@ -11,17 +12,20 @@ namespace AudioCore::Renderer {
 
 MixInfo::MixInfo(std::span<s32> effect_order_buffer_, s32 effect_count_, BehaviorInfo& behavior)
     : effect_order_buffer{effect_order_buffer_}, effect_count{effect_count_},
-      long_size_pre_delay_supported{behavior.IsLongSizePreDelaySupported()} {
+      long_size_pre_delay_supported{behavior.IsLongSizePreDelaySupported()}
+{
     ClearEffectProcessingOrder();
 }
 
-void MixInfo::Cleanup() {
+void MixInfo::Cleanup()
+{
     mix_id = UnusedMixId;
     dst_mix_id = UnusedMixId;
     dst_splitter_id = UnusedSplitterId;
 }
 
-void MixInfo::ClearEffectProcessingOrder() {
+void MixInfo::ClearEffectProcessingOrder()
+{
     for (s32 i = 0; i < effect_count; i++) {
         effect_order_buffer[i] = -1;
     }
@@ -29,7 +33,8 @@ void MixInfo::ClearEffectProcessingOrder() {
 
 bool MixInfo::Update(EdgeMatrix& edge_matrix, const InParameter& in_params,
                      EffectContext& effect_context, SplitterContext& splitter_context,
-                     const BehaviorInfo& behavior) {
+                     const BehaviorInfo& behavior)
+{
     volume = in_params.volume;
     sample_rate = in_params.sample_rate;
     buffer_count = static_cast<s16>(in_params.buffer_count);
@@ -68,7 +73,8 @@ bool MixInfo::Update(EdgeMatrix& edge_matrix, const InParameter& in_params,
 }
 
 bool MixInfo::UpdateConnection(EdgeMatrix& edge_matrix, const InParameter& in_params,
-                               SplitterContext& splitter_context) {
+                               SplitterContext& splitter_context)
+{
     auto has_new_connection{false};
     if (dst_splitter_id != UnusedSplitterId) {
         auto& splitter_info{splitter_context.GetInfo(dst_splitter_id)};
@@ -113,7 +119,8 @@ bool MixInfo::UpdateConnection(EdgeMatrix& edge_matrix, const InParameter& in_pa
     return true;
 }
 
-bool MixInfo::HasAnyConnection() const {
+bool MixInfo::HasAnyConnection() const
+{
     return dst_mix_id != UnusedMixId || dst_splitter_id != UnusedSplitterId;
 }
 

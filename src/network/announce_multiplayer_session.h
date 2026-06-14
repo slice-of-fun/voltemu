@@ -11,6 +11,7 @@
 #include <mutex>
 #include <set>
 #include <thread>
+
 #include "common/announce_multiplayer_room.h"
 #include "common/common_types.h"
 #include "common/thread.h"
@@ -72,9 +73,7 @@ public:
     /**
      * Whether the announce session is still running
      */
-    [[nodiscard]] bool IsRunning() const {
-        return announce_multiplayer_thread.has_value();
-    }
+    [[nodiscard]] bool IsRunning() const { return announce_multiplayer_thread.has_value(); }
 
     /**
      * Recreates the backend, updating the credentials.

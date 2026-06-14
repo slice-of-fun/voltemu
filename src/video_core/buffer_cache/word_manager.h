@@ -25,20 +25,14 @@ constexpr u64 PAGES_PER_WORD = 64;
 constexpr u64 BYTES_PER_PAGE = Core::DEVICE_PAGESIZE;
 constexpr u64 BYTES_PER_WORD = PAGES_PER_WORD * BYTES_PER_PAGE;
 
-enum class Type {
-    CPU,
-    GPU,
-    CachedCPU,
-    Untracked,
-    Preflushable,
-    Max
-};
+enum class Type { CPU, GPU, CachedCPU, Untracked, Preflushable, Max };
 
-template <class DeviceTracker, size_t stack_words, size_t size_bytes>
-struct WordManager {
+template<class DeviceTracker, size_t stack_words, size_t size_bytes> struct WordManager {
     static constexpr size_t num_words = Common::DivCeil(size_bytes, BYTES_PER_WORD);
 
-    explicit WordManager(VAddr cpu_addr_, DeviceTracker& tracker_) : tracker{&tracker_}, cpu_addr{cpu_addr_} {
+    explicit WordManager(VAddr cpu_addr_, DeviceTracker& tracker_)
+        : tracker{&tracker_}, cpu_addr{cpu_addr_}
+    {
         std::fill_n(heap.data() + size_t(Type::CPU) * num_words, num_words, ~u64{0});
         std::fill_n(heap.data() + size_t(Type::Untracked) * num_words, num_words, ~u64{0});
         // Clean up tailing bits
@@ -51,7 +45,8 @@ struct WordManager {
     }
     explicit WordManager() = default;
 
-    static u64 ExtractBits(u64 word, size_t page_start, size_t page_end) {
+    static u64 ExtractBits(u64 word, size_t page_start, size_t page_end)
+    {
         constexpr size_t number_bits = sizeof(u64) * 8;
         const size_t limit_page_end = number_bits - (std::min)(page_end, number_bits);
         u64 bits = (word >> page_start) << page_start;
@@ -59,15 +54,16 @@ struct WordManager {
         return bits;
     }
 
-    static std::pair<size_t, size_t> GetWordPage(VAddr address) {
+    static std::pair<size_t, size_t> GetWordPage(VAddr address)
+    {
         const size_t converted_address = size_t(address);
         const size_t word_number = converted_address / BYTES_PER_WORD;
         const size_t amount_pages = converted_address % BYTES_PER_WORD;
         return std::make_pair(word_number, amount_pages / BYTES_PER_PAGE);
     }
 
-    template <typename Func>
-    void IterateWords(size_t offset, size_t size, Func&& func) const {
+    template<typename Func> void IterateWords(size_t offset, size_t size, Func&& func) const
+    {
         using FuncReturn = std::invoke_result_t<Func, std::size_t, u64>;
         const size_t start = size_t(std::max<s64>(s64(offset), 0LL));
         const size_t end = size_t(std::max<s64>(s64(offset + size), 0LL));
@@ -95,8 +91,8 @@ struct WordManager {
         }
     }
 
-    template <typename Func>
-    void IteratePages(u64 mask, Func&& func) const {
+    template<typename Func> void IteratePages(u64 mask, Func&& func) const
+    {
         size_t offset = 0;
         while (mask != 0) {
             const size_t empty_bits = std::countr_zero(mask);
@@ -115,7 +111,8 @@ struct WordManager {
     /// @param enable        If enabling or disabling
     /// @param dirty_addr    Base address to mark or unmark as modified
     /// @param size          Size in bytes to mark or unmark as modified
-    void ChangeRegionState(Type type, bool enable, u64 dirty_addr, u64 size) noexcept {
+    void ChangeRegionState(Type type, bool enable, u64 dirty_addr, u64 size) noexcept
+    {
         std::span<u64> state_words = Span(type);
         [[maybe_unused]] std::span<u64> untracked_words = Span(Type::Untracked);
         [[maybe_unused]] std::span<u64> cached_words = Span(Type::CachedCPU);
@@ -144,15 +141,17 @@ struct WordManager {
     }
 
     /// @brief Loop over each page in the given range.
-    /// Turn off those bits and notify the tracker if needed. Call the given function on each turned off range.
+    /// Turn off those bits and notify the tracker if needed. Call the given function on each turned
+    /// off range.
     /// @param type            Type of the address
     /// @param clear           Whetever to clear
     /// @param query_cpu_range Base CPU address to loop over
     /// @param size            Size in bytes of the CPU range to loop over
     /// @param func            Function to call for each turned off region
-    template <typename Func>
-    void ForEachModifiedRange(Type type, bool clear, VAddr query_cpu_range, s64 size, Func&& func) {
-        //static_assert(type != Type::Untracked);
+    template<typename Func>
+    void ForEachModifiedRange(Type type, bool clear, VAddr query_cpu_range, s64 size, Func&& func)
+    {
+        // static_assert(type != Type::Untracked);
         std::span<u64> state_words = Span(type);
         std::span<u64> untracked_words = Span(Type::Untracked);
         std::span<u64> cached_words = Span(Type::CachedCPU);
@@ -188,7 +187,8 @@ struct WordManager {
                 } else if (pending_pointer == base_offset + pages_offset) {
                     pending_pointer += pages_size;
                 } else {
-                    func(cpu_addr + pending_offset * BYTES_PER_PAGE, (pending_pointer - pending_offset) * BYTES_PER_PAGE);
+                    func(cpu_addr + pending_offset * BYTES_PER_PAGE,
+                         (pending_pointer - pending_offset) * BYTES_PER_PAGE);
                     pending_offset = base_offset + pages_offset;
                     pending_pointer = base_offset + pages_offset + pages_size;
                 }
@@ -206,8 +206,9 @@ struct WordManager {
     /// @param type   Type of region
     /// @param offset Offset in bytes from the start of the buffer
     /// @param size   Size in bytes of the region to query for modifications
-    [[nodiscard]] bool IsRegionModified(Type type, u64 offset, u64 size) const noexcept {
-        //static_assert(type != Type::Untracked);
+    [[nodiscard]] bool IsRegionModified(Type type, u64 offset, u64 size) const noexcept
+    {
+        // static_assert(type != Type::Untracked);
         const std::span<const u64> state_words = Span(type);
         const std::span<const u64> untracked_words = Span(Type::Untracked);
         bool result = false;
@@ -222,8 +223,9 @@ struct WordManager {
     /// @brief Returns a begin end pair with the inclusive modified region
     /// @param offset Offset in bytes from the start of the buffer
     /// @param size   Size in bytes of the region to query for modifications
-    [[nodiscard]] std::pair<u64, u64> ModifiedRegion(Type type, u64 offset, u64 size) const noexcept {
-        //static_assert(type != Type::Untracked);
+    [[nodiscard]] std::pair<u64, u64> ModifiedRegion(Type type, u64 offset, u64 size) const noexcept
+    {
+        // static_assert(type != Type::Untracked);
         const std::span<const u64> state_words = Span(type);
         const std::span<const u64> untracked_words = Span(Type::Untracked);
         u64 begin = (std::numeric_limits<u64>::max)(), end = 0;
@@ -240,17 +242,19 @@ struct WordManager {
             }
         });
         return begin < end ? std::make_pair<u64, u64>(begin * BYTES_PER_PAGE, end * BYTES_PER_PAGE)
-            : std::make_pair<u64, u64>(0, 0);
+                           : std::make_pair<u64, u64>(0, 0);
     }
 
-    void FlushCachedWrites() noexcept {
+    void FlushCachedWrites() noexcept
+    {
         auto const cached_words = Span(Type::CachedCPU);
         auto const untracked_words = Span(Type::Untracked);
         auto const cpu_words = Span(Type::CPU);
         std::vector<std::pair<VAddr, u64>> ranges;
         for (u64 word_index = 0; word_index < num_words; ++word_index) {
             const u64 cached_bits = cached_words[word_index];
-            CollectChangedRanges(false, word_index, untracked_words[word_index], cached_bits, ranges);
+            CollectChangedRanges(false, word_index, untracked_words[word_index], cached_bits,
+                                 ranges);
             untracked_words[word_index] |= cached_bits;
             cpu_words[word_index] |= cached_bits;
             cached_words[word_index] = 0;
@@ -266,7 +270,9 @@ struct WordManager {
     /// @param current_bits   Current state of the word
     /// @param new_bits       New state of the word
     /// @tparam add_to_tracker True when the tracker should start tracking the new pages
-    void CollectChangedRanges(bool add_to_tracker, u64 word_index, u64 current_bits, u64 new_bits, std::vector<std::pair<VAddr, u64>>& out_ranges) const {
+    void CollectChangedRanges(bool add_to_tracker, u64 word_index, u64 current_bits, u64 new_bits,
+                              std::vector<std::pair<VAddr, u64>>& out_ranges) const
+    {
         u64 changed_bits = (add_to_tracker ? current_bits : ~current_bits) & new_bits;
         VAddr addr = cpu_addr + word_index * BYTES_PER_WORD;
         IteratePages(changed_bits, [&](size_t offset, size_t size) {
@@ -274,10 +280,12 @@ struct WordManager {
         });
     }
 
-    void ApplyCollectedRanges(std::vector<std::pair<VAddr, u64>>& ranges, int delta) const {
+    void ApplyCollectedRanges(std::vector<std::pair<VAddr, u64>>& ranges, int delta) const
+    {
         if (ranges.empty())
             return;
-        std::sort(ranges.begin(), ranges.end(), [](const auto& a, const auto& b) { return a.first < b.first; });
+        std::sort(ranges.begin(), ranges.end(),
+                  [](const auto& a, const auto& b) { return a.first < b.first; });
         // Coalesce adjacent/contiguous ranges
         std::vector<std::pair<VAddr, size_t>> coalesced;
         coalesced.reserve(ranges.size());
@@ -303,23 +311,27 @@ struct WordManager {
     /// @param word_index   Index to the word to notify to the tracker
     /// @param current_bits Current state of the word
     /// @param new_bits     New state of the word
-    void NotifyRasterizer(bool add_to_tracker, u64 word_index, u64 current_bits, u64 new_bits) const {
+    void NotifyRasterizer(bool add_to_tracker, u64 word_index, u64 current_bits, u64 new_bits) const
+    {
         u64 changed_bits = (add_to_tracker ? current_bits : ~current_bits) & new_bits;
         VAddr addr = cpu_addr + word_index * BYTES_PER_WORD;
         IteratePages(changed_bits, [&](size_t offset, size_t size) {
-            tracker->UpdatePagesCachedCount(addr + offset * BYTES_PER_PAGE, size * BYTES_PER_PAGE, add_to_tracker ? 1 : -1);
+            tracker->UpdatePagesCachedCount(addr + offset * BYTES_PER_PAGE, size * BYTES_PER_PAGE,
+                                            add_to_tracker ? 1 : -1);
         });
     }
 
-    std::span<u64> Span(Type type) noexcept {
+    std::span<u64> Span(Type type) noexcept
+    {
         return std::span<u64>(heap.data() + num_words * size_t(type), num_words);
     }
 
-    std::span<const u64> Span(Type type) const noexcept {
+    std::span<const u64> Span(Type type) const noexcept
+    {
         return std::span<const u64>(heap.data() + num_words * size_t(type), num_words);
     }
 
-    std::array<u64, size_t(Type::Max) * num_words> heap = {};
+    std::array<u64, size_t(Type::Max)* num_words> heap = {};
     DeviceTracker* tracker = nullptr;
     VAddr cpu_addr = 0;
 };

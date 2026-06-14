@@ -11,8 +11,8 @@
 
 #include "common/common_types.h"
 #include "common/scratch_buffer.h"
-#include "video_core/host1x/codecs/decoder.h"
 #include "video_core/host1x/codec_types.h"
+#include "video_core/host1x/codecs/decoder.h"
 #include "video_core/host1x/nvdec_common.h"
 
 namespace Tegra {
@@ -80,9 +80,7 @@ public:
     std::tuple<u64, u64, u64, u64> GetInterlacedOffsets() override;
     bool IsInterlaced() override;
 
-    std::string_view GetCurrentCodecName() const override {
-        return "H264";
-    }
+    std::string_view GetCurrentCodecName() const override { return "H264"; }
 
 private:
     H264DecoderContext current_context{};

@@ -6,14 +6,14 @@
 
 #pragma once
 
-#include <string>
 #include <ankerl/unordered_dense.h>
 
 #include <QString>
+#include <string>
 
 #include "common/common_types.h"
 
 using CompatibilityList = ankerl::unordered_dense::map<std::string, std::pair<QString, QString>>;
 
-CompatibilityList::const_iterator FindMatchingCompatibilityEntry(
-    const CompatibilityList& compatibility_list, u64 program_id);
+CompatibilityList::const_iterator
+FindMatchingCompatibilityEntry(const CompatibilityList& compatibility_list, u64 program_id);

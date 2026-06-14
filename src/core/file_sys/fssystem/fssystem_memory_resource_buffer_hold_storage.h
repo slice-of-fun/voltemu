@@ -14,38 +14,40 @@ class MemoryResourceBufferHoldStorage : public IStorage {
 public:
     MemoryResourceBufferHoldStorage(VirtualFile storage, size_t buffer_size)
         : m_storage(std::move(storage)), m_buffer(::operator new(buffer_size)),
-          m_buffer_size(buffer_size) {}
+          m_buffer_size(buffer_size)
+    {
+    }
 
-    virtual ~MemoryResourceBufferHoldStorage() {
+    virtual ~MemoryResourceBufferHoldStorage()
+    {
         // If we have a buffer, deallocate it.
         if (m_buffer != nullptr) {
             ::operator delete(m_buffer);
         }
     }
 
-    bool IsValid() const {
-        return m_buffer != nullptr;
-    }
-    void* GetBuffer() const {
-        return m_buffer;
-    }
+    bool IsValid() const { return m_buffer != nullptr; }
+    void* GetBuffer() const { return m_buffer; }
 
 public:
-    virtual size_t Read(u8* buffer, size_t size, size_t offset) const override {
+    virtual size_t Read(u8* buffer, size_t size, size_t offset) const override
+    {
         // Check pre-conditions.
         ASSERT(m_storage != nullptr);
 
         return m_storage->Read(buffer, size, offset);
     }
 
-    virtual size_t GetSize() const override {
+    virtual size_t GetSize() const override
+    {
         // Check pre-conditions.
         ASSERT(m_storage != nullptr);
 
         return m_storage->GetSize();
     }
 
-    virtual size_t Write(const u8* buffer, size_t size, size_t offset) override {
+    virtual size_t Write(const u8* buffer, size_t size, size_t offset) override
+    {
         // Check pre-conditions.
         ASSERT(m_storage != nullptr);
 

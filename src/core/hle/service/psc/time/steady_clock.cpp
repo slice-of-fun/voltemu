@@ -4,10 +4,11 @@
 // SPDX-FileCopyrightText: Copyright 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/psc/time/steady_clock.h"
+
 #include "common/scope_exit.h"
 #include "core/core.h"
 #include "core/hle/service/cmif_serialization.h"
-#include "core/hle/service/psc/time/steady_clock.h"
 
 namespace Service::PSC::Time {
 
@@ -16,7 +17,8 @@ SteadyClock::SteadyClock(Core::System& system_, std::shared_ptr<TimeManager> man
     : ServiceFramework{system_, "ISteadyClock"}, m_system{system},
       m_clock_core{manager->m_standard_steady_clock},
       m_can_write_steady_clock{can_write_steady_clock}, m_can_write_uninitialized_clock{
-                                                            can_write_uninitialized_clock} {
+                                                            can_write_uninitialized_clock}
+{
     // clang-format off
          static const FunctionInfo functions[] = {
         {0, D<&SteadyClock::GetCurrentTimePoint>, "GetCurrentTimePoint"},
@@ -31,8 +33,10 @@ SteadyClock::SteadyClock(Core::System& system_, std::shared_ptr<TimeManager> man
     RegisterHandlers(functions);
 }
 
-Result SteadyClock::GetCurrentTimePoint(Out<SteadyClockTimePoint> out_time_point) {
-    SCOPE_EXIT {
+Result SteadyClock::GetCurrentTimePoint(Out<SteadyClockTimePoint> out_time_point)
+{
+    SCOPE_EXIT
+    {
         LOG_DEBUG(Service_Time, "called. out_time_point={}", *out_time_point);
     };
 
@@ -42,8 +46,10 @@ Result SteadyClock::GetCurrentTimePoint(Out<SteadyClockTimePoint> out_time_point
     R_RETURN(m_clock_core.GetCurrentTimePoint(*out_time_point));
 }
 
-Result SteadyClock::GetTestOffset(Out<s64> out_test_offset) {
-    SCOPE_EXIT {
+Result SteadyClock::GetTestOffset(Out<s64> out_test_offset)
+{
+    SCOPE_EXIT
+    {
         LOG_DEBUG(Service_Time, "called. out_test_offset={}", *out_test_offset);
     };
 
@@ -54,7 +60,8 @@ Result SteadyClock::GetTestOffset(Out<s64> out_test_offset) {
     R_SUCCEED();
 }
 
-Result SteadyClock::SetTestOffset(s64 test_offset) {
+Result SteadyClock::SetTestOffset(s64 test_offset)
+{
     LOG_DEBUG(Service_Time, "called. test_offset={}", test_offset);
 
     R_UNLESS(m_can_write_steady_clock, ResultPermissionDenied);
@@ -65,8 +72,10 @@ Result SteadyClock::SetTestOffset(s64 test_offset) {
     R_SUCCEED();
 }
 
-Result SteadyClock::GetRtcValue(Out<s64> out_rtc_value) {
-    SCOPE_EXIT {
+Result SteadyClock::GetRtcValue(Out<s64> out_rtc_value)
+{
+    SCOPE_EXIT
+    {
         LOG_DEBUG(Service_Time, "called. out_rtc_value={}", *out_rtc_value);
     };
 
@@ -76,8 +85,10 @@ Result SteadyClock::GetRtcValue(Out<s64> out_rtc_value) {
     R_RETURN(m_clock_core.GetRtcValue(*out_rtc_value));
 }
 
-Result SteadyClock::IsRtcResetDetected(Out<bool> out_is_detected) {
-    SCOPE_EXIT {
+Result SteadyClock::IsRtcResetDetected(Out<bool> out_is_detected)
+{
+    SCOPE_EXIT
+    {
         LOG_DEBUG(Service_Time, "called. out_is_detected={}", *out_is_detected);
     };
 
@@ -88,8 +99,10 @@ Result SteadyClock::IsRtcResetDetected(Out<bool> out_is_detected) {
     R_SUCCEED();
 }
 
-Result SteadyClock::GetSetupResultValue(Out<Result> out_result) {
-    SCOPE_EXIT {
+Result SteadyClock::GetSetupResultValue(Out<Result> out_result)
+{
+    SCOPE_EXIT
+    {
         LOG_DEBUG(Service_Time, "called. out_result={:#X}", out_result->raw);
     };
 
@@ -100,8 +113,10 @@ Result SteadyClock::GetSetupResultValue(Out<Result> out_result) {
     R_SUCCEED();
 }
 
-Result SteadyClock::GetInternalOffset(Out<s64> out_internal_offset) {
-    SCOPE_EXIT {
+Result SteadyClock::GetInternalOffset(Out<s64> out_internal_offset)
+{
+    SCOPE_EXIT
+    {
         LOG_DEBUG(Service_Time, "called. out_internal_offset={}", *out_internal_offset);
     };
 

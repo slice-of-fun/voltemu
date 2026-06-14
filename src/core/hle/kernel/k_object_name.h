@@ -7,7 +7,6 @@
 #include <memory>
 
 #include "common/intrusive_list.h"
-
 #include "core/hle/kernel/k_light_lock.h"
 #include "core/hle/kernel/slab_helpers.h"
 #include "core/hle/kernel/svc_results.h"
@@ -30,8 +29,8 @@ public:
 
     static KScopedAutoObject<KAutoObject> Find(KernelCore& kernel, const char* name);
 
-    template <typename Derived>
-    static Result Delete(KernelCore& kernel, const char* name) {
+    template<typename Derived> static Result Delete(KernelCore& kernel, const char* name)
+    {
         // Find the object.
         KScopedAutoObject obj = Find(kernel, name);
         R_UNLESS(obj.IsNotNull(), ResultNotFound);
@@ -46,9 +45,10 @@ public:
         R_RETURN(Delete(kernel, obj.GetPointerUnsafe(), name));
     }
 
-    template <typename Derived>
-        requires(std::derived_from<Derived, KAutoObject>)
-    static KScopedAutoObject<Derived> Find(KernelCore& kernel, const char* name) {
+    template<typename Derived>
+    requires(std::derived_from<Derived, KAutoObject>) static KScopedAutoObject<Derived> Find(
+        KernelCore& kernel, const char* name)
+    {
         return Find(kernel, name);
     }
 
@@ -58,9 +58,7 @@ private:
     void Initialize(KAutoObject* obj, const char* name);
 
     bool MatchesName(const char* name) const;
-    KAutoObject* GetObject() const {
-        return m_object;
-    }
+    KAutoObject* GetObject() const { return m_object; }
 
 private:
     std::array<char, NameLengthMax> m_name{};
@@ -72,13 +70,9 @@ public:
     explicit KObjectNameGlobalData(KernelCore& kernel);
     ~KObjectNameGlobalData();
 
-    KLightLock& GetObjectListLock() {
-        return m_object_list_lock;
-    }
+    KLightLock& GetObjectListLock() { return m_object_list_lock; }
 
-    KObjectName::List& GetObjectList() {
-        return m_object_list;
-    }
+    KObjectName::List& GetObjectList() { return m_object_list; }
 
 private:
     KLightLock m_object_list_lock;

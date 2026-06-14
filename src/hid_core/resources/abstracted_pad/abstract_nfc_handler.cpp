@@ -4,29 +4,35 @@
 // SPDX-FileCopyrightText: Copyright 2024 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+#include "hid_core/resources/abstracted_pad/abstract_nfc_handler.h"
+
 #include "core/hle/kernel/k_event.h"
 #include "core/hle/kernel/k_readable_event.h"
 #include "hid_core/hid_result.h"
-#include "hid_core/resources/abstracted_pad/abstract_nfc_handler.h"
 #include "hid_core/resources/abstracted_pad/abstract_pad_holder.h"
 #include "hid_core/resources/abstracted_pad/abstract_properties_handler.h"
 #include "hid_core/resources/npad/npad_types.h"
 
 namespace Service::HID {
 
-NpadAbstractNfcHandler::NpadAbstractNfcHandler() {}
+NpadAbstractNfcHandler::NpadAbstractNfcHandler()
+{
+}
 
 NpadAbstractNfcHandler::~NpadAbstractNfcHandler() = default;
 
-void NpadAbstractNfcHandler::SetAbstractPadHolder(NpadAbstractedPadHolder* holder) {
+void NpadAbstractNfcHandler::SetAbstractPadHolder(NpadAbstractedPadHolder* holder)
+{
     abstract_pad_holder = holder;
 }
 
-void NpadAbstractNfcHandler::SetPropertiesHandler(NpadAbstractPropertiesHandler* handler) {
+void NpadAbstractNfcHandler::SetPropertiesHandler(NpadAbstractPropertiesHandler* handler)
+{
     properties_handler = handler;
 }
 
-Result NpadAbstractNfcHandler::IncrementRefCounter() {
+Result NpadAbstractNfcHandler::IncrementRefCounter()
+{
     if (ref_counter == (std::numeric_limits<s32>::max)() - 1) {
         return ResultNpadHandlerOverflow;
     }
@@ -34,7 +40,8 @@ Result NpadAbstractNfcHandler::IncrementRefCounter() {
     return ResultSuccess;
 }
 
-Result NpadAbstractNfcHandler::DecrementRefCounter() {
+Result NpadAbstractNfcHandler::DecrementRefCounter()
+{
     if (ref_counter == 0) {
         return ResultNpadHandlerNotInitialized;
     }
@@ -42,7 +49,8 @@ Result NpadAbstractNfcHandler::DecrementRefCounter() {
     return ResultSuccess;
 }
 
-void NpadAbstractNfcHandler::UpdateNfcState() {
+void NpadAbstractNfcHandler::UpdateNfcState()
+{
     std::array<IAbstractedPad*, 5> abstract_pads{};
     const std::size_t count = properties_handler->GetAbstractedPads(abstract_pads);
 
@@ -94,25 +102,29 @@ void NpadAbstractNfcHandler::UpdateNfcState() {
     return;
 }
 
-bool NpadAbstractNfcHandler::HasNfcSensor() {
+bool NpadAbstractNfcHandler::HasNfcSensor()
+{
     return sensor_state != NpadNfcState::Unavailable;
 }
 
-bool NpadAbstractNfcHandler::IsNfcActivated() {
+bool NpadAbstractNfcHandler::IsNfcActivated()
+{
     return sensor_state == NpadNfcState::Active;
 }
 
-Result NpadAbstractNfcHandler::GetAcquireNfcActivateEventHandle(
-    Kernel::KReadableEvent** out_event) {
+Result NpadAbstractNfcHandler::GetAcquireNfcActivateEventHandle(Kernel::KReadableEvent** out_event)
+{
     *out_event = &nfc_activate_event->GetReadableEvent();
     return ResultSuccess;
 }
 
-void NpadAbstractNfcHandler::SetInputEvent(Kernel::KEvent* event) {
+void NpadAbstractNfcHandler::SetInputEvent(Kernel::KEvent* event)
+{
     input_event = event;
 }
 
-Result NpadAbstractNfcHandler::ActivateNfc(bool is_enabled) {
+Result NpadAbstractNfcHandler::ActivateNfc(bool is_enabled)
+{
     if (sensor_state == NpadNfcState::Active) {
         return ResultNfcIsNotReady;
     }
@@ -128,7 +140,8 @@ Result NpadAbstractNfcHandler::ActivateNfc(bool is_enabled) {
     return ResultSuccess;
 }
 
-Result NpadAbstractNfcHandler::GetXcdHandleWithNfc(u64& out_xcd_handle) const {
+Result NpadAbstractNfcHandler::GetXcdHandleWithNfc(u64& out_xcd_handle) const
+{
     if (sensor_state == NpadNfcState::Unavailable) {
         return ResultNfcIsNotReady;
     }

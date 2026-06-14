@@ -7,7 +7,8 @@
 
 namespace Shader::Backend::SPIRV {
 namespace {
-Id Image(EmitContext& ctx, IR::TextureInstInfo info) {
+Id Image(EmitContext& ctx, IR::TextureInstInfo info)
+{
     if (info.type == TextureType::Buffer) {
         const ImageBufferDefinition def{ctx.image_buffers.at(info.descriptor_index)};
         return def.id;
@@ -17,14 +18,16 @@ Id Image(EmitContext& ctx, IR::TextureInstInfo info) {
     }
 }
 
-std::pair<Id, Id> AtomicArgs(EmitContext& ctx) {
+std::pair<Id, Id> AtomicArgs(EmitContext& ctx)
+{
     const Id scope{ctx.Const(static_cast<u32>(spv::Scope::Device))};
     const Id semantics{ctx.u32_zero_value};
     return {scope, semantics};
 }
 
 Id ImageAtomicU32(EmitContext& ctx, IR::Inst* inst, const IR::Value& index, Id coords, Id value,
-                  Id (Sirit::Module::*atomic_func)(Id, Id, Id, Id, Id)) {
+                  Id (Sirit::Module::*atomic_func)(Id, Id, Id, Id, Id))
+{
     if (!index.IsImmediate() || index.U32() != 0) {
         // TODO: handle layers
         throw NotImplementedException("Image indexing");
@@ -38,145 +41,178 @@ Id ImageAtomicU32(EmitContext& ctx, IR::Inst* inst, const IR::Value& index, Id c
 } // Anonymous namespace
 
 Id EmitImageAtomicIAdd32(EmitContext& ctx, IR::Inst* inst, const IR::Value& index, Id coords,
-                         Id value) {
+                         Id value)
+{
     return ImageAtomicU32(ctx, inst, index, coords, value, &Sirit::Module::OpAtomicIAdd);
 }
 
 Id EmitImageAtomicSMin32(EmitContext& ctx, IR::Inst* inst, const IR::Value& index, Id coords,
-                         Id value) {
+                         Id value)
+{
     return ImageAtomicU32(ctx, inst, index, coords, value, &Sirit::Module::OpAtomicSMin);
 }
 
 Id EmitImageAtomicUMin32(EmitContext& ctx, IR::Inst* inst, const IR::Value& index, Id coords,
-                         Id value) {
+                         Id value)
+{
     return ImageAtomicU32(ctx, inst, index, coords, value, &Sirit::Module::OpAtomicUMin);
 }
 
 Id EmitImageAtomicSMax32(EmitContext& ctx, IR::Inst* inst, const IR::Value& index, Id coords,
-                         Id value) {
+                         Id value)
+{
     return ImageAtomicU32(ctx, inst, index, coords, value, &Sirit::Module::OpAtomicSMax);
 }
 
 Id EmitImageAtomicUMax32(EmitContext& ctx, IR::Inst* inst, const IR::Value& index, Id coords,
-                         Id value) {
+                         Id value)
+{
     return ImageAtomicU32(ctx, inst, index, coords, value, &Sirit::Module::OpAtomicUMax);
 }
 
-Id EmitImageAtomicInc32(EmitContext&, IR::Inst*, const IR::Value&, Id, Id) {
+Id EmitImageAtomicInc32(EmitContext&, IR::Inst*, const IR::Value&, Id, Id)
+{
     // TODO: This is not yet implemented
     throw NotImplementedException("SPIR-V Instruction");
 }
 
-Id EmitImageAtomicDec32(EmitContext&, IR::Inst*, const IR::Value&, Id, Id) {
+Id EmitImageAtomicDec32(EmitContext&, IR::Inst*, const IR::Value&, Id, Id)
+{
     // TODO: This is not yet implemented
     throw NotImplementedException("SPIR-V Instruction");
 }
 
 Id EmitImageAtomicAnd32(EmitContext& ctx, IR::Inst* inst, const IR::Value& index, Id coords,
-                        Id value) {
+                        Id value)
+{
     return ImageAtomicU32(ctx, inst, index, coords, value, &Sirit::Module::OpAtomicAnd);
 }
 
 Id EmitImageAtomicOr32(EmitContext& ctx, IR::Inst* inst, const IR::Value& index, Id coords,
-                       Id value) {
+                       Id value)
+{
     return ImageAtomicU32(ctx, inst, index, coords, value, &Sirit::Module::OpAtomicOr);
 }
 
 Id EmitImageAtomicXor32(EmitContext& ctx, IR::Inst* inst, const IR::Value& index, Id coords,
-                        Id value) {
+                        Id value)
+{
     return ImageAtomicU32(ctx, inst, index, coords, value, &Sirit::Module::OpAtomicXor);
 }
 
 Id EmitImageAtomicExchange32(EmitContext& ctx, IR::Inst* inst, const IR::Value& index, Id coords,
-                             Id value) {
+                             Id value)
+{
     return ImageAtomicU32(ctx, inst, index, coords, value, &Sirit::Module::OpAtomicExchange);
 }
 
-Id EmitBindlessImageAtomicIAdd32(EmitContext&) {
+Id EmitBindlessImageAtomicIAdd32(EmitContext&)
+{
     throw NotImplementedException("SPIR-V Instruction");
 }
 
-Id EmitBindlessImageAtomicSMin32(EmitContext&) {
+Id EmitBindlessImageAtomicSMin32(EmitContext&)
+{
     throw NotImplementedException("SPIR-V Instruction");
 }
 
-Id EmitBindlessImageAtomicUMin32(EmitContext&) {
+Id EmitBindlessImageAtomicUMin32(EmitContext&)
+{
     throw NotImplementedException("SPIR-V Instruction");
 }
 
-Id EmitBindlessImageAtomicSMax32(EmitContext&) {
+Id EmitBindlessImageAtomicSMax32(EmitContext&)
+{
     throw NotImplementedException("SPIR-V Instruction");
 }
 
-Id EmitBindlessImageAtomicUMax32(EmitContext&) {
+Id EmitBindlessImageAtomicUMax32(EmitContext&)
+{
     throw NotImplementedException("SPIR-V Instruction");
 }
 
-Id EmitBindlessImageAtomicInc32(EmitContext&) {
+Id EmitBindlessImageAtomicInc32(EmitContext&)
+{
     throw NotImplementedException("SPIR-V Instruction");
 }
 
-Id EmitBindlessImageAtomicDec32(EmitContext&) {
+Id EmitBindlessImageAtomicDec32(EmitContext&)
+{
     throw NotImplementedException("SPIR-V Instruction");
 }
 
-Id EmitBindlessImageAtomicAnd32(EmitContext&) {
+Id EmitBindlessImageAtomicAnd32(EmitContext&)
+{
     throw NotImplementedException("SPIR-V Instruction");
 }
 
-Id EmitBindlessImageAtomicOr32(EmitContext&) {
+Id EmitBindlessImageAtomicOr32(EmitContext&)
+{
     throw NotImplementedException("SPIR-V Instruction");
 }
 
-Id EmitBindlessImageAtomicXor32(EmitContext&) {
+Id EmitBindlessImageAtomicXor32(EmitContext&)
+{
     throw NotImplementedException("SPIR-V Instruction");
 }
 
-Id EmitBindlessImageAtomicExchange32(EmitContext&) {
+Id EmitBindlessImageAtomicExchange32(EmitContext&)
+{
     throw NotImplementedException("SPIR-V Instruction");
 }
 
-Id EmitBoundImageAtomicIAdd32(EmitContext&) {
+Id EmitBoundImageAtomicIAdd32(EmitContext&)
+{
     throw NotImplementedException("SPIR-V Instruction");
 }
 
-Id EmitBoundImageAtomicSMin32(EmitContext&) {
+Id EmitBoundImageAtomicSMin32(EmitContext&)
+{
     throw NotImplementedException("SPIR-V Instruction");
 }
 
-Id EmitBoundImageAtomicUMin32(EmitContext&) {
+Id EmitBoundImageAtomicUMin32(EmitContext&)
+{
     throw NotImplementedException("SPIR-V Instruction");
 }
 
-Id EmitBoundImageAtomicSMax32(EmitContext&) {
+Id EmitBoundImageAtomicSMax32(EmitContext&)
+{
     throw NotImplementedException("SPIR-V Instruction");
 }
 
-Id EmitBoundImageAtomicUMax32(EmitContext&) {
+Id EmitBoundImageAtomicUMax32(EmitContext&)
+{
     throw NotImplementedException("SPIR-V Instruction");
 }
 
-Id EmitBoundImageAtomicInc32(EmitContext&) {
+Id EmitBoundImageAtomicInc32(EmitContext&)
+{
     throw NotImplementedException("SPIR-V Instruction");
 }
 
-Id EmitBoundImageAtomicDec32(EmitContext&) {
+Id EmitBoundImageAtomicDec32(EmitContext&)
+{
     throw NotImplementedException("SPIR-V Instruction");
 }
 
-Id EmitBoundImageAtomicAnd32(EmitContext&) {
+Id EmitBoundImageAtomicAnd32(EmitContext&)
+{
     throw NotImplementedException("SPIR-V Instruction");
 }
 
-Id EmitBoundImageAtomicOr32(EmitContext&) {
+Id EmitBoundImageAtomicOr32(EmitContext&)
+{
     throw NotImplementedException("SPIR-V Instruction");
 }
 
-Id EmitBoundImageAtomicXor32(EmitContext&) {
+Id EmitBoundImageAtomicXor32(EmitContext&)
+{
     throw NotImplementedException("SPIR-V Instruction");
 }
 
-Id EmitBoundImageAtomicExchange32(EmitContext&) {
+Id EmitBoundImageAtomicExchange32(EmitContext&)
+{
     throw NotImplementedException("SPIR-V Instruction");
 }
 

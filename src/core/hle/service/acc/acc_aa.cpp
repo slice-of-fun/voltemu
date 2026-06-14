@@ -7,7 +7,8 @@ namespace Service::Account {
 
 ACC_AA::ACC_AA(std::shared_ptr<Module> module_, std::shared_ptr<ProfileManager> profile_manager_,
                Core::System& system_)
-    : Interface(std::move(module_), std::move(profile_manager_), system_, "acc:aa") {
+    : Interface(std::move(module_), std::move(profile_manager_), system_, "acc:aa")
+{
     // clang-format off
     static const FunctionInfo functions[] = {
         {0, nullptr, "EnsureCacheAsync"},

@@ -4,6 +4,8 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/am/frontend/applet_cabinet.h"
+
 #include "common/assert.h"
 #include "common/logging.h"
 #include "core/core.h"
@@ -11,7 +13,6 @@
 #include "core/hle/kernel/k_event.h"
 #include "core/hle/kernel/k_readable_event.h"
 #include "core/hle/service/am/am.h"
-#include "core/hle/service/am/frontend/applet_cabinet.h"
 #include "core/hle/service/am/service/storage.h"
 #include "core/hle/service/mii/mii_manager.h"
 #include "core/hle/service/nfc/common/device.h"
@@ -23,17 +24,20 @@ Cabinet::Cabinet(Core::System& system_, std::shared_ptr<Applet> applet_,
                  LibraryAppletMode applet_mode_, const Core::Frontend::CabinetApplet& frontend_)
     : FrontendApplet{system_, applet_, applet_mode_}, frontend{frontend_}, service_context{
                                                                                system_,
-                                                                               "CabinetApplet"} {
+                                                                               "CabinetApplet"}
+{
 
     availability_change_event =
         service_context.CreateEvent("CabinetApplet:AvailabilityChangeEvent");
 }
 
-Cabinet::~Cabinet() {
+Cabinet::~Cabinet()
+{
     service_context.CloseEvent(availability_change_event);
 };
 
-void Cabinet::Initialize() {
+void Cabinet::Initialize()
+{
     FrontendApplet::Initialize();
 
     LOG_INFO(Service_HID, "Initializing Cabinet Applet.");
@@ -55,15 +59,18 @@ void Cabinet::Initialize() {
                 sizeof(StartParamForAmiiboSettings));
 }
 
-Result Cabinet::GetStatus() const {
+Result Cabinet::GetStatus() const
+{
     return ResultSuccess;
 }
 
-void Cabinet::ExecuteInteractive() {
+void Cabinet::ExecuteInteractive()
+{
     ASSERT_MSG(false, "Attempted to call interactive execution on non-interactive applet.");
 }
 
-void Cabinet::Execute() {
+void Cabinet::Execute()
+{
     if (is_complete) {
         return;
     }
@@ -100,7 +107,8 @@ void Cabinet::Execute() {
     }
 }
 
-void Cabinet::DisplayCompleted(bool apply_changes, std::string_view amiibo_name) {
+void Cabinet::DisplayCompleted(bool apply_changes, std::string_view amiibo_name)
+{
     Service::Mii::MiiManager manager;
     ReturnValueForAmiiboSettings applet_output{};
 
@@ -164,7 +172,8 @@ void Cabinet::DisplayCompleted(bool apply_changes, std::string_view amiibo_name)
     Exit();
 }
 
-void Cabinet::Cancel() {
+void Cabinet::Cancel()
+{
     ReturnValueForAmiiboSettings applet_output{};
     applet_output.device_handle = applet_input_common.device_handle;
     applet_output.result = CabinetResult::Cancel;
@@ -179,7 +188,8 @@ void Cabinet::Cancel() {
     Exit();
 }
 
-Result Cabinet::RequestExit() {
+Result Cabinet::RequestExit()
+{
     frontend.Close();
     R_SUCCEED();
 }

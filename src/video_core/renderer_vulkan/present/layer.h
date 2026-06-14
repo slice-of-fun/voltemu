@@ -11,11 +11,11 @@
 
 #include "common/math_util.h"
 #include "video_core/host1x/gpu_device_memory_manager.h"
-#include "video_core/vulkan_common/vulkan_wrapper.h"
 #include "video_core/renderer_vulkan/present/fsr.h"
-#include "video_core/renderer_vulkan/present/sgsr.h"
 #include "video_core/renderer_vulkan/present/fxaa.h"
+#include "video_core/renderer_vulkan/present/sgsr.h"
 #include "video_core/renderer_vulkan/present/smaa.h"
+#include "video_core/vulkan_common/vulkan_wrapper.h"
 
 namespace Layout {
 struct FramebufferLayout;

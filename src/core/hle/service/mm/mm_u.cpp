@@ -4,13 +4,14 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include "common/logging.h"
-#include "core/hle/service/ipc_helpers.h"
 #include "core/hle/service/mm/mm_u.h"
-#include "core/hle/service/server_manager.h"
-#include "core/hle/service/sm/sm.h"
 
 #include <vector>
+
+#include "common/logging.h"
+#include "core/hle/service/ipc_helpers.h"
+#include "core/hle/service/server_manager.h"
+#include "core/hle/service/sm/sm.h"
 
 namespace Service::MM {
 enum class Module : u32 {
@@ -27,7 +28,8 @@ enum class Module : u32 {
 
 class Session {
 public:
-    Session(Module module_, u32 request_id_, bool is_auto_clear_event_) {
+    Session(Module module_, u32 request_id_, bool is_auto_clear_event_)
+    {
         this->module = module_;
         this->request_id = request_id_;
         this->is_auto_clear_event = is_auto_clear_event_;
@@ -41,7 +43,8 @@ public:
     s32 max;
     bool is_auto_clear_event;
 
-    void SetAndWait(u32 min_, s32 max_) {
+    void SetAndWait(u32 min_, s32 max_)
+    {
         this->min = min_;
         this->max = max_;
     }
@@ -49,7 +52,8 @@ public:
 
 class MM_U final : public ServiceFramework<MM_U> {
 public:
-    explicit MM_U(Core::System& system_) : ServiceFramework{system_, "mm:u"} {
+    explicit MM_U(Core::System& system_) : ServiceFramework{system_, "mm:u"}
+    {
         // clang-format off
         static const FunctionInfo functions[] = {
             {0, &MM_U::InitializeOld, "InitializeOld"},
@@ -67,7 +71,8 @@ public:
     }
 
 private:
-    void InitializeOld(HLERequestContext& ctx) {
+    void InitializeOld(HLERequestContext& ctx)
+    {
         LOG_DEBUG(Service_MM, "(STUBBED) called");
 
         IPC::RequestParser rp{ctx};
@@ -83,7 +88,8 @@ private:
         rb.Push(ResultSuccess);
     }
 
-    void FinalizeOld(HLERequestContext& ctx) {
+    void FinalizeOld(HLERequestContext& ctx)
+    {
         LOG_DEBUG(Service_MM, "(STUBBED) called");
 
         IPC::RequestParser rp{ctx};
@@ -100,7 +106,8 @@ private:
         rb.Push(ResultSuccess);
     }
 
-    void SetAndWaitOld(HLERequestContext& ctx) {
+    void SetAndWaitOld(HLERequestContext& ctx)
+    {
         LOG_DEBUG(Service_MM, "(STUBBED) called");
 
         IPC::RequestParser rp{ctx};
@@ -119,7 +126,8 @@ private:
         rb.Push(ResultSuccess);
     }
 
-    void GetOld(HLERequestContext& ctx) {
+    void GetOld(HLERequestContext& ctx)
+    {
         LOG_DEBUG(Service_MM, "(STUBBED) called");
 
         IPC::RequestParser rp{ctx};
@@ -139,7 +147,8 @@ private:
         rb.Push<u32>(0);
     }
 
-    void Initialize(HLERequestContext& ctx) {
+    void Initialize(HLERequestContext& ctx)
+    {
         LOG_DEBUG(Service_MM, "(STUBBED) called");
 
         IPC::RequestParser rp{ctx};
@@ -156,7 +165,8 @@ private:
         rb.Push(request_id - 1);
     }
 
-    void Finalize(HLERequestContext& ctx) {
+    void Finalize(HLERequestContext& ctx)
+    {
         LOG_DEBUG(Service_MM, "(STUBBED) called");
 
         IPC::RequestParser rp{ctx};
@@ -173,7 +183,8 @@ private:
         rb.Push(ResultSuccess);
     }
 
-    void SetAndWait(HLERequestContext& ctx) {
+    void SetAndWait(HLERequestContext& ctx)
+    {
         LOG_DEBUG(Service_MM, "(STUBBED) called");
 
         IPC::RequestParser rp{ctx};
@@ -192,7 +203,8 @@ private:
         rb.Push(ResultSuccess);
     }
 
-    void Get(HLERequestContext& ctx) {
+    void Get(HLERequestContext& ctx)
+    {
         LOG_DEBUG(Service_MM, "(STUBBED) called");
 
         IPC::RequestParser rp{ctx};
@@ -216,7 +228,8 @@ private:
     u32 request_id{1};
 };
 
-void LoopProcess(Core::System& system) {
+void LoopProcess(Core::System& system)
+{
     auto server_manager = std::make_unique<ServerManager>(system);
 
     server_manager->RegisterNamedService("mm:u", std::make_shared<MM_U>(system));

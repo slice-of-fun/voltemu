@@ -1,16 +1,18 @@
 // SPDX-FileCopyrightText: Copyright 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include "common/alignment.h"
-#include "common/scope_exit.h"
 #include "core/file_sys/fssystem/fssystem_hierarchical_sha256_storage.h"
 
 #include <cmath>
 
+#include "common/alignment.h"
+#include "common/scope_exit.h"
+
 namespace FileSys {
 
 Result HierarchicalSha256Storage::Initialize(VirtualFile* base_storages, s32 layer_count,
-                                             size_t htbs, void* hash_buf, size_t hash_buf_size) {
+                                             size_t htbs, void* hash_buf, size_t hash_buf_size)
+{
     // Validate preconditions.
     ASSERT(layer_count == LayerCount);
     ASSERT(Common::IsPowerOfTwo(htbs));
@@ -24,7 +26,8 @@ Result HierarchicalSha256Storage::Initialize(VirtualFile* base_storages, s32 lay
     // Get the base storage size.
     m_base_storage_size = base_storages[2]->GetSize();
     {
-        auto size_guard = SCOPE_GUARD {
+        auto size_guard = SCOPE_GUARD
+        {
             m_base_storage_size = 0;
         };
         R_UNLESS(m_base_storage_size <= static_cast<s64>(HashSize)
@@ -54,7 +57,8 @@ Result HierarchicalSha256Storage::Initialize(VirtualFile* base_storages, s32 lay
     R_SUCCEED();
 }
 
-size_t HierarchicalSha256Storage::Read(u8* buffer, size_t size, size_t offset) const {
+size_t HierarchicalSha256Storage::Read(u8* buffer, size_t size, size_t offset) const
+{
     // Succeed if zero-size.
     if (size == 0) {
         return size;

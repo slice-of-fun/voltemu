@@ -1,14 +1,16 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "audio_core/renderer/performance/performance_manager.h"
+
 #include "audio_core/renderer/behavior/behavior_info.h"
 #include "audio_core/renderer/memory/memory_pool_info.h"
-#include "audio_core/renderer/performance/performance_manager.h"
 #include "common/common_funcs.h"
 
 namespace AudioCore::Renderer {
 
-void PerformanceManager::CreateImpl(const size_t version) {
+void PerformanceManager::CreateImpl(const size_t version)
+{
     switch (version) {
     case 1:
         impl = std::make_unique<
@@ -32,20 +34,22 @@ void PerformanceManager::CreateImpl(const size_t version) {
 
 void PerformanceManager::Initialize(std::span<u8> workbuffer, const u64 workbuffer_size,
                                     const AudioRendererParameterInternal& params,
-                                    const BehaviorInfo& behavior,
-                                    const MemoryPoolInfo& memory_pool) {
+                                    const BehaviorInfo& behavior, const MemoryPoolInfo& memory_pool)
+{
     CreateImpl(behavior.GetPerformanceMetricsDataFormat());
     impl->Initialize(workbuffer, workbuffer_size, params, behavior, memory_pool);
 }
 
-bool PerformanceManager::IsInitialized() const {
+bool PerformanceManager::IsInitialized() const
+{
     if (impl) {
         return impl->IsInitialized();
     }
     return false;
 }
 
-u32 PerformanceManager::CopyHistories(u8* out_buffer, u64 out_size) {
+u32 PerformanceManager::CopyHistories(u8* out_buffer, u64 out_size)
+{
     if (impl) {
         return impl->CopyHistories(out_buffer, out_size);
     }
@@ -54,7 +58,8 @@ u32 PerformanceManager::CopyHistories(u8* out_buffer, u64 out_size) {
 
 bool PerformanceManager::GetNextEntry(PerformanceEntryAddresses& addresses, u32** unk,
                                       const PerformanceSysDetailType sys_detail_type,
-                                      const s32 node_id) {
+                                      const s32 node_id)
+{
     if (impl) {
         return impl->GetNextEntry(addresses, unk, sys_detail_type, node_id);
     }
@@ -62,7 +67,8 @@ bool PerformanceManager::GetNextEntry(PerformanceEntryAddresses& addresses, u32*
 }
 
 bool PerformanceManager::GetNextEntry(PerformanceEntryAddresses& addresses,
-                                      const PerformanceEntryType entry_type, const s32 node_id) {
+                                      const PerformanceEntryType entry_type, const s32 node_id)
+{
     if (impl) {
         return impl->GetNextEntry(addresses, entry_type, node_id);
     }
@@ -71,7 +77,8 @@ bool PerformanceManager::GetNextEntry(PerformanceEntryAddresses& addresses,
 
 bool PerformanceManager::GetNextEntry(PerformanceEntryAddresses& addresses,
                                       const PerformanceDetailType detail_type,
-                                      const PerformanceEntryType entry_type, const s32 node_id) {
+                                      const PerformanceEntryType entry_type, const s32 node_id)
+{
     if (impl) {
         return impl->GetNextEntry(addresses, detail_type, entry_type, node_id);
     }
@@ -79,32 +86,36 @@ bool PerformanceManager::GetNextEntry(PerformanceEntryAddresses& addresses,
 }
 
 void PerformanceManager::TapFrame(const bool dsp_behind, const u32 voices_dropped,
-                                  const u64 rendering_start_tick) {
+                                  const u64 rendering_start_tick)
+{
     if (impl) {
         impl->TapFrame(dsp_behind, voices_dropped, rendering_start_tick);
     }
 }
 
-bool PerformanceManager::IsDetailTarget(const u32 target_node_id) const {
+bool PerformanceManager::IsDetailTarget(const u32 target_node_id) const
+{
     if (impl) {
         return impl->IsDetailTarget(target_node_id);
     }
     return false;
 }
 
-void PerformanceManager::SetDetailTarget(const u32 target_node_id) {
+void PerformanceManager::SetDetailTarget(const u32 target_node_id)
+{
     if (impl) {
         impl->SetDetailTarget(target_node_id);
     }
 }
 
-template <>
+template<>
 void PerformanceManagerImpl<
     PerformanceVersion::Version1, PerformanceFrameHeaderVersion1, PerformanceEntryVersion1,
     PerformanceDetailVersion1>::Initialize(std::span<u8> workbuffer_, const u64 workbuffer_size,
                                            const AudioRendererParameterInternal& params,
                                            const BehaviorInfo& behavior,
-                                           const MemoryPoolInfo& memory_pool) {
+                                           const MemoryPoolInfo& memory_pool)
+{
     workbuffer = workbuffer_;
     entries_per_frame = params.voices + params.effects + params.sinks + params.sub_mixes + 1;
     max_detail_count = MaxDetailEntries;
@@ -152,17 +163,19 @@ void PerformanceManagerImpl<
     is_initialized = true;
 }
 
-template <>
+template<>
 bool PerformanceManagerImpl<PerformanceVersion::Version1, PerformanceFrameHeaderVersion1,
                             PerformanceEntryVersion1, PerformanceDetailVersion1>::IsInitialized()
-    const {
+    const
+{
     return is_initialized;
 }
 
-template <>
+template<>
 u32 PerformanceManagerImpl<PerformanceVersion::Version1, PerformanceFrameHeaderVersion1,
                            PerformanceEntryVersion1,
-                           PerformanceDetailVersion1>::CopyHistories(u8* out_buffer, u64 out_size) {
+                           PerformanceDetailVersion1>::CopyHistories(u8* out_buffer, u64 out_size)
+{
     if (out_buffer == nullptr || out_size == 0 || !is_initialized) {
         return 0;
     }
@@ -254,21 +267,23 @@ u32 PerformanceManagerImpl<PerformanceVersion::Version1, PerformanceFrameHeaderV
     return out_history_size;
 }
 
-template <>
+template<>
 bool PerformanceManagerImpl<PerformanceVersion::Version1, PerformanceFrameHeaderVersion1,
                             PerformanceEntryVersion1, PerformanceDetailVersion1>::
     GetNextEntry([[maybe_unused]] PerformanceEntryAddresses& addresses, [[maybe_unused]] u32** unk,
                  [[maybe_unused]] PerformanceSysDetailType sys_detail_type,
-                 [[maybe_unused]] s32 node_id) {
+                 [[maybe_unused]] s32 node_id)
+{
     return false;
 }
 
-template <>
+template<>
 bool PerformanceManagerImpl<
     PerformanceVersion::Version1, PerformanceFrameHeaderVersion1, PerformanceEntryVersion1,
     PerformanceDetailVersion1>::GetNextEntry(PerformanceEntryAddresses& addresses,
                                              const PerformanceEntryType entry_type,
-                                             const s32 node_id) {
+                                             const s32 node_id)
+{
     if (!is_initialized) {
         return false;
     }
@@ -289,13 +304,14 @@ bool PerformanceManagerImpl<
     return true;
 }
 
-template <>
+template<>
 bool PerformanceManagerImpl<
     PerformanceVersion::Version1, PerformanceFrameHeaderVersion1, PerformanceEntryVersion1,
     PerformanceDetailVersion1>::GetNextEntry(PerformanceEntryAddresses& addresses,
                                              const PerformanceDetailType detail_type,
                                              const PerformanceEntryType entry_type,
-                                             const s32 node_id) {
+                                             const s32 node_id)
+{
     if (!is_initialized || detail_count > MaxDetailEntries) {
         return false;
     }
@@ -317,12 +333,13 @@ bool PerformanceManagerImpl<
     return true;
 }
 
-template <>
+template<>
 void PerformanceManagerImpl<
     PerformanceVersion::Version1, PerformanceFrameHeaderVersion1, PerformanceEntryVersion1,
     PerformanceDetailVersion1>::TapFrame([[maybe_unused]] bool dsp_behind,
                                          [[maybe_unused]] u32 voices_dropped,
-                                         [[maybe_unused]] u64 rendering_start_tick) {
+                                         [[maybe_unused]] u64 rendering_start_tick)
+{
     if (!is_initialized) {
         return;
     }
@@ -343,27 +360,30 @@ void PerformanceManagerImpl<
     frame_header->detail_count = 0;
 }
 
-template <>
+template<>
 bool PerformanceManagerImpl<
     PerformanceVersion::Version1, PerformanceFrameHeaderVersion1, PerformanceEntryVersion1,
-    PerformanceDetailVersion1>::IsDetailTarget(const u32 target_node_id_) const {
+    PerformanceDetailVersion1>::IsDetailTarget(const u32 target_node_id_) const
+{
     return target_node_id == target_node_id_;
 }
 
-template <>
+template<>
 void PerformanceManagerImpl<PerformanceVersion::Version1, PerformanceFrameHeaderVersion1,
                             PerformanceEntryVersion1,
-                            PerformanceDetailVersion1>::SetDetailTarget(const u32 target_node_id_) {
+                            PerformanceDetailVersion1>::SetDetailTarget(const u32 target_node_id_)
+{
     target_node_id = target_node_id_;
 }
 
-template <>
+template<>
 void PerformanceManagerImpl<
     PerformanceVersion::Version2, PerformanceFrameHeaderVersion2, PerformanceEntryVersion2,
     PerformanceDetailVersion2>::Initialize(std::span<u8> workbuffer_, const u64 workbuffer_size,
                                            const AudioRendererParameterInternal& params,
                                            const BehaviorInfo& behavior,
-                                           const MemoryPoolInfo& memory_pool) {
+                                           const MemoryPoolInfo& memory_pool)
+{
     workbuffer = workbuffer_;
     entries_per_frame = params.voices + params.effects + params.sinks + params.sub_mixes + 1;
     max_detail_count = MaxDetailEntries;
@@ -411,17 +431,19 @@ void PerformanceManagerImpl<
     is_initialized = true;
 }
 
-template <>
+template<>
 bool PerformanceManagerImpl<PerformanceVersion::Version2, PerformanceFrameHeaderVersion2,
                             PerformanceEntryVersion2, PerformanceDetailVersion2>::IsInitialized()
-    const {
+    const
+{
     return is_initialized;
 }
 
-template <>
+template<>
 u32 PerformanceManagerImpl<PerformanceVersion::Version2, PerformanceFrameHeaderVersion2,
                            PerformanceEntryVersion2,
-                           PerformanceDetailVersion2>::CopyHistories(u8* out_buffer, u64 out_size) {
+                           PerformanceDetailVersion2>::CopyHistories(u8* out_buffer, u64 out_size)
+{
     if (out_buffer == nullptr || out_size == 0 || !is_initialized) {
         return 0;
     }
@@ -516,12 +538,13 @@ u32 PerformanceManagerImpl<PerformanceVersion::Version2, PerformanceFrameHeaderV
     return out_history_size;
 }
 
-template <>
+template<>
 bool PerformanceManagerImpl<
     PerformanceVersion::Version2, PerformanceFrameHeaderVersion2, PerformanceEntryVersion2,
     PerformanceDetailVersion2>::GetNextEntry(PerformanceEntryAddresses& addresses, u32** unk,
                                              const PerformanceSysDetailType sys_detail_type,
-                                             const s32 node_id) {
+                                             const s32 node_id)
+{
     if (!is_initialized || detail_count > MaxDetailEntries) {
         return false;
     }
@@ -546,12 +569,13 @@ bool PerformanceManagerImpl<
     return true;
 }
 
-template <>
+template<>
 bool PerformanceManagerImpl<
     PerformanceVersion::Version2, PerformanceFrameHeaderVersion2, PerformanceEntryVersion2,
     PerformanceDetailVersion2>::GetNextEntry(PerformanceEntryAddresses& addresses,
                                              const PerformanceEntryType entry_type,
-                                             const s32 node_id) {
+                                             const s32 node_id)
+{
     if (!is_initialized) {
         return false;
     }
@@ -572,13 +596,14 @@ bool PerformanceManagerImpl<
     return true;
 }
 
-template <>
+template<>
 bool PerformanceManagerImpl<
     PerformanceVersion::Version2, PerformanceFrameHeaderVersion2, PerformanceEntryVersion2,
     PerformanceDetailVersion2>::GetNextEntry(PerformanceEntryAddresses& addresses,
                                              const PerformanceDetailType detail_type,
                                              const PerformanceEntryType entry_type,
-                                             const s32 node_id) {
+                                             const s32 node_id)
+{
     if (!is_initialized || detail_count > MaxDetailEntries) {
         return false;
     }
@@ -600,12 +625,13 @@ bool PerformanceManagerImpl<
     return true;
 }
 
-template <>
+template<>
 void PerformanceManagerImpl<PerformanceVersion::Version2, PerformanceFrameHeaderVersion2,
                             PerformanceEntryVersion2,
                             PerformanceDetailVersion2>::TapFrame(const bool dsp_behind,
                                                                  const u32 voices_dropped,
-                                                                 const u64 rendering_start_tick) {
+                                                                 const u64 rendering_start_tick)
+{
     if (!is_initialized) {
         return;
     }
@@ -629,17 +655,19 @@ void PerformanceManagerImpl<PerformanceVersion::Version2, PerformanceFrameHeader
     frame_header->detail_count = 0;
 }
 
-template <>
+template<>
 bool PerformanceManagerImpl<
     PerformanceVersion::Version2, PerformanceFrameHeaderVersion2, PerformanceEntryVersion2,
-    PerformanceDetailVersion2>::IsDetailTarget(const u32 target_node_id_) const {
+    PerformanceDetailVersion2>::IsDetailTarget(const u32 target_node_id_) const
+{
     return target_node_id == target_node_id_;
 }
 
-template <>
+template<>
 void PerformanceManagerImpl<PerformanceVersion::Version2, PerformanceFrameHeaderVersion2,
                             PerformanceEntryVersion2,
-                            PerformanceDetailVersion2>::SetDetailTarget(const u32 target_node_id_) {
+                            PerformanceDetailVersion2>::SetDetailTarget(const u32 target_node_id_)
+{
     target_node_id = target_node_id_;
 }
 

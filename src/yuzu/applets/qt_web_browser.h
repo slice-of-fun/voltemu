@@ -6,10 +6,9 @@
 
 #pragma once
 
+#include <QObject>
 #include <atomic>
 #include <thread>
-
-#include <QObject>
 
 #ifdef YUZU_USE_QT_WEB_ENGINE
 #include <QWebEngineView>
@@ -117,8 +116,7 @@ private:
      *
      * @tparam HIDButton The list of buttons contained in yuzu_key_callbacks
      */
-    template <Core::HID::NpadButton... T>
-    void HandleWindowFooterButtonPressedOnce();
+    template<Core::HID::NpadButton... T> void HandleWindowFooterButtonPressedOnce();
 
     /**
      * Handles button presses and converts them into keyboard input.
@@ -126,8 +124,7 @@ private:
      *
      * @tparam HIDButton The list of buttons that can be converted into keyboard input.
      */
-    template <Core::HID::NpadButton... T>
-    void HandleWindowKeyButtonPressedOnce();
+    template<Core::HID::NpadButton... T> void HandleWindowKeyButtonPressedOnce();
 
     /**
      * Handles button holds and converts them into keyboard input.
@@ -135,8 +132,7 @@ private:
      *
      * @tparam HIDButton The list of buttons that can be converted into keyboard input.
      */
-    template <Core::HID::NpadButton... T>
-    void HandleWindowKeyButtonHold();
+    template<Core::HID::NpadButton... T> void HandleWindowKeyButtonHold();
 
     /**
      * Sends a key press event to QWebEngineView.
@@ -150,10 +146,7 @@ private:
      *
      * @tparam int Qt key code.
      */
-    template <int... T>
-    void SendMultipleKeyPressEvents() {
-        (SendKeyPressEvent(T), ...);
-    }
+    template<int... T> void SendMultipleKeyPressEvents() { (SendKeyPressEvent(T), ...); }
 
     void StartInputThread();
     void StopInputThread();

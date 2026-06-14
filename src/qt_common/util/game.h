@@ -5,6 +5,7 @@
 
 #include <QObject>
 #include <QStandardPaths>
+
 #include "common/fs/path_util.h"
 
 namespace QtCommon::Game {

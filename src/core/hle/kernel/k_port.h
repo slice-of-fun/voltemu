@@ -29,30 +29,18 @@ public:
     void OnClientClosed();
     void OnServerClosed();
 
-    uintptr_t GetName() const {
-        return m_name;
-    }
-    bool IsLight() const {
-        return m_is_light;
-    }
+    uintptr_t GetName() const { return m_name; }
+    bool IsLight() const { return m_is_light; }
 
     bool IsServerClosed() const;
 
     Result EnqueueSession(KServerSession* session);
     Result EnqueueSession(KLightServerSession* session);
 
-    KClientPort& GetClientPort() {
-        return m_client;
-    }
-    KServerPort& GetServerPort() {
-        return m_server;
-    }
-    const KClientPort& GetClientPort() const {
-        return m_client;
-    }
-    const KServerPort& GetServerPort() const {
-        return m_server;
-    }
+    KClientPort& GetClientPort() { return m_client; }
+    KServerPort& GetServerPort() { return m_server; }
+    const KClientPort& GetClientPort() const { return m_client; }
+    const KServerPort& GetServerPort() const { return m_server; }
 
 private:
     enum class State : u8 {

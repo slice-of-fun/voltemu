@@ -4,10 +4,11 @@
 // SPDX-FileCopyrightText: Copyright 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "video_core/renderer_vulkan/vk_present_manager.h"
+
 #include "common/settings.h"
 #include "common/thread.h"
 #include "core/frontend/emu_window.h"
-#include "video_core/renderer_vulkan/vk_present_manager.h"
 #include "video_core/renderer_vulkan/vk_scheduler.h"
 #include "video_core/renderer_vulkan/vk_swapchain.h"
 #include "video_core/vulkan_common/vulkan_device.h"
@@ -16,15 +17,16 @@
 
 namespace Vulkan {
 
-
 namespace {
 
-bool CanBlitToSwapchain(const vk::PhysicalDevice& physical_device, VkFormat format) {
+bool CanBlitToSwapchain(const vk::PhysicalDevice& physical_device, VkFormat format)
+{
     const VkFormatProperties props{physical_device.GetFormatProperties(format)};
     return (props.optimalTilingFeatures & VK_FORMAT_FEATURE_BLIT_DST_BIT);
 }
 
-[[nodiscard]] VkImageSubresourceLayers MakeImageSubresourceLayers() {
+[[nodiscard]] VkImageSubresourceLayers MakeImageSubresourceLayers()
+{
     return VkImageSubresourceLayers{
         .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
         .mipLevel = 0,
@@ -34,7 +36,8 @@ bool CanBlitToSwapchain(const vk::PhysicalDevice& physical_device, VkFormat form
 }
 
 [[nodiscard]] VkImageBlit MakeImageBlit(s32 frame_width, s32 frame_height, s32 swapchain_width,
-                                        s32 swapchain_height) {
+                                        s32 swapchain_height)
+{
     return VkImageBlit{
         .srcSubresource = MakeImageSubresourceLayers(),
         .srcOffsets =
@@ -68,7 +71,8 @@ bool CanBlitToSwapchain(const vk::PhysicalDevice& physical_device, VkFormat form
 }
 
 [[nodiscard]] VkImageCopy MakeImageCopy(u32 frame_width, u32 frame_height, u32 swapchain_width,
-                                        u32 swapchain_height) {
+                                        u32 swapchain_height)
+{
     return VkImageCopy{
         .srcSubresource = MakeImageSubresourceLayers(),
         .srcOffset =
@@ -96,21 +100,14 @@ bool CanBlitToSwapchain(const vk::PhysicalDevice& physical_device, VkFormat form
 } // Anonymous namespace
 
 PresentManager::PresentManager(const vk::Instance& instance_,
-                               Core::Frontend::EmuWindow& render_window_,
-                               const Device& device_,
-                               MemoryAllocator& memory_allocator_,
-                               Scheduler& scheduler_,
-                               Swapchain& swapchain_,
-                               vk::SurfaceKHR& surface_)
-    : instance{instance_}
-    , render_window{render_window_}
-    , device{device_}
-    , memory_allocator{memory_allocator_}
-    , scheduler{scheduler_}
-    , swapchain{swapchain_}
-    , surface{surface_}
-    , blit_supported{CanBlitToSwapchain(device.GetPhysical(), swapchain.GetImageViewFormat())}
-    , use_present_thread{Settings::values.async_presentation.GetValue()}
+                               Core::Frontend::EmuWindow& render_window_, const Device& device_,
+                               MemoryAllocator& memory_allocator_, Scheduler& scheduler_,
+                               Swapchain& swapchain_, vk::SurfaceKHR& surface_)
+    : instance{instance_}, render_window{render_window_}, device{device_},
+      memory_allocator{memory_allocator_}, scheduler{scheduler_}, swapchain{swapchain_},
+      surface{surface_}, blit_supported{CanBlitToSwapchain(device.GetPhysical(),
+                                                           swapchain.GetImageViewFormat())},
+      use_present_thread{Settings::values.async_presentation.GetValue()}
 {
     SetImageCount();
 
@@ -148,7 +145,8 @@ PresentManager::PresentManager(const vk::Instance& instance_,
 
 PresentManager::~PresentManager() = default;
 
-Frame* PresentManager::GetRenderFrame() {
+Frame* PresentManager::GetRenderFrame()
+{
 
     // Wait for free presentation frames
     std::unique_lock lock{free_mutex};
@@ -165,7 +163,8 @@ Frame* PresentManager::GetRenderFrame() {
     return frame;
 }
 
-void PresentManager::Present(Frame* frame) {
+void PresentManager::Present(Frame* frame)
+{
     if (use_present_thread) {
         scheduler.Record([this, frame](vk::CommandBuffer) {
             std::unique_lock lock{queue_mutex};
@@ -180,7 +179,8 @@ void PresentManager::Present(Frame* frame) {
 }
 
 void PresentManager::RecreateFrame(Frame* frame, u32 width, u32 height, VkFormat image_view_format,
-                                   VkRenderPass rd) {
+                                   VkRenderPass rd)
+{
     auto& dld = device.GetLogical();
 
     frame->width = width;
@@ -247,7 +247,8 @@ void PresentManager::RecreateFrame(Frame* frame, u32 width, u32 height, VkFormat
     });
 }
 
-void PresentManager::WaitPresent() {
+void PresentManager::WaitPresent()
+{
     if (!use_present_thread) {
         return;
     }
@@ -264,7 +265,8 @@ void PresentManager::WaitPresent() {
     std::scoped_lock swapchain_lock{swapchain_mutex};
 }
 
-void PresentManager::PresentThread(std::stop_token token) {
+void PresentManager::PresentThread(std::stop_token token)
+{
     Common::SetCurrentThreadName("VulkanPresent");
     while (!token.stop_requested()) {
         std::unique_lock lock{queue_mutex};
@@ -290,19 +292,22 @@ void PresentManager::PresentThread(std::stop_token token) {
     }
 }
 
-void PresentManager::RecreateSwapchain(Frame* frame) {
+void PresentManager::RecreateSwapchain(Frame* frame)
+{
     swapchain.Create(*surface, frame->width, frame->height); // Pass raw pointer
     SetImageCount();
 }
 
-void PresentManager::SetImageCount() {
+void PresentManager::SetImageCount()
+{
     // We cannot have more than 7 images in flight at any given time.
     // FRAMES_IN_FLIGHT is 8, and the cache TICKS_TO_DESTROY is 8.
     // Mali drivers will give us 6.
     image_count = std::min<size_t>(swapchain.GetImageCount(), 7);
 }
 
-void PresentManager::CopyToSwapchain(Frame* frame) {
+void PresentManager::CopyToSwapchain(Frame* frame)
+{
     bool requires_recreation = false;
 
     while (true) {
@@ -327,7 +332,8 @@ void PresentManager::CopyToSwapchain(Frame* frame) {
     }
 }
 
-void PresentManager::CopyToSwapchainImpl(Frame* frame) {
+void PresentManager::CopyToSwapchainImpl(Frame* frame)
+{
 
     // If the size of the incoming frames has changed, recreate the swapchain
     // to account for that.
@@ -429,8 +435,8 @@ void PresentManager::CopyToSwapchainImpl(Frame* frame) {
         },
     };
 
-    cmdbuf.PipelineBarrier(vk::PIPELINE_STAGE_GRAPHICS_COMPUTE_TRANSFER, VK_PIPELINE_STAGE_TRANSFER_BIT, {},
-                           {}, {}, pre_barriers);
+    cmdbuf.PipelineBarrier(vk::PIPELINE_STAGE_GRAPHICS_COMPUTE_TRANSFER,
+                           VK_PIPELINE_STAGE_TRANSFER_BIT, {}, {}, {}, pre_barriers);
 
     if (blit_supported) {
         cmdbuf.BlitImage(*frame->image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, image,

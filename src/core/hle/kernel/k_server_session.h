@@ -9,7 +9,6 @@
 #include <utility>
 
 #include "common/intrusive_list.h"
-
 #include "core/hle/kernel/k_light_lock.h"
 #include "core/hle/kernel/k_session_request.h"
 #include "core/hle/kernel/k_synchronization_object.h"
@@ -38,13 +37,9 @@ public:
 
     void Destroy() override;
 
-    void Initialize(KSession* p) {
-        m_parent = p;
-    }
+    void Initialize(KSession* p) { m_parent = p; }
 
-    const KSession* GetParent() const {
-        return m_parent;
-    }
+    const KSession* GetParent() const { return m_parent; }
 
     bool IsSignaled() const override;
     void OnClientClosed();
@@ -57,12 +52,11 @@ public:
                           std::shared_ptr<Service::HLERequestContext>* out_context = nullptr,
                           std::weak_ptr<Service::SessionRequestManager> manager = {});
 
-    Result SendReplyHLE() {
-        R_RETURN(this->SendReply(0, 0, 0, true));
-    }
+    Result SendReplyHLE() { R_RETURN(this->SendReply(0, 0, 0, true)); }
 
     Result ReceiveRequestHLE(std::shared_ptr<Service::HLERequestContext>* out_context,
-                             std::weak_ptr<Service::SessionRequestManager> manager) {
+                             std::weak_ptr<Service::SessionRequestManager> manager)
+    {
         R_RETURN(this->ReceiveRequest(0, 0, 0, out_context, manager));
     }
 

@@ -4,17 +4,17 @@
 // SPDX-FileCopyrightText: Copyright 2020 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include <ankerl/unordered_dense.h>
+
 #include <atomic>
+#include <catch2/catch_test_macros.hpp>
 #include <cstdlib>
 #include <functional>
 #include <memory>
 #include <mutex>
 #include <stdexcept>
 #include <thread>
-#include <ankerl/unordered_dense.h>
 #include <vector>
-
-#include <catch2/catch_test_macros.hpp>
 
 #include "common/common_types.h"
 #include "common/fiber.h"
@@ -23,7 +23,8 @@ namespace Common {
 
 class ThreadIds {
 public:
-    void Register(u32 id) {
+    void Register(u32 id)
+    {
         const auto thread_id = std::this_thread::get_id();
         std::scoped_lock lock{mutex};
         if (ids.contains(thread_id)) {
@@ -32,7 +33,8 @@ public:
         ids.emplace(thread_id, id);
     }
 
-    [[nodiscard]] u32 Get() const {
+    [[nodiscard]] u32 Get() const
+    {
         std::scoped_lock lock{mutex};
         return ids.at(std::this_thread::get_id());
     }
@@ -46,7 +48,8 @@ class TestControl1 {
 public:
     TestControl1() = default;
 
-    void DoWork() {
+    void DoWork()
+    {
         const u32 id = thread_ids.Get();
         u32 value = items[id];
         for (u32 i = 0; i < id; i++) {
@@ -65,7 +68,8 @@ public:
     std::vector<u32> results;
 };
 
-void TestControl1::ExecuteThread(u32 id) {
+void TestControl1::ExecuteThread(u32 id)
+{
     thread_ids.Register(id);
     auto thread_fiber = Fiber::ThreadToFiber();
     thread_fibers[id] = thread_fiber;
@@ -78,7 +82,8 @@ void TestControl1::ExecuteThread(u32 id) {
 /** This test checks for fiber setup configuration and validates that fibers are
  *  doing all the work required.
  */
-TEST_CASE("Fibers::Setup", "[common]") {
+TEST_CASE("Fibers::Setup", "[common]")
+{
     constexpr std::size_t num_threads = 7;
     TestControl1 test_control{};
     test_control.thread_fibers.resize(num_threads);
@@ -101,7 +106,8 @@ class TestControl2 {
 public:
     TestControl2() = default;
 
-    void DoWork1() {
+    void DoWork1()
+    {
         trap2 = false;
         while (trap.load())
             ;
@@ -115,7 +121,8 @@ public:
         Fiber::YieldTo(fiber1, *thread_fibers[id]);
     }
 
-    void DoWork2() {
+    void DoWork2()
+    {
         while (trap2.load())
             ;
         value2 = 2000;
@@ -124,7 +131,8 @@ public:
         assert3 = false;
     }
 
-    void DoWork3() {
+    void DoWork3()
+    {
         const u32 id = thread_ids.Get();
         assert2 = id == 0;
         value1 += 1000;
@@ -133,12 +141,14 @@ public:
 
     void ExecuteThread(u32 id);
 
-    void CallFiber1() {
+    void CallFiber1()
+    {
         const u32 id = thread_ids.Get();
         Fiber::YieldTo(thread_fibers[id], *fiber1);
     }
 
-    void CallFiber2() {
+    void CallFiber2()
+    {
         const u32 id = thread_ids.Get();
         Fiber::YieldTo(thread_fibers[id], *fiber2);
     }
@@ -159,13 +169,15 @@ public:
     std::shared_ptr<Common::Fiber> fiber3;
 };
 
-void TestControl2::ExecuteThread(u32 id) {
+void TestControl2::ExecuteThread(u32 id)
+{
     thread_ids.Register(id);
     auto thread_fiber = Fiber::ThreadToFiber();
     thread_fibers[id] = thread_fiber;
 }
 
-void TestControl2::Exit() {
+void TestControl2::Exit()
+{
     const u32 id = thread_ids.Get();
     thread_fibers[id]->Exit();
 }
@@ -174,7 +186,8 @@ void TestControl2::Exit() {
  *  that a fiber has been successfully transferred from one thread to another and that the TLS
  *  region of the thread is kept while changing fibers.
  */
-TEST_CASE("Fibers::InterExchange", "[common]") {
+TEST_CASE("Fibers::InterExchange", "[common]")
+{
     TestControl2 test_control{};
     test_control.thread_fibers.resize(2);
     test_control.fiber1 = std::make_shared<Fiber>([&test_control] { test_control.DoWork1(); });
@@ -208,7 +221,8 @@ class TestControl3 {
 public:
     TestControl3() = default;
 
-    void DoWork1() {
+    void DoWork1()
+    {
         value1 += 1;
         Fiber::YieldTo(fiber1, *fiber2);
         const u32 id = thread_ids.Get();
@@ -216,7 +230,8 @@ public:
         Fiber::YieldTo(fiber1, *thread_fibers[id]);
     }
 
-    void DoWork2() {
+    void DoWork2()
+    {
         value2 += 1;
         const u32 id = thread_ids.Get();
         Fiber::YieldTo(fiber2, *thread_fibers[id]);
@@ -224,7 +239,8 @@ public:
 
     void ExecuteThread(u32 id);
 
-    void CallFiber1() {
+    void CallFiber1()
+    {
         const u32 id = thread_ids.Get();
         Fiber::YieldTo(thread_fibers[id], *fiber1);
     }
@@ -240,13 +256,15 @@ public:
     std::shared_ptr<Common::Fiber> fiber2;
 };
 
-void TestControl3::ExecuteThread(u32 id) {
+void TestControl3::ExecuteThread(u32 id)
+{
     thread_ids.Register(id);
     auto thread_fiber = Fiber::ThreadToFiber();
     thread_fibers[id] = thread_fiber;
 }
 
-void TestControl3::Exit() {
+void TestControl3::Exit()
+{
     const u32 id = thread_ids.Get();
     thread_fibers[id]->Exit();
 }
@@ -255,7 +273,8 @@ void TestControl3::Exit() {
  *  It checks execution occurred in an ordered manner and by no time there were
  *  two contexts at the same time.
  */
-TEST_CASE("Fibers::StartRace", "[common]") {
+TEST_CASE("Fibers::StartRace", "[common]")
+{
     TestControl3 test_control{};
     test_control.thread_fibers.resize(2);
     test_control.fiber1 = std::make_shared<Fiber>([&test_control] { test_control.DoWork1(); });

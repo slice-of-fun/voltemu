@@ -4,19 +4,21 @@
 // SPDX-FileCopyrightText: 2014 Citra Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include <sstream>
+#include "yuzu/hotkeys.h"
+
 #include <QShortcut>
 #include <QTreeWidgetItem>
 #include <QtGlobal>
+#include <sstream>
 
 #include "hid_core/frontend/emulated_controller.h"
 #include "qt_common/config/uisettings.h"
-#include "yuzu/hotkeys.h"
 
 HotkeyRegistry::HotkeyRegistry() = default;
 HotkeyRegistry::~HotkeyRegistry() = default;
 
-void HotkeyRegistry::SaveHotkeys() {
+void HotkeyRegistry::SaveHotkeys()
+{
     UISettings::values.shortcuts.clear();
     for (const auto& group : hotkey_groups) {
         for (const auto& hotkey : group.second) {
@@ -29,7 +31,8 @@ void HotkeyRegistry::SaveHotkeys() {
     }
 }
 
-void HotkeyRegistry::LoadHotkeys() {
+void HotkeyRegistry::LoadHotkeys()
+{
     // Make sure NOT to use a reference here because it would become invalid once we call
     // beginGroup()
     for (auto shortcut : UISettings::values.shortcuts) {
@@ -55,7 +58,8 @@ void HotkeyRegistry::LoadHotkeys() {
 }
 
 QShortcut* HotkeyRegistry::GetHotkey(const std::string& group, const std::string& action,
-                                     QWidget* widget) {
+                                     QWidget* widget)
+{
     Hotkey& hk = hotkey_groups[group][action];
 
     if (!hk.shortcut) {
@@ -68,7 +72,8 @@ QShortcut* HotkeyRegistry::GetHotkey(const std::string& group, const std::string
 
 ControllerShortcut* HotkeyRegistry::GetControllerHotkey(const std::string& group,
                                                         const std::string& action,
-                                                        Core::HID::EmulatedController* controller) {
+                                                        Core::HID::EmulatedController* controller)
+{
     Hotkey& hk = hotkey_groups[group][action];
 
     if (!hk.controller_shortcut) {
@@ -79,16 +84,19 @@ ControllerShortcut* HotkeyRegistry::GetControllerHotkey(const std::string& group
     return hk.controller_shortcut;
 }
 
-QKeySequence HotkeyRegistry::GetKeySequence(const std::string& group, const std::string& action) {
+QKeySequence HotkeyRegistry::GetKeySequence(const std::string& group, const std::string& action)
+{
     return hotkey_groups[group][action].keyseq;
 }
 
 Qt::ShortcutContext HotkeyRegistry::GetShortcutContext(const std::string& group,
-                                                       const std::string& action) {
+                                                       const std::string& action)
+{
     return hotkey_groups[group][action].context;
 }
 
-ControllerShortcut::ControllerShortcut(Core::HID::EmulatedController* controller) {
+ControllerShortcut::ControllerShortcut(Core::HID::EmulatedController* controller)
+{
     emulated_controller = controller;
     Core::HID::ControllerUpdateCallback engine_callback{
         .on_change = [this](Core::HID::ControllerTriggerType type) { ControllerUpdateEvent(type); },
@@ -98,15 +106,18 @@ ControllerShortcut::ControllerShortcut(Core::HID::EmulatedController* controller
     is_enabled = true;
 }
 
-ControllerShortcut::~ControllerShortcut() {
+ControllerShortcut::~ControllerShortcut()
+{
     emulated_controller->DeleteCallback(callback_key);
 }
 
-void ControllerShortcut::SetKey(const ControllerButtonSequence& buttons) {
+void ControllerShortcut::SetKey(const ControllerButtonSequence& buttons)
+{
     button_sequence = buttons;
 }
 
-void ControllerShortcut::SetKey(const std::string& buttons_shortcut) {
+void ControllerShortcut::SetKey(const std::string& buttons_shortcut)
+{
     ControllerButtonSequence sequence{};
     name = buttons_shortcut;
     std::istringstream command_line(buttons_shortcut);
@@ -174,19 +185,23 @@ void ControllerShortcut::SetKey(const std::string& buttons_shortcut) {
     button_sequence = sequence;
 }
 
-ControllerButtonSequence ControllerShortcut::ButtonSequence() const {
+ControllerButtonSequence ControllerShortcut::ButtonSequence() const
+{
     return button_sequence;
 }
 
-void ControllerShortcut::SetEnabled(bool enable) {
+void ControllerShortcut::SetEnabled(bool enable)
+{
     is_enabled = enable;
 }
 
-bool ControllerShortcut::IsEnabled() const {
+bool ControllerShortcut::IsEnabled() const
+{
     return is_enabled;
 }
 
-void ControllerShortcut::ControllerUpdateEvent(Core::HID::ControllerTriggerType type) {
+void ControllerShortcut::ControllerUpdateEvent(Core::HID::ControllerTriggerType type)
+{
     if (!is_enabled) {
         return;
     }

@@ -4,11 +4,12 @@
 // SPDX-FileCopyrightText: Copyright 2024 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/pctl/parental_control_service.h"
+
 #include "core/core.h"
 #include "core/file_sys/control_metadata.h"
 #include "core/file_sys/patch_manager.h"
 #include "core/hle/service/cmif_serialization.h"
-#include "core/hle/service/pctl/parental_control_service.h"
 #include "core/hle/service/pctl/pctl_results.h"
 
 namespace Service::PCTL {
@@ -16,7 +17,8 @@ namespace Service::PCTL {
 IParentalControlService::IParentalControlService(Core::System& system_, Capability capability_)
     : ServiceFramework{system_, "IParentalControlService"}, capability{capability_},
       service_context{system_, "IParentalControlService"}, synchronization_event{service_context},
-      unlinked_event{service_context}, request_suspension_event{service_context} {
+      unlinked_event{service_context}, request_suspension_event{service_context}
+{
     // clang-format off
     static const FunctionInfo functions[] = {
         {1, D<&IParentalControlService::Initialize>, "Initialize"},
@@ -149,7 +151,8 @@ IParentalControlService::IParentalControlService(Core::System& system_, Capabili
 
 IParentalControlService::~IParentalControlService() = default;
 
-bool IParentalControlService::CheckFreeCommunicationPermissionImpl() const {
+bool IParentalControlService::CheckFreeCommunicationPermissionImpl() const
+{
     if (states.temporary_unlocked) {
         return true;
     }
@@ -168,7 +171,8 @@ bool IParentalControlService::CheckFreeCommunicationPermissionImpl() const {
     return true;
 }
 
-bool IParentalControlService::ConfirmStereoVisionPermissionImpl() const {
+bool IParentalControlService::ConfirmStereoVisionPermissionImpl() const
+{
     if (states.temporary_unlocked) {
         return true;
     }
@@ -181,7 +185,8 @@ bool IParentalControlService::ConfirmStereoVisionPermissionImpl() const {
     return true;
 }
 
-void IParentalControlService::SetStereoVisionRestrictionImpl(bool is_restricted) {
+void IParentalControlService::SetStereoVisionRestrictionImpl(bool is_restricted)
+{
     if (settings.disabled) {
         return;
     }
@@ -192,7 +197,8 @@ void IParentalControlService::SetStereoVisionRestrictionImpl(bool is_restricted)
     settings.is_stero_vision_restricted = is_restricted;
 }
 
-Result IParentalControlService::Initialize() {
+Result IParentalControlService::Initialize()
+{
     LOG_DEBUG(Service_PCTL, "called");
 
     if (False(capability & (Capability::Application | Capability::System))) {
@@ -229,7 +235,8 @@ Result IParentalControlService::Initialize() {
     R_SUCCEED();
 }
 
-Result IParentalControlService::CheckFreeCommunicationPermission() {
+Result IParentalControlService::CheckFreeCommunicationPermission()
+{
     LOG_DEBUG(Service_PCTL, "called");
 
     if (!CheckFreeCommunicationPermissionImpl()) {
@@ -241,31 +248,35 @@ Result IParentalControlService::CheckFreeCommunicationPermission() {
 }
 
 Result IParentalControlService::ConfirmLaunchApplicationPermission(
-    InBuffer<BufferAttr_HipcPointer> restriction_bitset, u64 nacp_flag, u64 application_id) {
+    InBuffer<BufferAttr_HipcPointer> restriction_bitset, u64 nacp_flag, u64 application_id)
+{
     LOG_WARNING(Service_PCTL, "(STUBBED) called, nacp_flag={:#x} application_id={:016X}", nacp_flag,
                 application_id);
     R_SUCCEED();
 }
 
 Result IParentalControlService::ConfirmResumeApplicationPermission(
-    InBuffer<BufferAttr_HipcPointer> restriction_bitset, u64 nacp_flag, u64 application_id) {
+    InBuffer<BufferAttr_HipcPointer> restriction_bitset, u64 nacp_flag, u64 application_id)
+{
     LOG_WARNING(Service_PCTL, "(STUBBED) called, nacp_flag={:#x} application_id={:016X}", nacp_flag,
                 application_id);
     R_SUCCEED();
 }
 
-Result IParentalControlService::ConfirmSnsPostPermission() {
+Result IParentalControlService::ConfirmSnsPostPermission()
+{
     LOG_WARNING(Service_PCTL, "(STUBBED) called");
     R_THROW(PCTL::ResultNoFreeCommunication);
 }
 
-Result IParentalControlService::ConfirmSystemSettingsPermission() {
+Result IParentalControlService::ConfirmSystemSettingsPermission()
+{
     LOG_WARNING(Service_PCTL, "(STUBBED) called");
     R_SUCCEED();
 }
 
-Result IParentalControlService::IsRestrictionTemporaryUnlocked(
-    Out<bool> out_is_temporary_unlocked) {
+Result IParentalControlService::IsRestrictionTemporaryUnlocked(Out<bool> out_is_temporary_unlocked)
+{
     *out_is_temporary_unlocked = false;
     LOG_WARNING(Service_PCTL, "(STUBBED) called, is_temporary_unlocked={}",
                 *out_is_temporary_unlocked);
@@ -273,25 +284,29 @@ Result IParentalControlService::IsRestrictionTemporaryUnlocked(
 }
 
 Result IParentalControlService::IsRestrictedSystemSettingsEntered(
-    Out<bool> out_is_restricted_system_settings_entered) {
+    Out<bool> out_is_restricted_system_settings_entered)
+{
     *out_is_restricted_system_settings_entered = false;
     LOG_WARNING(Service_PCTL, "(STUBBED) called, is_temporary_unlocked={}",
                 *out_is_restricted_system_settings_entered);
     R_SUCCEED();
 }
 
-Result IParentalControlService::ConfirmStereoVisionPermission() {
+Result IParentalControlService::ConfirmStereoVisionPermission()
+{
     LOG_DEBUG(Service_PCTL, "called");
     states.stereo_vision = true;
     R_SUCCEED();
 }
 
-Result IParentalControlService::EndFreeCommunication() {
+Result IParentalControlService::EndFreeCommunication()
+{
     LOG_WARNING(Service_PCTL, "(STUBBED) called");
     R_SUCCEED();
 }
 
-Result IParentalControlService::IsFreeCommunicationAvailable() {
+Result IParentalControlService::IsFreeCommunicationAvailable()
+{
     LOG_DEBUG(Service_PCTL, "(STUBBED) called");
 
     if (!CheckFreeCommunicationPermissionImpl()) {
@@ -301,7 +316,8 @@ Result IParentalControlService::IsFreeCommunicationAvailable() {
     }
 }
 
-Result IParentalControlService::IsRestrictionEnabled(Out<bool> out_restriction_enabled) {
+Result IParentalControlService::IsRestrictionEnabled(Out<bool> out_restriction_enabled)
+{
     LOG_DEBUG(Service_PCTL, "called");
 
     if (False(capability & (Capability::Status | Capability::Recovery))) {
@@ -314,25 +330,29 @@ Result IParentalControlService::IsRestrictionEnabled(Out<bool> out_restriction_e
     R_SUCCEED();
 }
 
-Result IParentalControlService::GetSafetyLevel(Out<u32> out_safety_level) {
+Result IParentalControlService::GetSafetyLevel(Out<u32> out_safety_level)
+{
     *out_safety_level = 0;
     LOG_WARNING(Service_PCTL, "(STUBBED) called, safety_level={}", *out_safety_level);
     R_SUCCEED();
 }
 
-Result IParentalControlService::GetCurrentSettings(Out<RestrictionSettings> out_settings) {
+Result IParentalControlService::GetCurrentSettings(Out<RestrictionSettings> out_settings)
+{
     LOG_INFO(Service_PCTL, "called");
     *out_settings = restriction_settings;
     R_SUCCEED();
 }
 
-Result IParentalControlService::GetFreeCommunicationApplicationListCount(Out<s32> out_count) {
+Result IParentalControlService::GetFreeCommunicationApplicationListCount(Out<s32> out_count)
+{
     *out_count = 4;
     LOG_WARNING(Service_PCTL, "(STUBBED) called, count={}", *out_count);
     R_SUCCEED();
 }
 
-Result IParentalControlService::ConfirmStereoVisionRestrictionConfigurable() {
+Result IParentalControlService::ConfirmStereoVisionRestrictionConfigurable()
+{
     LOG_DEBUG(Service_PCTL, "called");
 
     if (False(capability & Capability::StereoVision)) {
@@ -347,7 +367,8 @@ Result IParentalControlService::ConfirmStereoVisionRestrictionConfigurable() {
     R_SUCCEED();
 }
 
-Result IParentalControlService::IsStereoVisionPermitted(Out<bool> out_is_permitted) {
+Result IParentalControlService::IsStereoVisionPermitted(Out<bool> out_is_permitted)
+{
     LOG_DEBUG(Service_PCTL, "called");
 
     if (!ConfirmStereoVisionPermissionImpl()) {
@@ -359,99 +380,114 @@ Result IParentalControlService::IsStereoVisionPermitted(Out<bool> out_is_permitt
     }
 }
 
-Result IParentalControlService::GetPinCodeLength(Out<s32> out_length) {
+Result IParentalControlService::GetPinCodeLength(Out<s32> out_length)
+{
     *out_length = 0;
     LOG_WARNING(Service_PCTL, "(STUBBED) called, length={}", *out_length);
     R_SUCCEED();
 }
 
-Result IParentalControlService::IsPairingActive(Out<bool> out_is_pairing_active) {
+Result IParentalControlService::IsPairingActive(Out<bool> out_is_pairing_active)
+{
     *out_is_pairing_active = false;
     LOG_WARNING(Service_PCTL, "(STUBBED) called, is_pairing_active={}", *out_is_pairing_active);
     R_SUCCEED();
 }
 
-Result IParentalControlService::GetSynchronizationEvent(
-    OutCopyHandle<Kernel::KReadableEvent> out_event) {
+Result
+IParentalControlService::GetSynchronizationEvent(OutCopyHandle<Kernel::KReadableEvent> out_event)
+{
     LOG_INFO(Service_PCTL, "called");
     *out_event = synchronization_event.GetHandle();
     R_SUCCEED();
 }
 
-Result IParentalControlService::StartPlayTimer() {
+Result IParentalControlService::StartPlayTimer()
+{
     LOG_WARNING(Service_PCTL, "(STUBBED) called");
     R_SUCCEED();
 }
 
-Result IParentalControlService::StopPlayTimer() {
+Result IParentalControlService::StopPlayTimer()
+{
     LOG_WARNING(Service_PCTL, "(STUBBED) called");
     R_SUCCEED();
 }
 
-Result IParentalControlService::IsPlayTimerEnabled(Out<bool> out_is_play_timer_enabled) {
+Result IParentalControlService::IsPlayTimerEnabled(Out<bool> out_is_play_timer_enabled)
+{
     *out_is_play_timer_enabled = false;
     LOG_WARNING(Service_PCTL, "(STUBBED) called, enabled={}", *out_is_play_timer_enabled);
     R_SUCCEED();
 }
 
-Result IParentalControlService::GetPlayTimerRemainingTime(Out<s32> out_remaining_time) {
+Result IParentalControlService::GetPlayTimerRemainingTime(Out<s32> out_remaining_time)
+{
     LOG_WARNING(Service_PCTL, "(STUBBED) called");
     *out_remaining_time = std::numeric_limits<s32>::max();
     R_SUCCEED();
 }
 
-Result IParentalControlService::IsRestrictedByPlayTimer(Out<bool> out_is_restricted_by_play_timer) {
+Result IParentalControlService::IsRestrictedByPlayTimer(Out<bool> out_is_restricted_by_play_timer)
+{
     *out_is_restricted_by_play_timer = false;
     LOG_WARNING(Service_PCTL, "(STUBBED) called, restricted={}", *out_is_restricted_by_play_timer);
     R_SUCCEED();
 }
 
-Result IParentalControlService::GetPlayTimerSettingsOld(
-    Out<PlayTimerSettingsOld> out_play_timer_settings) {
+Result
+IParentalControlService::GetPlayTimerSettingsOld(Out<PlayTimerSettingsOld> out_play_timer_settings)
+{
     LOG_WARNING(Service_PCTL, "(STUBBED) called");
     *out_play_timer_settings = {};
     R_SUCCEED();
 }
 
-Result IParentalControlService::GetPlayTimerSettings(Out<PlayTimerSettings> out_play_timer_settings) {
+Result IParentalControlService::GetPlayTimerSettings(Out<PlayTimerSettings> out_play_timer_settings)
+{
     LOG_WARNING(Service_PCTL, "(STUBBED) called");
     *out_play_timer_settings = raw_play_timer_settings;
     R_SUCCEED();
 }
 
-Result IParentalControlService::SetPlayTimerSettings(PlayTimerSettings play_timer_settings) {
+Result IParentalControlService::SetPlayTimerSettings(PlayTimerSettings play_timer_settings)
+{
     LOG_WARNING(Service_PCTL, "(STUBBED) called");
     raw_play_timer_settings = play_timer_settings;
     R_SUCCEED();
 }
 
 Result IParentalControlService::GetPlayTimerEventToRequestSuspension(
-    OutCopyHandle<Kernel::KReadableEvent> out_event) {
+    OutCopyHandle<Kernel::KReadableEvent> out_event)
+{
     LOG_INFO(Service_PCTL, "called");
     *out_event = request_suspension_event.GetHandle();
     R_SUCCEED();
 }
 
-Result IParentalControlService::IsPlayTimerAlarmDisabled(Out<bool> out_play_timer_alarm_disabled) {
+Result IParentalControlService::IsPlayTimerAlarmDisabled(Out<bool> out_play_timer_alarm_disabled)
+{
     *out_play_timer_alarm_disabled = false;
     LOG_INFO(Service_PCTL, "called, is_play_timer_alarm_disabled={}",
              *out_play_timer_alarm_disabled);
     R_SUCCEED();
 }
 
-Result IParentalControlService::GetPlayTimerRemainingTimeDisplayInfo(/* Out 0x18 */) {
+Result IParentalControlService::GetPlayTimerRemainingTimeDisplayInfo(/* Out 0x18 */)
+{
     LOG_INFO(Service_PCTL, "called");
     R_SUCCEED();
 }
 
-Result IParentalControlService::GetUnlinkedEvent(OutCopyHandle<Kernel::KReadableEvent> out_event) {
+Result IParentalControlService::GetUnlinkedEvent(OutCopyHandle<Kernel::KReadableEvent> out_event)
+{
     LOG_INFO(Service_PCTL, "called");
     *out_event = unlinked_event.GetHandle();
     R_SUCCEED();
 }
 
-Result IParentalControlService::GetStereoVisionRestriction(
-    Out<bool> out_stereo_vision_restriction) {
+Result IParentalControlService::GetStereoVisionRestriction(Out<bool> out_stereo_vision_restriction)
+{
     LOG_DEBUG(Service_PCTL, "called");
 
     if (False(capability & Capability::StereoVision)) {
@@ -464,7 +500,8 @@ Result IParentalControlService::GetStereoVisionRestriction(
     R_SUCCEED();
 }
 
-Result IParentalControlService::SetStereoVisionRestriction(bool stereo_vision_restriction) {
+Result IParentalControlService::SetStereoVisionRestriction(bool stereo_vision_restriction)
+{
     LOG_DEBUG(Service_PCTL, "called, can_use={}", stereo_vision_restriction);
 
     if (False(capability & Capability::StereoVision)) {
@@ -476,7 +513,8 @@ Result IParentalControlService::SetStereoVisionRestriction(bool stereo_vision_re
     R_SUCCEED();
 }
 
-Result IParentalControlService::ResetConfirmedStereoVisionPermission() {
+Result IParentalControlService::ResetConfirmedStereoVisionPermission()
+{
     LOG_DEBUG(Service_PCTL, "called");
 
     states.stereo_vision = false;

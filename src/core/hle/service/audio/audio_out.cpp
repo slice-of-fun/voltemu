@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include "audio_core/out/audio_out.h"
+
 #include "audio_core/out/audio_out_system.h"
 #include "core/hle/kernel/k_process.h"
 #include "core/hle/service/audio/audio_out.h"
@@ -17,7 +18,8 @@ IAudioOut::IAudioOut(Core::System& system_, Manager& manager, size_t session_id,
                      Kernel::KProcess* handle, u64 applet_resource_user_id)
     : ServiceFramework{system_, "IAudioOut"}, service_context{system_, "IAudioOut"},
       event{service_context.CreateEvent("AudioOutEvent")}, process{handle},
-      impl{std::make_shared<AudioCore::AudioOut::Out>(system_, manager, event, session_id)} {
+      impl{std::make_shared<AudioCore::AudioOut::Out>(system_, manager, event, session_id)}
+{
 
     // clang-format off
     static const FunctionInfo functions[] = {
@@ -42,35 +44,42 @@ IAudioOut::IAudioOut(Core::System& system_, Manager& manager, size_t session_id,
     process->Open();
 }
 
-IAudioOut::~IAudioOut() {
+IAudioOut::~IAudioOut()
+{
     impl->Free();
     service_context.CloseEvent(event);
     process->Close();
 }
 
-Result IAudioOut::GetAudioOutState(Out<u32> out_state) {
+Result IAudioOut::GetAudioOutState(Out<u32> out_state)
+{
     *out_state = static_cast<u32>(impl->GetState());
     LOG_DEBUG(Service_Audio, "called. state={}", *out_state);
     R_SUCCEED();
 }
 
-Result IAudioOut::Start() {
+Result IAudioOut::Start()
+{
     LOG_DEBUG(Service_Audio, "called");
     R_RETURN(impl->StartSystem());
 }
 
-Result IAudioOut::Stop() {
+Result IAudioOut::Stop()
+{
     LOG_DEBUG(Service_Audio, "called");
     R_RETURN(impl->StopSystem());
 }
 
-Result IAudioOut::AppendAudioOutBuffer(
-    InArray<AudioOutBuffer, BufferAttr_HipcMapAlias> audio_out_buffer, u64 buffer_client_ptr) {
+Result
+IAudioOut::AppendAudioOutBuffer(InArray<AudioOutBuffer, BufferAttr_HipcMapAlias> audio_out_buffer,
+                                u64 buffer_client_ptr)
+{
     R_RETURN(this->AppendAudioOutBufferAuto(audio_out_buffer, buffer_client_ptr));
 }
 
 Result IAudioOut::AppendAudioOutBufferAuto(
-    InArray<AudioOutBuffer, BufferAttr_HipcAutoSelect> audio_out_buffer, u64 buffer_client_ptr) {
+    InArray<AudioOutBuffer, BufferAttr_HipcAutoSelect> audio_out_buffer, u64 buffer_client_ptr)
+{
     if (audio_out_buffer.empty()) {
         LOG_ERROR(Service_Audio, "Input buffer is too small for an AudioOutBuffer!");
         R_THROW(Audio::ResultInsufficientBuffer);
@@ -81,19 +90,24 @@ Result IAudioOut::AppendAudioOutBufferAuto(
     R_RETURN(impl->AppendBuffer(audio_out_buffer[0], buffer_client_ptr));
 }
 
-Result IAudioOut::RegisterBufferEvent(OutCopyHandle<Kernel::KReadableEvent> out_event) {
+Result IAudioOut::RegisterBufferEvent(OutCopyHandle<Kernel::KReadableEvent> out_event)
+{
     LOG_DEBUG(Service_Audio, "called");
     *out_event = &impl->GetBufferEvent();
     R_SUCCEED();
 }
 
-Result IAudioOut::GetReleasedAudioOutBuffers(
-    OutArray<u64, BufferAttr_HipcMapAlias> out_audio_buffer, Out<u32> out_count) {
+Result
+IAudioOut::GetReleasedAudioOutBuffers(OutArray<u64, BufferAttr_HipcMapAlias> out_audio_buffer,
+                                      Out<u32> out_count)
+{
     R_RETURN(this->GetReleasedAudioOutBuffersAuto(out_audio_buffer, out_count));
 }
 
-Result IAudioOut::GetReleasedAudioOutBuffersAuto(
-    OutArray<u64, BufferAttr_HipcAutoSelect> out_audio_buffer, Out<u32> out_count) {
+Result
+IAudioOut::GetReleasedAudioOutBuffersAuto(OutArray<u64, BufferAttr_HipcAutoSelect> out_audio_buffer,
+                                          Out<u32> out_count)
+{
 
     if (!out_audio_buffer.empty()) {
         out_audio_buffer[0] = 0;
@@ -105,7 +119,8 @@ Result IAudioOut::GetReleasedAudioOutBuffersAuto(
     R_SUCCEED();
 }
 
-Result IAudioOut::ContainsAudioOutBuffer(Out<bool> out_contains_buffer, u64 buffer_client_ptr) {
+Result IAudioOut::ContainsAudioOutBuffer(Out<bool> out_contains_buffer, u64 buffer_client_ptr)
+{
     *out_contains_buffer = impl->ContainsAudioBuffer(buffer_client_ptr);
 
     LOG_DEBUG(Service_Audio, "called. Is buffer {:08X} registered? {}", buffer_client_ptr,
@@ -113,31 +128,36 @@ Result IAudioOut::ContainsAudioOutBuffer(Out<bool> out_contains_buffer, u64 buff
     R_SUCCEED();
 }
 
-Result IAudioOut::GetAudioOutBufferCount(Out<u32> out_buffer_count) {
+Result IAudioOut::GetAudioOutBufferCount(Out<u32> out_buffer_count)
+{
     *out_buffer_count = impl->GetBufferCount();
     LOG_DEBUG(Service_Audio, "called. Buffer count={}", *out_buffer_count);
     R_SUCCEED();
 }
 
-Result IAudioOut::GetAudioOutPlayedSampleCount(Out<u64> out_played_sample_count) {
+Result IAudioOut::GetAudioOutPlayedSampleCount(Out<u64> out_played_sample_count)
+{
     *out_played_sample_count = impl->GetPlayedSampleCount();
     LOG_DEBUG(Service_Audio, "called. Played samples={}", *out_played_sample_count);
     R_SUCCEED();
 }
 
-Result IAudioOut::FlushAudioOutBuffers(Out<bool> out_flushed) {
+Result IAudioOut::FlushAudioOutBuffers(Out<bool> out_flushed)
+{
     *out_flushed = impl->FlushAudioOutBuffers();
     LOG_DEBUG(Service_Audio, "called. Were any buffers flushed? {}", *out_flushed);
     R_SUCCEED();
 }
 
-Result IAudioOut::SetAudioOutVolume(f32 volume) {
+Result IAudioOut::SetAudioOutVolume(f32 volume)
+{
     LOG_DEBUG(Service_Audio, "called. Volume={}", volume);
     impl->SetVolume(volume);
     R_SUCCEED();
 }
 
-Result IAudioOut::GetAudioOutVolume(Out<f32> out_volume) {
+Result IAudioOut::GetAudioOutVolume(Out<f32> out_volume)
+{
     *out_volume = impl->GetVolume();
     LOG_DEBUG(Service_Audio, "called. Volume={}", *out_volume);
     R_SUCCEED();

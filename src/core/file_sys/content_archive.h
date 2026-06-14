@@ -47,12 +47,14 @@ enum class NCAContentType : u8 {
 
 using RightsId = std::array<u8, 0x10>;
 
-inline bool IsDirectoryExeFS(const VirtualDir& pfs) {
+inline bool IsDirectoryExeFS(const VirtualDir& pfs)
+{
     // According to switchbrew, an exefs must only contain these two files:
     return pfs->GetFile("main") != nullptr && pfs->GetFile("main.npdm") != nullptr;
 }
 
-inline bool IsDirectoryLogoPartition(const VirtualDir& pfs) {
+inline bool IsDirectoryLogoPartition(const VirtualDir& pfs)
+{
     // NintendoLogo is the static image in the top left corner while StartupMovie is the animation
     // in the bottom right corner.
     return pfs->GetFile("NintendoLogo.png") != nullptr &&

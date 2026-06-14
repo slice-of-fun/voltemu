@@ -3,10 +3,10 @@
 
 #pragma once
 
-#include <QGuiApplication>
-#include "qt_common/qt_common.h"
-
 #include <QFileDialog>
+#include <QGuiApplication>
+
+#include "qt_common/qt_common.h"
 
 /**
  * manages common functionality e.g. message boxes and such for Qt/QML
@@ -73,19 +73,22 @@ StandardButton ShowMessage(Icon icon, const QString& title, const QString& text,
 
 #define UTIL_OVERRIDES(level)                                                                      \
     inline StandardButton level(QObject* parent, const QString& title, const QString& text,        \
-                                StandardButtons buttons) {                                         \
+                                StandardButtons buttons)                                           \
+    {                                                                                              \
         return ShowMessage(Icon::level, title, text, buttons, parent);                             \
     }                                                                                              \
     inline StandardButton level(QObject* parent, const QString& title, const QString& text,        \
-                                int buttons = StandardButton::Ok) {                                \
+                                int buttons = StandardButton::Ok)                                  \
+    {                                                                                              \
         return ShowMessage(Icon::level, title, text, StandardButtons(buttons), parent);            \
     }                                                                                              \
-    inline StandardButton level(const QString title, const QString& text,                          \
-                                StandardButtons buttons) {                                         \
+    inline StandardButton level(const QString title, const QString& text, StandardButtons buttons) \
+    {                                                                                              \
         return ShowMessage(Icon::level, title, text, buttons, rootObject);                         \
     }                                                                                              \
     inline StandardButton level(const QString& title, const QString& text,                         \
-                                int buttons = StandardButton::Ok) {                                \
+                                int buttons = StandardButton::Ok)                                  \
+    {                                                                                              \
         return ShowMessage(Icon::level, title, text, StandardButtons(buttons), rootObject);        \
     }
 

@@ -1,12 +1,14 @@
 // SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#include "frontend_common/play_time_manager.h"
-#include "ui_set_play_time_dialog.h"
 #include "yuzu/set_play_time_dialog.h"
 
+#include "frontend_common/play_time_manager.h"
+#include "ui_set_play_time_dialog.h"
+
 SetPlayTimeDialog::SetPlayTimeDialog(QWidget* parent, u64 current_play_time)
-    : QDialog(parent), ui{std::make_unique<Ui::SetPlayTimeDialog>()} {
+    : QDialog(parent), ui{std::make_unique<Ui::SetPlayTimeDialog>()}
+{
     ui->setupUi(this);
 
     ui->hoursSpinBox->setValue(
@@ -29,7 +31,8 @@ SetPlayTimeDialog::SetPlayTimeDialog(QWidget* parent, u64 current_play_time)
 
 SetPlayTimeDialog::~SetPlayTimeDialog() = default;
 
-u64 SetPlayTimeDialog::GetTotalSeconds() const {
+u64 SetPlayTimeDialog::GetTotalSeconds() const
+{
     const u64 hours = static_cast<u64>(ui->hoursSpinBox->value());
     const u64 minutes = static_cast<u64>(ui->minutesSpinBox->value());
     const u64 seconds = static_cast<u64>(ui->secondsSpinBox->value());
@@ -37,7 +40,8 @@ u64 SetPlayTimeDialog::GetTotalSeconds() const {
     return hours * 3600 + minutes * 60 + seconds;
 }
 
-void SetPlayTimeDialog::OnValueChanged() {
+void SetPlayTimeDialog::OnValueChanged()
+{
     if (ui->errorLabel->isVisible()) {
         ui->errorLabel->setVisible(false);
     }

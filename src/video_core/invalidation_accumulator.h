@@ -18,7 +18,8 @@ public:
     InvalidationAccumulator() = default;
     ~InvalidationAccumulator() = default;
 
-    void Add(GPUVAddr address, size_t size) noexcept {
+    void Add(GPUVAddr address, size_t size) noexcept
+    {
         auto const end_address = start_address + accumulated_size;
         if (!(address >= start_address && address + size <= end_address)) {
             size = ((address + size + atomicity_size_mask) & atomicity_mask) - address;
@@ -37,8 +38,8 @@ public:
         }
     }
 
-    template <typename F>
-    [[nodiscard]] bool InvalidateAll(F&& f) noexcept {
+    template<typename F> [[nodiscard]] bool InvalidateAll(F&& f) noexcept
+    {
         if (start_address > 0) {
             for (auto [address, size] : buffer)
                 f(address, size);

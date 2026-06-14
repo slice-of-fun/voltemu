@@ -11,28 +11,32 @@
 
 namespace Shader::Backend::GLSL {
 namespace {
-std::string Texture(EmitContext& ctx, const IR::TextureInstInfo& info, const IR::Value& index) {
+std::string Texture(EmitContext& ctx, const IR::TextureInstInfo& info, const IR::Value& index)
+{
     const auto def{info.type == TextureType::Buffer ? ctx.texture_buffers.at(info.descriptor_index)
                                                     : ctx.textures.at(info.descriptor_index)};
     const auto index_offset{def.count > 1 ? fmt::format("[{}]", ctx.var_alloc.Consume(index)) : ""};
     return fmt::format("tex{}{}", def.binding, index_offset);
 }
 
-std::string Image(EmitContext& ctx, const IR::TextureInstInfo& info, const IR::Value& index) {
+std::string Image(EmitContext& ctx, const IR::TextureInstInfo& info, const IR::Value& index)
+{
     const auto def{info.type == TextureType::Buffer ? ctx.image_buffers.at(info.descriptor_index)
                                                     : ctx.images.at(info.descriptor_index)};
     const auto index_offset{def.count > 1 ? fmt::format("[{}]", ctx.var_alloc.Consume(index)) : ""};
     return fmt::format("img{}{}", def.binding, index_offset);
 }
 
-bool IsTextureMsaa(EmitContext& ctx, const IR::TextureInstInfo& info) {
+bool IsTextureMsaa(EmitContext& ctx, const IR::TextureInstInfo& info)
+{
     if (info.type == TextureType::Buffer) {
         return false;
     }
     return ctx.info.texture_descriptors.at(info.descriptor_index).is_multisample;
 }
 
-std::string CastToIntVec(std::string_view value, const IR::TextureInstInfo& info) {
+std::string CastToIntVec(std::string_view value, const IR::TextureInstInfo& info)
+{
     switch (info.type) {
     case TextureType::Color1D:
     case TextureType::Buffer:
@@ -51,7 +55,8 @@ std::string CastToIntVec(std::string_view value, const IR::TextureInstInfo& info
     }
 }
 
-std::string CoordsCastToInt(std::string_view value, const IR::TextureInstInfo& info) {
+std::string CoordsCastToInt(std::string_view value, const IR::TextureInstInfo& info)
+{
     switch (info.type) {
     case TextureType::Color1D:
     case TextureType::Buffer:
@@ -70,7 +75,8 @@ std::string CoordsCastToInt(std::string_view value, const IR::TextureInstInfo& i
     }
 }
 
-bool NeedsShadowLodExt(TextureType type) {
+bool NeedsShadowLodExt(TextureType type)
+{
     switch (type) {
     case TextureType::ColorArray2D:
     case TextureType::ColorCube:
@@ -81,7 +87,8 @@ bool NeedsShadowLodExt(TextureType type) {
     }
 }
 
-std::string GetOffsetVec(EmitContext& ctx, const IR::Value& offset) {
+std::string GetOffsetVec(EmitContext& ctx, const IR::Value& offset)
+{
     if (offset.IsImmediate()) {
         return fmt::format("int({})", offset.U32());
     }
@@ -119,7 +126,8 @@ std::string GetOffsetVec(EmitContext& ctx, const IR::Value& offset) {
     }
 }
 
-std::string PtpOffsets(const IR::Value& offset, const IR::Value& offset2) {
+std::string PtpOffsets(const IR::Value& offset, const IR::Value& offset2)
+{
     const std::array values{offset.InstRecursive(), offset2.InstRecursive()};
     if (!values[0]->AreAllArgsImmediates() || !values[1]->AreAllArgsImmediates()) {
         LOG_WARNING(Shader_GLSL, "Not all arguments in PTP are immediate, STUBBING");
@@ -136,7 +144,8 @@ std::string PtpOffsets(const IR::Value& offset, const IR::Value& offset2) {
                        read(1, 3));
 }
 
-IR::Inst* PrepareSparse(IR::Inst& inst) {
+IR::Inst* PrepareSparse(IR::Inst& inst)
+{
     const auto sparse_inst{inst.GetAssociatedPseudoOperation(IR::Opcode::GetSparseFromOp)};
     if (sparse_inst) {
         sparse_inst->Invalidate();
@@ -145,7 +154,8 @@ IR::Inst* PrepareSparse(IR::Inst& inst) {
 }
 
 std::string ImageGatherSubpixelOffset(const IR::TextureInstInfo& info, std::string_view texture,
-                                      std::string_view coords) {
+                                      std::string_view coords)
+{
     switch (info.type) {
     case TextureType::Color2D:
     case TextureType::Color2DRect:
@@ -162,7 +172,8 @@ std::string ImageGatherSubpixelOffset(const IR::TextureInstInfo& info, std::stri
 
 void EmitImageSampleImplicitLod(EmitContext& ctx, IR::Inst& inst, const IR::Value& index,
                                 std::string_view coords, std::string_view bias_lc,
-                                const IR::Value& offset) {
+                                const IR::Value& offset)
+{
     const auto info{inst.Flags<IR::TextureInstInfo>()};
     if (info.has_lod_clamp) {
         throw NotImplementedException("EmitImageSampleImplicitLod Lod clamp samples");
@@ -204,7 +215,8 @@ void EmitImageSampleImplicitLod(EmitContext& ctx, IR::Inst& inst, const IR::Valu
 
 void EmitImageSampleExplicitLod(EmitContext& ctx, IR::Inst& inst, const IR::Value& index,
                                 std::string_view coords, std::string_view lod_lc,
-                                const IR::Value& offset) {
+                                const IR::Value& offset)
+{
     const auto info{inst.Flags<IR::TextureInstInfo>()};
     if (info.has_bias) {
         throw NotImplementedException("EmitImageSampleExplicitLod Bias texture samples");
@@ -241,7 +253,8 @@ void EmitImageSampleExplicitLod(EmitContext& ctx, IR::Inst& inst, const IR::Valu
 
 void EmitImageSampleDrefImplicitLod(EmitContext& ctx, IR::Inst& inst, const IR::Value& index,
                                     std::string_view coords, std::string_view dref,
-                                    std::string_view bias_lc, const IR::Value& offset) {
+                                    std::string_view bias_lc, const IR::Value& offset)
+{
     const auto info{inst.Flags<IR::TextureInstInfo>()};
     const auto sparse_inst{PrepareSparse(inst)};
     if (sparse_inst) {
@@ -296,7 +309,8 @@ void EmitImageSampleDrefImplicitLod(EmitContext& ctx, IR::Inst& inst, const IR::
 
 void EmitImageSampleDrefExplicitLod(EmitContext& ctx, IR::Inst& inst, const IR::Value& index,
                                     std::string_view coords, std::string_view dref,
-                                    std::string_view lod_lc, const IR::Value& offset) {
+                                    std::string_view lod_lc, const IR::Value& offset)
+{
     const auto info{inst.Flags<IR::TextureInstInfo>()};
     const auto sparse_inst{PrepareSparse(inst)};
     if (sparse_inst) {
@@ -345,7 +359,8 @@ void EmitImageSampleDrefExplicitLod(EmitContext& ctx, IR::Inst& inst, const IR::
 }
 
 void EmitImageGather(EmitContext& ctx, IR::Inst& inst, const IR::Value& index,
-                     std::string_view coords, const IR::Value& offset, const IR::Value& offset2) {
+                     std::string_view coords, const IR::Value& offset, const IR::Value& offset2)
+{
     const auto info{inst.Flags<IR::TextureInstInfo>()};
     const auto texture{Texture(ctx, info, index)};
     const auto texel{ctx.var_alloc.Define(inst, GlslVarType::F32x4)};
@@ -399,7 +414,8 @@ void EmitImageGather(EmitContext& ctx, IR::Inst& inst, const IR::Value& index,
 
 void EmitImageGatherDref(EmitContext& ctx, IR::Inst& inst, const IR::Value& index,
                          std::string_view coords, const IR::Value& offset, const IR::Value& offset2,
-                         std::string_view dref) {
+                         std::string_view dref)
+{
     const auto info{inst.Flags<IR::TextureInstInfo>()};
     const auto texture{Texture(ctx, info, index)};
     const auto texel{ctx.var_alloc.Define(inst, GlslVarType::F32x4)};
@@ -450,7 +466,8 @@ void EmitImageGatherDref(EmitContext& ctx, IR::Inst& inst, const IR::Value& inde
 
 void EmitImageFetch(EmitContext& ctx, IR::Inst& inst, const IR::Value& index,
                     std::string_view coords, const IR::Value& offset, std::string_view lod,
-                    std::string_view ms) {
+                    std::string_view ms)
+{
     const auto info{inst.Flags<IR::TextureInstInfo>()};
     if (info.has_bias) {
         throw NotImplementedException("EmitImageFetch Bias texture samples");
@@ -496,7 +513,8 @@ void EmitImageFetch(EmitContext& ctx, IR::Inst& inst, const IR::Value& index,
 }
 
 void EmitImageQueryDimensions(EmitContext& ctx, IR::Inst& inst, const IR::Value& index,
-                              std::string_view lod, const IR::Value& skip_mips_val) {
+                              std::string_view lod, const IR::Value& skip_mips_val)
+{
     const auto info{inst.Flags<IR::TextureInstInfo>()};
     const auto texture{Texture(ctx, info, index)};
     const bool is_msaa{IsTextureMsaa(ctx, info)};
@@ -531,7 +549,8 @@ void EmitImageQueryDimensions(EmitContext& ctx, IR::Inst& inst, const IR::Value&
 }
 
 void EmitImageQueryLod(EmitContext& ctx, IR::Inst& inst, const IR::Value& index,
-                       std::string_view coords) {
+                       std::string_view coords)
+{
     const auto info{inst.Flags<IR::TextureInstInfo>()};
     const auto texture{Texture(ctx, info, index)};
     return ctx.AddF32x4("{}=vec4(textureQueryLod({},{}),0.0,0.0);", inst, texture, coords);
@@ -539,7 +558,8 @@ void EmitImageQueryLod(EmitContext& ctx, IR::Inst& inst, const IR::Value& index,
 
 void EmitImageGradient(EmitContext& ctx, IR::Inst& inst, const IR::Value& index,
                        std::string_view coords, const IR::Value& derivatives,
-                       const IR::Value& offset, [[maybe_unused]] const IR::Value& lod_clamp) {
+                       const IR::Value& offset, [[maybe_unused]] const IR::Value& lod_clamp)
+{
     const auto info{inst.Flags<IR::TextureInstInfo>()};
     if (info.has_lod_clamp) {
         throw NotImplementedException("EmitImageGradient Lod clamp samples");
@@ -571,7 +591,8 @@ void EmitImageGradient(EmitContext& ctx, IR::Inst& inst, const IR::Value& index,
 }
 
 void EmitImageRead(EmitContext& ctx, IR::Inst& inst, const IR::Value& index,
-                   std::string_view coords) {
+                   std::string_view coords)
+{
     const auto info{inst.Flags<IR::TextureInstInfo>()};
     const auto sparse_inst{PrepareSparse(inst)};
     if (sparse_inst) {
@@ -582,21 +603,24 @@ void EmitImageRead(EmitContext& ctx, IR::Inst& inst, const IR::Value& index,
 }
 
 void EmitImageWrite(EmitContext& ctx, IR::Inst& inst, const IR::Value& index,
-                    std::string_view coords, std::string_view color) {
+                    std::string_view coords, std::string_view color)
+{
     const auto info{inst.Flags<IR::TextureInstInfo>()};
     const auto image{Image(ctx, info, index)};
     ctx.Add("imageStore({},{},{});", image, CoordsCastToInt(coords, info), color);
 }
 
 void EmitImageAtomicIAdd32(EmitContext& ctx, IR::Inst& inst, const IR::Value& index,
-                           std::string_view coords, std::string_view value) {
+                           std::string_view coords, std::string_view value)
+{
     const auto info{inst.Flags<IR::TextureInstInfo>()};
     const auto image{Image(ctx, info, index)};
     ctx.AddU32("{}=imageAtomicAdd({},{},{});", inst, image, CoordsCastToInt(coords, info), value);
 }
 
 void EmitImageAtomicSMin32(EmitContext& ctx, IR::Inst& inst, const IR::Value& index,
-                           std::string_view coords, std::string_view value) {
+                           std::string_view coords, std::string_view value)
+{
     const auto info{inst.Flags<IR::TextureInstInfo>()};
     const auto image{Image(ctx, info, index)};
     ctx.AddU32("{}=imageAtomicMin({},{},int({}));", inst, image, CoordsCastToInt(coords, info),
@@ -604,7 +628,8 @@ void EmitImageAtomicSMin32(EmitContext& ctx, IR::Inst& inst, const IR::Value& in
 }
 
 void EmitImageAtomicUMin32(EmitContext& ctx, IR::Inst& inst, const IR::Value& index,
-                           std::string_view coords, std::string_view value) {
+                           std::string_view coords, std::string_view value)
+{
     const auto info{inst.Flags<IR::TextureInstInfo>()};
     const auto image{Image(ctx, info, index)};
     ctx.AddU32("{}=imageAtomicMin({},{},uint({}));", inst, image, CoordsCastToInt(coords, info),
@@ -612,7 +637,8 @@ void EmitImageAtomicUMin32(EmitContext& ctx, IR::Inst& inst, const IR::Value& in
 }
 
 void EmitImageAtomicSMax32(EmitContext& ctx, IR::Inst& inst, const IR::Value& index,
-                           std::string_view coords, std::string_view value) {
+                           std::string_view coords, std::string_view value)
+{
     const auto info{inst.Flags<IR::TextureInstInfo>()};
     const auto image{Image(ctx, info, index)};
     ctx.AddU32("{}=imageAtomicMax({},{},int({}));", inst, image, CoordsCastToInt(coords, info),
@@ -620,7 +646,8 @@ void EmitImageAtomicSMax32(EmitContext& ctx, IR::Inst& inst, const IR::Value& in
 }
 
 void EmitImageAtomicUMax32(EmitContext& ctx, IR::Inst& inst, const IR::Value& index,
-                           std::string_view coords, std::string_view value) {
+                           std::string_view coords, std::string_view value)
+{
     const auto info{inst.Flags<IR::TextureInstInfo>()};
     const auto image{Image(ctx, info, index)};
     ctx.AddU32("{}=imageAtomicMax({},{},uint({}));", inst, image, CoordsCastToInt(coords, info),
@@ -628,45 +655,52 @@ void EmitImageAtomicUMax32(EmitContext& ctx, IR::Inst& inst, const IR::Value& in
 }
 
 void EmitImageAtomicInc32(EmitContext&, IR::Inst&, const IR::Value&, std::string_view,
-                          std::string_view) {
+                          std::string_view)
+{
     NotImplemented();
 }
 
 void EmitImageAtomicDec32(EmitContext&, IR::Inst&, const IR::Value&, std::string_view,
-                          std::string_view) {
+                          std::string_view)
+{
     NotImplemented();
 }
 
 void EmitImageAtomicAnd32(EmitContext& ctx, IR::Inst& inst, const IR::Value& index,
-                          std::string_view coords, std::string_view value) {
+                          std::string_view coords, std::string_view value)
+{
     const auto info{inst.Flags<IR::TextureInstInfo>()};
     const auto image{Image(ctx, info, index)};
     ctx.AddU32("{}=imageAtomicAnd({},{},{});", inst, image, CoordsCastToInt(coords, info), value);
 }
 
 void EmitImageAtomicOr32(EmitContext& ctx, IR::Inst& inst, const IR::Value& index,
-                         std::string_view coords, std::string_view value) {
+                         std::string_view coords, std::string_view value)
+{
     const auto info{inst.Flags<IR::TextureInstInfo>()};
     const auto image{Image(ctx, info, index)};
     ctx.AddU32("{}=imageAtomicOr({},{},{});", inst, image, CoordsCastToInt(coords, info), value);
 }
 
 void EmitImageAtomicXor32(EmitContext& ctx, IR::Inst& inst, const IR::Value& index,
-                          std::string_view coords, std::string_view value) {
+                          std::string_view coords, std::string_view value)
+{
     const auto info{inst.Flags<IR::TextureInstInfo>()};
     const auto image{Image(ctx, info, index)};
     ctx.AddU32("{}=imageAtomicXor({},{},{});", inst, image, CoordsCastToInt(coords, info), value);
 }
 
 void EmitImageAtomicExchange32(EmitContext& ctx, IR::Inst& inst, const IR::Value& index,
-                               std::string_view coords, std::string_view value) {
+                               std::string_view coords, std::string_view value)
+{
     const auto info{inst.Flags<IR::TextureInstInfo>()};
     const auto image{Image(ctx, info, index)};
     ctx.AddU32("{}=imageAtomicExchange({},{},{});", inst, image, CoordsCastToInt(coords, info),
                value);
 }
 
-void EmitIsTextureScaled(EmitContext& ctx, IR::Inst& inst, const IR::Value& index) {
+void EmitIsTextureScaled(EmitContext& ctx, IR::Inst& inst, const IR::Value& index)
+{
     if (!index.IsImmediate()) {
         throw NotImplementedException("Non-constant texture rescaling");
     }
@@ -674,7 +708,8 @@ void EmitIsTextureScaled(EmitContext& ctx, IR::Inst& inst, const IR::Value& inde
     ctx.AddU1("{}=(ftou(scaling.x)&{})!=0;", inst, 1u << image_index);
 }
 
-void EmitIsImageScaled(EmitContext& ctx, IR::Inst& inst, const IR::Value& index) {
+void EmitIsImageScaled(EmitContext& ctx, IR::Inst& inst, const IR::Value& index)
+{
     if (!index.IsImmediate()) {
         throw NotImplementedException("Non-constant texture rescaling");
     }
@@ -682,187 +717,233 @@ void EmitIsImageScaled(EmitContext& ctx, IR::Inst& inst, const IR::Value& index)
     ctx.AddU1("{}=(ftou(scaling.y)&{})!=0;", inst, 1u << image_index);
 }
 
-void EmitBindlessImageSampleImplicitLod(EmitContext&) {
+void EmitBindlessImageSampleImplicitLod(EmitContext&)
+{
     NotImplemented();
 }
 
-void EmitBindlessImageSampleExplicitLod(EmitContext&) {
+void EmitBindlessImageSampleExplicitLod(EmitContext&)
+{
     NotImplemented();
 }
 
-void EmitBindlessImageSampleDrefImplicitLod(EmitContext&) {
+void EmitBindlessImageSampleDrefImplicitLod(EmitContext&)
+{
     NotImplemented();
 }
 
-void EmitBindlessImageSampleDrefExplicitLod(EmitContext&) {
+void EmitBindlessImageSampleDrefExplicitLod(EmitContext&)
+{
     NotImplemented();
 }
 
-void EmitBindlessImageGather(EmitContext&) {
+void EmitBindlessImageGather(EmitContext&)
+{
     NotImplemented();
 }
 
-void EmitBindlessImageGatherDref(EmitContext&) {
+void EmitBindlessImageGatherDref(EmitContext&)
+{
     NotImplemented();
 }
 
-void EmitBindlessImageFetch(EmitContext&) {
+void EmitBindlessImageFetch(EmitContext&)
+{
     NotImplemented();
 }
 
-void EmitBindlessImageQueryDimensions(EmitContext&) {
+void EmitBindlessImageQueryDimensions(EmitContext&)
+{
     NotImplemented();
 }
 
-void EmitBindlessImageQueryLod(EmitContext&) {
+void EmitBindlessImageQueryLod(EmitContext&)
+{
     NotImplemented();
 }
 
-void EmitBindlessImageGradient(EmitContext&) {
+void EmitBindlessImageGradient(EmitContext&)
+{
     NotImplemented();
 }
 
-void EmitBindlessImageRead(EmitContext&) {
+void EmitBindlessImageRead(EmitContext&)
+{
     NotImplemented();
 }
 
-void EmitBindlessImageWrite(EmitContext&) {
+void EmitBindlessImageWrite(EmitContext&)
+{
     NotImplemented();
 }
 
-void EmitBoundImageSampleImplicitLod(EmitContext&) {
+void EmitBoundImageSampleImplicitLod(EmitContext&)
+{
     NotImplemented();
 }
 
-void EmitBoundImageSampleExplicitLod(EmitContext&) {
+void EmitBoundImageSampleExplicitLod(EmitContext&)
+{
     NotImplemented();
 }
 
-void EmitBoundImageSampleDrefImplicitLod(EmitContext&) {
+void EmitBoundImageSampleDrefImplicitLod(EmitContext&)
+{
     NotImplemented();
 }
 
-void EmitBoundImageSampleDrefExplicitLod(EmitContext&) {
+void EmitBoundImageSampleDrefExplicitLod(EmitContext&)
+{
     NotImplemented();
 }
 
-void EmitBoundImageGather(EmitContext&) {
+void EmitBoundImageGather(EmitContext&)
+{
     NotImplemented();
 }
 
-void EmitBoundImageGatherDref(EmitContext&) {
+void EmitBoundImageGatherDref(EmitContext&)
+{
     NotImplemented();
 }
 
-void EmitBoundImageFetch(EmitContext&) {
+void EmitBoundImageFetch(EmitContext&)
+{
     NotImplemented();
 }
 
-void EmitBoundImageQueryDimensions(EmitContext&) {
+void EmitBoundImageQueryDimensions(EmitContext&)
+{
     NotImplemented();
 }
 
-void EmitBoundImageQueryLod(EmitContext&) {
+void EmitBoundImageQueryLod(EmitContext&)
+{
     NotImplemented();
 }
 
-void EmitBoundImageGradient(EmitContext&) {
+void EmitBoundImageGradient(EmitContext&)
+{
     NotImplemented();
 }
 
-void EmitBoundImageRead(EmitContext&) {
+void EmitBoundImageRead(EmitContext&)
+{
     NotImplemented();
 }
 
-void EmitBoundImageWrite(EmitContext&) {
+void EmitBoundImageWrite(EmitContext&)
+{
     NotImplemented();
 }
 
-void EmitBindlessImageAtomicIAdd32(EmitContext&) {
+void EmitBindlessImageAtomicIAdd32(EmitContext&)
+{
     NotImplemented();
 }
 
-void EmitBindlessImageAtomicSMin32(EmitContext&) {
+void EmitBindlessImageAtomicSMin32(EmitContext&)
+{
     NotImplemented();
 }
 
-void EmitBindlessImageAtomicUMin32(EmitContext&) {
+void EmitBindlessImageAtomicUMin32(EmitContext&)
+{
     NotImplemented();
 }
 
-void EmitBindlessImageAtomicSMax32(EmitContext&) {
+void EmitBindlessImageAtomicSMax32(EmitContext&)
+{
     NotImplemented();
 }
 
-void EmitBindlessImageAtomicUMax32(EmitContext&) {
+void EmitBindlessImageAtomicUMax32(EmitContext&)
+{
     NotImplemented();
 }
 
-void EmitBindlessImageAtomicInc32(EmitContext&) {
+void EmitBindlessImageAtomicInc32(EmitContext&)
+{
     NotImplemented();
 }
 
-void EmitBindlessImageAtomicDec32(EmitContext&) {
+void EmitBindlessImageAtomicDec32(EmitContext&)
+{
     NotImplemented();
 }
 
-void EmitBindlessImageAtomicAnd32(EmitContext&) {
+void EmitBindlessImageAtomicAnd32(EmitContext&)
+{
     NotImplemented();
 }
 
-void EmitBindlessImageAtomicOr32(EmitContext&) {
+void EmitBindlessImageAtomicOr32(EmitContext&)
+{
     NotImplemented();
 }
 
-void EmitBindlessImageAtomicXor32(EmitContext&) {
+void EmitBindlessImageAtomicXor32(EmitContext&)
+{
     NotImplemented();
 }
 
-void EmitBindlessImageAtomicExchange32(EmitContext&) {
+void EmitBindlessImageAtomicExchange32(EmitContext&)
+{
     NotImplemented();
 }
 
-void EmitBoundImageAtomicIAdd32(EmitContext&) {
+void EmitBoundImageAtomicIAdd32(EmitContext&)
+{
     NotImplemented();
 }
 
-void EmitBoundImageAtomicSMin32(EmitContext&) {
+void EmitBoundImageAtomicSMin32(EmitContext&)
+{
     NotImplemented();
 }
 
-void EmitBoundImageAtomicUMin32(EmitContext&) {
+void EmitBoundImageAtomicUMin32(EmitContext&)
+{
     NotImplemented();
 }
 
-void EmitBoundImageAtomicSMax32(EmitContext&) {
+void EmitBoundImageAtomicSMax32(EmitContext&)
+{
     NotImplemented();
 }
 
-void EmitBoundImageAtomicUMax32(EmitContext&) {
+void EmitBoundImageAtomicUMax32(EmitContext&)
+{
     NotImplemented();
 }
 
-void EmitBoundImageAtomicInc32(EmitContext&) {
+void EmitBoundImageAtomicInc32(EmitContext&)
+{
     NotImplemented();
 }
 
-void EmitBoundImageAtomicDec32(EmitContext&) {
+void EmitBoundImageAtomicDec32(EmitContext&)
+{
     NotImplemented();
 }
 
-void EmitBoundImageAtomicAnd32(EmitContext&) {
+void EmitBoundImageAtomicAnd32(EmitContext&)
+{
     NotImplemented();
 }
 
-void EmitBoundImageAtomicOr32(EmitContext&) {
+void EmitBoundImageAtomicOr32(EmitContext&)
+{
     NotImplemented();
 }
 
-void EmitBoundImageAtomicXor32(EmitContext&) {
+void EmitBoundImageAtomicXor32(EmitContext&)
+{
     NotImplemented();
 }
 
-void EmitBoundImageAtomicExchange32(EmitContext&) {
+void EmitBoundImageAtomicExchange32(EmitContext&)
+{
     NotImplemented();
 }
 

@@ -1,17 +1,19 @@
 // SPDX-FileCopyrightText: 2024 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "yuzu/configuration/configure_applets.h"
+
 #include "common/settings.h"
 #include "core/core.h"
 #include "ui_configure_applets.h"
 #include "yuzu/configuration/configuration_shared.h"
-#include "yuzu/configuration/configure_applets.h"
 #include "yuzu/configuration/shared_widget.h"
 
 ConfigureApplets::ConfigureApplets(Core::System& system_,
                                    std::shared_ptr<std::vector<ConfigurationShared::Tab*>> group_,
                                    const ConfigurationShared::Builder& builder, QWidget* parent)
-    : Tab(group_, parent), ui{std::make_unique<Ui::ConfigureApplets>()}, system{system_} {
+    : Tab(group_, parent), ui{std::make_unique<Ui::ConfigureApplets>()}, system{system_}
+{
     ui->setupUi(this);
 
     Setup(builder);
@@ -21,7 +23,8 @@ ConfigureApplets::ConfigureApplets(Core::System& system_,
 
 ConfigureApplets::~ConfigureApplets() = default;
 
-void ConfigureApplets::changeEvent(QEvent* event) {
+void ConfigureApplets::changeEvent(QEvent* event)
+{
     if (event->type() == QEvent::LanguageChange) {
         RetranslateUI();
     }
@@ -29,11 +32,13 @@ void ConfigureApplets::changeEvent(QEvent* event) {
     QWidget::changeEvent(event);
 }
 
-void ConfigureApplets::RetranslateUI() {
+void ConfigureApplets::RetranslateUI()
+{
     ui->retranslateUi(this);
 }
 
-void ConfigureApplets::Setup(const ConfigurationShared::Builder& builder) {
+void ConfigureApplets::Setup(const ConfigurationShared::Builder& builder)
+{
     auto& library_applets_layout = *ui->group_library_applet_modes->layout();
     std::map<u32, QWidget*> applets_hold{};
 
@@ -74,9 +79,12 @@ void ConfigureApplets::Setup(const ConfigurationShared::Builder& builder) {
     }
 }
 
-void ConfigureApplets::SetConfiguration() {}
+void ConfigureApplets::SetConfiguration()
+{
+}
 
-void ConfigureApplets::ApplyConfiguration() {
+void ConfigureApplets::ApplyConfiguration()
+{
     const bool powered_on = system.IsPoweredOn();
     for (const auto& func : apply_funcs) {
         func(powered_on);

@@ -8,12 +8,11 @@
 
 #include <span>
 
-#include "video_core/texture_cache/texture_cache_base.h"
-
 #include "shader_recompiler/shader_info.h"
 #include "video_core/renderer_vulkan/vk_compute_pass.h"
 #include "video_core/renderer_vulkan/vk_staging_buffer_pool.h"
 #include "video_core/texture_cache/image_view_base.h"
+#include "video_core/texture_cache/texture_cache_base.h"
 #include "video_core/vulkan_common/vulkan_memory_allocator.h"
 #include "video_core/vulkan_common/vulkan_wrapper.h"
 
@@ -82,35 +81,34 @@ public:
 
     void ConvertImage(Framebuffer* dst, ImageView& dst_view, ImageView& src_view);
 
-    bool CanAccelerateImageUpload(Image&) const noexcept {
-        return false;
-    }
+    bool CanAccelerateImageUpload(Image&) const noexcept { return false; }
 
-    bool CanUploadMSAA() const noexcept {
-        return msaa_copy_pass.operator bool();
-    }
+    bool CanUploadMSAA() const noexcept { return msaa_copy_pass.operator bool(); }
 
     void AccelerateImageUpload(Image&, const StagingBufferRef&,
-                               std::span<const VideoCommon::SwizzleParameters>,
-                               u32 z_start, u32 z_count);
+                               std::span<const VideoCommon::SwizzleParameters>, u32 z_start,
+                               u32 z_count);
 
     void InsertUploadMemoryBarrier() {}
 
     void TransitionImageLayout(Image& image);
 
-    bool HasBrokenTextureViewFormats() const noexcept {
+    bool HasBrokenTextureViewFormats() const noexcept
+    {
         // No known Vulkan driver has broken image views
         return false;
     }
 
-    bool HasNativeBgr() const noexcept {
+    bool HasNativeBgr() const noexcept
+    {
         // All known Vulkan drivers can natively handle BGR textures
         return true;
     }
 
     [[nodiscard]] VkBuffer GetTemporaryBuffer(size_t needed_size);
 
-    std::span<const VkFormat> ViewFormats(PixelFormat format) {
+    std::span<const VkFormat> ViewFormats(PixelFormat format)
+    {
         return view_formats[static_cast<std::size_t>(format)];
     }
 
@@ -119,7 +117,8 @@ public:
     bool IsFormatDitherable(VideoCore::Surface::PixelFormat format);
     bool IsFormatScalable(VideoCore::Surface::PixelFormat format);
 
-    VkFormat GetSupportedFormat(VkFormat requested_format, VkFormatFeatureFlags required_features) const;
+    VkFormat GetSupportedFormat(VkFormat requested_format,
+                                VkFormatFeatureFlags required_features) const;
 
     const Device& device;
     Scheduler& scheduler;
@@ -161,53 +160,35 @@ public:
                            std::span<ImageView*, NUM_RT> color_buffers, ImageView* depth_buffer,
                            bool is_rescaled = false);
 
-    [[nodiscard]] VkFramebuffer Handle() const noexcept {
-        return *framebuffer;
-    }
+    [[nodiscard]] VkFramebuffer Handle() const noexcept { return *framebuffer; }
 
-    [[nodiscard]] VkRenderPass RenderPass() const noexcept {
-        return renderpass;
-    }
+    [[nodiscard]] VkRenderPass RenderPass() const noexcept { return renderpass; }
 
-    [[nodiscard]] VkExtent2D RenderArea() const noexcept {
-        return render_area;
-    }
+    [[nodiscard]] VkExtent2D RenderArea() const noexcept { return render_area; }
 
-    [[nodiscard]] VkSampleCountFlagBits Samples() const noexcept {
-        return samples;
-    }
+    [[nodiscard]] VkSampleCountFlagBits Samples() const noexcept { return samples; }
 
-    [[nodiscard]] u32 NumColorBuffers() const noexcept {
-        return num_color_buffers;
-    }
+    [[nodiscard]] u32 NumColorBuffers() const noexcept { return num_color_buffers; }
 
-    [[nodiscard]] u32 NumImages() const noexcept {
-        return num_images;
-    }
+    [[nodiscard]] u32 NumImages() const noexcept { return num_images; }
 
-    [[nodiscard]] const std::array<VkImage, 9>& Images() const noexcept {
-        return images;
-    }
+    [[nodiscard]] const std::array<VkImage, 9>& Images() const noexcept { return images; }
 
-    [[nodiscard]] const std::array<VkImageSubresourceRange, 9>& ImageRanges() const noexcept {
+    [[nodiscard]] const std::array<VkImageSubresourceRange, 9>& ImageRanges() const noexcept
+    {
         return image_ranges;
     }
 
-    [[nodiscard]] bool HasAspectColorBit(size_t index) const noexcept {
+    [[nodiscard]] bool HasAspectColorBit(size_t index) const noexcept
+    {
         return (image_ranges.at(rt_map[index]).aspectMask & VK_IMAGE_ASPECT_COLOR_BIT) != 0;
     }
 
-    [[nodiscard]] bool HasAspectDepthBit() const noexcept {
-        return has_depth;
-    }
+    [[nodiscard]] bool HasAspectDepthBit() const noexcept { return has_depth; }
 
-    [[nodiscard]] bool HasAspectStencilBit() const noexcept {
-        return has_stencil;
-    }
+    [[nodiscard]] bool HasAspectStencilBit() const noexcept { return has_stencil; }
 
-    [[nodiscard]] bool IsRescaled() const noexcept {
-        return is_rescaled;
-    }
+    [[nodiscard]] bool IsRescaled() const noexcept { return is_rescaled; }
 
 private:
     vk::Framebuffer framebuffer;
@@ -255,20 +236,18 @@ public:
 
     void AllocateComputeUnswizzleImage();
 
-    [[nodiscard]] VkImage Handle() const noexcept {
-        return *(this->*current_image);
-    }
+    [[nodiscard]] VkImage Handle() const noexcept { return *(this->*current_image); }
 
-    [[nodiscard]] VkImageAspectFlags AspectMask() const noexcept {
-        return aspect_mask;
-    }
+    [[nodiscard]] VkImageAspectFlags AspectMask() const noexcept { return aspect_mask; }
 
-    [[nodiscard]] VkImageUsageFlags UsageFlags() const noexcept {
+    [[nodiscard]] VkImageUsageFlags UsageFlags() const noexcept
+    {
         return (this->*current_image).UsageFlags();
     }
 
     /// Returns true when the image is already initialized and mark it as initialized
-    [[nodiscard]] bool ExchangeInitialization() noexcept {
+    [[nodiscard]] bool ExchangeInitialization() noexcept
+    {
         return std::exchange(initialized, true);
     }
 
@@ -343,29 +322,20 @@ public:
 
     [[nodiscard]] bool IsRescaled() const noexcept;
 
-    [[nodiscard]] VkImageView Handle(Shader::TextureType texture_type) const noexcept {
+    [[nodiscard]] VkImageView Handle(Shader::TextureType texture_type) const noexcept
+    {
         return *image_views[static_cast<size_t>(texture_type)];
     }
 
-    [[nodiscard]] VkImage ImageHandle() const noexcept {
-        return image_handle;
-    }
+    [[nodiscard]] VkImage ImageHandle() const noexcept { return image_handle; }
 
-    [[nodiscard]] VkImageView RenderTarget() const noexcept {
-        return render_target;
-    }
+    [[nodiscard]] VkImageView RenderTarget() const noexcept { return render_target; }
 
-    [[nodiscard]] VkSampleCountFlagBits Samples() const noexcept {
-        return samples;
-    }
+    [[nodiscard]] VkSampleCountFlagBits Samples() const noexcept { return samples; }
 
-    [[nodiscard]] GPUVAddr GpuAddr() const noexcept {
-        return gpu_addr;
-    }
+    [[nodiscard]] GPUVAddr GpuAddr() const noexcept { return gpu_addr; }
 
-    [[nodiscard]] u32 BufferSize() const noexcept {
-        return buffer_size;
-    }
+    [[nodiscard]] u32 BufferSize() const noexcept { return buffer_size; }
 
 private:
     struct StorageViews {
@@ -396,15 +366,15 @@ class Sampler {
 public:
     explicit Sampler(TextureCacheRuntime&, const Tegra::Texture::TSCEntry&);
 
-    [[nodiscard]] VkSampler Handle() const noexcept {
-        return *sampler;
-    }
+    [[nodiscard]] VkSampler Handle() const noexcept { return *sampler; }
 
-    [[nodiscard]] VkSampler HandleWithDefaultAnisotropy() const noexcept {
+    [[nodiscard]] VkSampler HandleWithDefaultAnisotropy() const noexcept
+    {
         return *sampler_default_anisotropy;
     }
 
-    [[nodiscard]] bool HasAddedAnisotropy() const noexcept {
+    [[nodiscard]] bool HasAddedAnisotropy() const noexcept
+    {
         return static_cast<bool>(sampler_default_anisotropy);
     }
 

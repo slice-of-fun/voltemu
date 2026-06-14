@@ -10,7 +10,6 @@
 #include "common/fs/file.h"
 #include "common/hex_util.h"
 #include "common/string_util.h"
-
 #include "core/hle/service/ssl/ssl_backend.h"
 #include "core/internal_network/network.h"
 #include "core/internal_network/sockets.h"
@@ -31,7 +30,8 @@ bool one_time_init_success = false;
 SCHANNEL_CRED schannel_cred{};
 CredHandle cred_handle;
 
-static void OneTimeInit() {
+static void OneTimeInit()
+{
     schannel_cred.dwVersion = SCHANNEL_CRED_VERSION;
     schannel_cred.dwFlags =
         SCH_USE_STRONG_CRYPTO |        // don't allow insecure protocols
@@ -67,7 +67,8 @@ namespace Service::SSL {
 
 class SSLConnectionBackendSchannel final : public SSLConnectionBackend {
 public:
-    Result Init() {
+    Result Init()
+    {
         std::call_once(one_time_init_flag, OneTimeInit);
 
         if (!one_time_init_success) {
@@ -80,22 +81,25 @@ public:
         return ResultSuccess;
     }
 
-    void SetSocket(std::shared_ptr<Network::SocketBase> socket_in) override {
+    void SetSocket(std::shared_ptr<Network::SocketBase> socket_in) override
+    {
         socket = std::move(socket_in);
     }
 
-    Result SetHostName(const std::string& hostname_in) override {
+    Result SetHostName(const std::string& hostname_in) override
+    {
         hostname = hostname_in;
         return ResultSuccess;
     }
 
-    void SetVerifyOption(u32 option) override {
+    void SetVerifyOption(u32 option) override
+    {
         skip_cert_verification = (option == 0);
-        LOG_WARNING(Service_SSL, "option={} skip_verification={}", option,
-                    skip_cert_verification);
+        LOG_WARNING(Service_SSL, "option={} skip_verification={}", option, skip_cert_verification);
     }
 
-    Result DoHandshake() override {
+    Result DoHandshake() override
+    {
         while (1) {
             Result r;
             switch (handshake_state) {
@@ -136,7 +140,8 @@ public:
         }
     }
 
-    Result FillCiphertextReadBuf() {
+    Result FillCiphertextReadBuf()
+    {
         const size_t fill_size = read_buf_fill_size ? read_buf_fill_size : 4096;
         read_buf_fill_size = 0;
         // This unnecessarily zeroes the buffer; oh well.
@@ -161,7 +166,8 @@ public:
     }
 
     // Returns success if the write buffer has been completely emptied.
-    Result FlushCiphertextWriteBuf() {
+    Result FlushCiphertextWriteBuf()
+    {
         while (!ciphertext_write_buf.empty()) {
             const auto [actual, err] = socket->Send(ciphertext_write_buf, 0);
             switch (err) {
@@ -180,10 +186,10 @@ public:
         return ResultSuccess;
     }
 
-    Result CallInitializeSecurityContext() {
-        unsigned long req = ISC_REQ_ALLOCATE_MEMORY | ISC_REQ_CONFIDENTIALITY |
-                            ISC_REQ_INTEGRITY | ISC_REQ_REPLAY_DETECT |
-                            ISC_REQ_SEQUENCE_DETECT | ISC_REQ_STREAM |
+    Result CallInitializeSecurityContext()
+    {
+        unsigned long req = ISC_REQ_ALLOCATE_MEMORY | ISC_REQ_CONFIDENTIALITY | ISC_REQ_INTEGRITY |
+                            ISC_REQ_REPLAY_DETECT | ISC_REQ_SEQUENCE_DETECT | ISC_REQ_STREAM |
                             ISC_REQ_USE_SUPPLIED_CREDS;
 
         if (skip_cert_verification) {
@@ -300,7 +306,8 @@ public:
         }
     }
 
-    Result GrabStreamSizes() {
+    Result GrabStreamSizes()
+    {
         const SECURITY_STATUS ret =
             QueryContextAttributes(&ctxt, SECPKG_ATTR_STREAM_SIZES, &stream_sizes);
         if (ret != SEC_E_OK) {
@@ -312,7 +319,8 @@ public:
         return ResultSuccess;
     }
 
-    Result Read(size_t* out_size, std::span<u8> data) override {
+    Result Read(size_t* out_size, std::span<u8> data) override
+    {
         *out_size = 0;
         if (handshake_state != HandshakeState::Connected) {
             LOG_ERROR(Service_SSL, "Called Read but we did not successfully handshake");
@@ -400,7 +408,8 @@ public:
         }
     }
 
-    Result Write(size_t* out_size, std::span<const u8> data) override {
+    Result Write(size_t* out_size, std::span<const u8> data) override
+    {
         *out_size = 0;
 
         if (handshake_state != HandshakeState::Connected) {
@@ -469,7 +478,8 @@ public:
         return WriteAlreadyEncryptedData(out_size);
     }
 
-    Result WriteAlreadyEncryptedData(size_t* out_size) {
+    Result WriteAlreadyEncryptedData(size_t* out_size)
+    {
         const Result r = FlushCiphertextWriteBuf();
         if (r != ResultSuccess) {
             return r;
@@ -480,7 +490,8 @@ public:
         return ResultSuccess;
     }
 
-    Result GetServerCerts(std::vector<std::vector<u8>>* out_certs) override {
+    Result GetServerCerts(std::vector<std::vector<u8>>* out_certs) override
+    {
         PCCERT_CONTEXT returned_cert = nullptr;
         const SECURITY_STATUS ret =
             QueryContextAttributes(&ctxt, SECPKG_ATTR_REMOTE_CERT_CONTEXT, &returned_cert);
@@ -503,7 +514,8 @@ public:
         return ResultSuccess;
     }
 
-    ~SSLConnectionBackendSchannel() {
+    ~SSLConnectionBackendSchannel()
+    {
         if (handshake_state != HandshakeState::Initial) {
             DeleteSecurityContext(&ctxt);
         }
@@ -551,7 +563,8 @@ public:
     size_t read_buf_fill_size = 0;
 };
 
-Result CreateSSLConnectionBackend(std::unique_ptr<SSLConnectionBackend>* out_backend) {
+Result CreateSSLConnectionBackend(std::unique_ptr<SSLConnectionBackend>* out_backend)
+{
     auto conn = std::make_unique<SSLConnectionBackendSchannel>();
 
     R_TRY(conn->Init());

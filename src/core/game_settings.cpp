@@ -16,42 +16,46 @@
 
 namespace Core::GameSettings {
 
-static GPUVendor GetGPU(const std::string& gpu_vendor_string) {
-    struct Entry { const char* name; GPUVendor vendor; };
+static GPUVendor GetGPU(const std::string& gpu_vendor_string)
+{
+    struct Entry {
+        const char* name;
+        GPUVendor vendor;
+    };
     static constexpr Entry GpuVendor[] = {
         // NVIDIA
-        {"NVIDIA",   GPUVendor::Nvidia},
-        {"Nouveau",  GPUVendor::Nvidia},
-        {"NVK",      GPUVendor::Nvidia},
-        {"Tegra",    GPUVendor::Nvidia},
+        {"NVIDIA", GPUVendor::Nvidia},
+        {"Nouveau", GPUVendor::Nvidia},
+        {"NVK", GPUVendor::Nvidia},
+        {"Tegra", GPUVendor::Nvidia},
         // AMD
-        {"AMD",       GPUVendor::AMD},
-        {"RadeonSI",  GPUVendor::AMD},
-        {"RADV",      GPUVendor::AMD},
-        {"AMDVLK",    GPUVendor::AMD},
-        {"R600",      GPUVendor::AMD},
+        {"AMD", GPUVendor::AMD},
+        {"RadeonSI", GPUVendor::AMD},
+        {"RADV", GPUVendor::AMD},
+        {"AMDVLK", GPUVendor::AMD},
+        {"R600", GPUVendor::AMD},
         // Intel
-        {"Intel",     GPUVendor::Intel},
-        {"ANV",       GPUVendor::Intel},
-        {"i965",      GPUVendor::Intel},
-        {"i915",      GPUVendor::Intel},
-        {"OpenSWR",   GPUVendor::Intel},
+        {"Intel", GPUVendor::Intel},
+        {"ANV", GPUVendor::Intel},
+        {"i965", GPUVendor::Intel},
+        {"i915", GPUVendor::Intel},
+        {"OpenSWR", GPUVendor::Intel},
         // Apple
-        {"Apple",     GPUVendor::Apple},
-        {"MoltenVK",  GPUVendor::Apple},
+        {"Apple", GPUVendor::Apple},
+        {"MoltenVK", GPUVendor::Apple},
         // Qualcomm / Adreno
-        {"Qualcomm",  GPUVendor::Qualcomm},
-        {"Turnip",    GPUVendor::Qualcomm},
+        {"Qualcomm", GPUVendor::Qualcomm},
+        {"Turnip", GPUVendor::Qualcomm},
         // ARM / Mali
-        {"Mali",      GPUVendor::ARM},
-        {"PanVK",     GPUVendor::ARM},
+        {"Mali", GPUVendor::ARM},
+        {"PanVK", GPUVendor::ARM},
         // Imagination / PowerVR
-        {"PowerVR",   GPUVendor::Imagination},
-        {"PVR",       GPUVendor::Imagination},
+        {"PowerVR", GPUVendor::Imagination},
+        {"PVR", GPUVendor::Imagination},
         // Microsoft / WARP / D3D12 GL
-        {"D3D12",     GPUVendor::Microsoft},
+        {"D3D12", GPUVendor::Microsoft},
         {"Microsoft", GPUVendor::Microsoft},
-        {"WARP",      GPUVendor::Microsoft},
+        {"WARP", GPUVendor::Microsoft},
     };
 
     for (const auto& entry : GpuVendor) {
@@ -62,7 +66,8 @@ static GPUVendor GetGPU(const std::string& gpu_vendor_string) {
 
     // legacy (shouldn't be needed anymore, but just in case)
     std::string gpu = gpu_vendor_string;
-    std::transform(gpu.begin(), gpu.end(), gpu.begin(), [](unsigned char c){ return (char)std::tolower(c); });
+    std::transform(gpu.begin(), gpu.end(), gpu.begin(),
+                   [](unsigned char c) { return (char)std::tolower(c); });
     if (gpu.find("geforce") != std::string::npos) {
         return GPUVendor::Nvidia;
     }
@@ -73,7 +78,8 @@ static GPUVendor GetGPU(const std::string& gpu_vendor_string) {
     return GPUVendor::Unknown;
 }
 
-static OS DetectOS() {
+static OS DetectOS()
+{
 #if defined(_WIN32)
     return OS::Windows;
 #elif defined(__FIREOS__)
@@ -111,7 +117,8 @@ static OS DetectOS() {
 #endif
 }
 
-EnvironmentInfo DetectEnvironment(const VideoCore::RendererBase& renderer) {
+EnvironmentInfo DetectEnvironment(const VideoCore::RendererBase& renderer)
+{
     EnvironmentInfo env{};
     env.os = DetectOS();
     env.vendor_string = renderer.GetDeviceVendor();
@@ -119,22 +126,20 @@ EnvironmentInfo DetectEnvironment(const VideoCore::RendererBase& renderer) {
     return env;
 }
 
-void LoadOverrides(std::uint64_t program_id, const VideoCore::RendererBase& renderer) {
+void LoadOverrides(std::uint64_t program_id, const VideoCore::RendererBase& renderer)
+{
     const auto env = DetectEnvironment(renderer);
 
     switch (static_cast<TitleID>(program_id)) {
-        case TitleID::NinjaGaidenRagebound:
-            Settings::values.use_squashed_iterated_blend = true;
-            break;
-        default:
-            break;
+    case TitleID::NinjaGaidenRagebound:
+        Settings::values.use_squashed_iterated_blend = true;
+        break;
+    default:
+        break;
     }
 
     LOG_INFO(Core, "Applied game settings for title ID {:016X} on OS {}, GPU vendor {} ({})",
-             program_id,
-             static_cast<int>(env.os),
-             static_cast<int>(env.vendor),
-             env.vendor_string);
+             program_id, static_cast<int>(env.os), static_cast<int>(env.vendor), env.vendor_string);
 }
 
 } // namespace Core::GameSettings

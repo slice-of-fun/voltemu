@@ -4,6 +4,8 @@
 // SPDX-FileCopyrightText: Copyright 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/vi/shared_buffer_manager.h"
+
 #include <random>
 
 #include "core/core.h"
@@ -15,7 +17,6 @@
 #include "core/hle/service/nvnflinger/pixel_format.h"
 #include "core/hle/service/nvnflinger/ui/graphic_buffer.h"
 #include "core/hle/service/vi/container.h"
-#include "core/hle/service/vi/shared_buffer_manager.h"
 #include "core/hle/service/vi/vi_results.h"
 #include "video_core/gpu.h"
 #include "video_core/host1x/host1x.h"
@@ -25,7 +26,8 @@ namespace Service::VI {
 namespace {
 
 Result AllocateSharedBufferMemory(std::unique_ptr<Kernel::KPageGroup>* out_page_group,
-                                  Core::System& system, u32 size) {
+                                  Core::System& system, u32 size)
+{
     using Core::Memory::YUZU_PAGESIZE;
 
     // Allocate memory for the system shared buffer.
@@ -60,7 +62,8 @@ Result AllocateSharedBufferMemory(std::unique_ptr<Kernel::KPageGroup>* out_page_
 
 Result MapSharedBufferIntoProcessAddressSpace(Common::ProcessAddress* out_map_address,
                                               std::unique_ptr<Kernel::KPageGroup>& pg,
-                                              Kernel::KProcess* process, Core::System& system) {
+                                              Kernel::KProcess* process, Core::System& system)
+{
     using Core::Memory::YUZU_PAGESIZE;
 
     auto& page_table = process->GetPageTable();
@@ -90,7 +93,8 @@ Result MapSharedBufferIntoProcessAddressSpace(Common::ProcessAddress* out_map_ad
     R_SUCCEED();
 }
 
-Result CreateNvMapHandle(u32* out_nv_map_handle, Nvidia::Devices::nvmap& nvmap, u32 size) {
+Result CreateNvMapHandle(u32* out_nv_map_handle, Nvidia::Devices::nvmap& nvmap, u32 size)
+{
     // Create a handle.
     Nvidia::Devices::nvmap::IocCreateParams create_params{
         .size = size,
@@ -106,7 +110,8 @@ Result CreateNvMapHandle(u32* out_nv_map_handle, Nvidia::Devices::nvmap& nvmap, 
     R_SUCCEED();
 }
 
-Result FreeNvMapHandle(Nvidia::Devices::nvmap& nvmap, u32 handle, Nvidia::DeviceFD nvmap_fd) {
+Result FreeNvMapHandle(Nvidia::Devices::nvmap& nvmap, u32 handle, Nvidia::DeviceFD nvmap_fd)
+{
     // Free the handle.
     Nvidia::Devices::nvmap::IocFreeParams free_params{
         .handle = handle,
@@ -119,7 +124,8 @@ Result FreeNvMapHandle(Nvidia::Devices::nvmap& nvmap, u32 handle, Nvidia::Device
 }
 
 Result AllocNvMapHandle(Nvidia::Devices::nvmap& nvmap, u32 handle, Common::ProcessAddress buffer,
-                        u32 size, Nvidia::DeviceFD nvmap_fd) {
+                        u32 size, Nvidia::DeviceFD nvmap_fd)
+{
     // Assign the allocated memory to the handle.
     Nvidia::Devices::nvmap::IocAllocParams alloc_params{
         .handle = handle,
@@ -137,7 +143,8 @@ Result AllocNvMapHandle(Nvidia::Devices::nvmap& nvmap, u32 handle, Common::Proce
 }
 
 Result AllocateHandleForBuffer(u32* out_handle, Nvidia::Module& nvdrv, Nvidia::DeviceFD nvmap_fd,
-                               Common::ProcessAddress buffer, u32 size) {
+                               Common::ProcessAddress buffer, u32 size)
+{
     // Get the nvmap device.
     auto nvmap = nvdrv.GetDevice<Nvidia::Devices::nvmap>(nvmap_fd);
     ASSERT(nvmap != nullptr);
@@ -146,7 +153,8 @@ Result AllocateHandleForBuffer(u32* out_handle, Nvidia::Module& nvdrv, Nvidia::D
     R_TRY(CreateNvMapHandle(out_handle, *nvmap, size));
 
     // Ensure we maintain a clean state on failure.
-    ON_RESULT_FAILURE {
+    ON_RESULT_FAILURE
+    {
         R_ASSERT(FreeNvMapHandle(*nvmap, *out_handle, nvmap_fd));
     };
 
@@ -154,7 +162,8 @@ Result AllocateHandleForBuffer(u32* out_handle, Nvidia::Module& nvdrv, Nvidia::D
     R_RETURN(AllocNvMapHandle(*nvmap, *out_handle, buffer, size, nvmap_fd));
 }
 
-void FreeHandle(u32 handle, Nvidia::Module& nvdrv, Nvidia::DeviceFD nvmap_fd) {
+void FreeHandle(u32 handle, Nvidia::Module& nvdrv, Nvidia::DeviceFD nvmap_fd)
+{
     auto nvmap = nvdrv.GetDevice<Nvidia::Devices::nvmap>(nvmap_fd);
     ASSERT(nvmap != nullptr);
 
@@ -192,7 +201,8 @@ constexpr SharedMemoryPoolLayout SharedBufferPoolLayout = [] {
     return layout;
 }();
 
-void MakeGraphicBuffer(android::BufferQueueProducer& producer, u32 slot, u32 handle) {
+void MakeGraphicBuffer(android::BufferQueueProducer& producer, u32 slot, u32 handle)
+{
     auto buffer = std::make_shared<android::NvGraphicBuffer>();
     buffer->width = SharedBufferWidth;
     buffer->height = SharedBufferHeight;
@@ -208,13 +218,16 @@ void MakeGraphicBuffer(android::BufferQueueProducer& producer, u32 slot, u32 han
 
 SharedBufferManager::SharedBufferManager(Core::System& system, Container& container,
                                          std::shared_ptr<Nvidia::Module> nvdrv)
-    : m_system(system), m_container(container), m_nvdrv(std::move(nvdrv)) {}
+    : m_system(system), m_container(container), m_nvdrv(std::move(nvdrv))
+{
+}
 
 SharedBufferManager::~SharedBufferManager() = default;
 
 Result SharedBufferManager::CreateSession(Kernel::KProcess* owner_process, u64* out_buffer_id,
                                           u64* out_layer_handle, u64 display_id,
-                                          bool enable_blending) {
+                                          bool enable_blending)
+{
     std::scoped_lock lk{m_guard};
 
     // Ensure we haven't already created.
@@ -272,7 +285,8 @@ Result SharedBufferManager::CreateSession(Kernel::KProcess* owner_process, u64* 
     R_SUCCEED();
 }
 
-void SharedBufferManager::DestroySession(Kernel::KProcess* owner_process) {
+void SharedBufferManager::DestroySession(Kernel::KProcess* owner_process)
+{
     std::scoped_lock lk{m_guard};
 
     if (m_buffer_id == 0) {
@@ -308,7 +322,8 @@ Result SharedBufferManager::GetSharedBufferMemoryHandleId(u64* out_buffer_size,
                                                           s32* out_nvmap_handle,
                                                           SharedMemoryPoolLayout* out_pool_layout,
                                                           u64 buffer_id,
-                                                          u64 applet_resource_user_id) {
+                                                          u64 applet_resource_user_id)
+{
     std::scoped_lock lk{m_guard};
 
     R_UNLESS(m_buffer_id > 0, VI::ResultNotFound);
@@ -324,7 +339,8 @@ Result SharedBufferManager::GetSharedBufferMemoryHandleId(u64* out_buffer_size,
 
 Result SharedBufferManager::AcquireSharedFrameBuffer(android::Fence* out_fence,
                                                      std::array<s32, 4>& out_slot_indexes,
-                                                     s64* out_target_slot, u64 layer_id) {
+                                                     s64* out_target_slot, u64 layer_id)
+{
     // Get the producer.
     std::shared_ptr<android::BufferQueueProducer> producer;
     R_TRY(m_container.GetLayerProducerHandle(std::addressof(producer), layer_id));
@@ -347,7 +363,8 @@ Result SharedBufferManager::AcquireSharedFrameBuffer(android::Fence* out_fence,
 Result SharedBufferManager::PresentSharedFrameBuffer(android::Fence fence,
                                                      Common::Rectangle<s32> crop_region,
                                                      u32 transform, s32 swap_interval, u64 layer_id,
-                                                     s64 slot) {
+                                                     s64 slot)
+{
     // Get the producer.
     std::shared_ptr<android::BufferQueueProducer> producer;
     R_TRY(m_container.GetLayerProducerHandle(std::addressof(producer), layer_id));
@@ -358,7 +375,8 @@ Result SharedBufferManager::PresentSharedFrameBuffer(android::Fence fence,
                  android::Status::NoError,
              VI::ResultOperationFailed);
 
-    ON_RESULT_FAILURE {
+    ON_RESULT_FAILURE
+    {
         producer->CancelBuffer(static_cast<s32>(slot), fence);
     };
 
@@ -379,7 +397,8 @@ Result SharedBufferManager::PresentSharedFrameBuffer(android::Fence fence,
     R_SUCCEED();
 }
 
-Result SharedBufferManager::CancelSharedFrameBuffer(u64 layer_id, s64 slot) {
+Result SharedBufferManager::CancelSharedFrameBuffer(u64 layer_id, s64 slot)
+{
     // Get the producer.
     std::shared_ptr<android::BufferQueueProducer> producer;
     R_TRY(m_container.GetLayerProducerHandle(std::addressof(producer), layer_id));
@@ -392,7 +411,8 @@ Result SharedBufferManager::CancelSharedFrameBuffer(u64 layer_id, s64 slot) {
 }
 
 Result SharedBufferManager::GetSharedFrameBufferAcquirableEvent(Kernel::KReadableEvent** out_event,
-                                                                u64 layer_id) {
+                                                                u64 layer_id)
+{
     // Get the producer.
     std::shared_ptr<android::BufferQueueProducer> producer;
     R_TRY(m_container.GetLayerProducerHandle(std::addressof(producer), layer_id));
@@ -404,7 +424,8 @@ Result SharedBufferManager::GetSharedFrameBufferAcquirableEvent(Kernel::KReadabl
     R_SUCCEED();
 }
 
-Result SharedBufferManager::WriteAppletCaptureBuffer(bool* out_was_written, s32* out_layer_index) {
+Result SharedBufferManager::WriteAppletCaptureBuffer(bool* out_was_written, s32* out_layer_index)
+{
     std::vector<u8> capture_buffer(m_system.GPU().GetAppletCaptureBuffer());
     Common::ScratchBuffer<u32> scratch;
 

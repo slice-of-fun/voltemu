@@ -9,13 +9,13 @@
 #include <algorithm>
 #include <bit>
 #include <numeric>
+#include <ranges>
 #include <type_traits>
 #include <utility>
 #include <vector>
 
 #include "common/assert.h"
 #include "common/common_types.h"
-#include <ranges>
 
 namespace Common {
 
@@ -24,21 +24,17 @@ struct SlotId {
     static constexpr u32 TAGGED_VALUE = 0x80000000;
     static constexpr u32 INVALID_INDEX = (std::numeric_limits<u32>::max)();
 
-    constexpr u32 Value() const noexcept {
-        return index & (~TAGGED_VALUE);
-    }
+    constexpr u32 Value() const noexcept { return index & (~TAGGED_VALUE); }
     constexpr auto operator<=>(const SlotId&) const noexcept = default;
-    constexpr explicit operator bool() const noexcept {
-        return index != INVALID_INDEX;
-    }
+    constexpr explicit operator bool() const noexcept { return index != INVALID_INDEX; }
 
     u32 index = INVALID_INDEX;
 };
 
-template <class T>
+template<class T>
 // TODO: More "stable" debian fixes... wohoo
 #if __GNUC__ > 12
-    requires std::is_nothrow_move_assignable_v<T> && std::is_nothrow_move_constructible_v<T>
+requires std::is_nothrow_move_assignable_v<T> && std::is_nothrow_move_constructible_v<T>
 #endif
 class SlotVector {
 public:
@@ -48,7 +44,8 @@ public:
     public:
         constexpr Iterator() = default;
 
-        Iterator& operator++() noexcept {
+        Iterator& operator++() noexcept
+        {
             const u64* const bitset = slot_vector->stored_bitset.data();
             const u32 size = static_cast<u32>(slot_vector->stored_bitset.size()) * 64;
             if (id.Value() < size) {
@@ -62,33 +59,32 @@ public:
             return *this;
         }
 
-        Iterator operator++(int) noexcept {
+        Iterator operator++(int) noexcept
+        {
             const Iterator copy{*this};
             ++*this;
             return copy;
         }
 
-        bool operator==(const Iterator& other) const noexcept {
-            return id.index == other.id.index;
-        }
+        bool operator==(const Iterator& other) const noexcept { return id.index == other.id.index; }
 
-        bool operator!=(const Iterator& other) const noexcept {
-            return id.index != other.id.index;
-        }
+        bool operator!=(const Iterator& other) const noexcept { return id.index != other.id.index; }
 
-        std::pair<SlotId, T*> operator*() const noexcept {
+        std::pair<SlotId, T*> operator*() const noexcept
+        {
             return {id, std::addressof((*slot_vector)[id])};
         }
 
-        T* operator->() const noexcept {
-            return std::addressof((*slot_vector)[id]);
-        }
+        T* operator->() const noexcept { return std::addressof((*slot_vector)[id]); }
 
     private:
         Iterator(SlotVector<T>* slot_vector_, SlotId id_) noexcept
-            : slot_vector{slot_vector_}, id{id_} {}
+            : slot_vector{slot_vector_}, id{id_}
+        {
+        }
 
-        bool IsValid(const u64* bitset) const noexcept {
+        bool IsValid(const u64* bitset) const noexcept
+        {
             return ((bitset[id.Value() / 64] >> (id.Value() % 64)) & 1) != 0;
         }
 
@@ -96,7 +92,8 @@ public:
         SlotId id;
     };
 
-    ~SlotVector() noexcept {
+    ~SlotVector() noexcept
+    {
         size_t index = 0;
         for (u64 bits : stored_bitset) {
             for (size_t bit = 0; bits; ++bit, bits >>= 1) {
@@ -109,18 +106,20 @@ public:
         delete[] values;
     }
 
-    [[nodiscard]] T& operator[](SlotId id) noexcept {
+    [[nodiscard]] T& operator[](SlotId id) noexcept
+    {
         ValidateIndex(id);
         return values[id.Value()].object;
     }
 
-    [[nodiscard]] const T& operator[](SlotId id) const noexcept {
+    [[nodiscard]] const T& operator[](SlotId id) const noexcept
+    {
         ValidateIndex(id);
         return values[id.Value()].object;
     }
 
-    template <typename... Args>
-    [[nodiscard]] SlotId insert(Args&&... args) noexcept {
+    template<typename... Args> [[nodiscard]] SlotId insert(Args&&... args) noexcept
+    {
         const u32 index = FreeValueIndex();
         new (&values[index].object) T(std::forward<Args>(args)...);
         SetStorageBit(index);
@@ -128,13 +127,15 @@ public:
         return SlotId{index};
     }
 
-    void erase(SlotId id) noexcept {
+    void erase(SlotId id) noexcept
+    {
         values[id.Value()].object.~T();
         free_list.push_back(id.Value());
         ResetStorageBit(id.Value());
     }
 
-    [[nodiscard]] Iterator begin() noexcept {
+    [[nodiscard]] Iterator begin() noexcept
+    {
         const auto it = std::ranges::find_if(stored_bitset, [](u64 value) { return value != 0; });
         if (it == stored_bitset.end()) {
             return end();
@@ -144,13 +145,9 @@ public:
         return Iterator(this, first_id);
     }
 
-    [[nodiscard]] Iterator end() noexcept {
-        return Iterator(this, SlotId{});
-    }
+    [[nodiscard]] Iterator end() noexcept { return Iterator(this, SlotId{}); }
 
-    [[nodiscard]] size_t size() const noexcept {
-        return values_capacity - free_list.size();
-    }
+    [[nodiscard]] size_t size() const noexcept { return values_capacity - free_list.size(); }
 
 private:
     struct NonTrivialDummy {
@@ -165,25 +162,27 @@ private:
         T object;
     };
 
-    void SetStorageBit(u32 index) noexcept {
-        stored_bitset[index / 64] |= u64(1) << (index % 64);
-    }
+    void SetStorageBit(u32 index) noexcept { stored_bitset[index / 64] |= u64(1) << (index % 64); }
 
-    void ResetStorageBit(u32 index) noexcept {
+    void ResetStorageBit(u32 index) noexcept
+    {
         stored_bitset[index / 64] &= ~(u64(1) << (index % 64));
     }
 
-    bool ReadStorageBit(u32 index) noexcept {
+    bool ReadStorageBit(u32 index) noexcept
+    {
         return ((stored_bitset[index / 64] >> (index % 64)) & 1) != 0;
     }
 
-    void ValidateIndex(SlotId id) const noexcept {
+    void ValidateIndex(SlotId id) const noexcept
+    {
         DEBUG_ASSERT(id);
         DEBUG_ASSERT(id.Value() / 64 < stored_bitset.size());
         DEBUG_ASSERT(((stored_bitset[id.Value() / 64] >> (id.Value() % 64)) & 1) != 0);
     }
 
-    [[nodiscard]] u32 FreeValueIndex() noexcept {
+    [[nodiscard]] u32 FreeValueIndex() noexcept
+    {
         if (free_list.empty()) {
             Reserve(values_capacity ? (values_capacity << 1) : 1);
         }
@@ -192,7 +191,8 @@ private:
         return free_index;
     }
 
-    void Reserve(size_t new_capacity) noexcept {
+    void Reserve(size_t new_capacity) noexcept
+    {
         Entry* const new_values = new Entry[new_capacity];
         size_t index = 0;
         for (u64 bits : stored_bitset) {
@@ -227,9 +227,9 @@ private:
 
 } // namespace Common
 
-template <>
-struct std::hash<Common::SlotId> {
-    size_t operator()(const Common::SlotId& id) const noexcept {
+template<> struct std::hash<Common::SlotId> {
+    size_t operator()(const Common::SlotId& id) const noexcept
+    {
         return std::hash<u32>{}(id.index);
     }
 };

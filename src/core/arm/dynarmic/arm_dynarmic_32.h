@@ -19,7 +19,7 @@ class Memory;
 namespace Kernel {
 enum class DebugWatchpointType : u8;
 class KPRocess;
-}
+} // namespace Kernel
 
 namespace Core {
 
@@ -35,8 +35,9 @@ public:
     u32 MemoryRead32(u32 vaddr) override;
     u64 MemoryRead64(u32 vaddr) override;
     std::optional<u32> MemoryReadCode(u32 vaddr) override;
-    void InstructionSynchronizationBarrierRaised() override {
-        last_code_addr = u64(-1); //reset back, force refetch
+    void InstructionSynchronizationBarrierRaised() override
+    {
+        last_code_addr = u64(-1); // reset back, force refetch
     }
     void MemoryWrite8(u32 vaddr, u8 value) override;
     void MemoryWrite16(u32 vaddr, u16 value) override;
@@ -64,12 +65,11 @@ public:
 
 class ArmDynarmic32 final : public ArmInterface {
 public:
-    ArmDynarmic32(System& system, bool uses_wall_clock, Kernel::KProcess* process, DynarmicExclusiveMonitor& exclusive_monitor, std::size_t core_index);
+    ArmDynarmic32(System& system, bool uses_wall_clock, Kernel::KProcess* process,
+                  DynarmicExclusiveMonitor& exclusive_monitor, std::size_t core_index);
     ~ArmDynarmic32() override;
 
-    Architecture GetArchitecture() const override {
-        return Architecture::AArch32;
-    }
+    Architecture GetArchitecture() const override { return Architecture::AArch32; }
 
     bool IsInThumbMode() const;
 

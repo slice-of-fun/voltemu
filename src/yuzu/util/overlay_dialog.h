@@ -5,10 +5,9 @@
 
 #pragma once
 
+#include <QDialog>
 #include <memory>
 #include <thread>
-
-#include <QDialog>
 
 #include "common/common_types.h"
 
@@ -80,8 +79,7 @@ private:
      *
      * @tparam HIDButton The list of buttons that can be converted into keyboard input.
      */
-    template <Core::HID::NpadButton... T>
-    void HandleButtonPressedOnce();
+    template<Core::HID::NpadButton... T> void HandleButtonPressedOnce();
 
     /**
      * Translates a button press to focus or click either the left or right buttons.

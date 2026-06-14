@@ -3,10 +3,10 @@
 
 #pragma once
 
-#include <memory>
 #include <QDialog>
 #include <QStyledItemDelegate>
 #include <QTableView>
+#include <memory>
 
 namespace Ui {
 class DepsDialog;

@@ -33,8 +33,9 @@ private:
 
     Result GetRegionCode(Out<SystemRegionCode> out_region_code);
 
-    Result GetAvailableLanguageCodes2(
-        Out<s32> out_count, OutArray<LanguageCode, BufferAttr_HipcMapAlias> language_codes);
+    Result
+    GetAvailableLanguageCodes2(Out<s32> out_count,
+                               OutArray<LanguageCode, BufferAttr_HipcMapAlias> language_codes);
 
     Result GetAvailableLanguageCodeCount2(Out<s32> out_count);
 
@@ -44,10 +45,11 @@ private:
 
     Result GetKeyCodeMap2(OutLargeData<KeyCodeMap, BufferAttr_HipcMapAlias> out_key_code_map);
 
-    Result GetDeviceNickName(
-        OutLargeData<std::array<u8, 0x80>, BufferAttr_HipcMapAlias> out_device_name);
-    
-    Result GetKeyCodeMapByPort(OutLargeData<KeyCodeMap, BufferAttr_HipcMapAlias> out_key_code_map, u32 port);
+    Result
+    GetDeviceNickName(OutLargeData<std::array<u8, 0x80>, BufferAttr_HipcMapAlias> out_device_name);
+
+    Result GetKeyCodeMapByPort(OutLargeData<KeyCodeMap, BufferAttr_HipcMapAlias> out_key_code_map,
+                               u32 port);
 };
 
 } // namespace Service::Set

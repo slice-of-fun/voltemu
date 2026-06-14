@@ -3,9 +3,9 @@
 
 #pragma once
 
-#include <memory>
 #include <QFutureWatcher>
 #include <QWizard>
+#include <memory>
 
 namespace Ui {
 class CompatDB;

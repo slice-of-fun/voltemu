@@ -10,6 +10,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+
 #include "common/announce_multiplayer_room.h"
 #include "common/common_types.h"
 #include "common/socket_types.h"
@@ -109,15 +110,13 @@ public:
     using MemberList = std::vector<MemberInformation>;
 
     // The handle for the callback functions
-    template <typename T>
-    using CallbackHandle = std::shared_ptr<std::function<void(const T&)>>;
+    template<typename T> using CallbackHandle = std::shared_ptr<std::function<void(const T&)>>;
 
     /**
      * Unbinds a callback function from the events.
      * @param handle The connection handle to disconnect
      */
-    template <typename T>
-    void Unbind(CallbackHandle<T> handle);
+    template<typename T> void Unbind(CallbackHandle<T> handle);
 
     RoomMember();
     ~RoomMember();
@@ -227,8 +226,8 @@ public:
      * @param callback The function to call
      * @return A handle used for removing the function from the registered list
      */
-    CallbackHandle<ProxyPacket> BindOnProxyPacketReceived(
-        std::function<void(const ProxyPacket&)> callback);
+    CallbackHandle<ProxyPacket>
+    BindOnProxyPacketReceived(std::function<void(const ProxyPacket&)> callback);
 
     /**
      * Binds a function to an event that will be triggered every time an LDNPacket is received.
@@ -237,8 +236,8 @@ public:
      * @param callback The function to call
      * @return A handle used for removing the function from the registered list
      */
-    CallbackHandle<LDNPacket> BindOnLdnPacketReceived(
-        std::function<void(const LDNPacket&)> callback);
+    CallbackHandle<LDNPacket>
+    BindOnLdnPacketReceived(std::function<void(const LDNPacket&)> callback);
 
     /**
      * Binds a function to an event that will be triggered every time the RoomInformation changes.
@@ -247,8 +246,8 @@ public:
      * @param callback The function to call
      * @return A handle used for removing the function from the registered list
      */
-    CallbackHandle<RoomInformation> BindOnRoomInformationChanged(
-        std::function<void(const RoomInformation&)> callback);
+    CallbackHandle<RoomInformation>
+    BindOnRoomInformationChanged(std::function<void(const RoomInformation&)> callback);
 
     /**
      * Binds a function to an event that will be triggered every time a ChatMessage is received.
@@ -257,8 +256,8 @@ public:
      * @param callback The function to call
      * @return A handle used for removing the function from the registered list
      */
-    CallbackHandle<ChatEntry> BindOnChatMessageReceived(
-        std::function<void(const ChatEntry&)> callback);
+    CallbackHandle<ChatEntry>
+    BindOnChatMessageReceived(std::function<void(const ChatEntry&)> callback);
 
     /**
      * Binds a function to an event that will be triggered every time a StatusMessage is
@@ -267,8 +266,8 @@ public:
      * @param callback The function to call
      * @return A handle used for removing the function from the registered list
      */
-    CallbackHandle<StatusMessageEntry> BindOnStatusMessageReceived(
-        std::function<void(const StatusMessageEntry&)> callback);
+    CallbackHandle<StatusMessageEntry>
+    BindOnStatusMessageReceived(std::function<void(const StatusMessageEntry&)> callback);
 
     /**
      * Binds a function to an event that will be triggered every time a requested ban list
@@ -277,8 +276,8 @@ public:
      * @param callback The function to call
      * @return A handle used for removing the function from the registered list
      */
-    CallbackHandle<Room::BanList> BindOnBanListReceived(
-        std::function<void(const Room::BanList&)> callback);
+    CallbackHandle<Room::BanList>
+    BindOnBanListReceived(std::function<void(const Room::BanList&)> callback);
 
     /**
      * Leaves the current room.
@@ -290,7 +289,8 @@ private:
     std::unique_ptr<RoomMemberImpl> room_member_impl;
 };
 
-inline const char* GetStateStr(const RoomMember::State& s) {
+inline const char* GetStateStr(const RoomMember::State& s)
+{
     switch (s) {
     case RoomMember::State::Uninitialized:
         return "Uninitialized";
@@ -306,7 +306,8 @@ inline const char* GetStateStr(const RoomMember::State& s) {
     return "Unknown";
 }
 
-inline const char* GetErrorStr(const RoomMember::Error& e) {
+inline const char* GetErrorStr(const RoomMember::Error& e)
+{
     switch (e) {
     case RoomMember::Error::LostConnection:
         return "LostConnection";

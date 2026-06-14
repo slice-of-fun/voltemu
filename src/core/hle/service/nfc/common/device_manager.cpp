@@ -4,6 +4,8 @@
 // SPDX-FileCopyrightText: Copyright 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+#include "core/hle/service/nfc/common/device_manager.h"
+
 #include <algorithm>
 
 #include "common/logging.h"
@@ -12,7 +14,6 @@
 #include "core/hle/service/glue/time/static.h"
 #include "core/hle/service/ipc_helpers.h"
 #include "core/hle/service/nfc/common/device.h"
-#include "core/hle/service/nfc/common/device_manager.h"
 #include "core/hle/service/nfc/nfc_result.h"
 #include "core/hle/service/psc/time/steady_clock.h"
 #include "core/hle/service/service.h"
@@ -24,7 +25,8 @@
 namespace Service::NFC {
 
 DeviceManager::DeviceManager(Core::System& system_, KernelHelpers::ServiceContext& service_context_)
-    : system{system_}, service_context{service_context_} {
+    : system{system_}, service_context{service_context_}
+{
 
     availability_change_event =
         service_context.CreateEvent("Nfc:DeviceManager:AvailabilityChangeEvent");
@@ -41,14 +43,16 @@ DeviceManager::DeviceManager(Core::System& system_, KernelHelpers::ServiceContex
         system.ServiceManager().GetService<Service::Set::ISystemSettingsServer>("set:sys", true);
 }
 
-DeviceManager ::~DeviceManager() {
+DeviceManager ::~DeviceManager()
+{
     if (is_initialized) {
         Finalize();
     }
     service_context.CloseEvent(availability_change_event);
 }
 
-Result DeviceManager::Initialize() {
+Result DeviceManager::Initialize()
+{
     for (auto& device : devices) {
         device->Initialize();
     }
@@ -56,7 +60,8 @@ Result DeviceManager::Initialize() {
     return ResultSuccess;
 }
 
-Result DeviceManager::Finalize() {
+Result DeviceManager::Finalize()
+{
     for (auto& device : devices) {
         device->Finalize();
     }
@@ -65,7 +70,8 @@ Result DeviceManager::Finalize() {
 }
 
 Result DeviceManager::ListDevices(std::vector<u64>& nfp_devices, std::size_t max_allowed_devices,
-                                  bool skip_fatal_errors) const {
+                                  bool skip_fatal_errors) const
+{
     std::scoped_lock lock{mutex};
     if (max_allowed_devices < 1) {
         return ResultInvalidArgument;
@@ -121,7 +127,8 @@ Result DeviceManager::ListDevices(std::vector<u64>& nfp_devices, std::size_t max
     return result;
 }
 
-DeviceState DeviceManager::GetDeviceState(u64 device_handle) const {
+DeviceState DeviceManager::GetDeviceState(u64 device_handle) const
+{
     std::scoped_lock lock{mutex};
 
     std::shared_ptr<NfcDevice> device = nullptr;
@@ -134,7 +141,8 @@ DeviceState DeviceManager::GetDeviceState(u64 device_handle) const {
     return DeviceState::Finalized;
 }
 
-Result DeviceManager::GetNpadId(u64 device_handle, Core::HID::NpadIdType& npad_id) {
+Result DeviceManager::GetNpadId(u64 device_handle, Core::HID::NpadIdType& npad_id)
+{
     std::scoped_lock lock{mutex};
 
     std::shared_ptr<NfcDevice> device = nullptr;
@@ -148,11 +156,13 @@ Result DeviceManager::GetNpadId(u64 device_handle, Core::HID::NpadIdType& npad_i
     return result;
 }
 
-Kernel::KReadableEvent& DeviceManager::AttachAvailabilityChangeEvent() const {
+Kernel::KReadableEvent& DeviceManager::AttachAvailabilityChangeEvent() const
+{
     return availability_change_event->GetReadableEvent();
 }
 
-Result DeviceManager::StartDetection(u64 device_handle, NfcProtocol tag_protocol) {
+Result DeviceManager::StartDetection(u64 device_handle, NfcProtocol tag_protocol)
+{
     std::scoped_lock lock{mutex};
 
     std::shared_ptr<NfcDevice> device = nullptr;
@@ -166,7 +176,8 @@ Result DeviceManager::StartDetection(u64 device_handle, NfcProtocol tag_protocol
     return result;
 }
 
-Result DeviceManager::StopDetection(u64 device_handle) {
+Result DeviceManager::StopDetection(u64 device_handle)
+{
     std::scoped_lock lock{mutex};
 
     std::shared_ptr<NfcDevice> device = nullptr;
@@ -180,7 +191,8 @@ Result DeviceManager::StopDetection(u64 device_handle) {
     return result;
 }
 
-Result DeviceManager::GetTagInfo(u64 device_handle, TagInfo& tag_info) {
+Result DeviceManager::GetTagInfo(u64 device_handle, TagInfo& tag_info)
+{
     std::scoped_lock lock{mutex};
 
     std::shared_ptr<NfcDevice> device = nullptr;
@@ -195,7 +207,8 @@ Result DeviceManager::GetTagInfo(u64 device_handle, TagInfo& tag_info) {
 }
 
 Result DeviceManager::AttachActivateEvent(Kernel::KReadableEvent** out_event,
-                                          u64 device_handle) const {
+                                          u64 device_handle) const
+{
     std::vector<u64> nfp_devices;
     std::shared_ptr<NfcDevice> device = nullptr;
     Result result = ListDevices(nfp_devices, 9, false);
@@ -216,7 +229,8 @@ Result DeviceManager::AttachActivateEvent(Kernel::KReadableEvent** out_event,
 }
 
 Result DeviceManager::AttachDeactivateEvent(Kernel::KReadableEvent** out_event,
-                                            u64 device_handle) const {
+                                            u64 device_handle) const
+{
     std::vector<u64> nfp_devices;
     std::shared_ptr<NfcDevice> device = nullptr;
     Result result = ListDevices(nfp_devices, 9, false);
@@ -238,7 +252,8 @@ Result DeviceManager::AttachDeactivateEvent(Kernel::KReadableEvent** out_event,
 
 Result DeviceManager::ReadMifare(u64 device_handle,
                                  std::span<const MifareReadBlockParameter> read_parameters,
-                                 std::span<MifareReadBlockData> read_data) {
+                                 std::span<MifareReadBlockData> read_data)
+{
     std::scoped_lock lock{mutex};
 
     std::shared_ptr<NfcDevice> device = nullptr;
@@ -253,7 +268,8 @@ Result DeviceManager::ReadMifare(u64 device_handle,
 }
 
 Result DeviceManager::WriteMifare(u64 device_handle,
-                                  std::span<const MifareWriteBlockParameter> write_parameters) {
+                                  std::span<const MifareWriteBlockParameter> write_parameters)
+{
     std::scoped_lock lock{mutex};
 
     std::shared_ptr<NfcDevice> device = nullptr;
@@ -269,7 +285,8 @@ Result DeviceManager::WriteMifare(u64 device_handle,
 
 Result DeviceManager::SendCommandByPassThrough(u64 device_handle, const s64& timeout,
                                                std::span<const u8> command_data,
-                                               std::span<u8> out_data) {
+                                               std::span<u8> out_data)
+{
     std::scoped_lock lock{mutex};
 
     std::shared_ptr<NfcDevice> device = nullptr;
@@ -284,7 +301,8 @@ Result DeviceManager::SendCommandByPassThrough(u64 device_handle, const s64& tim
 }
 
 Result DeviceManager::Mount(u64 device_handle, NFP::ModelType model_type,
-                            NFP::MountTarget mount_target) {
+                            NFP::MountTarget mount_target)
+{
     std::scoped_lock lock{mutex};
 
     std::shared_ptr<NfcDevice> device = nullptr;
@@ -298,7 +316,8 @@ Result DeviceManager::Mount(u64 device_handle, NFP::ModelType model_type,
     return result;
 }
 
-Result DeviceManager::Unmount(u64 device_handle) {
+Result DeviceManager::Unmount(u64 device_handle)
+{
     std::scoped_lock lock{mutex};
 
     std::shared_ptr<NfcDevice> device = nullptr;
@@ -312,7 +331,8 @@ Result DeviceManager::Unmount(u64 device_handle) {
     return result;
 }
 
-Result DeviceManager::OpenApplicationArea(u64 device_handle, u32 access_id) {
+Result DeviceManager::OpenApplicationArea(u64 device_handle, u32 access_id)
+{
     std::scoped_lock lock{mutex};
 
     std::shared_ptr<NfcDevice> device = nullptr;
@@ -326,7 +346,8 @@ Result DeviceManager::OpenApplicationArea(u64 device_handle, u32 access_id) {
     return result;
 }
 
-Result DeviceManager::GetApplicationArea(u64 device_handle, std::span<u8> data) {
+Result DeviceManager::GetApplicationArea(u64 device_handle, std::span<u8> data)
+{
     std::scoped_lock lock{mutex};
 
     std::shared_ptr<NfcDevice> device = nullptr;
@@ -340,7 +361,8 @@ Result DeviceManager::GetApplicationArea(u64 device_handle, std::span<u8> data) 
     return result;
 }
 
-Result DeviceManager::SetApplicationArea(u64 device_handle, std::span<const u8> data) {
+Result DeviceManager::SetApplicationArea(u64 device_handle, std::span<const u8> data)
+{
     std::scoped_lock lock{mutex};
 
     std::shared_ptr<NfcDevice> device = nullptr;
@@ -354,7 +376,8 @@ Result DeviceManager::SetApplicationArea(u64 device_handle, std::span<const u8> 
     return result;
 }
 
-Result DeviceManager::Flush(u64 device_handle) {
+Result DeviceManager::Flush(u64 device_handle)
+{
     std::scoped_lock lock{mutex};
 
     std::shared_ptr<NfcDevice> device = nullptr;
@@ -368,7 +391,8 @@ Result DeviceManager::Flush(u64 device_handle) {
     return result;
 }
 
-Result DeviceManager::Restore(u64 device_handle) {
+Result DeviceManager::Restore(u64 device_handle)
+{
     std::scoped_lock lock{mutex};
 
     std::shared_ptr<NfcDevice> device = nullptr;
@@ -383,7 +407,8 @@ Result DeviceManager::Restore(u64 device_handle) {
 }
 
 Result DeviceManager::CreateApplicationArea(u64 device_handle, u32 access_id,
-                                            std::span<const u8> data) {
+                                            std::span<const u8> data)
+{
     std::scoped_lock lock{mutex};
 
     std::shared_ptr<NfcDevice> device = nullptr;
@@ -397,7 +422,8 @@ Result DeviceManager::CreateApplicationArea(u64 device_handle, u32 access_id,
     return result;
 }
 
-Result DeviceManager::GetRegisterInfo(u64 device_handle, NFP::RegisterInfo& register_info) {
+Result DeviceManager::GetRegisterInfo(u64 device_handle, NFP::RegisterInfo& register_info)
+{
     std::scoped_lock lock{mutex};
 
     std::shared_ptr<NfcDevice> device = nullptr;
@@ -411,7 +437,8 @@ Result DeviceManager::GetRegisterInfo(u64 device_handle, NFP::RegisterInfo& regi
     return result;
 }
 
-Result DeviceManager::GetCommonInfo(u64 device_handle, NFP::CommonInfo& common_info) {
+Result DeviceManager::GetCommonInfo(u64 device_handle, NFP::CommonInfo& common_info)
+{
     std::scoped_lock lock{mutex};
 
     std::shared_ptr<NfcDevice> device = nullptr;
@@ -425,7 +452,8 @@ Result DeviceManager::GetCommonInfo(u64 device_handle, NFP::CommonInfo& common_i
     return result;
 }
 
-Result DeviceManager::GetModelInfo(u64 device_handle, NFP::ModelInfo& model_info) {
+Result DeviceManager::GetModelInfo(u64 device_handle, NFP::ModelInfo& model_info)
+{
     std::scoped_lock lock{mutex};
 
     std::shared_ptr<NfcDevice> device = nullptr;
@@ -439,12 +467,14 @@ Result DeviceManager::GetModelInfo(u64 device_handle, NFP::ModelInfo& model_info
     return result;
 }
 
-u32 DeviceManager::GetApplicationAreaSize() const {
+u32 DeviceManager::GetApplicationAreaSize() const
+{
     return sizeof(NFP::ApplicationArea);
 }
 
 Result DeviceManager::RecreateApplicationArea(u64 device_handle, u32 access_id,
-                                              std::span<const u8> data) {
+                                              std::span<const u8> data)
+{
     std::scoped_lock lock{mutex};
 
     std::shared_ptr<NfcDevice> device = nullptr;
@@ -458,7 +488,8 @@ Result DeviceManager::RecreateApplicationArea(u64 device_handle, u32 access_id,
     return result;
 }
 
-Result DeviceManager::Format(u64 device_handle) {
+Result DeviceManager::Format(u64 device_handle)
+{
     std::scoped_lock lock{mutex};
 
     std::shared_ptr<NfcDevice> device = nullptr;
@@ -472,7 +503,8 @@ Result DeviceManager::Format(u64 device_handle) {
     return result;
 }
 
-Result DeviceManager::GetAdminInfo(u64 device_handle, NFP::AdminInfo& admin_info) {
+Result DeviceManager::GetAdminInfo(u64 device_handle, NFP::AdminInfo& admin_info)
+{
     std::scoped_lock lock{mutex};
 
     std::shared_ptr<NfcDevice> device = nullptr;
@@ -487,7 +519,8 @@ Result DeviceManager::GetAdminInfo(u64 device_handle, NFP::AdminInfo& admin_info
 }
 
 Result DeviceManager::GetRegisterInfoPrivate(u64 device_handle,
-                                             NFP::RegisterInfoPrivate& register_info) {
+                                             NFP::RegisterInfoPrivate& register_info)
+{
     std::scoped_lock lock{mutex};
 
     std::shared_ptr<NfcDevice> device = nullptr;
@@ -502,7 +535,8 @@ Result DeviceManager::GetRegisterInfoPrivate(u64 device_handle,
 }
 
 Result DeviceManager::SetRegisterInfoPrivate(u64 device_handle,
-                                             const NFP::RegisterInfoPrivate& register_info) {
+                                             const NFP::RegisterInfoPrivate& register_info)
+{
     std::scoped_lock lock{mutex};
 
     std::shared_ptr<NfcDevice> device = nullptr;
@@ -516,7 +550,8 @@ Result DeviceManager::SetRegisterInfoPrivate(u64 device_handle,
     return result;
 }
 
-Result DeviceManager::DeleteRegisterInfo(u64 device_handle) {
+Result DeviceManager::DeleteRegisterInfo(u64 device_handle)
+{
     std::scoped_lock lock{mutex};
 
     std::shared_ptr<NfcDevice> device = nullptr;
@@ -530,7 +565,8 @@ Result DeviceManager::DeleteRegisterInfo(u64 device_handle) {
     return result;
 }
 
-Result DeviceManager::DeleteApplicationArea(u64 device_handle) {
+Result DeviceManager::DeleteApplicationArea(u64 device_handle)
+{
     std::scoped_lock lock{mutex};
 
     std::shared_ptr<NfcDevice> device = nullptr;
@@ -544,7 +580,8 @@ Result DeviceManager::DeleteApplicationArea(u64 device_handle) {
     return result;
 }
 
-Result DeviceManager::ExistsApplicationArea(u64 device_handle, bool& has_application_area) {
+Result DeviceManager::ExistsApplicationArea(u64 device_handle, bool& has_application_area)
+{
     std::scoped_lock lock{mutex};
 
     std::shared_ptr<NfcDevice> device = nullptr;
@@ -558,7 +595,8 @@ Result DeviceManager::ExistsApplicationArea(u64 device_handle, bool& has_applica
     return result;
 }
 
-Result DeviceManager::GetAll(u64 device_handle, NFP::NfpData& nfp_data) {
+Result DeviceManager::GetAll(u64 device_handle, NFP::NfpData& nfp_data)
+{
     std::scoped_lock lock{mutex};
 
     std::shared_ptr<NfcDevice> device = nullptr;
@@ -572,7 +610,8 @@ Result DeviceManager::GetAll(u64 device_handle, NFP::NfpData& nfp_data) {
     return result;
 }
 
-Result DeviceManager::SetAll(u64 device_handle, const NFP::NfpData& nfp_data) {
+Result DeviceManager::SetAll(u64 device_handle, const NFP::NfpData& nfp_data)
+{
     std::scoped_lock lock{mutex};
 
     std::shared_ptr<NfcDevice> device = nullptr;
@@ -586,7 +625,8 @@ Result DeviceManager::SetAll(u64 device_handle, const NFP::NfpData& nfp_data) {
     return result;
 }
 
-Result DeviceManager::FlushDebug(u64 device_handle) {
+Result DeviceManager::FlushDebug(u64 device_handle)
+{
     std::scoped_lock lock{mutex};
 
     std::shared_ptr<NfcDevice> device = nullptr;
@@ -600,7 +640,8 @@ Result DeviceManager::FlushDebug(u64 device_handle) {
     return result;
 }
 
-Result DeviceManager::BreakTag(u64 device_handle, NFP::BreakType break_type) {
+Result DeviceManager::BreakTag(u64 device_handle, NFP::BreakType break_type)
+{
     std::scoped_lock lock{mutex};
 
     std::shared_ptr<NfcDevice> device = nullptr;
@@ -614,7 +655,8 @@ Result DeviceManager::BreakTag(u64 device_handle, NFP::BreakType break_type) {
     return result;
 }
 
-Result DeviceManager::ReadBackupData(u64 device_handle, std::span<u8> data) {
+Result DeviceManager::ReadBackupData(u64 device_handle, std::span<u8> data)
+{
     std::scoped_lock lock{mutex};
 
     std::shared_ptr<NfcDevice> device = nullptr;
@@ -633,7 +675,8 @@ Result DeviceManager::ReadBackupData(u64 device_handle, std::span<u8> data) {
     return result;
 }
 
-Result DeviceManager::WriteBackupData(u64 device_handle, std::span<const u8> data) {
+Result DeviceManager::WriteBackupData(u64 device_handle, std::span<const u8> data)
+{
     std::scoped_lock lock{mutex};
 
     std::shared_ptr<NfcDevice> device = nullptr;
@@ -652,7 +695,8 @@ Result DeviceManager::WriteBackupData(u64 device_handle, std::span<const u8> dat
     return result;
 }
 
-Result DeviceManager::WriteNtf(u64 device_handle, NFP::WriteType, std::span<const u8> data) {
+Result DeviceManager::WriteNtf(u64 device_handle, NFP::WriteType, std::span<const u8> data)
+{
     std::scoped_lock lock{mutex};
 
     std::shared_ptr<NfcDevice> device = nullptr;
@@ -667,7 +711,8 @@ Result DeviceManager::WriteNtf(u64 device_handle, NFP::WriteType, std::span<cons
 }
 
 Result DeviceManager::CheckHandleOnList(u64 device_handle,
-                                        const std::span<const u64> device_list) const {
+                                        const std::span<const u64> device_list) const
+{
     if (device_list.size() < 1) {
         return ResultDeviceNotFound;
     }
@@ -680,7 +725,8 @@ Result DeviceManager::CheckHandleOnList(u64 device_handle,
 }
 
 Result DeviceManager::GetDeviceFromHandle(u64 handle, std::shared_ptr<NfcDevice>& nfc_device,
-                                          bool check_state) const {
+                                          bool check_state) const
+{
     if (check_state) {
         const Result is_parameter_set = IsNfcParameterSet();
         if (is_parameter_set.IsError()) {
@@ -706,7 +752,8 @@ Result DeviceManager::GetDeviceFromHandle(u64 handle, std::shared_ptr<NfcDevice>
     return ResultDeviceNotFound;
 }
 
-std::optional<std::shared_ptr<NfcDevice>> DeviceManager::GetNfcDevice(u64 handle) {
+std::optional<std::shared_ptr<NfcDevice>> DeviceManager::GetNfcDevice(u64 handle)
+{
     for (auto& device : devices) {
         if (device->GetHandle() == handle) {
             return device;
@@ -715,7 +762,8 @@ std::optional<std::shared_ptr<NfcDevice>> DeviceManager::GetNfcDevice(u64 handle
     return std::nullopt;
 }
 
-const std::optional<std::shared_ptr<NfcDevice>> DeviceManager::GetNfcDevice(u64 handle) const {
+const std::optional<std::shared_ptr<NfcDevice>> DeviceManager::GetNfcDevice(u64 handle) const
+{
     for (auto& device : devices) {
         if (device->GetHandle() == handle) {
             return device;
@@ -724,7 +772,8 @@ const std::optional<std::shared_ptr<NfcDevice>> DeviceManager::GetNfcDevice(u64 
     return std::nullopt;
 }
 
-Result DeviceManager::GetDeviceHandle(u64 handle, std::shared_ptr<NfcDevice>& device) const {
+Result DeviceManager::GetDeviceHandle(u64 handle, std::shared_ptr<NfcDevice>& device) const
+{
     const auto result = GetDeviceFromHandle(handle, device, true);
     if (result.IsError()) {
         return result;
@@ -732,8 +781,8 @@ Result DeviceManager::GetDeviceHandle(u64 handle, std::shared_ptr<NfcDevice>& de
     return CheckDeviceState(device);
 }
 
-Result DeviceManager::VerifyDeviceResult(std::shared_ptr<NfcDevice> device,
-                                         Result operation_result) {
+Result DeviceManager::VerifyDeviceResult(std::shared_ptr<NfcDevice> device, Result operation_result)
+{
     if (operation_result.IsSuccess()) {
         return operation_result;
     }
@@ -772,7 +821,8 @@ Result DeviceManager::VerifyDeviceResult(std::shared_ptr<NfcDevice> device,
     return operation_result;
 }
 
-Result DeviceManager::CheckDeviceState(std::shared_ptr<NfcDevice> device) const {
+Result DeviceManager::CheckDeviceState(std::shared_ptr<NfcDevice> device) const
+{
     if (device == nullptr) {
         return ResultInvalidArgument;
     }
@@ -780,7 +830,8 @@ Result DeviceManager::CheckDeviceState(std::shared_ptr<NfcDevice> device) const 
     return ResultSuccess;
 }
 
-Result DeviceManager::IsNfcEnabled() const {
+Result DeviceManager::IsNfcEnabled() const
+{
     bool is_enabled{};
     R_TRY(m_set_sys->GetNfcEnableFlag(&is_enabled));
     if (!is_enabled) {
@@ -789,7 +840,8 @@ Result DeviceManager::IsNfcEnabled() const {
     return ResultSuccess;
 }
 
-Result DeviceManager::IsNfcParameterSet() const {
+Result DeviceManager::IsNfcParameterSet() const
+{
     // TODO: This calls checks against a bool on offset 0x450
     const bool is_set = true;
     if (!is_set) {
@@ -798,7 +850,8 @@ Result DeviceManager::IsNfcParameterSet() const {
     return ResultSuccess;
 }
 
-Result DeviceManager::IsNfcInitialized() const {
+Result DeviceManager::IsNfcInitialized() const
+{
     if (!is_initialized) {
         return ResultNfcNotInitialized;
     }

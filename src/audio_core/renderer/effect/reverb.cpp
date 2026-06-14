@@ -6,7 +6,8 @@
 namespace AudioCore::Renderer {
 
 void ReverbInfo::Update(BehaviorInfo::ErrorInfo& error_info, const InParameterVersion1& in_params,
-                        const PoolMapper& pool_mapper) {
+                        const PoolMapper& pool_mapper)
+{
     auto in_specific{reinterpret_cast<const ParameterVersion1*>(in_params.specific.data())};
     auto params{reinterpret_cast<ParameterVersion1*>(parameter.data())};
 
@@ -39,7 +40,8 @@ void ReverbInfo::Update(BehaviorInfo::ErrorInfo& error_info, const InParameterVe
 }
 
 void ReverbInfo::Update(BehaviorInfo::ErrorInfo& error_info, const InParameterVersion2& in_params,
-                        const PoolMapper& pool_mapper) {
+                        const PoolMapper& pool_mapper)
+{
     auto in_specific{reinterpret_cast<const ParameterVersion2*>(in_params.specific.data())};
     auto params{reinterpret_cast<ParameterVersion2*>(parameter.data())};
 
@@ -71,7 +73,8 @@ void ReverbInfo::Update(BehaviorInfo::ErrorInfo& error_info, const InParameterVe
     error_info.address = CpuAddr(0);
 }
 
-void ReverbInfo::UpdateForCommandGeneration() {
+void ReverbInfo::UpdateForCommandGeneration()
+{
     if (enabled) {
         usage_state = UsageState::Enabled;
     } else {
@@ -82,11 +85,16 @@ void ReverbInfo::UpdateForCommandGeneration() {
     params->state = ParameterState::Updated;
 }
 
-void ReverbInfo::InitializeResultState(EffectResultState& result_state) {}
+void ReverbInfo::InitializeResultState(EffectResultState& result_state)
+{
+}
 
-void ReverbInfo::UpdateResultState(EffectResultState& cpu_state, EffectResultState& dsp_state) {}
+void ReverbInfo::UpdateResultState(EffectResultState& cpu_state, EffectResultState& dsp_state)
+{
+}
 
-CpuAddr ReverbInfo::GetWorkbuffer(s32 index) {
+CpuAddr ReverbInfo::GetWorkbuffer(s32 index)
+{
     return GetSingleBuffer(index);
 }
 

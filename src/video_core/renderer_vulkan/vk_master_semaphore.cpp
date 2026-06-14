@@ -4,11 +4,12 @@
 // SPDX-FileCopyrightText: Copyright 2020 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include <thread>
+#include "video_core/renderer_vulkan/vk_master_semaphore.h"
 
 #include <ranges>
+#include <thread>
+
 #include "common/settings.h"
-#include "video_core/renderer_vulkan/vk_master_semaphore.h"
 #include "video_core/vulkan_common/vulkan_device.h"
 #include "video_core/vulkan_common/vulkan_wrapper.h"
 
@@ -16,7 +17,8 @@ namespace Vulkan {
 
 constexpr u64 FENCE_RESERVE_SIZE = 8;
 
-MasterSemaphore::MasterSemaphore(const Device& device_) : device(device_) {
+MasterSemaphore::MasterSemaphore(const Device& device_) : device(device_)
+{
     if (!device.HasTimelineSemaphore()) {
         static constexpr VkFenceCreateInfo fence_ci{
             .sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO, .pNext = nullptr, .flags = 0};
@@ -58,7 +60,8 @@ MasterSemaphore::MasterSemaphore(const Device& device_) : device(device_) {
 
 MasterSemaphore::~MasterSemaphore() = default;
 
-void MasterSemaphore::Refresh() {
+void MasterSemaphore::Refresh()
+{
     if (!semaphore) {
         // If we don't support timeline semaphores, there's nothing to refresh
         return;
@@ -76,7 +79,8 @@ void MasterSemaphore::Refresh() {
                                              std::memory_order_relaxed));
 }
 
-void MasterSemaphore::Wait(u64 tick) {
+void MasterSemaphore::Wait(u64 tick)
+{
     if (!semaphore) {
         // Fast check: already reached the requested tick?
         if (gpu_tick.load(std::memory_order_acquire) >= tick) {
@@ -112,7 +116,8 @@ void MasterSemaphore::Wait(u64 tick) {
 
 VkResult MasterSemaphore::SubmitQueue(vk::CommandBuffer& cmdbuf, vk::CommandBuffer& upload_cmdbuf,
                                       VkSemaphore signal_semaphore, VkSemaphore wait_semaphore,
-                                      u64 host_tick) {
+                                      u64 host_tick)
+{
     if (semaphore) {
         return SubmitQueueTimeline(cmdbuf, upload_cmdbuf, signal_semaphore, wait_semaphore,
                                    host_tick);
@@ -121,13 +126,15 @@ VkResult MasterSemaphore::SubmitQueue(vk::CommandBuffer& cmdbuf, vk::CommandBuff
     }
 }
 
-static constexpr VkPipelineStageFlags wait_stage_mask = VK_PIPELINE_STAGE_VERTEX_SHADER_BIT | VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT |
-                                                        VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+static constexpr VkPipelineStageFlags wait_stage_mask =
+    VK_PIPELINE_STAGE_VERTEX_SHADER_BIT | VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT |
+    VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 
 VkResult MasterSemaphore::SubmitQueueTimeline(vk::CommandBuffer& cmdbuf,
                                               vk::CommandBuffer& upload_cmdbuf,
                                               VkSemaphore signal_semaphore,
-                                              VkSemaphore wait_semaphore, u64 host_tick) {
+                                              VkSemaphore wait_semaphore, u64 host_tick)
+{
     const VkSemaphore timeline_semaphore = *semaphore;
 
     const u32 num_signal_semaphores = signal_semaphore ? 2 : 1;
@@ -138,8 +145,7 @@ VkResult MasterSemaphore::SubmitQueueTimeline(vk::CommandBuffer& cmdbuf,
 
     const u32 num_wait_semaphores = wait_semaphore ? 1 : 0;
     // Pointers must be null when the count is zero (best-practices)
-    const VkSemaphore* p_wait_sems =
-        (num_wait_semaphores > 0) ? &wait_semaphore : nullptr;
+    const VkSemaphore* p_wait_sems = (num_wait_semaphores > 0) ? &wait_semaphore : nullptr;
     const VkPipelineStageFlags* p_wait_masks =
         (num_wait_semaphores > 0) ? &wait_stage_mask : nullptr;
     const VkSemaphore* p_signal_sems =
@@ -149,7 +155,7 @@ VkResult MasterSemaphore::SubmitQueueTimeline(vk::CommandBuffer& cmdbuf,
         .sType = VK_STRUCTURE_TYPE_TIMELINE_SEMAPHORE_SUBMIT_INFO,
         .pNext = nullptr,
         .waitSemaphoreValueCount = num_wait_semaphores,
-        .pWaitSemaphoreValues    = num_wait_semaphores ? &wait_zero : nullptr,
+        .pWaitSemaphoreValues = num_wait_semaphores ? &wait_zero : nullptr,
         .signalSemaphoreValueCount = num_signal_semaphores,
         .pSignalSemaphoreValues = signal_values.data(),
     };
@@ -171,16 +177,15 @@ VkResult MasterSemaphore::SubmitQueueTimeline(vk::CommandBuffer& cmdbuf,
 VkResult MasterSemaphore::SubmitQueueFence(vk::CommandBuffer& cmdbuf,
                                            vk::CommandBuffer& upload_cmdbuf,
                                            VkSemaphore signal_semaphore, VkSemaphore wait_semaphore,
-                                           u64 host_tick) {
+                                           u64 host_tick)
+{
     const u32 num_signal_semaphores = signal_semaphore ? 1 : 0;
     const u32 num_wait_semaphores = wait_semaphore ? 1 : 0;
 
-    const VkSemaphore* p_wait_sems =
-            (num_wait_semaphores > 0) ? &wait_semaphore : nullptr;
+    const VkSemaphore* p_wait_sems = (num_wait_semaphores > 0) ? &wait_semaphore : nullptr;
     const VkPipelineStageFlags* p_wait_masks =
         (num_wait_semaphores > 0) ? &wait_stage_mask : nullptr;
-    const VkSemaphore* p_signal_sems =
-        (num_signal_semaphores > 0) ? &signal_semaphore : nullptr;
+    const VkSemaphore* p_signal_sems = (num_signal_semaphores > 0) ? &signal_semaphore : nullptr;
     const std::array cmdbuffers{*upload_cmdbuf, *cmdbuf};
 
     const VkSubmitInfo submit_info{
@@ -207,7 +212,8 @@ VkResult MasterSemaphore::SubmitQueueFence(vk::CommandBuffer& cmdbuf,
     return result;
 }
 
-void MasterSemaphore::WaitThread(std::stop_token token) {
+void MasterSemaphore::WaitThread(std::stop_token token)
+{
     while (!token.stop_requested()) {
         u64 host_tick;
         vk::Fence fence;
@@ -233,7 +239,8 @@ void MasterSemaphore::WaitThread(std::stop_token token) {
     }
 }
 
-vk::Fence MasterSemaphore::GetFreeFence() {
+vk::Fence MasterSemaphore::GetFreeFence()
+{
     std::scoped_lock lock{free_mutex};
     if (free_queue.empty()) {
         static constexpr VkFenceCreateInfo fence_ci{

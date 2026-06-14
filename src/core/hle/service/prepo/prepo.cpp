@@ -4,15 +4,16 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/prepo/prepo.h"
+
+#include <cstring>
+
 #include "common/hex_util.h"
 #include "common/logging.h"
 #include "common/uuid.h"
-#include <cstring>
-
 #include "core/core.h"
 #include "core/hle/service/acc/profile_manager.h"
 #include "core/hle/service/ipc_helpers.h"
-#include "core/hle/service/prepo/prepo.h"
 #include "core/hle/service/server_manager.h"
 #include "core/hle/service/service.h"
 #include "core/reporter.h"
@@ -21,7 +22,8 @@ namespace Service::PlayReport {
 
 class PlayReport final : public ServiceFramework<PlayReport> {
 public:
-    explicit PlayReport(const char* name, Core::System& system_) : ServiceFramework{system_, name} {
+    explicit PlayReport(const char* name, Core::System& system_) : ServiceFramework{system_, name}
+    {
         // clang-format off
         static const FunctionInfo functions[] = {
             {10100, &PlayReport::SaveReport<Core::Reporter::PlayReportType::Old>, "SaveReportOld"},
@@ -63,8 +65,8 @@ public:
     }
 
 private:
-    template <Core::Reporter::PlayReportType Type>
-    void SaveReport(HLERequestContext& ctx) {
+    template<Core::Reporter::PlayReportType Type> void SaveReport(HLERequestContext& ctx)
+    {
         IPC::RequestParser rp{ctx};
         const auto process_id = rp.PopRaw<u64>();
 
@@ -83,8 +85,8 @@ private:
         rb.Push(ResultSuccess);
     }
 
-    template <Core::Reporter::PlayReportType Type>
-    void SaveReportWithUser(HLERequestContext& ctx) {
+    template<Core::Reporter::PlayReportType Type> void SaveReportWithUser(HLERequestContext& ctx)
+    {
         IPC::RequestParser rp{ctx};
         const auto user_id = rp.PopRaw<u128>();
         const auto process_id = rp.PopRaw<u64>();
@@ -105,14 +107,16 @@ private:
         rb.Push(ResultSuccess);
     }
 
-    void RequestImmediateTransmission(HLERequestContext& ctx) {
+    void RequestImmediateTransmission(HLERequestContext& ctx)
+    {
         LOG_WARNING(Service_PREPO, "(STUBBED) called");
 
         IPC::ResponseBuilder rb{ctx, 2};
         rb.Push(ResultSuccess);
     }
 
-    void GetTransmissionStatus(HLERequestContext& ctx) {
+    void GetTransmissionStatus(HLERequestContext& ctx)
+    {
         LOG_WARNING(Service_PREPO, "(STUBBED) called");
 
         constexpr s32 status = 0;
@@ -122,7 +126,8 @@ private:
         rb.Push(status);
     }
 
-    void GetSystemSessionId(HLERequestContext& ctx) {
+    void GetSystemSessionId(HLERequestContext& ctx)
+    {
         LOG_WARNING(Service_PREPO, "(STUBBED) called");
 
         constexpr u64 system_session_id = 0;
@@ -131,7 +136,8 @@ private:
         rb.Push(system_session_id);
     }
 
-    void SaveSystemReportOld(HLERequestContext& ctx) {
+    void SaveSystemReportOld(HLERequestContext& ctx)
+    {
         IPC::RequestParser rp{ctx};
         const auto title_id = rp.PopRaw<u64>();
 
@@ -145,7 +151,8 @@ private:
         rb.Push(ResultSuccess);
     }
 
-    void SaveSystemReportWithUserOld(HLERequestContext& ctx) {
+    void SaveSystemReportWithUserOld(HLERequestContext& ctx)
+    {
         IPC::RequestParser rp{ctx};
         const auto user_id = rp.PopRaw<u128>();
         const auto title_id = rp.PopRaw<u64>();
@@ -169,7 +176,8 @@ private:
     }
 
     // (21.0.0+) buffers: [0x9 (X), 0x5 (A)], inbytes: 0x10
-    void SaveSystemReport(HLERequestContext& ctx) {
+    void SaveSystemReport(HLERequestContext& ctx)
+    {
         IPC::RequestParser rp{ctx};
         const auto field0 = rp.PopRaw<u64>();
         const auto title_id = rp.PopRaw<u64>();
@@ -178,8 +186,8 @@ private:
         const auto data_a = ctx.ReadBufferA(0);
 
         LOG_DEBUG(Service_PREPO,
-                  "called, field0={}, title_id={:016X}, data_a_size={}, data_x_size={}",
-                  field0, title_id, data_a.size(), data_x.size());
+                  "called, field0={}, title_id={:016X}, data_a_size={}, data_x_size={}", field0,
+                  title_id, data_a.size(), data_x.size());
 
         const auto& reporter{system.GetReporter()};
         reporter.SavePlayReport(Core::Reporter::PlayReportType::System, title_id, {data_a, data_x});
@@ -189,7 +197,8 @@ private:
     }
 
     // (21.0.0+) buffers: [0x9 (X), 0x5 (A)], inbytes: 0x20
-    void SaveSystemReportWithUser(HLERequestContext& ctx) {
+    void SaveSystemReportWithUser(HLERequestContext& ctx)
+    {
         IPC::RequestParser rp{ctx};
 
         // 21.0.0+: field0 (u64), user_id (u128), title_id (u64)
@@ -203,9 +212,10 @@ private:
         Common::UUID uuid{};
         std::memcpy(uuid.uuid.data(), user_id.data(), sizeof(Common::UUID));
 
-        LOG_DEBUG(Service_PREPO,
-                  "called, user_id={}, field0={:016X}, title_id={:016X}, data_a_size={}, data_x_size={}",
-                  uuid.FormattedString(), field0, title_id, data_a.size(), data_x.size());
+        LOG_DEBUG(
+            Service_PREPO,
+            "called, user_id={}, field0={:016X}, title_id={:016X}, data_a_size={}, data_x_size={}",
+            uuid.FormattedString(), field0, title_id, data_a.size(), data_x.size());
 
         const auto& reporter{system.GetReporter()};
         reporter.SavePlayReport(Core::Reporter::PlayReportType::System, title_id, {data_a, data_x},
@@ -216,7 +226,8 @@ private:
     }
 };
 
-void LoopProcess(Core::System& system) {
+void LoopProcess(Core::System& system)
+{
     auto server_manager = std::make_unique<ServerManager>(system);
 
     server_manager->RegisterNamedService("prepo:a",

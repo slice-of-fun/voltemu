@@ -4,10 +4,11 @@
 // SPDX-FileCopyrightText: Copyright 2019 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/file_sys/kernel_executable.h"
+
 #include <cstring>
 
 #include "common/string_util.h"
-#include "core/file_sys/kernel_executable.h"
 #include "core/file_sys/vfs/vfs_offset.h"
 #include "core/loader/loader.h"
 
@@ -16,7 +17,8 @@ namespace FileSys {
 constexpr u32 INI_MAX_KIPS = 0x50;
 
 namespace {
-bool DecompressBLZ(std::vector<u8>& data) {
+bool DecompressBLZ(std::vector<u8>& data)
+{
     if (data.size() < 0xC)
         return {};
 
@@ -84,7 +86,8 @@ bool DecompressBLZ(std::vector<u8>& data) {
 }
 } // Anonymous namespace
 
-KIP::KIP(const VirtualFile& file) : status(Loader::ResultStatus::Success) {
+KIP::KIP(const VirtualFile& file) : status(Loader::ResultStatus::Success)
+{
     if (file == nullptr) {
         status = Loader::ResultStatus::ErrorNullFile;
         return;
@@ -119,83 +122,103 @@ KIP::KIP(const VirtualFile& file) : status(Loader::ResultStatus::Success) {
     }
 }
 
-Loader::ResultStatus KIP::GetStatus() const {
+Loader::ResultStatus KIP::GetStatus() const
+{
     return status;
 }
 
-std::string KIP::GetName() const {
+std::string KIP::GetName() const
+{
     return Common::StringFromFixedZeroTerminatedBuffer(header.name.data(), header.name.size());
 }
 
-u64 KIP::GetTitleID() const {
+u64 KIP::GetTitleID() const
+{
     return header.title_id;
 }
 
-std::vector<u8> KIP::GetSectionDecompressed(u8 index) const {
+std::vector<u8> KIP::GetSectionDecompressed(u8 index) const
+{
     return decompressed_sections[index];
 }
 
-bool KIP::Is64Bit() const {
+bool KIP::Is64Bit() const
+{
     return (header.flags & 0x8) != 0;
 }
 
-bool KIP::Is39BitAddressSpace() const {
+bool KIP::Is39BitAddressSpace() const
+{
     return (header.flags & 0x10) != 0;
 }
 
-bool KIP::IsService() const {
+bool KIP::IsService() const
+{
     return (header.flags & 0x20) != 0;
 }
 
-std::vector<u32> KIP::GetKernelCapabilities() const {
+std::vector<u32> KIP::GetKernelCapabilities() const
+{
     return std::vector<u32>(header.capabilities.begin(), header.capabilities.end());
 }
 
-s32 KIP::GetMainThreadPriority() const {
+s32 KIP::GetMainThreadPriority() const
+{
     return static_cast<s32>(header.main_thread_priority);
 }
 
-u32 KIP::GetMainThreadStackSize() const {
+u32 KIP::GetMainThreadStackSize() const
+{
     return header.sections[1].attribute;
 }
 
-u32 KIP::GetMainThreadCpuCore() const {
+u32 KIP::GetMainThreadCpuCore() const
+{
     return header.default_core;
 }
 
-std::span<const u8> KIP::GetTextSection() const {
+std::span<const u8> KIP::GetTextSection() const
+{
     return decompressed_sections[0];
 }
 
-std::span<const u8> KIP::GetRODataSection() const {
+std::span<const u8> KIP::GetRODataSection() const
+{
     return decompressed_sections[1];
 }
 
-std::span<const u8> KIP::GetDataSection() const {
+std::span<const u8> KIP::GetDataSection() const
+{
     return decompressed_sections[2];
 }
 
-u32 KIP::GetTextOffset() const {
+u32 KIP::GetTextOffset() const
+{
     return header.sections[0].offset;
 }
 
-u32 KIP::GetRODataOffset() const {
+u32 KIP::GetRODataOffset() const
+{
     return header.sections[1].offset;
 }
 
-u32 KIP::GetDataOffset() const {
+u32 KIP::GetDataOffset() const
+{
     return header.sections[2].offset;
 }
 
-u32 KIP::GetBSSSize() const {
+u32 KIP::GetBSSSize() const
+{
     return header.sections[3].decompressed_size;
 }
 
-u32 KIP::GetBSSOffset() const {
+u32 KIP::GetBSSOffset() const
+{
     return header.sections[3].offset;
 }
 
-INI::INI(const VirtualFile& file) : status(Loader::ResultStatus::Success) {
+INI::INI(const VirtualFile& file) : status(Loader::ResultStatus::Success)
+{
     if (file->GetSize() < sizeof(INIHeader) || file->ReadObject(&header) != sizeof(INIHeader)) {
         status = Loader::ResultStatus::ErrorBadINIHeader;
         return;
@@ -222,11 +245,13 @@ INI::INI(const VirtualFile& file) : status(Loader::ResultStatus::Success) {
     }
 }
 
-Loader::ResultStatus INI::GetStatus() const {
+Loader::ResultStatus INI::GetStatus() const
+{
     return status;
 }
 
-const std::vector<KIP>& INI::GetKIPs() const {
+const std::vector<KIP>& INI::GetKIPs() const
+{
     return kips;
 }
 

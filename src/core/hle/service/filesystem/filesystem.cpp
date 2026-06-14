@@ -4,6 +4,8 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/filesystem/filesystem.h"
+
 #include <utility>
 
 #include "common/assert.h"
@@ -23,7 +25,6 @@
 #include "core/file_sys/sdmc_factory.h"
 #include "core/file_sys/vfs/vfs.h"
 #include "core/file_sys/vfs/vfs_offset.h"
-#include "core/hle/service/filesystem/filesystem.h"
 #include "core/hle/service/filesystem/fsp/fsp_ldr.h"
 #include "core/hle/service/filesystem/fsp/fsp_pr.h"
 #include "core/hle/service/filesystem/fsp/fsp_srv.h"
@@ -35,7 +36,8 @@
 namespace Service::FileSystem {
 
 static FileSys::VirtualDir GetDirectoryRelativeWrapped(FileSys::VirtualDir base,
-                                                       std::string_view dir_name_) {
+                                                       std::string_view dir_name_)
+{
     std::string dir_name(Common::FS::SanitizePath(dir_name_));
     if (dir_name.empty() || dir_name == "." || dir_name == "/" || dir_name == "\\")
         return base;
@@ -44,15 +46,19 @@ static FileSys::VirtualDir GetDirectoryRelativeWrapped(FileSys::VirtualDir base,
 }
 
 VfsDirectoryServiceWrapper::VfsDirectoryServiceWrapper(FileSys::VirtualDir backing_)
-    : backing(std::move(backing_)) {}
+    : backing(std::move(backing_))
+{
+}
 
 VfsDirectoryServiceWrapper::~VfsDirectoryServiceWrapper() = default;
 
-std::string VfsDirectoryServiceWrapper::GetName() const {
+std::string VfsDirectoryServiceWrapper::GetName() const
+{
     return backing->GetName();
 }
 
-Result VfsDirectoryServiceWrapper::CreateFile(const std::string& path_, u64 size) const {
+Result VfsDirectoryServiceWrapper::CreateFile(const std::string& path_, u64 size) const
+{
     std::string path(Common::FS::SanitizePath(path_));
     auto dir = GetDirectoryRelativeWrapped(backing, Common::FS::GetParentPath(path));
     if (dir == nullptr) {
@@ -76,7 +82,8 @@ Result VfsDirectoryServiceWrapper::CreateFile(const std::string& path_, u64 size
     return ResultSuccess;
 }
 
-Result VfsDirectoryServiceWrapper::DeleteFile(const std::string& path_) const {
+Result VfsDirectoryServiceWrapper::DeleteFile(const std::string& path_) const
+{
     std::string path(Common::FS::SanitizePath(path_));
     if (path.empty()) {
         // TODO(DarkLordZach): Why do games call this and what should it do? Works as is but...
@@ -95,7 +102,8 @@ Result VfsDirectoryServiceWrapper::DeleteFile(const std::string& path_) const {
     return ResultSuccess;
 }
 
-Result VfsDirectoryServiceWrapper::CreateDirectory(const std::string& path_) const {
+Result VfsDirectoryServiceWrapper::CreateDirectory(const std::string& path_) const
+{
     std::string path(Common::FS::SanitizePath(path_));
 
     // NOTE: This is inaccurate behavior. CreateDirectory is not recursive.
@@ -115,7 +123,8 @@ Result VfsDirectoryServiceWrapper::CreateDirectory(const std::string& path_) con
     return ResultSuccess;
 }
 
-Result VfsDirectoryServiceWrapper::DeleteDirectory(const std::string& path_) const {
+Result VfsDirectoryServiceWrapper::DeleteDirectory(const std::string& path_) const
+{
     std::string path(Common::FS::SanitizePath(path_));
     auto dir = GetDirectoryRelativeWrapped(backing, Common::FS::GetParentPath(path));
     if (!dir->DeleteSubdirectory(Common::FS::GetFilename(path))) {
@@ -125,7 +134,8 @@ Result VfsDirectoryServiceWrapper::DeleteDirectory(const std::string& path_) con
     return ResultSuccess;
 }
 
-Result VfsDirectoryServiceWrapper::DeleteDirectoryRecursively(const std::string& path_) const {
+Result VfsDirectoryServiceWrapper::DeleteDirectoryRecursively(const std::string& path_) const
+{
     std::string path(Common::FS::SanitizePath(path_));
     auto dir = GetDirectoryRelativeWrapped(backing, Common::FS::GetParentPath(path));
     if (!dir->DeleteSubdirectoryRecursive(Common::FS::GetFilename(path))) {
@@ -135,7 +145,8 @@ Result VfsDirectoryServiceWrapper::DeleteDirectoryRecursively(const std::string&
     return ResultSuccess;
 }
 
-Result VfsDirectoryServiceWrapper::CleanDirectoryRecursively(const std::string& path) const {
+Result VfsDirectoryServiceWrapper::CleanDirectoryRecursively(const std::string& path) const
+{
     const std::string sanitized_path(Common::FS::SanitizePath(path));
     auto dir = GetDirectoryRelativeWrapped(backing, Common::FS::GetParentPath(sanitized_path));
 
@@ -148,7 +159,8 @@ Result VfsDirectoryServiceWrapper::CleanDirectoryRecursively(const std::string& 
 }
 
 Result VfsDirectoryServiceWrapper::RenameFile(const std::string& src_path_,
-                                              const std::string& dest_path_) const {
+                                              const std::string& dest_path_) const
+{
     std::string src_path(Common::FS::SanitizePath(src_path_));
     std::string dest_path(Common::FS::SanitizePath(dest_path_));
     auto src = backing->GetFileRelative(src_path);
@@ -191,7 +203,8 @@ Result VfsDirectoryServiceWrapper::RenameFile(const std::string& src_path_,
 }
 
 Result VfsDirectoryServiceWrapper::RenameDirectory(const std::string& src_path_,
-                                                   const std::string& dest_path_) const {
+                                                   const std::string& dest_path_) const
+{
     std::string src_path(Common::FS::SanitizePath(src_path_));
     std::string dest_path(Common::FS::SanitizePath(dest_path_));
     auto src = GetDirectoryRelativeWrapped(backing, src_path);
@@ -217,8 +230,8 @@ Result VfsDirectoryServiceWrapper::RenameDirectory(const std::string& src_path_,
 }
 
 Result VfsDirectoryServiceWrapper::OpenFile(FileSys::VirtualFile* out_file,
-                                            const std::string& path_,
-                                            FileSys::OpenMode mode) const {
+                                            const std::string& path_, FileSys::OpenMode mode) const
+{
     const std::string path(Common::FS::SanitizePath(path_));
     std::string_view npath = path;
     while (!npath.empty() && (npath[0] == '/' || npath[0] == '\\')) {
@@ -240,7 +253,8 @@ Result VfsDirectoryServiceWrapper::OpenFile(FileSys::VirtualFile* out_file,
 }
 
 Result VfsDirectoryServiceWrapper::OpenDirectory(FileSys::VirtualDir* out_directory,
-                                                 const std::string& path_) {
+                                                 const std::string& path_)
+{
     std::string path(Common::FS::SanitizePath(path_));
     auto dir = GetDirectoryRelativeWrapped(backing, path);
     if (dir == nullptr) {
@@ -252,7 +266,8 @@ Result VfsDirectoryServiceWrapper::OpenDirectory(FileSys::VirtualDir* out_direct
 }
 
 Result VfsDirectoryServiceWrapper::GetEntryType(FileSys::DirectoryEntryType* out_entry_type,
-                                                const std::string& path_) const {
+                                                const std::string& path_) const
+{
     std::string path(Common::FS::SanitizePath(path_));
     auto dir = GetDirectoryRelativeWrapped(backing, Common::FS::GetParentPath(path));
     if (dir == nullptr) {
@@ -279,8 +294,10 @@ Result VfsDirectoryServiceWrapper::GetEntryType(FileSys::DirectoryEntryType* out
     return FileSys::ResultPathNotFound;
 }
 
-Result VfsDirectoryServiceWrapper::GetFileTimeStampRaw(
-    FileSys::FileTimeStampRaw* out_file_time_stamp_raw, const std::string& path) const {
+Result
+VfsDirectoryServiceWrapper::GetFileTimeStampRaw(FileSys::FileTimeStampRaw* out_file_time_stamp_raw,
+                                                const std::string& path) const
+{
     auto dir = GetDirectoryRelativeWrapped(backing, Common::FS::GetParentPath(path));
     if (dir == nullptr) {
         return FileSys::ResultPathNotFound;
@@ -295,13 +312,15 @@ Result VfsDirectoryServiceWrapper::GetFileTimeStampRaw(
     return ResultSuccess;
 }
 
-FileSystemController::FileSystemController(Core::System& system_) : system{system_} {}
+FileSystemController::FileSystemController(Core::System& system_) : system{system_}
+{
+}
 
 FileSystemController::~FileSystemController() = default;
 
-Result FileSystemController::RegisterProcess(
-    ProcessId process_id, ProgramId program_id,
-    std::shared_ptr<FileSys::RomFSFactory>&& romfs_factory) {
+Result FileSystemController::RegisterProcess(ProcessId process_id, ProgramId program_id,
+                                             std::shared_ptr<FileSys::RomFSFactory>&& romfs_factory)
+{
     std::scoped_lock lk{registration_lock};
 
     registrations.emplace(process_id, Registration{
@@ -316,7 +335,8 @@ Result FileSystemController::RegisterProcess(
 
 Result FileSystemController::OpenProcess(
     ProgramId* out_program_id, std::shared_ptr<SaveDataController>* out_save_data_controller,
-    std::shared_ptr<RomFsController>* out_romfs_controller, ProcessId process_id) {
+    std::shared_ptr<RomFsController>* out_romfs_controller, ProcessId process_id)
+{
     std::scoped_lock lk{registration_lock};
 
     const auto it = registrations.find(process_id);
@@ -332,7 +352,8 @@ Result FileSystemController::OpenProcess(
     return ResultSuccess;
 }
 
-void FileSystemController::SetPackedUpdate(ProcessId process_id, FileSys::VirtualFile update_raw) {
+void FileSystemController::SetPackedUpdate(ProcessId process_id, FileSys::VirtualFile update_raw)
+{
     LOG_TRACE(Service_FS, "Setting packed update for romfs");
 
     std::scoped_lock lk{registration_lock};
@@ -344,12 +365,14 @@ void FileSystemController::SetPackedUpdate(ProcessId process_id, FileSys::Virtua
     it->second.romfs_factory->SetPackedUpdate(std::move(update_raw));
 }
 
-std::shared_ptr<SaveDataController> FileSystemController::OpenSaveDataController() {
+std::shared_ptr<SaveDataController> FileSystemController::OpenSaveDataController()
+{
     return std::make_shared<SaveDataController>(system, CreateSaveDataFactory(ProgramId{}));
 }
 
-std::shared_ptr<FileSys::SaveDataFactory> FileSystemController::CreateSaveDataFactory(
-    ProgramId program_id) {
+std::shared_ptr<FileSys::SaveDataFactory>
+FileSystemController::CreateSaveDataFactory(ProgramId program_id)
+{
     using VoltPath = Common::FS::VoltPath;
     const auto rw_mode = FileSys::OpenMode::ReadWrite;
 
@@ -360,7 +383,8 @@ std::shared_ptr<FileSys::SaveDataFactory> FileSystemController::CreateSaveDataFa
                                                       std::move(save_directory));
 }
 
-Result FileSystemController::OpenSDMC(FileSys::VirtualDir* out_sdmc) const {
+Result FileSystemController::OpenSDMC(FileSys::VirtualDir* out_sdmc) const
+{
     LOG_TRACE(Service_FS, "Opening SDMC");
 
     if (sdmc_factory == nullptr) {
@@ -377,7 +401,8 @@ Result FileSystemController::OpenSDMC(FileSys::VirtualDir* out_sdmc) const {
 }
 
 Result FileSystemController::OpenBISPartition(FileSys::VirtualDir* out_bis_partition,
-                                              FileSys::BisPartitionId id) const {
+                                              FileSys::BisPartitionId id) const
+{
     LOG_TRACE(Service_FS, "Opening BIS Partition with id={:08X}", id);
 
     if (bis_factory == nullptr) {
@@ -393,8 +418,10 @@ Result FileSystemController::OpenBISPartition(FileSys::VirtualDir* out_bis_parti
     return ResultSuccess;
 }
 
-Result FileSystemController::OpenBISPartitionStorage(
-    FileSys::VirtualFile* out_bis_partition_storage, FileSys::BisPartitionId id) const {
+Result
+FileSystemController::OpenBISPartitionStorage(FileSys::VirtualFile* out_bis_partition_storage,
+                                              FileSys::BisPartitionId id) const
+{
     LOG_TRACE(Service_FS, "Opening BIS Partition Storage with id={:08X}", id);
 
     if (bis_factory == nullptr) {
@@ -410,7 +437,8 @@ Result FileSystemController::OpenBISPartitionStorage(
     return ResultSuccess;
 }
 
-u64 FileSystemController::GetFreeSpaceSize(FileSys::StorageId id) const {
+u64 FileSystemController::GetFreeSpaceSize(FileSys::StorageId id) const
+{
     switch (id) {
     case FileSys::StorageId::None:
     case FileSys::StorageId::GameCard:
@@ -436,7 +464,8 @@ u64 FileSystemController::GetFreeSpaceSize(FileSys::StorageId id) const {
     return 0;
 }
 
-u64 FileSystemController::GetTotalSpaceSize(FileSys::StorageId id) const {
+u64 FileSystemController::GetTotalSpaceSize(FileSys::StorageId id) const
+{
     switch (id) {
     case FileSys::StorageId::None:
     case FileSys::StorageId::GameCard:
@@ -462,26 +491,31 @@ u64 FileSystemController::GetTotalSpaceSize(FileSys::StorageId id) const {
     return 0;
 }
 
-void FileSystemController::SetGameCard(FileSys::VirtualFile file) {
+void FileSystemController::SetGameCard(FileSys::VirtualFile file)
+{
     gamecard = std::make_unique<FileSys::XCI>(file);
     const auto dir = gamecard->ConcatenatedPseudoDirectory();
     gamecard_registered = std::make_unique<FileSys::RegisteredCache>(dir);
     gamecard_placeholder = std::make_unique<FileSys::PlaceholderCache>(dir);
 }
 
-FileSys::XCI* FileSystemController::GetGameCard() const {
+FileSys::XCI* FileSystemController::GetGameCard() const
+{
     return gamecard.get();
 }
 
-FileSys::RegisteredCache* FileSystemController::GetGameCardContents() const {
+FileSys::RegisteredCache* FileSystemController::GetGameCardContents() const
+{
     return gamecard_registered.get();
 }
 
-FileSys::PlaceholderCache* FileSystemController::GetGameCardPlaceholder() const {
+FileSys::PlaceholderCache* FileSystemController::GetGameCardPlaceholder() const
+{
     return gamecard_placeholder.get();
 }
 
-FileSys::RegisteredCache* FileSystemController::GetSystemNANDContents() const {
+FileSys::RegisteredCache* FileSystemController::GetSystemNANDContents() const
+{
     LOG_TRACE(Service_FS, "Opening System NAND Contents");
 
     if (bis_factory == nullptr)
@@ -490,7 +524,8 @@ FileSys::RegisteredCache* FileSystemController::GetSystemNANDContents() const {
     return bis_factory->GetSystemNANDContents();
 }
 
-FileSys::RegisteredCache* FileSystemController::GetUserNANDContents() const {
+FileSys::RegisteredCache* FileSystemController::GetUserNANDContents() const
+{
     LOG_TRACE(Service_FS, "Opening User NAND Contents");
 
     if (bis_factory == nullptr)
@@ -499,7 +534,8 @@ FileSys::RegisteredCache* FileSystemController::GetUserNANDContents() const {
     return bis_factory->GetUserNANDContents();
 }
 
-FileSys::RegisteredCache* FileSystemController::GetSDMCContents() const {
+FileSys::RegisteredCache* FileSystemController::GetSDMCContents() const
+{
     LOG_TRACE(Service_FS, "Opening SDMC Contents");
 
     if (sdmc_factory == nullptr)
@@ -508,11 +544,13 @@ FileSys::RegisteredCache* FileSystemController::GetSDMCContents() const {
     return sdmc_factory->GetSDMCContents();
 }
 
-FileSys::ExternalContentProvider* FileSystemController::GetExternalContentProvider() const {
+FileSys::ExternalContentProvider* FileSystemController::GetExternalContentProvider() const
+{
     return external_provider.get();
 }
 
-FileSys::PlaceholderCache* FileSystemController::GetSystemNANDPlaceholder() const {
+FileSys::PlaceholderCache* FileSystemController::GetSystemNANDPlaceholder() const
+{
     LOG_TRACE(Service_FS, "Opening System NAND Placeholder");
 
     if (bis_factory == nullptr)
@@ -521,7 +559,8 @@ FileSys::PlaceholderCache* FileSystemController::GetSystemNANDPlaceholder() cons
     return bis_factory->GetSystemNANDPlaceholder();
 }
 
-FileSys::PlaceholderCache* FileSystemController::GetUserNANDPlaceholder() const {
+FileSys::PlaceholderCache* FileSystemController::GetUserNANDPlaceholder() const
+{
     LOG_TRACE(Service_FS, "Opening User NAND Placeholder");
 
     if (bis_factory == nullptr)
@@ -530,7 +569,8 @@ FileSys::PlaceholderCache* FileSystemController::GetUserNANDPlaceholder() const 
     return bis_factory->GetUserNANDPlaceholder();
 }
 
-FileSys::PlaceholderCache* FileSystemController::GetSDMCPlaceholder() const {
+FileSys::PlaceholderCache* FileSystemController::GetSDMCPlaceholder() const
+{
     LOG_TRACE(Service_FS, "Opening SDMC Placeholder");
 
     if (sdmc_factory == nullptr)
@@ -539,8 +579,9 @@ FileSys::PlaceholderCache* FileSystemController::GetSDMCPlaceholder() const {
     return sdmc_factory->GetSDMCPlaceholder();
 }
 
-FileSys::RegisteredCache* FileSystemController::GetRegisteredCacheForStorage(
-    FileSys::StorageId id) const {
+FileSys::RegisteredCache*
+FileSystemController::GetRegisteredCacheForStorage(FileSys::StorageId id) const
+{
     switch (id) {
     case FileSys::StorageId::None:
     case FileSys::StorageId::Host:
@@ -559,8 +600,9 @@ FileSys::RegisteredCache* FileSystemController::GetRegisteredCacheForStorage(
     return nullptr;
 }
 
-FileSys::PlaceholderCache* FileSystemController::GetPlaceholderCacheForStorage(
-    FileSys::StorageId id) const {
+FileSys::PlaceholderCache*
+FileSystemController::GetPlaceholderCacheForStorage(FileSys::StorageId id) const
+{
     switch (id) {
     case FileSys::StorageId::None:
     case FileSys::StorageId::Host:
@@ -579,7 +621,8 @@ FileSys::PlaceholderCache* FileSystemController::GetPlaceholderCacheForStorage(
     return nullptr;
 }
 
-FileSys::VirtualDir FileSystemController::GetSystemNANDContentDirectory() const {
+FileSys::VirtualDir FileSystemController::GetSystemNANDContentDirectory() const
+{
     LOG_TRACE(Service_FS, "Opening system NAND content directory");
 
     if (bis_factory == nullptr)
@@ -588,7 +631,8 @@ FileSys::VirtualDir FileSystemController::GetSystemNANDContentDirectory() const 
     return bis_factory->GetSystemNANDContentDirectory();
 }
 
-FileSys::VirtualDir FileSystemController::GetUserNANDContentDirectory() const {
+FileSys::VirtualDir FileSystemController::GetUserNANDContentDirectory() const
+{
     LOG_TRACE(Service_FS, "Opening user NAND content directory");
 
     if (bis_factory == nullptr)
@@ -597,7 +641,8 @@ FileSys::VirtualDir FileSystemController::GetUserNANDContentDirectory() const {
     return bis_factory->GetUserNANDContentDirectory();
 }
 
-FileSys::VirtualDir FileSystemController::GetSDMCContentDirectory() const {
+FileSys::VirtualDir FileSystemController::GetSDMCContentDirectory() const
+{
     LOG_TRACE(Service_FS, "Opening SDMC content directory");
 
     if (sdmc_factory == nullptr)
@@ -606,7 +651,8 @@ FileSys::VirtualDir FileSystemController::GetSDMCContentDirectory() const {
     return sdmc_factory->GetSDMCContentDirectory();
 }
 
-FileSys::VirtualDir FileSystemController::GetNANDImageDirectory() const {
+FileSys::VirtualDir FileSystemController::GetNANDImageDirectory() const
+{
     LOG_TRACE(Service_FS, "Opening NAND image directory");
 
     if (bis_factory == nullptr)
@@ -615,7 +661,8 @@ FileSys::VirtualDir FileSystemController::GetNANDImageDirectory() const {
     return bis_factory->GetImageDirectory();
 }
 
-FileSys::VirtualDir FileSystemController::GetSDMCImageDirectory() const {
+FileSys::VirtualDir FileSystemController::GetSDMCImageDirectory() const
+{
     LOG_TRACE(Service_FS, "Opening SDMC image directory");
 
     if (sdmc_factory == nullptr)
@@ -624,7 +671,8 @@ FileSys::VirtualDir FileSystemController::GetSDMCImageDirectory() const {
     return sdmc_factory->GetImageDirectory();
 }
 
-FileSys::VirtualDir FileSystemController::GetContentDirectory(ContentStorageId id) const {
+FileSys::VirtualDir FileSystemController::GetContentDirectory(ContentStorageId id) const
+{
     switch (id) {
     case ContentStorageId::System:
         return GetSystemNANDContentDirectory();
@@ -637,7 +685,8 @@ FileSys::VirtualDir FileSystemController::GetContentDirectory(ContentStorageId i
     return nullptr;
 }
 
-FileSys::VirtualDir FileSystemController::GetImageDirectory(ImageDirectoryId id) const {
+FileSys::VirtualDir FileSystemController::GetImageDirectory(ImageDirectoryId id) const
+{
     switch (id) {
     case ImageDirectoryId::NAND:
         return GetNANDImageDirectory();
@@ -648,7 +697,8 @@ FileSys::VirtualDir FileSystemController::GetImageDirectory(ImageDirectoryId id)
     return nullptr;
 }
 
-FileSys::VirtualDir FileSystemController::GetModificationLoadRoot(u64 title_id) const {
+FileSys::VirtualDir FileSystemController::GetModificationLoadRoot(u64 title_id) const
+{
     LOG_TRACE(Service_FS, "Opening mod load root for tid={:016X}", title_id);
 
     if (bis_factory == nullptr)
@@ -657,7 +707,8 @@ FileSys::VirtualDir FileSystemController::GetModificationLoadRoot(u64 title_id) 
     return bis_factory->GetModificationLoadRoot(title_id);
 }
 
-FileSys::VirtualDir FileSystemController::GetSDMCModificationLoadRoot(u64 title_id) const {
+FileSys::VirtualDir FileSystemController::GetSDMCModificationLoadRoot(u64 title_id) const
+{
     LOG_TRACE(Service_FS, "Opening SDMC mod load root for tid={:016X}", title_id);
 
     if (sdmc_factory == nullptr) {
@@ -667,7 +718,8 @@ FileSys::VirtualDir FileSystemController::GetSDMCModificationLoadRoot(u64 title_
     return sdmc_factory->GetSDMCModificationLoadRoot(title_id);
 }
 
-FileSys::VirtualDir FileSystemController::GetModificationDumpRoot(u64 title_id) const {
+FileSys::VirtualDir FileSystemController::GetModificationDumpRoot(u64 title_id) const
+{
     LOG_TRACE(Service_FS, "Opening mod dump root for tid={:016X}", title_id);
 
     if (bis_factory == nullptr)
@@ -676,7 +728,8 @@ FileSys::VirtualDir FileSystemController::GetModificationDumpRoot(u64 title_id) 
     return bis_factory->GetModificationDumpRoot(title_id);
 }
 
-FileSys::VirtualDir FileSystemController::GetBCATDirectory(u64 title_id) const {
+FileSys::VirtualDir FileSystemController::GetBCATDirectory(u64 title_id) const
+{
     LOG_TRACE(Service_FS, "Opening BCAT root for tid={:016X}", title_id);
 
     if (bis_factory == nullptr)
@@ -685,7 +738,8 @@ FileSys::VirtualDir FileSystemController::GetBCATDirectory(u64 title_id) const {
     return bis_factory->GetBCATDirectory(title_id);
 }
 
-void FileSystemController::CreateFactories(FileSys::VfsFilesystem& vfs, bool overwrite) {
+void FileSystemController::CreateFactories(FileSys::VfsFilesystem& vfs, bool overwrite)
+{
     if (overwrite) {
         bis_factory = nullptr;
         sdmc_factory = nullptr;
@@ -745,8 +799,8 @@ void FileSystemController::CreateFactories(FileSys::VfsFilesystem& vfs, bool ove
         LOG_DEBUG(Service_FS, "Creating ExternalContentProvider with {} opened directories",
                   external_dirs.size());
 
-        external_provider = std::make_unique<FileSys::ExternalContentProvider>(
-            std::move(external_dirs));
+        external_provider =
+            std::make_unique<FileSys::ExternalContentProvider>(std::move(external_dirs));
         system.RegisterContentProvider(FileSys::ContentProviderUnionSlot::External,
                                        external_provider.get());
 
@@ -754,12 +808,14 @@ void FileSystemController::CreateFactories(FileSys::VfsFilesystem& vfs, bool ove
     }
 }
 
-void FileSystemController::Reset() {
+void FileSystemController::Reset()
+{
     std::scoped_lock lk{registration_lock};
     registrations.clear();
 }
 
-void LoopProcess(Core::System& system) {
+void LoopProcess(Core::System& system)
+{
     auto server_manager = std::make_unique<ServerManager>(system);
 
     const auto FileSystemProxyFactory = [&] { return std::make_shared<FSP_SRV>(system); };

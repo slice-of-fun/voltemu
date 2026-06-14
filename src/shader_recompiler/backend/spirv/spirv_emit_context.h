@@ -6,10 +6,10 @@
 
 #pragma once
 
-#include <array>
-
-#include <sirit/sirit.h>
 #include <ankerl/unordered_dense.h>
+#include <sirit/sirit.h>
+
+#include <array>
 
 #include "shader_recompiler/backend/bindings.h"
 #include "shader_recompiler/frontend/ir/program.h"
@@ -27,9 +27,7 @@ class VectorTypes {
 public:
     void Define(Sirit::Module& sirit_ctx, Id base_type, std::string_view name);
 
-    [[nodiscard]] Id operator[](size_t size) const noexcept {
-        return defs[size - 1];
-    }
+    [[nodiscard]] Id operator[](size_t size) const noexcept { return defs[size - 1]; }
 
 private:
     std::array<Id, 4> defs{};
@@ -75,7 +73,8 @@ struct UniformDefinitions {
     Id U32x2{};
     Id U32x4{};
 
-    constexpr static size_t NumElements(Id UniformDefinitions::*member_ptr) {
+    constexpr static size_t NumElements(Id UniformDefinitions::*member_ptr)
+    {
         if (member_ptr == &UniformDefinitions::U8) {
             return 1;
         }
@@ -104,7 +103,8 @@ struct UniformDefinitions {
         return 1;
     }
 
-    constexpr static bool IsFloat(Id UniformDefinitions::*member_ptr) {
+    constexpr static bool IsFloat(Id UniformDefinitions::*member_ptr)
+    {
         if (member_ptr == &UniformDefinitions::F32) {
             return true;
         }
@@ -172,43 +172,43 @@ public:
     [[nodiscard]] Id BitOffset8(const IR::Value& offset);
     [[nodiscard]] Id BitOffset16(const IR::Value& offset);
 
-    Id Const(u32 value) {
-        return Constant(U32[1], value);
-    }
+    Id Const(u32 value) { return Constant(U32[1], value); }
 
-    Id Const(u32 element_1, u32 element_2) {
+    Id Const(u32 element_1, u32 element_2)
+    {
         return ConstantComposite(U32[2], Const(element_1), Const(element_2));
     }
 
-    Id Const(u32 element_1, u32 element_2, u32 element_3) {
+    Id Const(u32 element_1, u32 element_2, u32 element_3)
+    {
         return ConstantComposite(U32[3], Const(element_1), Const(element_2), Const(element_3));
     }
 
-    Id Const(u32 element_1, u32 element_2, u32 element_3, u32 element_4) {
+    Id Const(u32 element_1, u32 element_2, u32 element_3, u32 element_4)
+    {
         return ConstantComposite(U32[4], Const(element_1), Const(element_2), Const(element_3),
                                  Const(element_4));
     }
 
-    Id SConst(s32 value) {
-        return Constant(S32[1], value);
-    }
+    Id SConst(s32 value) { return Constant(S32[1], value); }
 
-    Id SConst(s32 element_1, s32 element_2) {
+    Id SConst(s32 element_1, s32 element_2)
+    {
         return ConstantComposite(S32[2], SConst(element_1), SConst(element_2));
     }
 
-    Id SConst(s32 element_1, s32 element_2, s32 element_3) {
+    Id SConst(s32 element_1, s32 element_2, s32 element_3)
+    {
         return ConstantComposite(S32[3], SConst(element_1), SConst(element_2), SConst(element_3));
     }
 
-    Id SConst(s32 element_1, s32 element_2, s32 element_3, s32 element_4) {
+    Id SConst(s32 element_1, s32 element_2, s32 element_3, s32 element_4)
+    {
         return ConstantComposite(S32[4], SConst(element_1), SConst(element_2), SConst(element_3),
                                  SConst(element_4));
     }
 
-    Id Const(f32 value) {
-        return Constant(F32[1], value);
-    }
+    Id Const(f32 value) { return Constant(F32[1], value); }
 
     const Profile& profile;
     const RuntimeInfo& runtime_info;

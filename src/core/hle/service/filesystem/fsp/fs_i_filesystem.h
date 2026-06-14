@@ -30,10 +30,10 @@ public:
     Result DeleteFile(const InLargeData<FileSys::Sf::Path, BufferAttr_HipcPointer> path);
     Result CreateDirectory(const InLargeData<FileSys::Sf::Path, BufferAttr_HipcPointer> path);
     Result DeleteDirectory(const InLargeData<FileSys::Sf::Path, BufferAttr_HipcPointer> path);
-    Result DeleteDirectoryRecursively(
-        const InLargeData<FileSys::Sf::Path, BufferAttr_HipcPointer> path);
-    Result CleanDirectoryRecursively(
-        const InLargeData<FileSys::Sf::Path, BufferAttr_HipcPointer> path);
+    Result
+    DeleteDirectoryRecursively(const InLargeData<FileSys::Sf::Path, BufferAttr_HipcPointer> path);
+    Result
+    CleanDirectoryRecursively(const InLargeData<FileSys::Sf::Path, BufferAttr_HipcPointer> path);
     Result RenameFile(const InLargeData<FileSys::Sf::Path, BufferAttr_HipcPointer> old_path,
                       const InLargeData<FileSys::Sf::Path, BufferAttr_HipcPointer> new_path);
     Result OpenFile(OutInterface<IFile> out_interface,

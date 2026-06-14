@@ -4,10 +4,11 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/apm/apm_interface.h"
+
 #include "common/logging.h"
 #include "core/hle/service/apm/apm.h"
 #include "core/hle/service/apm/apm_controller.h"
-#include "core/hle/service/apm/apm_interface.h"
 #include "core/hle/service/ipc_helpers.h"
 
 namespace Service::APM {
@@ -15,7 +16,8 @@ namespace Service::APM {
 class ISession final : public ServiceFramework<ISession> {
 public:
     explicit ISession(Core::System& system_, Controller& controller_)
-        : ServiceFramework{system_, "ISession"}, controller{controller_} {
+        : ServiceFramework{system_, "ISession"}, controller{controller_}
+    {
         static const FunctionInfo functions[] = {
             {0, &ISession::SetPerformanceConfiguration, "SetPerformanceConfiguration"},
             {1, &ISession::GetPerformanceConfiguration, "GetPerformanceConfiguration"},
@@ -25,7 +27,8 @@ public:
     }
 
 private:
-    void SetPerformanceConfiguration(HLERequestContext& ctx) {
+    void SetPerformanceConfiguration(HLERequestContext& ctx)
+    {
         IPC::RequestParser rp{ctx};
 
         const auto mode = rp.PopEnum<PerformanceMode>();
@@ -38,7 +41,8 @@ private:
         rb.Push(ResultSuccess);
     }
 
-    void GetPerformanceConfiguration(HLERequestContext& ctx) {
+    void GetPerformanceConfiguration(HLERequestContext& ctx)
+    {
         IPC::RequestParser rp{ctx};
 
         const auto mode = rp.PopEnum<PerformanceMode>();
@@ -49,7 +53,8 @@ private:
         rb.PushEnum(controller.GetCurrentPerformanceConfiguration(mode));
     }
 
-    void SetCpuOverclockEnabled(HLERequestContext& ctx) {
+    void SetCpuOverclockEnabled(HLERequestContext& ctx)
+    {
         IPC::RequestParser rp{ctx};
 
         const auto cpu_overclock_enabled = rp.Pop<bool>();
@@ -66,7 +71,8 @@ private:
 
 APM::APM(Core::System& system_, std::shared_ptr<Module> apm_, Controller& controller_,
          const char* name)
-    : ServiceFramework{system_, name}, apm(std::move(apm_)), controller{controller_} {
+    : ServiceFramework{system_, name}, apm(std::move(apm_)), controller{controller_}
+{
     static const FunctionInfo functions[] = {
         {0, &APM::OpenSession, "OpenSession"},
         {1, &APM::GetPerformanceMode, "GetPerformanceMode"},
@@ -77,7 +83,8 @@ APM::APM(Core::System& system_, std::shared_ptr<Module> apm_, Controller& contro
 
 APM::~APM() = default;
 
-void APM::OpenSession(HLERequestContext& ctx) {
+void APM::OpenSession(HLERequestContext& ctx)
+{
     LOG_DEBUG(Service_APM, "called");
 
     IPC::ResponseBuilder rb{ctx, 2, 0, 1};
@@ -85,14 +92,16 @@ void APM::OpenSession(HLERequestContext& ctx) {
     rb.PushIpcInterface<ISession>(system, controller);
 }
 
-void APM::GetPerformanceMode(HLERequestContext& ctx) {
+void APM::GetPerformanceMode(HLERequestContext& ctx)
+{
     LOG_DEBUG(Service_APM, "called");
 
     IPC::ResponseBuilder rb{ctx, 2};
     rb.PushEnum(controller.GetCurrentPerformanceMode());
 }
 
-void APM::IsCpuOverclockEnabled(HLERequestContext& ctx) {
+void APM::IsCpuOverclockEnabled(HLERequestContext& ctx)
+{
     LOG_WARNING(Service_APM, "(STUBBED) called");
 
     IPC::ResponseBuilder rb{ctx, 3};
@@ -101,7 +110,8 @@ void APM::IsCpuOverclockEnabled(HLERequestContext& ctx) {
 }
 
 APM_Sys::APM_Sys(Core::System& system_, Controller& controller_)
-    : ServiceFramework{system_, "apm:sys"}, controller{controller_} {
+    : ServiceFramework{system_, "apm:sys"}, controller{controller_}
+{
     // clang-format off
     static const FunctionInfo functions[] = {
         {0, nullptr, "RequestPerformanceMode"},
@@ -120,7 +130,8 @@ APM_Sys::APM_Sys(Core::System& system_, Controller& controller_)
 
 APM_Sys::~APM_Sys() = default;
 
-void APM_Sys::GetPerformanceEvent(HLERequestContext& ctx) {
+void APM_Sys::GetPerformanceEvent(HLERequestContext& ctx)
+{
     LOG_DEBUG(Service_APM, "called");
 
     IPC::ResponseBuilder rb{ctx, 2, 0, 1};
@@ -128,7 +139,8 @@ void APM_Sys::GetPerformanceEvent(HLERequestContext& ctx) {
     rb.PushIpcInterface<ISession>(system, controller);
 }
 
-void APM_Sys::SetCpuBoostMode(HLERequestContext& ctx) {
+void APM_Sys::SetCpuBoostMode(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     const auto mode = rp.PopEnum<CpuBoostMode>();
 
@@ -140,7 +152,8 @@ void APM_Sys::SetCpuBoostMode(HLERequestContext& ctx) {
     rb.Push(ResultSuccess);
 }
 
-void APM_Sys::GetCurrentPerformanceConfiguration(HLERequestContext& ctx) {
+void APM_Sys::GetCurrentPerformanceConfiguration(HLERequestContext& ctx)
+{
     LOG_DEBUG(Service_APM, "called");
 
     IPC::ResponseBuilder rb{ctx, 3};

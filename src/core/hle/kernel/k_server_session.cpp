@@ -4,6 +4,8 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/kernel/k_server_session.h"
+
 #include <tuple>
 #include <utility>
 
@@ -19,7 +21,6 @@
 #include "core/hle/kernel/k_process.h"
 #include "core/hle/kernel/k_scheduler.h"
 #include "core/hle/kernel/k_server_port.h"
-#include "core/hle/kernel/k_server_session.h"
 #include "core/hle/kernel/k_session.h"
 #include "core/hle/kernel/k_thread.h"
 #include "core/hle/kernel/k_thread_queue.h"
@@ -42,7 +43,8 @@ using ThreadQueueImplForKServerSessionRequest = KThreadQueue;
 
 class ReceiveList {
 public:
-    static constexpr int GetEntryCount(const MessageBuffer::MessageHeader& header) {
+    static constexpr int GetEntryCount(const MessageBuffer::MessageHeader& header)
+    {
         const auto count = header.GetReceiveListCount();
         switch (count) {
         case MessageBuffer::MessageHeader::ReceiveListCountType_None:
@@ -60,7 +62,8 @@ public:
                          KProcessPageTable& dst_page_table,
                          const MessageBuffer::MessageHeader& dst_header,
                          const MessageBuffer::SpecialHeader& dst_special_header, size_t msg_size,
-                         size_t out_offset, s32 dst_recv_list_idx, bool is_tls) {
+                         size_t out_offset, s32 dst_recv_list_idx, bool is_tls)
+    {
         m_recv_list_count = dst_header.GetReceiveListCount();
         m_msg_buffer_end = dst_address + sizeof(u32) * out_offset;
         m_msg_buffer_space_end = dst_address + msg_size;
@@ -85,17 +88,20 @@ public:
         }
     }
 
-    bool IsIndex() const {
+    bool IsIndex() const
+    {
         return m_recv_list_count >
                static_cast<s32>(MessageBuffer::MessageHeader::ReceiveListCountType_CountOffset);
     }
 
-    bool IsToMessageBuffer() const {
+    bool IsToMessageBuffer() const
+    {
         return m_recv_list_count ==
                MessageBuffer::MessageHeader::ReceiveListCountType_ToMessageBuffer;
     }
 
-    void GetBuffer(uint64_t& out, size_t size, int& key) const {
+    void GetBuffer(uint64_t& out, size_t size, int& key) const
+    {
         switch (m_recv_list_count) {
         case MessageBuffer::MessageHeader::ReceiveListCountType_None: {
             out = 0;
@@ -158,11 +164,12 @@ private:
     uint64_t m_msg_buffer_space_end;
 };
 
-template <bool MoveHandleAllowed>
+template<bool MoveHandleAllowed>
 Result ProcessMessageSpecialData(s32& offset, KProcess& dst_process, KProcess& src_process,
                                  KThread& src_thread, const MessageBuffer& dst_msg,
                                  const MessageBuffer& src_msg,
-                                 const MessageBuffer::SpecialHeader& src_special_header) {
+                                 const MessageBuffer::SpecialHeader& src_special_header)
+{
     // Copy the special header to the destination.
     offset = dst_msg.Set(src_special_header);
 
@@ -245,7 +252,8 @@ Result ProcessReceiveMessagePointerDescriptors(int& offset, int& pointer_key,
                                                KProcessPageTable& src_page_table,
                                                const MessageBuffer& dst_msg,
                                                const MessageBuffer& src_msg,
-                                               const ReceiveList& dst_recv_list, bool dst_user) {
+                                               const ReceiveList& dst_recv_list, bool dst_user)
+{
     // Get the offset at the start of processing.
     const int cur_offset = offset;
 
@@ -294,7 +302,8 @@ Result ProcessReceiveMessagePointerDescriptors(int& offset, int& pointer_key,
 }
 
 constexpr Result GetMapAliasMemoryState(KMemoryState& out,
-                                        MessageBuffer::MapAliasDescriptor::Attribute attr) {
+                                        MessageBuffer::MapAliasDescriptor::Attribute attr)
+{
     switch (attr) {
     case MessageBuffer::MapAliasDescriptor::Attribute::Ipc:
         out = KMemoryState::Ipc;
@@ -314,7 +323,8 @@ constexpr Result GetMapAliasMemoryState(KMemoryState& out,
 
 constexpr Result GetMapAliasTestStateAndAttributeMask(KMemoryState& out_state,
                                                       KMemoryAttribute& out_attr_mask,
-                                                      KMemoryState state) {
+                                                      KMemoryState state)
+{
     switch (state) {
     case KMemoryState::Ipc:
         out_state = KMemoryState::FlagCanUseIpc;
@@ -336,7 +346,8 @@ constexpr Result GetMapAliasTestStateAndAttributeMask(KMemoryState& out_state,
     R_SUCCEED();
 }
 
-void CleanupSpecialData(KProcess& dst_process, u32* dst_msg_ptr, size_t dst_buffer_size) {
+void CleanupSpecialData(KProcess& dst_process, u32* dst_msg_ptr, size_t dst_buffer_size)
+{
     // Parse the message.
     const MessageBuffer dst_msg(dst_msg_ptr, dst_buffer_size);
     const MessageBuffer::MessageHeader dst_header(dst_msg);
@@ -371,7 +382,8 @@ void CleanupSpecialData(KProcess& dst_process, u32* dst_msg_ptr, size_t dst_buff
 }
 
 Result CleanupServerHandles(KernelCore& kernel, uint64_t message, size_t buffer_size,
-                            KPhysicalAddress message_paddr) {
+                            KPhysicalAddress message_paddr)
+{
     // Server is assumed to be current thread.
     KThread& thread = GetCurrentThread(kernel);
 
@@ -418,7 +430,8 @@ Result CleanupServerHandles(KernelCore& kernel, uint64_t message, size_t buffer_
     R_SUCCEED();
 }
 
-Result CleanupServerMap(KSessionRequest* request, KProcess* server_process) {
+Result CleanupServerMap(KSessionRequest* request, KProcess* server_process)
+{
     // If there's no server process, there's nothing to clean up.
     R_SUCCEED_IF(server_process == nullptr);
 
@@ -449,7 +462,8 @@ Result CleanupServerMap(KSessionRequest* request, KProcess* server_process) {
     R_SUCCEED();
 }
 
-Result CleanupClientMap(KSessionRequest* request, KProcessPageTable* client_page_table) {
+Result CleanupClientMap(KSessionRequest* request, KProcessPageTable* client_page_table)
+{
     // If there's no client page table, there's nothing to clean up.
     R_SUCCEED_IF(client_page_table == nullptr);
 
@@ -478,7 +492,8 @@ Result CleanupClientMap(KSessionRequest* request, KProcessPageTable* client_page
 }
 
 Result CleanupMap(KSessionRequest* request, KProcess* server_process,
-                  KProcessPageTable* client_page_table) {
+                  KProcessPageTable* client_page_table)
+{
     // Cleanup the server map.
     R_TRY(CleanupServerMap(request, server_process));
 
@@ -493,7 +508,8 @@ Result ProcessReceiveMessageMapAliasDescriptors(int& offset, KProcessPageTable& 
                                                 const MessageBuffer& dst_msg,
                                                 const MessageBuffer& src_msg,
                                                 KSessionRequest* request, KMemoryPermission perm,
-                                                bool send) {
+                                                bool send)
+{
     // Get the offset at the start of processing.
     const int cur_offset = offset;
 
@@ -517,7 +533,8 @@ Result ProcessReceiveMessageMapAliasDescriptors(int& offset, KProcessPageTable& 
                                          src_page_table, perm, dst_state, send));
 
         // Ensure that we clean up on failure.
-        ON_RESULT_FAILURE {
+        ON_RESULT_FAILURE
+        {
             dst_page_table.CleanupForIpcServer(dst_address, size, dst_state);
             src_page_table.CleanupForIpcClient(src_address, size, dst_state);
         };
@@ -543,7 +560,8 @@ Result ProcessReceiveMessageMapAliasDescriptors(int& offset, KProcessPageTable& 
 Result ReceiveMessage(KernelCore& kernel, bool& recv_list_broken, uint64_t dst_message_buffer,
                       size_t dst_buffer_size, KPhysicalAddress dst_message_paddr,
                       KThread& src_thread, uint64_t src_message_buffer, size_t src_buffer_size,
-                      KServerSession* session, KSessionRequest* request) {
+                      KServerSession* session, KSessionRequest* request)
+{
     // Prepare variables for receive.
     KThread& dst_thread = GetCurrentThread(kernel);
     KProcess& dst_process = *(dst_thread.GetOwnerProcess());
@@ -633,7 +651,8 @@ Result ReceiveMessage(KernelCore& kernel, bool& recv_list_broken, uint64_t dst_m
     int offset = dst_msg.Set(src_header);
 
     // Set up a guard to make sure that we end up in a clean state on error.
-    ON_RESULT_FAILURE {
+    ON_RESULT_FAILURE
+    {
         // Cleanup mappings.
         CleanupMap(request, std::addressof(dst_process), std::addressof(src_page_table));
 
@@ -654,7 +673,8 @@ Result ReceiveMessage(KernelCore& kernel, bool& recv_list_broken, uint64_t dst_m
     // Process any special data.
     if (src_header.GetHasSpecialHeader()) {
         // After we process, make sure we track whether the receive list is broken.
-        SCOPE_EXIT {
+        SCOPE_EXIT
+        {
             if (offset > dst_recv_list_idx) {
                 recv_list_broken = true;
             }
@@ -668,7 +688,8 @@ Result ReceiveMessage(KernelCore& kernel, bool& recv_list_broken, uint64_t dst_m
     // Process any pointer buffers.
     for (auto i = 0; i < src_header.GetPointerCount(); ++i) {
         // After we process, make sure we track whether the receive list is broken.
-        SCOPE_EXIT {
+        SCOPE_EXIT
+        {
             if (offset > dst_recv_list_idx) {
                 recv_list_broken = true;
             }
@@ -683,7 +704,8 @@ Result ReceiveMessage(KernelCore& kernel, bool& recv_list_broken, uint64_t dst_m
     // Process any map alias buffers.
     for (auto i = 0; i < src_header.GetMapAliasCount(); ++i) {
         // After we process, make sure we track whether the receive list is broken.
-        SCOPE_EXIT {
+        SCOPE_EXIT
+        {
             if (offset > dst_recv_list_idx) {
                 recv_list_broken = true;
             }
@@ -705,7 +727,8 @@ Result ReceiveMessage(KernelCore& kernel, bool& recv_list_broken, uint64_t dst_m
     // Process any raw data.
     if (const auto raw_count = src_header.GetRawCount(); raw_count != 0) {
         // After we process, make sure we track whether the receive list is broken.
-        SCOPE_EXIT {
+        SCOPE_EXIT
+        {
             if (offset + raw_count > dst_recv_list_idx) {
                 recv_list_broken = true;
             }
@@ -771,7 +794,8 @@ Result ProcessSendMessageReceiveMapping(KProcessPageTable& src_page_table,
                                         KProcessPageTable& dst_page_table,
                                         KProcessAddress client_address,
                                         KProcessAddress server_address, size_t size,
-                                        KMemoryState src_state) {
+                                        KMemoryState src_state)
+{
     // If the size is zero, there's nothing to process.
     R_SUCCEED_IF(size == 0);
 
@@ -816,7 +840,8 @@ Result ProcessSendMessagePointerDescriptors(int& offset, int& pointer_key,
                                             KProcessPageTable& dst_page_table,
                                             const MessageBuffer& dst_msg,
                                             const MessageBuffer& src_msg,
-                                            const ReceiveList& dst_recv_list, bool dst_user) {
+                                            const ReceiveList& dst_recv_list, bool dst_user)
+{
     // Get the offset at the start of processing.
     const int cur_offset = offset;
 
@@ -862,7 +887,8 @@ Result ProcessSendMessagePointerDescriptors(int& offset, int& pointer_key,
 Result SendMessage(KernelCore& kernel, uint64_t src_message_buffer, size_t src_buffer_size,
                    KPhysicalAddress src_message_paddr, KThread& dst_thread,
                    uint64_t dst_message_buffer, size_t dst_buffer_size, KServerSession* session,
-                   KSessionRequest* request) {
+                   KSessionRequest* request)
+{
     // Prepare variables for send.
     KThread& src_thread = GetCurrentThread(kernel);
     KProcess& dst_process = *(dst_thread.GetOwnerProcess());
@@ -918,7 +944,8 @@ Result SendMessage(KernelCore& kernel, uint64_t src_message_buffer, size_t src_b
     // Send the message.
     {
         // Make sure that we end up in a clean state on error.
-        ON_RESULT_FAILURE {
+        ON_RESULT_FAILURE
+        {
             // Cleanup special data.
             if (processed_special_data) {
                 if (src_header.GetHasSpecialHeader()) {
@@ -1068,7 +1095,8 @@ Result SendMessage(KernelCore& kernel, uint64_t src_message_buffer, size_t src_b
 }
 
 void ReplyAsyncError(KProcess* to_process, uint64_t to_msg_buf, size_t to_msg_buf_size,
-                     Result result) {
+                     Result result)
+{
     // Convert the address to a linear pointer.
     u32* to_msg = to_process->GetMemory().GetPointer<u32>(to_msg_buf);
 
@@ -1080,11 +1108,14 @@ void ReplyAsyncError(KProcess* to_process, uint64_t to_msg_buf, size_t to_msg_bu
 } // namespace
 
 KServerSession::KServerSession(KernelCore& kernel)
-    : KSynchronizationObject{kernel}, m_lock{m_kernel} {}
+    : KSynchronizationObject{kernel}, m_lock{m_kernel}
+{
+}
 
 KServerSession::~KServerSession() = default;
 
-void KServerSession::Destroy() {
+void KServerSession::Destroy()
+{
     m_parent->OnServerClosed();
 
     this->CleanupRequests();
@@ -1095,7 +1126,8 @@ void KServerSession::Destroy() {
 Result KServerSession::ReceiveRequest(uintptr_t server_message, uintptr_t server_buffer_size,
                                       KPhysicalAddress server_message_paddr,
                                       std::shared_ptr<Service::HLERequestContext>* out_context,
-                                      std::weak_ptr<Service::SessionRequestManager> manager) {
+                                      std::weak_ptr<Service::SessionRequestManager> manager)
+{
     // Lock the session.
     KScopedLightLock lk{m_lock};
 
@@ -1127,7 +1159,8 @@ Result KServerSession::ReceiveRequest(uintptr_t server_message, uintptr_t server
         client_thread->Open();
     }
 
-    SCOPE_EXIT {
+    SCOPE_EXIT
+    {
         client_thread->Close();
     };
 
@@ -1179,7 +1212,8 @@ Result KServerSession::ReceiveRequest(uintptr_t server_message, uintptr_t server
         // Reply to the client.
         {
             // After we reply, close our reference to the request.
-            SCOPE_EXIT {
+            SCOPE_EXIT
+            {
                 request->Close();
             };
 
@@ -1222,7 +1256,8 @@ Result KServerSession::ReceiveRequest(uintptr_t server_message, uintptr_t server
 }
 
 Result KServerSession::SendReply(uintptr_t server_message, uintptr_t server_buffer_size,
-                                 KPhysicalAddress server_message_paddr, bool is_hle) {
+                                 KPhysicalAddress server_message_paddr, bool is_hle)
+{
     // Lock the session.
     KScopedLightLock lk{m_lock};
 
@@ -1243,7 +1278,8 @@ Result KServerSession::SendReply(uintptr_t server_message, uintptr_t server_buff
     }
 
     // Close reference to the request once we're done processing it.
-    SCOPE_EXIT {
+    SCOPE_EXIT
+    {
         request->Close();
     };
 
@@ -1327,7 +1363,8 @@ Result KServerSession::SendReply(uintptr_t server_message, uintptr_t server_buff
     R_RETURN(result);
 }
 
-Result KServerSession::OnRequest(KSessionRequest* request) {
+Result KServerSession::OnRequest(KSessionRequest* request)
+{
     // Create the wait queue.
     ThreadQueueImplForKServerSessionRequest wait_queue{m_kernel};
 
@@ -1364,7 +1401,8 @@ Result KServerSession::OnRequest(KSessionRequest* request) {
     return GetCurrentThread(m_kernel).GetWaitResult();
 }
 
-bool KServerSession::IsSignaled() const {
+bool KServerSession::IsSignaled() const
+{
     ASSERT(KScheduler::IsSchedulerLockedByCurrentThread(m_kernel));
 
     // If the client is closed, we're always signaled.
@@ -1376,7 +1414,8 @@ bool KServerSession::IsSignaled() const {
     return !m_request_list.empty() && m_current_request == nullptr;
 }
 
-void KServerSession::CleanupRequests() {
+void KServerSession::CleanupRequests()
+{
     KScopedLightLock lk(m_lock);
 
     // Clean up any pending requests.
@@ -1403,7 +1442,8 @@ void KServerSession::CleanupRequests() {
         }
 
         // Close a reference to the request once it's cleaned up.
-        SCOPE_EXIT {
+        SCOPE_EXIT
+        {
             request->Close();
         };
 
@@ -1447,7 +1487,8 @@ void KServerSession::CleanupRequests() {
     }
 }
 
-void KServerSession::OnClientClosed() {
+void KServerSession::OnClientClosed()
+{
     KScopedLightLock lk{m_lock};
 
     // Handle any pending requests.
@@ -1502,7 +1543,8 @@ void KServerSession::OnClientClosed() {
         ASSERT(thread != nullptr);
 
         // Ensure that we close the request when done.
-        SCOPE_EXIT {
+        SCOPE_EXIT
+        {
             request->Close();
         };
 

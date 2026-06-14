@@ -8,7 +8,8 @@
 
 namespace Shader::Maxwell {
 namespace {
-void DSET(TranslatorVisitor& v, u64 insn, const IR::F64& src_b) {
+void DSET(TranslatorVisitor& v, u64 insn, const IR::F64& src_b)
+{
     union {
         u64 insn;
         BitField<0, 8, IR::Reg> dest_reg;
@@ -56,15 +57,18 @@ void DSET(TranslatorVisitor& v, u64 insn, const IR::F64& src_b) {
 }
 } // Anonymous namespace
 
-void TranslatorVisitor::DSET_reg(u64 insn) {
+void TranslatorVisitor::DSET_reg(u64 insn)
+{
     DSET(*this, insn, GetDoubleReg20(insn));
 }
 
-void TranslatorVisitor::DSET_cbuf(u64 insn) {
+void TranslatorVisitor::DSET_cbuf(u64 insn)
+{
     DSET(*this, insn, GetDoubleCbuf(insn));
 }
 
-void TranslatorVisitor::DSET_imm(u64 insn) {
+void TranslatorVisitor::DSET_imm(u64 insn)
+{
     DSET(*this, insn, GetDoubleImm20(insn));
 }
 

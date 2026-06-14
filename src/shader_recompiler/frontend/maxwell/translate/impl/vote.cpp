@@ -13,7 +13,8 @@ enum class VoteOp : u64 {
     EQ,
 };
 
-[[nodiscard]] IR::U1 VoteOperation(IR::IREmitter& ir, const IR::U1& pred, VoteOp vote_op) {
+[[nodiscard]] IR::U1 VoteOperation(IR::IREmitter& ir, const IR::U1& pred, VoteOp vote_op)
+{
     switch (vote_op) {
     case VoteOp::ALL:
         return ir.VoteAll(pred);
@@ -26,7 +27,8 @@ enum class VoteOp : u64 {
     }
 }
 
-void Vote(TranslatorVisitor& v, u64 insn) {
+void Vote(TranslatorVisitor& v, u64 insn)
+{
     union {
         u64 insn;
         BitField<0, 8, IR::Reg> dest_reg;
@@ -42,11 +44,13 @@ void Vote(TranslatorVisitor& v, u64 insn) {
 }
 } // Anonymous namespace
 
-void TranslatorVisitor::VOTE(u64 insn) {
+void TranslatorVisitor::VOTE(u64 insn)
+{
     Vote(*this, insn);
 }
 
-void TranslatorVisitor::VOTE_vtg(u64) {
+void TranslatorVisitor::VOTE_vtg(u64)
+{
     LOG_WARNING(Shader, "(STUBBED) called");
 }
 

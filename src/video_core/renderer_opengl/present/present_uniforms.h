@@ -22,7 +22,9 @@ struct ScreenRectVertex {
     constexpr ScreenRectVertex() = default;
 
     constexpr ScreenRectVertex(u32 x, u32 y, GLfloat u, GLfloat v)
-        : position{{static_cast<GLfloat>(x), static_cast<GLfloat>(y)}}, tex_coord{{u, v}} {}
+        : position{{static_cast<GLfloat>(x), static_cast<GLfloat>(y)}}, tex_coord{{u, v}}
+    {
+    }
 
     std::array<GLfloat, 2> position{};
     std::array<GLfloat, 2> tex_coord{};
@@ -35,7 +37,8 @@ struct ScreenRectVertex {
  * The projection part of the matrix is trivial, hence these operations are represented
  * by a 3x2 matrix.
  */
-static inline std::array<GLfloat, 3 * 2> MakeOrthographicMatrix(float width, float height) {
+static inline std::array<GLfloat, 3 * 2> MakeOrthographicMatrix(float width, float height)
+{
     std::array<GLfloat, 3 * 2> matrix; // Laid out in column-major order
 
     // clang-format off

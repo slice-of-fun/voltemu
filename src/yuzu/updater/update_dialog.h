@@ -4,6 +4,7 @@
 #pragma once
 
 #include <QDialog>
+
 #include "common/net/net.h"
 
 class QRadioButton;

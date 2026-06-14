@@ -23,8 +23,8 @@ public:
 
 private:
     Result DeactivateTouchScreen();
-    Result SetTouchScreenAutoPilotState(
-        InArray<TouchState, BufferAttr_HipcMapAlias> auto_pilot_buffer);
+    Result
+    SetTouchScreenAutoPilotState(InArray<TouchState, BufferAttr_HipcMapAlias> auto_pilot_buffer);
     Result UnsetTouchScreenAutoPilotState();
     Result GetTouchScreenConfiguration(
         Out<Core::HID::TouchScreenConfigurationForNx> out_touchscreen_config,

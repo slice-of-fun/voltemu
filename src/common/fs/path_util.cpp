@@ -4,10 +4,11 @@
 // SPDX-FileCopyrightText: Copyright 2021 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include <ankerl/unordered_dense.h>
+
 #include <algorithm>
 #include <iostream>
 #include <sstream>
-#include <ankerl/unordered_dense.h>
 
 #include "common/assert.h"
 #include "common/fs/fs.h"
@@ -21,10 +22,11 @@
 #ifdef _WIN32
 #include <shlobj.h> // Used in GetExeDirectory()
 #else
-#include <cstdlib>     // Used in Get(Home/Data)Directory()
 #include <pwd.h>       // Used in GetHomeDirectory()
 #include <sys/types.h> // Used in GetHomeDirectory()
 #include <unistd.h>    // Used in GetDataDirectory()
+
+#include <cstdlib> // Used in Get(Home/Data)Directory()
 #endif
 
 #ifdef __APPLE__
@@ -68,7 +70,8 @@ namespace fs = std::filesystem;
  */
 class PathManagerImpl {
 public:
-    static PathManagerImpl& GetInstance() {
+    static PathManagerImpl& GetInstance()
+    {
         static PathManagerImpl path_manager_impl;
 
         return path_manager_impl;
@@ -80,25 +83,29 @@ public:
     PathManagerImpl(PathManagerImpl&&) = delete;
     PathManagerImpl& operator=(PathManagerImpl&&) = delete;
 
-    [[nodiscard]] const fs::path& GetVoltPathImpl(VoltPath volt_path) {
+    [[nodiscard]] const fs::path& GetVoltPathImpl(VoltPath volt_path)
+    {
         return volt_paths.at(volt_path);
     }
 
-    [[nodiscard]] const fs::path& GetLegacyPathImpl(EmuPath legacy_path) {
+    [[nodiscard]] const fs::path& GetLegacyPathImpl(EmuPath legacy_path)
+    {
         return legacy_paths.at(legacy_path);
     }
 
-    void CreateEdenPaths() {
-        std::for_each(volt_paths.begin(), volt_paths.end(), [](auto &path) {
-            void(FS::CreateDirs(path.second));
-        });
+    void CreateEdenPaths()
+    {
+        std::for_each(volt_paths.begin(), volt_paths.end(),
+                      [](auto& path) { void(FS::CreateDirs(path.second)); });
     }
 
-    void SetVoltPathImpl(VoltPath volt_path, const fs::path& new_path) {
+    void SetVoltPathImpl(VoltPath volt_path, const fs::path& new_path)
+    {
         volt_paths.insert_or_assign(volt_path, new_path);
     }
 
-    void SetLegacyPathImpl(EmuPath legacy_path, const fs::path& new_path) {
+    void SetLegacyPathImpl(EmuPath legacy_path, const fs::path& new_path)
+    {
         legacy_paths.insert_or_assign(legacy_path, new_path);
     }
 
@@ -107,7 +114,8 @@ public:
     /// over the global configuration directory (in other words, portable directories
     /// take priority over the global ones, always)
     /// On Android, the behaviour is to look for the current directory only.
-    void Reinitialize(fs::path volt_path = {}) {
+    void Reinitialize(fs::path volt_path = {})
+    {
         fs::path eden_path_cache;
         fs::path eden_path_config;
 #ifdef _WIN32
@@ -118,9 +126,12 @@ public:
         }
         eden_path_cache = volt_path / CACHE_DIR;
         eden_path_config = volt_path / CONFIG_DIR;
-#define LEGACY_PATH(titleName, upperName) GenerateLegacyPath(EmuPath::titleName##Dir, GetAppDataRoamingDirectory() / upperName##_DIR); \
-        GenerateLegacyPath(EmuPath::titleName##ConfigDir, GetAppDataRoamingDirectory() / upperName##_DIR / CONFIG_DIR); \
-        GenerateLegacyPath(EmuPath::titleName##CacheDir, GetAppDataRoamingDirectory() / upperName##_DIR / CACHE_DIR);
+#define LEGACY_PATH(titleName, upperName)                                                          \
+    GenerateLegacyPath(EmuPath::titleName##Dir, GetAppDataRoamingDirectory() / upperName##_DIR);   \
+    GenerateLegacyPath(EmuPath::titleName##ConfigDir,                                              \
+                       GetAppDataRoamingDirectory() / upperName##_DIR / CONFIG_DIR);               \
+    GenerateLegacyPath(EmuPath::titleName##CacheDir,                                               \
+                       GetAppDataRoamingDirectory() / upperName##_DIR / CACHE_DIR);
         LEGACY_PATH(Citron, CITRON)
         LEGACY_PATH(Sudachi, SUDACHI)
         LEGACY_PATH(Yuzu, YUZU)
@@ -140,9 +151,13 @@ public:
             eden_path_cache = volt_path / CACHE_DIR;
             eden_path_config = volt_path / CONFIG_DIR;
         }
-#define LEGACY_PATH(titleName, upperName) GenerateLegacyPath(EmuPath::titleName##Dir, GetDataDirectory("XDG_DATA_HOME") / upperName##_DIR); \
-        GenerateLegacyPath(EmuPath::titleName##ConfigDir, GetDataDirectory("XDG_CONFIG_HOME") / upperName##_DIR); \
-        GenerateLegacyPath(EmuPath::titleName##CacheDir, GetDataDirectory("XDG_CACHE_HOME") / upperName##_DIR);
+#define LEGACY_PATH(titleName, upperName)                                                          \
+    GenerateLegacyPath(EmuPath::titleName##Dir,                                                    \
+                       GetDataDirectory("XDG_DATA_HOME") / upperName##_DIR);                       \
+    GenerateLegacyPath(EmuPath::titleName##ConfigDir,                                              \
+                       GetDataDirectory("XDG_CONFIG_HOME") / upperName##_DIR);                     \
+    GenerateLegacyPath(EmuPath::titleName##CacheDir,                                               \
+                       GetDataDirectory("XDG_CACHE_HOME") / upperName##_DIR);
         LEGACY_PATH(Citron, CITRON)
         LEGACY_PATH(Sudachi, SUDACHI)
         LEGACY_PATH(Yuzu, YUZU)
@@ -174,22 +189,24 @@ public:
         // This is incredibly stupid and violates a million XDG standards, but whatever
         GenerateLegacyPath(EmuPath::RyujinxDir, GetDataDirectory("XDG_CONFIG_HOME") / RYUJINX_DIR);
 #endif
-
     }
 
 private:
-    PathManagerImpl() {
+    PathManagerImpl()
+    {
         Reinitialize();
     }
 
     ~PathManagerImpl() = default;
 
-    void GenerateVoltPath(VoltPath volt_path, const fs::path& new_path) {
+    void GenerateVoltPath(VoltPath volt_path, const fs::path& new_path)
+    {
         // Defer path creation
         SetVoltPathImpl(volt_path, new_path);
     }
 
-    void GenerateLegacyPath(EmuPath legacy_path, const fs::path& new_path) {
+    void GenerateLegacyPath(EmuPath legacy_path, const fs::path& new_path)
+    {
         SetLegacyPathImpl(legacy_path, new_path);
     }
 
@@ -197,7 +214,8 @@ private:
     ankerl::unordered_dense::map<EmuPath, fs::path> legacy_paths;
 };
 
-bool ValidatePath(const fs::path& path) {
+bool ValidatePath(const fs::path& path)
+{
     if (path.empty()) {
         LOG_ERROR(Common_Filesystem, "Input path is empty, path={}", PathToUTF8String(path));
         return false;
@@ -218,7 +236,8 @@ bool ValidatePath(const fs::path& path) {
     return true;
 }
 
-fs::path ConcatPath(const fs::path& first, const fs::path& second) {
+fs::path ConcatPath(const fs::path& first, const fs::path& second)
+{
     const bool second_has_dir_sep = IsDirSeparator(second.u8string().front());
 
     if (!second_has_dir_sep) {
@@ -231,7 +250,8 @@ fs::path ConcatPath(const fs::path& first, const fs::path& second) {
     return concat_path.lexically_normal();
 }
 
-fs::path ConcatPathSafe(const fs::path& base, const fs::path& offset) {
+fs::path ConcatPathSafe(const fs::path& base, const fs::path& offset)
+{
     const auto concatenated_path = ConcatPath(base, offset);
 
     if (!IsPathSandboxed(base, concatenated_path)) {
@@ -241,7 +261,8 @@ fs::path ConcatPathSafe(const fs::path& base, const fs::path& offset) {
     return concatenated_path;
 }
 
-bool IsPathSandboxed(const fs::path& base, const fs::path& path) {
+bool IsPathSandboxed(const fs::path& base, const fs::path& path)
+{
     const auto base_string = RemoveTrailingSeparators(base.lexically_normal()).u8string();
     const auto path_string = RemoveTrailingSeparators(path.lexically_normal()).u8string();
 
@@ -252,15 +273,18 @@ bool IsPathSandboxed(const fs::path& base, const fs::path& path) {
     return base_string.compare(0, base_string.size(), path_string, 0, base_string.size()) == 0;
 }
 
-bool IsDirSeparator(char character) {
+bool IsDirSeparator(char character)
+{
     return character == '/' || character == '\\';
 }
 
-bool IsDirSeparator(char8_t character) {
+bool IsDirSeparator(char8_t character)
+{
     return character == u8'/' || character == u8'\\';
 }
 
-fs::path RemoveTrailingSeparators(const fs::path& path) {
+fs::path RemoveTrailingSeparators(const fs::path& path)
+{
     if (path.empty()) {
         return path;
     }
@@ -274,42 +298,51 @@ fs::path RemoveTrailingSeparators(const fs::path& path) {
     return fs::path{string_path};
 }
 
-void SetAppDirectory(const std::string& app_directory) {
+void SetAppDirectory(const std::string& app_directory)
+{
     PathManagerImpl::GetInstance().Reinitialize(app_directory);
 }
 
-const fs::path& GetVoltPath(VoltPath volt_path) {
+const fs::path& GetVoltPath(VoltPath volt_path)
+{
     return PathManagerImpl::GetInstance().GetVoltPathImpl(volt_path);
 }
 
-const std::filesystem::path& GetLegacyPath(EmuPath legacy_path) {
+const std::filesystem::path& GetLegacyPath(EmuPath legacy_path)
+{
     return PathManagerImpl::GetInstance().GetLegacyPathImpl(legacy_path);
 }
 
-std::string GetVoltPathString(VoltPath volt_path) {
+std::string GetVoltPathString(VoltPath volt_path)
+{
     return PathToUTF8String(GetVoltPath(volt_path));
 }
 
-std::string GetLegacyPathString(EmuPath legacy_path) {
+std::string GetLegacyPathString(EmuPath legacy_path)
+{
     return PathToUTF8String(GetLegacyPath(legacy_path));
 }
 
-void SetVoltPath(VoltPath volt_path, const fs::path& new_path) {
+void SetVoltPath(VoltPath volt_path, const fs::path& new_path)
+{
     auto& instance = PathManagerImpl::GetInstance();
     if (FS::IsDir(new_path)) {
         instance.SetVoltPathImpl(volt_path, new_path);
     } else {
-        LOG_ERROR(Common_Filesystem, "Filesystem object at new_path={} is not a directory", PathToUTF8String(new_path));
+        LOG_ERROR(Common_Filesystem, "Filesystem object at new_path={} is not a directory",
+                  PathToUTF8String(new_path));
     }
 }
 
-void CreateEdenPaths() {
+void CreateEdenPaths()
+{
     PathManagerImpl::GetInstance().CreateEdenPaths();
 }
 
 #ifdef _WIN32
 
-fs::path GetExeDirectory() {
+fs::path GetExeDirectory()
+{
     wchar_t exe_path[MAX_PATH];
 
     if (GetModuleFileNameW(nullptr, exe_path, MAX_PATH) == 0) {
@@ -320,7 +353,8 @@ fs::path GetExeDirectory() {
     return fs::path{exe_path}.parent_path();
 }
 
-fs::path GetAppDataRoamingDirectory() {
+fs::path GetAppDataRoamingDirectory()
+{
     PWSTR appdata_roaming_path = nullptr;
 
     SHGetKnownFolderPath(FOLDERID_RoamingAppData, 0, nullptr, &appdata_roaming_path);
@@ -338,7 +372,8 @@ fs::path GetAppDataRoamingDirectory() {
 
 #else
 
-fs::path GetHomeDirectory() {
+fs::path GetHomeDirectory()
+{
     const char* home_env_var = getenv("HOME");
 
     if (home_env_var) {
@@ -359,7 +394,8 @@ fs::path GetHomeDirectory() {
     return fs::path{pw->pw_dir};
 }
 
-fs::path GetDataDirectory(const std::string& env_name) {
+fs::path GetDataDirectory(const std::string& env_name)
+{
     const char* data_env_var = getenv(env_name.c_str());
 
     if (data_env_var) {
@@ -381,7 +417,8 @@ fs::path GetDataDirectory(const std::string& env_name) {
 
 #ifdef __APPLE__
 
-fs::path GetBundleDirectory() {
+fs::path GetBundleDirectory()
+{
     char app_bundle_path[MAXPATHLEN];
 
     // Get the main bundle for the app
@@ -400,7 +437,8 @@ fs::path GetBundleDirectory() {
 
 // vvvvvvvvvv Deprecated vvvvvvvvvv //
 
-std::string_view RemoveTrailingSlash(std::string_view path) {
+std::string_view RemoveTrailingSlash(std::string_view path)
+{
     if (path.empty()) {
         return path;
     }
@@ -413,8 +451,8 @@ std::string_view RemoveTrailingSlash(std::string_view path) {
     return path;
 }
 
-template <typename F>
-static void ForEachPathComponent(std::string_view filename, F&& cb) {
+template<typename F> static void ForEachPathComponent(std::string_view filename, F&& cb)
+{
     const char* component_begin = filename.data();
     const char* const end = component_begin + filename.size();
     for (const char* it = component_begin; it != end; ++it) {
@@ -431,21 +469,24 @@ static void ForEachPathComponent(std::string_view filename, F&& cb) {
     }
 }
 
-std::vector<std::string_view> SplitPathComponents(std::string_view filename) {
+std::vector<std::string_view> SplitPathComponents(std::string_view filename)
+{
     std::vector<std::string_view> components;
     ForEachPathComponent(filename, [&](auto component) { components.emplace_back(component); });
 
     return components;
 }
 
-std::vector<std::string> SplitPathComponentsCopy(std::string_view filename) {
+std::vector<std::string> SplitPathComponentsCopy(std::string_view filename)
+{
     std::vector<std::string> components;
     ForEachPathComponent(filename, [&](auto component) { components.emplace_back(component); });
 
     return components;
 }
 
-std::string SanitizePath(std::string_view path_, DirectorySeparator directory_separator) {
+std::string SanitizePath(std::string_view path_, DirectorySeparator directory_separator)
+{
     std::string path(path_);
 #ifdef __ANDROID__
     if (Android::IsContentUri(path)) {
@@ -477,7 +518,8 @@ std::string SanitizePath(std::string_view path_, DirectorySeparator directory_se
     return std::string(RemoveTrailingSlash(path));
 }
 
-std::string GetParentPath(std::string_view path) {
+std::string GetParentPath(std::string_view path)
+{
     if (path.empty()) {
         return std::string(path);
     }
@@ -501,7 +543,8 @@ std::string GetParentPath(std::string_view path) {
     return std::string(path.substr(0, name_index));
 }
 
-std::string_view GetPathWithoutTop(std::string_view path) {
+std::string_view GetPathWithoutTop(std::string_view path)
+{
     if (path.empty()) {
         return path;
     }

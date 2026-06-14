@@ -26,16 +26,16 @@ public:
     virtual void DoneCurrent() {}
 
     /// Gets the GPU driver library (used by Android only)
-    virtual std::shared_ptr<Common::DynamicLibrary> GetDriverLibrary() {
-        return {};
-    }
+    virtual std::shared_ptr<Common::DynamicLibrary> GetDriverLibrary() { return {}; }
 
     class Scoped {
     public:
-        [[nodiscard]] explicit Scoped(GraphicsContext& context_) : context(context_) {
+        [[nodiscard]] explicit Scoped(GraphicsContext& context_) : context(context_)
+        {
             context.MakeCurrent();
         }
-        ~Scoped() {
+        ~Scoped()
+        {
             if (active) {
                 context.DoneCurrent();
             }
@@ -43,9 +43,7 @@ public:
 
         /// In the event that context was destroyed before the Scoped is destroyed, this provides a
         /// mechanism to prevent calling a destroyed object's method during the deconstructor
-        void Cancel() {
-            active = false;
-        }
+        void Cancel() { active = false; }
 
     private:
         GraphicsContext& context;
@@ -54,9 +52,7 @@ public:
 
     /// Calls MakeCurrent on the context and calls DoneCurrent when the scope for the returned value
     /// ends
-    [[nodiscard]] Scoped Acquire() {
-        return Scoped{*this};
-    }
+    [[nodiscard]] Scoped Acquire() { return Scoped{*this}; }
 };
 
 } // namespace Core::Frontend

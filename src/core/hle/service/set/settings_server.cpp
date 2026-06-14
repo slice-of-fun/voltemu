@@ -4,15 +4,17 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/set/settings_server.h"
+
 #include <algorithm>
 #include <array>
 #include <chrono>
+
 #include "common/logging.h"
 #include "common/settings.h"
 #include "core/hle/service/cmif_serialization.h"
 #include "core/hle/service/ipc_helpers.h"
 #include "core/hle/service/set/key_code_map.h"
-#include "core/hle/service/set/settings_server.h"
 
 namespace Service::Set {
 namespace {
@@ -23,7 +25,8 @@ constexpr Result ResultInvalidLanguage{ErrorModule::Settings, 625};
 constexpr Result ResultNullPointer{ErrorModule::Settings, 1261};
 
 Result GetKeyCodeMapImpl(KeyCodeMap& out_key_code_map, KeyboardLayout keyboard_layout,
-                         LanguageCode language_code) {
+                         LanguageCode language_code)
+{
     switch (keyboard_layout) {
     case KeyboardLayout::Japanese:
         out_key_code_map = KeyCodeMapJapanese;
@@ -85,11 +88,13 @@ Result GetKeyCodeMapImpl(KeyCodeMap& out_key_code_map, KeyboardLayout keyboard_l
 
 } // Anonymous namespace
 
-LanguageCode GetLanguageCodeFromIndex(std::size_t index) {
+LanguageCode GetLanguageCodeFromIndex(std::size_t index)
+{
     return available_language_codes.at(index);
 }
 
-ISettingsServer::ISettingsServer(Core::System& system_) : ServiceFramework{system_, "set"} {
+ISettingsServer::ISettingsServer(Core::System& system_) : ServiceFramework{system_, "set"}
+{
     // clang-format off
     static const FunctionInfo functions[] = {
         {0, C<&ISettingsServer::GetLanguageCode>, "GetLanguageCode"},
@@ -113,7 +118,8 @@ ISettingsServer::ISettingsServer(Core::System& system_) : ServiceFramework{syste
 
 ISettingsServer::~ISettingsServer() = default;
 
-Result ISettingsServer::GetLanguageCode(Out<LanguageCode> out_language_code) {
+Result ISettingsServer::GetLanguageCode(Out<LanguageCode> out_language_code)
+{
     LOG_DEBUG(Service_SET, "called {}", Settings::values.language_index.GetValue());
 
     *out_language_code = available_language_codes[static_cast<std::size_t>(
@@ -122,7 +128,8 @@ Result ISettingsServer::GetLanguageCode(Out<LanguageCode> out_language_code) {
 }
 
 Result ISettingsServer::GetAvailableLanguageCodes(
-    Out<s32> out_count, OutArray<LanguageCode, BufferAttr_HipcPointer> out_language_codes) {
+    Out<s32> out_count, OutArray<LanguageCode, BufferAttr_HipcPointer> out_language_codes)
+{
     LOG_DEBUG(Service_SET, "called");
 
     const std::size_t max_amount = (std::min)(PRE_4_0_0_MAX_ENTRIES, out_language_codes.size());
@@ -134,7 +141,8 @@ Result ISettingsServer::GetAvailableLanguageCodes(
     R_SUCCEED();
 }
 
-Result ISettingsServer::MakeLanguageCode(Out<LanguageCode> out_language_code, Language language) {
+Result ISettingsServer::MakeLanguageCode(Out<LanguageCode> out_language_code, Language language)
+{
     LOG_DEBUG(Service_SET, "called, language={}", language);
 
     const auto index = static_cast<std::size_t>(language);
@@ -144,14 +152,16 @@ Result ISettingsServer::MakeLanguageCode(Out<LanguageCode> out_language_code, La
     R_SUCCEED();
 }
 
-Result ISettingsServer::GetAvailableLanguageCodeCount(Out<s32> out_count) {
+Result ISettingsServer::GetAvailableLanguageCodeCount(Out<s32> out_count)
+{
     LOG_DEBUG(Service_SET, "called");
 
     *out_count = PRE_4_0_0_MAX_ENTRIES;
     R_SUCCEED();
 }
 
-Result ISettingsServer::GetRegionCode(Out<SystemRegionCode> out_region_code) {
+Result ISettingsServer::GetRegionCode(Out<SystemRegionCode> out_region_code)
+{
     LOG_DEBUG(Service_SET, "called");
 
     *out_region_code = static_cast<SystemRegionCode>(Settings::values.region_index.GetValue());
@@ -159,7 +169,8 @@ Result ISettingsServer::GetRegionCode(Out<SystemRegionCode> out_region_code) {
 }
 
 Result ISettingsServer::GetAvailableLanguageCodes2(
-    Out<s32> out_count, OutArray<LanguageCode, BufferAttr_HipcMapAlias> language_codes) {
+    Out<s32> out_count, OutArray<LanguageCode, BufferAttr_HipcMapAlias> language_codes)
+{
     LOG_DEBUG(Service_SET, "called");
 
     const std::size_t max_amount = (std::min)(POST_4_0_0_MAX_ENTRIES, language_codes.size());
@@ -171,15 +182,17 @@ Result ISettingsServer::GetAvailableLanguageCodes2(
     R_SUCCEED();
 }
 
-Result ISettingsServer::GetAvailableLanguageCodeCount2(Out<s32> out_count) {
+Result ISettingsServer::GetAvailableLanguageCodeCount2(Out<s32> out_count)
+{
     LOG_DEBUG(Service_SET, "called");
 
     *out_count = POST_4_0_0_MAX_ENTRIES;
     R_SUCCEED();
 }
 
-Result ISettingsServer::GetKeyCodeMap(
-    OutLargeData<KeyCodeMap, BufferAttr_HipcMapAlias> out_key_code_map) {
+Result
+ISettingsServer::GetKeyCodeMap(OutLargeData<KeyCodeMap, BufferAttr_HipcMapAlias> out_key_code_map)
+{
     LOG_DEBUG(Service_SET, "called");
 
     R_UNLESS(out_key_code_map != nullptr, ResultNullPointer);
@@ -201,15 +214,17 @@ Result ISettingsServer::GetKeyCodeMap(
     R_RETURN(GetKeyCodeMapImpl(*out_key_code_map, key_code->second, key_code->first));
 }
 
-Result ISettingsServer::GetQuestFlag(Out<bool> out_quest_flag) {
+Result ISettingsServer::GetQuestFlag(Out<bool> out_quest_flag)
+{
     LOG_DEBUG(Service_SET, "called");
 
     *out_quest_flag = Settings::values.quest_flag.GetValue();
     R_SUCCEED();
 }
 
-Result ISettingsServer::GetKeyCodeMap2(
-    OutLargeData<KeyCodeMap, BufferAttr_HipcMapAlias> out_key_code_map) {
+Result
+ISettingsServer::GetKeyCodeMap2(OutLargeData<KeyCodeMap, BufferAttr_HipcMapAlias> out_key_code_map)
+{
     LOG_DEBUG(Service_SET, "called");
 
     R_UNLESS(out_key_code_map != nullptr, ResultNullPointer);
@@ -232,7 +247,8 @@ Result ISettingsServer::GetKeyCodeMap2(
 }
 
 Result ISettingsServer::GetDeviceNickName(
-    OutLargeData<std::array<u8, 0x80>, BufferAttr_HipcMapAlias> out_device_name) {
+    OutLargeData<std::array<u8, 0x80>, BufferAttr_HipcMapAlias> out_device_name)
+{
     LOG_DEBUG(Service_SET, "called");
 
     const std::size_t string_size =
@@ -243,7 +259,9 @@ Result ISettingsServer::GetDeviceNickName(
     R_SUCCEED();
 }
 
-Result ISettingsServer::GetKeyCodeMapByPort(OutLargeData<KeyCodeMap, BufferAttr_HipcMapAlias> out_key_code_map, u32 port) {
+Result ISettingsServer::GetKeyCodeMapByPort(
+    OutLargeData<KeyCodeMap, BufferAttr_HipcMapAlias> out_key_code_map, u32 port)
+{
     LOG_DEBUG(Service_SET, "called, port={}", port);
 
     // Similar to other key code map functions, just pass through to the main implementation

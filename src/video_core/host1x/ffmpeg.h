@@ -8,9 +8,9 @@
 
 #include <memory>
 #include <optional>
+#include <queue>
 #include <span>
 #include <vector>
-#include <queue>
 
 #include "common/common_funcs.h"
 #include "common/common_types.h"
@@ -54,9 +54,7 @@ public:
     explicit Packet(std::span<const u8> data);
     ~Packet();
 
-    AVPacket* GetPacket() const {
-        return m_packet;
-    }
+    AVPacket* GetPacket() const { return m_packet; }
 
 private:
     AVPacket* m_packet{};
@@ -71,43 +69,26 @@ public:
     explicit Frame();
     ~Frame();
 
-    int GetWidth() const {
-        return m_frame->width;
-    }
+    int GetWidth() const { return m_frame->width; }
 
-    int GetHeight() const {
-        return m_frame->height;
-    }
+    int GetHeight() const { return m_frame->height; }
 
-    AVPixelFormat GetPixelFormat() const {
-        return static_cast<AVPixelFormat>(m_frame->format);
-    }
+    AVPixelFormat GetPixelFormat() const { return static_cast<AVPixelFormat>(m_frame->format); }
 
-    int GetStride(int plane) const {
-        return m_frame->linesize[plane];
-    }
+    int GetStride(int plane) const { return m_frame->linesize[plane]; }
 
-    int* GetStrides() const {
-        return m_frame->linesize;
-    }
+    int* GetStrides() const { return m_frame->linesize; }
 
-    u8* GetData(int plane) const {
-        return m_frame->data[plane];
-    }
+    u8* GetData(int plane) const { return m_frame->data[plane]; }
 
-    const u8* GetPlane(int plane) const {
-        return m_frame->data[plane];
-    }
+    const u8* GetPlane(int plane) const { return m_frame->data[plane]; }
 
-    u8** GetPlanes() const {
-        return m_frame->data;
-    }
+    u8** GetPlanes() const { return m_frame->data; }
 
-    void SetFormat(int format) {
-        m_frame->format = format;
-    }
+    void SetFormat(int format) { m_frame->format = format; }
 
-    bool IsInterlaced() const {
+    bool IsInterlaced() const
+    {
 #if defined(FF_API_INTERLACED_FRAME) || LIBAVUTIL_VERSION_MAJOR >= 59
         return m_frame->flags & AV_FRAME_FLAG_INTERLACED;
 #else
@@ -115,11 +96,13 @@ public:
 #endif
     }
 
-    bool IsHardwareDecoded() const {
+    bool IsHardwareDecoded() const
+    {
         return m_frame->hw_frames_ctx != nullptr;
     }
 
-    AVFrame* GetFrame() const {
+    AVFrame* GetFrame() const
+    {
         return m_frame;
     }
 
@@ -138,9 +121,7 @@ public:
 
     bool SupportsDecodingOnDevice(AVPixelFormat* out_pix_fmt, AVHWDeviceType type) const;
 
-    const AVCodec* GetCodec() const {
-        return m_codec;
-    }
+    const AVCodec* GetCodec() const { return m_codec; }
 
 private:
     const AVCodec* m_codec{};
@@ -159,9 +140,7 @@ public:
 
     bool InitializeForDecoder(DecoderContext& decoder_context, const Decoder& decoder);
 
-    AVBufferRef* GetBufferRef() const {
-        return m_gpu_decoder;
-    }
+    AVBufferRef* GetBufferRef() const { return m_gpu_decoder; }
 
 private:
     bool InitializeWithType(AVHWDeviceType type);
@@ -183,13 +162,9 @@ public:
     bool SendPacket(const Packet& packet);
     std::shared_ptr<Frame> ReceiveFrame();
 
-    AVCodecContext* GetCodecContext() const {
-        return m_codec_context;
-    }
+    AVCodecContext* GetCodecContext() const { return m_codec_context; }
 
-    bool UsingDecodeOrder() const {
-        return m_decode_order;
-    }
+    bool UsingDecodeOrder() const { return m_decode_order; }
 
 private:
     const Decoder& m_decoder;
@@ -209,9 +184,7 @@ public:
     bool Initialize(Tegra::Host1x::NvdecCommon::VideoCodec codec);
     void Reset();
 
-    bool UsingDecodeOrder() const {
-        return m_decoder_context->UsingDecodeOrder();
-    }
+    bool UsingDecodeOrder() const { return m_decoder_context->UsingDecodeOrder(); }
 
     bool SendPacket(std::span<const u8> packet_data);
     std::shared_ptr<Frame> ReceiveFrame();

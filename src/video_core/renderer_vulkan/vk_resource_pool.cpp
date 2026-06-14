@@ -1,17 +1,21 @@
 // SPDX-FileCopyrightText: Copyright 2020 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "video_core/renderer_vulkan/vk_resource_pool.h"
+
 #include <optional>
 
 #include "video_core/renderer_vulkan/vk_master_semaphore.h"
-#include "video_core/renderer_vulkan/vk_resource_pool.h"
 
 namespace Vulkan {
 
 ResourcePool::ResourcePool(MasterSemaphore& master_semaphore_, size_t grow_step_)
-    : master_semaphore{&master_semaphore_}, grow_step{grow_step_} {}
+    : master_semaphore{&master_semaphore_}, grow_step{grow_step_}
+{
+}
 
-size_t ResourcePool::CommitResource() {
+size_t ResourcePool::CommitResource()
+{
     // Refresh semaphore to query updated results
     master_semaphore->Refresh();
     const u64 gpu_tick = master_semaphore->KnownGpuTick();
@@ -42,7 +46,8 @@ size_t ResourcePool::CommitResource() {
     return *found;
 }
 
-size_t ResourcePool::ManageOverflow() {
+size_t ResourcePool::ManageOverflow()
+{
     const size_t old_capacity = ticks.size();
     Grow();
 
@@ -51,7 +56,8 @@ size_t ResourcePool::ManageOverflow() {
     return old_capacity;
 }
 
-void ResourcePool::Grow() {
+void ResourcePool::Grow()
+{
     const size_t old_capacity = ticks.size();
     ticks.resize(old_capacity + grow_step);
     Allocate(old_capacity, old_capacity + grow_step);

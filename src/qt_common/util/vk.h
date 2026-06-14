@@ -9,6 +9,7 @@
 #include <string>
 #include <string_view>
 #include <vector>
+
 #include "common/common_types.h"
 #include "common/settings_enums.h"
 #include "vulkan/vulkan_core.h"
@@ -17,7 +18,8 @@ static const std::vector<VkPresentModeKHR> default_present_modes{VK_PRESENT_MODE
                                                                  VK_PRESENT_MODE_FIFO_KHR};
 
 // Converts a setting to a present mode (or vice versa)
-static inline constexpr VkPresentModeKHR VSyncSettingToMode(Settings::VSyncMode mode) {
+static inline constexpr VkPresentModeKHR VSyncSettingToMode(Settings::VSyncMode mode)
+{
     switch (mode) {
     case Settings::VSyncMode::Immediate:
         return VK_PRESENT_MODE_IMMEDIATE_KHR;
@@ -32,7 +34,8 @@ static inline constexpr VkPresentModeKHR VSyncSettingToMode(Settings::VSyncMode 
     }
 }
 
-static inline constexpr Settings::VSyncMode PresentModeToSetting(VkPresentModeKHR mode) {
+static inline constexpr Settings::VSyncMode PresentModeToSetting(VkPresentModeKHR mode)
+{
     switch (mode) {
     case VK_PRESENT_MODE_IMMEDIATE_KHR:
         return Settings::VSyncMode::Immediate;

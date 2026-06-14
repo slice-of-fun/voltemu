@@ -136,8 +136,8 @@ private:
     void UpdateHidbus(std::chrono::nanoseconds ns_late);
     std::optional<std::size_t> GetDeviceIndexFromHandle(BusHandle handle) const;
 
-    template <typename T>
-    void MakeDevice(BusHandle handle) {
+    template<typename T> void MakeDevice(BusHandle handle)
+    {
         const auto device_index = GetDeviceIndexFromHandle(handle);
         if (device_index) {
             devices[device_index.value()].device = std::make_unique<T>(system, service_context);

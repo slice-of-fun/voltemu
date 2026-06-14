@@ -101,16 +101,15 @@ public:
     };
     static_assert(sizeof(State) == 0x500, "EffectInfoBase::State has the wrong size!");
 
-    EffectInfoBase() {
-        Cleanup();
-    }
+    EffectInfoBase() { Cleanup(); }
 
     virtual ~EffectInfoBase() = default;
 
     /**
      * Cleanup this effect, resetting it to a starting state.
      */
-    void Cleanup() {
+    void Cleanup()
+    {
         type = Type::Invalid;
         enabled = false;
         mix_id = UnusedMixId;
@@ -127,7 +126,8 @@ public:
      *
      * @param pool_mapper - Mapper to unmap the buffers.
      */
-    void ForceUnmapBuffers(const PoolMapper& pool_mapper) {
+    void ForceUnmapBuffers(const PoolMapper& pool_mapper)
+    {
         for (auto& workbuffer : workbuffers) {
             if (workbuffer.GetReference(false) != 0) {
                 pool_mapper.ForceUnmapPointer(workbuffer);
@@ -140,81 +140,63 @@ public:
      *
      * @return True if effect is enabled, otherwise false.
      */
-    bool IsEnabled() const {
-        return enabled;
-    }
+    bool IsEnabled() const { return enabled; }
 
     /**
      * Check if this effect should not be generated.
      *
      * @return True if effect should be skipped, otherwise false.
      */
-    bool ShouldSkip() const {
-        return buffer_unmapped;
-    }
+    bool ShouldSkip() const { return buffer_unmapped; }
 
     /**
      * Get the type of this effect.
      *
      * @return The type of this effect. See EffectInfoBase::Type
      */
-    Type GetType() const {
-        return type;
-    }
+    Type GetType() const { return type; }
 
     /**
      * Set the type of this effect.
      *
      * @param type_ - The new type of this effect.
      */
-    void SetType(const Type type_) {
-        type = type_;
-    }
+    void SetType(const Type type_) { type = type_; }
 
     /**
      * Get the mix id of this effect.
      *
      * @return Mix id of this effect.
      */
-    s32 GetMixId() const {
-        return mix_id;
-    }
+    s32 GetMixId() const { return mix_id; }
 
     /**
      * Get the processing order of this effect.
      *
      * @return Process order of this effect.
      */
-    s32 GetProcessingOrder() const {
-        return process_order;
-    }
+    s32 GetProcessingOrder() const { return process_order; }
 
     /**
      * Get this effect's parameter data.
      *
      * @return Pointer to the parameter, must be cast to the correct type.
      */
-    u8* GetParameter() {
-        return parameter.data();
-    }
+    u8* GetParameter() { return parameter.data(); }
 
     /**
      * Get this effect's parameter data.
      *
      * @return Pointer to the parameter, must be cast to the correct type.
      */
-    u8* GetStateBuffer() {
-        return state.data();
-    }
+    u8* GetStateBuffer() { return state.data(); }
 
     /**
      * Set this effect's usage state.
      *
      * @param usage - new usage state of this effect.
      */
-    void SetUsage(const UsageState usage) {
-        usage_state = usage;
-    }
+    void SetUsage(const UsageState usage) { usage_state = usage; }
 
     /**
      * Check if this effects need to have its workbuffer information updated.
@@ -223,7 +205,8 @@ public:
      * @param params - Input parameters.
      * @return True if workbuffers need updating, otherwise false.
      */
-    bool ShouldUpdateWorkBufferInfo(const InParameterVersion1& params) const {
+    bool ShouldUpdateWorkBufferInfo(const InParameterVersion1& params) const
+    {
         return buffer_unmapped || params.is_new;
     }
 
@@ -234,7 +217,8 @@ public:
      * @param params - Input parameters.
      * @return True if workbuffers need updating, otherwise false.
      */
-    bool ShouldUpdateWorkBufferInfo(const InParameterVersion2& params) const {
+    bool ShouldUpdateWorkBufferInfo(const InParameterVersion2& params) const
+    {
         return buffer_unmapped || params.is_new;
     }
 
@@ -243,9 +227,7 @@ public:
      *
      * @return The current usage state.
      */
-    UsageState GetUsage() const {
-        return usage_state;
-    }
+    UsageState GetUsage() const { return usage_state; }
 
     /**
      * Write the current state. Version 1.
@@ -253,7 +235,8 @@ public:
      * @param out_status      - Status to write.
      * @param renderer_active - Is the AudioRenderer active?
      */
-    void StoreStatus(OutStatusVersion1& out_status, const bool renderer_active) const {
+    void StoreStatus(OutStatusVersion1& out_status, const bool renderer_active) const
+    {
         if (renderer_active) {
             if (usage_state != UsageState::Disabled) {
                 out_status.state = OutStatus::Used;
@@ -273,7 +256,8 @@ public:
      * @param out_status      - Status to write.
      * @param renderer_active - Is the AudioRenderer active?
      */
-    void StoreStatus(OutStatusVersion2& out_status, const bool renderer_active) const {
+    void StoreStatus(OutStatusVersion2& out_status, const bool renderer_active) const
+    {
         if (renderer_active) {
             if (usage_state != UsageState::Disabled) {
                 out_status.state = OutStatus::Used;
@@ -296,7 +280,8 @@ public:
      */
     virtual void Update(BehaviorInfo::ErrorInfo& error_info,
                         [[maybe_unused]] const InParameterVersion1& params,
-                        [[maybe_unused]] const PoolMapper& pool_mapper) {
+                        [[maybe_unused]] const PoolMapper& pool_mapper)
+    {
         error_info.error_code = ResultSuccess;
         error_info.address = CpuAddr(0);
     }
@@ -310,7 +295,8 @@ public:
      */
     virtual void Update(BehaviorInfo::ErrorInfo& error_info,
                         [[maybe_unused]] const InParameterVersion2& params,
-                        [[maybe_unused]] const PoolMapper& pool_mapper) {
+                        [[maybe_unused]] const PoolMapper& pool_mapper)
+    {
         error_info.error_code = ResultSuccess;
         error_info.address = CpuAddr(0);
     }
@@ -334,7 +320,9 @@ public:
      * @param dsp_state - AudioRenderer-side result state to update from.
      */
     virtual void UpdateResultState([[maybe_unused]] EffectResultState& cpu_state,
-                                   [[maybe_unused]] EffectResultState& dsp_state) {}
+                                   [[maybe_unused]] EffectResultState& dsp_state)
+    {
+    }
 
     /**
      * Get a workbuffer assigned to this effect with the given index.
@@ -342,9 +330,7 @@ public:
      * @param index - Workbuffer index.
      * @return Address of the buffer.
      */
-    virtual CpuAddr GetWorkbuffer([[maybe_unused]] s32 index) {
-        return 0;
-    }
+    virtual CpuAddr GetWorkbuffer([[maybe_unused]] s32 index) { return 0; }
 
     /**
      * Get the first workbuffer assigned to this effect.
@@ -352,7 +338,8 @@ public:
      * @param index - Workbuffer index. Unused.
      * @return Address of the buffer.
      */
-    CpuAddr GetSingleBuffer([[maybe_unused]] const s32 index) {
+    CpuAddr GetSingleBuffer([[maybe_unused]] const s32 index)
+    {
         if (enabled) {
             return workbuffers[0].GetReference(true);
         }
@@ -372,36 +359,28 @@ public:
      *
      * @return Address of the buffer info.
      */
-    CpuAddr GetSendBufferInfo() const {
-        return send_buffer_info;
-    }
+    CpuAddr GetSendBufferInfo() const { return send_buffer_info; }
 
     /**
      * Get the send buffer, used by Aux and Capture.
      *
      * @return Address of the buffer.
      */
-    CpuAddr GetSendBuffer() const {
-        return send_buffer;
-    }
+    CpuAddr GetSendBuffer() const { return send_buffer; }
 
     /**
      * Get the return buffer info, used by Aux and Capture.
      *
      * @return Address of the buffer info.
      */
-    CpuAddr GetReturnBufferInfo() const {
-        return return_buffer_info;
-    }
+    CpuAddr GetReturnBufferInfo() const { return return_buffer_info; }
 
     /**
      * Get the return buffer, used by Aux and Capture.
      *
      * @return Address of the buffer.
      */
-    CpuAddr GetReturnBuffer() const {
-        return return_buffer;
-    }
+    CpuAddr GetReturnBuffer() const { return return_buffer; }
 
 protected:
     /// Type of this effect. May be changed

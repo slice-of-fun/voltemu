@@ -4,11 +4,12 @@
 // SPDX-FileCopyrightText: Copyright 2024 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/am/service/self_controller.h"
+
 #include "common/logging.h"
 #include "core/hle/result.h"
 #include "core/hle/service/am/am_results.h"
 #include "core/hle/service/am/frontend/applets.h"
-#include "core/hle/service/am/service/self_controller.h"
 #include "core/hle/service/caps/caps_su.h"
 #include "core/hle/service/cmif_serialization.h"
 #include "core/hle/service/nvnflinger/nvnflinger.h"
@@ -19,8 +20,8 @@ namespace Service::AM {
 
 ISelfController::ISelfController(Core::System& system_, std::shared_ptr<Applet> applet,
                                  Kernel::KProcess* process)
-    : ServiceFramework{system_, "ISelfController"}, m_process{process}, m_applet{
-                                                                            std::move(applet)} {
+    : ServiceFramework{system_, "ISelfController"}, m_process{process}, m_applet{std::move(applet)}
+{
     // clang-format off
     static const FunctionInfo functions[] = {
         {0, D<&ISelfController::Exit>, "Exit"},
@@ -82,12 +83,14 @@ ISelfController::ISelfController(Core::System& system_, std::shared_ptr<Applet> 
                                                m_applet->library_applet_mode);
 }
 
-ISelfController::~ISelfController() {
+ISelfController::~ISelfController()
+{
     std::scoped_lock lk{m_applet->lock};
     m_applet->display_layer_manager.Finalize();
 }
 
-Result ISelfController::Exit() {
+Result ISelfController::Exit()
+{
     LOG_DEBUG(Service_AM, "called");
 
     m_applet->process->Terminate();
@@ -95,7 +98,8 @@ Result ISelfController::Exit() {
     R_SUCCEED();
 }
 
-Result ISelfController::LockExit() {
+Result ISelfController::LockExit()
+{
     LOG_DEBUG(Service_AM, "called");
 
     std::scoped_lock lk{m_applet->lock};
@@ -112,7 +116,8 @@ Result ISelfController::LockExit() {
     R_SUCCEED();
 }
 
-Result ISelfController::UnlockExit() {
+Result ISelfController::UnlockExit()
+{
     LOG_DEBUG(Service_AM, "called");
 
     std::scoped_lock lk{m_applet->lock};
@@ -127,7 +132,8 @@ Result ISelfController::UnlockExit() {
     R_SUCCEED();
 }
 
-Result ISelfController::EnterFatalSection() {
+Result ISelfController::EnterFatalSection()
+{
     std::scoped_lock lk{m_applet->lock};
 
     m_applet->fatal_section_count++;
@@ -136,7 +142,8 @@ Result ISelfController::EnterFatalSection() {
     R_SUCCEED();
 }
 
-Result ISelfController::LeaveFatalSection() {
+Result ISelfController::LeaveFatalSection()
+{
     LOG_DEBUG(Service_AM, "called");
 
     // Entry and exit of fatal sections must be balanced.
@@ -147,8 +154,9 @@ Result ISelfController::LeaveFatalSection() {
     R_SUCCEED();
 }
 
-Result ISelfController::GetLibraryAppletLaunchableEvent(
-    OutCopyHandle<Kernel::KReadableEvent> out_event) {
+Result
+ISelfController::GetLibraryAppletLaunchableEvent(OutCopyHandle<Kernel::KReadableEvent> out_event)
+{
     LOG_WARNING(Service_AM, "(STUBBED) called");
 
     m_applet->library_applet_launchable_event.Signal();
@@ -157,7 +165,8 @@ Result ISelfController::GetLibraryAppletLaunchableEvent(
     R_SUCCEED();
 }
 
-Result ISelfController::SetScreenShotPermission(ScreenshotPermission screen_shot_permission) {
+Result ISelfController::SetScreenShotPermission(ScreenshotPermission screen_shot_permission)
+{
     LOG_DEBUG(Service_AM, "called, permission={}", screen_shot_permission);
 
     std::scoped_lock lk{m_applet->lock};
@@ -166,7 +175,8 @@ Result ISelfController::SetScreenShotPermission(ScreenshotPermission screen_shot
     R_SUCCEED();
 }
 
-Result ISelfController::SetOperationModeChangedNotification(bool enabled) {
+Result ISelfController::SetOperationModeChangedNotification(bool enabled)
+{
     LOG_INFO(Service_AM, "called, enabled={}", enabled);
 
     std::scoped_lock lk{m_applet->lock};
@@ -175,7 +185,8 @@ Result ISelfController::SetOperationModeChangedNotification(bool enabled) {
     R_SUCCEED();
 }
 
-Result ISelfController::SetPerformanceModeChangedNotification(bool enabled) {
+Result ISelfController::SetPerformanceModeChangedNotification(bool enabled)
+{
     LOG_INFO(Service_AM, "called, enabled={}", enabled);
 
     std::scoped_lock lk{m_applet->lock};
@@ -184,7 +195,8 @@ Result ISelfController::SetPerformanceModeChangedNotification(bool enabled) {
     R_SUCCEED();
 }
 
-Result ISelfController::SetFocusHandlingMode(bool notify, bool background, bool suspend) {
+Result ISelfController::SetFocusHandlingMode(bool notify, bool background, bool suspend)
+{
     LOG_INFO(Service_AM, "called, notify={} background={} suspend={}", notify, background, suspend);
 
     std::scoped_lock lk{m_applet->lock};
@@ -195,7 +207,8 @@ Result ISelfController::SetFocusHandlingMode(bool notify, bool background, bool 
     R_SUCCEED();
 }
 
-Result ISelfController::SetRestartMessageEnabled(bool enabled) {
+Result ISelfController::SetRestartMessageEnabled(bool enabled)
+{
     LOG_INFO(Service_AM, "called, enabled={}", enabled);
 
     std::scoped_lock lk{m_applet->lock};
@@ -205,7 +218,8 @@ Result ISelfController::SetRestartMessageEnabled(bool enabled) {
 }
 
 Result ISelfController::SetScreenShotAppletIdentityInfo(
-    AppletIdentityInfo screen_shot_applet_identity_info) {
+    AppletIdentityInfo screen_shot_applet_identity_info)
+{
     LOG_WARNING(Service_AM, "(STUBBED) called");
 
     std::scoped_lock lk{m_applet->lock};
@@ -214,7 +228,8 @@ Result ISelfController::SetScreenShotAppletIdentityInfo(
     R_SUCCEED();
 }
 
-Result ISelfController::SetOutOfFocusSuspendingEnabled(bool enabled) {
+Result ISelfController::SetOutOfFocusSuspendingEnabled(bool enabled)
+{
     LOG_INFO(Service_AM, "called, enabled={}", enabled);
 
     std::scoped_lock lk{m_applet->lock};
@@ -224,8 +239,9 @@ Result ISelfController::SetOutOfFocusSuspendingEnabled(bool enabled) {
     R_SUCCEED();
 }
 
-Result ISelfController::SetAlbumImageOrientation(
-    Capture::AlbumImageOrientation album_image_orientation) {
+Result
+ISelfController::SetAlbumImageOrientation(Capture::AlbumImageOrientation album_image_orientation)
+{
     LOG_WARNING(Service_AM, "(STUBBED) called, orientation={}", album_image_orientation);
 
     std::scoped_lock lk{m_applet->lock};
@@ -234,14 +250,16 @@ Result ISelfController::SetAlbumImageOrientation(
     R_SUCCEED();
 }
 
-Result ISelfController::IsSystemBufferSharingEnabled() {
+Result ISelfController::IsSystemBufferSharingEnabled()
+{
     LOG_INFO(Service_AM, "called");
 
     std::scoped_lock lk{m_applet->lock};
     R_RETURN(m_applet->display_layer_manager.IsSystemBufferSharingEnabled());
 }
 
-Result ISelfController::GetSystemSharedBufferHandle(Out<u64> out_buffer_id) {
+Result ISelfController::GetSystemSharedBufferHandle(Out<u64> out_buffer_id)
+{
     LOG_INFO(Service_AM, "called");
 
     u64 layer_id;
@@ -250,7 +268,8 @@ Result ISelfController::GetSystemSharedBufferHandle(Out<u64> out_buffer_id) {
     R_RETURN(m_applet->display_layer_manager.GetSystemSharedLayerHandle(out_buffer_id, &layer_id));
 }
 
-Result ISelfController::GetSystemSharedLayerHandle(Out<u64> out_buffer_id, Out<u64> out_layer_id) {
+Result ISelfController::GetSystemSharedLayerHandle(Out<u64> out_buffer_id, Out<u64> out_layer_id)
+{
     LOG_INFO(Service_AM, "called");
 
     std::scoped_lock lk{m_applet->lock};
@@ -258,7 +277,8 @@ Result ISelfController::GetSystemSharedLayerHandle(Out<u64> out_buffer_id, Out<u
         m_applet->display_layer_manager.GetSystemSharedLayerHandle(out_buffer_id, out_layer_id));
 }
 
-Result ISelfController::CreateManagedDisplayLayer(Out<u64> out_layer_id) {
+Result ISelfController::CreateManagedDisplayLayer(Out<u64> out_layer_id)
+{
     LOG_INFO(Service_AM, "called");
 
     std::scoped_lock lk{m_applet->lock};
@@ -266,7 +286,8 @@ Result ISelfController::CreateManagedDisplayLayer(Out<u64> out_layer_id) {
 }
 
 Result ISelfController::CreateManagedDisplaySeparableLayer(Out<u64> out_layer_id,
-                                                           Out<u64> out_recording_layer_id) {
+                                                           Out<u64> out_recording_layer_id)
+{
     LOG_WARNING(Service_AM, "(STUBBED) called");
 
     std::scoped_lock lk{m_applet->lock};
@@ -274,28 +295,33 @@ Result ISelfController::CreateManagedDisplaySeparableLayer(Out<u64> out_layer_id
         out_layer_id, out_recording_layer_id));
 }
 
-Result ISelfController::SetHandlesRequestToDisplay(bool enable) {
+Result ISelfController::SetHandlesRequestToDisplay(bool enable)
+{
     LOG_WARNING(Service_AM, "(STUBBED) called, enable={}", enable);
     R_SUCCEED();
 }
 
-Result ISelfController::ApproveToDisplay() {
+Result ISelfController::ApproveToDisplay()
+{
     LOG_WARNING(Service_AM, "(STUBBED) called");
     R_SUCCEED();
 }
 
-Result ISelfController::SetMediaPlaybackState(bool state) {
+Result ISelfController::SetMediaPlaybackState(bool state)
+{
     LOG_WARNING(Service_AM, "(STUBBED) called, state={}", state);
     R_SUCCEED();
 }
 
-Result ISelfController::OverrideAutoSleepTimeAndDimmingTime(s32 a, s32 b, s32 c, s32 d) {
+Result ISelfController::OverrideAutoSleepTimeAndDimmingTime(s32 a, s32 b, s32 c, s32 d)
+{
     LOG_WARNING(Service_AM, "(STUBBED) called, a={}, b={}, c={}, d={}", a, b, c, d);
     R_SUCCEED();
 }
 
 Result ISelfController::SetIdleTimeDetectionExtension(
-    IdleTimeDetectionExtension idle_time_detection_extension) {
+    IdleTimeDetectionExtension idle_time_detection_extension)
+{
     LOG_DEBUG(Service_AM, "(STUBBED) called extension={}", idle_time_detection_extension);
 
     std::scoped_lock lk{m_applet->lock};
@@ -305,7 +331,8 @@ Result ISelfController::SetIdleTimeDetectionExtension(
 }
 
 Result ISelfController::GetIdleTimeDetectionExtension(
-    Out<IdleTimeDetectionExtension> out_idle_time_detection_extension) {
+    Out<IdleTimeDetectionExtension> out_idle_time_detection_extension)
+{
     LOG_WARNING(Service_AM, "(STUBBED) called");
 
     std::scoped_lock lk{m_applet->lock};
@@ -314,12 +341,14 @@ Result ISelfController::GetIdleTimeDetectionExtension(
     R_SUCCEED();
 }
 
-Result ISelfController::ReportUserIsActive() {
+Result ISelfController::ReportUserIsActive()
+{
     LOG_WARNING(Service_AM, "(STUBBED) called");
     R_SUCCEED();
 }
 
-Result ISelfController::SetAutoSleepDisabled(bool is_auto_sleep_disabled) {
+Result ISelfController::SetAutoSleepDisabled(bool is_auto_sleep_disabled)
+{
     LOG_DEBUG(Service_AM, "called. is_auto_sleep_disabled={}", is_auto_sleep_disabled);
 
     // On the system itself, if the previous state of is_auto_sleep_disabled
@@ -338,7 +367,8 @@ Result ISelfController::SetAutoSleepDisabled(bool is_auto_sleep_disabled) {
     R_SUCCEED();
 }
 
-Result ISelfController::IsAutoSleepDisabled(Out<bool> out_is_auto_sleep_disabled) {
+Result ISelfController::IsAutoSleepDisabled(Out<bool> out_is_auto_sleep_disabled)
+{
     LOG_DEBUG(Service_AM, "called.");
 
     std::scoped_lock lk{m_applet->lock};
@@ -347,13 +377,15 @@ Result ISelfController::IsAutoSleepDisabled(Out<bool> out_is_auto_sleep_disabled
     R_SUCCEED();
 }
 
-Result ISelfController::SetInputDetectionPolicy(InputDetectionPolicy input_detection_policy) {
+Result ISelfController::SetInputDetectionPolicy(InputDetectionPolicy input_detection_policy)
+{
     LOG_WARNING(Service_AM, "(STUBBED) called");
     R_SUCCEED();
 }
 
-Result ISelfController::GetAccumulatedSuspendedTickValue(
-    Out<u64> out_accumulated_suspended_tick_value) {
+Result
+ISelfController::GetAccumulatedSuspendedTickValue(Out<u64> out_accumulated_suspended_tick_value)
+{
     LOG_DEBUG(Service_AM, "called.");
 
     // This command returns the total number of system ticks since ISelfController creation
@@ -366,14 +398,16 @@ Result ISelfController::GetAccumulatedSuspendedTickValue(
 }
 
 Result ISelfController::GetAccumulatedSuspendedTickChangedEvent(
-    OutCopyHandle<Kernel::KReadableEvent> out_event) {
+    OutCopyHandle<Kernel::KReadableEvent> out_event)
+{
     LOG_DEBUG(Service_AM, "called.");
 
     *out_event = m_applet->accumulated_suspended_tick_changed_event.GetHandle();
     R_SUCCEED();
 }
 
-Result ISelfController::SetAlbumImageTakenNotificationEnabled(bool enabled) {
+Result ISelfController::SetAlbumImageTakenNotificationEnabled(bool enabled)
+{
     LOG_WARNING(Service_AM, "(STUBBED) called. enabled={}", enabled);
 
     // This service call sets an internal flag whether a notification is shown when an image is
@@ -385,7 +419,8 @@ Result ISelfController::SetAlbumImageTakenNotificationEnabled(bool enabled) {
     R_SUCCEED();
 }
 
-Result ISelfController::SaveCurrentScreenshot(Capture::AlbumReportOption album_report_option) {
+Result ISelfController::SaveCurrentScreenshot(Capture::AlbumReportOption album_report_option)
+{
     LOG_INFO(Service_AM, "called, report_option={}", album_report_option);
 
     const auto screenshot_service =
@@ -399,7 +434,8 @@ Result ISelfController::SaveCurrentScreenshot(Capture::AlbumReportOption album_r
     R_SUCCEED();
 }
 
-Result ISelfController::SetRecordVolumeMuted(bool muted) {
+Result ISelfController::SetRecordVolumeMuted(bool muted)
+{
     LOG_WARNING(Service_AM, "(STUBBED) called. muted={}", muted);
 
     std::scoped_lock lk{m_applet->lock};
@@ -408,7 +444,8 @@ Result ISelfController::SetRecordVolumeMuted(bool muted) {
     R_SUCCEED();
 }
 
-Result ISelfController::Unknown230(u32 in_val, Out<u16> out_val) {
+Result ISelfController::Unknown230(u32 in_val, Out<u16> out_val)
+{
     LOG_WARNING(Service_AM, "(STUBBED) called, in_val={}", in_val);
 
     *out_val = 0;

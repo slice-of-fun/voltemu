@@ -3,8 +3,8 @@
 // SPDX-FileCopyrightText: Copyright 2017 Citra Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include <array>
-#include <future>
+#include "yuzu/multiplayer/chat_room.h"
+
 #include <QColor>
 #include <QDesktopServices>
 #include <QFutureWatcher>
@@ -17,11 +17,13 @@
 #include <QTime>
 #include <QUrl>
 #include <QtConcurrentRun>
+#include <array>
+#include <future>
+
 #include "common/logging.h"
 #include "network/announce_multiplayer_session.h"
-#include "ui_chat_room.h"
 #include "qt_common/game_list/game_list_p.h"
-#include "yuzu/multiplayer/chat_room.h"
+#include "ui_chat_room.h"
 #include "yuzu/multiplayer/message.h"
 #ifdef ENABLE_WEB_SERVICE
 #include "web_service/web_backend.h"
@@ -29,7 +31,8 @@
 
 class ChatMessage {
 public:
-    explicit ChatMessage(const Network::ChatEntry& chat, QTime ts = {}) {
+    explicit ChatMessage(const Network::ChatEntry& chat, QTime ts = {})
+    {
         /// Convert the time to their default locale defined format
         QLocale locale;
         timestamp = locale.toString(ts.isValid() ? ts : QTime::currentTime(), QLocale::ShortFormat);
@@ -56,12 +59,11 @@ public:
         }
     }
 
-    bool ContainsPing() const {
-        return contains_ping;
-    }
+    bool ContainsPing() const { return contains_ping; }
 
     /// Format the message using the players color
-    QString GetPlayerChatMessage(u16 player) const {
+    QString GetPlayerChatMessage(u16 player) const
+    {
         const bool is_dark_theme = QIcon::themeName().contains(QStringLiteral("dark")) ||
                                    QIcon::themeName().contains(QStringLiteral("midnight"));
         auto color =
@@ -105,14 +107,16 @@ private:
 
 class StatusMessage {
 public:
-    explicit StatusMessage(const QString& msg, QTime ts = {}) {
+    explicit StatusMessage(const QString& msg, QTime ts = {})
+    {
         /// Convert the time to their default locale defined format
         QLocale locale;
         timestamp = locale.toString(ts.isValid() ? ts : QTime::currentTime(), QLocale::ShortFormat);
         message = msg;
     }
 
-    QString GetSystemChatMessage() const {
+    QString GetSystemChatMessage() const
+    {
         return QStringLiteral("[%1] <font color='%2'>* %3</font>")
             .arg(timestamp, QString::fromStdString(system_color), message);
     }
@@ -134,7 +138,8 @@ public:
     PlayerListItem() = default;
     explicit PlayerListItem(const std::string& nickname, const std::string& username,
                             const std::string& avatar_url,
-                            const AnnounceMultiplayerRoom::GameInfo& game_info) {
+                            const AnnounceMultiplayerRoom::GameInfo& game_info)
+    {
         setEditable(false);
         setData(QString::fromStdString(nickname), NicknameRole);
         setData(QString::fromStdString(username), UsernameRole);
@@ -147,7 +152,8 @@ public:
         setData(QString::fromStdString(game_info.version), GameVersionRole);
     }
 
-    QVariant data(int role) const override {
+    QVariant data(int role) const override
+    {
         if (role != Qt::DisplayRole) {
             return QStandardItem::data(role);
         }
@@ -169,7 +175,8 @@ public:
     }
 };
 
-ChatRoom::ChatRoom(QWidget* parent) : QWidget(parent), ui(std::make_unique<Ui::ChatRoom>()) {
+ChatRoom::ChatRoom(QWidget* parent) : QWidget(parent), ui(std::make_unique<Ui::ChatRoom>())
+{
     ui->setupUi(this);
 
     // set the item_model for player_view
@@ -203,7 +210,8 @@ ChatRoom::ChatRoom(QWidget* parent) : QWidget(parent), ui(std::make_unique<Ui::C
 
 ChatRoom::~ChatRoom() = default;
 
-void ChatRoom::Initialize() {
+void ChatRoom::Initialize()
+{
     // setup the callbacks for network updates
     if (auto member = Network::GetRoomMember().lock()) {
         member->BindOnChatMessageReceived(
@@ -217,28 +225,34 @@ void ChatRoom::Initialize() {
     }
 }
 
-void ChatRoom::SetModPerms(bool is_mod) {
+void ChatRoom::SetModPerms(bool is_mod)
+{
     has_mod_perms = is_mod;
 }
 
-void ChatRoom::RetranslateUi() {
+void ChatRoom::RetranslateUi()
+{
     ui->retranslateUi(this);
 }
 
-void ChatRoom::Clear() {
+void ChatRoom::Clear()
+{
     ui->chat_history->clear();
     block_list.clear();
 }
 
-void ChatRoom::AppendStatusMessage(const QString& msg) {
+void ChatRoom::AppendStatusMessage(const QString& msg)
+{
     ui->chat_history->append(StatusMessage(msg).GetSystemChatMessage());
 }
 
-void ChatRoom::AppendChatMessage(const QString& msg) {
+void ChatRoom::AppendChatMessage(const QString& msg)
+{
     ui->chat_history->append(msg);
 }
 
-void ChatRoom::SendModerationRequest(Network::RoomMessageTypes type, const std::string& nickname) {
+void ChatRoom::SendModerationRequest(Network::RoomMessageTypes type, const std::string& nickname)
+{
     if (auto room = Network::GetRoomMember().lock()) {
         auto members = room->GetMemberInformation();
         auto it = std::find_if(members.begin(), members.end(),
@@ -253,28 +267,33 @@ void ChatRoom::SendModerationRequest(Network::RoomMessageTypes type, const std::
     }
 }
 
-bool ChatRoom::ValidateMessage(const std::string& msg) {
+bool ChatRoom::ValidateMessage(const std::string& msg)
+{
     return !msg.empty();
 }
 
-void ChatRoom::OnRoomUpdate(const Network::RoomInformation& info) {
+void ChatRoom::OnRoomUpdate(const Network::RoomInformation& info)
+{
     // TODO(B3N30): change title
     if (auto room_member = Network::GetRoomMember().lock()) {
         SetPlayerList(room_member->GetMemberInformation());
     }
 }
 
-void ChatRoom::Disable() {
+void ChatRoom::Disable()
+{
     ui->send_message->setDisabled(true);
     ui->chat_message->setDisabled(true);
 }
 
-void ChatRoom::Enable() {
+void ChatRoom::Enable()
+{
     ui->send_message->setEnabled(true);
     ui->chat_message->setEnabled(true);
 }
 
-void ChatRoom::OnChatReceive(const Network::ChatEntry& chat) {
+void ChatRoom::OnChatReceive(const Network::ChatEntry& chat)
+{
     if (!ValidateMessage(chat.message)) {
         return;
     }
@@ -304,7 +323,8 @@ void ChatRoom::OnChatReceive(const Network::ChatEntry& chat) {
     }
 }
 
-void ChatRoom::OnStatusMessageReceive(const Network::StatusMessageEntry& status_message) {
+void ChatRoom::OnStatusMessageReceive(const Network::StatusMessageEntry& status_message)
+{
     QString name;
     if (status_message.username.empty() || status_message.username == status_message.nickname) {
         name = QString::fromStdString(status_message.nickname);
@@ -334,7 +354,8 @@ void ChatRoom::OnStatusMessageReceive(const Network::StatusMessageEntry& status_
         AppendStatusMessage(message);
 }
 
-void ChatRoom::OnSendChat() {
+void ChatRoom::OnSendChat()
+{
     if (auto room_member = Network::GetRoomMember().lock()) {
         if (!room_member->IsConnected()) {
             return;
@@ -364,7 +385,8 @@ void ChatRoom::OnSendChat() {
     }
 }
 
-void ChatRoom::UpdateIconDisplay() {
+void ChatRoom::UpdateIconDisplay()
+{
     for (int row = 0; row < player_list->invisibleRootItem()->rowCount(); ++row) {
         QStandardItem* item = player_list->invisibleRootItem()->child(row);
         const std::string avatar_url =
@@ -378,7 +400,8 @@ void ChatRoom::UpdateIconDisplay() {
     }
 }
 
-void ChatRoom::SetPlayerList(const Network::RoomMember::MemberList& member_list) {
+void ChatRoom::SetPlayerList(const Network::RoomMember::MemberList& member_list)
+{
     // TODO(B3N30): Remember which row is selected
     player_list->removeRows(0, player_list->rowCount());
     for (const auto& member : member_list) {
@@ -425,13 +448,15 @@ void ChatRoom::SetPlayerList(const Network::RoomMember::MemberList& member_list)
     // TODO(B3N30): Restore row selection
 }
 
-void ChatRoom::OnChatTextChanged() {
+void ChatRoom::OnChatTextChanged()
+{
     if (ui->chat_message->text().length() > static_cast<int>(Network::MaxMessageSize))
         ui->chat_message->setText(
             ui->chat_message->text().left(static_cast<int>(Network::MaxMessageSize)));
 }
 
-void ChatRoom::PopupContextMenu(const QPoint& menu_location) {
+void ChatRoom::PopupContextMenu(const QPoint& menu_location)
+{
     QModelIndex item = ui->player_view->indexAt(menu_location);
     if (!item.isValid())
         return;

@@ -7,7 +7,8 @@ namespace Shader::Maxwell {
 namespace {
 void HFMA2(TranslatorVisitor& v, u64 insn, Merge merge, Swizzle swizzle_a, bool neg_b, bool neg_c,
            Swizzle swizzle_b, Swizzle swizzle_c, const IR::U32& src_b, const IR::U32& src_c,
-           bool sat, HalfPrecision precision) {
+           bool sat, HalfPrecision precision)
+{
     union {
         u64 raw;
         BitField<0, 8, IR::Reg> dest_reg;
@@ -73,7 +74,8 @@ void HFMA2(TranslatorVisitor& v, u64 insn, Merge merge, Swizzle swizzle_a, bool 
 
 void HFMA2(TranslatorVisitor& v, u64 insn, bool neg_b, bool neg_c, Swizzle swizzle_b,
            Swizzle swizzle_c, const IR::U32& src_b, const IR::U32& src_c, bool sat,
-           HalfPrecision precision) {
+           HalfPrecision precision)
+{
     union {
         u64 raw;
         BitField<47, 2, Swizzle> swizzle_a;
@@ -85,7 +87,8 @@ void HFMA2(TranslatorVisitor& v, u64 insn, bool neg_b, bool neg_c, Swizzle swizz
 }
 } // Anonymous namespace
 
-void TranslatorVisitor::HFMA2_reg(u64 insn) {
+void TranslatorVisitor::HFMA2_reg(u64 insn)
+{
     union {
         u64 raw;
         BitField<28, 2, Swizzle> swizzle_b;
@@ -100,7 +103,8 @@ void TranslatorVisitor::HFMA2_reg(u64 insn) {
           GetReg20(insn), GetReg39(insn), hfma2.saturate != 0, hfma2.precision);
 }
 
-void TranslatorVisitor::HFMA2_rc(u64 insn) {
+void TranslatorVisitor::HFMA2_rc(u64 insn)
+{
     union {
         u64 raw;
         BitField<51, 1, u64> neg_c;
@@ -114,7 +118,8 @@ void TranslatorVisitor::HFMA2_rc(u64 insn) {
           GetReg39(insn), GetCbuf(insn), hfma2.saturate != 0, hfma2.precision);
 }
 
-void TranslatorVisitor::HFMA2_cr(u64 insn) {
+void TranslatorVisitor::HFMA2_cr(u64 insn)
+{
     union {
         u64 raw;
         BitField<51, 1, u64> neg_c;
@@ -128,7 +133,8 @@ void TranslatorVisitor::HFMA2_cr(u64 insn) {
           GetCbuf(insn), GetReg39(insn), hfma2.saturate != 0, hfma2.precision);
 }
 
-void TranslatorVisitor::HFMA2_imm(u64 insn) {
+void TranslatorVisitor::HFMA2_imm(u64 insn)
+{
     union {
         u64 raw;
         BitField<51, 1, u64> neg_c;
@@ -150,7 +156,8 @@ void TranslatorVisitor::HFMA2_imm(u64 insn) {
           GetReg39(insn), hfma2.saturate != 0, hfma2.precision);
 }
 
-void TranslatorVisitor::HFMA2_32I(u64 insn) {
+void TranslatorVisitor::HFMA2_32I(u64 insn)
+{
     union {
         u64 raw;
         BitField<0, 8, IR::Reg> src_c;

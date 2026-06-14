@@ -8,7 +8,8 @@
 
 namespace Shader::Maxwell {
 namespace {
-void Check(u64 insn) {
+void Check(u64 insn)
+{
     union {
         u64 raw;
         BitField<5, 1, u64> cbuf_mode;
@@ -24,11 +25,13 @@ void Check(u64 insn) {
 }
 } // Anonymous namespace
 
-void TranslatorVisitor::BRX(u64 insn) {
+void TranslatorVisitor::BRX(u64 insn)
+{
     Check(insn);
 }
 
-void TranslatorVisitor::JMX(u64 insn) {
+void TranslatorVisitor::JMX(u64 insn)
+{
     Check(insn);
 }
 

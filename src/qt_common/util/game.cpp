@@ -3,6 +3,10 @@
 
 #include "qt_common/util/game.h"
 
+#include <QDesktopServices>
+#include <QStandardPaths>
+#include <QUrl>
+
 #include "common/fs/fs.h"
 #include "common/fs/path_util.h"
 #include "core/file_sys/savedata_factory.h"
@@ -12,18 +16,16 @@
 #include "qt_common/config/uisettings.h"
 #include "qt_common/qt_common.h"
 
-#include <QDesktopServices>
-#include <QStandardPaths>
-#include <QUrl>
-
 #ifdef _WIN32
 #include <shlobj.h>
 #include <windows.h>
+
+#include "common/fs/file.h"
 #include "common/scope_exit.h"
 #include "common/string_util.h"
-#include "common/fs/file.h"
 #else
 #include <fstream>
+
 #include "fmt/ostream.h"
 #endif
 
@@ -33,19 +35,22 @@ bool CreateShortcutLink(const std::filesystem::path& shortcut_path, const std::s
                         const std::filesystem::path& icon_path,
                         const std::filesystem::path& command, const std::string& arguments,
                         const std::string& categories, const std::string& keywords,
-                        const std::string& name) try {
+                        const std::string& name)
+try {
 #ifdef _WIN32 // Windows
     HRESULT hr = CoInitialize(nullptr);
     if (FAILED(hr)) {
         LOG_ERROR(Frontend, "CoInitialize failed");
         return false;
     }
-    SCOPE_EXIT {
+    SCOPE_EXIT
+    {
         CoUninitialize();
     };
     IShellLinkW* ps1 = nullptr;
     IPersistFile* persist_file = nullptr;
-    SCOPE_EXIT {
+    SCOPE_EXIT
+    {
         if (persist_file != nullptr) {
             persist_file->Release();
         }
@@ -134,7 +139,8 @@ bool CreateShortcutLink(const std::filesystem::path& shortcut_path, const std::s
 }
 
 bool MakeShortcutIcoPath(const u64 program_id, const std::string_view game_file_name,
-                         std::filesystem::path& out_icon_path) {
+                         std::filesystem::path& out_icon_path)
+{
     // Get path to Yuzu icons directory & icon extension
     std::string ico_extension = "png";
 #if defined(_WIN32)
@@ -155,38 +161,46 @@ bool MakeShortcutIcoPath(const u64 program_id, const std::string_view game_file_
     return true;
 }
 
-void OpenEdenFolder(const Common::FS::VoltPath& path) {
+void OpenEdenFolder(const Common::FS::VoltPath& path)
+{
     QDesktopServices::openUrl(
         QUrl::fromLocalFile(QString::fromStdString(Common::FS::GetVoltPathString(path))));
 }
 
-void OpenRootDataFolder() {
+void OpenRootDataFolder()
+{
     OpenEdenFolder(Common::FS::VoltPath::VoltDir);
 }
 
-void OpenNANDFolder() {
+void OpenNANDFolder()
+{
     OpenEdenFolder(Common::FS::VoltPath::NANDDir);
 }
 
-void OpenSaveFolder() {
+void OpenSaveFolder()
+{
     const auto path =
         Common::FS::GetVoltPath(Common::FS::VoltPath::NANDDir) / "user/save/0000000000000000";
     QDesktopServices::openUrl(QUrl::fromLocalFile(QString::fromStdString(path.string())));
 }
 
-void OpenSDMCFolder() {
+void OpenSDMCFolder()
+{
     OpenEdenFolder(Common::FS::VoltPath::SDMCDir);
 }
 
-void OpenModFolder() {
+void OpenModFolder()
+{
     OpenEdenFolder(Common::FS::VoltPath::LoadDir);
 }
 
-void OpenLogFolder() {
+void OpenLogFolder()
+{
     OpenEdenFolder(Common::FS::VoltPath::LogDir);
 }
 
-static QString GetGameListErrorRemoving(QtCommon::Game::InstalledEntryType type) {
+static QString GetGameListErrorRemoving(QtCommon::Game::InstalledEntryType type)
+{
     switch (type) {
     case QtCommon::Game::InstalledEntryType::Game:
         return tr("Error Removing Contents");
@@ -200,7 +214,8 @@ static QString GetGameListErrorRemoving(QtCommon::Game::InstalledEntryType type)
 }
 
 // Game Content //
-void RemoveBaseContent(u64 program_id, InstalledEntryType type) {
+void RemoveBaseContent(u64 program_id, InstalledEntryType type)
+{
     const auto res =
         ContentManager::RemoveBaseContent(system->GetFileSystemController(), program_id);
     if (res) {
@@ -214,7 +229,8 @@ void RemoveBaseContent(u64 program_id, InstalledEntryType type) {
     }
 }
 
-void RemoveUpdateContent(u64 program_id, InstalledEntryType type) {
+void RemoveUpdateContent(u64 program_id, InstalledEntryType type)
+{
     const auto res = ContentManager::RemoveUpdate(system->GetFileSystemController(), program_id);
     if (res) {
         QtCommon::Frontend::Information(tr("Successfully Removed"),
@@ -225,7 +241,8 @@ void RemoveUpdateContent(u64 program_id, InstalledEntryType type) {
     }
 }
 
-void RemoveAddOnContent(u64 program_id, InstalledEntryType type) {
+void RemoveAddOnContent(u64 program_id, InstalledEntryType type)
+{
     const size_t count = ContentManager::RemoveAllDLC(*system, program_id);
     if (count == 0) {
         QtCommon::Frontend::Warning(GetGameListErrorRemoving(type),
@@ -239,7 +256,8 @@ void RemoveAddOnContent(u64 program_id, InstalledEntryType type) {
 
 // Global Content //
 
-void RemoveTransferableShaderCache(u64 program_id, GameListRemoveTarget target) {
+void RemoveTransferableShaderCache(u64 program_id, GameListRemoveTarget target)
+{
     const auto target_file_name = [target] {
         switch (target) {
         case GameListRemoveTarget::GlShaderCache:
@@ -268,7 +286,8 @@ void RemoveTransferableShaderCache(u64 program_id, GameListRemoveTarget target) 
     }
 }
 
-void RemoveVulkanDriverPipelineCache(u64 program_id) {
+void RemoveVulkanDriverPipelineCache(u64 program_id)
+{
     static constexpr std::string_view target_file_name = "vulkan_pipelines.bin";
 
     const auto shader_cache_dir = Common::FS::GetVoltPath(Common::FS::VoltPath::ShaderDir);
@@ -284,7 +303,8 @@ void RemoveVulkanDriverPipelineCache(u64 program_id) {
     }
 }
 
-void RemoveAllTransferableShaderCaches(u64 program_id) {
+void RemoveAllTransferableShaderCaches(u64 program_id)
+{
     const auto shader_cache_dir = Common::FS::GetVoltPath(Common::FS::VoltPath::ShaderDir);
     const auto program_shader_cache_dir = shader_cache_dir / fmt::format("{:016x}", program_id);
 
@@ -304,7 +324,8 @@ void RemoveAllTransferableShaderCaches(u64 program_id) {
     }
 }
 
-void RemoveCustomConfiguration(u64 program_id, const std::string& game_path) {
+void RemoveCustomConfiguration(u64 program_id, const std::string& game_path)
+{
     const auto file_path = std::filesystem::path(Common::FS::ToU8String(game_path));
     const auto config_file_name =
         program_id == 0 ? Common::FS::PathToUTF8String(file_path.filename()).append(".ini")
@@ -327,7 +348,8 @@ void RemoveCustomConfiguration(u64 program_id, const std::string& game_path) {
     }
 }
 
-void RemoveCacheStorage(u64 program_id) {
+void RemoveCacheStorage(u64 program_id)
+{
     const auto nand_dir = Common::FS::GetVoltPath(Common::FS::VoltPath::NANDDir);
     auto vfs_nand_dir =
         vfs->OpenDirectory(Common::FS::PathToUTF8String(nand_dir), FileSys::OpenMode::Read);
@@ -343,7 +365,8 @@ void RemoveCacheStorage(u64 program_id) {
 }
 
 // Metadata //
-void ResetMetadata(bool show_message) {
+void ResetMetadata(bool show_message)
+{
     const QString title = tr("Reset Metadata Cache");
 
     if (!Common::FS::Exists(Common::FS::GetVoltPath(Common::FS::VoltPath::CacheDir) /
@@ -369,7 +392,8 @@ void ResetMetadata(bool show_message) {
 
 // TODO(crueter): Make QtCommon::Shortcut
 // Messages in pre-defined message boxes for less code spaghetti
-inline constexpr bool CreateShortcutMessagesGUI(ShortcutMessages imsg, const QString& game_title) {
+inline constexpr bool CreateShortcutMessagesGUI(ShortcutMessages imsg, const QString& game_title)
+{
     int result = 0;
     using namespace QtCommon::Frontend;
     int buttons;
@@ -403,7 +427,8 @@ inline constexpr bool CreateShortcutMessagesGUI(ShortcutMessages imsg, const QSt
 
 void CreateShortcut(const std::string& game_path, const u64 program_id,
                     const std::string& game_title_, const ShortcutTarget& target,
-                    std::string arguments_, const bool needs_title) {
+                    std::string arguments_, const bool needs_title)
+{
     // Get path to Eden executable
     std::filesystem::path command = GetEdenCommand();
 
@@ -496,7 +521,8 @@ void CreateShortcut(const std::string& game_path, const u64 program_id,
 
 // TODO: You want this to be constexpr? Well too bad, clang19 doesn't believe this is a string
 // literal
-std::string GetShortcutPath(ShortcutTarget target) {
+std::string GetShortcutPath(ShortcutTarget target)
+{
     {
         std::string shortcut_path{};
         if (target == ShortcutTarget::Desktop) {
@@ -511,7 +537,8 @@ std::string GetShortcutPath(ShortcutTarget target) {
     }
 }
 
-void CreateHomeMenuShortcut(ShortcutTarget target) {
+void CreateHomeMenuShortcut(ShortcutTarget target)
+{
     constexpr u64 QLaunchId = static_cast<u64>(Service::AM::AppletProgramId::QLaunch);
     auto bis_system = QtCommon::system->GetFileSystemController().GetSystemNANDContents();
     if (!bis_system) {
@@ -534,7 +561,8 @@ void CreateHomeMenuShortcut(ShortcutTarget target) {
     CreateShortcut(game_path, QLaunchId, "Switch Home Menu", target, "-qlaunch", false);
 }
 
-bool SaveIconToFile(const std::filesystem::path& icon_path, const QImage& image) {
+bool SaveIconToFile(const std::filesystem::path& icon_path, const QImage& image)
+{
 #if defined(WIN32)
 #pragma pack(push, 2)
     struct IconDir {

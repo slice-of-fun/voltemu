@@ -1,7 +1,10 @@
 // SPDX-FileCopyrightText: Copyright 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+#include "hid_core/resources/six_axis/seven_six_axis.h"
+
 #include <cstring>
+
 #include "common/common_types.h"
 #include "core/core.h"
 #include "core/core_timing.h"
@@ -10,20 +13,25 @@
 #include "hid_core/frontend/emulated_console.h"
 #include "hid_core/frontend/emulated_devices.h"
 #include "hid_core/hid_core.h"
-#include "hid_core/resources/six_axis/seven_six_axis.h"
 
 namespace Service::HID {
 SevenSixAxis::SevenSixAxis(Core::System& system_)
-    : ControllerBase{system_.HIDCore()}, system{system_} {
+    : ControllerBase{system_.HIDCore()}, system{system_}
+{
     console = hid_core.GetEmulatedConsole();
 }
 
 SevenSixAxis::~SevenSixAxis() = default;
 
-void SevenSixAxis::OnInit() {}
-void SevenSixAxis::OnRelease() {}
+void SevenSixAxis::OnInit()
+{
+}
+void SevenSixAxis::OnRelease()
+{
+}
 
-void SevenSixAxis::OnUpdate(const Core::Timing::CoreTiming& core_timing) {
+void SevenSixAxis::OnUpdate(const Core::Timing::CoreTiming& core_timing)
+{
     if (!IsControllerActivated() || transfer_memory == 0) {
         seven_sixaxis_lifo.buffer_count = 0;
         seven_sixaxis_lifo.buffer_tail = 0;
@@ -55,11 +63,13 @@ void SevenSixAxis::OnUpdate(const Core::Timing::CoreTiming& core_timing) {
                                           sizeof(seven_sixaxis_lifo));
 }
 
-void SevenSixAxis::SetTransferMemoryAddress(Common::ProcessAddress t_mem) {
+void SevenSixAxis::SetTransferMemoryAddress(Common::ProcessAddress t_mem)
+{
     transfer_memory = t_mem;
 }
 
-void SevenSixAxis::ResetTimestamp() {
+void SevenSixAxis::ResetTimestamp()
+{
     last_saved_timestamp = last_global_timestamp;
 }
 

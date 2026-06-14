@@ -9,10 +9,11 @@
 
 #include "shared_translation.h"
 
+#include <QCoreApplication>
 #include <map>
 #include <memory>
 #include <utility>
-#include <QCoreApplication>
+
 #include "common/settings.h"
 #include "common/settings_enums.h"
 #include "common/settings_setting.h"
@@ -21,7 +22,8 @@
 
 namespace ConfigurationShared {
 
-std::unique_ptr<TranslationMap> InitializeTranslations(QObject* parent) {
+std::unique_ptr<TranslationMap> InitializeTranslations(QObject* parent)
+{
     std::unique_ptr<TranslationMap> translations = std::make_unique<TranslationMap>();
     const auto& tr = [parent](const char* text) -> QString { return parent->tr(text); };
 
@@ -148,8 +150,9 @@ std::unique_ptr<TranslationMap> InitializeTranslations(QObject* parent) {
               "Higher resolutions require more VRAM and bandwidth.\n"
               "Options lower than 1X can cause artifacts."));
     INSERT(Settings, scaling_filter, tr("Window Adapting Filter:"), QString());
-    INSERT(Settings, fsr_sharpening_slider, tr("FSR Sharpness:"),
-           tr("Determines how sharpened the image will look using FSR's or SGSR's dynamic contrast."));
+    INSERT(
+        Settings, fsr_sharpening_slider, tr("FSR Sharpness:"),
+        tr("Determines how sharpened the image will look using FSR's or SGSR's dynamic contrast."));
     INSERT(Settings, anti_aliasing, tr("Anti-Aliasing Method:"),
            tr("The anti-aliasing method to use.\nSMAA offers the best quality.\nFXAA "
               "can produce a more stable picture in lower resolutions."));
@@ -366,7 +369,8 @@ std::unique_ptr<TranslationMap> InitializeTranslations(QObject* parent) {
     return translations;
 }
 
-std::unique_ptr<ComboboxTranslationMap> ComboboxEnumeration(QObject* parent) {
+std::unique_ptr<ComboboxTranslationMap> ComboboxEnumeration(QObject* parent)
+{
     std::unique_ptr<ComboboxTranslationMap> translations =
         std::make_unique<ComboboxTranslationMap>();
     const auto& tr = [&](const char* text, const char* context = "") {
@@ -477,24 +481,25 @@ std::unique_ptr<ComboboxTranslationMap> ComboboxEnumeration(QObject* parent) {
              PAIR(ResolutionSetup, Res7X, tr("7X (5040p/7560p)")),
              PAIR(ResolutionSetup, Res8X, tr("8X (5760p/8640p)")),
          }});
-    translations->insert({Settings::EnumMetadata<Settings::ScalingFilter>::Index(),
-                          {
-                              PAIR(ScalingFilter, NearestNeighbor, tr("Nearest Neighbor")),
-                              PAIR(ScalingFilter, Bilinear, tr("Bilinear")),
-                              PAIR(ScalingFilter, Bicubic, tr("Bicubic")),
-                              PAIR(ScalingFilter, Gaussian, tr("Gaussian")),
-                              PAIR(ScalingFilter, Lanczos, tr("Lanczos")),
-                              PAIR(ScalingFilter, ScaleForce, tr("ScaleForce")),
-                              PAIR(ScalingFilter, Fsr, tr("AMD FidelityFX Super Resolution")),
-                              PAIR(ScalingFilter, Area, tr("Area")),
-                              PAIR(ScalingFilter, Mmpx, tr("MMPX")),
-                              PAIR(ScalingFilter, ZeroTangent, tr("Zero-Tangent")),
-                              PAIR(ScalingFilter, BSpline, tr("B-Spline")),
-                              PAIR(ScalingFilter, Mitchell, tr("Mitchell")),
-                              PAIR(ScalingFilter, Spline1, tr("Spline-1")),
-                              PAIR(ScalingFilter, Sgsr, tr("Snapdragon Game Super Resolution")),
-                              PAIR(ScalingFilter, SgsrEdge, tr("Snapdragon Game Super Resolution EdgeDir")),
-                          }});
+    translations->insert(
+        {Settings::EnumMetadata<Settings::ScalingFilter>::Index(),
+         {
+             PAIR(ScalingFilter, NearestNeighbor, tr("Nearest Neighbor")),
+             PAIR(ScalingFilter, Bilinear, tr("Bilinear")),
+             PAIR(ScalingFilter, Bicubic, tr("Bicubic")),
+             PAIR(ScalingFilter, Gaussian, tr("Gaussian")),
+             PAIR(ScalingFilter, Lanczos, tr("Lanczos")),
+             PAIR(ScalingFilter, ScaleForce, tr("ScaleForce")),
+             PAIR(ScalingFilter, Fsr, tr("AMD FidelityFX Super Resolution")),
+             PAIR(ScalingFilter, Area, tr("Area")),
+             PAIR(ScalingFilter, Mmpx, tr("MMPX")),
+             PAIR(ScalingFilter, ZeroTangent, tr("Zero-Tangent")),
+             PAIR(ScalingFilter, BSpline, tr("B-Spline")),
+             PAIR(ScalingFilter, Mitchell, tr("Mitchell")),
+             PAIR(ScalingFilter, Spline1, tr("Spline-1")),
+             PAIR(ScalingFilter, Sgsr, tr("Snapdragon Game Super Resolution")),
+             PAIR(ScalingFilter, SgsrEdge, tr("Snapdragon Game Super Resolution EdgeDir")),
+         }});
     translations->insert({Settings::EnumMetadata<Settings::AntiAliasing>::Index(),
                           {
                               PAIR(AntiAliasing, None, tr("None")),

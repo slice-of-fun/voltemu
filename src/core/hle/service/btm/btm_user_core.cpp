@@ -4,18 +4,20 @@
 // SPDX-FileCopyrightText: Copyright 2024 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+#include "core/hle/service/btm/btm_user_core.h"
+
 #include <memory>
 
 #include "common/logging.h"
 #include "core/core.h"
 #include "core/hle/kernel/k_event.h"
-#include "core/hle/service/btm/btm_user_core.h"
 #include "core/hle/service/cmif_serialization.h"
 
 namespace Service::BTM {
 
 IBtmUserCore::IBtmUserCore(Core::System& system_)
-    : ServiceFramework{system_, "IBtmUserCore"}, service_context{system_, "IBtmUserCore"} {
+    : ServiceFramework{system_, "IBtmUserCore"}, service_context{system_, "IBtmUserCore"}
+{
     // clang-format off
     static const FunctionInfo functions[] = {
         {0, C<&IBtmUserCore::AcquireBleScanEvent>, "AcquireBleScanEvent"},
@@ -60,7 +62,8 @@ IBtmUserCore::IBtmUserCore(Core::System& system_)
     config_event = service_context.CreateEvent("IBtmUserCore:ConfigEvent");
 }
 
-IBtmUserCore::~IBtmUserCore() {
+IBtmUserCore::~IBtmUserCore()
+{
     service_context.CloseEvent(scan_event);
     service_context.CloseEvent(connection_event);
     service_context.CloseEvent(service_discovery_event);
@@ -68,7 +71,8 @@ IBtmUserCore::~IBtmUserCore() {
 }
 
 Result IBtmUserCore::AcquireBleScanEvent(Out<bool> out_is_valid,
-                                         OutCopyHandle<Kernel::KReadableEvent> out_event) {
+                                         OutCopyHandle<Kernel::KReadableEvent> out_event)
+{
     LOG_WARNING(Service_BTM, "(STUBBED) called");
 
     *out_is_valid = true;
@@ -77,7 +81,8 @@ Result IBtmUserCore::AcquireBleScanEvent(Out<bool> out_is_valid,
 }
 
 Result IBtmUserCore::AcquireBleConnectionEvent(Out<bool> out_is_valid,
-                                               OutCopyHandle<Kernel::KReadableEvent> out_event) {
+                                               OutCopyHandle<Kernel::KReadableEvent> out_event)
+{
     LOG_WARNING(Service_BTM, "(STUBBED) called");
 
     *out_is_valid = true;
@@ -85,8 +90,10 @@ Result IBtmUserCore::AcquireBleConnectionEvent(Out<bool> out_is_valid,
     R_SUCCEED();
 }
 
-Result IBtmUserCore::AcquireBleServiceDiscoveryEvent(
-    Out<bool> out_is_valid, OutCopyHandle<Kernel::KReadableEvent> out_event) {
+Result
+IBtmUserCore::AcquireBleServiceDiscoveryEvent(Out<bool> out_is_valid,
+                                              OutCopyHandle<Kernel::KReadableEvent> out_event)
+{
     LOG_WARNING(Service_BTM, "(STUBBED) called");
 
     *out_is_valid = true;
@@ -95,7 +102,8 @@ Result IBtmUserCore::AcquireBleServiceDiscoveryEvent(
 }
 
 Result IBtmUserCore::AcquireBleMtuConfigEvent(Out<bool> out_is_valid,
-                                              OutCopyHandle<Kernel::KReadableEvent> out_event) {
+                                              OutCopyHandle<Kernel::KReadableEvent> out_event)
+{
     LOG_WARNING(Service_BTM, "(STUBBED) called");
 
     *out_is_valid = true;

@@ -6,17 +6,16 @@
 
 #pragma once
 
-#include <array>
-#include <map>
-#include <string>
-#include <utility>
-
 #include <QCoreApplication>
 #include <QFileInfo>
 #include <QObject>
 #include <QRegularExpression>
 #include <QStandardItem>
 #include <QString>
+#include <array>
+#include <map>
+#include <string>
+#include <utility>
 
 #include "common/common_types.h"
 #include "common/logging.h"
@@ -42,7 +41,8 @@ Q_DECLARE_METATYPE(GameListItemType);
  * @param size The desired width and height of the default icon.
  * @return QPixmap default icon
  */
-static QPixmap GetDefaultIcon(u32 size) {
+static QPixmap GetDefaultIcon(u32 size)
+{
     QPixmap icon(size, size);
     icon.fill(Qt::transparent);
     return icon;
@@ -55,7 +55,8 @@ public:
     static constexpr int TypeRole = Qt::UserRole + 1;
     static constexpr int SortRole = Qt::UserRole + 2;
     GameListItem() = default;
-    explicit GameListItem(const QString& string) : QStandardItem(string) {
+    explicit GameListItem(const QString& string) : QStandardItem(string)
+    {
         setData(string, SortRole);
     }
 };
@@ -76,7 +77,8 @@ public:
     GameListItemPath() = default;
     GameListItemPath(const QString& game_path, const std::vector<u8>& picture_data,
                      const QString& game_name, const QString& game_type, u64 program_id,
-                     u64 play_time, const QString& patch_versions) {
+                     u64 play_time, const QString& patch_versions)
+    {
         setData(type(), TypeRole);
         setData(game_path, FullPathRole);
         setData(game_name, TitleRole);
@@ -115,11 +117,10 @@ public:
         setData(picture, Qt::DecorationRole);
     }
 
-    int type() const override {
-        return static_cast<int>(GameListItemType::Game);
-    }
+    int type() const override { return static_cast<int>(GameListItemType::Game); }
 
-    QVariant data(int role) const override {
+    QVariant data(int role) const override
+    {
         if (role == Qt::DisplayRole || role == SortRole) {
             std::string filename;
             Common::SplitPath(data(FullPathRole).toString().toStdString(), nullptr, &filename,
@@ -172,7 +173,8 @@ class GameListItemCompat : public GameListItem {
 public:
     static constexpr int CompatNumberRole = SortRole;
     GameListItemCompat() = default;
-    explicit GameListItemCompat(const QString& compatibility) {
+    explicit GameListItemCompat(const QString& compatibility)
+    {
         setData(type(), TypeRole);
 
         struct CompatStatus {
@@ -206,11 +208,10 @@ public:
         setData(QtCommon::CreateCirclePixmapFromColor(status.color), Qt::DecorationRole);
     }
 
-    int type() const override {
-        return static_cast<int>(GameListItemType::Game);
-    }
+    int type() const override { return static_cast<int>(GameListItemType::Game); }
 
-    bool operator<(const QStandardItem& other) const override {
+    bool operator<(const QStandardItem& other) const override
+    {
         return data(CompatNumberRole).value<QString>() <
                other.data(CompatNumberRole).value<QString>();
     }
@@ -226,12 +227,14 @@ public:
     static constexpr int SizeRole = SortRole;
 
     GameListItemSize() = default;
-    explicit GameListItemSize(const qulonglong size_bytes) {
+    explicit GameListItemSize(const qulonglong size_bytes)
+    {
         setData(type(), TypeRole);
         setData(size_bytes, SizeRole);
     }
 
-    void setData(const QVariant& value, int role) override {
+    void setData(const QVariant& value, int role) override
+    {
         // By specializing setData for SizeRole, we can ensure that the numerical and string
         // representations of the data are always accurate and in the correct format.
         if (role == SizeRole) {
@@ -243,16 +246,15 @@ public:
         }
     }
 
-    int type() const override {
-        return static_cast<int>(GameListItemType::Game);
-    }
+    int type() const override { return static_cast<int>(GameListItemType::Game); }
 
     /**
      * This operator is, in practice, only used by the TreeView sorting systems.
      * Override it so that it will correctly sort by numerical value instead of by string
      * representation.
      */
-    bool operator<(const QStandardItem& other) const override {
+    bool operator<(const QStandardItem& other) const override
+    {
         return data(SizeRole).toULongLong() < other.data(SizeRole).toULongLong();
     }
 };
@@ -267,11 +269,13 @@ public:
     static constexpr int PlayTimeRole = SortRole;
 
     GameListItemPlayTime() = default;
-    explicit GameListItemPlayTime(const qulonglong time_seconds) {
+    explicit GameListItemPlayTime(const qulonglong time_seconds)
+    {
         setData(time_seconds, PlayTimeRole);
     }
 
-    void setData(const QVariant& value, int role) override {
+    void setData(const QVariant& value, int role) override
+    {
         qulonglong time_seconds = value.toULongLong();
         GameListItem::setData(
             QString::fromStdString(PlayTime::PlayTimeManager::GetReadablePlayTime(time_seconds)),
@@ -279,7 +283,8 @@ public:
         GameListItem::setData(value, PlayTimeRole);
     }
 
-    bool operator<(const QStandardItem& other) const override {
+    bool operator<(const QStandardItem& other) const override
+    {
         return data(PlayTimeRole).toULongLong() < other.data(PlayTimeRole).toULongLong();
     }
 };
@@ -290,7 +295,8 @@ public:
 
     explicit GameListDir(UISettings::GameDir& directory,
                          GameListItemType dir_type_ = GameListItemType::CustomDir)
-        : dir_type{dir_type_} {
+        : dir_type{dir_type_}
+    {
         setData(type(), TypeRole);
 
         UISettings::GameDir* game_dir = &directory;
@@ -337,16 +343,12 @@ public:
         }
     }
 
-    int type() const override {
-        return static_cast<int>(dir_type);
-    }
+    int type() const override { return static_cast<int>(dir_type); }
 
     /**
      * Override to prevent automatic sorting between folders and the addDir button.
      */
-    bool operator<(const QStandardItem& other) const override {
-        return false;
-    }
+    bool operator<(const QStandardItem& other) const override { return false; }
 
 private:
     GameListItemType dir_type;
@@ -354,7 +356,8 @@ private:
 
 class GameListAddDir : public GameListItem {
 public:
-    explicit GameListAddDir() {
+    explicit GameListAddDir()
+    {
         setData(type(), TypeRole);
 
         const int icon_size = UISettings::values.folder_icon_size.GetValue();
@@ -366,18 +369,15 @@ public:
         setData(QObject::tr("Add New Game Directory"), Qt::DisplayRole);
     }
 
-    int type() const override {
-        return static_cast<int>(GameListItemType::AddDir);
-    }
+    int type() const override { return static_cast<int>(GameListItemType::AddDir); }
 
-    bool operator<(const QStandardItem& other) const override {
-        return false;
-    }
+    bool operator<(const QStandardItem& other) const override { return false; }
 };
 
 class GameListFavorites : public GameListItem {
 public:
-    explicit GameListFavorites() {
+    explicit GameListFavorites()
+    {
         setData(type(), TypeRole);
 
         const int icon_size = UISettings::values.folder_icon_size.GetValue();
@@ -389,11 +389,7 @@ public:
         setData(QObject::tr("Favorites"), Qt::DisplayRole);
     }
 
-    int type() const override {
-        return static_cast<int>(GameListItemType::Favorites);
-    }
+    int type() const override { return static_cast<int>(GameListItemType::Favorites); }
 
-    bool operator<(const QStandardItem& other) const override {
-        return false;
-    }
+    bool operator<(const QStandardItem& other) const override { return false; }
 };

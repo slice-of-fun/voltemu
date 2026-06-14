@@ -4,16 +4,19 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/file_sys/nca_metadata.h"
+
 #include <cstring>
+
 #include "common/common_types.h"
 #include "common/logging.h"
 #include "common/swap.h"
-#include "core/file_sys/nca_metadata.h"
 #include "core/file_sys/vfs/vfs.h"
 
 namespace FileSys {
 
-CNMT::CNMT(VirtualFile file) {
+CNMT::CNMT(VirtualFile file)
+{
     if (file->ReadObject(&header) != sizeof(CNMTHeader))
         return;
 
@@ -44,35 +47,44 @@ CNMT::CNMT(VirtualFile file) {
 CNMT::CNMT(CNMTHeader header_, OptionalHeader opt_header_,
            std::vector<ContentRecord> content_records_, std::vector<MetaRecord> meta_records_)
     : header(std::move(header_)), opt_header(std::move(opt_header_)),
-      content_records(std::move(content_records_)), meta_records(std::move(meta_records_)) {}
+      content_records(std::move(content_records_)), meta_records(std::move(meta_records_))
+{
+}
 
 CNMT::~CNMT() = default;
 
-const CNMTHeader& CNMT::GetHeader() const {
+const CNMTHeader& CNMT::GetHeader() const
+{
     return header;
 }
 
-u64 CNMT::GetTitleID() const {
+u64 CNMT::GetTitleID() const
+{
     return header.title_id;
 }
 
-u32 CNMT::GetTitleVersion() const {
+u32 CNMT::GetTitleVersion() const
+{
     return header.title_version;
 }
 
-TitleType CNMT::GetType() const {
+TitleType CNMT::GetType() const
+{
     return header.type;
 }
 
-const std::vector<ContentRecord>& CNMT::GetContentRecords() const {
+const std::vector<ContentRecord>& CNMT::GetContentRecords() const
+{
     return content_records;
 }
 
-const std::vector<MetaRecord>& CNMT::GetMetaRecords() const {
+const std::vector<MetaRecord>& CNMT::GetMetaRecords() const
+{
     return meta_records;
 }
 
-bool CNMT::UnionRecords(const CNMT& other) {
+bool CNMT::UnionRecords(const CNMT& other)
+{
     bool change = false;
     for (const auto& rec : other.content_records) {
         const auto iter = std::find_if(content_records.begin(), content_records.end(),
@@ -100,7 +112,8 @@ bool CNMT::UnionRecords(const CNMT& other) {
     return change;
 }
 
-std::vector<u8> CNMT::Serialize() const {
+std::vector<u8> CNMT::Serialize() const
+{
     const bool has_opt_header =
         header.type >= TitleType::Application && header.type <= TitleType::AOC;
     const auto dead_zone = header.table_offset + sizeof(CNMTHeader);

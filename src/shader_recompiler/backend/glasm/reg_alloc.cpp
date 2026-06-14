@@ -4,23 +4,29 @@
 // SPDX-FileCopyrightText: Copyright 2021 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include <fmt/ranges.h>
-#include <bit>
 #include "shader_recompiler/backend/glasm/reg_alloc.h"
+
+#include <fmt/ranges.h>
+
+#include <bit>
+
 #include "shader_recompiler/exception.h"
 #include "shader_recompiler/frontend/ir/value.h"
 
 namespace Shader::Backend::GLASM {
 
-Register RegAlloc::Define(IR::Inst& inst) {
+Register RegAlloc::Define(IR::Inst& inst)
+{
     return Define(inst, false);
 }
 
-Register RegAlloc::LongDefine(IR::Inst& inst) {
+Register RegAlloc::LongDefine(IR::Inst& inst)
+{
     return Define(inst, true);
 }
 
-Value RegAlloc::Peek(const IR::Value& value) {
+Value RegAlloc::Peek(const IR::Value& value)
+{
     if (value.IsImmediate()) {
         return MakeImm(value);
     } else {
@@ -28,7 +34,8 @@ Value RegAlloc::Peek(const IR::Value& value) {
     }
 }
 
-Value RegAlloc::Consume(const IR::Value& value) {
+Value RegAlloc::Consume(const IR::Value& value)
+{
     if (value.IsImmediate()) {
         return MakeImm(value);
     } else {
@@ -36,7 +43,8 @@ Value RegAlloc::Consume(const IR::Value& value) {
     }
 }
 
-void RegAlloc::Unref(IR::Inst& inst) {
+void RegAlloc::Unref(IR::Inst& inst)
+{
     IR::Inst& value_inst{AliasInst(inst)};
     value_inst.DestructiveRemoveUsage();
     if (!value_inst.HasUses()) {
@@ -44,25 +52,29 @@ void RegAlloc::Unref(IR::Inst& inst) {
     }
 }
 
-Register RegAlloc::AllocReg() {
+Register RegAlloc::AllocReg()
+{
     Register ret;
     ret.type = Type::Register;
     ret.id = Alloc(false);
     return ret;
 }
 
-Register RegAlloc::AllocLongReg() {
+Register RegAlloc::AllocLongReg()
+{
     Register ret;
     ret.type = Type::Register;
     ret.id = Alloc(true);
     return ret;
 }
 
-void RegAlloc::FreeReg(Register reg) {
+void RegAlloc::FreeReg(Register reg)
+{
     Free(reg.id);
 }
 
-Value RegAlloc::MakeImm(const IR::Value& value) {
+Value RegAlloc::MakeImm(const IR::Value& value)
+{
     Value ret;
     switch (value.Type()) {
     case IR::Type::Void:
@@ -94,7 +106,8 @@ Value RegAlloc::MakeImm(const IR::Value& value) {
     return ret;
 }
 
-Register RegAlloc::Define(IR::Inst& inst, bool is_long) {
+Register RegAlloc::Define(IR::Inst& inst, bool is_long)
+{
     if (inst.HasUses()) {
         inst.SetDefinition<Id>(Alloc(is_long));
     } else {
@@ -106,19 +119,22 @@ Register RegAlloc::Define(IR::Inst& inst, bool is_long) {
     return Register{PeekInst(inst)};
 }
 
-Value RegAlloc::PeekInst(IR::Inst& inst) {
+Value RegAlloc::PeekInst(IR::Inst& inst)
+{
     Value ret;
     ret.type = Type::Register;
     ret.id = inst.Definition<Id>();
     return ret;
 }
 
-Value RegAlloc::ConsumeInst(IR::Inst& inst) {
+Value RegAlloc::ConsumeInst(IR::Inst& inst)
+{
     Unref(inst);
     return PeekInst(inst);
 }
 
-Id RegAlloc::Alloc(bool is_long) {
+Id RegAlloc::Alloc(bool is_long)
+{
     size_t& num_regs{is_long ? num_used_long_registers : num_used_registers};
     std::bitset<NUM_REGS>& use{is_long ? long_register_use : register_use};
     if (num_used_registers + num_used_long_registers < NUM_REGS) {
@@ -141,7 +157,8 @@ Id RegAlloc::Alloc(bool is_long) {
     throw NotImplementedException("Register spilling");
 }
 
-void RegAlloc::Free(Id id) {
+void RegAlloc::Free(Id id)
+{
     if (id.is_valid == 0) {
         throw LogicError("Freeing invalid register");
     }
@@ -155,7 +172,8 @@ void RegAlloc::Free(Id id) {
     }
 }
 
-/*static*/ bool RegAlloc::IsAliased(const IR::Inst& inst) {
+/*static*/ bool RegAlloc::IsAliased(const IR::Inst& inst)
+{
     switch (inst.GetOpcode()) {
     case IR::Opcode::Identity:
     case IR::Opcode::BitCastU16F16:
@@ -170,7 +188,8 @@ void RegAlloc::Free(Id id) {
     }
 }
 
-/*static*/ IR::Inst& RegAlloc::AliasInst(IR::Inst& inst) {
+/*static*/ IR::Inst& RegAlloc::AliasInst(IR::Inst& inst)
+{
     IR::Inst* it{&inst};
     while (IsAliased(*it)) {
         const IR::Value arg{it->Arg(0)};

@@ -3,11 +3,11 @@
 
 #pragma once
 
+#include <QDialog>
 #include <functional>
 #include <memory>
 #include <optional>
 #include <vector>
-#include <QDialog>
 
 class QItemSelection;
 class QModelIndex;

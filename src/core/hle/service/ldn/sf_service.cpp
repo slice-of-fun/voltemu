@@ -5,7 +5,8 @@
 
 namespace Service::LDN {
 
-ISfService::ISfService(Core::System& system_) : ServiceFramework{system_, "ISfService"} {
+ISfService::ISfService(Core::System& system_) : ServiceFramework{system_, "ISfService"}
+{
     // clang-format off
     static const FunctionInfo functions[] = {
             {0, nullptr, "Initialize"},

@@ -22,7 +22,8 @@
 namespace Common {
 
 // This function multiplies 2 u64 values and divides it by a u64 value.
-[[nodiscard]] static inline u64 MultiplyAndDivide64(u64 a, u64 b, u64 d) {
+[[nodiscard]] static inline u64 MultiplyAndDivide64(u64 a, u64 b, u64 d)
+{
 #if defined(_MSC_VER) && !defined(__clang__)
     u128 r{};
     r[0] = _umul128(a, b, &r[1]);
@@ -42,7 +43,8 @@ namespace Common {
 }
 
 // This function multiplies 2 u64 values and produces a u128 value;
-[[nodiscard]] static inline u128 Multiply64Into128(u64 a, u64 b) {
+[[nodiscard]] static inline u128 Multiply64Into128(u64 a, u64 b)
+{
     u128 result;
 #if defined(_MSC_VER) && !defined(__clang__)
     result[0] = _umul128(a, b, &result[1]);
@@ -54,7 +56,8 @@ namespace Common {
     return result;
 }
 
-[[nodiscard]] static inline u64 GetFixedPoint64Factor(u64 numerator, u64 divisor) {
+[[nodiscard]] static inline u64 GetFixedPoint64Factor(u64 numerator, u64 divisor)
+{
 #ifdef __SIZEOF_INT128__
     const auto base = static_cast<unsigned __int128>(numerator) << 64ULL;
     return static_cast<u64>(base / divisor);
@@ -72,7 +75,8 @@ namespace Common {
 #endif
 }
 
-[[nodiscard]] static inline u64 MultiplyHigh(u64 a, u64 b) {
+[[nodiscard]] static inline u64 MultiplyHigh(u64 a, u64 b)
+{
 #ifdef __SIZEOF_INT128__
     return (static_cast<unsigned __int128>(a) * static_cast<unsigned __int128>(b)) >> 64;
 #elif defined(_M_X64) || defined(_M_ARM64)
@@ -101,7 +105,8 @@ namespace Common {
 
 // This function divides a u128 by a u32 value and produces two u64 values:
 // the result of division and the remainder
-[[nodiscard]] static inline std::pair<u64, u64> Divide128On32(u128 dividend, u32 divisor) {
+[[nodiscard]] static inline std::pair<u64, u64> Divide128On32(u128 dividend, u32 divisor)
+{
     u64 remainder = dividend[0] % divisor;
     u64 accum = dividend[0] / divisor;
     if (dividend[1] == 0)

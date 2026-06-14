@@ -1,14 +1,16 @@
 // SPDX-FileCopyrightText: Copyright 2020 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "hid_core/frontend/motion_input.h"
+
 #include <cmath>
 
 #include "common/math_util.h"
-#include "hid_core/frontend/motion_input.h"
 
 namespace Core::HID {
 
-MotionInput::MotionInput() {
+MotionInput::MotionInput()
+{
     // Initialize PID constants with default values
     SetPID(0.3f, 0.005f, 0.0f);
     SetGyroThreshold(ThresholdStandard);
@@ -16,13 +18,15 @@ MotionInput::MotionInput() {
     ResetRotations();
 }
 
-void MotionInput::SetPID(f32 new_kp, f32 new_ki, f32 new_kd) {
+void MotionInput::SetPID(f32 new_kp, f32 new_ki, f32 new_kd)
+{
     kp = new_kp;
     ki = new_ki;
     kd = new_kd;
 }
 
-void MotionInput::SetAcceleration(const Common::Vec3f& acceleration) {
+void MotionInput::SetAcceleration(const Common::Vec3f& acceleration)
+{
     accel = acceleration;
 
     accel.x = std::clamp(accel.x, -AccelMaxValue, AccelMaxValue);
@@ -30,7 +34,8 @@ void MotionInput::SetAcceleration(const Common::Vec3f& acceleration) {
     accel.z = std::clamp(accel.z, -AccelMaxValue, AccelMaxValue);
 }
 
-void MotionInput::SetGyroscope(const Common::Vec3f& gyroscope) {
+void MotionInput::SetGyroscope(const Common::Vec3f& gyroscope)
+{
     gyro = gyroscope - gyro_bias;
 
     gyro.x = std::clamp(gyro.x, -GyroMaxValue, GyroMaxValue);
@@ -55,11 +60,13 @@ void MotionInput::SetGyroscope(const Common::Vec3f& gyroscope) {
     }
 }
 
-void MotionInput::SetQuaternion(const Common::Quaternion<f32>& quaternion) {
+void MotionInput::SetQuaternion(const Common::Quaternion<f32>& quaternion)
+{
     quat = quaternion;
 }
 
-void MotionInput::SetEulerAngles(const Common::Vec3f& euler_angles) {
+void MotionInput::SetEulerAngles(const Common::Vec3f& euler_angles)
+{
     const float cr = std::cos(euler_angles.x * 0.5f);
     const float sr = std::sin(euler_angles.x * 0.5f);
     const float cp = std::cos(euler_angles.y * 0.5f);
@@ -73,39 +80,48 @@ void MotionInput::SetEulerAngles(const Common::Vec3f& euler_angles) {
     quat.xyz.z = cr * cp * sy - sr * sp * cy;
 }
 
-void MotionInput::SetGyroBias(const Common::Vec3f& bias) {
+void MotionInput::SetGyroBias(const Common::Vec3f& bias)
+{
     gyro_bias = bias;
 }
 
-void MotionInput::SetGyroThreshold(f32 threshold) {
+void MotionInput::SetGyroThreshold(f32 threshold)
+{
     gyro_threshold = threshold;
 }
 
-void MotionInput::SetUserGyroThreshold(f32 threshold) {
+void MotionInput::SetUserGyroThreshold(f32 threshold)
+{
     user_gyro_threshold = threshold / ThresholdStandard;
 }
 
-void MotionInput::EnableReset(bool reset) {
+void MotionInput::EnableReset(bool reset)
+{
     reset_enabled = reset;
 }
 
-void MotionInput::ResetRotations() {
+void MotionInput::ResetRotations()
+{
     rotations = {};
 }
 
-void MotionInput::ResetQuaternion() {
+void MotionInput::ResetQuaternion()
+{
     quat = {{0.0f, 0.0f, -1.0f}, 0.0f};
 }
 
-bool MotionInput::IsMoving(f32 sensitivity) const {
+bool MotionInput::IsMoving(f32 sensitivity) const
+{
     return gyro.Length() >= sensitivity || accel.Length() <= 0.9f || accel.Length() >= 1.1f;
 }
 
-bool MotionInput::IsCalibrated(f32 sensitivity) const {
+bool MotionInput::IsCalibrated(f32 sensitivity) const
+{
     return real_error.Length() < sensitivity;
 }
 
-void MotionInput::UpdateRotation(u64 elapsed_time) {
+void MotionInput::UpdateRotation(u64 elapsed_time)
+{
     const auto sample_period = static_cast<f32>(elapsed_time) / 1000000.0f;
     if (sample_period > 0.1f) {
         return;
@@ -113,12 +129,14 @@ void MotionInput::UpdateRotation(u64 elapsed_time) {
     rotations += gyro * sample_period;
 }
 
-void MotionInput::Calibrate() {
+void MotionInput::Calibrate()
+{
     calibration_mode = true;
     calibration_counter = 0;
 }
 
-void MotionInput::StopCalibration() {
+void MotionInput::StopCalibration()
+{
     if (calibration_counter++ > CalibrationSamples) {
         calibration_mode = false;
         ResetQuaternion();
@@ -128,7 +146,8 @@ void MotionInput::StopCalibration() {
 
 // Based on Madgwick's implementation of Mayhony's AHRS algorithm.
 // https://github.com/xioTechnologies/Open-Source-AHRS-With-x-IMU/blob/master/x-IMU%20IMU%20and%20AHRS%20Algorithms/x-IMU%20IMU%20and%20AHRS%20Algorithms/AHRS/MahonyAHRS.cs
-void MotionInput::UpdateOrientation(u64 elapsed_time) {
+void MotionInput::UpdateOrientation(u64 elapsed_time)
+{
     if (!IsCalibrated(0.1f)) {
         ResetOrientation();
     }
@@ -225,7 +244,8 @@ void MotionInput::UpdateOrientation(u64 elapsed_time) {
     quat = quat.Normalized();
 }
 
-std::array<Common::Vec3f, 3> MotionInput::GetOrientation() const {
+std::array<Common::Vec3f, 3> MotionInput::GetOrientation() const
+{
     const Common::Quaternion<float> quad{
         .xyz = {-quat.xyz[1], -quat.xyz[0], -quat.w},
         .w = -quat.xyz[2],
@@ -237,27 +257,33 @@ std::array<Common::Vec3f, 3> MotionInput::GetOrientation() const {
             Common::Vec3f(-matrix4x4[8], -matrix4x4[9], matrix4x4[10])};
 }
 
-Common::Vec3f MotionInput::GetAcceleration() const {
+Common::Vec3f MotionInput::GetAcceleration() const
+{
     return accel;
 }
 
-Common::Vec3f MotionInput::GetGyroscope() const {
+Common::Vec3f MotionInput::GetGyroscope() const
+{
     return gyro;
 }
 
-Common::Vec3f MotionInput::GetGyroBias() const {
+Common::Vec3f MotionInput::GetGyroBias() const
+{
     return gyro_bias;
 }
 
-Common::Quaternion<f32> MotionInput::GetQuaternion() const {
+Common::Quaternion<f32> MotionInput::GetQuaternion() const
+{
     return quat;
 }
 
-Common::Vec3f MotionInput::GetRotations() const {
+Common::Vec3f MotionInput::GetRotations() const
+{
     return rotations;
 }
 
-Common::Vec3f MotionInput::GetEulerAngles() const {
+Common::Vec3f MotionInput::GetEulerAngles() const
+{
     // roll (x-axis rotation)
     const float sinr_cosp = 2 * (quat.w * quat.xyz.x + quat.xyz.y * quat.xyz.z);
     const float cosr_cosp = 1 - 2 * (quat.xyz.x * quat.xyz.x + quat.xyz.y * quat.xyz.y);
@@ -277,7 +303,8 @@ Common::Vec3f MotionInput::GetEulerAngles() const {
     };
 }
 
-void MotionInput::ResetOrientation() {
+void MotionInput::ResetOrientation()
+{
     if (!reset_enabled || only_accelerometer) {
         return;
     }
@@ -297,7 +324,8 @@ void MotionInput::ResetOrientation() {
     }
 }
 
-void MotionInput::SetOrientationFromAccelerometer() {
+void MotionInput::SetOrientationFromAccelerometer()
+{
     int iterations = 0;
     const f32 sample_period = 0.015f;
 

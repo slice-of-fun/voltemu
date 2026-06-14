@@ -7,12 +7,13 @@
 
 #pragma once
 
+#include <ankerl/unordered_dense.h>
+
 #include <functional>
 #include <list>
 #include <memory>
 #include <span>
 #include <string>
-#include <ankerl/unordered_dense.h>
 
 #include "common/common_types.h"
 #include "core/hle/service/kernel_helpers.h"
@@ -63,8 +64,8 @@ public:
     ~Module();
 
     /// Returns a pointer to one of the available devices, identified by its name.
-    template <typename T>
-    std::shared_ptr<T> GetDevice(DeviceFD fd) {
+    template<typename T> std::shared_ptr<T> GetDevice(DeviceFD fd)
+    {
         auto itr = open_files.find(fd);
         if (itr == open_files.end())
             return nullptr;
@@ -90,9 +91,7 @@ public:
 
     NvResult QueryEvent(DeviceFD fd, u32 event_id, Kernel::KEvent*& event);
 
-    NvCore::Container& GetContainer() {
-        return container;
-    }
+    NvCore::Container& GetContainer() { return container; }
 
 private:
     friend class EventInterface;
@@ -103,7 +102,8 @@ private:
     /// Id to use for the next open file descriptor.
     DeviceFD next_fd = 1;
 
-    using FilesContainerType = ankerl::unordered_dense::map<DeviceFD, std::shared_ptr<Devices::nvdevice>>;
+    using FilesContainerType =
+        ankerl::unordered_dense::map<DeviceFD, std::shared_ptr<Devices::nvdevice>>;
     /// Mapping of file descriptors to the devices they reference.
     FilesContainerType open_files;
 
@@ -111,7 +111,8 @@ private:
 
     EventInterface events_interface;
 
-    ankerl::unordered_dense::map<std::string, std::function<FilesContainerType::iterator(DeviceFD)>> builders;
+    ankerl::unordered_dense::map<std::string, std::function<FilesContainerType::iterator(DeviceFD)>>
+        builders;
 };
 
 void LoopProcess(Core::System& system);

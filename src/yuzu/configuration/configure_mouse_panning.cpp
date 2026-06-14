@@ -1,18 +1,20 @@
 // SPDX-FileCopyrightText: 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "yuzu/configuration/configure_mouse_panning.h"
+
 #include <QCloseEvent>
 #include <QMessageBox>
 
 #include "common/settings.h"
 #include "ui_configure_mouse_panning.h"
-#include "yuzu/configuration/configure_mouse_panning.h"
 
 ConfigureMousePanning::ConfigureMousePanning(QWidget* parent,
                                              InputCommon::InputSubsystem* input_subsystem_,
                                              float right_stick_deadzone, float right_stick_range)
     : QDialog(parent), input_subsystem{input_subsystem_},
-      ui(std::make_unique<Ui::ConfigureMousePanning>()) {
+      ui(std::make_unique<Ui::ConfigureMousePanning>())
+{
     ui->setupUi(this);
     SetConfiguration(right_stick_deadzone, right_stick_range);
     ConnectEvents();
@@ -20,11 +22,13 @@ ConfigureMousePanning::ConfigureMousePanning(QWidget* parent,
 
 ConfigureMousePanning::~ConfigureMousePanning() = default;
 
-void ConfigureMousePanning::closeEvent(QCloseEvent* event) {
+void ConfigureMousePanning::closeEvent(QCloseEvent* event)
+{
     event->accept();
 }
 
-void ConfigureMousePanning::SetConfiguration(float right_stick_deadzone, float right_stick_range) {
+void ConfigureMousePanning::SetConfiguration(float right_stick_deadzone, float right_stick_range)
+{
     ui->enable->setChecked(Settings::values.mouse_panning.GetValue());
     ui->x_sensitivity->setValue(Settings::values.mouse_panning_x_sensitivity.GetValue());
     ui->y_sensitivity->setValue(Settings::values.mouse_panning_y_sensitivity.GetValue());
@@ -51,7 +55,8 @@ void ConfigureMousePanning::SetConfiguration(float right_stick_deadzone, float r
     }
 }
 
-void ConfigureMousePanning::SetDefaultConfiguration() {
+void ConfigureMousePanning::SetDefaultConfiguration()
+{
     ui->x_sensitivity->setValue(Settings::values.mouse_panning_x_sensitivity.GetDefault());
     ui->y_sensitivity->setValue(Settings::values.mouse_panning_y_sensitivity.GetDefault());
     ui->deadzone_counterweight->setValue(
@@ -60,7 +65,8 @@ void ConfigureMousePanning::SetDefaultConfiguration() {
     ui->min_decay->setValue(Settings::values.mouse_panning_min_decay.GetDefault());
 }
 
-void ConfigureMousePanning::ConnectEvents() {
+void ConfigureMousePanning::ConnectEvents()
+{
     connect(ui->default_button, &QPushButton::clicked, this,
             &ConfigureMousePanning::SetDefaultConfiguration);
     connect(ui->button_box, &QDialogButtonBox::accepted, this,
@@ -68,7 +74,8 @@ void ConfigureMousePanning::ConnectEvents() {
     connect(ui->button_box, &QDialogButtonBox::rejected, this, [this] { reject(); });
 }
 
-void ConfigureMousePanning::ApplyConfiguration() {
+void ConfigureMousePanning::ApplyConfiguration()
+{
     Settings::values.mouse_panning = ui->enable->isChecked();
     Settings::values.mouse_panning_x_sensitivity = static_cast<float>(ui->x_sensitivity->value());
     Settings::values.mouse_panning_y_sensitivity = static_cast<float>(ui->y_sensitivity->value());

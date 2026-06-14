@@ -47,6 +47,7 @@
 #pragma once
 
 #include <cstddef>
+
 #include "common/common_types.h"
 
 namespace Common {
@@ -71,7 +72,8 @@ namespace Common {
 
 // Hash 128 input bits down to 64 bits of output.
 // This is intended to be a reasonably good hash function.
-[[nodiscard]] inline u64 Hash128to64(const u128& x) {
+[[nodiscard]] inline u64 Hash128to64(const u128& x)
+{
     // Murmur-inspired hashing.
     const u64 mul = 0x9ddfea08eb382d69ULL;
     u64 a = (x[0] ^ x[1]) * mul;

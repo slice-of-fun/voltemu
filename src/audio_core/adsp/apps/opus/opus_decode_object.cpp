@@ -2,23 +2,27 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include "audio_core/adsp/apps/opus/opus_decode_object.h"
+
 #include "common/assert.h"
 
 namespace AudioCore::ADSP::OpusDecoder {
 namespace {
-bool IsValidChannelCount(u32 channel_count) {
+bool IsValidChannelCount(u32 channel_count)
+{
     return channel_count == 1 || channel_count == 2;
 }
 } // namespace
 
-u32 OpusDecodeObject::GetWorkBufferSize(u32 channel_count) {
+u32 OpusDecodeObject::GetWorkBufferSize(u32 channel_count)
+{
     if (!IsValidChannelCount(channel_count)) {
         return 0;
     }
     return static_cast<u32>(sizeof(OpusDecodeObject)) + opus_decoder_get_size(channel_count);
 }
 
-OpusDecodeObject& OpusDecodeObject::Initialize(u64 buffer, u64 buffer2) {
+OpusDecodeObject& OpusDecodeObject::Initialize(u64 buffer, u64 buffer2)
+{
     auto* new_decoder = reinterpret_cast<OpusDecodeObject*>(buffer);
     auto* comparison = reinterpret_cast<OpusDecodeObject*>(buffer2);
 
@@ -34,7 +38,8 @@ OpusDecodeObject& OpusDecodeObject::Initialize(u64 buffer, u64 buffer2) {
     return *new_decoder;
 }
 
-s32 OpusDecodeObject::InitializeDecoder(u32 sample_rate, u32 channel_count) {
+s32 OpusDecodeObject::InitializeDecoder(u32 sample_rate, u32 channel_count)
+{
     if (!state_valid) {
         return OPUS_INVALID_STATE;
     }
@@ -63,7 +68,8 @@ s32 OpusDecodeObject::InitializeDecoder(u32 sample_rate, u32 channel_count) {
     return ret;
 }
 
-s32 OpusDecodeObject::Shutdown() {
+s32 OpusDecodeObject::Shutdown()
+{
     if (!state_valid) {
         return OPUS_INVALID_STATE;
     }
@@ -79,12 +85,14 @@ s32 OpusDecodeObject::Shutdown() {
     return OPUS_OK;
 }
 
-s32 OpusDecodeObject::ResetDecoder() {
+s32 OpusDecodeObject::ResetDecoder()
+{
     return opus_decoder_ctl(decoder, OPUS_RESET_STATE);
 }
 
 s32 OpusDecodeObject::Decode(u32& out_sample_count, u64 output_data, u64 output_data_size,
-                             u64 input_data, u64 input_data_size) {
+                             u64 input_data, u64 input_data_size)
+{
     ASSERT(initialized);
     out_sample_count = 0;
 

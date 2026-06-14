@@ -5,10 +5,13 @@
 
 namespace Kernel {
 
-KObjectNameGlobalData::KObjectNameGlobalData(KernelCore& kernel) : m_object_list_lock{kernel} {}
+KObjectNameGlobalData::KObjectNameGlobalData(KernelCore& kernel) : m_object_list_lock{kernel}
+{
+}
 KObjectNameGlobalData::~KObjectNameGlobalData() = default;
 
-void KObjectName::Initialize(KAutoObject* obj, const char* name) {
+void KObjectName::Initialize(KAutoObject* obj, const char* name)
+{
     // Set member variables.
     m_object = obj;
     std::strncpy(m_name.data(), name, sizeof(m_name) - 1);
@@ -18,11 +21,13 @@ void KObjectName::Initialize(KAutoObject* obj, const char* name) {
     m_object->Open();
 }
 
-bool KObjectName::MatchesName(const char* name) const {
+bool KObjectName::MatchesName(const char* name) const
+{
     return std::strncmp(m_name.data(), name, sizeof(m_name)) == 0;
 }
 
-Result KObjectName::NewFromName(KernelCore& kernel, KAutoObject* obj, const char* name) {
+Result KObjectName::NewFromName(KernelCore& kernel, KAutoObject* obj, const char* name)
+{
     // Create a new object name.
     KObjectName* new_name = KObjectName::Allocate(kernel);
     R_UNLESS(new_name != nullptr, ResultOutOfResource);
@@ -52,7 +57,8 @@ Result KObjectName::NewFromName(KernelCore& kernel, KAutoObject* obj, const char
     R_THROW(ResultInvalidState);
 }
 
-Result KObjectName::Delete(KernelCore& kernel, KAutoObject* obj, const char* compare_name) {
+Result KObjectName::Delete(KernelCore& kernel, KAutoObject* obj, const char* compare_name)
+{
     // Get the global data.
     KObjectNameGlobalData& gd{kernel.ObjectNameGlobalData()};
 
@@ -74,7 +80,8 @@ Result KObjectName::Delete(KernelCore& kernel, KAutoObject* obj, const char* com
     R_THROW(ResultNotFound);
 }
 
-KScopedAutoObject<KAutoObject> KObjectName::Find(KernelCore& kernel, const char* name) {
+KScopedAutoObject<KAutoObject> KObjectName::Find(KernelCore& kernel, const char* name)
+{
     // Get the global data.
     KObjectNameGlobalData& gd{kernel.ObjectNameGlobalData()};
 
@@ -84,7 +91,8 @@ KScopedAutoObject<KAutoObject> KObjectName::Find(KernelCore& kernel, const char*
     return FindImpl(kernel, name);
 }
 
-KScopedAutoObject<KAutoObject> KObjectName::FindImpl(KernelCore& kernel, const char* compare_name) {
+KScopedAutoObject<KAutoObject> KObjectName::FindImpl(KernelCore& kernel, const char* compare_name)
+{
     // Get the global data.
     KObjectNameGlobalData& gd{kernel.ObjectNameGlobalData()};
 

@@ -1,13 +1,14 @@
 // SPDX-FileCopyrightText: Copyright 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/glue/time/standard_steady_clock_resource.h"
+
 #include <chrono>
 
 #include "common/settings.h"
 #include "core/core.h"
 #include "core/core_timing.h"
 #include "core/hle/kernel/svc.h"
-#include "core/hle/service/glue/time/standard_steady_clock_resource.h"
 #include "core/hle/service/psc/time/errors.h"
 
 namespace Service::Glue::Time {
@@ -15,7 +16,8 @@ namespace {
 [[maybe_unused]] constexpr u32 Max77620PmicSession = 0x3A000001;
 [[maybe_unused]] constexpr u32 Max77620RtcSession = 0x3B000001;
 
-Result GetTimeInSeconds(Core::System& system, s64& out_time_s) {
+Result GetTimeInSeconds(Core::System& system, s64& out_time_s)
+{
     out_time_s = std::chrono::duration_cast<std::chrono::seconds>(
                      std::chrono::system_clock::now().time_since_epoch())
                      .count();
@@ -27,10 +29,13 @@ Result GetTimeInSeconds(Core::System& system, s64& out_time_s) {
 }
 } // namespace
 
-StandardSteadyClockResource::StandardSteadyClockResource(Core::System& system) : m_system{system} {}
+StandardSteadyClockResource::StandardSteadyClockResource(Core::System& system) : m_system{system}
+{
+}
 
 void StandardSteadyClockResource::Initialize(Common::UUID* out_source_id,
-                                             Common::UUID* external_source_id) {
+                                             Common::UUID* external_source_id)
+{
     constexpr size_t NUM_TRIES{20};
 
     size_t i{0};
@@ -64,7 +69,8 @@ void StandardSteadyClockResource::Initialize(Common::UUID* out_source_id,
     }
 }
 
-bool StandardSteadyClockResource::GetResetDetected() {
+bool StandardSteadyClockResource::GetResetDetected()
+{
     // TODO:
     // call Rtc::GetRtcResetDetected(Max77620RtcSession)
     // if detected:
@@ -76,7 +82,8 @@ bool StandardSteadyClockResource::GetResetDetected() {
     return m_rtc_reset;
 }
 
-Result StandardSteadyClockResource::SetCurrentTime() {
+Result StandardSteadyClockResource::SetCurrentTime()
+{
     auto start_tick{m_system.CoreTiming().GetClockTicks()};
 
     s64 rtc_time_s{};
@@ -98,13 +105,15 @@ Result StandardSteadyClockResource::SetCurrentTime() {
     R_SUCCEED();
 }
 
-Result StandardSteadyClockResource::GetRtcTimeInSeconds(s64& out_time) {
+Result StandardSteadyClockResource::GetRtcTimeInSeconds(s64& out_time)
+{
     // TODO
     // R_TRY(Rtc::GetTimeInSeconds(time_s, Max77620RtcSession)
     R_RETURN(GetTimeInSeconds(m_system, out_time));
 }
 
-void StandardSteadyClockResource::UpdateTime() {
+void StandardSteadyClockResource::UpdateTime()
+{
     constexpr size_t NUM_TRIES{3};
 
     size_t i{0};

@@ -9,11 +9,12 @@
 #include <map>
 #include <memory>
 #include <string>
+
 #include "core/hle/result.h"
 #include "core/hle/service/cmif_types.h"
 #include "core/hle/service/kernel_helpers.h"
-#include "core/hle/service/service.h"
 #include "core/hle/service/psc/ovln/ovln_types.h"
+#include "core/hle/service/service.h"
 
 namespace Kernel {
 class KReadableEvent;
@@ -40,7 +41,8 @@ private:
     KernelHelpers::ServiceContext service_context;
     Kernel::KEvent* receive_event;
 
-    std::map<std::string, std::vector<std::pair<OverlayNotification, MessageFlags>>> message_sources;
+    std::map<std::string, std::vector<std::pair<OverlayNotification, MessageFlags>>>
+        message_sources;
 };
 
 } // namespace Service::PSC

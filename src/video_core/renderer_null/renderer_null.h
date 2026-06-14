@@ -21,13 +21,9 @@ public:
 
     std::vector<u8> GetAppletCaptureBuffer() override;
 
-    VideoCore::RasterizerInterface* ReadRasterizer() override {
-        return &m_rasterizer;
-    }
+    VideoCore::RasterizerInterface* ReadRasterizer() override { return &m_rasterizer; }
 
-    [[nodiscard]] std::string GetDeviceVendor() const override {
-        return "NULL";
-    }
+    [[nodiscard]] std::string GetDeviceVendor() const override { return "NULL"; }
 
 private:
     Tegra::GPU& m_gpu;

@@ -19,7 +19,8 @@ struct PositionInst {
 using PositionInstVector = boost::container::small_vector<PositionInst, 24>;
 } // Anonymous namespace
 
-void PositionPass(Environment& env, IR::Program& program) {
+void PositionPass(Environment& env, IR::Program& program)
+{
     if (env.ShaderStage() != Stage::VertexB || env.ReadViewportTransformState()) {
         return;
     }

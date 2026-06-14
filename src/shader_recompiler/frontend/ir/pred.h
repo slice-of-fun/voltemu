@@ -21,19 +21,18 @@ enum class Pred : u64 {
 constexpr size_t NUM_USER_PREDS = 7;
 constexpr size_t NUM_PREDS = 8;
 
-[[nodiscard]] constexpr size_t PredIndex(Pred pred) noexcept {
+[[nodiscard]] constexpr size_t PredIndex(Pred pred) noexcept
+{
     return static_cast<size_t>(pred);
 }
 
 } // namespace Shader::IR
 
-template <>
-struct fmt::formatter<Shader::IR::Pred> {
-    constexpr auto parse(format_parse_context& ctx) {
-        return ctx.begin();
-    }
-    template <typename FormatContext>
-    auto format(const Shader::IR::Pred& pred, FormatContext& ctx) const {
+template<> struct fmt::formatter<Shader::IR::Pred> {
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(const Shader::IR::Pred& pred, FormatContext& ctx) const
+    {
         if (pred == Shader::IR::Pred::PT) {
             return fmt::format_to(ctx.out(), "PT");
         } else {

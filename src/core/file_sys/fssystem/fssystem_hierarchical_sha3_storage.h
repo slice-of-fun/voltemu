@@ -25,9 +25,7 @@ public:
     Result Initialize(VirtualFile* base_storages, s32 layer_count, size_t htbs, void* hash_buf,
                       size_t hash_buf_size);
 
-    virtual size_t GetSize() const override {
-        return m_base_storage->GetSize();
-    }
+    virtual size_t GetSize() const override { return m_base_storage->GetSize(); }
 
     virtual size_t Read(u8* buffer, size_t length, size_t offset) const override;
 

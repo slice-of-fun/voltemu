@@ -1,13 +1,15 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include "core/hle/service/pctl/parental_control_service_factory.h"
 #include "core/hle/service/pctl/pctl.h"
+
+#include "core/hle/service/pctl/parental_control_service_factory.h"
 #include "core/hle/service/server_manager.h"
 
 namespace Service::PCTL {
 
-void LoopProcess(Core::System& system) {
+void LoopProcess(Core::System& system)
+{
     auto server_manager = std::make_unique<ServerManager>(system);
 
     server_manager->RegisterNamedService("pctl",

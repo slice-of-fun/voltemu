@@ -34,23 +34,18 @@ public:
 
     void Finalize() override;
 
-    bool IsInitialized() const override {
-        return m_is_initialized;
-    }
+    bool IsInitialized() const override { return m_is_initialized; }
 
-    uintptr_t GetPostDestroyArgument() const override {
+    uintptr_t GetPostDestroyArgument() const override
+    {
         return reinterpret_cast<uintptr_t>(m_owner);
     }
 
     static void PostDestroy(uintptr_t arg);
 
-    KProcess* GetOwner() const override {
-        return m_owner;
-    }
+    KProcess* GetOwner() const override { return m_owner; }
 
-    KProcessAddress GetSourceAddress() const {
-        return m_address;
-    }
+    KProcessAddress GetSourceAddress() const { return m_address; }
 
     size_t GetSize() const;
 

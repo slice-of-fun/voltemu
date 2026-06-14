@@ -14,16 +14,16 @@ class UsageTracker {
     static constexpr size_t PAGE_BYTES = 1 << PAGE_SHIFT;
 
 public:
-    explicit UsageTracker(size_t size) {
+    explicit UsageTracker(size_t size)
+    {
         const size_t num_pages = (size >> PAGE_SHIFT) + 1;
         pages.resize(num_pages, 0ULL);
     }
 
-    void Reset() noexcept {
-        std::ranges::fill(pages, 0ULL);
-    }
+    void Reset() noexcept { std::ranges::fill(pages, 0ULL); }
 
-    void Track(u64 offset, u64 size) noexcept {
+    void Track(u64 offset, u64 size) noexcept
+    {
         const size_t page = offset >> PAGE_SHIFT;
         const size_t page_end = (offset + size) >> PAGE_SHIFT;
         if (page_end < page || page_end >= pages.size()) {
@@ -41,7 +41,8 @@ public:
         TrackPage(page_end, offset_end_page_aligned, offset_end - offset_end_page_aligned);
     }
 
-    [[nodiscard]] bool IsUsed(u64 offset, u64 size) const noexcept {
+    [[nodiscard]] bool IsUsed(u64 offset, u64 size) const noexcept
+    {
         const size_t page = offset >> PAGE_SHIFT;
         const size_t page_end = (offset + size) >> PAGE_SHIFT;
         if (page_end < page || page_end >= pages.size()) {
@@ -61,7 +62,8 @@ public:
     }
 
 private:
-    void TrackPage(u64 page, u64 offset, u64 size) noexcept {
+    void TrackPage(u64 page, u64 offset, u64 size) noexcept
+    {
         const size_t offset_in_page = offset % PAGE_BYTES;
         const size_t first_bit = offset_in_page >> BYTES_PER_BIT_SHIFT;
         const size_t num_bits = std::min<size_t>(size, PAGE_BYTES) >> BYTES_PER_BIT_SHIFT;
@@ -69,7 +71,8 @@ private:
         pages[page] |= (~u64{0} & mask) << first_bit;
     }
 
-    bool IsPageUsed(u64 page, u64 offset, u64 size) const noexcept {
+    bool IsPageUsed(u64 page, u64 offset, u64 size) const noexcept
+    {
         const size_t offset_in_page = offset % PAGE_BYTES;
         const size_t first_bit = offset_in_page >> BYTES_PER_BIT_SHIFT;
         const size_t num_bits = std::min<size_t>(size, PAGE_BYTES) >> BYTES_PER_BIT_SHIFT;

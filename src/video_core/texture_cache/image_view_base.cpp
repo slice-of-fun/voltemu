@@ -4,6 +4,8 @@
 // SPDX-FileCopyrightText: Copyright 2020 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "video_core/texture_cache/image_view_base.h"
+
 #include <algorithm>
 
 #include "common/assert.h"
@@ -11,7 +13,6 @@
 #include "video_core/surface.h"
 #include "video_core/texture_cache/formatter.h"
 #include "video_core/texture_cache/image_info.h"
-#include "video_core/texture_cache/image_view_base.h"
 #include "video_core/texture_cache/image_view_info.h"
 #include "video_core/texture_cache/types.h"
 
@@ -24,7 +25,8 @@ ImageViewBase::ImageViewBase(const ImageViewInfo& info, const ImageInfo& image_i
           .width = (std::max)(image_info.size.width >> range.base.level, 1u),
           .height = (std::max)(image_info.size.height >> range.base.level, 1u),
           .depth = (std::max)(image_info.size.depth >> range.base.level, 1u),
-      } {
+      }
+{
     ASSERT_MSG(VideoCore::Surface::IsViewCompatible(image_info.format, info.format, false, true),
                "Image view format {} is incompatible with image format {}", info.format,
                image_info.format);
@@ -42,13 +44,17 @@ ImageViewBase::ImageViewBase(const ImageInfo& info, const ImageViewInfo& view_in
           .width = info.size.width,
           .height = 1,
           .depth = 1,
-      } {
+      }
+{
     ASSERT_MSG(view_info.type == ImageViewType::Buffer, "Expected texture buffer");
 }
 
-ImageViewBase::ImageViewBase(const NullImageViewParams&) : image_id{NULL_IMAGE_ID} {}
+ImageViewBase::ImageViewBase(const NullImageViewParams&) : image_id{NULL_IMAGE_ID}
+{
+}
 
-bool ImageViewBase::SupportsAnisotropy() const noexcept {
+bool ImageViewBase::SupportsAnisotropy() const noexcept
+{
     const bool has_mips = range.extent.levels > 1;
     const bool is_2d = type == ImageViewType::e2D || type == ImageViewType::e2DArray;
     if (!has_mips || !is_2d) {

@@ -11,53 +11,46 @@
 #include <memory>
 #include <string>
 #include <vector>
+
 #include "core/file_sys/vfs/vfs.h"
 
 namespace FileSys {
 
 // An implementation of VfsFile that is backed by a statically-sized array
-template <std::size_t size>
-class ArrayVfsFile : public VfsFile {
+template<std::size_t size> class ArrayVfsFile : public VfsFile {
 public:
     explicit ArrayVfsFile(const std::array<u8, size>& data_, std::string name_ = "",
                           VirtualDir parent_ = nullptr)
-        : data(data_), name(std::move(name_)), parent(std::move(parent_)) {}
-
-    std::string GetName() const override {
-        return name;
+        : data(data_), name(std::move(name_)), parent(std::move(parent_))
+    {
     }
 
-    std::size_t GetSize() const override {
-        return size;
-    }
+    std::string GetName() const override { return name; }
 
-    bool Resize(std::size_t new_size) override {
-        return false;
-    }
+    std::size_t GetSize() const override { return size; }
 
-    VirtualDir GetContainingDirectory() const override {
-        return parent;
-    }
+    bool Resize(std::size_t new_size) override { return false; }
 
-    bool IsWritable() const override {
-        return false;
-    }
+    VirtualDir GetContainingDirectory() const override { return parent; }
 
-    bool IsReadable() const override {
-        return true;
-    }
+    bool IsWritable() const override { return false; }
 
-    std::size_t Read(u8* data_, std::size_t length, std::size_t offset) const override {
+    bool IsReadable() const override { return true; }
+
+    std::size_t Read(u8* data_, std::size_t length, std::size_t offset) const override
+    {
         const auto read = (std::min)(length, size - offset);
         std::memcpy(data_, data.data() + offset, read);
         return read;
     }
 
-    std::size_t Write(const u8* data_, std::size_t length, std::size_t offset) override {
+    std::size_t Write(const u8* data_, std::size_t length, std::size_t offset) override
+    {
         return 0;
     }
 
-    bool Rename(std::string_view new_name) override {
+    bool Rename(std::string_view new_name) override
+    {
         name = new_name;
         return true;
     }
@@ -68,9 +61,9 @@ private:
     VirtualDir parent;
 };
 
-template <std::size_t Size, typename... Args>
-std::shared_ptr<ArrayVfsFile<Size>> MakeArrayFile(const std::array<u8, Size>& data,
-                                                  Args&&... args) {
+template<std::size_t Size, typename... Args>
+std::shared_ptr<ArrayVfsFile<Size>> MakeArrayFile(const std::array<u8, Size>& data, Args&&... args)
+{
     return std::make_shared<ArrayVfsFile<Size>>(data, std::forward<Args>(args)...);
 }
 

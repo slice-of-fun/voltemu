@@ -6,13 +6,13 @@
 
 #pragma once
 
+#include <memory>
+
 #include "common/uuid.h"
 #include "core/hle/service/am/am_types.h"
 #include "core/hle/service/cmif_types.h"
 #include "core/hle/service/ns/ns_types.h"
 #include "core/hle/service/service.h"
-
-#include <memory>
 
 namespace PlayTime {
 class PlayTimeManager;
@@ -40,7 +40,8 @@ struct ApplicationPlayStatistics {
     u64 play_time_ns{};
     u64 launch_count{};
 };
-static_assert(sizeof(ApplicationPlayStatistics) == 0x18, "ApplicationPlayStatistics is an invalid size");
+static_assert(sizeof(ApplicationPlayStatistics) == 0x18,
+              "ApplicationPlayStatistics is an invalid size");
 
 class IQueryService final : public ServiceFramework<IQueryService> {
 public:

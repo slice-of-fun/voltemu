@@ -11,6 +11,12 @@
 #include <stack>
 
 #include "common/math_util.h"
+#include "core/hle/service/am/am_types.h"
+#include "core/hle/service/am/display_layer_manager.h"
+#include "core/hle/service/am/hid_registration.h"
+#include "core/hle/service/am/lifecycle_manager.h"
+#include "core/hle/service/am/process_holder.h"
+#include "core/hle/service/am/service/storage.h"
 #include "core/hle/service/apm/apm_controller.h"
 #include "core/hle/service/caps/caps_types.h"
 #include "core/hle/service/cmif_types.h"
@@ -18,13 +24,6 @@
 #include "core/hle/service/os/event.h"
 #include "core/hle/service/os/process.h"
 #include "core/hle/service/service.h"
-
-#include "core/hle/service/am/am_types.h"
-#include "core/hle/service/am/display_layer_manager.h"
-#include "core/hle/service/am/hid_registration.h"
-#include "core/hle/service/am/lifecycle_manager.h"
-#include "core/hle/service/am/process_holder.h"
-#include "core/hle/service/am/service/storage.h"
 
 namespace Service::AM {
 

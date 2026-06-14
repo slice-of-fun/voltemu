@@ -18,7 +18,8 @@ constexpr u32 PROGRAM_LOCAL_PARAMETER_STORAGE_BUFFER_BASE = 1;
                                     IR::Program& program, Bindings& bindings);
 
 [[nodiscard]] inline std::string EmitGLASM(const Profile& profile, const RuntimeInfo& runtime_info,
-                                           IR::Program& program) {
+                                           IR::Program& program)
+{
     Bindings binding;
     return EmitGLASM(profile, runtime_info, program, binding);
 }

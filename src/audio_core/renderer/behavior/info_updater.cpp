@@ -4,9 +4,10 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "audio_core/renderer/behavior/info_updater.h"
+
 #include "audio_core/common/feature_support.h"
 #include "audio_core/renderer/behavior/behavior_info.h"
-#include "audio_core/renderer/behavior/info_updater.h"
 #include "audio_core/renderer/effect/effect_context.h"
 #include "audio_core/renderer/effect/effect_reset.h"
 #include "audio_core/renderer/memory/memory_pool_info.h"
@@ -28,11 +29,13 @@ InfoUpdater::InfoUpdater(std::span<const u8> input_, std::span<u8> output_,
                                   input_origin.data())},
       out_header{reinterpret_cast<UpdateDataHeader*>(output_origin.data())},
       expected_input_size{input_.size()}, expected_output_size{output_.size()},
-      process_handle{process_handle_}, behaviour{behaviour_} {
+      process_handle{process_handle_}, behaviour{behaviour_}
+{
     std::construct_at<UpdateDataHeader>(out_header, behaviour.GetProcessRevision());
 }
 
-Result InfoUpdater::UpdateVoiceChannelResources(VoiceContext& voice_context) {
+Result InfoUpdater::UpdateVoiceChannelResources(VoiceContext& voice_context)
+{
     const auto voice_count{voice_context.GetCount()};
     std::span<const VoiceChannelResource::InParameter> in_params{
         reinterpret_cast<const VoiceChannelResource::InParameter*>(input), voice_count};
@@ -60,7 +63,8 @@ Result InfoUpdater::UpdateVoiceChannelResources(VoiceContext& voice_context) {
 
 Result InfoUpdater::UpdateVoices(VoiceContext& voice_context,
                                  std::span<MemoryPoolInfo> memory_pools,
-                                 const u32 memory_pool_count) {
+                                 const u32 memory_pool_count)
+{
     const PoolMapper pool_mapper(process_handle, memory_pools, memory_pool_count,
                                  behaviour.IsMemoryForceMappingEnabled());
     const auto voice_count{voice_context.GetCount()};
@@ -243,7 +247,8 @@ Result InfoUpdater::UpdateVoices(VoiceContext& voice_context,
 
 Result InfoUpdater::UpdateEffects(EffectContext& effect_context, const bool renderer_active,
                                   std::span<MemoryPoolInfo> memory_pools,
-                                  const u32 memory_pool_count) {
+                                  const u32 memory_pool_count)
+{
     if (behaviour.IsEffectInfoVersion2Supported()) {
         return UpdateEffectsVersion2(effect_context, renderer_active, memory_pools,
                                      memory_pool_count);
@@ -255,7 +260,8 @@ Result InfoUpdater::UpdateEffects(EffectContext& effect_context, const bool rend
 
 Result InfoUpdater::UpdateEffectsVersion1(EffectContext& effect_context, const bool renderer_active,
                                           std::span<MemoryPoolInfo> memory_pools,
-                                          const u32 memory_pool_count) {
+                                          const u32 memory_pool_count)
+{
     PoolMapper pool_mapper(process_handle, memory_pools, memory_pool_count,
                            behaviour.IsMemoryForceMappingEnabled());
 
@@ -302,7 +308,8 @@ Result InfoUpdater::UpdateEffectsVersion1(EffectContext& effect_context, const b
 
 Result InfoUpdater::UpdateEffectsVersion2(EffectContext& effect_context, const bool renderer_active,
                                           std::span<MemoryPoolInfo> memory_pools,
-                                          const u32 memory_pool_count) {
+                                          const u32 memory_pool_count)
+{
     PoolMapper pool_mapper(process_handle, memory_pools, memory_pool_count,
                            behaviour.IsMemoryForceMappingEnabled());
 
@@ -356,7 +363,8 @@ Result InfoUpdater::UpdateEffectsVersion2(EffectContext& effect_context, const b
 }
 
 Result InfoUpdater::UpdateMixes(MixContext& mix_context, const u32 mix_buffer_count,
-                                EffectContext& effect_context, SplitterContext& splitter_context) {
+                                EffectContext& effect_context, SplitterContext& splitter_context)
+{
     s32 mix_count{0};
     u32 consumed_input_size{0};
     u32 input_mix_size{0};
@@ -382,7 +390,6 @@ Result InfoUpdater::UpdateMixes(MixContext& mix_context, const u32 mix_buffer_co
 
     input_mix_size = static_cast<u32>(mix_count * sizeof(MixInfo::InParameter));
     consumed_input_size += input_mix_size;
-
 
     if (mix_buffer_count == 0) {
         return Service::Audio::ResultInvalidUpdateInfo;
@@ -454,7 +461,8 @@ Result InfoUpdater::UpdateMixes(MixContext& mix_context, const u32 mix_buffer_co
 }
 
 Result InfoUpdater::UpdateSinks(SinkContext& sink_context, std::span<MemoryPoolInfo> memory_pools,
-                                const u32 memory_pool_count) {
+                                const u32 memory_pool_count)
+{
     PoolMapper pool_mapper(process_handle, memory_pools, memory_pool_count,
                            behaviour.IsMemoryForceMappingEnabled());
 
@@ -514,7 +522,8 @@ Result InfoUpdater::UpdateSinks(SinkContext& sink_context, std::span<MemoryPoolI
 }
 
 Result InfoUpdater::UpdateMemoryPools(std::span<MemoryPoolInfo> memory_pools,
-                                      const u32 memory_pool_count) {
+                                      const u32 memory_pool_count)
+{
     PoolMapper pool_mapper(process_handle, memory_pools, memory_pool_count,
                            behaviour.IsMemoryForceMappingEnabled());
     std::span<const MemoryPoolInfo::InParameter> in_params{
@@ -553,7 +562,8 @@ Result InfoUpdater::UpdateMemoryPools(std::span<MemoryPoolInfo> memory_pools,
 
 Result InfoUpdater::UpdatePerformanceBuffer(std::span<u8> performance_output,
                                             const u64 performance_output_size,
-                                            PerformanceManager* performance_manager) {
+                                            PerformanceManager* performance_manager)
+{
     auto in_params{reinterpret_cast<const PerformanceManager::InParameter*>(input)};
     auto out_params{reinterpret_cast<PerformanceManager::OutStatus*>(output)};
 
@@ -581,7 +591,8 @@ Result InfoUpdater::UpdatePerformanceBuffer(std::span<u8> performance_output,
     return ResultSuccess;
 }
 
-Result InfoUpdater::UpdateBehaviorInfo(BehaviorInfo& behaviour_) {
+Result InfoUpdater::UpdateBehaviorInfo(BehaviorInfo& behaviour_)
+{
     const auto in_params{reinterpret_cast<const BehaviorInfo::InParameter*>(input)};
 
     if (!CheckValidRevision(in_params->revision)) {
@@ -603,7 +614,8 @@ Result InfoUpdater::UpdateBehaviorInfo(BehaviorInfo& behaviour_) {
     return ResultSuccess;
 }
 
-Result InfoUpdater::UpdateErrorInfo(const BehaviorInfo& behaviour_) {
+Result InfoUpdater::UpdateErrorInfo(const BehaviorInfo& behaviour_)
+{
     auto out_params{reinterpret_cast<BehaviorInfo::OutStatus*>(output)};
     behaviour_.CopyErrorInfo(out_params->errors, out_params->error_count);
 
@@ -615,7 +627,8 @@ Result InfoUpdater::UpdateErrorInfo(const BehaviorInfo& behaviour_) {
     return ResultSuccess;
 }
 
-Result InfoUpdater::UpdateSplitterInfo(SplitterContext& splitter_context) {
+Result InfoUpdater::UpdateSplitterInfo(SplitterContext& splitter_context)
+{
     if (!splitter_context.Update(input)) {
         return Service::Audio::ResultInvalidUpdateInfo;
     }
@@ -625,7 +638,8 @@ Result InfoUpdater::UpdateSplitterInfo(SplitterContext& splitter_context) {
     return ResultSuccess;
 }
 
-Result InfoUpdater::UpdateRendererInfo(const u64 elapsed_frames) {
+Result InfoUpdater::UpdateRendererInfo(const u64 elapsed_frames)
+{
     struct RenderInfo {
         /* 0x00 */ u64 frames_elapsed;
         /* 0x08 */ char unk08[0x8];
@@ -644,7 +658,8 @@ Result InfoUpdater::UpdateRendererInfo(const u64 elapsed_frames) {
     return ResultSuccess;
 }
 
-Result InfoUpdater::CheckConsumedSize() {
+Result InfoUpdater::CheckConsumedSize()
+{
     if (CpuAddr(input) - CpuAddr(input_origin.data()) != expected_input_size) {
         return Service::Audio::ResultInvalidUpdateInfo;
     } else if (CpuAddr(output) - CpuAddr(output_origin.data()) != expected_output_size) {

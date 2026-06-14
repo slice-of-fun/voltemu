@@ -163,13 +163,16 @@ struct Elf64_Sym {
 
 /* How to extract and insert information held in the st_info field.  */
 
-static inline u8 ElfStBind(u8 st_info) {
+static inline u8 ElfStBind(u8 st_info)
+{
     return st_info >> 4;
 }
-static inline u8 ElfStType(u8 st_info) {
+static inline u8 ElfStType(u8 st_info)
+{
     return st_info & 0xf;
 }
-static inline u8 ElfStInfo(u8 st_bind, u8 st_type) {
+static inline u8 ElfStInfo(u8 st_bind, u8 st_type)
+{
     return static_cast<u8>((st_bind << 4) + (st_type & 0xf));
 }
 
@@ -181,7 +184,8 @@ constexpr u8 ElfTypeUnspec = 0; /* Symbol type is unspecified */
 constexpr u8 ElfTypeObject = 1; /* Symbol is a data object */
 constexpr u8 ElfTypeFunc = 2;   /* Symbol is a code object */
 
-static inline u8 ElfStVisibility(u8 st_other) {
+static inline u8 ElfStVisibility(u8 st_other)
+{
     return static_cast<u8>(st_other & 0x3);
 }
 
@@ -218,22 +222,28 @@ using Elf64_Relr = Elf64_Xword;
 
 /* How to extract and insert information held in the r_info field.  */
 
-static inline u32 Elf32RelSymIndex(Elf32_Word r_info) {
+static inline u32 Elf32RelSymIndex(Elf32_Word r_info)
+{
     return r_info >> 8;
 }
-static inline u8 Elf32RelType(Elf32_Word r_info) {
+static inline u8 Elf32RelType(Elf32_Word r_info)
+{
     return static_cast<u8>(r_info & 0xff);
 }
-static inline Elf32_Word Elf32RelInfo(u32 sym_index, u8 type) {
+static inline Elf32_Word Elf32RelInfo(u32 sym_index, u8 type)
+{
     return (sym_index << 8) + type;
 }
-static inline u32 Elf64RelSymIndex(Elf64_Xword r_info) {
+static inline u32 Elf64RelSymIndex(Elf64_Xword r_info)
+{
     return static_cast<u32>(r_info >> 32);
 }
-static inline u32 Elf64RelType(Elf64_Xword r_info) {
+static inline u32 Elf64RelType(Elf64_Xword r_info)
+{
     return r_info & 0xffffffff;
 }
-static inline Elf64_Xword Elf64RelInfo(u32 sym_index, u32 type) {
+static inline Elf64_Xword Elf64RelInfo(u32 sym_index, u32 type)
+{
     return (static_cast<Elf64_Xword>(sym_index) << 32) + type;
 }
 

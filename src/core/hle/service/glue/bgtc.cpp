@@ -4,14 +4,16 @@
 // SPDX-FileCopyrightText: Copyright 2019 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/glue/bgtc.h"
+
 #include "common/logging.h"
 #include "core/core.h"
-#include "core/hle/service/glue/bgtc.h"
 #include "core/hle/service/ipc_helpers.h"
 
 namespace Service::Glue {
 
-BGTC_T::BGTC_T(Core::System& system_) : ServiceFramework{system_, "bgtc:t"} {
+BGTC_T::BGTC_T(Core::System& system_) : ServiceFramework{system_, "bgtc:t"}
+{
     // clang-format off
     static const FunctionInfo functions[] = {
         {100, &BGTC_T::OpenTaskService, "OpenTaskService"},
@@ -23,7 +25,8 @@ BGTC_T::BGTC_T(Core::System& system_) : ServiceFramework{system_, "bgtc:t"} {
 
 BGTC_T::~BGTC_T() = default;
 
-void BGTC_T::OpenTaskService(HLERequestContext& ctx) {
+void BGTC_T::OpenTaskService(HLERequestContext& ctx)
+{
     LOG_DEBUG(Service_BGTC, "called");
 
     IPC::ResponseBuilder rb{ctx, 2, 0, 1};
@@ -31,7 +34,8 @@ void BGTC_T::OpenTaskService(HLERequestContext& ctx) {
     rb.PushIpcInterface<ITaskService>(system);
 }
 
-ITaskService::ITaskService(Core::System& system_) : ServiceFramework{system_, "ITaskService"} {
+ITaskService::ITaskService(Core::System& system_) : ServiceFramework{system_, "ITaskService"}
+{
     // clang-format off
     static const FunctionInfo functions[] = {
         {1, nullptr, "NotifyTaskStarting"},
@@ -58,7 +62,8 @@ ITaskService::ITaskService(Core::System& system_) : ServiceFramework{system_, "I
 
 ITaskService::~ITaskService() = default;
 
-BGTC_SC::BGTC_SC(Core::System& system_) : ServiceFramework{system_, "bgtc:sc"} {
+BGTC_SC::BGTC_SC(Core::System& system_) : ServiceFramework{system_, "bgtc:sc"}
+{
     // clang-format off
     static const FunctionInfo functions[] = {
         {1, nullptr, "GetState"},

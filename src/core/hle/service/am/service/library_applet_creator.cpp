@@ -4,6 +4,8 @@
 // SPDX-FileCopyrightText: Copyright 2024 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/am/service/library_applet_creator.h"
+
 #include "common/settings.h"
 #include "core/hle/kernel/k_transfer_memory.h"
 #include "core/hle/service/am/applet_data_broker.h"
@@ -12,7 +14,6 @@
 #include "core/hle/service/am/library_applet_storage.h"
 #include "core/hle/service/am/process_creation.h"
 #include "core/hle/service/am/service/library_applet_accessor.h"
-#include "core/hle/service/am/service/library_applet_creator.h"
 #include "core/hle/service/am/service/storage.h"
 #include "core/hle/service/am/window_system.h"
 #include "core/hle/service/cmif_serialization.h"
@@ -22,7 +23,8 @@ namespace Service::AM {
 
 namespace {
 
-bool ShouldCreateGuestApplet(AppletId applet_id) {
+bool ShouldCreateGuestApplet(AppletId applet_id)
+{
 #define X(Name, name)                                                                              \
     if (applet_id == AppletId::Name &&                                                             \
         Settings::values.name##_applet_mode.GetValue() != Settings::AppletMode::LLE) {             \
@@ -50,7 +52,8 @@ bool ShouldCreateGuestApplet(AppletId applet_id) {
     return true;
 }
 
-AppletProgramId AppletIdToProgramId(AppletId applet_id) {
+AppletProgramId AppletIdToProgramId(AppletId applet_id)
+{
     switch (applet_id) {
     case AppletId::OverlayDisplay:
         return AppletProgramId::OverlayDisplay;
@@ -97,11 +100,10 @@ AppletProgramId AppletIdToProgramId(AppletId applet_id) {
     }
 }
 
-std::shared_ptr<ILibraryAppletAccessor> CreateGuestApplet(Core::System& system,
-                                                          WindowSystem& window_system,
-                                                          std::shared_ptr<Applet> caller_applet,
-                                                          AppletId applet_id,
-                                                          LibraryAppletMode mode) {
+std::shared_ptr<ILibraryAppletAccessor>
+CreateGuestApplet(Core::System& system, WindowSystem& window_system,
+                  std::shared_ptr<Applet> caller_applet, AppletId applet_id, LibraryAppletMode mode)
+{
     const auto program_id = static_cast<u64>(AppletIdToProgramId(applet_id));
     if (program_id == 0) {
         // Unknown applet
@@ -148,7 +150,8 @@ std::shared_ptr<ILibraryAppletAccessor> CreateFrontendApplet(Core::System& syste
                                                              WindowSystem& window_system,
                                                              std::shared_ptr<Applet> caller_applet,
                                                              AppletId applet_id,
-                                                             LibraryAppletMode mode) {
+                                                             LibraryAppletMode mode)
+{
     const auto program_id = static_cast<u64>(AppletIdToProgramId(applet_id));
 
     auto process = std::make_unique<Process>(system);
@@ -174,7 +177,8 @@ std::shared_ptr<ILibraryAppletAccessor> CreateFrontendApplet(Core::System& syste
 ILibraryAppletCreator::ILibraryAppletCreator(Core::System& system_, std::shared_ptr<Applet> applet,
                                              WindowSystem& window_system)
     : ServiceFramework{system_, "ILibraryAppletCreator"},
-      m_window_system{window_system}, m_applet{std::move(applet)} {
+      m_window_system{window_system}, m_applet{std::move(applet)}
+{
     static const FunctionInfo functions[] = {
         {0, D<&ILibraryAppletCreator::CreateLibraryApplet>, "CreateLibraryApplet"},
         {1, nullptr, "TerminateAllLibraryApplets"},
@@ -191,7 +195,8 @@ ILibraryAppletCreator::~ILibraryAppletCreator() = default;
 
 Result ILibraryAppletCreator::CreateLibraryApplet(
     Out<SharedPointer<ILibraryAppletAccessor>> out_library_applet_accessor, AppletId applet_id,
-    LibraryAppletMode library_applet_mode) {
+    LibraryAppletMode library_applet_mode)
+{
     LOG_DEBUG(Service_AM, "called with applet_id={} applet_mode={}", applet_id,
               library_applet_mode);
 
@@ -217,7 +222,8 @@ Result ILibraryAppletCreator::CreateLibraryApplet(
 
 Result ILibraryAppletCreator::CreateLibraryAppletEx(
     Out<SharedPointer<ILibraryAppletAccessor>> out_library_applet_accessor, AppletId applet_id,
-    LibraryAppletMode library_applet_mode, u64 thread_id) {
+    LibraryAppletMode library_applet_mode, u64 thread_id)
+{
     LOG_DEBUG(Service_AM, "called with applet_id={} applet_mode={} thread_id={}", applet_id,
               library_applet_mode, thread_id);
 
@@ -241,7 +247,8 @@ Result ILibraryAppletCreator::CreateLibraryAppletEx(
     R_SUCCEED();
 }
 
-Result ILibraryAppletCreator::CreateStorage(Out<SharedPointer<IStorage>> out_storage, s64 size) {
+Result ILibraryAppletCreator::CreateStorage(Out<SharedPointer<IStorage>> out_storage, s64 size)
+{
     LOG_DEBUG(Service_AM, "called, size={}", size);
 
     if (size <= 0) {
@@ -255,7 +262,8 @@ Result ILibraryAppletCreator::CreateStorage(Out<SharedPointer<IStorage>> out_sto
 
 Result ILibraryAppletCreator::CreateTransferMemoryStorage(
     Out<SharedPointer<IStorage>> out_storage, bool is_writable, s64 size,
-    InCopyHandle<Kernel::KTransferMemory> transfer_memory_handle) {
+    InCopyHandle<Kernel::KTransferMemory> transfer_memory_handle)
+{
     LOG_DEBUG(Service_AM, "called, is_writable={} size={}", is_writable, size);
 
     if (size <= 0) {
@@ -276,7 +284,8 @@ Result ILibraryAppletCreator::CreateTransferMemoryStorage(
 
 Result ILibraryAppletCreator::CreateHandleStorage(
     Out<SharedPointer<IStorage>> out_storage, s64 size,
-    InCopyHandle<Kernel::KTransferMemory> transfer_memory_handle) {
+    InCopyHandle<Kernel::KTransferMemory> transfer_memory_handle)
+{
     LOG_DEBUG(Service_AM, "called, size={}", size);
 
     if (size <= 0) {

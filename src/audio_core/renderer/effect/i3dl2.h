@@ -69,7 +69,8 @@ public:
     static constexpr u32 MaxDelayTaps = 20;
 
     struct I3dl2DelayLine {
-        void Initialize(const s32 delay_time) {
+        void Initialize(const s32 delay_time)
+        {
             max_delay = delay_time;
             buffer.resize(delay_time + 1, 0);
             buffer_end = &buffer[delay_time];
@@ -78,7 +79,8 @@ public:
             wet_gain = 0.0f;
         }
 
-        void SetDelay(const s32 delay_time) {
+        void SetDelay(const s32 delay_time)
+        {
             if (max_delay < delay_time) {
                 return;
             }
@@ -86,7 +88,8 @@ public:
             input = &buffer[(output - buffer.data() + delay) % (max_delay + 1)];
         }
 
-        Common::FixedPoint<50, 14> Tick(const Common::FixedPoint<50, 14> sample) {
+        Common::FixedPoint<50, 14> Tick(const Common::FixedPoint<50, 14> sample)
+        {
             Write(sample);
 
             auto out_sample{Read()};
@@ -99,11 +102,10 @@ public:
             return out_sample;
         }
 
-        Common::FixedPoint<50, 14> Read() const {
-            return *output;
-        }
+        Common::FixedPoint<50, 14> Read() const { return *output; }
 
-        void Write(const Common::FixedPoint<50, 14> sample) {
+        void Write(const Common::FixedPoint<50, 14> sample)
+        {
             *input = sample;
             input++;
             if (input >= buffer_end) {
@@ -111,7 +113,8 @@ public:
             }
         }
 
-        Common::FixedPoint<50, 14> TapOut(const s32 index) const {
+        Common::FixedPoint<50, 14> TapOut(const s32 index) const
+        {
             auto out{input - (index + 1)};
             if (out < buffer.data()) {
                 out += max_delay + 1;

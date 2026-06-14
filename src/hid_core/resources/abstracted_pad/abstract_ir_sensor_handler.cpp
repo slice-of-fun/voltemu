@@ -4,29 +4,35 @@
 // SPDX-FileCopyrightText: Copyright 2024 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+#include "hid_core/resources/abstracted_pad/abstract_ir_sensor_handler.h"
+
 #include "core/hle/kernel/k_event.h"
 #include "core/hle/kernel/k_readable_event.h"
 #include "hid_core/hid_result.h"
-#include "hid_core/resources/abstracted_pad/abstract_ir_sensor_handler.h"
 #include "hid_core/resources/abstracted_pad/abstract_pad_holder.h"
 #include "hid_core/resources/abstracted_pad/abstract_properties_handler.h"
 #include "hid_core/resources/npad/npad_types.h"
 
 namespace Service::HID {
 
-NpadAbstractIrSensorHandler::NpadAbstractIrSensorHandler() {}
+NpadAbstractIrSensorHandler::NpadAbstractIrSensorHandler()
+{
+}
 
 NpadAbstractIrSensorHandler::~NpadAbstractIrSensorHandler() = default;
 
-void NpadAbstractIrSensorHandler::SetAbstractPadHolder(NpadAbstractedPadHolder* holder) {
+void NpadAbstractIrSensorHandler::SetAbstractPadHolder(NpadAbstractedPadHolder* holder)
+{
     abstract_pad_holder = holder;
 }
 
-void NpadAbstractIrSensorHandler::SetPropertiesHandler(NpadAbstractPropertiesHandler* handler) {
+void NpadAbstractIrSensorHandler::SetPropertiesHandler(NpadAbstractPropertiesHandler* handler)
+{
     properties_handler = handler;
 }
 
-Result NpadAbstractIrSensorHandler::IncrementRefCounter() {
+Result NpadAbstractIrSensorHandler::IncrementRefCounter()
+{
     if (ref_counter == (std::numeric_limits<s32>::max)() - 1) {
         return ResultNpadHandlerOverflow;
     }
@@ -34,7 +40,8 @@ Result NpadAbstractIrSensorHandler::IncrementRefCounter() {
     return ResultSuccess;
 }
 
-Result NpadAbstractIrSensorHandler::DecrementRefCounter() {
+Result NpadAbstractIrSensorHandler::DecrementRefCounter()
+{
     if (ref_counter == 0) {
         return ResultNpadHandlerNotInitialized;
     }
@@ -42,7 +49,8 @@ Result NpadAbstractIrSensorHandler::DecrementRefCounter() {
     return ResultSuccess;
 }
 
-void NpadAbstractIrSensorHandler::UpdateIrSensorState() {
+void NpadAbstractIrSensorHandler::UpdateIrSensorState()
+{
     const auto previous_state = sensor_state;
     std::array<IAbstractedPad*, 5> abstract_pads{};
     const std::size_t count = abstract_pad_holder->GetAbstractedPads(abstract_pads);
@@ -90,7 +98,8 @@ void NpadAbstractIrSensorHandler::UpdateIrSensorState() {
     return;
 }
 
-Result NpadAbstractIrSensorHandler::ActivateIrSensor(bool is_enabled) {
+Result NpadAbstractIrSensorHandler::ActivateIrSensor(bool is_enabled)
+{
     if (sensor_state == NpadIrSensorState::Unavailable) {
         return ResultIrSensorIsNotReady;
     }
@@ -109,12 +118,14 @@ Result NpadAbstractIrSensorHandler::ActivateIrSensor(bool is_enabled) {
     return ResultSuccess;
 }
 
-Result NpadAbstractIrSensorHandler::GetIrSensorEventHandle(Kernel::KReadableEvent** out_event) {
+Result NpadAbstractIrSensorHandler::GetIrSensorEventHandle(Kernel::KReadableEvent** out_event)
+{
     *out_event = &ir_sensor_event->GetReadableEvent();
     return ResultSuccess;
 }
 
-Result NpadAbstractIrSensorHandler::GetXcdHandleForNpadWithIrSensor(u64& handle) const {
+Result NpadAbstractIrSensorHandler::GetXcdHandleForNpadWithIrSensor(u64& handle) const
+{
     if (sensor_state < NpadIrSensorState::Available) {
         return ResultIrSensorIsNotReady;
     }
@@ -122,7 +133,8 @@ Result NpadAbstractIrSensorHandler::GetXcdHandleForNpadWithIrSensor(u64& handle)
     return ResultSuccess;
 }
 
-NpadIrSensorState NpadAbstractIrSensorHandler::GetSensorState() const {
+NpadIrSensorState NpadAbstractIrSensorHandler::GetSensorState() const
+{
     return sensor_state;
 }
 

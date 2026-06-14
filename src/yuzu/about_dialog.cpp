@@ -4,14 +4,17 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include <QIcon>
-#include <fmt/ranges.h>
-#include "common/scm_rev.h"
-#include "ui_aboutdialog.h"
 #include "yuzu/about_dialog.h"
 
-AboutDialog::AboutDialog(QWidget* parent)
-    : QDialog(parent), ui{std::make_unique<Ui::AboutDialog>()} {
+#include <fmt/ranges.h>
+
+#include <QIcon>
+
+#include "common/scm_rev.h"
+#include "ui_aboutdialog.h"
+
+AboutDialog::AboutDialog(QWidget* parent) : QDialog(parent), ui{std::make_unique<Ui::AboutDialog>()}
+{
     static const std::string build_id = std::string{Common::g_build_id};
     static const std::string yuzu_build =
         fmt::format("{} | {} | {}", std::string{Common::g_build_name},

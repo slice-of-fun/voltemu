@@ -9,7 +9,8 @@
 namespace Shader::Maxwell {
 namespace {
 void FFMA(TranslatorVisitor& v, u64 insn, const IR::F32& src_b, const IR::F32& src_c, bool neg_a,
-          bool neg_b, bool neg_c, bool sat, bool cc, FmzMode fmz_mode, FpRounding fp_rounding) {
+          bool neg_b, bool neg_c, bool sat, bool cc, FmzMode fmz_mode, FpRounding fp_rounding)
+{
     union {
         u64 raw;
         BitField<0, 8, IR::Reg> dest_reg;
@@ -43,7 +44,8 @@ void FFMA(TranslatorVisitor& v, u64 insn, const IR::F32& src_b, const IR::F32& s
     v.F(ffma.dest_reg, value);
 }
 
-void FFMA(TranslatorVisitor& v, u64 insn, const IR::F32& src_b, const IR::F32& src_c) {
+void FFMA(TranslatorVisitor& v, u64 insn, const IR::F32& src_b, const IR::F32& src_c)
+{
     union {
         u64 raw;
         BitField<47, 1, u64> cc;
@@ -59,23 +61,28 @@ void FFMA(TranslatorVisitor& v, u64 insn, const IR::F32& src_b, const IR::F32& s
 }
 } // Anonymous namespace
 
-void TranslatorVisitor::FFMA_reg(u64 insn) {
+void TranslatorVisitor::FFMA_reg(u64 insn)
+{
     FFMA(*this, insn, GetFloatReg20(insn), GetFloatReg39(insn));
 }
 
-void TranslatorVisitor::FFMA_rc(u64 insn) {
+void TranslatorVisitor::FFMA_rc(u64 insn)
+{
     FFMA(*this, insn, GetFloatReg39(insn), GetFloatCbuf(insn));
 }
 
-void TranslatorVisitor::FFMA_cr(u64 insn) {
+void TranslatorVisitor::FFMA_cr(u64 insn)
+{
     FFMA(*this, insn, GetFloatCbuf(insn), GetFloatReg39(insn));
 }
 
-void TranslatorVisitor::FFMA_imm(u64 insn) {
+void TranslatorVisitor::FFMA_imm(u64 insn)
+{
     FFMA(*this, insn, GetFloatImm20(insn), GetFloatReg39(insn));
 }
 
-void TranslatorVisitor::FFMA32I(u64 insn) {
+void TranslatorVisitor::FFMA32I(u64 insn)
+{
     union {
         u64 raw;
         BitField<0, 8, IR::Reg> src_c; // FFMA32I mirrors the destination and addition register

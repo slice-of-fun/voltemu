@@ -4,13 +4,14 @@
 // SPDX-FileCopyrightText: Copyright 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include <map>
-#include <thread>
+#include "common/android/applets/software_keyboard.h"
 
 #include <jni.h>
 
+#include <map>
+#include <thread>
+
 #include "common/android/android_common.h"
-#include "common/android/applets/software_keyboard.h"
 #include "common/android/id_cache.h"
 #include "common/logging.h"
 #include "common/string_util.h"
@@ -24,7 +25,8 @@ static jmethodID s_swkbd_execute_inline;
 
 namespace Common::Android::SoftwareKeyboard {
 
-static jobject ToJKeyboardParams(const Core::Frontend::KeyboardInitializeParameters& config) {
+static jobject ToJKeyboardParams(const Core::Frontend::KeyboardInitializeParameters& config)
+{
     JNIEnv* env = GetEnvForThread();
     jobject object = env->AllocObject(s_keyboard_config_class);
 
@@ -80,7 +82,8 @@ static jobject ToJKeyboardParams(const Core::Frontend::KeyboardInitializeParamet
     return object;
 }
 
-AndroidKeyboard::ResultData AndroidKeyboard::ResultData::CreateFromFrontend(jobject object) {
+AndroidKeyboard::ResultData AndroidKeyboard::ResultData::CreateFromFrontend(jobject object)
+{
     JNIEnv* env = GetEnvForThread();
     const jstring string = reinterpret_cast<jstring>(env->GetObjectField(
         object, env->GetFieldID(s_keyboard_data_class, "text", "Ljava/lang/String;")));
@@ -93,7 +96,8 @@ AndroidKeyboard::~AndroidKeyboard() = default;
 
 void AndroidKeyboard::InitializeKeyboard(
     bool is_inline, Core::Frontend::KeyboardInitializeParameters initialize_parameters,
-    SubmitNormalCallback submit_normal_callback_, SubmitInlineCallback submit_inline_callback_) {
+    SubmitNormalCallback submit_normal_callback_, SubmitInlineCallback submit_inline_callback_)
+{
     if (is_inline) {
         LOG_WARNING(
             Frontend,
@@ -137,7 +141,8 @@ void AndroidKeyboard::InitializeKeyboard(
              parameters.enable_return_button, parameters.disable_cancel_button);
 }
 
-void AndroidKeyboard::ShowNormalKeyboard() const {
+void AndroidKeyboard::ShowNormalKeyboard() const
+{
     LOG_DEBUG(Frontend, "called, backend requested to show the normal software keyboard.");
 
     ResultData data{};
@@ -153,12 +158,14 @@ void AndroidKeyboard::ShowNormalKeyboard() const {
 
 void AndroidKeyboard::ShowTextCheckDialog(
     Service::AM::Frontend::SwkbdTextCheckResult text_check_result,
-    std::u16string text_check_message) const {
+    std::u16string text_check_message) const
+{
     LOG_WARNING(Frontend, "(STUBBED) called, backend requested to show the text check dialog.");
 }
 
 void AndroidKeyboard::ShowInlineKeyboard(
-    Core::Frontend::InlineAppearParameters appear_parameters) const {
+    Core::Frontend::InlineAppearParameters appear_parameters) const
+{
     LOG_WARNING(Frontend,
                 "(STUBBED) called, backend requested to show the inline software keyboard.");
 
@@ -191,13 +198,14 @@ void AndroidKeyboard::ShowInlineKeyboard(
     }).join();
 }
 
-void AndroidKeyboard::HideInlineKeyboard() const {
+void AndroidKeyboard::HideInlineKeyboard() const
+{
     LOG_WARNING(Frontend,
                 "(STUBBED) called, backend requested to hide the inline software keyboard.");
 }
 
-void AndroidKeyboard::InlineTextChanged(
-    Core::Frontend::InlineTextParameters text_parameters) const {
+void AndroidKeyboard::InlineTextChanged(Core::Frontend::InlineTextParameters text_parameters) const
+{
     LOG_WARNING(Frontend,
                 "(STUBBED) called, backend requested to change the inline keyboard text.");
 
@@ -211,11 +219,13 @@ void AndroidKeyboard::InlineTextChanged(
                            text_parameters.input_text, text_parameters.cursor_position);
 }
 
-void AndroidKeyboard::ExitKeyboard() const {
+void AndroidKeyboard::ExitKeyboard() const
+{
     LOG_WARNING(Frontend, "(STUBBED) called, backend requested to exit the software keyboard.");
 }
 
-void AndroidKeyboard::SubmitInlineKeyboardText(std::u16string submitted_text) {
+void AndroidKeyboard::SubmitInlineKeyboardText(std::u16string submitted_text)
+{
     if (!m_is_inline_active) {
         return;
     }
@@ -226,7 +236,8 @@ void AndroidKeyboard::SubmitInlineKeyboardText(std::u16string submitted_text) {
                            static_cast<int>(m_current_text.size()));
 }
 
-void AndroidKeyboard::SubmitInlineKeyboardInput(int key_code) {
+void AndroidKeyboard::SubmitInlineKeyboardInput(int key_code)
+{
     static constexpr int KEYCODE_BACK = 4;
     static constexpr int KEYCODE_ENTER = 66;
     static constexpr int KEYCODE_DEL = 67;
@@ -253,11 +264,13 @@ void AndroidKeyboard::SubmitInlineKeyboardInput(int key_code) {
     }
 }
 
-void AndroidKeyboard::SubmitNormalText(const ResultData& data) const {
+void AndroidKeyboard::SubmitNormalText(const ResultData& data) const
+{
     submit_normal_callback(data.result, Common::UTF8ToUTF16(data.text), true);
 }
 
-void InitJNI(JNIEnv* env) {
+void InitJNI(JNIEnv* env)
+{
     s_software_keyboard_class = reinterpret_cast<jclass>(
         env->NewGlobalRef(env->FindClass("org/yuzu/yuzu_emu/applets/keyboard/SoftwareKeyboard")));
     s_keyboard_config_class = reinterpret_cast<jclass>(env->NewGlobalRef(
@@ -274,7 +287,8 @@ void InitJNI(JNIEnv* env) {
         "(Lorg/yuzu/yuzu_emu/applets/keyboard/SoftwareKeyboard$KeyboardConfig;)V");
 }
 
-void CleanupJNI(JNIEnv* env) {
+void CleanupJNI(JNIEnv* env)
+{
     env->DeleteGlobalRef(s_software_keyboard_class);
     env->DeleteGlobalRef(s_keyboard_config_class);
     env->DeleteGlobalRef(s_keyboard_data_class);

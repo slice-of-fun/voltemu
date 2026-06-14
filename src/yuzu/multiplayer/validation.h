@@ -10,22 +10,16 @@
 class Validation {
 public:
     Validation()
-        : room_name(room_name_regex), nickname(nickname_regex), ip(ip_regex), port(0, UINT16_MAX) {}
+        : room_name(room_name_regex), nickname(nickname_regex), ip(ip_regex), port(0, UINT16_MAX)
+    {
+    }
 
     ~Validation() = default;
 
-    const QValidator* GetRoomName() const {
-        return &room_name;
-    }
-    const QValidator* GetNickname() const {
-        return &nickname;
-    }
-    const QValidator* GetIP() const {
-        return &ip;
-    }
-    const QValidator* GetPort() const {
-        return &port;
-    }
+    const QValidator* GetRoomName() const { return &room_name; }
+    const QValidator* GetNickname() const { return &nickname; }
+    const QValidator* GetIP() const { return &ip; }
+    const QValidator* GetPort() const { return &port; }
 
 private:
     /// room name can be alphanumeric and " " "_" "." and "-" and must have a size of 4-20

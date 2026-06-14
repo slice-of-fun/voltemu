@@ -6,15 +6,17 @@
 
 #pragma once
 
-#include <functional>
-#include <memory>
-#include <string>
-#include <vector>
+#include <qobjectdefs.h>
+
 #include <QObject>
 #include <QString>
 #include <QStringLiteral>
 #include <QWidget>
-#include <qobjectdefs.h>
+#include <functional>
+#include <memory>
+#include <string>
+#include <vector>
+
 #include "qt_common/config/shared_translation.h"
 
 class QCheckBox;

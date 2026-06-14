@@ -4,23 +4,24 @@
 // SPDX-FileCopyrightText: Copyright 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "video_core/host1x/codecs/decoder.h"
+
 #include "common/assert.h"
 #include "common/settings.h"
-#include "video_core/host1x/codecs/decoder.h"
 #include "video_core/host1x/host1x.h"
 #include "video_core/memory_manager.h"
 
 namespace Tegra {
 
 Decoder::Decoder(Host1x::Host1x& host1x_, s32 id_, const Host1x::NvdecCommon::NvdecRegisters& regs_)
-    : host1x(host1x_)
-    , regs{regs_}
-    , id{id_}
-{}
+    : host1x(host1x_), regs{regs_}, id{id_}
+{
+}
 
 Decoder::~Decoder() = default;
 
-void Decoder::Decode() {
+void Decoder::Decode()
+{
     if (!initialized) {
         return;
     }

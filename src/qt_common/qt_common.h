@@ -3,16 +3,14 @@
 
 #pragma once
 
-#include <memory>
 #include <QWindow>
+#include <memory>
 
 #include "core/core.h"
 #include "core/file_sys/registered_cache.h"
-#include "core/frontend/emu_window.h"
-
-#include "qt_common/render/emu_thread.h"
-
 #include "core/file_sys/vfs/vfs_real.h"
+#include "core/frontend/emu_window.h"
+#include "qt_common/render/emu_thread.h"
 
 enum class StartGameType {
     Normal, // Can use custom configuration
@@ -56,8 +54,6 @@ const QString tr(const std::string& str);
  * @return QPixmap circle pixmap
  */
 [[nodiscard]] QPixmap CreateCirclePixmapFromColor(const QColor& color);
-
-
 
 std::filesystem::path GetEdenCommand();
 } // namespace QtCommon

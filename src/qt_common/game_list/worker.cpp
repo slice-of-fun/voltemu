@@ -4,16 +4,17 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include <filesystem>
-#include <memory>
-#include <string>
-#include <utility>
-#include <vector>
+#include "qt_common/game_list/worker.h"
 
 #include <QDir>
 #include <QFile>
 #include <QFileInfo>
 #include <QSettings>
+#include <filesystem>
+#include <memory>
+#include <string>
+#include <utility>
+#include <vector>
 
 #include "common/fs/fs.h"
 #include "common/fs/path_util.h"
@@ -28,20 +29,17 @@
 #include "core/file_sys/registered_cache.h"
 #include "core/file_sys/submission_package.h"
 #include "core/loader/loader.h"
-
 #include "qt_common/config/uisettings.h"
-#include "qt_common/qt_common.h"
-
-#include "yuzu/compatibility_list.h"
 #include "qt_common/game_list/game_list_p.h"
-
-#include "qt_common/game_list/worker.h"
 #include "qt_common/game_list/model.h"
+#include "qt_common/qt_common.h"
+#include "yuzu/compatibility_list.h"
 
 namespace {
 
 QString GetGameListCachedObject(const std::string& filename, const std::string& ext,
-                                const std::function<QString()>& generator) {
+                                const std::function<QString()>& generator)
+{
     if (!UISettings::values.cache_game_list || filename == "0000000000000000") {
         return generator();
     }
@@ -71,9 +69,10 @@ QString GetGameListCachedObject(const std::string& filename, const std::string& 
     return generator();
 }
 
-std::pair<std::vector<u8>, std::string> GetGameListCachedObject(
-    const std::string& filename, const std::string& ext,
-    const std::function<std::pair<std::vector<u8>, std::string>()>& generator) {
+std::pair<std::vector<u8>, std::string>
+GetGameListCachedObject(const std::string& filename, const std::string& ext,
+                        const std::function<std::pair<std::vector<u8>, std::string>()>& generator)
+{
     if (!UISettings::values.cache_game_list || filename == "0000000000000000") {
         return generator();
     }
@@ -140,7 +139,8 @@ std::pair<std::vector<u8>, std::string> GetGameListCachedObject(
 }
 
 void GetMetadataFromControlNCA(const FileSys::PatchManager& patch_manager, const FileSys::NCA& nca,
-                               std::vector<u8>& icon, std::string& name) {
+                               std::vector<u8>& icon, std::string& name)
+{
     std::tie(icon, name) = GetGameListCachedObject(
         fmt::format("{:016X}", patch_manager.GetTitleID()), {}, [&patch_manager, &nca] {
             const auto [nacp, icon_f] = patch_manager.ParseControlNCA(nca);
@@ -148,16 +148,19 @@ void GetMetadataFromControlNCA(const FileSys::PatchManager& patch_manager, const
         });
 }
 
-bool HasSupportedFileExtension(const std::string& file_name) {
+bool HasSupportedFileExtension(const std::string& file_name)
+{
     const QFileInfo file = QFileInfo(QString::fromStdString(file_name));
     return QtCommon::supported_file_extensions.contains(file.suffix(), Qt::CaseInsensitive);
 }
 
-bool IsExtractedNCAMain(const std::string& file_name) {
+bool IsExtractedNCAMain(const std::string& file_name)
+{
     return QFileInfo(QString::fromStdString(file_name)).fileName() == QStringLiteral("main");
 }
 
-QString FormatGameName(const std::string& physical_name) {
+QString FormatGameName(const std::string& physical_name)
+{
     const QString physical_name_as_qstring = QString::fromStdString(physical_name);
     const QFileInfo file_info(physical_name_as_qstring);
 
@@ -169,7 +172,8 @@ QString FormatGameName(const std::string& physical_name) {
 }
 
 QString FormatPatchNameVersions(const FileSys::PatchManager& patch_manager,
-                                Loader::AppLoader& loader, bool updatable = true) {
+                                Loader::AppLoader& loader, bool updatable = true)
+{
     QString out;
     FileSys::VirtualFile update_raw;
     loader.ReadUpdateRaw(update_raw);
@@ -205,7 +209,8 @@ QList<QStandardItem*> MakeGameListEntry(const std::string& path, const std::stri
                                         Loader::AppLoader& loader, u64 program_id,
                                         const CompatibilityList& compatibility_list,
                                         const PlayTime::PlayTimeManager& play_time_manager,
-                                        const FileSys::PatchManager& patch) {
+                                        const FileSys::PatchManager& patch)
+{
     auto const it = FindMatchingCompatibilityEntry(compatibility_list, program_id);
     // The game list uses 99 as compatibility number for untested games
     QString compatibility =
@@ -239,19 +244,22 @@ GameListWorker::GameListWorker(FileSys::VirtualFilesystem vfs_,
                                const PlayTime::PlayTimeManager& play_time_manager_,
                                Core::System& system_)
     : vfs{std::move(vfs_)}, provider{provider_}, game_dirs{game_dirs_},
-      compatibility_list{compatibility_list_}, play_time_manager{play_time_manager_},
-      system{system_} {
+      compatibility_list{compatibility_list_}, play_time_manager{play_time_manager_}, system{
+                                                                                          system_}
+{
     // We want the game list to manage our lifetime.
     setAutoDelete(false);
 }
 
-GameListWorker::~GameListWorker() {
+GameListWorker::~GameListWorker()
+{
     this->disconnect();
     stop_requested.store(true);
     processing_completed.Wait();
 }
 
-void GameListWorker::ProcessEvents(GameListModel* model) {
+void GameListWorker::ProcessEvents(GameListModel* model)
+{
     while (true) {
         std::function<void(GameListModel*)> func;
         {
@@ -273,8 +281,8 @@ void GameListWorker::ProcessEvents(GameListModel* model) {
     }
 }
 
-template <typename F>
-void GameListWorker::RecordEvent(F&& func) {
+template<typename F> void GameListWorker::RecordEvent(F&& func)
+{
     {
         // Lock queue to protect concurrent modification.
         std::scoped_lock lk(lock);
@@ -287,7 +295,8 @@ void GameListWorker::RecordEvent(F&& func) {
     emit DataAvailable();
 }
 
-void GameListWorker::AddTitlesToGameList(GameListDir* parent_dir) {
+void GameListWorker::AddTitlesToGameList(GameListDir* parent_dir)
+{
     using namespace FileSys;
 
     const auto& cache = system.GetContentProviderUnion();
@@ -341,7 +350,8 @@ void GameListWorker::AddTitlesToGameList(GameListDir* parent_dir) {
 }
 
 void GameListWorker::ScanFileSystem(ScanTarget target, const std::string& dir_path, bool deep_scan,
-                                    GameListDir* parent_dir) {
+                                    GameListDir* parent_dir)
+{
     const auto callback = [this, target, parent_dir](const std::filesystem::path& path) -> bool {
         if (stop_requested) {
             // Breaks the callback loop.
@@ -434,8 +444,7 @@ void GameListWorker::ScanFileSystem(ScanTarget target, const std::string& dir_pa
                         physical_name, name, Common::FS::GetSize(physical_name), icon, *loader,
                         program_id, compatibility_list, play_time_manager, patch);
 
-                    RecordEvent(
-                        [=](GameListModel* model) { model->AddEntry(entry, parent_dir); });
+                    RecordEvent([=](GameListModel* model) { model->AddEntry(entry, parent_dir); });
                 }
             }
         } else if (is_dir) {
@@ -453,7 +462,8 @@ void GameListWorker::ScanFileSystem(ScanTarget target, const std::string& dir_pa
     }
 }
 
-void GameListWorker::run() {
+void GameListWorker::run()
+{
     watch_list.clear();
     provider->ClearAllEntries();
 

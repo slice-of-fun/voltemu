@@ -1,29 +1,36 @@
 // SPDX-FileCopyrightText: Ryujinx Team and Contributors
 // SPDX-License-Identifier: MIT
 
-#include <algorithm>
 #include "sync_manager.h"
+
+#include <algorithm>
+
 #include "video_core/host1x/host1x.h"
 #include "video_core/host1x/syncpoint_manager.h"
 
 namespace Tegra {
 namespace Host1x {
 
-SyncptIncrManager::SyncptIncrManager(Host1x& host1x_) : host1x(host1x_) {}
+SyncptIncrManager::SyncptIncrManager(Host1x& host1x_) : host1x(host1x_)
+{
+}
 SyncptIncrManager::~SyncptIncrManager() = default;
 
-void SyncptIncrManager::Increment(u32 id) {
+void SyncptIncrManager::Increment(u32 id)
+{
     increments.emplace_back(0, 0, id, true);
     IncrementAllDone();
 }
 
-u32 SyncptIncrManager::IncrementWhenDone(u32 class_id, u32 id) {
+u32 SyncptIncrManager::IncrementWhenDone(u32 class_id, u32 id)
+{
     const u32 handle = current_id++;
     increments.emplace_back(handle, class_id, id);
     return handle;
 }
 
-void SyncptIncrManager::SignalDone(u32 handle) {
+void SyncptIncrManager::SignalDone(u32 handle)
+{
     const auto done_incr =
         std::find_if(increments.begin(), increments.end(),
                      [handle](const SyncptIncr& incr) { return incr.id == handle; });
@@ -33,7 +40,8 @@ void SyncptIncrManager::SignalDone(u32 handle) {
     IncrementAllDone();
 }
 
-void SyncptIncrManager::IncrementAllDone() {
+void SyncptIncrManager::IncrementAllDone()
+{
     std::size_t done_count = 0;
     for (; done_count < increments.size(); ++done_count) {
         if (!increments[done_count].complete) {

@@ -3,11 +3,11 @@
 
 #pragma once
 
+#include <QFrame>
+#include <QPointer>
 #include <optional>
 #include <utility>
 #include <vector>
-#include <QFrame>
-#include <QPointer>
 
 class QLabel;
 

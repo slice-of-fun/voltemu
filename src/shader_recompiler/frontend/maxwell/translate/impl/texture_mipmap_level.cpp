@@ -20,7 +20,8 @@ enum class TextureType : u64 {
     ARRAY_CUBE,
 };
 
-Shader::TextureType GetType(TextureType type) {
+Shader::TextureType GetType(TextureType type)
+{
     switch (type) {
     case TextureType::_1D:
         return Shader::TextureType::Color1D;
@@ -42,7 +43,8 @@ Shader::TextureType GetType(TextureType type) {
     throw NotImplementedException("Invalid texture type {}", type);
 }
 
-IR::Value MakeCoords(TranslatorVisitor& v, IR::Reg reg, TextureType type) {
+IR::Value MakeCoords(TranslatorVisitor& v, IR::Reg reg, TextureType type)
+{
     // The ISA reads an array component here, but this is not needed on high level shading languages
     // We are dropping this information.
     switch (type) {
@@ -66,7 +68,8 @@ IR::Value MakeCoords(TranslatorVisitor& v, IR::Reg reg, TextureType type) {
     throw NotImplementedException("Invalid texture type {}", type);
 }
 
-void Impl(TranslatorVisitor& v, u64 insn, bool is_bindless) {
+void Impl(TranslatorVisitor& v, u64 insn, bool is_bindless)
+{
     union {
         u64 raw;
         BitField<49, 1, u64> nodep;
@@ -112,11 +115,13 @@ void Impl(TranslatorVisitor& v, u64 insn, bool is_bindless) {
 }
 } // Anonymous namespace
 
-void TranslatorVisitor::TMML(u64 insn) {
+void TranslatorVisitor::TMML(u64 insn)
+{
     Impl(*this, insn, false);
 }
 
-void TranslatorVisitor::TMML_b(u64 insn) {
+void TranslatorVisitor::TMML_b(u64 insn)
+{
     Impl(*this, insn, true);
 }
 

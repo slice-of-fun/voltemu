@@ -6,12 +6,13 @@
 
 #pragma once
 
+#include <ankerl/unordered_dense.h>
+
 #include <memory>
 #include <mutex>
 #include <optional>
-#include <string_view>
-#include <ankerl/unordered_dense.h>
 #include <queue>
+#include <string_view>
 
 #include "common/common_types.h"
 #include "video_core/host1x/ffmpeg.h"
@@ -31,15 +32,14 @@ public:
     /// Call decoders to construct headers, decode AVFrame with ffmpeg
     void Decode();
 
-    bool UsingDecodeOrder() const {
-        return decode_api.UsingDecodeOrder();
-    }
+    bool UsingDecodeOrder() const { return decode_api.UsingDecodeOrder(); }
 
     /// Return name of the current codec
     [[nodiscard]] virtual std::string_view GetCurrentCodecName() const = 0;
 
 protected:
-    explicit Decoder(Host1x::Host1x& host1x, s32 id, const Host1x::NvdecCommon::NvdecRegisters& regs);
+    explicit Decoder(Host1x::Host1x& host1x, s32 id,
+                     const Host1x::NvdecCommon::NvdecRegisters& regs);
 
     virtual std::span<const u8> ComposeFrame() = 0;
     virtual std::tuple<u64, u64> GetProgressiveOffsets() = 0;

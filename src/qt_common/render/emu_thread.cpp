@@ -1,20 +1,25 @@
 // SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+#include "emu_thread.h"
+
 #include <qdebug.h>
+
 #include "core/core.h"
 #include "core/cpu_manager.h"
-#include "emu_thread.h"
 #include "qt_common/qt_common.h"
 #include "video_core/gpu.h"
 #include "video_core/rasterizer_interface.h"
 #include "video_core/renderer_base.h"
 
-EmuThread::EmuThread() {}
+EmuThread::EmuThread()
+{
+}
 
 EmuThread::~EmuThread() = default;
 
-void EmuThread::run() {
+void EmuThread::run()
+{
     Common::SetCurrentThreadName("EmuControlThread");
 
     auto& gpu = QtCommon::system->GPU();
@@ -70,13 +75,15 @@ void EmuThread::run() {
 // Unlock while emitting signals so that the main thread can
 // continue pumping events.
 
-void EmuThread::EmulationPaused(std::unique_lock<std::mutex>& lk) {
+void EmuThread::EmulationPaused(std::unique_lock<std::mutex>& lk)
+{
     lk.unlock();
     emit DebugModeEntered();
     lk.lock();
 }
 
-void EmuThread::EmulationResumed(std::unique_lock<std::mutex>& lk) {
+void EmuThread::EmulationResumed(std::unique_lock<std::mutex>& lk)
+{
     lk.unlock();
     emit DebugModeLeft();
     lk.lock();

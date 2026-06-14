@@ -9,9 +9,6 @@
 #include "common/common_types.h"
 #include "core/hle/result.h"
 #include "hid_core/hid_types.h"
-#include "hid_core/resources/applet_resource.h"
-#include "hid_core/resources/npad/npad_types.h"
-
 #include "hid_core/resources/abstracted_pad/abstract_battery_handler.h"
 #include "hid_core/resources/abstracted_pad/abstract_button_handler.h"
 #include "hid_core/resources/abstracted_pad/abstract_ir_sensor_handler.h"
@@ -23,6 +20,8 @@
 #include "hid_core/resources/abstracted_pad/abstract_properties_handler.h"
 #include "hid_core/resources/abstracted_pad/abstract_sixaxis_handler.h"
 #include "hid_core/resources/abstracted_pad/abstract_vibration_handler.h"
+#include "hid_core/resources/applet_resource.h"
+#include "hid_core/resources/npad/npad_types.h"
 #include "hid_core/resources/vibration/gc_vibration_device.h"
 #include "hid_core/resources/vibration/n64_vibration_device.h"
 #include "hid_core/resources/vibration/vibration_device.h"

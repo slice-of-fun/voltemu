@@ -4,10 +4,11 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "audio_core/renderer/command/command_generator.h"
+
 #include "audio_core/common/audio_renderer_parameter.h"
 #include "audio_core/renderer/behavior/behavior_info.h"
 #include "audio_core/renderer/command/command_buffer.h"
-#include "audio_core/renderer/command/command_generator.h"
 #include "audio_core/renderer/command/command_list_header.h"
 #include "audio_core/renderer/effect/aux_.h"
 #include "audio_core/renderer/effect/biquad_filter.h"
@@ -36,12 +37,14 @@ CommandGenerator::CommandGenerator(CommandBuffer& command_buffer_,
     : command_buffer{command_buffer_}, command_header{command_list_header_},
       render_context{render_context_}, voice_context{voice_context_}, mix_context{mix_context_},
       effect_context{effect_context_}, sink_context{sink_context_},
-      splitter_context{splitter_context_}, performance_manager{performance_manager_} {
+      splitter_context{splitter_context_}, performance_manager{performance_manager_}
+{
     command_buffer.GenerateClearMixCommand(InvalidNodeId);
 }
 
 void CommandGenerator::GenerateDataSourceCommand(VoiceInfo& voice_info,
-                                                 const VoiceState& voice_state, const s8 channel) {
+                                                 const VoiceState& voice_state, const s8 channel)
+{
     if (voice_info.mix_id == UnusedMixId) {
         if (voice_info.splitter_id != UnusedSplitterId) {
             auto destination{splitter_context.GetDestinationData(voice_info.splitter_id, 0)};
@@ -122,7 +125,8 @@ void CommandGenerator::GenerateVoiceMixCommand(std::span<const f32> mix_volumes,
                                                std::span<const f32> prev_mix_volumes,
                                                const VoiceState& voice_state, s16 output_index,
                                                const s16 buffer_count, const s16 input_index,
-                                               const s32 node_id) {
+                                               const s32 node_id)
+{
     u8 precision{15};
     if (render_context.behavior->IsVolumeMixParameterPrecisionQ23Supported()) {
         precision = 23;
@@ -149,7 +153,8 @@ void CommandGenerator::GenerateVoiceMixCommand(std::span<const f32> mix_volumes,
 void CommandGenerator::GenerateBiquadFilterCommandForVoice(VoiceInfo& voice_info,
                                                            const VoiceState& voice_state,
                                                            const s16 buffer_count, const s8 channel,
-                                                           const s32 node_id) {
+                                                           const s32 node_id)
+{
     const bool both_biquads_enabled{voice_info.biquads[0].enabled && voice_info.biquads[1].enabled};
     const auto use_float_processing{render_context.behavior->UseBiquadFilterFloatProcessing()};
 
@@ -168,7 +173,8 @@ void CommandGenerator::GenerateBiquadFilterCommandForVoice(VoiceInfo& voice_info
     }
 }
 
-void CommandGenerator::GenerateVoiceCommand(VoiceInfo& voice_info) {
+void CommandGenerator::GenerateVoiceCommand(VoiceInfo& voice_info)
+{
     u8 precision{15};
     if (render_context.behavior->IsVolumeMixParameterPrecisionQ23Supported()) {
         precision = 23;
@@ -275,7 +281,8 @@ void CommandGenerator::GenerateVoiceCommand(VoiceInfo& voice_info) {
     }
 }
 
-void CommandGenerator::GenerateVoiceCommands() {
+void CommandGenerator::GenerateVoiceCommands()
+{
     const auto voice_count{voice_context.GetCount()};
 
     for (u32 i = 0; i < voice_count; i++) {
@@ -300,7 +307,8 @@ void CommandGenerator::GenerateVoiceCommands() {
 }
 
 void CommandGenerator::GenerateBufferMixerCommand(const s16 buffer_offset,
-                                                  EffectInfoBase& effect_info, const s32 node_id) {
+                                                  EffectInfoBase& effect_info, const s32 node_id)
+{
     u8 precision{15};
     if (render_context.behavior->IsVolumeMixParameterPrecisionQ23Supported()) {
         precision = 23;
@@ -320,25 +328,29 @@ void CommandGenerator::GenerateBufferMixerCommand(const s16 buffer_offset,
 }
 
 void CommandGenerator::GenerateDelayCommand(const s16 buffer_offset, EffectInfoBase& effect_info,
-                                            const s32 node_id) {
+                                            const s32 node_id)
+{
     command_buffer.GenerateDelayCommand(node_id, effect_info, buffer_offset);
 }
 
 void CommandGenerator::GenerateReverbCommand(const s16 buffer_offset, EffectInfoBase& effect_info,
                                              const s32 node_id,
-                                             const bool long_size_pre_delay_supported) {
+                                             const bool long_size_pre_delay_supported)
+{
     command_buffer.GenerateReverbCommand(node_id, effect_info, buffer_offset,
                                          long_size_pre_delay_supported);
 }
 
 void CommandGenerator::GenerateI3dl2ReverbEffectCommand(const s16 buffer_offset,
                                                         EffectInfoBase& effect_info,
-                                                        const s32 node_id) {
+                                                        const s32 node_id)
+{
     command_buffer.GenerateI3dl2ReverbCommand(node_id, effect_info, buffer_offset);
 }
 
 void CommandGenerator::GenerateAuxCommand(const s16 buffer_offset, EffectInfoBase& effect_info,
-                                          const s32 node_id) {
+                                          const s32 node_id)
+{
 
     if (effect_info.IsEnabled()) {
         effect_info.GetWorkbuffer(0);
@@ -363,18 +375,19 @@ void CommandGenerator::GenerateAuxCommand(const s16 buffer_offset, EffectInfoBas
 
 void CommandGenerator::GenerateBiquadFilterEffectCommand(const s16 buffer_offset,
                                                          EffectInfoBase& effect_info,
-                                                         const s32 node_id) {
+                                                         const s32 node_id)
+{
     EffectInfoBase::ParameterState param_state{};
     s8 channel_count = 0;
 
     if (render_context.behavior->IsEffectInfoVersion2Supported()) {
-        const auto* parameter =
-            reinterpret_cast<const BiquadFilterInfo::ParameterVersion2*>(effect_info.GetParameter());
+        const auto* parameter = reinterpret_cast<const BiquadFilterInfo::ParameterVersion2*>(
+            effect_info.GetParameter());
         param_state = parameter->state;
         channel_count = parameter->channel_count;
     } else {
-        const auto* parameter =
-            reinterpret_cast<const BiquadFilterInfo::ParameterVersion1*>(effect_info.GetParameter());
+        const auto* parameter = reinterpret_cast<const BiquadFilterInfo::ParameterVersion1*>(
+            effect_info.GetParameter());
         param_state = parameter->state;
         channel_count = parameter->channel_count;
     }
@@ -399,8 +412,8 @@ void CommandGenerator::GenerateBiquadFilterEffectCommand(const s16 buffer_offset
                 render_context.behavior->UseBiquadFilterFloatProcessing();
 
             for (s8 channel = 0; channel < channel_count; channel++) {
-                command_buffer.GenerateBiquadFilterCommand(node_id, effect_info, buffer_offset, channel,
-                                                           needs_init, use_float_processing);
+                command_buffer.GenerateBiquadFilterCommand(
+                    node_id, effect_info, buffer_offset, channel, needs_init, use_float_processing);
             }
         } else {
             for (s8 channel = 0; channel < channel_count; channel++) {
@@ -413,8 +426,8 @@ void CommandGenerator::GenerateBiquadFilterEffectCommand(const s16 buffer_offset
 
 void CommandGenerator::GenerateLightLimiterEffectCommand(const s16 buffer_offset,
                                                          EffectInfoBase& effect_info,
-                                                         const s32 node_id,
-                                                         const u32 effect_index) {
+                                                         const s32 node_id, const u32 effect_index)
+{
 
     const auto& state{*reinterpret_cast<LightLimiterInfo::State*>(effect_info.GetStateBuffer())};
 
@@ -436,7 +449,8 @@ void CommandGenerator::GenerateLightLimiterEffectCommand(const s16 buffer_offset
 }
 
 void CommandGenerator::GenerateCaptureCommand(const s16 buffer_offset, EffectInfoBase& effect_info,
-                                              const s32 node_id) {
+                                              const s32 node_id)
+{
     if (effect_info.IsEnabled()) {
         effect_info.GetWorkbuffer(0);
     }
@@ -458,11 +472,13 @@ void CommandGenerator::GenerateCaptureCommand(const s16 buffer_offset, EffectInf
 }
 
 void CommandGenerator::GenerateCompressorCommand(const s16 buffer_offset,
-                                                 EffectInfoBase& effect_info, const s32 node_id) {
+                                                 EffectInfoBase& effect_info, const s32 node_id)
+{
     command_buffer.GenerateCompressorCommand(buffer_offset, effect_info, node_id);
 }
 
-void CommandGenerator::GenerateEffectCommand(MixInfo& mix_info) {
+void CommandGenerator::GenerateEffectCommand(MixInfo& mix_info)
+{
     const auto effect_count{effect_context.GetCount()};
     for (u32 i = 0; i < effect_count; i++) {
         const auto effect_index{mix_info.effect_order_buffer[i]};
@@ -591,7 +607,8 @@ void CommandGenerator::GenerateEffectCommand(MixInfo& mix_info) {
     }
 }
 
-void CommandGenerator::GenerateMixCommands(MixInfo& mix_info) {
+void CommandGenerator::GenerateMixCommands(MixInfo& mix_info)
+{
     u8 precision{15};
     if (render_context.behavior->IsVolumeMixParameterPrecisionQ23Supported()) {
         precision = 23;
@@ -644,7 +661,8 @@ void CommandGenerator::GenerateMixCommands(MixInfo& mix_info) {
     }
 }
 
-void CommandGenerator::GenerateSubMixCommand(MixInfo& mix_info) {
+void CommandGenerator::GenerateSubMixCommand(MixInfo& mix_info)
+{
     command_buffer.GenerateDepopForMixBuffersCommand(mix_info.node_id, mix_info,
                                                      render_context.depop_buffer);
     GenerateEffectCommand(mix_info);
@@ -660,7 +678,8 @@ void CommandGenerator::GenerateSubMixCommand(MixInfo& mix_info) {
     }
 }
 
-void CommandGenerator::GenerateSubMixCommands() {
+void CommandGenerator::GenerateSubMixCommands()
+{
     const auto submix_count{mix_context.GetCount()};
     for (s32 i = 0; i < submix_count; i++) {
         auto sorted_info{mix_context.GetSortedInfo(i)};
@@ -680,7 +699,8 @@ void CommandGenerator::GenerateSubMixCommands() {
     }
 }
 
-void CommandGenerator::GenerateFinalMixCommand() {
+void CommandGenerator::GenerateFinalMixCommand()
+{
     auto& final_mix_info{*mix_context.GetFinalMixInfo()};
 
     command_buffer.GenerateDepopForMixBuffersCommand(final_mix_info.node_id, final_mix_info,
@@ -704,7 +724,8 @@ void CommandGenerator::GenerateFinalMixCommand() {
     }
 }
 
-void CommandGenerator::GenerateFinalMixCommands() {
+void CommandGenerator::GenerateFinalMixCommands()
+{
     auto final_mix_info{mix_context.GetFinalMixInfo()};
     EntryAspect final_mix_entry(*this, PerformanceEntryType::FinalMix, final_mix_info->node_id);
     GenerateFinalMixCommand();
@@ -714,7 +735,8 @@ void CommandGenerator::GenerateFinalMixCommands() {
     }
 }
 
-void CommandGenerator::GenerateSinkCommands() {
+void CommandGenerator::GenerateSinkCommands()
+{
     const auto sink_count{sink_context.GetCount()};
 
     for (u32 i = 0; i < sink_count; i++) {
@@ -757,7 +779,8 @@ void CommandGenerator::GenerateSinkCommands() {
     }
 }
 
-void CommandGenerator::GenerateSinkCommand(const s16 buffer_offset, SinkInfoBase& sink_info) {
+void CommandGenerator::GenerateSinkCommand(const s16 buffer_offset, SinkInfoBase& sink_info)
+{
     if (sink_info.ShouldSkip()) {
         return;
     }
@@ -780,7 +803,8 @@ void CommandGenerator::GenerateSinkCommand(const s16 buffer_offset, SinkInfoBase
     sink_info.UpdateForCommandGeneration();
 }
 
-void CommandGenerator::GenerateDeviceSinkCommand(const s16 buffer_offset, SinkInfoBase& sink_info) {
+void CommandGenerator::GenerateDeviceSinkCommand(const s16 buffer_offset, SinkInfoBase& sink_info)
+{
     auto& parameter{
         *reinterpret_cast<DeviceSinkInfo::DeviceInParameter*>(sink_info.GetParameter())};
     auto state{*reinterpret_cast<DeviceSinkInfo::DeviceState*>(sink_info.GetState())};
@@ -802,8 +826,9 @@ void CommandGenerator::GenerateDeviceSinkCommand(const s16 buffer_offset, SinkIn
                                              command_header.samples_buffer);
 }
 
-void CommandGenerator::GeneratePerformanceCommand(
-    s32 node_id, PerformanceState state, const PerformanceEntryAddresses& entry_addresses) {
+void CommandGenerator::GeneratePerformanceCommand(s32 node_id, PerformanceState state,
+                                                  const PerformanceEntryAddresses& entry_addresses)
+{
     command_buffer.GeneratePerformanceCommand(node_id, state, entry_addresses);
 }
 

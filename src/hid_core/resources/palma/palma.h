@@ -135,8 +135,8 @@ public:
 
     Result GetPalmaConnectionHandle(Core::HID::NpadIdType npad_id, PalmaConnectionHandle& handle);
     Result InitializePalma(const PalmaConnectionHandle& handle);
-    Kernel::KReadableEvent& AcquirePalmaOperationCompleteEvent(
-        const PalmaConnectionHandle& handle) const;
+    Kernel::KReadableEvent&
+    AcquirePalmaOperationCompleteEvent(const PalmaConnectionHandle& handle) const;
     Result GetPalmaOperationInfo(const PalmaConnectionHandle& handle,
                                  PalmaOperationType& operation_type, std::span<u8> out_data) const;
     Result PlayPalmaActivity(const PalmaConnectionHandle& handle, u64 palma_activity);

@@ -8,7 +8,8 @@ namespace Kernel {
 KMemoryBlockManager::KMemoryBlockManager() = default;
 
 Result KMemoryBlockManager::Initialize(KProcessAddress st, KProcessAddress nd,
-                                       KMemoryBlockSlabManager* slab_manager) {
+                                       KMemoryBlockSlabManager* slab_manager)
+{
     // Allocate a block to encapsulate the address space, insert it into the tree.
     KMemoryBlock* start_block = slab_manager->Allocate();
     R_UNLESS(start_block != nullptr, ResultOutOfResource);
@@ -28,7 +29,8 @@ Result KMemoryBlockManager::Initialize(KProcessAddress st, KProcessAddress nd,
 }
 
 void KMemoryBlockManager::Finalize(KMemoryBlockSlabManager* slab_manager,
-                                   BlockCallback&& block_callback) {
+                                   BlockCallback&& block_callback)
+{
     // Erase every block until we have none left.
     auto it = m_memory_block_tree.begin();
     while (it != m_memory_block_tree.end()) {
@@ -44,7 +46,8 @@ void KMemoryBlockManager::Finalize(KMemoryBlockSlabManager* slab_manager,
 KProcessAddress KMemoryBlockManager::FindFreeArea(KProcessAddress region_start,
                                                   size_t region_num_pages, size_t num_pages,
                                                   size_t alignment, size_t offset,
-                                                  size_t guard_pages) const {
+                                                  size_t guard_pages) const
+{
     if (num_pages > 0) {
         const KProcessAddress region_end = region_start + region_num_pages * PageSize;
         const KProcessAddress region_last = region_end - 1;
@@ -80,7 +83,8 @@ KProcessAddress KMemoryBlockManager::FindFreeArea(KProcessAddress region_start,
 }
 
 void KMemoryBlockManager::CoalesceForUpdate(KMemoryBlockManagerUpdateAllocator* allocator,
-                                            KProcessAddress address, size_t num_pages) {
+                                            KProcessAddress address, size_t num_pages)
+{
     // Find the iterator now that we've updated.
     iterator it = this->FindIterator(address);
     if (address != m_start_address) {
@@ -112,7 +116,8 @@ void KMemoryBlockManager::Update(KMemoryBlockManagerUpdateAllocator* allocator,
                                  KProcessAddress address, size_t num_pages, KMemoryState state,
                                  KMemoryPermission perm, KMemoryAttribute attr,
                                  KMemoryBlockDisableMergeAttribute set_disable_attr,
-                                 KMemoryBlockDisableMergeAttribute clear_disable_attr) {
+                                 KMemoryBlockDisableMergeAttribute clear_disable_attr)
+{
     // Ensure for auditing that we never end up with an invalid tree.
     KScopedMemoryBlockManagerAuditor auditor(this);
     ASSERT(Common::IsAligned(GetInteger(address), PageSize));
@@ -177,7 +182,8 @@ void KMemoryBlockManager::UpdateIfMatch(KMemoryBlockManagerUpdateAllocator* allo
                                         KMemoryAttribute test_attr, KMemoryState state,
                                         KMemoryPermission perm, KMemoryAttribute attr,
                                         KMemoryBlockDisableMergeAttribute set_disable_attr,
-                                        KMemoryBlockDisableMergeAttribute clear_disable_attr) {
+                                        KMemoryBlockDisableMergeAttribute clear_disable_attr)
+{
     // Ensure for auditing that we never end up with an invalid tree.
     KScopedMemoryBlockManagerAuditor auditor(this);
     ASSERT(Common::IsAligned(GetInteger(address), PageSize));
@@ -239,7 +245,8 @@ void KMemoryBlockManager::UpdateIfMatch(KMemoryBlockManagerUpdateAllocator* allo
 
 void KMemoryBlockManager::UpdateLock(KMemoryBlockManagerUpdateAllocator* allocator,
                                      KProcessAddress address, size_t num_pages,
-                                     MemoryBlockLockFunction lock_func, KMemoryPermission perm) {
+                                     MemoryBlockLockFunction lock_func, KMemoryPermission perm)
+{
     // Ensure for auditing that we never end up with an invalid tree.
     KScopedMemoryBlockManagerAuditor auditor(this);
     ASSERT(Common::IsAligned(GetInteger(address), PageSize));
@@ -289,7 +296,8 @@ void KMemoryBlockManager::UpdateLock(KMemoryBlockManagerUpdateAllocator* allocat
 
 void KMemoryBlockManager::UpdateAttribute(KMemoryBlockManagerUpdateAllocator* allocator,
                                           KProcessAddress address, size_t num_pages,
-                                          KMemoryAttribute mask, KMemoryAttribute attr) {
+                                          KMemoryAttribute mask, KMemoryAttribute attr)
+{
     // Ensure for auditing that we never end up with an invalid tree.
     KScopedMemoryBlockManagerAuditor auditor(this);
     ASSERT(Common::IsAligned(GetInteger(address), PageSize));
@@ -347,7 +355,8 @@ void KMemoryBlockManager::UpdateAttribute(KMemoryBlockManagerUpdateAllocator* al
 }
 
 // Debug.
-bool KMemoryBlockManager::CheckState() const {
+bool KMemoryBlockManager::CheckState() const
+{
     // Loop over every block, ensuring that we are sorted and coalesced.
     auto it = m_memory_block_tree.cbegin();
     auto prev = it++;

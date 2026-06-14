@@ -6,8 +6,10 @@
 
 #pragma once
 
-#include <array>
 #include <fmt/ranges.h>
+
+#include <array>
+
 #include "common/common_funcs.h"
 #include "common/common_types.h"
 
@@ -110,7 +112,8 @@ struct SaveDataAttribute {
 
     static constexpr SaveDataAttribute Make(ProgramId program_id, SaveDataType type, UserId user_id,
                                             SystemSaveDataId system_save_data_id, u16 index,
-                                            SaveDataRank rank) {
+                                            SaveDataRank rank)
+    {
         return {
             .program_id = program_id,
             .user_id = user_id,
@@ -122,16 +125,19 @@ struct SaveDataAttribute {
     }
 
     static constexpr SaveDataAttribute Make(ProgramId program_id, SaveDataType type, UserId user_id,
-                                            SystemSaveDataId system_save_data_id, u16 index) {
+                                            SystemSaveDataId system_save_data_id, u16 index)
+    {
         return Make(program_id, type, user_id, system_save_data_id, index, SaveDataRank::Primary);
     }
 
     static constexpr SaveDataAttribute Make(ProgramId program_id, SaveDataType type, UserId user_id,
-                                            SystemSaveDataId system_save_data_id) {
+                                            SystemSaveDataId system_save_data_id)
+    {
         return Make(program_id, type, user_id, system_save_data_id, 0, SaveDataRank::Primary);
     }
 
-    std::string DebugInfo() const {
+    std::string DebugInfo() const
+    {
         return fmt::format(
             "[title_id={:016X}, user_id={:016X}{:016X}, save_id={:016X}, type={:02X}, "
             "rank={}, index={}]",
@@ -142,18 +148,21 @@ struct SaveDataAttribute {
 static_assert(sizeof(SaveDataAttribute) == 0x40);
 static_assert(std::is_trivially_destructible<SaveDataAttribute>::value);
 
-constexpr inline bool operator<(const SaveDataAttribute& lhs, const SaveDataAttribute& rhs) {
+constexpr inline bool operator<(const SaveDataAttribute& lhs, const SaveDataAttribute& rhs)
+{
     return std::tie(lhs.program_id, lhs.user_id, lhs.system_save_data_id, lhs.index, lhs.rank) <
            std::tie(rhs.program_id, rhs.user_id, rhs.system_save_data_id, rhs.index, rhs.rank);
 }
 
-constexpr inline bool operator==(const SaveDataAttribute& lhs, const SaveDataAttribute& rhs) {
+constexpr inline bool operator==(const SaveDataAttribute& lhs, const SaveDataAttribute& rhs)
+{
     return std::tie(lhs.program_id, lhs.user_id, lhs.system_save_data_id, lhs.type, lhs.rank,
                     lhs.index) == std::tie(rhs.program_id, rhs.user_id, rhs.system_save_data_id,
                                            rhs.type, rhs.rank, rhs.index);
 }
 
-constexpr inline bool operator!=(const SaveDataAttribute& lhs, const SaveDataAttribute& rhs) {
+constexpr inline bool operator!=(const SaveDataAttribute& lhs, const SaveDataAttribute& rhs)
+{
     return !(lhs == rhs);
 }
 

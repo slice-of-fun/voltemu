@@ -46,7 +46,8 @@ union F2I {
     BitField<49, 1, u64> neg;
 };
 
-size_t BitSize(DestFormat dest_format) {
+size_t BitSize(DestFormat dest_format)
+{
     switch (dest_format) {
     case DestFormat::I16:
         return 16;
@@ -59,7 +60,8 @@ size_t BitSize(DestFormat dest_format) {
     }
 }
 
-std::pair<f64, f64> ClampBounds(DestFormat format, bool is_signed) {
+std::pair<f64, f64> ClampBounds(DestFormat format, bool is_signed)
+{
     if (is_signed) {
         switch (format) {
         case DestFormat::I16:
@@ -92,7 +94,8 @@ std::pair<f64, f64> ClampBounds(DestFormat format, bool is_signed) {
     throw NotImplementedException("Invalid destination format {}", format);
 }
 
-IR::F64 UnpackCbuf(TranslatorVisitor& v, u64 insn) {
+IR::F64 UnpackCbuf(TranslatorVisitor& v, u64 insn)
+{
     union {
         u64 raw;
         BitField<20, 14, s64> offset;
@@ -114,7 +117,8 @@ IR::F64 UnpackCbuf(TranslatorVisitor& v, u64 insn) {
     return v.ir.PackDouble2x32(vector);
 }
 
-void TranslateF2I(TranslatorVisitor& v, u64 insn, const IR::F16F32F64& src_a) {
+void TranslateF2I(TranslatorVisitor& v, u64 insn, const IR::F16F32F64& src_a)
+{
     // F2I is used to convert from a floating point value to an integer
     const F2I f2i{insn};
 
@@ -208,7 +212,8 @@ void TranslateF2I(TranslatorVisitor& v, u64 insn, const IR::F16F32F64& src_a) {
 }
 } // Anonymous namespace
 
-void TranslatorVisitor::F2I_reg(u64 insn) {
+void TranslatorVisitor::F2I_reg(u64 insn)
+{
     union {
         u64 raw;
         F2I base;
@@ -231,7 +236,8 @@ void TranslatorVisitor::F2I_reg(u64 insn) {
     TranslateF2I(*this, insn, op_a);
 }
 
-void TranslatorVisitor::F2I_cbuf(u64 insn) {
+void TranslatorVisitor::F2I_cbuf(u64 insn)
+{
     const F2I f2i{insn};
     const IR::F16F32F64 op_a{[&]() -> IR::F16F32F64 {
         switch (f2i.src_format) {
@@ -249,7 +255,8 @@ void TranslatorVisitor::F2I_cbuf(u64 insn) {
     TranslateF2I(*this, insn, op_a);
 }
 
-void TranslatorVisitor::F2I_imm(u64) {
+void TranslatorVisitor::F2I_imm(u64)
+{
     throw NotImplementedException("{}", Opcode::F2I_imm);
 }
 

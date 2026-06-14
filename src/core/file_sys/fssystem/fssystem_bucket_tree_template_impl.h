@@ -12,9 +12,10 @@
 
 namespace FileSys {
 
-template <typename EntryType>
+template<typename EntryType>
 Result BucketTree::ScanContinuousReading(ContinuousReadingInfo* out_info,
-                                         const ContinuousReadingParam<EntryType>& param) const {
+                                         const ContinuousReadingParam<EntryType>& param) const
+{
     static_assert(std::is_trivial_v<ContinuousReadingParam<EntryType>>);
 
     // Validate our preconditions.
@@ -44,7 +45,7 @@ Result BucketTree::ScanContinuousReading(ContinuousReadingInfo* out_info,
     u8* buffer = reinterpret_cast<u8*>(pool.data());
     const auto ofs = param.entry_set.index * s64(m_node_size);
     R_UNLESS(m_node_size + ofs <= size_t(entry_storage_size),
-                ResultInvalidBucketTreeNodeEntryCount);
+             ResultInvalidBucketTreeNodeEntryCount);
 
     m_entry_storage->Read(buffer, m_node_size, ofs);
 
@@ -136,9 +137,10 @@ Result BucketTree::ScanContinuousReading(ContinuousReadingInfo* out_info,
     R_SUCCEED();
 }
 
-template <typename EntryType>
+template<typename EntryType>
 Result BucketTree::Visitor::ScanContinuousReading(ContinuousReadingInfo* out_info, s64 offset,
-                                                  size_t size) const {
+                                                  size_t size) const
+{
     static_assert(std::is_trivial_v<EntryType>);
     ASSERT(this->IsValid());
 

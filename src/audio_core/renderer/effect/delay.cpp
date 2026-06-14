@@ -6,7 +6,8 @@
 namespace AudioCore::Renderer {
 
 void DelayInfo::Update(BehaviorInfo::ErrorInfo& error_info, const InParameterVersion1& in_params,
-                       const PoolMapper& pool_mapper) {
+                       const PoolMapper& pool_mapper)
+{
     auto in_specific{reinterpret_cast<const ParameterVersion1*>(in_params.specific.data())};
     auto params{reinterpret_cast<ParameterVersion1*>(parameter.data())};
 
@@ -39,7 +40,8 @@ void DelayInfo::Update(BehaviorInfo::ErrorInfo& error_info, const InParameterVer
 }
 
 void DelayInfo::Update(BehaviorInfo::ErrorInfo& error_info, const InParameterVersion2& in_params,
-                       const PoolMapper& pool_mapper) {
+                       const PoolMapper& pool_mapper)
+{
     auto in_specific{reinterpret_cast<const ParameterVersion1*>(in_params.specific.data())};
     auto params{reinterpret_cast<ParameterVersion1*>(parameter.data())};
 
@@ -71,7 +73,8 @@ void DelayInfo::Update(BehaviorInfo::ErrorInfo& error_info, const InParameterVer
     error_info.address = CpuAddr(0);
 }
 
-void DelayInfo::UpdateForCommandGeneration() {
+void DelayInfo::UpdateForCommandGeneration()
+{
     if (enabled) {
         usage_state = UsageState::Enabled;
     } else {
@@ -82,11 +85,16 @@ void DelayInfo::UpdateForCommandGeneration() {
     params->state = ParameterState::Updated;
 }
 
-void DelayInfo::InitializeResultState(EffectResultState& result_state) {}
+void DelayInfo::InitializeResultState(EffectResultState& result_state)
+{
+}
 
-void DelayInfo::UpdateResultState(EffectResultState& cpu_state, EffectResultState& dsp_state) {}
+void DelayInfo::UpdateResultState(EffectResultState& cpu_state, EffectResultState& dsp_state)
+{
+}
 
-CpuAddr DelayInfo::GetWorkbuffer(s32 index) {
+CpuAddr DelayInfo::GetWorkbuffer(s32 index)
+{
     return GetSingleBuffer(index);
 }
 

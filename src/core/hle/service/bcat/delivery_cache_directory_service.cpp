@@ -4,20 +4,23 @@
 // SPDX-FileCopyrightText: Copyright 2024 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+#include "core/hle/service/bcat/delivery_cache_directory_service.h"
+
 #include <openssl/err.h>
 #include <openssl/evp.h>
+
 #include "common/string_util.h"
 #include "core/file_sys/vfs/vfs_types.h"
 #include "core/hle/service/bcat/bcat_result.h"
 #include "core/hle/service/bcat/bcat_util.h"
-#include "core/hle/service/bcat/delivery_cache_directory_service.h"
 #include "core/hle/service/cmif_serialization.h"
 
 namespace Service::BCAT {
 
 // The digest is only used to determine if a file is unique compared to others of the same name.
 // Since the algorithm isn't ever checked in game, MD5 is safe.
-static BcatDigest DigestFile(const FileSys::VirtualFile& file) {
+static BcatDigest DigestFile(const FileSys::VirtualFile& file)
+{
     BcatDigest out{};
     const auto bytes = file->ReadAllBytes();
 
@@ -29,7 +32,8 @@ static BcatDigest DigestFile(const FileSys::VirtualFile& file) {
 
 IDeliveryCacheDirectoryService::IDeliveryCacheDirectoryService(Core::System& system_,
                                                                FileSys::VirtualDir root_)
-    : ServiceFramework{system_, "IDeliveryCacheDirectoryService"}, root(std::move(root_)) {
+    : ServiceFramework{system_, "IDeliveryCacheDirectoryService"}, root(std::move(root_))
+{
     // clang-format off
     static const FunctionInfo functions[] = {
         {0, D<&IDeliveryCacheDirectoryService::Open>, "Open"},
@@ -43,7 +47,8 @@ IDeliveryCacheDirectoryService::IDeliveryCacheDirectoryService(Core::System& sys
 
 IDeliveryCacheDirectoryService::~IDeliveryCacheDirectoryService() = default;
 
-Result IDeliveryCacheDirectoryService::Open(const DirectoryName& dir_name_raw) {
+Result IDeliveryCacheDirectoryService::Open(const DirectoryName& dir_name_raw)
+{
     const auto dir_name =
         Common::StringFromFixedZeroTerminatedBuffer(dir_name_raw.data(), dir_name_raw.size());
 
@@ -59,7 +64,8 @@ Result IDeliveryCacheDirectoryService::Open(const DirectoryName& dir_name_raw) {
 }
 
 Result IDeliveryCacheDirectoryService::Read(
-    Out<s32> out_count, OutArray<DeliveryCacheDirectoryEntry, BufferAttr_HipcMapAlias> out_buffer) {
+    Out<s32> out_count, OutArray<DeliveryCacheDirectoryEntry, BufferAttr_HipcMapAlias> out_buffer)
+{
     LOG_DEBUG(Service_BCAT, "called, write_size={:016X}", out_buffer.size());
 
     R_UNLESS(current_dir != nullptr, ResultNoOpenEntry);
@@ -76,7 +82,8 @@ Result IDeliveryCacheDirectoryService::Read(
     R_SUCCEED();
 }
 
-Result IDeliveryCacheDirectoryService::GetCount(Out<s32> out_count) {
+Result IDeliveryCacheDirectoryService::GetCount(Out<s32> out_count)
+{
     LOG_DEBUG(Service_BCAT, "called");
 
     R_UNLESS(current_dir != nullptr, ResultNoOpenEntry);

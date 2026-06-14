@@ -8,7 +8,8 @@
 
 namespace Vulkan {
 
-[[nodiscard]] vk::SurfaceKHR CreateSurface(
-    const vk::Instance& instance, const Core::Frontend::EmuWindow::WindowSystemInfo& window_info);
+[[nodiscard]] vk::SurfaceKHR
+CreateSurface(const vk::Instance& instance,
+              const Core::Frontend::EmuWindow::WindowSystemInfo& window_info);
 
 } // namespace Vulkan

@@ -6,11 +6,12 @@
 
 #pragma once
 
+#include <ankerl/unordered_dense.h>
+
 #include <functional>
 #include <mutex>
 #include <optional>
 #include <span>
-#include <ankerl/unordered_dense.h>
 #include <utility>
 
 #include "common/assert.h"
@@ -36,7 +37,7 @@ struct LookupData {
     QueryBase* found_query;
 };
 
-template <typename Traits>
+template<typename Traits>
 class QueryCacheBase : public VideoCommon::ChannelSetupCaches<VideoCommon::ChannelInfo> {
     using RuntimeType = typename Traits::RuntimeType;
 
@@ -46,7 +47,8 @@ public:
         BitField<0, 27, u32> query_id;
         u32 raw;
 
-        std::pair<size_t, size_t> unpack() const {
+        std::pair<size_t, size_t> unpack() const
+        {
             return {static_cast<size_t>(stream_id.Value()), static_cast<size_t>(query_id.Value())};
         }
     };
@@ -57,12 +59,14 @@ public:
 
     ~QueryCacheBase();
 
-    void InvalidateRegion(VAddr addr, std::size_t size) {
+    void InvalidateRegion(VAddr addr, std::size_t size)
+    {
         IterateCache<true>(addr, size,
                            [this](QueryLocation location) { InvalidateQuery(location); });
     }
 
-    void FlushRegion(VAddr addr, std::size_t size) {
+    void FlushRegion(VAddr addr, std::size_t size)
+    {
         bool result = false;
         IterateCache<false>(addr, size, [this, &result](QueryLocation location) {
             result |= SemiFlushQueryDirty(location);
@@ -73,7 +77,8 @@ public:
         }
     }
 
-    static u64 BuildMask(std::span<const QueryType> types) {
+    static u64 BuildMask(std::span<const QueryType> types)
+    {
         u64 mask = 0;
         for (auto query_type : types) {
             mask |= 1ULL << (static_cast<u64>(query_type));
@@ -82,7 +87,8 @@ public:
     }
 
     /// Return true when a CPU region is modified from the GPU
-    [[nodiscard]] bool IsRegionGpuModified(VAddr addr, size_t size) {
+    [[nodiscard]] bool IsRegionGpuModified(VAddr addr, size_t size)
+    {
         bool result = false;
         IterateCache<false>(addr, size, [this, &result](QueryLocation location) {
             result |= IsQueryDirty(location);
@@ -118,8 +124,9 @@ public:
     void BindToChannel(s32 id) override;
 
 protected:
-    template <bool remove_from_cache, typename Func>
-    void IterateCache(VAddr addr, std::size_t size, Func&& func) {
+    template<bool remove_from_cache, typename Func>
+    void IterateCache(VAddr addr, std::size_t size, Func&& func)
+    {
         static constexpr bool RETURNS_BOOL =
             std::is_same_v<std::invoke_result<Func, QueryLocation>, bool>;
         const u64 addr_begin = addr;
@@ -160,7 +167,8 @@ protected:
         }
     }
 
-    using ContentCache = ankerl::unordered_dense::map<u64, ankerl::unordered_dense::map<u32, QueryLocation>>;
+    using ContentCache =
+        ankerl::unordered_dense::map<u64, ankerl::unordered_dense::map<u32, QueryLocation>>;
 
     void InvalidateQuery(QueryLocation location);
     bool IsQueryDirty(QueryLocation location);
@@ -168,7 +176,8 @@ protected:
     void RequestGuestHostSync();
     void UnregisterPending();
 
-    ankerl::unordered_dense::map<u64, ankerl::unordered_dense::map<u32, QueryLocation>> cached_queries;
+    ankerl::unordered_dense::map<u64, ankerl::unordered_dense::map<u32, QueryLocation>>
+        cached_queries;
     std::mutex cache_mutex;
 
     struct QueryCacheBaseImpl;

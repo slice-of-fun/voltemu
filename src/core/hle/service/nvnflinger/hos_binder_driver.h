@@ -24,13 +24,9 @@ public:
                               std::shared_ptr<SurfaceFlinger> surface_flinger);
     ~IHOSBinderDriver() override;
 
-    std::shared_ptr<SurfaceFlinger> GetSurfaceFlinger() {
-        return m_surface_flinger;
-    }
+    std::shared_ptr<SurfaceFlinger> GetSurfaceFlinger() { return m_surface_flinger; }
 
-    std::shared_ptr<HosBinderDriverServer> GetServer() {
-        return m_server;
-    }
+    std::shared_ptr<HosBinderDriverServer> GetServer() { return m_server; }
 
 private:
     Result TransactParcel(s32 binder_id, u32 transaction_id,

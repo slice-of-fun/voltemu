@@ -1,15 +1,17 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include "core/hle/service/bcat/backend/backend.h"
 #include "core/hle/service/bcat/bcat.h"
+
+#include "core/hle/service/bcat/backend/backend.h"
 #include "core/hle/service/bcat/news/service_creator.h"
 #include "core/hle/service/bcat/service_creator.h"
 #include "core/hle/service/server_manager.h"
 
 namespace Service::BCAT {
 
-void LoopProcess(Core::System& system) {
+void LoopProcess(Core::System& system)
+{
     auto server_manager = std::make_unique<ServerManager>(system);
 
     server_manager->RegisterNamedService("bcat:a",

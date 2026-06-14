@@ -1,14 +1,18 @@
 // SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#include <filesystem>
-#include <JlCompress.h>
-#include "frontend_common/mod_manager.h"
 #include "mod.h"
+
+#include <JlCompress.h>
+
+#include <filesystem>
+
+#include "frontend_common/mod_manager.h"
 #include "qt_common/abstract/frontend.h"
 
 namespace QtCommon::Mod {
-QStringList GetModFolders(const QString& root, const QString& fallbackName) {
+QStringList GetModFolders(const QString& root, const QString& fallbackName)
+{
     namespace fs = std::filesystem;
 
     const auto std_root = root.toStdString();
@@ -117,7 +121,8 @@ QStringList GetModFolders(const QString& root, const QString& fallbackName) {
 }
 
 // TODO(crueter): Make this a common extract_to_tmp func
-const QString ExtractMod(const QString& path) {
+const QString ExtractMod(const QString& path)
+{
     namespace fs = std::filesystem;
     fs::path tmp{fs::temp_directory_path() / "eden" / "unzip_mod"};
     std::error_code ec;

@@ -4,8 +4,8 @@
 // SPDX-FileCopyrightText: Copyright 2021 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include <vector>
 #include <boost/container/small_vector.hpp>
+#include <vector>
 
 #include "shader_recompiler/frontend/ir/basic_block.h"
 #include "shader_recompiler/frontend/ir/value.h"
@@ -13,7 +13,8 @@
 
 namespace Shader::Optimization {
 
-void IdentityRemovalPass(IR::Program& program) {
+void IdentityRemovalPass(IR::Program& program)
+{
     boost::container::small_vector<IR::Inst*, 16> to_invalidate;
     for (IR::Block* const block : program.blocks) {
         for (auto it = block->begin(); it != block->end();) {

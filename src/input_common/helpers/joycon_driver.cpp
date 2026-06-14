@@ -4,12 +4,13 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "input_common/helpers/joycon_driver.h"
+
 #include "common/input.h"
 #include "common/logging.h"
 #include "common/scope_exit.h"
 #include "common/swap.h"
 #include "common/thread.h"
-#include "input_common/helpers/joycon_driver.h"
 #include "input_common/helpers/joycon_protocol/calibration.h"
 #include "input_common/helpers/joycon_protocol/generic_functions.h"
 #include "input_common/helpers/joycon_protocol/irs.h"
@@ -19,20 +20,24 @@
 #include "input_common/helpers/joycon_protocol/rumble.h"
 
 namespace InputCommon::Joycon {
-JoyconDriver::JoyconDriver(std::size_t port_) : port{port_} {
+JoyconDriver::JoyconDriver(std::size_t port_) : port{port_}
+{
     hidapi_handle = std::make_shared<JoyconHandle>();
 }
 
-JoyconDriver::~JoyconDriver() {
+JoyconDriver::~JoyconDriver()
+{
     Stop();
 }
 
-void JoyconDriver::Stop() {
+void JoyconDriver::Stop()
+{
     is_connected = false;
     input_thread = {};
 }
 
-Common::Input::DriverResult JoyconDriver::RequestDeviceAccess(SDL_hid_device_info* device_info) {
+Common::Input::DriverResult JoyconDriver::RequestDeviceAccess(SDL_hid_device_info* device_info)
+{
     std::scoped_lock lock{mutex};
 
     handle_device_type = ControllerType::None;
@@ -53,7 +58,8 @@ Common::Input::DriverResult JoyconDriver::RequestDeviceAccess(SDL_hid_device_inf
     return Common::Input::DriverResult::Success;
 }
 
-Common::Input::DriverResult JoyconDriver::InitializeDevice() {
+Common::Input::DriverResult JoyconDriver::InitializeDevice()
+{
     if (!hidapi_handle->handle) {
         return Common::Input::DriverResult::InvalidHandle;
     }
@@ -136,7 +142,8 @@ Common::Input::DriverResult JoyconDriver::InitializeDevice() {
     return Common::Input::DriverResult::Success;
 }
 
-void JoyconDriver::InputThread(std::stop_token stop_token) {
+void JoyconDriver::InputThread(std::stop_token stop_token)
+{
     LOG_INFO(Input, "Joycon Adapter input thread started");
     Common::SetCurrentThreadName("JoyconInput");
     input_thread_running = true;
@@ -185,7 +192,8 @@ void JoyconDriver::InputThread(std::stop_token stop_token) {
     LOG_INFO(Input, "Joycon Adapter input thread stopped");
 }
 
-void JoyconDriver::OnNewData(std::span<u8> buffer) {
+void JoyconDriver::OnNewData(std::span<u8> buffer)
+{
     const auto report_mode = static_cast<ReportMode>(buffer[0]);
 
     // Packages can be a little bit inconsistent. Average the delta time to provide a smoother
@@ -270,8 +278,10 @@ void JoyconDriver::OnNewData(std::span<u8> buffer) {
     }
 }
 
-Common::Input::DriverResult JoyconDriver::SetPollingMode() {
-    SCOPE_EXIT {
+Common::Input::DriverResult JoyconDriver::SetPollingMode()
+{
+    SCOPE_EXIT
+    {
         disable_input_thread = false;
     };
     disable_input_thread = true;
@@ -358,7 +368,8 @@ Common::Input::DriverResult JoyconDriver::SetPollingMode() {
     return result;
 }
 
-JoyconDriver::SupportedFeatures JoyconDriver::GetSupportedFeatures() {
+JoyconDriver::SupportedFeatures JoyconDriver::GetSupportedFeatures()
+{
     SupportedFeatures features{
         .passive = true,
         .motion = true,
@@ -381,7 +392,8 @@ JoyconDriver::SupportedFeatures JoyconDriver::GetSupportedFeatures() {
     return features;
 }
 
-bool JoyconDriver::IsInputThreadValid() const {
+bool JoyconDriver::IsInputThreadValid() const
+{
     if (!is_connected.load()) {
         return false;
     }
@@ -395,7 +407,8 @@ bool JoyconDriver::IsInputThreadValid() const {
     return true;
 }
 
-bool JoyconDriver::IsPayloadCorrect(int status, std::span<const u8> buffer) {
+bool JoyconDriver::IsPayloadCorrect(int status, std::span<const u8> buffer)
+{
     if (status <= -1) {
         error_counter++;
         return false;
@@ -413,7 +426,8 @@ bool JoyconDriver::IsPayloadCorrect(int status, std::span<const u8> buffer) {
     return true;
 }
 
-Common::Input::DriverResult JoyconDriver::SetVibration(const VibrationValue& vibration) {
+Common::Input::DriverResult JoyconDriver::SetVibration(const VibrationValue& vibration)
+{
     std::scoped_lock lock{mutex};
     if (disable_input_thread) {
         return Common::Input::DriverResult::HandleInUse;
@@ -422,7 +436,8 @@ Common::Input::DriverResult JoyconDriver::SetVibration(const VibrationValue& vib
     return last_vibration_result;
 }
 
-Common::Input::DriverResult JoyconDriver::SetLedConfig(u8 led_pattern) {
+Common::Input::DriverResult JoyconDriver::SetLedConfig(u8 led_pattern)
+{
     std::scoped_lock lock{mutex};
     if (disable_input_thread) {
         return Common::Input::DriverResult::HandleInUse;
@@ -430,7 +445,8 @@ Common::Input::DriverResult JoyconDriver::SetLedConfig(u8 led_pattern) {
     return generic_protocol->SetLedPattern(led_pattern);
 }
 
-Common::Input::DriverResult JoyconDriver::SetIrsConfig(IrsMode mode_, IrsResolution format_) {
+Common::Input::DriverResult JoyconDriver::SetIrsConfig(IrsMode mode_, IrsResolution format_)
+{
     std::scoped_lock lock{mutex};
     if (disable_input_thread) {
         return Common::Input::DriverResult::HandleInUse;
@@ -441,7 +457,8 @@ Common::Input::DriverResult JoyconDriver::SetIrsConfig(IrsMode mode_, IrsResolut
     return result;
 }
 
-Common::Input::DriverResult JoyconDriver::SetPassiveMode() {
+Common::Input::DriverResult JoyconDriver::SetPassiveMode()
+{
     std::scoped_lock lock{mutex};
     motion_enabled = false;
     hidbus_enabled = false;
@@ -451,7 +468,8 @@ Common::Input::DriverResult JoyconDriver::SetPassiveMode() {
     return SetPollingMode();
 }
 
-Common::Input::DriverResult JoyconDriver::SetActiveMode() {
+Common::Input::DriverResult JoyconDriver::SetActiveMode()
+{
     if (is_ring_disabled_by_irs) {
         is_ring_disabled_by_irs = false;
         SetActiveMode();
@@ -467,7 +485,8 @@ Common::Input::DriverResult JoyconDriver::SetActiveMode() {
     return SetPollingMode();
 }
 
-Common::Input::DriverResult JoyconDriver::SetIrMode() {
+Common::Input::DriverResult JoyconDriver::SetIrMode()
+{
     std::scoped_lock lock{mutex};
 
     if (!supported_features.irs) {
@@ -486,7 +505,8 @@ Common::Input::DriverResult JoyconDriver::SetIrMode() {
     return SetPollingMode();
 }
 
-Common::Input::DriverResult JoyconDriver::SetNfcMode() {
+Common::Input::DriverResult JoyconDriver::SetNfcMode()
+{
     std::scoped_lock lock{mutex};
 
     if (!supported_features.nfc) {
@@ -501,7 +521,8 @@ Common::Input::DriverResult JoyconDriver::SetNfcMode() {
     return SetPollingMode();
 }
 
-Common::Input::DriverResult JoyconDriver::SetRingConMode() {
+Common::Input::DriverResult JoyconDriver::SetRingConMode()
+{
     std::scoped_lock lock{mutex};
 
     if (!supported_features.hidbus) {
@@ -523,7 +544,8 @@ Common::Input::DriverResult JoyconDriver::SetRingConMode() {
     return result;
 }
 
-Common::Input::DriverResult JoyconDriver::StartNfcPolling() {
+Common::Input::DriverResult JoyconDriver::StartNfcPolling()
+{
     std::scoped_lock lock{mutex};
 
     if (!supported_features.nfc) {
@@ -540,7 +562,8 @@ Common::Input::DriverResult JoyconDriver::StartNfcPolling() {
     return result;
 }
 
-Common::Input::DriverResult JoyconDriver::StopNfcPolling() {
+Common::Input::DriverResult JoyconDriver::StopNfcPolling()
+{
     std::scoped_lock lock{mutex};
 
     if (!supported_features.nfc) {
@@ -562,7 +585,8 @@ Common::Input::DriverResult JoyconDriver::StopNfcPolling() {
     return result;
 }
 
-Common::Input::DriverResult JoyconDriver::ReadAmiiboData(std::vector<u8>& out_data) {
+Common::Input::DriverResult JoyconDriver::ReadAmiiboData(std::vector<u8>& out_data)
+{
     std::scoped_lock lock{mutex};
 
     if (!supported_features.nfc) {
@@ -583,7 +607,8 @@ Common::Input::DriverResult JoyconDriver::ReadAmiiboData(std::vector<u8>& out_da
     return result;
 }
 
-Common::Input::DriverResult JoyconDriver::WriteNfcData(std::span<const u8> data) {
+Common::Input::DriverResult JoyconDriver::WriteNfcData(std::span<const u8> data)
+{
     std::scoped_lock lock{mutex};
 
     if (!supported_features.nfc) {
@@ -604,7 +629,8 @@ Common::Input::DriverResult JoyconDriver::WriteNfcData(std::span<const u8> data)
 }
 
 Common::Input::DriverResult JoyconDriver::ReadMifareData(std::span<const MifareReadChunk> data,
-                                                         std::span<MifareReadData> out_data) {
+                                                         std::span<MifareReadData> out_data)
+{
     std::scoped_lock lock{mutex};
 
     if (!supported_features.nfc) {
@@ -624,7 +650,8 @@ Common::Input::DriverResult JoyconDriver::ReadMifareData(std::span<const MifareR
     return result;
 }
 
-Common::Input::DriverResult JoyconDriver::WriteMifareData(std::span<const MifareWriteChunk> data) {
+Common::Input::DriverResult JoyconDriver::WriteMifareData(std::span<const MifareWriteChunk> data)
+{
     std::scoped_lock lock{mutex};
 
     if (!supported_features.nfc) {
@@ -644,57 +671,68 @@ Common::Input::DriverResult JoyconDriver::WriteMifareData(std::span<const Mifare
     return result;
 }
 
-bool JoyconDriver::IsConnected() const {
+bool JoyconDriver::IsConnected() const
+{
     std::scoped_lock lock{mutex};
     return is_connected.load();
 }
 
-bool JoyconDriver::IsVibrationEnabled() const {
+bool JoyconDriver::IsVibrationEnabled() const
+{
     std::scoped_lock lock{mutex};
     return vibration_enabled;
 }
 
-FirmwareVersion JoyconDriver::GetDeviceVersion() const {
+FirmwareVersion JoyconDriver::GetDeviceVersion() const
+{
     std::scoped_lock lock{mutex};
     return version;
 }
 
-Color JoyconDriver::GetDeviceColor() const {
+Color JoyconDriver::GetDeviceColor() const
+{
     std::scoped_lock lock{mutex};
     return color;
 }
 
-std::size_t JoyconDriver::GetDevicePort() const {
+std::size_t JoyconDriver::GetDevicePort() const
+{
     std::scoped_lock lock{mutex};
     return port;
 }
 
-ControllerType JoyconDriver::GetDeviceType() const {
+ControllerType JoyconDriver::GetDeviceType() const
+{
     std::scoped_lock lock{mutex};
     return device_type;
 }
 
-ControllerType JoyconDriver::GetHandleDeviceType() const {
+ControllerType JoyconDriver::GetHandleDeviceType() const
+{
     std::scoped_lock lock{mutex};
     return handle_device_type;
 }
 
-SerialNumber JoyconDriver::GetSerialNumber() const {
+SerialNumber JoyconDriver::GetSerialNumber() const
+{
     std::scoped_lock lock{mutex};
     return serial_number;
 }
 
-SerialNumber JoyconDriver::GetHandleSerialNumber() const {
+SerialNumber JoyconDriver::GetHandleSerialNumber() const
+{
     std::scoped_lock lock{mutex};
     return handle_serial_number;
 }
 
-void JoyconDriver::SetCallbacks(const JoyconCallbacks& callbacks) {
+void JoyconDriver::SetCallbacks(const JoyconCallbacks& callbacks)
+{
     joycon_poller->SetCallbacks(callbacks);
 }
 
 Common::Input::DriverResult JoyconDriver::GetDeviceType(SDL_hid_device_info* device_info,
-                                                        ControllerType& controller_type) {
+                                                        ControllerType& controller_type)
+{
     static constexpr std::array<std::pair<u32, ControllerType>, 6> supported_devices{
         std::pair<u32, ControllerType>{0x2006, ControllerType::Left},
         {0x2007, ControllerType::Right},
@@ -717,7 +755,8 @@ Common::Input::DriverResult JoyconDriver::GetDeviceType(SDL_hid_device_info* dev
 }
 
 Common::Input::DriverResult JoyconDriver::GetSerialNumber(SDL_hid_device_info* device_info,
-                                                          SerialNumber& serial_number) {
+                                                          SerialNumber& serial_number)
+{
     if (device_info->serial_number == nullptr) {
         return Common::Input::DriverResult::Unknown;
     }

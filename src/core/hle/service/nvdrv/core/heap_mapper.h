@@ -20,7 +20,8 @@ public:
                Tegra::Host1x::Host1x& host1x);
     ~HeapMapper();
 
-    bool IsInBounds(VAddr start, size_t size) const {
+    bool IsInBounds(VAddr start, size_t size) const
+    {
         VAddr end = start + size;
         return start >= m_vaddress && end <= (m_vaddress + m_size);
     }
@@ -29,13 +30,9 @@ public:
 
     void Unmap(VAddr start, size_t size);
 
-    DAddr GetRegionStart() const {
-        return m_daddress;
-    }
+    DAddr GetRegionStart() const { return m_daddress; }
 
-    size_t GetRegionSize() const {
-        return m_size;
-    }
+    size_t GetRegionSize() const { return m_size; }
 
 private:
     struct HeapMapperInternal;

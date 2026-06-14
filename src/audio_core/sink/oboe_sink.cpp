@@ -4,13 +4,14 @@
 // SPDX-FileCopyrightText: Copyright 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include <span>
-#include <vector>
+#include "audio_core/sink/oboe_sink.h"
 
 #include <oboe/Oboe.h>
 
+#include <span>
+#include <vector>
+
 #include "audio_core/common/common.h"
-#include "audio_core/sink/oboe_sink.h"
 #include "audio_core/sink/sink_stream.h"
 #include "common/logging.h"
 #include "common/scope_exit.h"
@@ -24,23 +25,24 @@ class OboeSinkStream final : public SinkStream,
 public:
     explicit OboeSinkStream(Core::System& system_, StreamType type_, const std::string& name_,
                             u32 system_channels_)
-        : SinkStream(system_, type_) {
+        : SinkStream(system_, type_)
+    {
         name = name_;
         system_channels = system_channels_;
 
         this->OpenStream();
     }
 
-    ~OboeSinkStream() override {
-        LOG_INFO(Audio_Sink, "Destroyed Oboe stream");
-    }
+    ~OboeSinkStream() override { LOG_INFO(Audio_Sink, "Destroyed Oboe stream"); }
 
-    void Finalize() override {
+    void Finalize() override
+    {
         this->Stop();
         m_stream.reset();
     }
 
-    void Start(bool resume = false) override {
+    void Start(bool resume = false) override
+    {
         if (!m_stream || !paused) {
             return;
         }
@@ -52,7 +54,8 @@ public:
         }
     }
 
-    void Stop() override {
+    void Stop() override
+    {
         if (!m_stream || paused) {
             return;
         }
@@ -65,7 +68,8 @@ public:
     }
 
 public:
-    static s32 QueryChannelCount(oboe::Direction direction) {
+    static s32 QueryChannelCount(oboe::Direction direction)
+    {
         std::shared_ptr<oboe::AudioStream> temp_stream;
         oboe::AudioStreamBuilder builder;
 
@@ -81,7 +85,8 @@ public:
 
 protected:
     oboe::DataCallbackResult onAudioReady(oboe::AudioStream*, void* audio_data,
-                                          s32 num_buffer_frames) override {
+                                          s32 num_buffer_frames) override
+    {
         const size_t num_channels = this->GetDeviceChannels();
         const size_t frame_size = num_channels;
         const size_t num_frames = static_cast<size_t>(num_buffer_frames);
@@ -99,7 +104,8 @@ protected:
         return oboe::DataCallbackResult::Continue;
     }
 
-    void onErrorAfterClose(oboe::AudioStream*, oboe::Result) override {
+    void onErrorAfterClose(oboe::AudioStream*, oboe::Result) override
+    {
         LOG_INFO(Audio_Sink, "Audio stream closed, reinitializing");
 
         if (this->OpenStream()) {
@@ -109,7 +115,8 @@ protected:
 
 private:
     static oboe::AudioStreamBuilder* ConfigureBuilder(oboe::AudioStreamBuilder& builder,
-                                                      oboe::Direction direction) {
+                                                      oboe::Direction direction)
+    {
         // TODO: investigate callback delay issues when using AAudio
         return builder.setPerformanceMode(oboe::PerformanceMode::LowLatency)
             ->setAudioApi(oboe::AudioApi::OpenSLES)
@@ -122,7 +129,8 @@ private:
             ->setBufferCapacityInFrames(TargetSampleCount * 2);
     }
 
-    bool OpenStream() {
+    bool OpenStream()
+    {
         const auto direction = [&]() {
             switch (type) {
             case StreamType::In:
@@ -163,7 +171,8 @@ private:
         return result == oboe::Result::OK && this->SetStreamProperties();
     }
 
-    bool SetStreamProperties() {
+    bool SetStreamProperties()
+    {
         ASSERT(m_stream);
 
         m_stream->setBufferSizeInFrames(TargetSampleCount * 2);
@@ -183,7 +192,8 @@ private:
     std::shared_ptr<oboe::AudioStream> m_stream{};
 };
 
-OboeSink::OboeSink() {
+OboeSink::OboeSink()
+{
     // TODO: This is not generally knowable
     // The channel count is distinct based on direction and can change
     device_channels = OboeSinkStream::QueryChannelCount(oboe::Direction::Output);
@@ -192,22 +202,26 @@ OboeSink::OboeSink() {
 OboeSink::~OboeSink() = default;
 
 SinkStream* OboeSink::AcquireSinkStream(Core::System& system, u32 system_channels,
-                                        const std::string& name, StreamType type) {
+                                        const std::string& name, StreamType type)
+{
     SinkStreamPtr& stream = sink_streams.emplace_back(
         std::make_unique<OboeSinkStream>(system, type, name, system_channels));
 
     return stream.get();
 }
 
-void OboeSink::CloseStream(SinkStream* to_remove) {
+void OboeSink::CloseStream(SinkStream* to_remove)
+{
     sink_streams.remove_if([&](auto& stream) { return stream.get() == to_remove; });
 }
 
-void OboeSink::CloseStreams() {
+void OboeSink::CloseStreams()
+{
     sink_streams.clear();
 }
 
-f32 OboeSink::GetDeviceVolume() const {
+f32 OboeSink::GetDeviceVolume() const
+{
     if (sink_streams.empty()) {
         return 1.0f;
     }
@@ -215,13 +229,15 @@ f32 OboeSink::GetDeviceVolume() const {
     return sink_streams.front()->GetDeviceVolume();
 }
 
-void OboeSink::SetDeviceVolume(f32 volume) {
+void OboeSink::SetDeviceVolume(f32 volume)
+{
     for (auto& stream : sink_streams) {
         stream->SetDeviceVolume(volume);
     }
 }
 
-void OboeSink::SetSystemVolume(f32 volume) {
+void OboeSink::SetSystemVolume(f32 volume)
+{
     for (auto& stream : sink_streams) {
         stream->SetSystemVolume(volume);
     }

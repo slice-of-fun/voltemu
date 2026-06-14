@@ -30,11 +30,11 @@ private:
 
     Result SetShimLibraryVersion(ShimLibraryVersion library_version,
                                  ClientAppletResourceUserId aruid);
-    Result SaveScreenShotEx0(
-        Out<ApplicationAlbumEntry> out_entry, const ScreenShotAttribute& attribute,
-        AlbumReportOption report_option, ClientAppletResourceUserId aruid,
-        InBuffer<BufferAttr_HipcMapTransferAllowsNonSecure | BufferAttr_HipcMapAlias>
-            image_data_buffer);
+    Result
+    SaveScreenShotEx0(Out<ApplicationAlbumEntry> out_entry, const ScreenShotAttribute& attribute,
+                      AlbumReportOption report_option, ClientAppletResourceUserId aruid,
+                      InBuffer<BufferAttr_HipcMapTransferAllowsNonSecure | BufferAttr_HipcMapAlias>
+                          image_data_buffer);
     Result SaveScreenShotEx1(
         Out<ApplicationAlbumEntry> out_entry, const ScreenShotAttribute& attribute,
         AlbumReportOption report_option, ClientAppletResourceUserId aruid,

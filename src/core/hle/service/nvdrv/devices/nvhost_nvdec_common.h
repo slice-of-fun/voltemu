@@ -6,8 +6,9 @@
 
 #pragma once
 
-#include <deque>
 #include <ankerl/unordered_dense.h>
+
+#include <deque>
 #include <vector>
 
 #include "common/common_types.h"

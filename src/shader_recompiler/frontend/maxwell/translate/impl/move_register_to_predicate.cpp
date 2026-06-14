@@ -12,7 +12,8 @@ enum class Mode : u64 {
     CC,
 };
 
-void SetFlag(IR::IREmitter& ir, const IR::U1& inv_mask_bit, const IR::U1& src_bit, u32 index) {
+void SetFlag(IR::IREmitter& ir, const IR::U1& inv_mask_bit, const IR::U1& src_bit, u32 index)
+{
     switch (index) {
     case 0:
         return ir.SetZFlag(IR::U1{ir.Select(inv_mask_bit, ir.GetZFlag(), src_bit)});
@@ -27,7 +28,8 @@ void SetFlag(IR::IREmitter& ir, const IR::U1& inv_mask_bit, const IR::U1& src_bi
     }
 }
 
-void R2P(TranslatorVisitor& v, u64 insn, const IR::U32& mask) {
+void R2P(TranslatorVisitor& v, u64 insn, const IR::U32& mask)
+{
     union {
         u64 raw;
         BitField<8, 8, IR::Reg> src_reg;
@@ -55,15 +57,18 @@ void R2P(TranslatorVisitor& v, u64 insn, const IR::U32& mask) {
 }
 } // Anonymous namespace
 
-void TranslatorVisitor::R2P_reg(u64 insn) {
+void TranslatorVisitor::R2P_reg(u64 insn)
+{
     R2P(*this, insn, GetReg20(insn));
 }
 
-void TranslatorVisitor::R2P_cbuf(u64 insn) {
+void TranslatorVisitor::R2P_cbuf(u64 insn)
+{
     R2P(*this, insn, GetCbuf(insn));
 }
 
-void TranslatorVisitor::R2P_imm(u64 insn) {
+void TranslatorVisitor::R2P_imm(u64 insn)
+{
     R2P(*this, insn, GetImm20(insn));
 }
 

@@ -3,12 +3,14 @@
 // SPDX-FileCopyrightText: Copyright 2018 Citra Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "yuzu/multiplayer/moderation_dialog.h"
+
 #include <QStandardItem>
 #include <QStandardItemModel>
+
 #include "network/network.h"
 #include "network/room_member.h"
 #include "ui_moderation_dialog.h"
-#include "yuzu/multiplayer/moderation_dialog.h"
 
 namespace Column {
 enum {
@@ -19,7 +21,8 @@ enum {
 }
 
 ModerationDialog::ModerationDialog(QWidget* parent)
-    : QDialog(parent), ui(std::make_unique<Ui::ModerationDialog>()) {
+    : QDialog(parent), ui(std::make_unique<Ui::ModerationDialog>())
+{
     ui->setupUi(this);
 
     qRegisterMetaType<Network::Room::BanList>();
@@ -55,7 +58,8 @@ ModerationDialog::ModerationDialog(QWidget* parent)
     connect(ui->ban_list_view, &QTreeView::clicked, [this] { ui->unban->setEnabled(true); });
 }
 
-ModerationDialog::~ModerationDialog() {
+ModerationDialog::~ModerationDialog()
+{
     if (callback_handle_status_message) {
         if (auto room = Network::GetRoomMember().lock()) {
             room->Unbind(callback_handle_status_message);
@@ -69,7 +73,8 @@ ModerationDialog::~ModerationDialog() {
     }
 }
 
-void ModerationDialog::LoadBanList() {
+void ModerationDialog::LoadBanList()
+{
     if (auto room = Network::GetRoomMember().lock()) {
         ui->refresh->setEnabled(false);
         ui->refresh->setText(tr("Refreshing"));
@@ -78,7 +83,8 @@ void ModerationDialog::LoadBanList() {
     }
 }
 
-void ModerationDialog::PopulateBanList(const Network::Room::BanList& ban_list) {
+void ModerationDialog::PopulateBanList(const Network::Room::BanList& ban_list)
+{
     model->removeRows(0, model->rowCount());
     for (const auto& username : ban_list.first) {
         QStandardItem* subject_item = new QStandardItem(QString::fromStdString(username));
@@ -98,13 +104,15 @@ void ModerationDialog::PopulateBanList(const Network::Room::BanList& ban_list) {
     ui->unban->setEnabled(false);
 }
 
-void ModerationDialog::SendUnbanRequest(const QString& subject) {
+void ModerationDialog::SendUnbanRequest(const QString& subject)
+{
     if (auto room = Network::GetRoomMember().lock()) {
         room->SendModerationRequest(Network::IdModUnban, subject.toStdString());
     }
 }
 
-void ModerationDialog::OnStatusMessageReceived(const Network::StatusMessageEntry& status_message) {
+void ModerationDialog::OnStatusMessageReceived(const Network::StatusMessageEntry& status_message)
+{
     if (status_message.type != Network::IdMemberBanned &&
         status_message.type != Network::IdAddressUnbanned)
         return;

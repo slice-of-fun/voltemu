@@ -6,11 +6,12 @@
 
 #pragma once
 
-#include <vector>
 #include <glad/glad.h>
+
+#include <vector>
+
 #include "common/common_types.h"
 #include "common/math_util.h"
-
 #include "video_core/renderer_base.h"
 #include "video_core/renderer_opengl/gl_device.h"
 #include "video_core/renderer_opengl/gl_rasterizer.h"
@@ -45,13 +46,9 @@ public:
 
     std::vector<u8> GetAppletCaptureBuffer() override;
 
-    VideoCore::RasterizerInterface* ReadRasterizer() override {
-        return &rasterizer;
-    }
+    VideoCore::RasterizerInterface* ReadRasterizer() override { return &rasterizer; }
 
-    [[nodiscard]] std::string GetDeviceVendor() const override {
-        return device.GetVendorName();
-    }
+    [[nodiscard]] std::string GetDeviceVendor() const override { return device.GetVendorName(); }
 
 private:
     void AddTelemetryFields();

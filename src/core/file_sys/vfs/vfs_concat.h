@@ -6,6 +6,7 @@
 #include <compare>
 #include <map>
 #include <memory>
+
 #include "core/file_sys/vfs/vfs.h"
 
 namespace FileSys {
@@ -18,7 +19,8 @@ private:
         u64 offset;
         VirtualFile file;
 
-        auto operator<=>(const ConcatenationEntry& other) const {
+        auto operator<=>(const ConcatenationEntry& other) const
+        {
             return this->offset <=> other.offset;
         }
     };

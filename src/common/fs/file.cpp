@@ -4,10 +4,11 @@
 // SPDX-FileCopyrightText: Copyright 2021 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "common/fs/file.h"
+
 #include <vector>
 
 #include "common/assert.h"
-#include "common/fs/file.h"
 #include "common/fs/fs.h"
 #ifdef __ANDROID__
 #include "common/fs/fs_android.h"
@@ -43,7 +44,8 @@ namespace {
  *
  * @returns A pointer to a wide string representing the file access mode.
  */
-[[nodiscard]] constexpr const wchar_t* AccessModeToWStr(FileAccessMode mode, FileType type) {
+[[nodiscard]] constexpr const wchar_t* AccessModeToWStr(FileAccessMode mode, FileType type)
+{
     switch (type) {
     case FileType::BinaryFile:
         switch (mode) {
@@ -85,7 +87,8 @@ namespace {
  *
  * @returns Windows defined file-share access flag.
  */
-[[nodiscard]] constexpr int ToWindowsFileShareFlag(FileShareFlag flag) {
+[[nodiscard]] constexpr int ToWindowsFileShareFlag(FileShareFlag flag)
+{
     switch (flag) {
     case FileShareFlag::ShareNone:
     default:
@@ -109,7 +112,8 @@ namespace {
  *
  * @returns A pointer to a string representing the file access mode.
  */
-[[nodiscard]] constexpr const char* AccessModeToStr(FileAccessMode mode, FileType type) {
+[[nodiscard]] constexpr const char* AccessModeToStr(FileAccessMode mode, FileType type)
+{
     switch (type) {
     case FileType::BinaryFile:
         switch (mode) {
@@ -153,7 +157,8 @@ namespace {
  *
  * @returns Seek origin integer.
  */
-[[nodiscard]] constexpr int ToSeekOrigin(SeekOrigin origin) {
+[[nodiscard]] constexpr int ToSeekOrigin(SeekOrigin origin)
+{
     switch (origin) {
     case SeekOrigin::SetOrigin:
     default:
@@ -167,7 +172,8 @@ namespace {
 
 } // Anonymous namespace
 
-std::string ReadStringFromFile(const std::filesystem::path& path, FileType type) {
+std::string ReadStringFromFile(const std::filesystem::path& path, FileType type)
+{
     if (!IsFile(path)) {
         return "";
     }
@@ -177,8 +183,8 @@ std::string ReadStringFromFile(const std::filesystem::path& path, FileType type)
     return io_file.ReadString(io_file.GetSize());
 }
 
-size_t WriteStringToFile(const std::filesystem::path& path, FileType type,
-                         std::string_view string) {
+size_t WriteStringToFile(const std::filesystem::path& path, FileType type, std::string_view string)
+{
     if (Exists(path) && !IsFile(path)) {
         return 0;
     }
@@ -188,8 +194,8 @@ size_t WriteStringToFile(const std::filesystem::path& path, FileType type,
     return io_file.WriteString(string);
 }
 
-size_t AppendStringToFile(const std::filesystem::path& path, FileType type,
-                          std::string_view string) {
+size_t AppendStringToFile(const std::filesystem::path& path, FileType type, std::string_view string)
+{
     if (Exists(path) && !IsFile(path)) {
         return 0;
     }
@@ -201,30 +207,36 @@ size_t AppendStringToFile(const std::filesystem::path& path, FileType type,
 
 IOFile::IOFile() = default;
 
-IOFile::IOFile(const std::string& path, FileAccessMode mode, FileType type, FileShareFlag flag) {
+IOFile::IOFile(const std::string& path, FileAccessMode mode, FileType type, FileShareFlag flag)
+{
     Open(path, mode, type, flag);
 }
 
-IOFile::IOFile(std::string_view path, FileAccessMode mode, FileType type, FileShareFlag flag) {
+IOFile::IOFile(std::string_view path, FileAccessMode mode, FileType type, FileShareFlag flag)
+{
     Open(path, mode, type, flag);
 }
 
-IOFile::IOFile(const fs::path& path, FileAccessMode mode, FileType type, FileShareFlag flag) {
+IOFile::IOFile(const fs::path& path, FileAccessMode mode, FileType type, FileShareFlag flag)
+{
     Open(path, mode, type, flag);
 }
 
-IOFile::~IOFile() {
+IOFile::~IOFile()
+{
     Close();
 }
 
-IOFile::IOFile(IOFile&& other) noexcept {
+IOFile::IOFile(IOFile&& other) noexcept
+{
     std::swap(file_path, other.file_path);
     std::swap(file_access_mode, other.file_access_mode);
     std::swap(file_type, other.file_type);
     std::swap(file, other.file);
 }
 
-IOFile& IOFile::operator=(IOFile&& other) noexcept {
+IOFile& IOFile::operator=(IOFile&& other) noexcept
+{
     std::swap(file_path, other.file_path);
     std::swap(file_access_mode, other.file_access_mode);
     std::swap(file_type, other.file_type);
@@ -232,19 +244,23 @@ IOFile& IOFile::operator=(IOFile&& other) noexcept {
     return *this;
 }
 
-fs::path IOFile::GetPath() const {
+fs::path IOFile::GetPath() const
+{
     return file_path;
 }
 
-FileAccessMode IOFile::GetAccessMode() const {
+FileAccessMode IOFile::GetAccessMode() const
+{
     return file_access_mode;
 }
 
-FileType IOFile::GetType() const {
+FileType IOFile::GetType() const
+{
     return file_type;
 }
 
-void IOFile::Open(const fs::path& path, FileAccessMode mode, FileType type, FileShareFlag flag) {
+void IOFile::Open(const fs::path& path, FileAccessMode mode, FileType type, FileShareFlag flag)
+{
     Close();
 
     file_path = path;
@@ -287,7 +303,8 @@ void IOFile::Open(const fs::path& path, FileAccessMode mode, FileType type, File
     }
 }
 
-void IOFile::Close() {
+void IOFile::Close()
+{
     if (!IsOpen()) {
         return;
     }
@@ -305,11 +322,13 @@ void IOFile::Close() {
     file = nullptr;
 }
 
-bool IOFile::IsOpen() const {
+bool IOFile::IsOpen() const
+{
     return file != nullptr;
 }
 
-std::string IOFile::ReadString(size_t length) const {
+std::string IOFile::ReadString(size_t length) const
+{
     std::vector<char> string_buffer(length);
 
     const auto chars_read = ReadSpan<char>(string_buffer);
@@ -318,11 +337,13 @@ std::string IOFile::ReadString(size_t length) const {
     return std::string{string_buffer.data(), string_size};
 }
 
-size_t IOFile::WriteString(std::span<const char> string) const {
+size_t IOFile::WriteString(std::span<const char> string) const
+{
     return WriteSpan(string);
 }
 
-bool IOFile::Flush() const {
+bool IOFile::Flush() const
+{
     if (!IsOpen()) {
         return false;
     }
@@ -344,7 +365,8 @@ bool IOFile::Flush() const {
     return flush_result;
 }
 
-bool IOFile::Commit() const {
+bool IOFile::Commit() const
+{
     if (!IsOpen()) {
         return false;
     }
@@ -366,7 +388,8 @@ bool IOFile::Commit() const {
     return commit_result;
 }
 
-bool IOFile::SetSize(u64 size) const {
+bool IOFile::SetSize(u64 size) const
+{
     if (!IsOpen()) {
         return false;
     }
@@ -388,7 +411,8 @@ bool IOFile::SetSize(u64 size) const {
     return set_size_result;
 }
 
-u64 IOFile::GetSize() const {
+u64 IOFile::GetSize() const
+{
     if (!IsOpen()) {
         return 0;
     }
@@ -427,7 +451,8 @@ u64 IOFile::GetSize() const {
     return file_size;
 }
 
-bool IOFile::Seek(s64 offset, SeekOrigin origin) const {
+bool IOFile::Seek(s64 offset, SeekOrigin origin) const
+{
     if (!IsOpen()) {
         return false;
     }
@@ -446,7 +471,8 @@ bool IOFile::Seek(s64 offset, SeekOrigin origin) const {
     return seek_result;
 }
 
-s64 IOFile::Tell() const {
+s64 IOFile::Tell() const
+{
     if (!IsOpen()) {
         return 0;
     }

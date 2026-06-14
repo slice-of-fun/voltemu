@@ -40,14 +40,15 @@ public:
     ~IOlscServiceForSystemService() override;
 
 private:
-    Result GetTransferTaskListController(
-        Out<SharedPointer<ITransferTaskListController>> out_interface);
+    Result
+    GetTransferTaskListController(Out<SharedPointer<ITransferTaskListController>> out_interface);
     Result GetRemoteStorageController(Out<SharedPointer<IRemoteStorageController>> out_interface);
     Result GetDaemonController(Out<SharedPointer<IDaemonController>> out_interface);
     Result GetDataTransferPolicy(Out<DataTransferPolicy> out_policy, u64 application_id);
-    Result GetTransferTaskErrorInfo(Out<TransferTaskErrorInfo> out_info, Common::UUID uid, u64 application_id);
-    Result GetOlscServiceForSystemService(
-        Out<SharedPointer<IOlscServiceForSystemService>> out_interface);
+    Result GetTransferTaskErrorInfo(Out<TransferTaskErrorInfo> out_info, Common::UUID uid,
+                                    u64 application_id);
+    Result
+    GetOlscServiceForSystemService(Out<SharedPointer<IOlscServiceForSystemService>> out_interface);
 };
 
 } // namespace Service::OLSC

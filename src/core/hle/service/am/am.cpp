@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include "core/hle/service/am/am.h"
+
 #include "core/hle/service/am/button_poller.h"
 #include "core/hle/service/am/event_observer.h"
 #include "core/hle/service/am/service/all_system_applet_proxies_service.h"
@@ -11,7 +12,8 @@
 
 namespace Service::AM {
 
-void LoopProcess(Core::System& system) {
+void LoopProcess(Core::System& system)
+{
     WindowSystem window_system(system);
     ButtonPoller button_poller(system, window_system);
     EventObserver event_observer(system, window_system);

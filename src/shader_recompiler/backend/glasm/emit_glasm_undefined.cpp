@@ -6,23 +6,28 @@
 
 namespace Shader::Backend::GLASM {
 
-void EmitUndefU1(EmitContext& ctx, IR::Inst& inst) {
+void EmitUndefU1(EmitContext& ctx, IR::Inst& inst)
+{
     ctx.Add("MOV.S {}.x,0;", inst);
 }
 
-void EmitUndefU8(EmitContext& ctx, IR::Inst& inst) {
+void EmitUndefU8(EmitContext& ctx, IR::Inst& inst)
+{
     ctx.Add("MOV.S {}.x,0;", inst);
 }
 
-void EmitUndefU16(EmitContext& ctx, IR::Inst& inst) {
+void EmitUndefU16(EmitContext& ctx, IR::Inst& inst)
+{
     ctx.Add("MOV.S {}.x,0;", inst);
 }
 
-void EmitUndefU32(EmitContext& ctx, IR::Inst& inst) {
+void EmitUndefU32(EmitContext& ctx, IR::Inst& inst)
+{
     ctx.Add("MOV.S {}.x,0;", inst);
 }
 
-void EmitUndefU64(EmitContext& ctx, IR::Inst& inst) {
+void EmitUndefU64(EmitContext& ctx, IR::Inst& inst)
+{
     ctx.LongAdd("MOV.S64 {}.x,0;", inst);
 }
 

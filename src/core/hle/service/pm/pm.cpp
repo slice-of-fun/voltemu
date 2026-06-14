@@ -1,11 +1,12 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/pm/pm.h"
+
 #include "core/core.h"
 #include "core/hle/kernel/k_process.h"
 #include "core/hle/kernel/kernel.h"
 #include "core/hle/service/ipc_helpers.h"
-#include "core/hle/service/pm/pm.h"
 #include "core/hle/service/server_manager.h"
 #include "core/hle/service/service.h"
 
@@ -24,9 +25,10 @@ constexpr u64 NO_PROCESS_FOUND_PID{0};
 
 using ProcessList = std::list<Kernel::KScopedAutoObject<Kernel::KProcess>>;
 
-template <typename F>
+template<typename F>
 Kernel::KScopedAutoObject<Kernel::KProcess> SearchProcessList(ProcessList& process_list,
-                                                              F&& predicate) {
+                                                              F&& predicate)
+{
     const auto iter = std::find_if(process_list.begin(), process_list.end(), predicate);
 
     if (iter == process_list.end()) {
@@ -36,7 +38,8 @@ Kernel::KScopedAutoObject<Kernel::KProcess> SearchProcessList(ProcessList& proce
     return iter->GetPointerUnsafe();
 }
 
-void GetApplicationPidGeneric(HLERequestContext& ctx, ProcessList& process_list) {
+void GetApplicationPidGeneric(HLERequestContext& ctx, ProcessList& process_list)
+{
     auto process = SearchProcessList(process_list, [](auto& p) { return p->IsApplication(); });
 
     IPC::ResponseBuilder rb{ctx, 4};
@@ -48,7 +51,8 @@ void GetApplicationPidGeneric(HLERequestContext& ctx, ProcessList& process_list)
 
 class BootMode final : public ServiceFramework<BootMode> {
 public:
-    explicit BootMode(Core::System& system_) : ServiceFramework{system_, "pm:bm"} {
+    explicit BootMode(Core::System& system_) : ServiceFramework{system_, "pm:bm"}
+    {
         static const FunctionInfo functions[] = {
             {0, &BootMode::GetBootMode, "GetBootMode"},
             {1, &BootMode::SetMaintenanceBoot, "SetMaintenanceBoot"},
@@ -57,7 +61,8 @@ public:
     }
 
 private:
-    void GetBootMode(HLERequestContext& ctx) {
+    void GetBootMode(HLERequestContext& ctx)
+    {
         LOG_DEBUG(Service_PM, "called");
 
         IPC::ResponseBuilder rb{ctx, 3};
@@ -65,7 +70,8 @@ private:
         rb.PushEnum(boot_mode);
     }
 
-    void SetMaintenanceBoot(HLERequestContext& ctx) {
+    void SetMaintenanceBoot(HLERequestContext& ctx)
+    {
         LOG_DEBUG(Service_PM, "called");
 
         boot_mode = SystemBootMode::Maintenance;
@@ -79,7 +85,8 @@ private:
 
 class DebugMonitor final : public ServiceFramework<DebugMonitor> {
 public:
-    explicit DebugMonitor(Core::System& system_) : ServiceFramework{system_, "pm:dmnt"} {
+    explicit DebugMonitor(Core::System& system_) : ServiceFramework{system_, "pm:dmnt"}
+    {
         // clang-format off
         static const FunctionInfo functions[] = {
             {0, nullptr, "GetJitDebugProcessIdList"},
@@ -98,7 +105,8 @@ public:
     }
 
 private:
-    void GetProcessId(HLERequestContext& ctx) {
+    void GetProcessId(HLERequestContext& ctx)
+    {
         IPC::RequestParser rp{ctx};
         const auto program_id = rp.PopRaw<u64>();
 
@@ -119,13 +127,15 @@ private:
         rb.Push(process->GetProcessId());
     }
 
-    void GetApplicationProcessId(HLERequestContext& ctx) {
+    void GetApplicationProcessId(HLERequestContext& ctx)
+    {
         LOG_DEBUG(Service_PM, "called");
         auto list = kernel.GetProcessList();
         GetApplicationPidGeneric(ctx, list);
     }
 
-    void AtmosphereGetProcessInfo(HLERequestContext& ctx) {
+    void AtmosphereGetProcessInfo(HLERequestContext& ctx)
+    {
         // https://github.com/Atmosphere-NX/Atmosphere/blob/master/stratosphere/pm/source/impl/pm_process_manager.cpp#L614
         // This implementation is incomplete; only a handle to the process is returned.
         IPC::RequestParser rp{ctx};
@@ -170,7 +180,8 @@ private:
 
 class Info final : public ServiceFramework<Info> {
 public:
-    explicit Info(Core::System& system_) : ServiceFramework{system_, "pm:info"} {
+    explicit Info(Core::System& system_) : ServiceFramework{system_, "pm:info"}
+    {
         static const FunctionInfo functions[] = {
             {0, &Info::GetProgramId, "GetProgramId"},
             {65000, &Info::AtmosphereGetProcessId, "AtmosphereGetProcessId"},
@@ -181,7 +192,8 @@ public:
     }
 
 private:
-    void GetProgramId(HLERequestContext& ctx) {
+    void GetProgramId(HLERequestContext& ctx)
+    {
         IPC::RequestParser rp{ctx};
         const auto process_id = rp.PopRaw<u64>();
 
@@ -202,7 +214,8 @@ private:
         rb.Push(process->GetProgramId());
     }
 
-    void AtmosphereGetProcessId(HLERequestContext& ctx) {
+    void AtmosphereGetProcessId(HLERequestContext& ctx)
+    {
         IPC::RequestParser rp{ctx};
         const auto program_id = rp.PopRaw<u64>();
 
@@ -226,7 +239,8 @@ private:
 
 class Shell final : public ServiceFramework<Shell> {
 public:
-    explicit Shell(Core::System& system_) : ServiceFramework{system_, "pm:shell"} {
+    explicit Shell(Core::System& system_) : ServiceFramework{system_, "pm:shell"}
+    {
         // clang-format off
         static const FunctionInfo functions[] = {
             {0, nullptr, "LaunchProgram"},
@@ -246,14 +260,16 @@ public:
     }
 
 private:
-    void GetApplicationProcessIdForShell(HLERequestContext& ctx) {
+    void GetApplicationProcessIdForShell(HLERequestContext& ctx)
+    {
         LOG_DEBUG(Service_PM, "called");
         auto list = kernel.GetProcessList();
         GetApplicationPidGeneric(ctx, list);
     }
 };
 
-void LoopProcess(Core::System& system) {
+void LoopProcess(Core::System& system)
+{
     auto server_manager = std::make_unique<ServerManager>(system);
 
     server_manager->RegisterNamedService("pm:bm", std::make_shared<BootMode>(system));

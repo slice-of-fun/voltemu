@@ -7,15 +7,16 @@
 
 #pragma once
 
-#include <atomic>
 #include <signal.h>
 #include <unistd.h>
+
+#include <atomic>
 #include <span>
 
-#include "core/hle/kernel/k_thread.h"
-#include "core/memory.h"
 #include "common/logging.h"
 #include "core/arm/nce/visitor_base.h"
+#include "core/hle/kernel/k_thread.h"
+#include "core/memory.h"
 
 namespace Core {
 
@@ -27,7 +28,9 @@ class InterpreterVisitor final : public VisitorBase {
 public:
     explicit InterpreterVisitor(Core::Memory::Memory& memory, std::span<u64, 31> regs,
                                 std::span<u128, 32> fpsimd_regs, u64& sp, const u64& pc)
-        : m_memory(memory), m_regs(regs), m_fpsimd_regs(fpsimd_regs), m_sp(sp), m_pc(pc) {}
+        : m_memory(memory), m_regs(regs), m_fpsimd_regs(fpsimd_regs), m_sp(sp), m_pc(pc)
+    {
+    }
     ~InterpreterVisitor() override = default;
 
     enum class MemOp {

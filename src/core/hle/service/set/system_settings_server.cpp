@@ -4,6 +4,8 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/set/system_settings_server.h"
+
 #include <fstream>
 
 #include "common/assert.h"
@@ -24,7 +26,6 @@
 #include "core/hle/service/filesystem/filesystem.h"
 #include "core/hle/service/ipc_helpers.h"
 #include "core/hle/service/set/settings_server.h"
-#include "core/hle/service/set/system_settings_server.h"
 
 namespace Service::Set {
 
@@ -37,20 +38,24 @@ struct SettingsHeader {
     u32 reserved;
 };
 
-void SyncGlobalLanguageFromCode(LanguageCode language_code) {
-    const auto it = std::find_if(available_language_codes.begin(), available_language_codes.end(),
-                                 [language_code](LanguageCode code) { return code == language_code; });
+void SyncGlobalLanguageFromCode(LanguageCode language_code)
+{
+    const auto it =
+        std::find_if(available_language_codes.begin(), available_language_codes.end(),
+                     [language_code](LanguageCode code) { return code == language_code; });
     if (it == available_language_codes.end()) {
         return;
     }
 
-    const std::size_t index = static_cast<std::size_t>(std::distance(available_language_codes.begin(), it));
+    const std::size_t index =
+        static_cast<std::size_t>(std::distance(available_language_codes.begin(), it));
     if (index >= static_cast<std::size_t>(Settings::values.language_index.GetValue())) {
         Settings::values.language_index.SetValue(static_cast<Settings::Language>(index));
     }
 }
 
-void SyncGlobalRegionFromCode(SystemRegionCode region_code) {
+void SyncGlobalRegionFromCode(SystemRegionCode region_code)
+{
     const auto region_index = static_cast<std::size_t>(region_code);
     if (region_index > static_cast<std::size_t>(Settings::Region::Taiwan)) {
         return;
@@ -62,7 +67,8 @@ void SyncGlobalRegionFromCode(SystemRegionCode region_code) {
 } // Anonymous namespace
 
 Result GetFirmwareVersionImpl(FirmwareVersionFormat& out_firmware, Core::System& system,
-                              GetFirmwareVersionType type) {
+                              GetFirmwareVersionType type)
+{
     constexpr u64 FirmwareVersionSystemDataId = 0x0100000000000809;
     auto& fsc = system.GetFileSystemController();
 
@@ -115,7 +121,8 @@ Result GetFirmwareVersionImpl(FirmwareVersionFormat& out_firmware, Core::System&
 }
 
 ISystemSettingsServer::ISystemSettingsServer(Core::System& system_)
-    : ServiceFramework{system_, "set:sys"}, m_system{system} {
+    : ServiceFramework{system_, "set:sys"}, m_system{system}
+{
     // clang-format off
     static const FunctionInfo functions[] = {
         {0, C<&ISystemSettingsServer::SetLanguageCode>, "SetLanguageCode"},
@@ -364,11 +371,13 @@ ISystemSettingsServer::ISystemSettingsServer(Core::System& system_)
     m_system_settings.eula_version_count = 1;
 }
 
-ISystemSettingsServer::~ISystemSettingsServer() {
+ISystemSettingsServer::~ISystemSettingsServer()
+{
     SetSaveNeeded();
 }
 
-bool ISystemSettingsServer::LoadSettingsFile(std::filesystem::path& path, auto&& default_func) {
+bool ISystemSettingsServer::LoadSettingsFile(std::filesystem::path& path, auto&& default_func)
+{
     using settings_type = decltype(default_func());
 
     if (!Common::FS::CreateDirs(path)) {
@@ -436,7 +445,8 @@ bool ISystemSettingsServer::LoadSettingsFile(std::filesystem::path& path, auto&&
     return true;
 }
 
-bool ISystemSettingsServer::StoreSettingsFile(std::filesystem::path& path, auto& settings) {
+bool ISystemSettingsServer::StoreSettingsFile(std::filesystem::path& path, auto& settings)
+{
     using settings_type = std::decay_t<decltype(settings)>;
 
     if (!Common::FS::IsDir(path)) {
@@ -476,7 +486,8 @@ bool ISystemSettingsServer::StoreSettingsFile(std::filesystem::path& path, auto&
     return true;
 }
 
-Result ISystemSettingsServer::SetLanguageCode(LanguageCode language_code) {
+Result ISystemSettingsServer::SetLanguageCode(LanguageCode language_code)
+{
     LOG_INFO(Service_SET, "called, language_code={}", language_code);
 
     m_system_settings.language_code = language_code;
@@ -486,27 +497,31 @@ Result ISystemSettingsServer::SetLanguageCode(LanguageCode language_code) {
 }
 
 Result ISystemSettingsServer::GetFirmwareVersion(
-    OutLargeData<FirmwareVersionFormat, BufferAttr_HipcPointer> out_firmware_data) {
+    OutLargeData<FirmwareVersionFormat, BufferAttr_HipcPointer> out_firmware_data)
+{
     LOG_DEBUG(Service_SET, "called");
 
     R_RETURN(GetFirmwareVersionImpl(*out_firmware_data, system, GetFirmwareVersionType::Version1));
 }
 
 Result ISystemSettingsServer::GetFirmwareVersion2(
-    OutLargeData<FirmwareVersionFormat, BufferAttr_HipcPointer> out_firmware_data) {
+    OutLargeData<FirmwareVersionFormat, BufferAttr_HipcPointer> out_firmware_data)
+{
     LOG_DEBUG(Service_SET, "called");
 
     R_RETURN(GetFirmwareVersionImpl(*out_firmware_data, system, GetFirmwareVersionType::Version2));
 }
 
-Result ISystemSettingsServer::GetLockScreenFlag(Out<bool> out_lock_screen_flag) {
+Result ISystemSettingsServer::GetLockScreenFlag(Out<bool> out_lock_screen_flag)
+{
     LOG_INFO(Service_SET, "called, lock_screen_flag={}", m_system_settings.lock_screen_flag);
 
     *out_lock_screen_flag = m_system_settings.lock_screen_flag;
     R_SUCCEED();
 }
 
-Result ISystemSettingsServer::SetLockScreenFlag(bool lock_screen_flag) {
+Result ISystemSettingsServer::SetLockScreenFlag(bool lock_screen_flag)
+{
     LOG_INFO(Service_SET, "called, lock_screen_flag={}", lock_screen_flag);
 
     m_system_settings.lock_screen_flag = lock_screen_flag;
@@ -514,8 +529,8 @@ Result ISystemSettingsServer::SetLockScreenFlag(bool lock_screen_flag) {
     R_SUCCEED();
 }
 
-Result ISystemSettingsServer::GetExternalSteadyClockSourceId(
-    Out<Common::UUID> out_clock_source_id) {
+Result ISystemSettingsServer::GetExternalSteadyClockSourceId(Out<Common::UUID> out_clock_source_id)
+{
     LOG_INFO(Service_SET, "called, clock_source_id={}",
              m_private_settings.external_clock_source_id.FormattedString());
 
@@ -523,7 +538,8 @@ Result ISystemSettingsServer::GetExternalSteadyClockSourceId(
     R_SUCCEED();
 }
 
-Result ISystemSettingsServer::SetExternalSteadyClockSourceId(const Common::UUID& clock_source_id) {
+Result ISystemSettingsServer::SetExternalSteadyClockSourceId(const Common::UUID& clock_source_id)
+{
     LOG_INFO(Service_SET, "called, clock_source_id={}", clock_source_id.FormattedString());
 
     m_private_settings.external_clock_source_id = clock_source_id;
@@ -532,7 +548,8 @@ Result ISystemSettingsServer::SetExternalSteadyClockSourceId(const Common::UUID&
 }
 
 Result ISystemSettingsServer::GetUserSystemClockContext(
-    Out<Service::PSC::Time::SystemClockContext> out_clock_context) {
+    Out<Service::PSC::Time::SystemClockContext> out_clock_context)
+{
     LOG_INFO(Service_SET, "called");
 
     *out_clock_context = m_system_settings.user_system_clock_context;
@@ -540,7 +557,8 @@ Result ISystemSettingsServer::GetUserSystemClockContext(
 }
 
 Result ISystemSettingsServer::SetUserSystemClockContext(
-    const Service::PSC::Time::SystemClockContext& clock_context) {
+    const Service::PSC::Time::SystemClockContext& clock_context)
+{
     LOG_INFO(Service_SET, "called");
 
     m_system_settings.user_system_clock_context = clock_context;
@@ -548,7 +566,8 @@ Result ISystemSettingsServer::SetUserSystemClockContext(
     R_SUCCEED();
 }
 
-Result ISystemSettingsServer::GetAccountSettings(Out<AccountSettings> out_account_settings) {
+Result ISystemSettingsServer::GetAccountSettings(Out<AccountSettings> out_account_settings)
+{
     LOG_INFO(Service_SET, "called, account_settings_flags={}",
              m_system_settings.account_settings.flags);
 
@@ -556,7 +575,8 @@ Result ISystemSettingsServer::GetAccountSettings(Out<AccountSettings> out_accoun
     R_SUCCEED();
 }
 
-Result ISystemSettingsServer::SetAccountSettings(AccountSettings account_settings) {
+Result ISystemSettingsServer::SetAccountSettings(AccountSettings account_settings)
+{
     LOG_INFO(Service_SET, "called, account_settings_flags={}", account_settings.flags);
 
     m_system_settings.account_settings = account_settings;
@@ -565,18 +585,20 @@ Result ISystemSettingsServer::SetAccountSettings(AccountSettings account_setting
 }
 
 Result ISystemSettingsServer::GetEulaVersions(
-    Out<s32> out_count, OutArray<EulaVersion, BufferAttr_HipcMapAlias> out_eula_versions) {
+    Out<s32> out_count, OutArray<EulaVersion, BufferAttr_HipcMapAlias> out_eula_versions)
+{
     LOG_INFO(Service_SET, "called, elements={}", m_system_settings.eula_version_count);
 
-    *out_count =
-        (std::min)(m_system_settings.eula_version_count, static_cast<s32>(out_eula_versions.size()));
+    *out_count = (std::min)(m_system_settings.eula_version_count,
+                            static_cast<s32>(out_eula_versions.size()));
     memcpy(out_eula_versions.data(), m_system_settings.eula_versions.data(),
            static_cast<std::size_t>(*out_count) * sizeof(EulaVersion));
     R_SUCCEED();
 }
 
-Result ISystemSettingsServer::SetEulaVersions(
-    InArray<EulaVersion, BufferAttr_HipcMapAlias> eula_versions) {
+Result
+ISystemSettingsServer::SetEulaVersions(InArray<EulaVersion, BufferAttr_HipcMapAlias> eula_versions)
+{
     LOG_INFO(Service_SET, "called, elements={}", eula_versions.size());
 
     ASSERT(eula_versions.size() <= m_system_settings.eula_versions.size());
@@ -588,14 +610,16 @@ Result ISystemSettingsServer::SetEulaVersions(
     R_SUCCEED();
 }
 
-Result ISystemSettingsServer::GetColorSetId(Out<ColorSet> out_color_set_id) {
+Result ISystemSettingsServer::GetColorSetId(Out<ColorSet> out_color_set_id)
+{
     LOG_DEBUG(Service_SET, "called, color_set=", m_system_settings.color_set_id);
 
     *out_color_set_id = m_system_settings.color_set_id;
     R_SUCCEED();
 }
 
-Result ISystemSettingsServer::SetColorSetId(ColorSet color_set_id) {
+Result ISystemSettingsServer::SetColorSetId(ColorSet color_set_id)
+{
     LOG_DEBUG(Service_SET, "called, color_set={}", color_set_id);
 
     m_system_settings.color_set_id = color_set_id;
@@ -603,8 +627,9 @@ Result ISystemSettingsServer::SetColorSetId(ColorSet color_set_id) {
     R_SUCCEED();
 }
 
-Result ISystemSettingsServer::GetNotificationSettings(
-    Out<NotificationSettings> out_notification_settings) {
+Result
+ISystemSettingsServer::GetNotificationSettings(Out<NotificationSettings> out_notification_settings)
+{
     LOG_INFO(Service_SET, "called, flags={}, volume={}, head_time={}:{}, tailt_time={}:{}",
              m_system_settings.notification_settings.flags.raw,
              m_system_settings.notification_settings.volume,
@@ -617,8 +642,9 @@ Result ISystemSettingsServer::GetNotificationSettings(
     R_SUCCEED();
 }
 
-Result ISystemSettingsServer::SetNotificationSettings(
-    const NotificationSettings& notification_settings) {
+Result
+ISystemSettingsServer::SetNotificationSettings(const NotificationSettings& notification_settings)
+{
     LOG_INFO(Service_SET, "called, flags={}, volume={}, head_time={}:{}, tailt_time={}:{}",
              notification_settings.flags.raw, notification_settings.volume,
              notification_settings.start_time.hour, notification_settings.start_time.minute,
@@ -631,12 +657,13 @@ Result ISystemSettingsServer::SetNotificationSettings(
 
 Result ISystemSettingsServer::GetAccountNotificationSettings(
     Out<s32> out_count, OutArray<AccountNotificationSettings, BufferAttr_HipcMapAlias>
-                            out_account_notification_settings) {
+                            out_account_notification_settings)
+{
     LOG_INFO(Service_SET, "called, elements={}",
              m_system_settings.account_notification_settings_count);
 
     *out_count = (std::min)(m_system_settings.account_notification_settings_count,
-                          static_cast<s32>(out_account_notification_settings.size()));
+                            static_cast<s32>(out_account_notification_settings.size()));
     memcpy(out_account_notification_settings.data(),
            m_system_settings.account_notification_settings.data(),
            static_cast<std::size_t>(*out_count) * sizeof(AccountNotificationSettings));
@@ -645,7 +672,8 @@ Result ISystemSettingsServer::GetAccountNotificationSettings(
 }
 
 Result ISystemSettingsServer::SetAccountNotificationSettings(
-    InArray<AccountNotificationSettings, BufferAttr_HipcMapAlias> account_notification_settings) {
+    InArray<AccountNotificationSettings, BufferAttr_HipcMapAlias> account_notification_settings)
+{
     LOG_INFO(Service_SET, "called, elements={}", account_notification_settings.size());
 
     ASSERT(account_notification_settings.size() <=
@@ -660,7 +688,8 @@ Result ISystemSettingsServer::SetAccountNotificationSettings(
     R_SUCCEED();
 }
 
-Result ISystemSettingsServer::GetVibrationMasterVolume(Out<f32> vibration_master_volume) {
+Result ISystemSettingsServer::GetVibrationMasterVolume(Out<f32> vibration_master_volume)
+{
     LOG_INFO(Service_SET, "called, vibration_master_volume={}",
              m_system_settings.vibration_master_volume);
 
@@ -668,7 +697,8 @@ Result ISystemSettingsServer::GetVibrationMasterVolume(Out<f32> vibration_master
     R_SUCCEED();
 }
 
-Result ISystemSettingsServer::SetVibrationMasterVolume(f32 vibration_master_volume) {
+Result ISystemSettingsServer::SetVibrationMasterVolume(f32 vibration_master_volume)
+{
     LOG_INFO(Service_SET, "called, vibration_master_volume={}", vibration_master_volume);
 
     m_system_settings.vibration_master_volume = vibration_master_volume;
@@ -678,8 +708,8 @@ Result ISystemSettingsServer::SetVibrationMasterVolume(f32 vibration_master_volu
 
 // FIXME: implement support for the real system_settings.ini
 
-template <typename T>
-static std::vector<u8> ToBytes(const T& value) {
+template<typename T> static std::vector<u8> ToBytes(const T& value)
+{
     static_assert(std::is_trivially_copyable_v<T>);
 
     const auto* begin = reinterpret_cast<const u8*>(&value);
@@ -691,7 +721,8 @@ static std::vector<u8> ToBytes(const T& value) {
 using Settings =
     std::map<std::string, std::map<std::string, std::vector<u8>, std::less<>>, std::less<>>;
 
-static Settings GetSettings() {
+static Settings GetSettings()
+{
     Settings ret;
 
     // AM
@@ -737,7 +768,8 @@ static Settings GetSettings() {
 
 Result ISystemSettingsServer::GetSettingsItemValueSize(
     Out<u64> out_size, InLargeData<SettingItemName, BufferAttr_HipcPointer> setting_category_buffer,
-    InLargeData<SettingItemName, BufferAttr_HipcPointer> setting_name_buffer) {
+    InLargeData<SettingItemName, BufferAttr_HipcPointer> setting_name_buffer)
+{
     const std::string setting_category{Common::StringFromBuffer(*setting_category_buffer)};
     const std::string setting_name{Common::StringFromBuffer(*setting_name_buffer)};
 
@@ -757,7 +789,8 @@ Result ISystemSettingsServer::GetSettingsItemValueSize(
 Result ISystemSettingsServer::GetSettingsItemValue(
     Out<u64> out_size, OutBuffer<BufferAttr_HipcMapAlias> out_data,
     InLargeData<SettingItemName, BufferAttr_HipcPointer> setting_category_buffer,
-    InLargeData<SettingItemName, BufferAttr_HipcPointer> setting_name_buffer) {
+    InLargeData<SettingItemName, BufferAttr_HipcPointer> setting_name_buffer)
+{
     const std::string setting_category{Common::StringFromBuffer(*setting_category_buffer)};
     const std::string setting_name{Common::StringFromBuffer(*setting_name_buffer)};
 
@@ -766,7 +799,8 @@ Result ISystemSettingsServer::GetSettingsItemValue(
     R_RETURN(GetSettingsItemValueImpl(out_data, *out_size, setting_category, setting_name));
 }
 
-Result ISystemSettingsServer::GetTvSettings(Out<TvSettings> out_tv_settings) {
+Result ISystemSettingsServer::GetTvSettings(Out<TvSettings> out_tv_settings)
+{
     LOG_INFO(Service_SET,
              "called, flags={}, cmu_mode={}, contrast_ratio={}, hdmi_content_type={}, "
              "rgb_range={}, tv_gama={}, tv_resolution={}, tv_underscan={}",
@@ -781,7 +815,8 @@ Result ISystemSettingsServer::GetTvSettings(Out<TvSettings> out_tv_settings) {
     R_SUCCEED();
 }
 
-Result ISystemSettingsServer::SetTvSettings(TvSettings tv_settings) {
+Result ISystemSettingsServer::SetTvSettings(TvSettings tv_settings)
+{
 
     LOG_INFO(Service_SET,
              "called, flags={}, cmu_mode={}, contrast_ratio={}, hdmi_content_type={}, "
@@ -796,7 +831,8 @@ Result ISystemSettingsServer::SetTvSettings(TvSettings tv_settings) {
 }
 
 Result ISystemSettingsServer::GetAudioOutputMode(Out<AudioOutputMode> out_output_mode,
-                                                 AudioOutputModeTarget target) {
+                                                 AudioOutputModeTarget target)
+{
     switch (target) {
     case AudioOutputModeTarget::Hdmi:
         *out_output_mode = m_system_settings.audio_output_mode_hdmi;
@@ -822,7 +858,8 @@ Result ISystemSettingsServer::GetAudioOutputMode(Out<AudioOutputMode> out_output
 }
 
 Result ISystemSettingsServer::SetAudioOutputMode(AudioOutputModeTarget target,
-                                                 AudioOutputMode output_mode) {
+                                                 AudioOutputMode output_mode)
+{
     LOG_INFO(Service_SET, "called, target={}, output_mode={}", target, output_mode);
 
     switch (target) {
@@ -849,8 +886,8 @@ Result ISystemSettingsServer::SetAudioOutputMode(AudioOutputModeTarget target,
     R_SUCCEED();
 }
 
-Result ISystemSettingsServer::GetSpeakerAutoMuteFlag(
-    Out<bool> out_force_mute_on_headphone_removed) {
+Result ISystemSettingsServer::GetSpeakerAutoMuteFlag(Out<bool> out_force_mute_on_headphone_removed)
+{
     LOG_INFO(Service_SET, "called, force_mute_on_headphone_removed={}",
              m_system_settings.force_mute_on_headphone_removed);
 
@@ -858,7 +895,8 @@ Result ISystemSettingsServer::GetSpeakerAutoMuteFlag(
     R_SUCCEED();
 }
 
-Result ISystemSettingsServer::SetSpeakerAutoMuteFlag(bool force_mute_on_headphone_removed) {
+Result ISystemSettingsServer::SetSpeakerAutoMuteFlag(bool force_mute_on_headphone_removed)
+{
     LOG_INFO(Service_SET, "called, force_mute_on_headphone_removed={}",
              force_mute_on_headphone_removed);
 
@@ -867,14 +905,16 @@ Result ISystemSettingsServer::SetSpeakerAutoMuteFlag(bool force_mute_on_headphon
     R_SUCCEED();
 }
 
-Result ISystemSettingsServer::GetQuestFlag(Out<QuestFlag> out_quest_flag) {
+Result ISystemSettingsServer::GetQuestFlag(Out<QuestFlag> out_quest_flag)
+{
     LOG_INFO(Service_SET, "called, quest_flag={}", m_system_settings.quest_flag);
 
     *out_quest_flag = m_system_settings.quest_flag;
     R_SUCCEED();
 }
 
-Result ISystemSettingsServer::SetQuestFlag(QuestFlag quest_flag) {
+Result ISystemSettingsServer::SetQuestFlag(QuestFlag quest_flag)
+{
     LOG_INFO(Service_SET, "called, quest_flag={}", quest_flag);
 
     m_system_settings.quest_flag = quest_flag;
@@ -883,7 +923,8 @@ Result ISystemSettingsServer::SetQuestFlag(QuestFlag quest_flag) {
 }
 
 Result ISystemSettingsServer::GetRebootlessSystemUpdateVersion(
-    Out<RebootlessSystemUpdateVersion> out_rebootless_system_update) {
+    Out<RebootlessSystemUpdateVersion> out_rebootless_system_update)
+{
     LOG_INFO(Service_SET, "(STUBBED) called");
 
     out_rebootless_system_update->version = 0;
@@ -892,16 +933,18 @@ Result ISystemSettingsServer::GetRebootlessSystemUpdateVersion(
     R_SUCCEED();
 }
 
-Result ISystemSettingsServer::GetDeviceTimeZoneLocationName(
-    Out<Service::PSC::Time::LocationName> out_name) {
+Result
+ISystemSettingsServer::GetDeviceTimeZoneLocationName(Out<Service::PSC::Time::LocationName> out_name)
+{
     LOG_INFO(Service_SET, "called");
 
     *out_name = m_system_settings.device_time_zone_location_name;
     R_SUCCEED();
 }
 
-Result ISystemSettingsServer::SetDeviceTimeZoneLocationName(
-    const Service::PSC::Time::LocationName& name) {
+Result
+ISystemSettingsServer::SetDeviceTimeZoneLocationName(const Service::PSC::Time::LocationName& name)
+{
     LOG_INFO(Service_SET, "called");
 
     m_system_settings.device_time_zone_location_name = name;
@@ -909,7 +952,8 @@ Result ISystemSettingsServer::SetDeviceTimeZoneLocationName(
     R_SUCCEED();
 }
 
-Result ISystemSettingsServer::SetRegionCode(SystemRegionCode region_code) {
+Result ISystemSettingsServer::SetRegionCode(SystemRegionCode region_code)
+{
     LOG_INFO(Service_SET, "called, region_code={}", region_code);
 
     m_system_settings.region_code = region_code;
@@ -919,7 +963,8 @@ Result ISystemSettingsServer::SetRegionCode(SystemRegionCode region_code) {
 }
 
 Result ISystemSettingsServer::GetNetworkSystemClockContext(
-    Out<Service::PSC::Time::SystemClockContext> out_context) {
+    Out<Service::PSC::Time::SystemClockContext> out_context)
+{
     LOG_INFO(Service_SET, "called");
 
     *out_context = m_system_settings.network_system_clock_context;
@@ -927,7 +972,8 @@ Result ISystemSettingsServer::GetNetworkSystemClockContext(
 }
 
 Result ISystemSettingsServer::SetNetworkSystemClockContext(
-    const Service::PSC::Time::SystemClockContext& context) {
+    const Service::PSC::Time::SystemClockContext& context)
+{
     LOG_INFO(Service_SET, "called");
 
     m_system_settings.network_system_clock_context = context;
@@ -936,7 +982,8 @@ Result ISystemSettingsServer::SetNetworkSystemClockContext(
 }
 
 Result ISystemSettingsServer::IsUserSystemClockAutomaticCorrectionEnabled(
-    Out<bool> out_automatic_correction_enabled) {
+    Out<bool> out_automatic_correction_enabled)
+{
     LOG_INFO(Service_SET, "called, out_automatic_correction_enabled={}",
              m_system_settings.user_system_clock_automatic_correction_enabled);
 
@@ -946,7 +993,8 @@ Result ISystemSettingsServer::IsUserSystemClockAutomaticCorrectionEnabled(
 }
 
 Result ISystemSettingsServer::SetUserSystemClockAutomaticCorrectionEnabled(
-    bool automatic_correction_enabled) {
+    bool automatic_correction_enabled)
+{
     LOG_INFO(Service_SET, "called, out_automatic_correction_enabled={}",
              automatic_correction_enabled);
 
@@ -955,7 +1003,8 @@ Result ISystemSettingsServer::SetUserSystemClockAutomaticCorrectionEnabled(
     R_SUCCEED();
 }
 
-Result ISystemSettingsServer::GetDebugModeFlag(Out<bool> is_debug_mode_enabled) {
+Result ISystemSettingsServer::GetDebugModeFlag(Out<bool> is_debug_mode_enabled)
+{
     const auto result = GetSettingsItemValueImpl<bool>(*is_debug_mode_enabled, "settings_debug",
                                                        "is_debug_mode_enabled");
 
@@ -963,8 +1012,9 @@ Result ISystemSettingsServer::GetDebugModeFlag(Out<bool> is_debug_mode_enabled) 
     R_RETURN(result);
 }
 
-Result ISystemSettingsServer::GetPrimaryAlbumStorage(
-    Out<PrimaryAlbumStorage> out_primary_album_storage) {
+Result
+ISystemSettingsServer::GetPrimaryAlbumStorage(Out<PrimaryAlbumStorage> out_primary_album_storage)
+{
     LOG_INFO(Service_SET, "called, primary_album_storage={}",
              m_system_settings.primary_album_storage);
 
@@ -972,7 +1022,8 @@ Result ISystemSettingsServer::GetPrimaryAlbumStorage(
     R_SUCCEED();
 }
 
-Result ISystemSettingsServer::SetPrimaryAlbumStorage(PrimaryAlbumStorage primary_album_storage) {
+Result ISystemSettingsServer::SetPrimaryAlbumStorage(PrimaryAlbumStorage primary_album_storage)
+{
     LOG_INFO(Service_SET, "called, primary_album_storage={}", primary_album_storage);
 
     m_system_settings.primary_album_storage = primary_album_storage;
@@ -980,21 +1031,17 @@ Result ISystemSettingsServer::SetPrimaryAlbumStorage(PrimaryAlbumStorage primary
     R_SUCCEED();
 }
 
-static void Fill3DS_CRC(u32 d, char* data) {
+static void Fill3DS_CRC(u32 d, char* data)
+{
     std::array<u8, 10> digits = {
-        u8((d / 1000000000) % 100),
-        u8((d / 100000000) % 10),
-        u8((d / 10000000) % 10),
-        u8((d / 1000000) % 10),
-        u8((d / 100000) % 10),
-        u8((d / 10000) % 10),
-        u8((d / 1000) % 10),
-        u8((d / 100) % 10),
-        u8((d / 10) % 10),
-        u8(d % 10),
+        u8((d / 1000000000) % 100), u8((d / 100000000) % 10),
+        u8((d / 10000000) % 10),    u8((d / 1000000) % 10),
+        u8((d / 100000) % 10),      u8((d / 10000) % 10),
+        u8((d / 1000) % 10),        u8((d / 100) % 10),
+        u8((d / 10) % 10),          u8(d % 10),
     };
     // Normalize to retail values
-    std::array<u8, 4> retail_digits = { 1, 4, 5, 7 };
+    std::array<u8, 4> retail_digits = {1, 4, 5, 7};
     digits[0] = retail_digits[(d % 10) % 4];
     digits[1] = 0;
     //
@@ -1011,9 +1058,10 @@ static void Fill3DS_CRC(u32 d, char* data) {
     data[sizeof(digits)] = char(sum_digit + '0');
 }
 
-Result ISystemSettingsServer::GetBatteryLot(Out<BatteryLot> out_battery_lot) {
+Result ISystemSettingsServer::GetBatteryLot(Out<BatteryLot> out_battery_lot)
+{
     LOG_INFO(Service_SET, "called");
-    *out_battery_lot = []{
+    *out_battery_lot = [] {
         u32 d = ::Settings::values.serial_battery.GetValue();
         BatteryLot c{};
         c.lot_number[0] = 'B';
@@ -1033,9 +1081,10 @@ Result ISystemSettingsServer::GetBatteryLot(Out<BatteryLot> out_battery_lot) {
     R_SUCCEED();
 }
 
-Result ISystemSettingsServer::GetSerialNumber(Out<SerialNumber> out_console_serial) {
+Result ISystemSettingsServer::GetSerialNumber(Out<SerialNumber> out_console_serial)
+{
     LOG_INFO(Service_SET, "called");
-    *out_console_serial = []{
+    *out_console_serial = [] {
         u32 d = ::Settings::values.serial_unit.GetValue();
         SerialNumber c{};
         c.serial_number[0] = 'X';
@@ -1043,14 +1092,21 @@ Result ISystemSettingsServer::GetSerialNumber(Out<SerialNumber> out_console_seri
         c.serial_number[2] = [] {
             // Adding another setting would be tedious so... let's just reuse region_index :)
             switch (::Settings::values.region_index.GetValue()) {
-            case ::Settings::Region::Japan: return 'J';
-            case ::Settings::Region::Usa: return 'W';
-            case ::Settings::Region::Europe: return 'E';
-            case ::Settings::Region::Australia: return 'M'; //pretend its Malaysia
+            case ::Settings::Region::Japan:
+                return 'J';
+            case ::Settings::Region::Usa:
+                return 'W';
+            case ::Settings::Region::Europe:
+                return 'E';
+            case ::Settings::Region::Australia:
+                return 'M'; // pretend its Malaysia
             case ::Settings::Region::China:
-            case ::Settings::Region::Taiwan: return 'C';
-            case ::Settings::Region::Korea: return 'K';
-            default: return 'W';
+            case ::Settings::Region::Taiwan:
+                return 'C';
+            case ::Settings::Region::Korea:
+                return 'K';
+            default:
+                return 'W';
             }
         }();
         Fill3DS_CRC(d, c.serial_number.data() + 3);
@@ -1059,14 +1115,16 @@ Result ISystemSettingsServer::GetSerialNumber(Out<SerialNumber> out_console_seri
     R_SUCCEED();
 }
 
-Result ISystemSettingsServer::GetNfcEnableFlag(Out<bool> out_nfc_enable_flag) {
+Result ISystemSettingsServer::GetNfcEnableFlag(Out<bool> out_nfc_enable_flag)
+{
     LOG_INFO(Service_SET, "called, nfc_enable_flag={}", m_system_settings.nfc_enable_flag);
 
     *out_nfc_enable_flag = m_system_settings.nfc_enable_flag;
     R_SUCCEED();
 }
 
-Result ISystemSettingsServer::SetNfcEnableFlag(bool nfc_enable_flag) {
+Result ISystemSettingsServer::SetNfcEnableFlag(bool nfc_enable_flag)
+{
     LOG_INFO(Service_SET, "called, nfc_enable_flag={}", nfc_enable_flag);
 
     m_system_settings.nfc_enable_flag = nfc_enable_flag;
@@ -1074,46 +1132,53 @@ Result ISystemSettingsServer::SetNfcEnableFlag(bool nfc_enable_flag) {
     R_SUCCEED();
 }
 
-Result ISystemSettingsServer::GetConsoleInformationUploadFlag(Out<bool> out_flag) {
+Result ISystemSettingsServer::GetConsoleInformationUploadFlag(Out<bool> out_flag)
+{
     LOG_INFO(Service_SET, "called {}", m_system_settings.console_information_upload_flag);
     *out_flag = m_system_settings.console_information_upload_flag;
     R_SUCCEED();
 }
 
-Result ISystemSettingsServer::SetConsoleInformationUploadFlag(bool flag) {
+Result ISystemSettingsServer::SetConsoleInformationUploadFlag(bool flag)
+{
     LOG_INFO(Service_SET, "called {}", flag);
     m_system_settings.usb_30_enable_flag = flag;
     SetSaveNeeded();
     R_SUCCEED();
 }
 
-Result ISystemSettingsServer::GetAutomaticApplicationDownloadFlag(Out<bool> out_flag) {
+Result ISystemSettingsServer::GetAutomaticApplicationDownloadFlag(Out<bool> out_flag)
+{
     LOG_INFO(Service_SET, "called {}", m_system_settings.usb_30_enable_flag);
     *out_flag = m_system_settings.automatic_application_download_flag;
     R_SUCCEED();
 }
 
-Result ISystemSettingsServer::SetAutomaticApplicationDownloadFlag(bool flag) {
+Result ISystemSettingsServer::SetAutomaticApplicationDownloadFlag(bool flag)
+{
     LOG_INFO(Service_SET, "called {}", flag);
     m_system_settings.automatic_application_download_flag = flag;
     SetSaveNeeded();
     R_SUCCEED();
 }
 
-Result ISystemSettingsServer::GetUsb30EnableFlag(Out<bool> out_usb30_enable_flag) {
+Result ISystemSettingsServer::GetUsb30EnableFlag(Out<bool> out_usb30_enable_flag)
+{
     LOG_INFO(Service_SET, "called, usb30_enable_flag={}", m_system_settings.usb_30_enable_flag);
     *out_usb30_enable_flag = m_system_settings.usb_30_enable_flag;
     R_SUCCEED();
 }
 
-Result ISystemSettingsServer::SetUsb30EnableFlag(bool usb30_enable_flag) {
+Result ISystemSettingsServer::SetUsb30EnableFlag(bool usb30_enable_flag)
+{
     LOG_INFO(Service_SET, "called, usb30_enable_flag={}", usb30_enable_flag);
     m_system_settings.usb_30_enable_flag = usb30_enable_flag;
     SetSaveNeeded();
     R_SUCCEED();
 }
 
-Result ISystemSettingsServer::GetSleepSettings(Out<SleepSettings> out_sleep_settings) {
+Result ISystemSettingsServer::GetSleepSettings(Out<SleepSettings> out_sleep_settings)
+{
     LOG_INFO(Service_SET, "called, flags={}, handheld_sleep_plan={}, console_sleep_plan={}",
              m_system_settings.sleep_settings.flags.raw,
              m_system_settings.sleep_settings.handheld_sleep_plan,
@@ -1123,7 +1188,8 @@ Result ISystemSettingsServer::GetSleepSettings(Out<SleepSettings> out_sleep_sett
     R_SUCCEED();
 }
 
-Result ISystemSettingsServer::SetSleepSettings(SleepSettings sleep_settings) {
+Result ISystemSettingsServer::SetSleepSettings(SleepSettings sleep_settings)
+{
     LOG_INFO(Service_SET, "called, flags={}, handheld_sleep_plan={}, console_sleep_plan={}",
              sleep_settings.flags.raw, sleep_settings.handheld_sleep_plan,
              sleep_settings.console_sleep_plan);
@@ -1133,7 +1199,8 @@ Result ISystemSettingsServer::SetSleepSettings(SleepSettings sleep_settings) {
     R_SUCCEED();
 }
 
-Result ISystemSettingsServer::GetWirelessLanEnableFlag(Out<bool> out_wireless_lan_enable_flag) {
+Result ISystemSettingsServer::GetWirelessLanEnableFlag(Out<bool> out_wireless_lan_enable_flag)
+{
     LOG_INFO(Service_SET, "called, wireless_lan_enable_flag={}",
              m_system_settings.wireless_lan_enable_flag);
 
@@ -1141,7 +1208,8 @@ Result ISystemSettingsServer::GetWirelessLanEnableFlag(Out<bool> out_wireless_la
     R_SUCCEED();
 }
 
-Result ISystemSettingsServer::SetWirelessLanEnableFlag(bool wireless_lan_enable_flag) {
+Result ISystemSettingsServer::SetWirelessLanEnableFlag(bool wireless_lan_enable_flag)
+{
     LOG_INFO(Service_SET, "called, wireless_lan_enable_flag={}", wireless_lan_enable_flag);
 
     m_system_settings.wireless_lan_enable_flag = wireless_lan_enable_flag;
@@ -1150,7 +1218,8 @@ Result ISystemSettingsServer::SetWirelessLanEnableFlag(bool wireless_lan_enable_
 }
 
 Result ISystemSettingsServer::GetInitialLaunchSettings(
-    Out<InitialLaunchSettings> out_initial_launch_settings) {
+    Out<InitialLaunchSettings> out_initial_launch_settings)
+{
     LOG_INFO(Service_SET, "called, flags={}, timestamp={}",
              m_system_settings.initial_launch_settings_packed.flags.raw,
              m_system_settings.initial_launch_settings_packed.timestamp.time_point);
@@ -1162,8 +1231,9 @@ Result ISystemSettingsServer::GetInitialLaunchSettings(
     R_SUCCEED();
 }
 
-Result ISystemSettingsServer::SetInitialLaunchSettings(
-    InitialLaunchSettings initial_launch_settings) {
+Result
+ISystemSettingsServer::SetInitialLaunchSettings(InitialLaunchSettings initial_launch_settings)
+{
     LOG_INFO(Service_SET, "called, flags={}, timestamp={}", initial_launch_settings.flags.raw,
              initial_launch_settings.timestamp.time_point);
 
@@ -1174,7 +1244,8 @@ Result ISystemSettingsServer::SetInitialLaunchSettings(
 }
 
 Result ISystemSettingsServer::GetDeviceNickName(
-    OutLargeData<std::array<u8, 0x80>, BufferAttr_HipcMapAlias> out_device_name) {
+    OutLargeData<std::array<u8, 0x80>, BufferAttr_HipcMapAlias> out_device_name)
+{
     LOG_DEBUG(Service_SET, "called");
 
     *out_device_name = {};
@@ -1186,7 +1257,8 @@ Result ISystemSettingsServer::GetDeviceNickName(
 }
 
 Result ISystemSettingsServer::SetDeviceNickName(
-    InLargeData<std::array<u8, 0x80>, BufferAttr_HipcMapAlias> device_name_buffer) {
+    InLargeData<std::array<u8, 0x80>, BufferAttr_HipcMapAlias> device_name_buffer)
+{
     const std::string device_name = Common::StringFromBuffer(*device_name_buffer);
 
     LOG_INFO(Service_SET, "called, device_name={}", device_name);
@@ -1195,15 +1267,18 @@ Result ISystemSettingsServer::SetDeviceNickName(
     R_SUCCEED();
 }
 
-Result ISystemSettingsServer::GetProductModel(Out<u32> out_product_model) {
-    // Most certainly should be 1 -- definitely should not be 2, but it's worth tinkering with anyways
+Result ISystemSettingsServer::GetProductModel(Out<u32> out_product_model)
+{
+    // Most certainly should be 1 -- definitely should not be 2, but it's worth tinkering with
+    // anyways
     u32 const product_model = 1;
     LOG_WARNING(Service_SET, "(STUBBED) called, product_model={}", product_model);
     *out_product_model = product_model;
     R_SUCCEED();
 }
 
-Result ISystemSettingsServer::GetBluetoothEnableFlag(Out<bool> out_bluetooth_enable_flag) {
+Result ISystemSettingsServer::GetBluetoothEnableFlag(Out<bool> out_bluetooth_enable_flag)
+{
     LOG_INFO(Service_SET, "called, bluetooth_enable_flag={}",
              m_system_settings.bluetooth_enable_flag);
 
@@ -1211,7 +1286,8 @@ Result ISystemSettingsServer::GetBluetoothEnableFlag(Out<bool> out_bluetooth_ena
     R_SUCCEED();
 }
 
-Result ISystemSettingsServer::SetBluetoothEnableFlag(bool bluetooth_enable_flag) {
+Result ISystemSettingsServer::SetBluetoothEnableFlag(bool bluetooth_enable_flag)
+{
     LOG_INFO(Service_SET, "called, bluetooth_enable_flag={}", bluetooth_enable_flag);
 
     m_system_settings.bluetooth_enable_flag = bluetooth_enable_flag;
@@ -1219,7 +1295,8 @@ Result ISystemSettingsServer::SetBluetoothEnableFlag(bool bluetooth_enable_flag)
     R_SUCCEED();
 }
 
-Result ISystemSettingsServer::GetMiiAuthorId(Out<Common::UUID> out_mii_author_id) {
+Result ISystemSettingsServer::GetMiiAuthorId(Out<Common::UUID> out_mii_author_id)
+{
     if (m_system_settings.mii_author_id.IsInvalid()) {
         m_system_settings.mii_author_id = Common::UUID::MakeDefault();
         SetSaveNeeded();
@@ -1232,14 +1309,16 @@ Result ISystemSettingsServer::GetMiiAuthorId(Out<Common::UUID> out_mii_author_id
     R_SUCCEED();
 }
 
-Result ISystemSettingsServer::GetAutoUpdateEnableFlag(Out<bool> out_auto_update_enable_flag) {
+Result ISystemSettingsServer::GetAutoUpdateEnableFlag(Out<bool> out_auto_update_enable_flag)
+{
     LOG_INFO(Service_SET, "called, auto_update_flag={}", m_system_settings.auto_update_enable_flag);
 
     *out_auto_update_enable_flag = m_system_settings.auto_update_enable_flag;
     R_SUCCEED();
 }
 
-Result ISystemSettingsServer::SetAutoUpdateEnableFlag(bool auto_update_enable_flag) {
+Result ISystemSettingsServer::SetAutoUpdateEnableFlag(bool auto_update_enable_flag)
+{
     LOG_INFO(Service_SET, "called, auto_update_flag={}", auto_update_enable_flag);
 
     m_system_settings.auto_update_enable_flag = auto_update_enable_flag;
@@ -1247,7 +1326,8 @@ Result ISystemSettingsServer::SetAutoUpdateEnableFlag(bool auto_update_enable_fl
     R_SUCCEED();
 }
 
-Result ISystemSettingsServer::GetBatteryPercentageFlag(Out<bool> out_battery_percentage_flag) {
+Result ISystemSettingsServer::GetBatteryPercentageFlag(Out<bool> out_battery_percentage_flag)
+{
     LOG_DEBUG(Service_SET, "called, battery_percentage_flag={}",
               m_system_settings.battery_percentage_flag);
 
@@ -1255,7 +1335,8 @@ Result ISystemSettingsServer::GetBatteryPercentageFlag(Out<bool> out_battery_per
     R_SUCCEED();
 }
 
-Result ISystemSettingsServer::SetBatteryPercentageFlag(bool battery_percentage_flag) {
+Result ISystemSettingsServer::SetBatteryPercentageFlag(bool battery_percentage_flag)
+{
     LOG_INFO(Service_SET, "called, battery_percentage_flag={}", battery_percentage_flag);
 
     m_system_settings.battery_percentage_flag = battery_percentage_flag;
@@ -1263,7 +1344,8 @@ Result ISystemSettingsServer::SetBatteryPercentageFlag(bool battery_percentage_f
     R_SUCCEED();
 }
 
-Result ISystemSettingsServer::SetExternalSteadyClockInternalOffset(s64 offset) {
+Result ISystemSettingsServer::SetExternalSteadyClockInternalOffset(s64 offset)
+{
     LOG_DEBUG(Service_SET, "called, external_steady_clock_internal_offset={}", offset);
 
     m_private_settings.external_steady_clock_internal_offset = offset;
@@ -1271,7 +1353,8 @@ Result ISystemSettingsServer::SetExternalSteadyClockInternalOffset(s64 offset) {
     R_SUCCEED();
 }
 
-Result ISystemSettingsServer::GetExternalSteadyClockInternalOffset(Out<s64> out_offset) {
+Result ISystemSettingsServer::GetExternalSteadyClockInternalOffset(Out<s64> out_offset)
+{
     LOG_DEBUG(Service_SET, "called, external_steady_clock_internal_offset={}",
               m_private_settings.external_steady_clock_internal_offset);
 
@@ -1280,7 +1363,8 @@ Result ISystemSettingsServer::GetExternalSteadyClockInternalOffset(Out<s64> out_
 }
 
 Result ISystemSettingsServer::GetPushNotificationActivityModeOnSleep(
-    Out<s32> out_push_notification_activity_mode_on_sleep) {
+    Out<s32> out_push_notification_activity_mode_on_sleep)
+{
     LOG_INFO(Service_SET, "called, push_notification_activity_mode_on_sleep={}",
              m_system_settings.push_notification_activity_mode_on_sleep);
 
@@ -1290,7 +1374,8 @@ Result ISystemSettingsServer::GetPushNotificationActivityModeOnSleep(
 }
 
 Result ISystemSettingsServer::SetPushNotificationActivityModeOnSleep(
-    s32 push_notification_activity_mode_on_sleep) {
+    s32 push_notification_activity_mode_on_sleep)
+{
     LOG_INFO(Service_SET, "called, push_notification_activity_mode_on_sleep={}",
              push_notification_activity_mode_on_sleep);
 
@@ -1301,7 +1386,8 @@ Result ISystemSettingsServer::SetPushNotificationActivityModeOnSleep(
 }
 
 Result ISystemSettingsServer::GetErrorReportSharePermission(
-    Out<ErrorReportSharePermission> out_error_report_share_permission) {
+    Out<ErrorReportSharePermission> out_error_report_share_permission)
+{
     LOG_INFO(Service_SET, "called, error_report_share_permission={}",
              m_system_settings.error_report_share_permission);
 
@@ -1310,7 +1396,8 @@ Result ISystemSettingsServer::GetErrorReportSharePermission(
 }
 
 Result ISystemSettingsServer::SetErrorReportSharePermission(
-    ErrorReportSharePermission error_report_share_permission) {
+    ErrorReportSharePermission error_report_share_permission)
+{
     LOG_INFO(Service_SET, "called, error_report_share_permission={}",
              error_report_share_permission);
 
@@ -1319,14 +1406,16 @@ Result ISystemSettingsServer::SetErrorReportSharePermission(
     R_SUCCEED();
 }
 
-Result ISystemSettingsServer::GetAppletLaunchFlags(Out<u32> out_applet_launch_flag) {
+Result ISystemSettingsServer::GetAppletLaunchFlags(Out<u32> out_applet_launch_flag)
+{
     LOG_INFO(Service_SET, "called, applet_launch_flag={}", m_system_settings.applet_launch_flag);
 
     *out_applet_launch_flag = m_system_settings.applet_launch_flag;
     R_SUCCEED();
 }
 
-Result ISystemSettingsServer::SetAppletLaunchFlags(u32 applet_launch_flag) {
+Result ISystemSettingsServer::SetAppletLaunchFlags(u32 applet_launch_flag)
+{
     LOG_INFO(Service_SET, "called, applet_launch_flag={}", applet_launch_flag);
 
     m_system_settings.applet_launch_flag = applet_launch_flag;
@@ -1334,14 +1423,16 @@ Result ISystemSettingsServer::SetAppletLaunchFlags(u32 applet_launch_flag) {
     R_SUCCEED();
 }
 
-Result ISystemSettingsServer::GetKeyboardLayout(Out<KeyboardLayout> out_keyboard_layout) {
+Result ISystemSettingsServer::GetKeyboardLayout(Out<KeyboardLayout> out_keyboard_layout)
+{
     LOG_INFO(Service_SET, "called, keyboard_layout={}", m_system_settings.keyboard_layout);
 
     *out_keyboard_layout = m_system_settings.keyboard_layout;
     R_SUCCEED();
 }
 
-Result ISystemSettingsServer::SetKeyboardLayout(KeyboardLayout keyboard_layout) {
+Result ISystemSettingsServer::SetKeyboardLayout(KeyboardLayout keyboard_layout)
+{
     LOG_INFO(Service_SET, "called, keyboard_layout={}", keyboard_layout);
 
     m_system_settings.keyboard_layout = keyboard_layout;
@@ -1350,7 +1441,8 @@ Result ISystemSettingsServer::SetKeyboardLayout(KeyboardLayout keyboard_layout) 
 }
 
 Result ISystemSettingsServer::GetDeviceTimeZoneLocationUpdatedTime(
-    Out<Service::PSC::Time::SteadyClockTimePoint> out_time_point) {
+    Out<Service::PSC::Time::SteadyClockTimePoint> out_time_point)
+{
     LOG_INFO(Service_SET, "called");
 
     *out_time_point = m_system_settings.device_time_zone_location_updated_time;
@@ -1358,7 +1450,8 @@ Result ISystemSettingsServer::GetDeviceTimeZoneLocationUpdatedTime(
 }
 
 Result ISystemSettingsServer::SetDeviceTimeZoneLocationUpdatedTime(
-    const Service::PSC::Time::SteadyClockTimePoint& time_point) {
+    const Service::PSC::Time::SteadyClockTimePoint& time_point)
+{
     LOG_INFO(Service_SET, "called");
 
     m_system_settings.device_time_zone_location_updated_time = time_point;
@@ -1367,7 +1460,8 @@ Result ISystemSettingsServer::SetDeviceTimeZoneLocationUpdatedTime(
 }
 
 Result ISystemSettingsServer::GetUserSystemClockAutomaticCorrectionUpdatedTime(
-    Out<Service::PSC::Time::SteadyClockTimePoint> out_time_point) {
+    Out<Service::PSC::Time::SteadyClockTimePoint> out_time_point)
+{
     LOG_INFO(Service_SET, "called");
 
     *out_time_point = m_system_settings.user_system_clock_automatic_correction_updated_time_point;
@@ -1375,7 +1469,8 @@ Result ISystemSettingsServer::GetUserSystemClockAutomaticCorrectionUpdatedTime(
 }
 
 Result ISystemSettingsServer::SetUserSystemClockAutomaticCorrectionUpdatedTime(
-    const Service::PSC::Time::SteadyClockTimePoint& out_time_point) {
+    const Service::PSC::Time::SteadyClockTimePoint& out_time_point)
+{
     LOG_INFO(Service_SET, "called");
 
     m_system_settings.user_system_clock_automatic_correction_updated_time_point = out_time_point;
@@ -1384,7 +1479,8 @@ Result ISystemSettingsServer::SetUserSystemClockAutomaticCorrectionUpdatedTime(
 }
 
 Result ISystemSettingsServer::GetChineseTraditionalInputMethod(
-    Out<ChineseTraditionalInputMethod> out_chinese_traditional_input_method) {
+    Out<ChineseTraditionalInputMethod> out_chinese_traditional_input_method)
+{
     LOG_INFO(Service_SET, "called, chinese_traditional_input_method={}",
              m_system_settings.chinese_traditional_input_method);
 
@@ -1392,7 +1488,8 @@ Result ISystemSettingsServer::GetChineseTraditionalInputMethod(
     R_SUCCEED();
 }
 
-Result ISystemSettingsServer::GetHomeMenuScheme(Out<HomeMenuScheme> out_home_menu_scheme) {
+Result ISystemSettingsServer::GetHomeMenuScheme(Out<HomeMenuScheme> out_home_menu_scheme)
+{
     LOG_DEBUG(Service_SET, "(STUBBED) called");
 
     *out_home_menu_scheme = {
@@ -1405,33 +1502,38 @@ Result ISystemSettingsServer::GetHomeMenuScheme(Out<HomeMenuScheme> out_home_men
     R_SUCCEED();
 }
 
-Result ISystemSettingsServer::GetPlatformRegion(Out<PlatformRegion> out_platform_region) {
+Result ISystemSettingsServer::GetPlatformRegion(Out<PlatformRegion> out_platform_region)
+{
     LOG_WARNING(Service_SET, "(STUBBED) called");
 
     *out_platform_region = PlatformRegion::Global;
     R_SUCCEED();
 }
 
-Result ISystemSettingsServer::SetPlatformRegion(PlatformRegion platform_region) {
+Result ISystemSettingsServer::SetPlatformRegion(PlatformRegion platform_region)
+{
     LOG_WARNING(Service_SET, "(STUBBED) called");
     R_SUCCEED();
 }
 
-Result ISystemSettingsServer::GetHomeMenuSchemeModel(Out<u32> out_home_menu_scheme_model) {
+Result ISystemSettingsServer::GetHomeMenuSchemeModel(Out<u32> out_home_menu_scheme_model)
+{
     LOG_WARNING(Service_SET, "(STUBBED) called");
 
     *out_home_menu_scheme_model = 0;
     R_SUCCEED();
 }
 
-Result ISystemSettingsServer::GetTouchScreenMode(Out<TouchScreenMode> out_touch_screen_mode) {
+Result ISystemSettingsServer::GetTouchScreenMode(Out<TouchScreenMode> out_touch_screen_mode)
+{
     LOG_INFO(Service_SET, "called, touch_screen_mode={}", m_system_settings.touch_screen_mode);
 
     *out_touch_screen_mode = m_system_settings.touch_screen_mode;
     R_SUCCEED();
 }
 
-Result ISystemSettingsServer::SetTouchScreenMode(TouchScreenMode touch_screen_mode) {
+Result ISystemSettingsServer::SetTouchScreenMode(TouchScreenMode touch_screen_mode)
+{
     LOG_INFO(Service_SET, "called, touch_screen_mode={}", touch_screen_mode);
 
     m_system_settings.touch_screen_mode = touch_screen_mode;
@@ -1439,21 +1541,24 @@ Result ISystemSettingsServer::SetTouchScreenMode(TouchScreenMode touch_screen_mo
     R_SUCCEED();
 }
 
-Result ISystemSettingsServer::GetFieldTestingFlag(Out<bool> out_field_testing_flag) {
+Result ISystemSettingsServer::GetFieldTestingFlag(Out<bool> out_field_testing_flag)
+{
     LOG_INFO(Service_SET, "called, field_testing_flag={}", m_system_settings.field_testing_flag);
 
     *out_field_testing_flag = m_system_settings.field_testing_flag;
     R_SUCCEED();
 }
 
-Result ISystemSettingsServer::GetPanelCrcMode(Out<s32> out_panel_crc_mode) {
+Result ISystemSettingsServer::GetPanelCrcMode(Out<s32> out_panel_crc_mode)
+{
     LOG_INFO(Service_SET, "called, panel_crc_mode={}", m_system_settings.panel_crc_mode);
 
     *out_panel_crc_mode = m_system_settings.panel_crc_mode;
     R_SUCCEED();
 }
 
-Result ISystemSettingsServer::SetPanelCrcMode(s32 panel_crc_mode) {
+Result ISystemSettingsServer::SetPanelCrcMode(s32 panel_crc_mode)
+{
     LOG_INFO(Service_SET, "called, panel_crc_mode={}", panel_crc_mode);
 
     m_system_settings.panel_crc_mode = panel_crc_mode;
@@ -1461,15 +1566,17 @@ Result ISystemSettingsServer::SetPanelCrcMode(s32 panel_crc_mode) {
     R_SUCCEED();
 }
 
-Result ISystemSettingsServer::GetHttpAuthConfigs(Out<s32> out_count, OutBuffer<BufferAttr_HipcMapAlias> out_configs) {
+Result ISystemSettingsServer::GetHttpAuthConfigs(Out<s32> out_count,
+                                                 OutBuffer<BufferAttr_HipcMapAlias> out_configs)
+{
     LOG_WARNING(Service_SET, "(STUBBED) called, buffer_size={}", out_configs.size());
     *out_count = 0;
     R_SUCCEED();
 }
 
 Result ISystemSettingsServer::GetAccountUserSettings(
-    Out<u32> out_count,
-    OutLargeData<AccountUserSettings, BufferAttr_HipcMapAlias> out_settings) {
+    Out<u32> out_count, OutLargeData<AccountUserSettings, BufferAttr_HipcMapAlias> out_settings)
+{
     LOG_WARNING(Service_SET, "(STUBBED) called");
 
     *out_count = 0;
@@ -1477,65 +1584,78 @@ Result ISystemSettingsServer::GetAccountUserSettings(
     R_SUCCEED();
 }
 
-Result ISystemSettingsServer::GetDefaultAccountUserSettings(Out<AccountUserSettings> out_settings) {
+Result ISystemSettingsServer::GetDefaultAccountUserSettings(Out<AccountUserSettings> out_settings)
+{
     LOG_WARNING(Service_SET, "(STUBBED) called");
 
     *out_settings = {};
     R_SUCCEED();
 }
 
-void ISystemSettingsServer::SetupSettings() {
-    auto system_dir = Common::FS::GetVoltPath(Common::FS::VoltPath::NANDDir) / "system/save/8000000000000050";
+void ISystemSettingsServer::SetupSettings()
+{
+    auto system_dir =
+        Common::FS::GetVoltPath(Common::FS::VoltPath::NANDDir) / "system/save/8000000000000050";
     if (!LoadSettingsFile(system_dir, []() { return DefaultSystemSettings(); })) {
         ASSERT(false);
     }
 
-    auto private_dir = Common::FS::GetVoltPath(Common::FS::VoltPath::NANDDir) / "system/save/8000000000000052";
+    auto private_dir =
+        Common::FS::GetVoltPath(Common::FS::VoltPath::NANDDir) / "system/save/8000000000000052";
     if (!LoadSettingsFile(private_dir, []() { return DefaultPrivateSettings(); })) {
         ASSERT(false);
     }
 
-    auto device_dir = Common::FS::GetVoltPath(Common::FS::VoltPath::NANDDir) / "system/save/8000000000000053";
+    auto device_dir =
+        Common::FS::GetVoltPath(Common::FS::VoltPath::NANDDir) / "system/save/8000000000000053";
     if (!LoadSettingsFile(device_dir, []() { return DefaultDeviceSettings(); })) {
         ASSERT(false);
     }
 
-    auto appln_dir = Common::FS::GetVoltPath(Common::FS::VoltPath::NANDDir) / "system/save/8000000000000054";
+    auto appln_dir =
+        Common::FS::GetVoltPath(Common::FS::VoltPath::NANDDir) / "system/save/8000000000000054";
     if (!LoadSettingsFile(appln_dir, []() { return DefaultApplnSettings(); })) {
         ASSERT(false);
     }
 }
 
-void ISystemSettingsServer::StoreSettings() {
-    auto system_dir = Common::FS::GetVoltPath(Common::FS::VoltPath::NANDDir) / "system/save/8000000000000050";
+void ISystemSettingsServer::StoreSettings()
+{
+    auto system_dir =
+        Common::FS::GetVoltPath(Common::FS::VoltPath::NANDDir) / "system/save/8000000000000050";
     if (!StoreSettingsFile(system_dir, m_system_settings)) {
         LOG_ERROR(Service_SET, "Failed to store System settings");
     }
 
-    auto private_dir = Common::FS::GetVoltPath(Common::FS::VoltPath::NANDDir) / "system/save/8000000000000052";
+    auto private_dir =
+        Common::FS::GetVoltPath(Common::FS::VoltPath::NANDDir) / "system/save/8000000000000052";
     if (!StoreSettingsFile(private_dir, m_private_settings)) {
         LOG_ERROR(Service_SET, "Failed to store Private settings");
     }
 
-    auto device_dir = Common::FS::GetVoltPath(Common::FS::VoltPath::NANDDir) / "system/save/8000000000000053";
+    auto device_dir =
+        Common::FS::GetVoltPath(Common::FS::VoltPath::NANDDir) / "system/save/8000000000000053";
     if (!StoreSettingsFile(device_dir, m_device_settings)) {
         LOG_ERROR(Service_SET, "Failed to store Device settings");
     }
 
-    auto appln_dir = Common::FS::GetVoltPath(Common::FS::VoltPath::NANDDir) / "system/save/8000000000000054";
+    auto appln_dir =
+        Common::FS::GetVoltPath(Common::FS::VoltPath::NANDDir) / "system/save/8000000000000054";
     if (!StoreSettingsFile(appln_dir, m_appln_settings)) {
         LOG_ERROR(Service_SET, "Failed to store ApplLn settings");
     }
 }
 
-void ISystemSettingsServer::SetSaveNeeded() {
+void ISystemSettingsServer::SetSaveNeeded()
+{
     std::scoped_lock l{m_save_needed_mutex};
     StoreSettings();
 }
 
 Result ISystemSettingsServer::GetSettingsItemValueImpl(std::span<u8> out_value, u64& out_size,
                                                        const std::string& category,
-                                                       const std::string& name) {
+                                                       const std::string& name)
+{
     auto settings{GetSettings()};
     R_UNLESS(settings.contains(category) && settings[category].contains(name), ResultUnknown);
 

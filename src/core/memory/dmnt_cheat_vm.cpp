@@ -1,23 +1,27 @@
 // SPDX-FileCopyrightText: Copyright 2019 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/memory/dmnt_cheat_vm.h"
+
 #include "common/assert.h"
 #include "common/scope_exit.h"
 #include "core/memory/dmnt_cheat_types.h"
-#include "core/memory/dmnt_cheat_vm.h"
 
 namespace Core::Memory {
 
-DmntCheatVm::DmntCheatVm(std::unique_ptr<Callbacks> callbacks_)
-    : callbacks(std::move(callbacks_)) {}
+DmntCheatVm::DmntCheatVm(std::unique_ptr<Callbacks> callbacks_) : callbacks(std::move(callbacks_))
+{
+}
 
 DmntCheatVm::~DmntCheatVm() = default;
 
-void DmntCheatVm::DebugLog(u32 log_id, u64 value) {
+void DmntCheatVm::DebugLog(u32 log_id, u64 value)
+{
     callbacks->DebugLog(static_cast<u8>(log_id), value);
 }
 
-void DmntCheatVm::LogOpcode(const CheatVmOpcode& opcode) {
+void DmntCheatVm::LogOpcode(const CheatVmOpcode& opcode)
+{
     if (auto store_static = std::get_if<StoreStaticOpcode>(&opcode.opcode)) {
         callbacks->CommandLog("Opcode: Store Static");
         callbacks->CommandLog(fmt::format("Bit Width: {:X}", store_static->bit_width));
@@ -220,11 +224,13 @@ void DmntCheatVm::LogOpcode(const CheatVmOpcode& opcode) {
 
 DmntCheatVm::Callbacks::~Callbacks() = default;
 
-bool DmntCheatVm::DecodeNextOpcode(CheatVmOpcode& out) {
+bool DmntCheatVm::DecodeNextOpcode(CheatVmOpcode& out)
+{
     // If we've ever seen a decode failure, return false.
     bool valid = decode_success;
     CheatVmOpcode opcode = {};
-    SCOPE_EXIT {
+    SCOPE_EXIT
+    {
         decode_success &= valid;
         if (valid) {
             out = opcode;
@@ -634,7 +640,8 @@ bool DmntCheatVm::DecodeNextOpcode(CheatVmOpcode& out) {
     return valid;
 }
 
-void DmntCheatVm::SkipConditionalBlock(bool is_if) {
+void DmntCheatVm::SkipConditionalBlock(bool is_if)
+{
     if (condition_depth > 0) {
         // We want to continue until we're out of the current block.
         const std::size_t desired_depth = condition_depth - 1;
@@ -668,7 +675,8 @@ void DmntCheatVm::SkipConditionalBlock(bool is_if) {
     }
 }
 
-u64 DmntCheatVm::GetVmInt(VmInt value, u32 bit_width) {
+u64 DmntCheatVm::GetVmInt(VmInt value, u32 bit_width)
+{
     switch (bit_width) {
     case 1:
         return value.bit8;
@@ -685,7 +693,8 @@ u64 DmntCheatVm::GetVmInt(VmInt value, u32 bit_width) {
 }
 
 u64 DmntCheatVm::GetCheatProcessAddress(const CheatProcessMetadata& metadata,
-                                        MemoryAccessType mem_type, u64 rel_address) {
+                                        MemoryAccessType mem_type, u64 rel_address)
+{
     switch (mem_type) {
     case MemoryAccessType::MainNso:
     default:
@@ -699,7 +708,8 @@ u64 DmntCheatVm::GetCheatProcessAddress(const CheatProcessMetadata& metadata,
     }
 }
 
-void DmntCheatVm::ResetState() {
+void DmntCheatVm::ResetState()
+{
     registers.fill(0);
     saved_values.fill(0);
     loop_tops.fill(0);
@@ -708,7 +718,8 @@ void DmntCheatVm::ResetState() {
     decode_success = true;
 }
 
-bool DmntCheatVm::LoadProgram(const std::vector<CheatEntry>& entries) {
+bool DmntCheatVm::LoadProgram(const std::vector<CheatEntry>& entries)
+{
     // Reset opcode count.
     num_opcodes = 0;
 
@@ -729,7 +740,8 @@ bool DmntCheatVm::LoadProgram(const std::vector<CheatEntry>& entries) {
     return true;
 }
 
-void DmntCheatVm::Execute(const CheatProcessMetadata& metadata) {
+void DmntCheatVm::Execute(const CheatProcessMetadata& metadata)
+{
     CheatVmOpcode cur_opcode{};
 
     // Get Keys down.

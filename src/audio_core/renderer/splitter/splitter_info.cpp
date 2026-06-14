@@ -5,9 +5,12 @@
 
 namespace AudioCore::Renderer {
 
-SplitterInfo::SplitterInfo(const s32 id_) : id{id_} {}
+SplitterInfo::SplitterInfo(const s32 id_) : id{id_}
+{
+}
 
-void SplitterInfo::InitializeInfos(SplitterInfo* splitters, const u32 count) {
+void SplitterInfo::InitializeInfos(SplitterInfo* splitters, const u32 count)
+{
     if (splitters == nullptr) {
         return;
     }
@@ -20,7 +23,8 @@ void SplitterInfo::InitializeInfos(SplitterInfo* splitters, const u32 count) {
     }
 }
 
-u32 SplitterInfo::Update(const InParameter* params) {
+u32 SplitterInfo::Update(const InParameter* params)
+{
     if (params->id != id) {
         return 0;
     }
@@ -30,7 +34,8 @@ u32 SplitterInfo::Update(const InParameter* params) {
                             params->destination_count * sizeof(s32));
 }
 
-SplitterDestinationData* SplitterInfo::GetData(const u32 destination_id) {
+SplitterDestinationData* SplitterInfo::GetData(const u32 destination_id)
+{
     auto out_destination{destinations};
     u32 i{0};
     while (i < destination_id) {
@@ -44,27 +49,33 @@ SplitterDestinationData* SplitterInfo::GetData(const u32 destination_id) {
     return out_destination;
 }
 
-u32 SplitterInfo::GetDestinationCount() const {
+u32 SplitterInfo::GetDestinationCount() const
+{
     return destination_count;
 }
 
-void SplitterInfo::SetDestinationCount(const u32 count) {
+void SplitterInfo::SetDestinationCount(const u32 count)
+{
     destination_count = count;
 }
 
-bool SplitterInfo::HasNewConnection() const {
+bool SplitterInfo::HasNewConnection() const
+{
     return has_new_connection;
 }
 
-void SplitterInfo::ClearNewConnectionFlag() {
+void SplitterInfo::ClearNewConnectionFlag()
+{
     has_new_connection = false;
 }
 
-void SplitterInfo::SetNewConnectionFlag() {
+void SplitterInfo::SetNewConnectionFlag()
+{
     has_new_connection = true;
 }
 
-void SplitterInfo::UpdateInternalState() {
+void SplitterInfo::UpdateInternalState()
+{
     auto destination{destinations};
     while (destination != nullptr) {
         destination->UpdateInternalState();
@@ -72,7 +83,8 @@ void SplitterInfo::UpdateInternalState() {
     }
 }
 
-void SplitterInfo::SetDestinations(SplitterDestinationData* destinations_) {
+void SplitterInfo::SetDestinations(SplitterDestinationData* destinations_)
+{
     destinations = destinations_;
 }
 

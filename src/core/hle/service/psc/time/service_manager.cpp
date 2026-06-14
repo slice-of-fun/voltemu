@@ -1,11 +1,12 @@
 // SPDX-FileCopyrightText: Copyright 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/psc/time/service_manager.h"
+
 #include "core/core.h"
 #include "core/core_timing.h"
 #include "core/hle/service/cmif_serialization.h"
 #include "core/hle/service/psc/time/power_state_service.h"
-#include "core/hle/service/psc/time/service_manager.h"
 #include "core/hle/service/psc/time/static.h"
 
 namespace Service::PSC::Time {
@@ -23,7 +24,8 @@ ServiceManager::ServiceManager(Core::System& system_, std::shared_ptr<TimeManage
       m_local_system_context_writer{m_time->m_local_system_clock_context_writer},
       m_network_system_context_writer{m_time->m_network_system_clock_context_writer},
       m_ephemeral_system_context_writer{m_time->m_ephemeral_network_clock_context_writer},
-      m_local_operation{m_system}, m_network_operation{m_system}, m_ephemeral_operation{m_system} {
+      m_local_operation{m_system}, m_network_operation{m_system}, m_ephemeral_operation{m_system}
+{
     // clang-format off
     static const FunctionInfo functions[] = {
         {0,   D<&ServiceManager::GetStaticServiceAsUser>, "GetStaticServiceAsUser"},
@@ -53,25 +55,29 @@ ServiceManager::ServiceManager(Core::System& system_, std::shared_ptr<TimeManage
     m_ephemeral_system_context_writer.Link(m_ephemeral_operation);
 }
 
-Result ServiceManager::GetStaticServiceAsUser(OutInterface<StaticService> out_service) {
+Result ServiceManager::GetStaticServiceAsUser(OutInterface<StaticService> out_service)
+{
     LOG_DEBUG(Service_Time, "called.");
 
     R_RETURN(GetStaticService(out_service, StaticServiceSetupInfo{0, 0, 0, 0, 0, 0}, "time:u"));
 }
 
-Result ServiceManager::GetStaticServiceAsAdmin(OutInterface<StaticService> out_service) {
+Result ServiceManager::GetStaticServiceAsAdmin(OutInterface<StaticService> out_service)
+{
     LOG_DEBUG(Service_Time, "called.");
 
     R_RETURN(GetStaticService(out_service, StaticServiceSetupInfo{1, 1, 0, 1, 0, 0}, "time:a"));
 }
 
-Result ServiceManager::GetStaticServiceAsRepair(OutInterface<StaticService> out_service) {
+Result ServiceManager::GetStaticServiceAsRepair(OutInterface<StaticService> out_service)
+{
     LOG_DEBUG(Service_Time, "called.");
 
     R_RETURN(GetStaticService(out_service, StaticServiceSetupInfo{0, 0, 0, 0, 1, 0}, "time:r"));
 }
 
-Result ServiceManager::GetStaticServiceAsServiceManager(OutInterface<StaticService> out_service) {
+Result ServiceManager::GetStaticServiceAsServiceManager(OutInterface<StaticService> out_service)
+{
     LOG_DEBUG(Service_Time, "called.");
 
     R_RETURN(GetStaticService(out_service, StaticServiceSetupInfo{1, 1, 1, 1, 1, 0}, "time:sm"));
@@ -80,7 +86,8 @@ Result ServiceManager::GetStaticServiceAsServiceManager(OutInterface<StaticServi
 Result ServiceManager::SetupStandardSteadyClockCore(bool is_rtc_reset_detected,
                                                     const Common::UUID& clock_source_id,
                                                     s64 rtc_offset, s64 internal_offset,
-                                                    s64 test_offset) {
+                                                    s64 test_offset)
+{
     LOG_DEBUG(Service_Time,
               "called. is_rtc_reset_detected={} clock_source_id={} rtc_offset={} "
               "internal_offset={} test_offset={}",
@@ -104,7 +111,8 @@ Result ServiceManager::SetupStandardSteadyClockCore(bool is_rtc_reset_detected,
 }
 
 Result ServiceManager::SetupStandardLocalSystemClockCore(const SystemClockContext& context,
-                                                         s64 time) {
+                                                         s64 time)
+{
     LOG_DEBUG(Service_Time,
               "called. context={} context.steady_time_point.clock_source_id={} time={}", context,
               context.steady_time_point.clock_source_id.RawString(), time);
@@ -116,8 +124,8 @@ Result ServiceManager::SetupStandardLocalSystemClockCore(const SystemClockContex
     R_SUCCEED();
 }
 
-Result ServiceManager::SetupStandardNetworkSystemClockCore(SystemClockContext context,
-                                                           s64 accuracy) {
+Result ServiceManager::SetupStandardNetworkSystemClockCore(SystemClockContext context, s64 accuracy)
+{
     LOG_DEBUG(Service_Time, "called. context={} steady_time_point.clock_source_id={} accuracy={}",
               context, context.steady_time_point.clock_source_id.RawString(), accuracy);
 
@@ -133,7 +141,8 @@ Result ServiceManager::SetupStandardNetworkSystemClockCore(SystemClockContext co
 }
 
 Result ServiceManager::SetupStandardUserSystemClockCore(bool automatic_correction,
-                                                        SteadyClockTimePoint time_point) {
+                                                        SteadyClockTimePoint time_point)
+{
     LOG_DEBUG(Service_Time, "called. automatic_correction={} time_point={} clock_source_id={}",
               automatic_correction, time_point, time_point.clock_source_id.RawString());
 
@@ -149,7 +158,8 @@ Result ServiceManager::SetupStandardUserSystemClockCore(bool automatic_correctio
 Result ServiceManager::SetupTimeZoneServiceCore(const LocationName& name,
                                                 const RuleVersion& rule_version, u32 location_count,
                                                 const SteadyClockTimePoint& time_point,
-                                                InBuffer<BufferAttr_HipcAutoSelect> rule_buffer) {
+                                                InBuffer<BufferAttr_HipcAutoSelect> rule_buffer)
+{
     LOG_DEBUG(Service_Time,
               "called. name={} rule_version={} location_count={} time_point={} "
               "clock_source_id={}",
@@ -169,7 +179,8 @@ Result ServiceManager::SetupTimeZoneServiceCore(const LocationName& name,
     R_SUCCEED();
 }
 
-Result ServiceManager::SetupEphemeralNetworkSystemClockCore() {
+Result ServiceManager::SetupEphemeralNetworkSystemClockCore()
+{
     LOG_DEBUG(Service_Time, "called.");
 
     m_ephemeral_network_clock.SetContextWriter(m_ephemeral_system_context_writer);
@@ -179,8 +190,9 @@ Result ServiceManager::SetupEphemeralNetworkSystemClockCore() {
     R_SUCCEED();
 }
 
-Result ServiceManager::GetStandardLocalClockOperationEvent(
-    OutCopyHandle<Kernel::KReadableEvent> out_event) {
+Result
+ServiceManager::GetStandardLocalClockOperationEvent(OutCopyHandle<Kernel::KReadableEvent> out_event)
+{
     LOG_DEBUG(Service_Time, "called.");
 
     *out_event = &m_local_operation.m_event->GetReadableEvent();
@@ -188,7 +200,8 @@ Result ServiceManager::GetStandardLocalClockOperationEvent(
 }
 
 Result ServiceManager::GetStandardNetworkClockOperationEventForServiceManager(
-    OutCopyHandle<Kernel::KReadableEvent> out_event) {
+    OutCopyHandle<Kernel::KReadableEvent> out_event)
+{
     LOG_DEBUG(Service_Time, "called.");
 
     *out_event = &m_network_operation.m_event->GetReadableEvent();
@@ -196,7 +209,8 @@ Result ServiceManager::GetStandardNetworkClockOperationEventForServiceManager(
 }
 
 Result ServiceManager::GetEphemeralNetworkClockOperationEventForServiceManager(
-    OutCopyHandle<Kernel::KReadableEvent> out_event) {
+    OutCopyHandle<Kernel::KReadableEvent> out_event)
+{
     LOG_DEBUG(Service_Time, "called.");
 
     *out_event = &m_ephemeral_operation.m_event->GetReadableEvent();
@@ -204,14 +218,16 @@ Result ServiceManager::GetEphemeralNetworkClockOperationEventForServiceManager(
 }
 
 Result ServiceManager::GetStandardUserSystemClockAutomaticCorrectionUpdatedEvent(
-    OutCopyHandle<Kernel::KReadableEvent> out_event) {
+    OutCopyHandle<Kernel::KReadableEvent> out_event)
+{
     LOG_DEBUG(Service_Time, "called.");
 
     *out_event = &m_user_system_clock.GetEvent().GetReadableEvent();
     R_SUCCEED();
 }
 
-Result ServiceManager::SetStandardSteadyClockBaseTime(s64 base_time) {
+Result ServiceManager::SetStandardSteadyClockBaseTime(s64 base_time)
+{
     LOG_DEBUG(Service_Time, "called. base_time={}", base_time);
 
     m_steady_clock.SetRtcOffset(base_time);
@@ -227,15 +243,16 @@ Result ServiceManager::SetStandardSteadyClockBaseTime(s64 base_time) {
     R_SUCCEED();
 }
 
-Result ServiceManager::GetClosestAlarmUpdatedEvent(
-    OutCopyHandle<Kernel::KReadableEvent> out_event) {
+Result ServiceManager::GetClosestAlarmUpdatedEvent(OutCopyHandle<Kernel::KReadableEvent> out_event)
+{
     LOG_DEBUG(Service_Time, "called.");
 
     *out_event = &m_alarms.GetEvent().GetReadableEvent();
     R_SUCCEED();
 }
 
-Result ServiceManager::CheckAndSignalAlarms() {
+Result ServiceManager::CheckAndSignalAlarms()
+{
     LOG_DEBUG(Service_Time, "called.");
 
     m_alarms.CheckAndSignal();
@@ -243,7 +260,8 @@ Result ServiceManager::CheckAndSignalAlarms() {
 }
 
 Result ServiceManager::GetClosestAlarmInfo(Out<bool> out_is_valid, Out<AlarmInfo> out_info,
-                                           Out<s64> out_time) {
+                                           Out<s64> out_time)
+{
     Alarm* alarm{nullptr};
     *out_is_valid = m_alarms.GetClosestAlarm(&alarm);
     if (*out_is_valid) {
@@ -261,7 +279,8 @@ Result ServiceManager::GetClosestAlarmInfo(Out<bool> out_is_valid, Out<AlarmInfo
     R_SUCCEED();
 }
 
-void ServiceManager::CheckAndSetupServicesSAndP() {
+void ServiceManager::CheckAndSetupServicesSAndP()
+{
     if (m_local_system_clock.IsInitialized() && m_user_system_clock.IsInitialized() &&
         m_network_system_clock.IsInitialized() && m_steady_clock.IsInitialized() &&
         m_time_zone.IsInitialized() && m_ephemeral_network_clock.IsInitialized()) {
@@ -269,7 +288,8 @@ void ServiceManager::CheckAndSetupServicesSAndP() {
     }
 }
 
-void ServiceManager::SetupSAndP() {
+void ServiceManager::SetupSAndP()
+{
     if (!m_is_s_and_p_setup) {
         m_is_s_and_p_setup = true;
         m_server_manager.RegisterNamedService(
@@ -282,7 +302,8 @@ void ServiceManager::SetupSAndP() {
 }
 
 Result ServiceManager::GetStaticService(OutInterface<StaticService> out_service,
-                                        StaticServiceSetupInfo setup_info, const char* name) {
+                                        StaticServiceSetupInfo setup_info, const char* name)
+{
     *out_service = std::make_shared<StaticService>(m_system, setup_info, m_time, name);
     R_SUCCEED();
 }

@@ -16,7 +16,8 @@
 namespace Kernel::Svc {
 namespace {
 
-constexpr bool IsValidVirtualCoreId(int32_t core_id) {
+constexpr bool IsValidVirtualCoreId(int32_t core_id)
+{
     return (0 <= core_id && core_id < static_cast<int32_t>(Core::Hardware::NUM_CPU_CORES));
 }
 
@@ -24,7 +25,8 @@ constexpr bool IsValidVirtualCoreId(int32_t core_id) {
 
 /// Creates a new thread
 Result CreateThread(Core::System& system, Handle* out_handle, u64 entry_point, u64 arg,
-                    u64 stack_bottom, s32 priority, s32 core_id) {
+                    u64 stack_bottom, s32 priority, s32 core_id)
+{
     LOG_DEBUG(Kernel_SVC,
               "called entry_point=0x{:08X}, arg=0x{:08X}, stack_bottom=0x{:08X}, "
               "priority=0x{:08X}, core_id=0x{:08X}",
@@ -54,7 +56,8 @@ Result CreateThread(Core::System& system, Handle* out_handle, u64 entry_point, u
     // Create the thread.
     KThread* thread = KThread::Create(kernel);
     R_UNLESS(thread != nullptr, ResultOutOfResource)
-    SCOPE_EXIT {
+    SCOPE_EXIT
+    {
         thread->Close();
     };
 
@@ -84,7 +87,8 @@ Result CreateThread(Core::System& system, Handle* out_handle, u64 entry_point, u
 }
 
 /// Starts the thread for the provided handle
-Result StartThread(Core::System& system, Handle thread_handle) {
+Result StartThread(Core::System& system, Handle thread_handle)
+{
     LOG_DEBUG(Kernel_SVC, "called thread=0x{:08X}", thread_handle);
 
     // Get the thread from its handle.
@@ -99,14 +103,16 @@ Result StartThread(Core::System& system, Handle thread_handle) {
 }
 
 /// Called when a thread exits
-void ExitThread(Core::System& system) {
+void ExitThread(Core::System& system)
+{
     auto* const current_thread = GetCurrentThreadPointer(system.Kernel());
     system.GlobalSchedulerContext().RemoveThread(current_thread);
     current_thread->Exit();
 }
 
 /// Sleep the current thread
-void SleepThread(Core::System& system, s64 ns) {
+void SleepThread(Core::System& system, s64 ns)
+{
     auto& kernel = system.Kernel();
     const auto yield_type = static_cast<Svc::YieldType>(ns);
 
@@ -143,7 +149,8 @@ void SleepThread(Core::System& system, s64 ns) {
 }
 
 /// Gets the thread context
-Result GetThreadContext3(Core::System& system, u64 out_context, Handle thread_handle) {
+Result GetThreadContext3(Core::System& system, u64 out_context, Handle thread_handle)
+{
     LOG_DEBUG(Kernel_SVC, "called, out_context=0x{:08X}, thread_handle={:#X}", out_context,
               thread_handle);
 
@@ -171,7 +178,8 @@ Result GetThreadContext3(Core::System& system, u64 out_context, Handle thread_ha
 }
 
 /// Gets the priority for the specified thread
-Result GetThreadPriority(Core::System& system, s32* out_priority, Handle handle) {
+Result GetThreadPriority(Core::System& system, s32* out_priority, Handle handle)
+{
     LOG_TRACE(Kernel_SVC, "called");
 
     // Get the thread from its handle.
@@ -185,7 +193,8 @@ Result GetThreadPriority(Core::System& system, s32* out_priority, Handle handle)
 }
 
 /// Sets the priority for the specified thread
-Result SetThreadPriority(Core::System& system, Handle thread_handle, s32 priority) {
+Result SetThreadPriority(Core::System& system, Handle thread_handle, s32 priority)
+{
     // Get the current process.
     KProcess& process = GetCurrentProcess(system.Kernel());
 
@@ -204,7 +213,8 @@ Result SetThreadPriority(Core::System& system, Handle thread_handle, s32 priorit
 }
 
 Result GetThreadList(Core::System& system, s32* out_num_threads, u64 out_thread_ids,
-                     s32 out_thread_ids_size, Handle debug_handle) {
+                     s32 out_thread_ids_size, Handle debug_handle)
+{
     // TODO: Handle this case when debug events are supported.
     UNIMPLEMENTED_IF(debug_handle != InvalidHandle);
 
@@ -244,7 +254,8 @@ Result GetThreadList(Core::System& system, s32* out_num_threads, u64 out_thread_
 }
 
 Result GetThreadCoreMask(Core::System& system, s32* out_core_id, u64* out_affinity_mask,
-                         Handle thread_handle) {
+                         Handle thread_handle)
+{
     LOG_TRACE(Kernel_SVC, "called, handle=0x{:08X}", thread_handle);
 
     // Get the thread from its handle.
@@ -256,8 +267,8 @@ Result GetThreadCoreMask(Core::System& system, s32* out_core_id, u64* out_affini
     R_RETURN(thread->GetCoreMask(out_core_id, out_affinity_mask));
 }
 
-Result SetThreadCoreMask(Core::System& system, Handle thread_handle, s32 core_id,
-                         u64 affinity_mask) {
+Result SetThreadCoreMask(Core::System& system, Handle thread_handle, s32 core_id, u64 affinity_mask)
+{
     // Determine the core id/affinity mask.
     if (core_id == IdealCoreUseProcessValue) {
         core_id = GetCurrentProcess(system.Kernel()).GetIdealCoreId();
@@ -287,7 +298,8 @@ Result SetThreadCoreMask(Core::System& system, Handle thread_handle, s32 core_id
 }
 
 /// Get the ID for the specified thread.
-Result GetThreadId(Core::System& system, u64* out_thread_id, Handle thread_handle) {
+Result GetThreadId(Core::System& system, u64* out_thread_id, Handle thread_handle)
+{
     // Get the thread from its handle.
     KScopedAutoObject thread =
         GetCurrentProcess(system.Kernel()).GetHandleTable().GetObject<KThread>(thread_handle);
@@ -299,99 +311,120 @@ Result GetThreadId(Core::System& system, u64* out_thread_id, Handle thread_handl
 }
 
 Result CreateThread64(Core::System& system, Handle* out_handle, uint64_t func, uint64_t arg,
-                      uint64_t stack_bottom, int32_t priority, int32_t core_id) {
+                      uint64_t stack_bottom, int32_t priority, int32_t core_id)
+{
     R_RETURN(CreateThread(system, out_handle, func, arg, stack_bottom, priority, core_id));
 }
 
-Result StartThread64(Core::System& system, Handle thread_handle) {
+Result StartThread64(Core::System& system, Handle thread_handle)
+{
     R_RETURN(StartThread(system, thread_handle));
 }
 
-void ExitThread64(Core::System& system) {
+void ExitThread64(Core::System& system)
+{
     return ExitThread(system);
 }
 
-void SleepThread64(Core::System& system, int64_t ns) {
+void SleepThread64(Core::System& system, int64_t ns)
+{
     return SleepThread(system, ns);
 }
 
-Result GetThreadPriority64(Core::System& system, int32_t* out_priority, Handle thread_handle) {
+Result GetThreadPriority64(Core::System& system, int32_t* out_priority, Handle thread_handle)
+{
     R_RETURN(GetThreadPriority(system, out_priority, thread_handle));
 }
 
-Result SetThreadPriority64(Core::System& system, Handle thread_handle, int32_t priority) {
+Result SetThreadPriority64(Core::System& system, Handle thread_handle, int32_t priority)
+{
     R_RETURN(SetThreadPriority(system, thread_handle, priority));
 }
 
 Result GetThreadCoreMask64(Core::System& system, int32_t* out_core_id, uint64_t* out_affinity_mask,
-                           Handle thread_handle) {
+                           Handle thread_handle)
+{
     R_RETURN(GetThreadCoreMask(system, out_core_id, out_affinity_mask, thread_handle));
 }
 
 Result SetThreadCoreMask64(Core::System& system, Handle thread_handle, int32_t core_id,
-                           uint64_t affinity_mask) {
+                           uint64_t affinity_mask)
+{
     R_RETURN(SetThreadCoreMask(system, thread_handle, core_id, affinity_mask));
 }
 
-Result GetThreadId64(Core::System& system, uint64_t* out_thread_id, Handle thread_handle) {
+Result GetThreadId64(Core::System& system, uint64_t* out_thread_id, Handle thread_handle)
+{
     R_RETURN(GetThreadId(system, out_thread_id, thread_handle));
 }
 
-Result GetThreadContext364(Core::System& system, uint64_t out_context, Handle thread_handle) {
+Result GetThreadContext364(Core::System& system, uint64_t out_context, Handle thread_handle)
+{
     R_RETURN(GetThreadContext3(system, out_context, thread_handle));
 }
 
 Result GetThreadList64(Core::System& system, int32_t* out_num_threads, uint64_t out_thread_ids,
-                       int32_t max_out_count, Handle debug_handle) {
+                       int32_t max_out_count, Handle debug_handle)
+{
     R_RETURN(GetThreadList(system, out_num_threads, out_thread_ids, max_out_count, debug_handle));
 }
 
 Result CreateThread64From32(Core::System& system, Handle* out_handle, uint32_t func, uint32_t arg,
-                            uint32_t stack_bottom, int32_t priority, int32_t core_id) {
+                            uint32_t stack_bottom, int32_t priority, int32_t core_id)
+{
     R_RETURN(CreateThread(system, out_handle, func, arg, stack_bottom, priority, core_id));
 }
 
-Result StartThread64From32(Core::System& system, Handle thread_handle) {
+Result StartThread64From32(Core::System& system, Handle thread_handle)
+{
     R_RETURN(StartThread(system, thread_handle));
 }
 
-void ExitThread64From32(Core::System& system) {
+void ExitThread64From32(Core::System& system)
+{
     return ExitThread(system);
 }
 
-void SleepThread64From32(Core::System& system, int64_t ns) {
+void SleepThread64From32(Core::System& system, int64_t ns)
+{
     return SleepThread(system, ns);
 }
 
-Result GetThreadPriority64From32(Core::System& system, int32_t* out_priority,
-                                 Handle thread_handle) {
+Result GetThreadPriority64From32(Core::System& system, int32_t* out_priority, Handle thread_handle)
+{
     R_RETURN(GetThreadPriority(system, out_priority, thread_handle));
 }
 
-Result SetThreadPriority64From32(Core::System& system, Handle thread_handle, int32_t priority) {
+Result SetThreadPriority64From32(Core::System& system, Handle thread_handle, int32_t priority)
+{
     R_RETURN(SetThreadPriority(system, thread_handle, priority));
 }
 
 Result GetThreadCoreMask64From32(Core::System& system, int32_t* out_core_id,
-                                 uint64_t* out_affinity_mask, Handle thread_handle) {
+                                 uint64_t* out_affinity_mask, Handle thread_handle)
+{
     R_RETURN(GetThreadCoreMask(system, out_core_id, out_affinity_mask, thread_handle));
 }
 
 Result SetThreadCoreMask64From32(Core::System& system, Handle thread_handle, int32_t core_id,
-                                 uint64_t affinity_mask) {
+                                 uint64_t affinity_mask)
+{
     R_RETURN(SetThreadCoreMask(system, thread_handle, core_id, affinity_mask));
 }
 
-Result GetThreadId64From32(Core::System& system, uint64_t* out_thread_id, Handle thread_handle) {
+Result GetThreadId64From32(Core::System& system, uint64_t* out_thread_id, Handle thread_handle)
+{
     R_RETURN(GetThreadId(system, out_thread_id, thread_handle));
 }
 
-Result GetThreadContext364From32(Core::System& system, uint32_t out_context, Handle thread_handle) {
+Result GetThreadContext364From32(Core::System& system, uint32_t out_context, Handle thread_handle)
+{
     R_RETURN(GetThreadContext3(system, out_context, thread_handle));
 }
 
 Result GetThreadList64From32(Core::System& system, int32_t* out_num_threads,
-                             uint32_t out_thread_ids, int32_t max_out_count, Handle debug_handle) {
+                             uint32_t out_thread_ids, int32_t max_out_count, Handle debug_handle)
+{
     R_RETURN(GetThreadList(system, out_num_threads, out_thread_ids, max_out_count, debug_handle));
 }
 

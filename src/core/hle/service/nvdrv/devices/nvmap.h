@@ -6,9 +6,11 @@
 
 #pragma once
 
-#include <memory>
 #include <ankerl/unordered_dense.h>
+
+#include <memory>
 #include <vector>
+
 #include "common/common_funcs.h"
 #include "common/common_types.h"
 #include "common/swap.h"

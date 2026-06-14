@@ -12,13 +12,12 @@
 #include <mutex>
 
 // Vulkan headers must be included before Aftermath
-#include "video_core/vulkan_common/vulkan_wrapper.h"
-
 #include <GFSDK_Aftermath_Defines.h>
 #include <GFSDK_Aftermath_GpuCrashDump.h>
 #include <GFSDK_Aftermath_GpuCrashDumpDecoding.h>
 
 #include "common/dynamic_library.h"
+#include "video_core/vulkan_common/vulkan_wrapper.h"
 #endif
 
 namespace Vulkan {
@@ -45,15 +44,16 @@ private:
     static void ShaderDebugInfoCallback(const void* shader_debug_info, u32 shader_debug_info_size,
                                         void* user_data);
 
-    static void CrashDumpDescriptionCallback(
-        PFN_GFSDK_Aftermath_AddGpuCrashDumpDescription add_description, void* user_data);
+    static void
+    CrashDumpDescriptionCallback(PFN_GFSDK_Aftermath_AddGpuCrashDumpDescription add_description,
+                                 void* user_data);
 
     void OnGpuCrashDumpCallback(const void* gpu_crash_dump, u32 gpu_crash_dump_size);
 
     void OnShaderDebugInfoCallback(const void* shader_debug_info, u32 shader_debug_info_size);
 
-    void OnCrashDumpDescriptionCallback(
-        PFN_GFSDK_Aftermath_AddGpuCrashDumpDescription add_description);
+    void
+    OnCrashDumpDescriptionCallback(PFN_GFSDK_Aftermath_AddGpuCrashDumpDescription add_description);
 
     mutable std::mutex mutex;
 
@@ -77,7 +77,9 @@ private:
 #ifndef HAS_NSIGHT_AFTERMATH
 inline NsightAftermathTracker::NsightAftermathTracker() = default;
 inline NsightAftermathTracker::~NsightAftermathTracker() = default;
-inline void NsightAftermathTracker::SaveShader(std::span<const u32>) const {}
+inline void NsightAftermathTracker::SaveShader(std::span<const u32>) const
+{
+}
 #endif
 
 } // namespace Vulkan

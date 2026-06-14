@@ -28,10 +28,11 @@ private:
         s64 end_posix_time, ClientAppletResourceUserId aruid,
         OutArray<ApplicationAlbumFileEntry, BufferAttr_HipcMapAlias> out_entries);
 
-    Result GetAlbumFileList3AaeAruid(
-        Out<u64> out_entries_count, ContentType content_type, AlbumFileDateTime start_date_time,
-        AlbumFileDateTime end_date_time, ClientAppletResourceUserId aruid,
-        OutArray<ApplicationAlbumEntry, BufferAttr_HipcMapAlias> out_entries);
+    Result
+    GetAlbumFileList3AaeAruid(Out<u64> out_entries_count, ContentType content_type,
+                              AlbumFileDateTime start_date_time, AlbumFileDateTime end_date_time,
+                              ClientAppletResourceUserId aruid,
+                              OutArray<ApplicationAlbumEntry, BufferAttr_HipcMapAlias> out_entries);
 
     std::shared_ptr<AlbumManager> manager = nullptr;
 };

@@ -6,8 +6,8 @@
 
 #pragma once
 
-#include <mutex>
 #include <boost/icl/interval_set.hpp>
+#include <mutex>
 
 namespace Common {
 
@@ -16,11 +16,10 @@ public:
     explicit FreeRegionManager() = default;
     ~FreeRegionManager() = default;
 
-    void SetAddressSpace(void* start, size_t size) {
-        this->FreeBlock(start, size);
-    }
+    void SetAddressSpace(void* start, size_t size) { this->FreeBlock(start, size); }
 
-    std::pair<void*, size_t> FreeBlock(void* block_ptr, size_t size) {
+    std::pair<void*, size_t> FreeBlock(void* block_ptr, size_t size)
+    {
         std::scoped_lock lk(m_mutex);
 
         // Check to see if we are adjacent to any regions.
@@ -43,7 +42,8 @@ public:
         return {block_ptr, size};
     }
 
-    void AllocateBlock(void* block_ptr, size_t size) {
+    void AllocateBlock(void* block_ptr, size_t size)
+    {
         std::scoped_lock lk(m_mutex);
 
         auto address = reinterpret_cast<uintptr_t>(block_ptr);

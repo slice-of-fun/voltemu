@@ -65,7 +65,8 @@ public:
     static constexpr u32 NumLateModes = 5;
 
     struct ReverbDelayLine {
-        void Initialize(const s32 delay_time, const f32 decay_rate) {
+        void Initialize(const s32 delay_time, const f32 decay_rate)
+        {
             buffer.resize(delay_time + 1, 0);
             buffer_end = &buffer[delay_time];
             output = &buffer[0];
@@ -74,7 +75,8 @@ public:
             SetDelay(delay_time);
         }
 
-        void SetDelay(const s32 delay_time) {
+        void SetDelay(const s32 delay_time)
+        {
             if (sample_count_max < delay_time) {
                 return;
             }
@@ -82,7 +84,8 @@ public:
             input = &buffer[0];
         }
 
-        Common::FixedPoint<50, 14> Tick(const Common::FixedPoint<50, 14> sample) {
+        Common::FixedPoint<50, 14> Tick(const Common::FixedPoint<50, 14> sample)
+        {
             auto out_sample{Read()};
 
             output++;
@@ -94,11 +97,10 @@ public:
             return out_sample;
         }
 
-        Common::FixedPoint<50, 14> Read() const {
-            return *output;
-        }
+        Common::FixedPoint<50, 14> Read() const { return *output; }
 
-        void Write(const Common::FixedPoint<50, 14> sample) {
+        void Write(const Common::FixedPoint<50, 14> sample)
+        {
             *input = sample;
             input++;
             if (input >= buffer_end) {
@@ -106,7 +108,8 @@ public:
             }
         }
 
-        Common::FixedPoint<50, 14> TapOut(const s32 index) const {
+        Common::FixedPoint<50, 14> TapOut(const s32 index) const
+        {
             auto out{input - (index + 1)};
             if (out < buffer.data()) {
                 out += sample_count;

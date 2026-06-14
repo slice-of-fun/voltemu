@@ -11,4 +11,4 @@ namespace FrontendCommon {
  */
 void GenerateSettings();
 
-}
+} // namespace FrontendCommon

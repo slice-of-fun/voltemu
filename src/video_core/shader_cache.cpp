@@ -4,10 +4,12 @@
 // SPDX-FileCopyrightText: Copyright 2021 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "video_core/shader_cache.h"
+
 #include <algorithm>
 #include <array>
-#include <vector>
 #include <boost/container/small_vector.hpp>
+#include <vector>
 
 #include "common/assert.h"
 #include "shader_recompiler/frontend/maxwell/control_flow.h"
@@ -18,32 +20,37 @@
 #include "video_core/engines/maxwell_3d.h"
 #include "video_core/host1x/gpu_device_memory_manager.h"
 #include "video_core/memory_manager.h"
-#include "video_core/shader_cache.h"
 #include "video_core/shader_environment.h"
 #include "video_core/texture_cache/util.h"
 
 namespace VideoCommon {
 
-void ShaderCache::InvalidateRegion(VAddr addr, size_t size) {
+void ShaderCache::InvalidateRegion(VAddr addr, size_t size)
+{
     std::scoped_lock lock{invalidation_mutex};
     InvalidatePagesInRegion(addr, size);
     RemovePendingShaders();
 }
 
-void ShaderCache::OnCacheInvalidation(VAddr addr, size_t size) {
+void ShaderCache::OnCacheInvalidation(VAddr addr, size_t size)
+{
     std::scoped_lock lock{invalidation_mutex};
     InvalidatePagesInRegion(addr, size);
 }
 
-void ShaderCache::SyncGuestHost() {
+void ShaderCache::SyncGuestHost()
+{
     std::scoped_lock lock{invalidation_mutex};
     RemovePendingShaders();
 }
 
 ShaderCache::ShaderCache(Tegra::MaxwellDeviceMemoryManager& device_memory_)
-    : device_memory{device_memory_} {}
+    : device_memory{device_memory_}
+{
+}
 
-bool ShaderCache::RefreshStages(std::array<u64, 6>& unique_hashes) {
+bool ShaderCache::RefreshStages(std::array<u64, 6>& unique_hashes)
+{
     auto& dirty{maxwell3d->dirty.flags};
     if (!dirty[VideoCommon::Dirty::Shaders]) {
         return last_shaders_valid;
@@ -83,7 +90,8 @@ bool ShaderCache::RefreshStages(std::array<u64, 6>& unique_hashes) {
     return true;
 }
 
-const ShaderInfo* ShaderCache::ComputeShader() {
+const ShaderInfo* ShaderCache::ComputeShader()
+{
     const GPUVAddr program_base{kepler_compute->regs.code_loc.Address()};
     const auto& qmd{kepler_compute->launch_description};
     const GPUVAddr shader_addr{program_base + qmd.program_start};
@@ -100,7 +108,8 @@ const ShaderInfo* ShaderCache::ComputeShader() {
 }
 
 void ShaderCache::GetGraphicsEnvironments(GraphicsEnvironments& result,
-                                          const std::array<u64, NUM_PROGRAMS>& unique_hashes) {
+                                          const std::array<u64, NUM_PROGRAMS>& unique_hashes)
+{
     size_t env_index{};
     const GPUVAddr base_addr{maxwell3d->regs.program_region.Address()};
     for (size_t index = 0; index < NUM_PROGRAMS; ++index) {
@@ -116,7 +125,8 @@ void ShaderCache::GetGraphicsEnvironments(GraphicsEnvironments& result,
     }
 }
 
-ShaderInfo* ShaderCache::TryGet(VAddr addr) const {
+ShaderInfo* ShaderCache::TryGet(VAddr addr) const
+{
     std::scoped_lock lock{lookup_mutex};
 
     const auto it = lookup_cache.find(addr);
@@ -126,7 +136,8 @@ ShaderInfo* ShaderCache::TryGet(VAddr addr) const {
     return it->second->data;
 }
 
-void ShaderCache::Register(std::unique_ptr<ShaderInfo> data, VAddr addr, size_t size) {
+void ShaderCache::Register(std::unique_ptr<ShaderInfo> data, VAddr addr, size_t size)
+{
     std::scoped_lock lock{invalidation_mutex, lookup_mutex};
 
     const VAddr addr_end = addr + size;
@@ -142,7 +153,8 @@ void ShaderCache::Register(std::unique_ptr<ShaderInfo> data, VAddr addr, size_t 
     device_memory.UpdatePagesCachedCount(addr, size, 1);
 }
 
-void ShaderCache::InvalidatePagesInRegion(VAddr addr, size_t size) {
+void ShaderCache::InvalidatePagesInRegion(VAddr addr, size_t size)
+{
     const VAddr addr_end = addr + size;
     const u64 page_end = (addr_end + YUZU_PAGESIZE - 1) >> YUZU_PAGEBITS;
     for (u64 page = addr >> YUZU_PAGEBITS; page < page_end; ++page) {
@@ -154,7 +166,8 @@ void ShaderCache::InvalidatePagesInRegion(VAddr addr, size_t size) {
     }
 }
 
-void ShaderCache::RemovePendingShaders() {
+void ShaderCache::RemovePendingShaders()
+{
     if (marked_for_removal.empty()) {
         return;
     }
@@ -181,7 +194,8 @@ void ShaderCache::RemovePendingShaders() {
     }
 }
 
-void ShaderCache::InvalidatePageEntries(std::vector<Entry*>& entries, VAddr addr, VAddr addr_end) {
+void ShaderCache::InvalidatePageEntries(std::vector<Entry*>& entries, VAddr addr, VAddr addr_end)
+{
     size_t index = 0;
     while (index < entries.size()) {
         Entry* const entry = entries[index];
@@ -196,7 +210,8 @@ void ShaderCache::InvalidatePageEntries(std::vector<Entry*>& entries, VAddr addr
     }
 }
 
-void ShaderCache::RemoveEntryFromInvalidationCache(const Entry* entry) {
+void ShaderCache::RemoveEntryFromInvalidationCache(const Entry* entry)
+{
     const u64 page_end = (entry->addr_end + YUZU_PAGESIZE - 1) >> YUZU_PAGEBITS;
     for (u64 page = entry->addr_start >> YUZU_PAGEBITS; page < page_end; ++page) {
         const auto entries_it = invalidation_cache.find(page);
@@ -209,7 +224,8 @@ void ShaderCache::RemoveEntryFromInvalidationCache(const Entry* entry) {
     }
 }
 
-void ShaderCache::UnmarkMemory(Entry* entry) {
+void ShaderCache::UnmarkMemory(Entry* entry)
+{
     if (!entry->is_memory_marked) {
         return;
     }
@@ -220,7 +236,8 @@ void ShaderCache::UnmarkMemory(Entry* entry) {
     device_memory.UpdatePagesCachedCount(addr, size, -1);
 }
 
-ShaderCache::Entry* ShaderCache::NewEntry(VAddr addr, VAddr addr_end, ShaderInfo* data) {
+ShaderCache::Entry* ShaderCache::NewEntry(VAddr addr, VAddr addr_end, ShaderInfo* data)
+{
     auto entry = std::make_unique<Entry>(Entry{addr, addr_end, data});
     Entry* const entry_pointer = entry.get();
 
@@ -228,7 +245,8 @@ ShaderCache::Entry* ShaderCache::NewEntry(VAddr addr, VAddr addr_end, ShaderInfo
     return entry_pointer;
 }
 
-const ShaderInfo* ShaderCache::MakeShaderInfo(GenericEnvironment& env, VAddr cpu_addr) {
+const ShaderInfo* ShaderCache::MakeShaderInfo(GenericEnvironment& env, VAddr cpu_addr)
+{
     auto info = std::make_unique<ShaderInfo>();
     if (const std::optional<u64> cached_hash{env.Analyze()}) {
         info->unique_hash = *cached_hash;

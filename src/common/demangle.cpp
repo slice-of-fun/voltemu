@@ -13,14 +13,16 @@
 #endif
 #include "common/demangle.h"
 
-static bool IsItanium(std::string_view name) {
+static bool IsItanium(std::string_view name)
+{
     // A valid Itanium encoding requires 1-4 leading underscores, followed by 'Z'.
     auto const pos = name.find_first_not_of('_');
     return pos > 0 && pos <= 4 && pos < name.size() && name[pos] == 'Z';
 }
 
 namespace Common {
-std::string DemangleSymbol(const std::string& mangled) {
+std::string DemangleSymbol(const std::string& mangled)
+{
     if (mangled.size() > 0) {
         if (IsItanium(mangled)) {
 #ifdef _WIN32

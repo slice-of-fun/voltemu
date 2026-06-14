@@ -3,19 +3,18 @@
 
 #pragma once
 
-#include <optional>
-#include <type_traits>
-#include <queue>
-
 #include <boost/container/small_vector.hpp>
+#include <optional>
+#include <queue>
+#include <type_traits>
 
 #include "shader_recompiler/frontend/ir/value.h"
 
 namespace Shader::IR {
 
-template <typename Pred>
-auto BreadthFirstSearch(const Value& value, Pred&& pred)
-    -> std::invoke_result_t<Pred, const Inst*> {
+template<typename Pred>
+auto BreadthFirstSearch(const Value& value, Pred&& pred) -> std::invoke_result_t<Pred, const Inst*>
+{
     if (value.IsImmediate()) {
         // Nothing to do with immediates
         return std::nullopt;

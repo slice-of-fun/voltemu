@@ -4,13 +4,15 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/nim/nim.h"
+
 #include <chrono>
 #include <ctime>
+
 #include "core/core.h"
 #include "core/hle/kernel/k_event.h"
 #include "core/hle/service/ipc_helpers.h"
 #include "core/hle/service/kernel_helpers.h"
-#include "core/hle/service/nim/nim.h"
 #include "core/hle/service/server_manager.h"
 #include "core/hle/service/service.h"
 
@@ -19,7 +21,8 @@ namespace Service::NIM {
 class IShopServiceAsync final : public ServiceFramework<IShopServiceAsync> {
 public:
     explicit IShopServiceAsync(Core::System& system_)
-        : ServiceFramework{system_, "IShopServiceAsync"} {
+        : ServiceFramework{system_, "IShopServiceAsync"}
+    {
         // clang-format off
         static const FunctionInfo functions[] = {
             {0, nullptr, "Cancel"},
@@ -38,7 +41,8 @@ public:
 class IShopServiceAccessor final : public ServiceFramework<IShopServiceAccessor> {
 public:
     explicit IShopServiceAccessor(Core::System& system_)
-        : ServiceFramework{system_, "IShopServiceAccessor"} {
+        : ServiceFramework{system_, "IShopServiceAccessor"}
+    {
         // clang-format off
         static const FunctionInfo functions[] = {
             {0, &IShopServiceAccessor::CreateAsyncInterface, "CreateAsyncInterface"},
@@ -49,7 +53,8 @@ public:
     }
 
 private:
-    void CreateAsyncInterface(HLERequestContext& ctx) {
+    void CreateAsyncInterface(HLERequestContext& ctx)
+    {
         LOG_WARNING(Service_NIM, "(STUBBED) called");
         IPC::ResponseBuilder rb{ctx, 2, 0, 1};
         rb.Push(ResultSuccess);
@@ -60,7 +65,8 @@ private:
 class IShopServiceAccessServer final : public ServiceFramework<IShopServiceAccessServer> {
 public:
     explicit IShopServiceAccessServer(Core::System& system_)
-        : ServiceFramework{system_, "IShopServiceAccessServer"} {
+        : ServiceFramework{system_, "IShopServiceAccessServer"}
+    {
         // clang-format off
         static const FunctionInfo functions[] = {
             {0, &IShopServiceAccessServer::CreateAccessorInterface, "CreateAccessorInterface"},
@@ -71,7 +77,8 @@ public:
     }
 
 private:
-    void CreateAccessorInterface(HLERequestContext& ctx) {
+    void CreateAccessorInterface(HLERequestContext& ctx)
+    {
         LOG_WARNING(Service_NIM, "(STUBBED) called");
         IPC::ResponseBuilder rb{ctx, 2, 0, 1};
         rb.Push(ResultSuccess);
@@ -81,7 +88,8 @@ private:
 
 class NIM final : public ServiceFramework<NIM> {
 public:
-    explicit NIM(Core::System& system_) : ServiceFramework{system_, "nim"} {
+    explicit NIM(Core::System& system_) : ServiceFramework{system_, "nim"}
+    {
         // clang-format off
         static const FunctionInfo functions[] = {
             {0, nullptr, "CreateSystemUpdateTask"},
@@ -316,7 +324,8 @@ public:
 
 class NIM_ECA final : public ServiceFramework<NIM_ECA> {
 public:
-    explicit NIM_ECA(Core::System& system_) : ServiceFramework{system_, "nim:eca"} {
+    explicit NIM_ECA(Core::System& system_) : ServiceFramework{system_, "nim:eca"}
+    {
         // clang-format off
         static const FunctionInfo functions[] = {
             {0, &NIM_ECA::CreateServerInterface, "CreateServerInterface"},
@@ -332,14 +341,16 @@ public:
     }
 
 private:
-    void CreateServerInterface(HLERequestContext& ctx) {
+    void CreateServerInterface(HLERequestContext& ctx)
+    {
         LOG_DEBUG(Service_NIM, "(STUBBED) called");
         IPC::ResponseBuilder rb{ctx, 2, 0, 1};
         rb.Push(ResultSuccess);
         rb.PushIpcInterface<IShopServiceAccessServer>(system);
     }
 
-    void IsLargeResourceAvailable(HLERequestContext& ctx) {
+    void IsLargeResourceAvailable(HLERequestContext& ctx)
+    {
         IPC::RequestParser rp{ctx};
 
         const auto unknown{rp.Pop<u64>()};
@@ -351,7 +362,8 @@ private:
         rb.Push(false);
     }
 
-    void CreateServerInterface2(HLERequestContext& ctx) {
+    void CreateServerInterface2(HLERequestContext& ctx)
+    {
         LOG_DEBUG(Service_NIM, "(STUBBED) called.");
 
         IPC::ResponseBuilder rb{ctx, 2, 0, 1};
@@ -362,7 +374,8 @@ private:
 
 class NIM_SHP final : public ServiceFramework<NIM_SHP> {
 public:
-    explicit NIM_SHP(Core::System& system_) : ServiceFramework{system_, "nim:shp"} {
+    explicit NIM_SHP(Core::System& system_) : ServiceFramework{system_, "nim:shp"}
+    {
         // clang-format off
         static const FunctionInfo functions[] = {
             {0, nullptr, "RequestDeviceAuthenticationToken"},
@@ -405,7 +418,8 @@ class IEnsureNetworkClockAvailabilityService final
 public:
     explicit IEnsureNetworkClockAvailabilityService(Core::System& system_)
         : ServiceFramework{system_, "IEnsureNetworkClockAvailabilityService"},
-          service_context{system_, "IEnsureNetworkClockAvailabilityService"} {
+          service_context{system_, "IEnsureNetworkClockAvailabilityService"}
+    {
         static const FunctionInfo functions[] = {
             {0, &IEnsureNetworkClockAvailabilityService::StartTask, "StartTask"},
             {1, &IEnsureNetworkClockAvailabilityService::GetFinishNotificationEvent,
@@ -421,12 +435,14 @@ public:
             service_context.CreateEvent("IEnsureNetworkClockAvailabilityService:FinishEvent");
     }
 
-    ~IEnsureNetworkClockAvailabilityService() override {
+    ~IEnsureNetworkClockAvailabilityService() override
+    {
         service_context.CloseEvent(finished_event);
     }
 
 private:
-    void StartTask(HLERequestContext& ctx) {
+    void StartTask(HLERequestContext& ctx)
+    {
         // No need to connect to the internet, just finish the task straight away.
         LOG_DEBUG(Service_NIM, "called");
         finished_event->Signal();
@@ -434,7 +450,8 @@ private:
         rb.Push(ResultSuccess);
     }
 
-    void GetFinishNotificationEvent(HLERequestContext& ctx) {
+    void GetFinishNotificationEvent(HLERequestContext& ctx)
+    {
         LOG_DEBUG(Service_NIM, "called");
 
         IPC::ResponseBuilder rb{ctx, 2, 1};
@@ -442,21 +459,24 @@ private:
         rb.PushCopyObjects(finished_event->GetReadableEvent());
     }
 
-    void GetResult(HLERequestContext& ctx) {
+    void GetResult(HLERequestContext& ctx)
+    {
         LOG_DEBUG(Service_NIM, "called");
 
         IPC::ResponseBuilder rb{ctx, 2};
         rb.Push(ResultSuccess);
     }
 
-    void Cancel(HLERequestContext& ctx) {
+    void Cancel(HLERequestContext& ctx)
+    {
         LOG_DEBUG(Service_NIM, "called");
         finished_event->Clear();
         IPC::ResponseBuilder rb{ctx, 2};
         rb.Push(ResultSuccess);
     }
 
-    void IsProcessing(HLERequestContext& ctx) {
+    void IsProcessing(HLERequestContext& ctx)
+    {
         LOG_DEBUG(Service_NIM, "called");
 
         IPC::ResponseBuilder rb{ctx, 3};
@@ -464,7 +484,8 @@ private:
         rb.PushRaw<u32>(0); // We instantly process the request
     }
 
-    void GetServerTime(HLERequestContext& ctx) {
+    void GetServerTime(HLERequestContext& ctx)
+    {
         LOG_DEBUG(Service_NIM, "called");
 
         const s64 server_time{std::chrono::duration_cast<std::chrono::seconds>(
@@ -482,7 +503,8 @@ private:
 
 class NTC final : public ServiceFramework<NTC> {
 public:
-    explicit NTC(Core::System& system_) : ServiceFramework{system_, "ntc"} {
+    explicit NTC(Core::System& system_) : ServiceFramework{system_, "ntc"}
+    {
         // clang-format off
         static const FunctionInfo functions[] = {
             {0, &NTC::OpenEnsureNetworkClockAvailabilityService, "OpenEnsureNetworkClockAvailabilityService"},
@@ -495,7 +517,8 @@ public:
     }
 
 private:
-    void OpenEnsureNetworkClockAvailabilityService(HLERequestContext& ctx) {
+    void OpenEnsureNetworkClockAvailabilityService(HLERequestContext& ctx)
+    {
         LOG_DEBUG(Service_NIM, "called");
 
         IPC::ResponseBuilder rb{ctx, 2, 0, 1};
@@ -504,14 +527,16 @@ private:
     }
 
     // TODO(ogniK): Do we need these?
-    void SuspendAutonomicTimeCorrection(HLERequestContext& ctx) {
+    void SuspendAutonomicTimeCorrection(HLERequestContext& ctx)
+    {
         LOG_WARNING(Service_NIM, "(STUBBED) called");
 
         IPC::ResponseBuilder rb{ctx, 2};
         rb.Push(ResultSuccess);
     }
 
-    void ResumeAutonomicTimeCorrection(HLERequestContext& ctx) {
+    void ResumeAutonomicTimeCorrection(HLERequestContext& ctx)
+    {
         LOG_WARNING(Service_NIM, "(STUBBED) called");
 
         IPC::ResponseBuilder rb{ctx, 2};
@@ -519,7 +544,8 @@ private:
     }
 };
 
-void LoopProcess(Core::System& system) {
+void LoopProcess(Core::System& system)
+{
     auto server_manager = std::make_unique<ServerManager>(system);
 
     server_manager->RegisterNamedService("nim", std::make_shared<NIM>(system));

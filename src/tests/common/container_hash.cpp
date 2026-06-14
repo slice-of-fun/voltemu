@@ -1,12 +1,14 @@
 // SPDX-FileCopyrightText: Copyright 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "common/container_hash.h"
+
 #include <catch2/catch_test_macros.hpp>
 
 #include "common/common_types.h"
-#include "common/container_hash.h"
 
-TEST_CASE("ContainerHash", "[common]") {
+TEST_CASE("ContainerHash", "[common]")
+{
     constexpr std::array<u8, 32> U8Values{
         114, 10, 238, 189, 199, 242, 86, 96, 53,  193, 195, 247, 249, 56, 253, 61,
         205, 3,  172, 4,   210, 197, 43, 72, 103, 8,   99,  89,  5,   97, 68,  196,

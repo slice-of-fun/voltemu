@@ -4,16 +4,18 @@
 // SPDX-FileCopyrightText: Copyright 2019 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "video_core/renderer_vulkan/fixed_pipeline_state.h"
+
 #include <algorithm>
-#include <cstring>
 #include <bit>
+#include <cstring>
 #include <numeric>
 #include <ranges>
+
 #include "common/cityhash.h"
 #include "common/common_types.h"
 #include "common/settings.h"
 #include "video_core/engines/maxwell_3d.h"
-#include "video_core/renderer_vulkan/fixed_pipeline_state.h"
 #include "video_core/renderer_vulkan/vk_state_tracker.h"
 
 namespace Vulkan {
@@ -39,7 +41,8 @@ constexpr std::array POLYGON_OFFSET_ENABLE_LUT = {
     POLYGON, // Patches
 };
 
-void RefreshXfbState(VideoCommon::TransformFeedbackState& state, const Maxwell& regs) {
+void RefreshXfbState(VideoCommon::TransformFeedbackState& state, const Maxwell& regs)
+{
     std::ranges::transform(regs.transform_feedback.controls, state.layouts.begin(),
                            [](const auto& layout) {
                                return VideoCommon::TransformFeedbackState::Layout{
@@ -52,14 +55,16 @@ void RefreshXfbState(VideoCommon::TransformFeedbackState& state, const Maxwell& 
 }
 } // Anonymous namespace
 
-void FixedPipelineState::Refresh(Tegra::Engines::Maxwell3D& maxwell3d, DynamicFeatures& features) {
+void FixedPipelineState::Refresh(Tegra::Engines::Maxwell3D& maxwell3d, DynamicFeatures& features)
+{
     const Maxwell& regs = maxwell3d.regs;
     const auto topology_ = maxwell3d.draw_manager.draw_state.topology;
 
     raw1 = 0;
     extended_dynamic_state.Assign(features.has_extended_dynamic_state ? 1 : 0);
     extended_dynamic_state_2.Assign(features.has_extended_dynamic_state_2 ? 1 : 0);
-    extended_dynamic_state_2_logic_op.Assign(features.has_extended_dynamic_state_2_logic_op ? 1 : 0);
+    extended_dynamic_state_2_logic_op.Assign(features.has_extended_dynamic_state_2_logic_op ? 1
+                                                                                            : 0);
     extended_dynamic_state_3_blend.Assign(features.has_extended_dynamic_state_3_blend ? 1 : 0);
     extended_dynamic_state_3_enables.Assign(features.has_extended_dynamic_state_3_enables ? 1 : 0);
     dynamic_vertex_input.Assign(features.has_dynamic_vertex_input ? 1 : 0);
@@ -196,7 +201,8 @@ void FixedPipelineState::Refresh(Tegra::Engines::Maxwell3D& maxwell3d, DynamicFe
     }
 }
 
-void FixedPipelineState::BlendingAttachment::Refresh(const Maxwell& regs, size_t index) {
+void FixedPipelineState::BlendingAttachment::Refresh(const Maxwell& regs, size_t index)
+{
     const auto& mask = regs.color_mask[regs.color_mask_common ? 0 : index];
 
     raw = 0;
@@ -228,8 +234,7 @@ void FixedPipelineState::BlendingAttachment::Refresh(const Maxwell& regs, size_t
             equation_a.Assign(PackBlendEquation(Maxwell::Blend::Equation::Add_GL));
             factor_source_rgb.Assign(PackBlendFactor(Maxwell::Blend::Factor::One_GL));
             factor_dest_rgb.Assign(PackBlendFactor(Maxwell::Blend::Factor::One_GL));
-            factor_source_a.Assign(
-                PackBlendFactor(Maxwell::Blend::Factor::OneMinusSourceColor_GL));
+            factor_source_a.Assign(PackBlendFactor(Maxwell::Blend::Factor::OneMinusSourceColor_GL));
             factor_dest_a.Assign(PackBlendFactor(Maxwell::Blend::Factor::Zero_GL));
             enable.Assign(1);
             return;
@@ -240,7 +245,8 @@ void FixedPipelineState::BlendingAttachment::Refresh(const Maxwell& regs, size_t
     setup_blend(regs.blend_per_target[index]);
 }
 
-void FixedPipelineState::DynamicState::Refresh(const Maxwell& regs) {
+void FixedPipelineState::DynamicState::Refresh(const Maxwell& regs)
+{
     u32 packed_front_face = PackFrontFace(regs.gl_front_face);
     if (regs.window_origin.flip_y != 0) {
         // Flip front face
@@ -274,7 +280,8 @@ void FixedPipelineState::DynamicState::Refresh(const Maxwell& regs) {
 
 void FixedPipelineState::DynamicState::Refresh2(const Maxwell& regs,
                                                 Maxwell::PrimitiveTopology topology_,
-                                                bool base_features_supported) {
+                                                bool base_features_supported)
+{
     logic_op.Assign(PackLogicOp(regs.logic_op.op));
 
     if (base_features_supported) {
@@ -294,7 +301,8 @@ void FixedPipelineState::DynamicState::Refresh2(const Maxwell& regs,
 }
 
 void FixedPipelineState::DynamicState::Refresh3(const Maxwell& regs,
-                                                const DynamicFeatures& features) {
+                                                const DynamicFeatures& features)
+{
     if (!features.has_dynamic_state3_logic_op_enable) {
         logic_op_enable.Assign(regs.logic_op.enable != 0 ? 1 : 0);
     }
@@ -311,16 +319,19 @@ void FixedPipelineState::DynamicState::Refresh3(const Maxwell& regs,
     }
 }
 
-size_t FixedPipelineState::Hash() const noexcept {
+size_t FixedPipelineState::Hash() const noexcept
+{
     const u64 hash = Common::CityHash64(reinterpret_cast<const char*>(this), Size());
     return static_cast<size_t>(hash);
 }
 
-bool FixedPipelineState::operator==(const FixedPipelineState& rhs) const noexcept {
+bool FixedPipelineState::operator==(const FixedPipelineState& rhs) const noexcept
+{
     return std::memcmp(this, &rhs, Size()) == 0;
 }
 
-u32 FixedPipelineState::PackComparisonOp(Maxwell::ComparisonOp op) noexcept {
+u32 FixedPipelineState::PackComparisonOp(Maxwell::ComparisonOp op) noexcept
+{
     // OpenGL enums go from 0x200 to 0x207 and the others from 1 to 8
     // If we subtract 0x200 to OpenGL enums and 1 to the others we get a 0-7 range.
     // Perfect for a hash.
@@ -328,12 +339,14 @@ u32 FixedPipelineState::PackComparisonOp(Maxwell::ComparisonOp op) noexcept {
     return value - (value >= 0x200 ? 0x200 : 1);
 }
 
-Maxwell::ComparisonOp FixedPipelineState::UnpackComparisonOp(u32 packed) noexcept {
+Maxwell::ComparisonOp FixedPipelineState::UnpackComparisonOp(u32 packed) noexcept
+{
     // Read PackComparisonOp for the logic behind this.
     return static_cast<Maxwell::ComparisonOp>(packed + 1);
 }
 
-u32 FixedPipelineState::PackStencilOp(Maxwell::StencilOp::Op op) noexcept {
+u32 FixedPipelineState::PackStencilOp(Maxwell::StencilOp::Op op) noexcept
+{
     switch (op) {
     case Maxwell::StencilOp::Op::Keep_D3D:
     case Maxwell::StencilOp::Op::Keep_GL:
@@ -363,7 +376,8 @@ u32 FixedPipelineState::PackStencilOp(Maxwell::StencilOp::Op op) noexcept {
     return 0;
 }
 
-Maxwell::StencilOp::Op FixedPipelineState::UnpackStencilOp(u32 packed) noexcept {
+Maxwell::StencilOp::Op FixedPipelineState::UnpackStencilOp(u32 packed) noexcept
+{
     static constexpr std::array LUT = {
         Maxwell::StencilOp::Op::Keep_D3D,         Maxwell::StencilOp::Op::Zero_D3D,
         Maxwell::StencilOp::Op::Replace_D3D,      Maxwell::StencilOp::Op::IncrSaturate_D3D,
@@ -372,44 +386,53 @@ Maxwell::StencilOp::Op FixedPipelineState::UnpackStencilOp(u32 packed) noexcept 
     return LUT[packed];
 }
 
-u32 FixedPipelineState::PackCullFace(Maxwell::CullFace cull) noexcept {
+u32 FixedPipelineState::PackCullFace(Maxwell::CullFace cull) noexcept
+{
     // FrontAndBack is 0x408, by subtracting 0x406 in it we get 2.
     // Individual cull faces are in 0x404 and 0x405, subtracting 0x404 we get 0 and 1.
     const u32 value = static_cast<u32>(cull);
     return value - (value == 0x408 ? 0x406 : 0x404);
 }
 
-Maxwell::CullFace FixedPipelineState::UnpackCullFace(u32 packed) noexcept {
+Maxwell::CullFace FixedPipelineState::UnpackCullFace(u32 packed) noexcept
+{
     static constexpr std::array LUT = {Maxwell::CullFace::Front, Maxwell::CullFace::Back,
                                        Maxwell::CullFace::FrontAndBack};
     return LUT[packed];
 }
 
-u32 FixedPipelineState::PackFrontFace(Maxwell::FrontFace face) noexcept {
+u32 FixedPipelineState::PackFrontFace(Maxwell::FrontFace face) noexcept
+{
     return static_cast<u32>(face) - 0x900;
 }
 
-Maxwell::FrontFace FixedPipelineState::UnpackFrontFace(u32 packed) noexcept {
+Maxwell::FrontFace FixedPipelineState::UnpackFrontFace(u32 packed) noexcept
+{
     return static_cast<Maxwell::FrontFace>(packed + 0x900);
 }
 
-u32 FixedPipelineState::PackPolygonMode(Maxwell::PolygonMode mode) noexcept {
+u32 FixedPipelineState::PackPolygonMode(Maxwell::PolygonMode mode) noexcept
+{
     return static_cast<u32>(mode) - 0x1B00;
 }
 
-Maxwell::PolygonMode FixedPipelineState::UnpackPolygonMode(u32 packed) noexcept {
+Maxwell::PolygonMode FixedPipelineState::UnpackPolygonMode(u32 packed) noexcept
+{
     return static_cast<Maxwell::PolygonMode>(packed + 0x1B00);
 }
 
-u32 FixedPipelineState::PackLogicOp(Maxwell::LogicOp::Op op) noexcept {
+u32 FixedPipelineState::PackLogicOp(Maxwell::LogicOp::Op op) noexcept
+{
     return static_cast<u32>(op) - 0x1500;
 }
 
-Maxwell::LogicOp::Op FixedPipelineState::UnpackLogicOp(u32 packed) noexcept {
+Maxwell::LogicOp::Op FixedPipelineState::UnpackLogicOp(u32 packed) noexcept
+{
     return static_cast<Maxwell::LogicOp::Op>(packed + 0x1500);
 }
 
-u32 FixedPipelineState::PackBlendEquation(Maxwell::Blend::Equation equation) noexcept {
+u32 FixedPipelineState::PackBlendEquation(Maxwell::Blend::Equation equation) noexcept
+{
     switch (equation) {
     case Maxwell::Blend::Equation::Add_D3D:
     case Maxwell::Blend::Equation::Add_GL:
@@ -430,7 +453,8 @@ u32 FixedPipelineState::PackBlendEquation(Maxwell::Blend::Equation equation) noe
     return 0;
 }
 
-Maxwell::Blend::Equation FixedPipelineState::UnpackBlendEquation(u32 packed) noexcept {
+Maxwell::Blend::Equation FixedPipelineState::UnpackBlendEquation(u32 packed) noexcept
+{
     static constexpr std::array LUT = {
         Maxwell::Blend::Equation::Add_D3D, Maxwell::Blend::Equation::Subtract_D3D,
         Maxwell::Blend::Equation::ReverseSubtract_D3D, Maxwell::Blend::Equation::Min_D3D,
@@ -438,7 +462,8 @@ Maxwell::Blend::Equation FixedPipelineState::UnpackBlendEquation(u32 packed) noe
     return LUT[packed];
 }
 
-u32 FixedPipelineState::PackBlendFactor(Maxwell::Blend::Factor factor) noexcept {
+u32 FixedPipelineState::PackBlendFactor(Maxwell::Blend::Factor factor) noexcept
+{
     switch (factor) {
     case Maxwell::Blend::Factor::Zero_D3D:
     case Maxwell::Blend::Factor::Zero_GL:
@@ -502,7 +527,8 @@ u32 FixedPipelineState::PackBlendFactor(Maxwell::Blend::Factor factor) noexcept 
     return 0;
 }
 
-Maxwell::Blend::Factor FixedPipelineState::UnpackBlendFactor(u32 packed) noexcept {
+Maxwell::Blend::Factor FixedPipelineState::UnpackBlendFactor(u32 packed) noexcept
+{
     static constexpr std::array LUT = {
         Maxwell::Blend::Factor::Zero_D3D,
         Maxwell::Blend::Factor::One_D3D,

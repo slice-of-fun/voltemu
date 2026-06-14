@@ -5,12 +5,14 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include "core/hle/service/psc/ovln/receiver.h"
+
 #include "core/hle/service/cmif_serialization.h"
 
 namespace Service::PSC {
 
 IReceiver::IReceiver(Core::System& system_)
-    : ServiceFramework{system_, "IReceiver"}, service_context{system_, "IReceiver"} {
+    : ServiceFramework{system_, "IReceiver"}, service_context{system_, "IReceiver"}
+{
     // clang-format off
         static const FunctionInfo functions[] = {
             {0, D<&IReceiver::AddSource>, "AddSource"},
@@ -26,11 +28,13 @@ IReceiver::IReceiver(Core::System& system_)
     receive_event = service_context.CreateEvent("IReceiver::ReceiveEvent");
 }
 
-IReceiver::~IReceiver() {
+IReceiver::~IReceiver()
+{
     service_context.CloseEvent(receive_event);
 }
 
-Result IReceiver::AddSource(SourceName source_name) {
+Result IReceiver::AddSource(SourceName source_name)
+{
     const std::string name = source_name.GetString();
     LOG_INFO(Service_PSC, "called: source_name={}", name);
 
@@ -42,7 +46,8 @@ Result IReceiver::AddSource(SourceName source_name) {
     R_SUCCEED();
 }
 
-Result IReceiver::RemoveSource(SourceName source_name) {
+Result IReceiver::RemoveSource(SourceName source_name)
+{
     const std::string name = source_name.GetString();
     LOG_INFO(Service_PSC, "called: source_name={}", name);
 
@@ -52,19 +57,22 @@ Result IReceiver::RemoveSource(SourceName source_name) {
     R_SUCCEED();
 }
 
-Result IReceiver::GetReceiveEventHandle(OutCopyHandle<Kernel::KReadableEvent> out_event) {
+Result IReceiver::GetReceiveEventHandle(OutCopyHandle<Kernel::KReadableEvent> out_event)
+{
     LOG_INFO(Service_PSC, "called");
     *out_event = &receive_event->GetReadableEvent();
     R_SUCCEED();
 }
 
-Result IReceiver::Receive(Out<OverlayNotification> out_notification, Out<MessageFlags> out_flags) {
+Result IReceiver::Receive(Out<OverlayNotification> out_notification, Out<MessageFlags> out_flags)
+{
     u64 tick;
     return ReceiveWithTick(out_notification, out_flags, Out<u64>(&tick));
 }
 
 Result IReceiver::ReceiveWithTick(Out<OverlayNotification> out_notification,
-                                   Out<MessageFlags> out_flags, Out<u64> out_tick) {
+                                  Out<MessageFlags> out_flags, Out<u64> out_tick)
+{
     LOG_DEBUG(Service_PSC, "called");
 
     // Find the message with the lowest ID across all sources

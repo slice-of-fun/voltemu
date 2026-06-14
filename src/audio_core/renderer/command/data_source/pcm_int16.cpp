@@ -1,16 +1,18 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "audio_core/renderer/command/data_source/pcm_int16.h"
+
 #include <span>
 
 #include "audio_core/adsp/apps/audio_renderer/command_list_processor.h"
 #include "audio_core/renderer/command/data_source/decode.h"
-#include "audio_core/renderer/command/data_source/pcm_int16.h"
 
 namespace AudioCore::Renderer {
 
 void PcmInt16DataSourceVersion1Command::Dump(const AudioRenderer::CommandListProcessor& processor,
-                                             std::string& string) {
+                                             std::string& string)
+{
     string +=
         fmt::format("PcmInt16DataSourceVersion1Command\n\toutput_index {:02X} channel {} "
                     "channel count {} source sample rate {} target sample rate {} src quality {}\n",
@@ -19,7 +21,8 @@ void PcmInt16DataSourceVersion1Command::Dump(const AudioRenderer::CommandListPro
 }
 
 void PcmInt16DataSourceVersion1Command::Process(
-    const AudioRenderer::CommandListProcessor& processor) {
+    const AudioRenderer::CommandListProcessor& processor)
+{
     auto out_buffer = processor.mix_buffers.subspan(output_index * processor.sample_count,
                                                     processor.sample_count);
 
@@ -50,13 +53,14 @@ void PcmInt16DataSourceVersion1Command::Process(
     DecodeFromWaveBuffers(*processor.memory, args);
 }
 
-bool PcmInt16DataSourceVersion1Command::Verify(
-    const AudioRenderer::CommandListProcessor& processor) {
+bool PcmInt16DataSourceVersion1Command::Verify(const AudioRenderer::CommandListProcessor& processor)
+{
     return true;
 }
 
 void PcmInt16DataSourceVersion2Command::Dump(const AudioRenderer::CommandListProcessor& processor,
-                                             std::string& string) {
+                                             std::string& string)
+{
     string +=
         fmt::format("PcmInt16DataSourceVersion2Command\n\toutput_index {:02X} channel {} "
                     "channel count {} source sample rate {} target sample rate {} src quality {}\n",
@@ -65,7 +69,8 @@ void PcmInt16DataSourceVersion2Command::Dump(const AudioRenderer::CommandListPro
 }
 
 void PcmInt16DataSourceVersion2Command::Process(
-    const AudioRenderer::CommandListProcessor& processor) {
+    const AudioRenderer::CommandListProcessor& processor)
+{
     auto out_buffer = processor.mix_buffers.subspan(output_index * processor.sample_count,
                                                     processor.sample_count);
     DecodeFromWaveBuffersArgs args{
@@ -89,8 +94,8 @@ void PcmInt16DataSourceVersion2Command::Process(
     DecodeFromWaveBuffers(*processor.memory, args);
 }
 
-bool PcmInt16DataSourceVersion2Command::Verify(
-    const AudioRenderer::CommandListProcessor& processor) {
+bool PcmInt16DataSourceVersion2Command::Verify(const AudioRenderer::CommandListProcessor& processor)
+{
     return true;
 }
 

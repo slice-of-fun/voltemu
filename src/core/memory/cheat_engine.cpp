@@ -4,7 +4,10 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/memory/cheat_engine.h"
+
 #include <locale>
+
 #include "common/hex_util.h"
 #include "common/swap.h"
 #include "core/arm/debug.h"
@@ -17,7 +20,6 @@
 #include "core/hle/service/hid/hid_server.h"
 #include "core/hle/service/sm/sm.h"
 #include "core/memory.h"
-#include "core/memory/cheat_engine.h"
 #include "hid_core/resource_manager.h"
 #include "hid_core/resources/npad/npad.h"
 
@@ -26,7 +28,8 @@ namespace {
 constexpr auto CHEAT_ENGINE_NS = std::chrono::nanoseconds{1000000000 / 12};
 
 std::string_view ExtractName(std::size_t& out_name_size, std::string_view data,
-                             std::size_t start_index, char match) {
+                             std::size_t start_index, char match)
+{
     auto end_index = start_index;
     while (data[end_index] != match) {
         ++end_index;
@@ -47,11 +50,14 @@ std::string_view ExtractName(std::size_t& out_name_size, std::string_view data,
 } // Anonymous namespace
 
 StandardVmCallbacks::StandardVmCallbacks(System& system_, const CheatProcessMetadata& metadata_)
-    : metadata{metadata_}, system{system_} {}
+    : metadata{metadata_}, system{system_}
+{
+}
 
 StandardVmCallbacks::~StandardVmCallbacks() = default;
 
-void StandardVmCallbacks::MemoryReadUnsafe(VAddr address, void* data, u64 size) {
+void StandardVmCallbacks::MemoryReadUnsafe(VAddr address, void* data, u64 size)
+{
     // Return zero on invalid address
     if (!IsAddressInRange(address) || !system.ApplicationMemory().IsValidVirtualAddress(address)) {
         std::memset(data, 0, size);
@@ -61,7 +67,8 @@ void StandardVmCallbacks::MemoryReadUnsafe(VAddr address, void* data, u64 size) 
     system.ApplicationMemory().ReadBlock(address, data, size);
 }
 
-void StandardVmCallbacks::MemoryWriteUnsafe(VAddr address, const void* data, u64 size) {
+void StandardVmCallbacks::MemoryWriteUnsafe(VAddr address, const void* data, u64 size)
+{
     // Skip invalid memory write address
     if (!IsAddressInRange(address) || !system.ApplicationMemory().IsValidVirtualAddress(address)) {
         return;
@@ -72,7 +79,8 @@ void StandardVmCallbacks::MemoryWriteUnsafe(VAddr address, const void* data, u64
     }
 }
 
-u64 StandardVmCallbacks::HidKeysDown() {
+u64 StandardVmCallbacks::HidKeysDown()
+{
     const auto hid = system.ServiceManager().GetService<Service::HID::IHidServer>("hid");
     if (hid == nullptr) {
         LOG_WARNING(CheatEngine, "Attempted to read input state, but hid is not initialized!");
@@ -90,30 +98,35 @@ u64 StandardVmCallbacks::HidKeysDown() {
     return static_cast<u64>(press_state & HID::NpadButton::All);
 }
 
-void StandardVmCallbacks::PauseProcess() {
+void StandardVmCallbacks::PauseProcess()
+{
     if (system.ApplicationProcess()->IsSuspended()) {
         return;
     }
     system.ApplicationProcess()->SetActivity(Kernel::Svc::ProcessActivity::Paused);
 }
 
-void StandardVmCallbacks::ResumeProcess() {
+void StandardVmCallbacks::ResumeProcess()
+{
     if (!system.ApplicationProcess()->IsSuspended()) {
         return;
     }
     system.ApplicationProcess()->SetActivity(Kernel::Svc::ProcessActivity::Runnable);
 }
 
-void StandardVmCallbacks::DebugLog(u8 id, u64 value) {
+void StandardVmCallbacks::DebugLog(u8 id, u64 value)
+{
     LOG_INFO(CheatEngine, "Cheat triggered DebugLog: ID '{:01X}' Value '{:016X}'", id, value);
 }
 
-void StandardVmCallbacks::CommandLog(std::string_view data) {
+void StandardVmCallbacks::CommandLog(std::string_view data)
+{
     LOG_DEBUG(CheatEngine, "[DmntCheatVm]: {}",
               data.back() == '\n' ? data.substr(0, data.size() - 1) : data);
 }
 
-bool StandardVmCallbacks::IsAddressInRange(VAddr in) const {
+bool StandardVmCallbacks::IsAddressInRange(VAddr in) const
+{
     if ((in < metadata.main_nso_extents.base ||
          in >= metadata.main_nso_extents.base + metadata.main_nso_extents.size) &&
         (in < metadata.heap_extents.base ||
@@ -138,7 +151,8 @@ CheatParser::~CheatParser() = default;
 
 TextCheatParser::~TextCheatParser() = default;
 
-std::vector<CheatEntry> TextCheatParser::Parse(std::string_view data) const {
+std::vector<CheatEntry> TextCheatParser::Parse(std::string_view data) const
+{
     std::vector<CheatEntry> out(1);
     std::optional<u64> current_entry;
 
@@ -221,21 +235,25 @@ std::vector<CheatEntry> TextCheatParser::Parse(std::string_view data) const {
 CheatEngine::CheatEngine(System& system_, std::vector<CheatEntry> cheats_,
                          const std::array<u8, 0x20>& build_id_)
     : vm{std::make_unique<StandardVmCallbacks>(system_, metadata)},
-      cheats(std::move(cheats_)), core_timing{system_.CoreTiming()}, system{system_} {
+      cheats(std::move(cheats_)), core_timing{system_.CoreTiming()}, system{system_}
+{
     metadata.main_nso_build_id = build_id_;
 }
 
-CheatEngine::~CheatEngine() {
+CheatEngine::~CheatEngine()
+{
     if (event)
         core_timing.UnscheduleEvent(event);
     else
         LOG_ERROR(CheatEngine, "~CheatEngine before event was registered");
 }
 
-void CheatEngine::Initialize() {
+void CheatEngine::Initialize()
+{
     event = Core::Timing::CreateEvent(
         "CheatEngine::FrameCallback::" + Common::HexToString(metadata.main_nso_build_id),
-        [this](s64 time, std::chrono::nanoseconds ns_late) -> std::optional<std::chrono::nanoseconds> {
+        [this](s64 time,
+               std::chrono::nanoseconds ns_late) -> std::optional<std::chrono::nanoseconds> {
             FrameCallback(ns_late);
             return std::nullopt;
         });
@@ -261,19 +279,22 @@ void CheatEngine::Initialize() {
     is_pending_reload.exchange(true);
 }
 
-void CheatEngine::SetMainMemoryParameters(VAddr main_region_begin, u64 main_region_size) {
+void CheatEngine::SetMainMemoryParameters(VAddr main_region_begin, u64 main_region_size)
+{
     metadata.main_nso_extents = {
         .base = main_region_begin,
         .size = main_region_size,
     };
 }
 
-void CheatEngine::Reload(std::vector<CheatEntry> reload_cheats) {
+void CheatEngine::Reload(std::vector<CheatEntry> reload_cheats)
+{
     cheats = std::move(reload_cheats);
     is_pending_reload.exchange(true);
 }
 
-void CheatEngine::FrameCallback(std::chrono::nanoseconds ns_late) {
+void CheatEngine::FrameCallback(std::chrono::nanoseconds ns_late)
+{
     if (is_pending_reload.exchange(false)) {
         vm.LoadProgram(cheats);
     }

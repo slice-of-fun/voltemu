@@ -23,26 +23,28 @@ enum class Direction : u32 {
 
 class Mailbox {
 public:
-    void Initialize(AppMailboxId id_) {
+    void Initialize(AppMailboxId id_)
+    {
         Reset();
         id = id_;
     }
 
-    AppMailboxId Id() const noexcept {
-        return id;
-    }
+    AppMailboxId Id() const noexcept { return id; }
 
-    void Send(Direction dir, u32 message) {
+    void Send(Direction dir, u32 message)
+    {
         auto& queue = dir == Direction::Host ? host_queue : adsp_queue;
         queue.EmplaceWait(message);
     }
 
-    u32 Receive(Direction dir, std::stop_token stop_token = {}) {
+    u32 Receive(Direction dir, std::stop_token stop_token = {})
+    {
         auto& queue = dir == Direction::Host ? host_queue : adsp_queue;
         return queue.PopWait(stop_token);
     }
 
-    void Reset() {
+    void Reset()
+    {
         id = AppMailboxId::Invalid;
         u32 t{};
         while (host_queue.TryPop(t)) {

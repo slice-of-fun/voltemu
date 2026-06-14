@@ -6,7 +6,8 @@
 namespace AudioCore::Renderer {
 
 void LightLimiterInfo::Update(BehaviorInfo::ErrorInfo& error_info,
-                              const InParameterVersion1& in_params, const PoolMapper& pool_mapper) {
+                              const InParameterVersion1& in_params, const PoolMapper& pool_mapper)
+{
     auto in_specific{reinterpret_cast<const ParameterVersion1*>(in_params.specific.data())};
     auto params{reinterpret_cast<ParameterVersion1*>(parameter.data())};
 
@@ -27,7 +28,8 @@ void LightLimiterInfo::Update(BehaviorInfo::ErrorInfo& error_info,
 }
 
 void LightLimiterInfo::Update(BehaviorInfo::ErrorInfo& error_info,
-                              const InParameterVersion2& in_params, const PoolMapper& pool_mapper) {
+                              const InParameterVersion2& in_params, const PoolMapper& pool_mapper)
+{
     auto in_specific{reinterpret_cast<const ParameterVersion1*>(in_params.specific.data())};
     auto params{reinterpret_cast<ParameterVersion1*>(parameter.data())};
 
@@ -47,7 +49,8 @@ void LightLimiterInfo::Update(BehaviorInfo::ErrorInfo& error_info,
     }
 }
 
-void LightLimiterInfo::UpdateForCommandGeneration() {
+void LightLimiterInfo::UpdateForCommandGeneration()
+{
     if (enabled) {
         usage_state = UsageState::Enabled;
     } else {
@@ -59,22 +62,24 @@ void LightLimiterInfo::UpdateForCommandGeneration() {
     params->statistics_reset_required = false;
 }
 
-void LightLimiterInfo::InitializeResultState(EffectResultState& result_state) {
+void LightLimiterInfo::InitializeResultState(EffectResultState& result_state)
+{
     auto result_state_{reinterpret_cast<StatisticsInternal*>(result_state.state.data())};
 
     result_state_->channel_max_sample.fill(0);
     result_state_->channel_compression_gain_min.fill(1.0f);
 }
 
-void LightLimiterInfo::UpdateResultState(EffectResultState& cpu_state,
-                                         EffectResultState& dsp_state) {
+void LightLimiterInfo::UpdateResultState(EffectResultState& cpu_state, EffectResultState& dsp_state)
+{
     auto cpu_statistics{reinterpret_cast<StatisticsInternal*>(cpu_state.state.data())};
     auto dsp_statistics{reinterpret_cast<StatisticsInternal*>(dsp_state.state.data())};
 
     *cpu_statistics = *dsp_statistics;
 }
 
-CpuAddr LightLimiterInfo::GetWorkbuffer(s32 index) {
+CpuAddr LightLimiterInfo::GetWorkbuffer(s32 index)
+{
     return GetSingleBuffer(index);
 }
 

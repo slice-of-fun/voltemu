@@ -66,7 +66,7 @@ enum class Protocol : u8 {
     NSP,
     INP,
     DCCP,
-    //TODO: 3PC,
+    // TODO: 3PC,
     IDPR,
     XTP,
     DDP,

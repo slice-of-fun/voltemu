@@ -6,12 +6,13 @@
 
 #pragma once
 
+#include <ankerl/unordered_dense.h>
+
 #include <chrono>
+#include <concepts>
 #include <memory>
 #include <mutex>
 #include <string>
-#include <ankerl/unordered_dense.h>
-#include <concepts>
 
 #include "core/hle/kernel/k_port.h"
 #include "core/hle/kernel/svc.h"
@@ -66,8 +67,9 @@ public:
     Result UnregisterService(const std::string& name);
     Result GetServicePort(Kernel::KClientPort** out_client_port, const std::string& name);
 
-    template <std::derived_from<SessionRequestHandler> T>
-    std::shared_ptr<T> GetService(const std::string& name, bool block = false) const {
+    template<std::derived_from<SessionRequestHandler> T>
+    std::shared_ptr<T> GetService(const std::string& name, bool block = false) const
+    {
         std::unique_lock l{lock};
         auto it = registered_services.find(name);
         if (it == registered_services.end() && !block) {
@@ -89,9 +91,7 @@ public:
 
     void InvokeControlRequest(HLERequestContext& context);
 
-    void SetDeferralEvent(Kernel::KEvent* deferral_event_) {
-        deferral_event = deferral_event_;
-    }
+    void SetDeferralEvent(Kernel::KEvent* deferral_event_) { deferral_event = deferral_event_; }
 
 private:
     std::shared_ptr<SM> sm_interface;

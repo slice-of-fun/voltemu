@@ -21,7 +21,8 @@ public:
      * @param count - The number of nodes in the graph.
      * @return The required workbuffer size.
      */
-    static u64 GetWorkBufferSize(u32 count) {
+    static u64 GetWorkBufferSize(u32 count)
+    {
         return Common::AlignUp(count * count, 0x40) / sizeof(u64);
     }
 

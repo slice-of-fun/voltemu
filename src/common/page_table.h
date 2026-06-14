@@ -55,39 +55,43 @@ struct PageTable {
     class PageInfo {
     public:
         /// Returns the page pointer
-        [[nodiscard]] uintptr_t Pointer() const noexcept {
+        [[nodiscard]] uintptr_t Pointer() const noexcept
+        {
             return ExtractPointer(raw.load(std::memory_order_relaxed));
         }
 
         /// Returns the page type attribute
-        [[nodiscard]] PageType Type() const noexcept {
+        [[nodiscard]] PageType Type() const noexcept
+        {
             return ExtractType(raw.load(std::memory_order_relaxed));
         }
 
         /// Returns the page pointer and attribute pair, extracted from the same atomic read
-        [[nodiscard]] std::pair<uintptr_t, PageType> PointerType() const noexcept {
+        [[nodiscard]] std::pair<uintptr_t, PageType> PointerType() const noexcept
+        {
             const uintptr_t non_atomic_raw = raw.load(std::memory_order_relaxed);
             return {ExtractPointer(non_atomic_raw), ExtractType(non_atomic_raw)};
         }
 
         /// Returns the raw representation of the page information.
         /// Use ExtractPointer and ExtractType to unpack the value.
-        [[nodiscard]] uintptr_t Raw() const noexcept {
-            return raw.load(std::memory_order_relaxed);
-        }
+        [[nodiscard]] uintptr_t Raw() const noexcept { return raw.load(std::memory_order_relaxed); }
 
         /// Write a page pointer and type pair atomically
-        void Store(uintptr_t pointer, PageType type) noexcept {
+        void Store(uintptr_t pointer, PageType type) noexcept
+        {
             raw.store(pointer | uintptr_t(type));
         }
 
         /// Unpack a pointer from a page info raw representation
-        [[nodiscard]] static uintptr_t ExtractPointer(uintptr_t raw) noexcept {
+        [[nodiscard]] static uintptr_t ExtractPointer(uintptr_t raw) noexcept
+        {
             return raw & (~uintptr_t{0} << ATTRIBUTE_BITS);
         }
 
         /// Unpack a page type from a page info raw representation
-        [[nodiscard]] static PageType ExtractType(uintptr_t raw) noexcept {
+        [[nodiscard]] static PageType ExtractType(uintptr_t raw) noexcept
+        {
             return static_cast<PageType>(raw & ((uintptr_t{1} << ATTRIBUTE_BITS) - 1));
         }
 
@@ -117,12 +121,11 @@ struct PageTable {
      */
     void Resize(std::size_t address_space_width_in_bits, std::size_t page_size_in_bits);
 
-    std::size_t GetAddressSpaceBits() const {
-        return current_address_space_width_in_bits;
-    }
+    std::size_t GetAddressSpaceBits() const { return current_address_space_width_in_bits; }
 
     bool GetPhysicalAddress(Common::PhysicalAddress* out_phys_addr,
-                            Common::ProcessAddress virt_addr) const {
+                            Common::ProcessAddress virt_addr) const
+    {
         if (virt_addr > (1ULL << this->GetAddressSpaceBits())) {
             return false;
         }

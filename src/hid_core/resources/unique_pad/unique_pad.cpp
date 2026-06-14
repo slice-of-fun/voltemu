@@ -1,22 +1,30 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "hid_core/resources/unique_pad/unique_pad.h"
+
 #include "core/core_timing.h"
 #include "hid_core/resources/applet_resource.h"
 #include "hid_core/resources/shared_memory_format.h"
-#include "hid_core/resources/unique_pad/unique_pad.h"
 
 namespace Service::HID {
 
-UniquePad::UniquePad(Core::HID::HIDCore& hid_core_) : ControllerBase{hid_core_} {}
+UniquePad::UniquePad(Core::HID::HIDCore& hid_core_) : ControllerBase{hid_core_}
+{
+}
 
 UniquePad::~UniquePad() = default;
 
-void UniquePad::OnInit() {}
+void UniquePad::OnInit()
+{
+}
 
-void UniquePad::OnRelease() {}
+void UniquePad::OnRelease()
+{
+}
 
-void UniquePad::OnUpdate(const Core::Timing::CoreTiming& core_timing) {
+void UniquePad::OnUpdate(const Core::Timing::CoreTiming& core_timing)
+{
     const u64 aruid = applet_resource->GetActiveAruid();
     auto* data = applet_resource->GetAruidData(aruid);
 

@@ -4,8 +4,9 @@
 // SPDX-FileCopyrightText: Copyright 2020 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include "common/logging.h"
 #include "core/hle/service/caps/caps_a.h"
+
+#include "common/logging.h"
 #include "core/hle/service/caps/caps_manager.h"
 #include "core/hle/service/caps/caps_result.h"
 #include "core/hle/service/cmif_serialization.h"
@@ -15,7 +16,8 @@ namespace Service::Capture {
 
 IAlbumAccessorService::IAlbumAccessorService(Core::System& system_,
                                              std::shared_ptr<AlbumManager> album_manager)
-    : ServiceFramework{system_, "caps:a"}, manager{album_manager} {
+    : ServiceFramework{system_, "caps:a"}, manager{album_manager}
+{
     // clang-format off
     static const FunctionInfo functions[] = {
         {0, nullptr, "GetAlbumFileCount"},
@@ -66,16 +68,18 @@ IAlbumAccessorService::IAlbumAccessorService(Core::System& system_,
 
 IAlbumAccessorService::~IAlbumAccessorService() = default;
 
-Result IAlbumAccessorService::GetAlbumFileList(
-    Out<u64> out_count, AlbumStorage storage,
-    OutArray<AlbumEntry, BufferAttr_HipcMapAlias> out_entries) {
+Result
+IAlbumAccessorService::GetAlbumFileList(Out<u64> out_count, AlbumStorage storage,
+                                        OutArray<AlbumEntry, BufferAttr_HipcMapAlias> out_entries)
+{
     LOG_INFO(Service_Capture, "called, storage={}", storage);
 
     const Result result = manager->GetAlbumFileList(out_entries, *out_count, storage, 0);
     R_RETURN(TranslateResult(result));
 }
 
-Result IAlbumAccessorService::DeleteAlbumFile(AlbumFileId file_id) {
+Result IAlbumAccessorService::DeleteAlbumFile(AlbumFileId file_id)
+{
     LOG_INFO(Service_Capture, "called, application_id=0x{:0x}, storage={}, type={}",
              file_id.application_id, file_id.storage, file_id.type);
 
@@ -83,7 +87,8 @@ Result IAlbumAccessorService::DeleteAlbumFile(AlbumFileId file_id) {
     R_RETURN(TranslateResult(result));
 }
 
-Result IAlbumAccessorService::IsAlbumMounted(Out<bool> out_is_mounted, AlbumStorage storage) {
+Result IAlbumAccessorService::IsAlbumMounted(Out<bool> out_is_mounted, AlbumStorage storage)
+{
     LOG_INFO(Service_Capture, "called, storage={}", storage);
 
     const Result result = manager->IsAlbumMounted(storage);
@@ -93,7 +98,8 @@ Result IAlbumAccessorService::IsAlbumMounted(Out<bool> out_is_mounted, AlbumStor
 
 Result IAlbumAccessorService::Unknown18(
     Out<u32> out_buffer_size,
-    OutArray<u8, BufferAttr_HipcMapAlias | BufferAttr_HipcMapTransferAllowsNonSecure> out_buffer) {
+    OutArray<u8, BufferAttr_HipcMapAlias | BufferAttr_HipcMapTransferAllowsNonSecure> out_buffer)
+{
     LOG_WARNING(Service_Capture, "(STUBBED) called");
     *out_buffer_size = 0;
     R_SUCCEED();
@@ -101,14 +107,16 @@ Result IAlbumAccessorService::Unknown18(
 
 Result IAlbumAccessorService::GetAlbumFileListEx0(
     Out<u64> out_entries_size, AlbumStorage storage, u8 flags,
-    OutArray<AlbumEntry, BufferAttr_HipcMapAlias> out_entries) {
+    OutArray<AlbumEntry, BufferAttr_HipcMapAlias> out_entries)
+{
     LOG_INFO(Service_Capture, "called, storage={}, flags={}", storage, flags);
 
     const Result result = manager->GetAlbumFileList(out_entries, *out_entries_size, storage, flags);
     R_RETURN(TranslateResult(result));
 }
 
-Result IAlbumAccessorService::GetAutoSavingStorage(Out<bool> out_is_autosaving) {
+Result IAlbumAccessorService::GetAutoSavingStorage(Out<bool> out_is_autosaving)
+{
     LOG_WARNING(Service_Capture, "(STUBBED) called");
 
     const Result result = manager->GetAutoSavingStorage(*out_is_autosaving);
@@ -119,7 +127,8 @@ Result IAlbumAccessorService::LoadAlbumScreenShotImageEx1(
     const AlbumFileId& file_id, const ScreenShotDecodeOption& decoder_options,
     OutLargeData<LoadAlbumScreenShotImageOutput, BufferAttr_HipcMapAlias> out_image_output,
     OutArray<u8, BufferAttr_HipcMapAlias | BufferAttr_HipcMapTransferAllowsNonSecure> out_image,
-    OutArray<u8, BufferAttr_HipcMapAlias> out_buffer) {
+    OutArray<u8, BufferAttr_HipcMapAlias> out_buffer)
+{
     LOG_INFO(Service_Capture, "called, application_id=0x{:0x}, storage={}, type={}, flags={}",
              file_id.application_id, file_id.storage, file_id.type, decoder_options.flags);
 
@@ -132,7 +141,8 @@ Result IAlbumAccessorService::LoadAlbumScreenShotThumbnailImageEx1(
     const AlbumFileId& file_id, const ScreenShotDecodeOption& decoder_options,
     OutLargeData<LoadAlbumScreenShotImageOutput, BufferAttr_HipcMapAlias> out_image_output,
     OutArray<u8, BufferAttr_HipcMapAlias | BufferAttr_HipcMapTransferAllowsNonSecure> out_image,
-    OutArray<u8, BufferAttr_HipcMapAlias> out_buffer) {
+    OutArray<u8, BufferAttr_HipcMapAlias> out_buffer)
+{
     LOG_INFO(Service_Capture, "called, application_id=0x{:0x}, storage={}, type={}, flags={}",
              file_id.application_id, file_id.storage, file_id.type, decoder_options.flags);
 
@@ -141,7 +151,8 @@ Result IAlbumAccessorService::LoadAlbumScreenShotThumbnailImageEx1(
     R_RETURN(TranslateResult(result));
 }
 
-Result IAlbumAccessorService::TranslateResult(Result in_result) {
+Result IAlbumAccessorService::TranslateResult(Result in_result)
+{
     if (in_result.IsSuccess()) {
         return in_result;
     }
@@ -201,8 +212,8 @@ Result IAlbumAccessorService::TranslateResult(Result in_result) {
     return in_result;
 }
 
-
-Result IAlbumAccessorService::GetAlbumAccessResultForDebug(Out<Result> out_result) {
+Result IAlbumAccessorService::GetAlbumAccessResultForDebug(Out<Result> out_result)
+{
     LOG_WARNING(Service_Capture, "(STUBBED) called");
     *out_result = ResultSuccess;
     R_SUCCEED();

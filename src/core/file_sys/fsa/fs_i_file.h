@@ -22,7 +22,8 @@ public:
     explicit IFile(VirtualFile backend_) : backend(std::move(backend_)) {}
     virtual ~IFile() {}
 
-    Result Read(size_t* out, s64 offset, void* buffer, size_t size, const ReadOption& option) {
+    Result Read(size_t* out, s64 offset, void* buffer, size_t size, const ReadOption& option)
+    {
         // Check that we have an output pointer
         R_UNLESS(out != nullptr, ResultNullptrArgument);
 
@@ -41,20 +42,21 @@ public:
         R_RETURN(this->DoRead(out, offset, buffer, size, option));
     }
 
-    Result Read(size_t* out, s64 offset, void* buffer, size_t size) {
+    Result Read(size_t* out, s64 offset, void* buffer, size_t size)
+    {
         R_RETURN(this->Read(out, offset, buffer, size, ReadOption::None));
     }
 
-    Result GetSize(s64* out) {
+    Result GetSize(s64* out)
+    {
         R_UNLESS(out != nullptr, ResultNullptrArgument);
         R_RETURN(this->DoGetSize(out));
     }
 
-    Result Flush() {
-        R_RETURN(this->DoFlush());
-    }
+    Result Flush() { R_RETURN(this->DoFlush()); }
 
-    Result Write(s64 offset, const void* buffer, size_t size, const WriteOption& option) {
+    Result Write(s64 offset, const void* buffer, size_t size, const WriteOption& option)
+    {
         // Handle the zero-size case
         if (size == 0) {
             if (option.HasFlushFlag()) {
@@ -71,23 +73,27 @@ public:
         R_RETURN(this->DoWrite(offset, buffer, size, option));
     }
 
-    Result SetSize(s64 size) {
+    Result SetSize(s64 size)
+    {
         R_UNLESS(size >= 0, ResultOutOfRange);
         R_RETURN(this->DoSetSize(size));
     }
 
     Result OperateRange(void* dst, size_t dst_size, OperationId op_id, s64 offset, s64 size,
-                        const void* src, size_t src_size) {
+                        const void* src, size_t src_size)
+    {
         R_RETURN(this->DoOperateRange(dst, dst_size, op_id, offset, size, src, src_size));
     }
 
-    Result OperateRange(OperationId op_id, s64 offset, s64 size) {
+    Result OperateRange(OperationId op_id, s64 offset, s64 size)
+    {
         R_RETURN(this->DoOperateRange(nullptr, 0, op_id, offset, size, nullptr, 0));
     }
 
 protected:
     Result DryRead(size_t* out, s64 offset, size_t size, const ReadOption& option,
-                   OpenMode open_mode) {
+                   OpenMode open_mode)
+    {
         // Check that we can read
         R_UNLESS(static_cast<u32>(open_mode & OpenMode::Read) != 0, ResultReadNotPermitted);
 
@@ -100,14 +106,16 @@ protected:
         R_SUCCEED();
     }
 
-    Result DrySetSize(s64 size, OpenMode open_mode) {
+    Result DrySetSize(s64 size, OpenMode open_mode)
+    {
         // Check that we can write
         R_UNLESS(static_cast<u32>(open_mode & OpenMode::Write) != 0, ResultWriteNotPermitted);
         R_SUCCEED();
     }
 
     Result DryWrite(bool* out_append, s64 offset, size_t size, const WriteOption& option,
-                    OpenMode open_mode) {
+                    OpenMode open_mode)
+    {
         // Check that we can write
         R_UNLESS(static_cast<u32>(open_mode & OpenMode::Write) != 0, ResultWriteNotPermitted);
 
@@ -127,24 +135,28 @@ protected:
     }
 
 private:
-    Result DoRead(size_t* out, s64 offset, void* buffer, size_t size, const ReadOption& option) {
+    Result DoRead(size_t* out, s64 offset, void* buffer, size_t size, const ReadOption& option)
+    {
         const auto read_size = backend->Read(static_cast<u8*>(buffer), size, offset);
         *out = read_size;
 
         R_SUCCEED();
     }
 
-    Result DoGetSize(s64* out) {
+    Result DoGetSize(s64* out)
+    {
         *out = backend->GetSize();
         R_SUCCEED();
     }
 
-    Result DoFlush() {
+    Result DoFlush()
+    {
         // Exists for SDK compatibiltity -- No need to flush file.
         R_SUCCEED();
     }
 
-    Result DoWrite(s64 offset, const void* buffer, size_t size, const WriteOption& option) {
+    Result DoWrite(s64 offset, const void* buffer, size_t size, const WriteOption& option)
+    {
         const std::size_t written = backend->Write(static_cast<const u8*>(buffer), size, offset);
 
         ASSERT_MSG(written == size,
@@ -154,13 +166,15 @@ private:
         R_SUCCEED();
     }
 
-    Result DoSetSize(s64 size) {
+    Result DoSetSize(s64 size)
+    {
         backend->Resize(size);
         R_SUCCEED();
     }
 
     Result DoOperateRange(void* dst, size_t dst_size, OperationId op_id, s64 offset, s64 size,
-                          const void* src, size_t src_size) {
+                          const void* src, size_t src_size)
+    {
         R_THROW(ResultNotImplemented);
     }
 

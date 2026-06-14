@@ -26,7 +26,8 @@ enum class AtomsSize : u64 {
 };
 
 IR::U32U64 ApplyAtomsOp(IR::IREmitter& ir, const IR::U32& offset, const IR::U32U64& op_b, AtomOp op,
-                        bool is_signed) {
+                        bool is_signed)
+{
     switch (op) {
     case AtomOp::ADD:
         return ir.SharedAtomicIAdd(offset, op_b);
@@ -51,7 +52,8 @@ IR::U32U64 ApplyAtomsOp(IR::IREmitter& ir, const IR::U32& offset, const IR::U32U
     }
 }
 
-IR::U32 AtomsOffset(TranslatorVisitor& v, u64 insn) {
+IR::U32 AtomsOffset(TranslatorVisitor& v, u64 insn)
+{
     union {
         u64 raw;
         BitField<8, 8, IR::Reg> offset_reg;
@@ -67,7 +69,8 @@ IR::U32 AtomsOffset(TranslatorVisitor& v, u64 insn) {
     }
 }
 
-void StoreResult(TranslatorVisitor& v, IR::Reg dest_reg, const IR::Value& result, AtomsSize size) {
+void StoreResult(TranslatorVisitor& v, IR::Reg dest_reg, const IR::Value& result, AtomsSize size)
+{
     switch (size) {
     case AtomsSize::U32:
     case AtomsSize::S32:
@@ -80,7 +83,8 @@ void StoreResult(TranslatorVisitor& v, IR::Reg dest_reg, const IR::Value& result
 }
 } // Anonymous namespace
 
-void TranslatorVisitor::ATOMS(u64 insn) {
+void TranslatorVisitor::ATOMS(u64 insn)
+{
     union {
         u64 raw;
         BitField<0, 8, IR::Reg> dest_reg;

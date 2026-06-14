@@ -4,10 +4,11 @@
 // SPDX-FileCopyrightText: Copyright 2020 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "video_core/texture_cache/image_view_info.h"
+
 #include <limits>
 
 #include "common/assert.h"
-#include "video_core/texture_cache/image_view_info.h"
 #include "video_core/texture_cache/texture_cache_base.h"
 #include "video_core/texture_cache/types.h"
 #include "video_core/texture_cache/util.h"
@@ -21,7 +22,8 @@ using Tegra::Texture::TextureType;
 
 constexpr u8 RENDER_TARGET_SWIZZLE = (std::numeric_limits<u8>::max)();
 
-[[nodiscard]] u8 CastSwizzle(SwizzleSource source) {
+[[nodiscard]] u8 CastSwizzle(SwizzleSource source)
+{
     const u8 casted = static_cast<u8>(source);
     ASSERT(static_cast<SwizzleSource>(casted) == source);
     return casted;
@@ -30,11 +32,10 @@ constexpr u8 RENDER_TARGET_SWIZZLE = (std::numeric_limits<u8>::max)();
 } // Anonymous namespace
 
 ImageViewInfo::ImageViewInfo(const TICEntry& config, s32 base_layer) noexcept
-    : format{PixelFormatFromTIC(config)},
-      x_source{CastSwizzle(config.x_source)},
-      y_source{CastSwizzle(config.y_source)},
-      z_source{CastSwizzle(config.z_source)},
-      w_source{CastSwizzle(config.w_source)} {
+    : format{PixelFormatFromTIC(config)}, x_source{CastSwizzle(config.x_source)},
+      y_source{CastSwizzle(config.y_source)}, z_source{CastSwizzle(config.z_source)},
+      w_source{CastSwizzle(config.w_source)}
+{
     range.base = SubresourceBase{
         .level = static_cast<s32>(config.res_min_mip_level),
         .layer = base_layer,
@@ -100,10 +101,13 @@ ImageViewInfo::ImageViewInfo(const TICEntry& config, s32 base_layer) noexcept
 ImageViewInfo::ImageViewInfo(ImageViewType type_, PixelFormat format_,
                              SubresourceRange range_) noexcept
     : type{type_}, format{format_}, range{range_}, x_source{RENDER_TARGET_SWIZZLE},
-      y_source{RENDER_TARGET_SWIZZLE}, z_source{RENDER_TARGET_SWIZZLE},
-      w_source{RENDER_TARGET_SWIZZLE} {}
+      y_source{RENDER_TARGET_SWIZZLE}, z_source{RENDER_TARGET_SWIZZLE}, w_source{
+                                                                            RENDER_TARGET_SWIZZLE}
+{
+}
 
-bool ImageViewInfo::IsRenderTarget() const noexcept {
+bool ImageViewInfo::IsRenderTarget() const noexcept
+{
     return x_source == RENDER_TARGET_SWIZZLE && y_source == RENDER_TARGET_SWIZZLE &&
            z_source == RENDER_TARGET_SWIZZLE && w_source == RENDER_TARGET_SWIZZLE;
 }

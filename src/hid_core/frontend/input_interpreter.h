@@ -52,8 +52,8 @@ public:
      *
      * @returns True when at least one of the buttons is pressed.
      */
-    template <Core::HID::NpadButton... T>
-    [[nodiscard]] bool IsAnyButtonPressed() {
+    template<Core::HID::NpadButton... T> [[nodiscard]] bool IsAnyButtonPressed()
+    {
         return (IsButtonPressed(T) || ...);
     }
 
@@ -74,8 +74,8 @@ public:
      *
      * @returns True when at least one of the buttons is pressed once.
      */
-    template <Core::HID::NpadButton... T>
-    [[nodiscard]] bool IsAnyButtonPressedOnce() const {
+    template<Core::HID::NpadButton... T> [[nodiscard]] bool IsAnyButtonPressedOnce() const
+    {
         return (IsButtonPressedOnce(T) || ...);
     }
 
@@ -95,8 +95,8 @@ public:
      *
      * @returns True when at least one of the buttons is held down.
      */
-    template <Core::HID::NpadButton... T>
-    [[nodiscard]] bool IsAnyButtonHeld() const {
+    template<Core::HID::NpadButton... T> [[nodiscard]] bool IsAnyButtonHeld() const
+    {
         return (IsButtonHeld(T) || ...);
     }
 

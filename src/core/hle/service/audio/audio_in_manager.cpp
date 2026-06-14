@@ -1,9 +1,10 @@
 // SPDX-FileCopyrightText: Copyright 2024 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/audio/audio_in_manager.h"
+
 #include "common/string_util.h"
 #include "core/hle/service/audio/audio_in.h"
-#include "core/hle/service/audio/audio_in_manager.h"
 #include "core/hle/service/cmif_serialization.h"
 
 namespace Service::Audio {
@@ -11,7 +12,8 @@ using namespace AudioCore::AudioIn;
 
 IAudioInManager::IAudioInManager(Core::System& system_)
     : ServiceFramework{system_, "audin:u"}, impl{std::make_unique<AudioCore::AudioIn::Manager>(
-                                                system_)} {
+                                                system_)}
+{
     // clang-format off
     static const FunctionInfo functions[] = {
         {0, D<&IAudioInManager::ListAudioIns>, "ListAudioIns"},
@@ -28,8 +30,10 @@ IAudioInManager::IAudioInManager(Core::System& system_)
 
 IAudioInManager::~IAudioInManager() = default;
 
-Result IAudioInManager::ListAudioIns(
-    OutArray<AudioDeviceName, BufferAttr_HipcMapAlias> out_audio_ins, Out<u32> out_count) {
+Result
+IAudioInManager::ListAudioIns(OutArray<AudioDeviceName, BufferAttr_HipcMapAlias> out_audio_ins,
+                              Out<u32> out_count)
+{
     LOG_DEBUG(Service_Audio, "called");
     R_RETURN(this->ListAudioInsAutoFiltered(out_audio_ins, out_count));
 }
@@ -40,14 +44,16 @@ Result IAudioInManager::OpenAudioIn(Out<AudioInParameterInternal> out_parameter_
                                     InArray<AudioDeviceName, BufferAttr_HipcMapAlias> name,
                                     AudioInParameter parameter,
                                     InCopyHandle<Kernel::KProcess> process_handle,
-                                    ClientAppletResourceUserId aruid) {
+                                    ClientAppletResourceUserId aruid)
+{
     LOG_DEBUG(Service_Audio, "called");
     R_RETURN(this->OpenAudioInProtocolSpecified(out_parameter_internal, out_audio_in, out_name,
                                                 name, {}, parameter, process_handle, aruid));
 }
 
 Result IAudioInManager::ListAudioInsAuto(
-    OutArray<AudioDeviceName, BufferAttr_HipcAutoSelect> out_audio_ins, Out<u32> out_count) {
+    OutArray<AudioDeviceName, BufferAttr_HipcAutoSelect> out_audio_ins, Out<u32> out_count)
+{
     LOG_DEBUG(Service_Audio, "called");
     R_RETURN(this->ListAudioInsAutoFiltered(out_audio_ins, out_count));
 }
@@ -56,14 +62,16 @@ Result IAudioInManager::OpenAudioInAuto(
     Out<AudioInParameterInternal> out_parameter_internal, Out<SharedPointer<IAudioIn>> out_audio_in,
     OutArray<AudioDeviceName, BufferAttr_HipcAutoSelect> out_name,
     InArray<AudioDeviceName, BufferAttr_HipcAutoSelect> name, AudioInParameter parameter,
-    InCopyHandle<Kernel::KProcess> process_handle, ClientAppletResourceUserId aruid) {
+    InCopyHandle<Kernel::KProcess> process_handle, ClientAppletResourceUserId aruid)
+{
     LOG_DEBUG(Service_Audio, "called");
     R_RETURN(this->OpenAudioInProtocolSpecified(out_parameter_internal, out_audio_in, out_name,
                                                 name, {}, parameter, process_handle, aruid));
 }
 
 Result IAudioInManager::ListAudioInsAutoFiltered(
-    OutArray<AudioDeviceName, BufferAttr_HipcAutoSelect> out_audio_ins, Out<u32> out_count) {
+    OutArray<AudioDeviceName, BufferAttr_HipcAutoSelect> out_audio_ins, Out<u32> out_count)
+{
     LOG_DEBUG(Service_Audio, "called");
     *out_count = impl->GetDeviceNames(out_audio_ins, true);
     R_SUCCEED();
@@ -74,7 +82,8 @@ Result IAudioInManager::OpenAudioInProtocolSpecified(
     OutArray<AudioDeviceName, BufferAttr_HipcAutoSelect> out_name,
     InArray<AudioDeviceName, BufferAttr_HipcAutoSelect> name, Protocol protocol,
     AudioInParameter parameter, InCopyHandle<Kernel::KProcess> process_handle,
-    ClientAppletResourceUserId aruid) {
+    ClientAppletResourceUserId aruid)
+{
     LOG_DEBUG(Service_Audio, "called");
 
     if (!process_handle) {

@@ -17,8 +17,8 @@
 
 #include "common/common_types.h"
 #include "core/file_sys/vfs/vfs_types.h"
-#include "core/hle/service/os/event.h"
 #include "core/hle/service/kernel_helpers.h"
+#include "core/hle/service/os/event.h"
 
 namespace Core::Frontend {
 class EmuWindow;
@@ -342,8 +342,8 @@ public:
     void SetFrontendAppletSet(Service::AM::Frontend::FrontendAppletSet&& set);
 
     [[nodiscard]] Service::AM::Frontend::FrontendAppletHolder& GetFrontendAppletHolder();
-    [[nodiscard]] const Service::AM::Frontend::FrontendAppletHolder& GetFrontendAppletHolder()
-        const;
+    [[nodiscard]] const Service::AM::Frontend::FrontendAppletHolder&
+    GetFrontendAppletHolder() const;
 
     [[nodiscard]] Service::AM::AppletManager& GetAppletManager();
 
@@ -358,7 +358,8 @@ public:
     [[nodiscard]] Service::FileSystem::FileSystemController& GetFileSystemController();
     [[nodiscard]] const Service::FileSystem::FileSystemController& GetFileSystemController() const;
 
-    void RegisterContentProvider(FileSys::ContentProviderUnionSlot slot, FileSys::ContentProvider* provider);
+    void RegisterContentProvider(FileSys::ContentProviderUnionSlot slot,
+                                 FileSys::ContentProvider* provider);
 
     [[nodiscard]] const Reporter& GetReporter() const;
 

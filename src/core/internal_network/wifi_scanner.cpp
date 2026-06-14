@@ -16,12 +16,12 @@
 #elif defined(__linux__) && !defined(__ANDROID__)
 #include <iwlib.h>
 #elif defined(__FreeBSD__)
-#include <sys/types.h>
-#include <sys/time.h>
-#include <sys/socket.h>
-#include <net/if.h>
 #include <net/ethernet.h>
+#include <net/if.h>
 #include <net80211/ieee80211_ioctl.h>
+#include <sys/socket.h>
+#include <sys/time.h>
+#include <sys/types.h>
 #endif
 
 #include "common/logging.h"
@@ -32,11 +32,13 @@ using namespace std::chrono_literals;
 
 namespace Network {
 #ifdef _WIN32
-static u8 QualityToPercent(DWORD q) {
+static u8 QualityToPercent(DWORD q)
+{
     return u8(q);
 }
 
-std::vector<Network::ScanData> ScanWifiNetworks(std::chrono::milliseconds deadline) {
+std::vector<Network::ScanData> ScanWifiNetworks(std::chrono::milliseconds deadline)
+{
     std::vector<Network::ScanData> out;
 
     HANDLE hClient{};
@@ -95,7 +97,8 @@ std::vector<Network::ScanData> ScanWifiNetworks(std::chrono::milliseconds deadli
     return out;
 }
 #elif defined(__linux__) && !defined(__ANDROID__)
-static u8 QualityToPercent(const iwrange& r, const wireless_scan* ws) {
+static u8 QualityToPercent(const iwrange& r, const wireless_scan* ws)
+{
     const iw_quality qual = ws->stats.qual;
     const int lvl = qual.level;
     const int max = r.max_qual.level ? r.max_qual.level : 100;
@@ -103,7 +106,8 @@ static u8 QualityToPercent(const iwrange& r, const wireless_scan* ws) {
 }
 
 // TODO(crueter, Maufeat): Check if driver supports wireless extensions, fallback to nl80211 if not
-std::vector<Network::ScanData> ScanWifiNetworks(std::chrono::milliseconds deadline) {
+std::vector<Network::ScanData> ScanWifiNetworks(std::chrono::milliseconds deadline)
+{
     std::vector<Network::ScanData> out;
     int sock = iw_sockets_open();
     if (sock < 0) {
@@ -112,19 +116,22 @@ std::vector<Network::ScanData> ScanWifiNetworks(std::chrono::milliseconds deadli
     }
 
     char ifname[IFNAMSIZ] = {0};
-    char *args[1] = {ifname};
+    char* args[1] = {ifname};
 
-    iw_enum_devices(sock, [](int skfd, char* ifname, char* args[], int count) -> int {
-        iwrange range;
-        int res = iw_get_range_info(skfd, ifname, &range);
-        LOG_INFO(Network, "ifname {} returned {} on iw_get_range_info", ifname, res);
-        if (res >= 0) {
-            strncpy(args[0], ifname, IFNAMSIZ - 1);
-            args[0][IFNAMSIZ - 1] = 0;
-            return 1;
-        }
-        return 0;
-    }, args, 0);
+    iw_enum_devices(
+        sock,
+        [](int skfd, char* ifname, char* args[], int count) -> int {
+            iwrange range;
+            int res = iw_get_range_info(skfd, ifname, &range);
+            LOG_INFO(Network, "ifname {} returned {} on iw_get_range_info", ifname, res);
+            if (res >= 0) {
+                strncpy(args[0], ifname, IFNAMSIZ - 1);
+                args[0][IFNAMSIZ - 1] = 0;
+                return 1;
+            }
+            return 0;
+        },
+        args, 0);
 
     if (strlen(ifname) == 0) {
         LOG_WARNING(Network, "No wireless interface found");
@@ -171,11 +178,13 @@ std::vector<Network::ScanData> ScanWifiNetworks(std::chrono::milliseconds deadli
     return out;
 }
 #elif defined(__FreeBSD__)
-std::vector<Network::ScanData> ScanWifiNetworks(std::chrono::milliseconds deadline) {
+std::vector<Network::ScanData> ScanWifiNetworks(std::chrono::milliseconds deadline)
+{
     return {}; // disabled, pretend no results
 }
 #else
-std::vector<Network::ScanData> ScanWifiNetworks(std::chrono::milliseconds deadline) {
+std::vector<Network::ScanData> ScanWifiNetworks(std::chrono::milliseconds deadline)
+{
     return {}; // disabled, pretend no results
 }
 #endif

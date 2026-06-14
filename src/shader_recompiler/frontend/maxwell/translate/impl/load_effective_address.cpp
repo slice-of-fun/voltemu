@@ -8,7 +8,8 @@
 namespace Shader::Maxwell {
 namespace {
 void LEA_hi(TranslatorVisitor& v, u64 insn, const IR::U32& base, IR::U32 offset_hi, u64 scale,
-            bool neg, bool x) {
+            bool neg, bool x)
+{
     union {
         u64 insn;
         BitField<0, 8, IR::Reg> dest_reg;
@@ -39,7 +40,8 @@ void LEA_hi(TranslatorVisitor& v, u64 insn, const IR::U32& base, IR::U32 offset_
     v.X(lea.dest_reg, result);
 }
 
-void LEA_lo(TranslatorVisitor& v, u64 insn, const IR::U32& base) {
+void LEA_lo(TranslatorVisitor& v, u64 insn, const IR::U32& base)
+{
     union {
         u64 insn;
         BitField<0, 8, IR::Reg> dest_reg;
@@ -70,7 +72,8 @@ void LEA_lo(TranslatorVisitor& v, u64 insn, const IR::U32& base) {
 }
 } // Anonymous namespace
 
-void TranslatorVisitor::LEA_hi_reg(u64 insn) {
+void TranslatorVisitor::LEA_hi_reg(u64 insn)
+{
     union {
         u64 insn;
         BitField<28, 5, u64> scale;
@@ -81,7 +84,8 @@ void TranslatorVisitor::LEA_hi_reg(u64 insn) {
     LEA_hi(*this, insn, GetReg20(insn), GetReg39(insn), lea.scale, lea.neg != 0, lea.x != 0);
 }
 
-void TranslatorVisitor::LEA_hi_cbuf(u64 insn) {
+void TranslatorVisitor::LEA_hi_cbuf(u64 insn)
+{
     union {
         u64 insn;
         BitField<51, 5, u64> scale;
@@ -92,15 +96,18 @@ void TranslatorVisitor::LEA_hi_cbuf(u64 insn) {
     LEA_hi(*this, insn, GetCbuf(insn), GetReg39(insn), lea.scale, lea.neg != 0, lea.x != 0);
 }
 
-void TranslatorVisitor::LEA_lo_reg(u64 insn) {
+void TranslatorVisitor::LEA_lo_reg(u64 insn)
+{
     LEA_lo(*this, insn, GetReg20(insn));
 }
 
-void TranslatorVisitor::LEA_lo_cbuf(u64 insn) {
+void TranslatorVisitor::LEA_lo_cbuf(u64 insn)
+{
     LEA_lo(*this, insn, GetCbuf(insn));
 }
 
-void TranslatorVisitor::LEA_lo_imm(u64 insn) {
+void TranslatorVisitor::LEA_lo_imm(u64 insn)
+{
     LEA_lo(*this, insn, GetImm20(insn));
 }
 

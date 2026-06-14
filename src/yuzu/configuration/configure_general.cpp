@@ -4,25 +4,28 @@
 // SPDX-FileCopyrightText: 2016 Citra Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include <functional>
-#include <utility>
-#include <vector>
+#include "yuzu/configuration/configure_general.h"
+
 #include <QDir>
 #include <QFileDialog>
 #include <QListWidget>
 #include <QMessageBox>
+#include <functional>
+#include <utility>
+#include <vector>
+
 #include "common/settings.h"
 #include "core/core.h"
 #include "qt_common/config/uisettings.h"
 #include "ui_configure_general.h"
 #include "yuzu/configuration/configuration_shared.h"
-#include "yuzu/configuration/configure_general.h"
 #include "yuzu/configuration/shared_widget.h"
 
 ConfigureGeneral::ConfigureGeneral(const Core::System& system_,
                                    std::shared_ptr<std::vector<ConfigurationShared::Tab*>> group_,
                                    const ConfigurationShared::Builder& builder, QWidget* parent)
-    : Tab(group_, parent), ui{std::make_unique<Ui::ConfigureGeneral>()}, system{system_} {
+    : Tab(group_, parent), ui{std::make_unique<Ui::ConfigureGeneral>()}, system{system_}
+{
     ui->setupUi(this);
 
     Setup(builder);
@@ -48,11 +51,13 @@ ConfigureGeneral::ConfigureGeneral(const Core::System& system_,
 
 ConfigureGeneral::~ConfigureGeneral() = default;
 
-void ConfigureGeneral::SetConfiguration() {
+void ConfigureGeneral::SetConfiguration()
+{
     UpdateExternalContentList();
 }
 
-void ConfigureGeneral::Setup(const ConfigurationShared::Builder& builder) {
+void ConfigureGeneral::Setup(const ConfigurationShared::Builder& builder)
+{
     QLayout& general_layout = *ui->general_widget->layout();
     std::map<u32, QWidget*> general_hold{};
     std::map<u32, QWidget*> linux_hold{};
@@ -92,11 +97,13 @@ void ConfigureGeneral::Setup(const ConfigurationShared::Builder& builder) {
 }
 
 // Called to set the callback when resetting settings to defaults
-void ConfigureGeneral::SetResetCallback(std::function<void()> callback) {
+void ConfigureGeneral::SetResetCallback(std::function<void()> callback)
+{
     reset_callback = std::move(callback);
 }
 
-void ConfigureGeneral::ResetDefaults() {
+void ConfigureGeneral::ResetDefaults()
+{
     QMessageBox::StandardButton answer = QMessageBox::question(
         this, tr("Eden"),
         tr("This reset all settings and remove all per-game configurations. This will not delete "
@@ -110,7 +117,8 @@ void ConfigureGeneral::ResetDefaults() {
     reset_callback();
 }
 
-void ConfigureGeneral::ApplyConfiguration() {
+void ConfigureGeneral::ApplyConfiguration()
+{
     bool powered_on = system.IsPoweredOn();
     for (const auto& func : apply_funcs) {
         func(powered_on);
@@ -128,14 +136,16 @@ void ConfigureGeneral::ApplyConfiguration() {
     }
 }
 
-void ConfigureGeneral::UpdateExternalContentList() {
+void ConfigureGeneral::UpdateExternalContentList()
+{
     ui->external_content_list->clear();
     for (const auto& dir : Settings::values.external_content_dirs) {
         ui->external_content_list->addItem(QString::fromStdString(dir));
     }
 }
 
-void ConfigureGeneral::AddExternalContentDirectory() {
+void ConfigureGeneral::AddExternalContentDirectory()
+{
     const QString dir_path = QFileDialog::getExistingDirectory(
         this, tr("Select External Content Directory..."), QString());
 
@@ -159,14 +169,16 @@ void ConfigureGeneral::AddExternalContentDirectory() {
     ui->external_content_list->addItem(normalized_path);
 }
 
-void ConfigureGeneral::RemoveSelectedExternalContentDirectory() {
+void ConfigureGeneral::RemoveSelectedExternalContentDirectory()
+{
     auto selected = ui->external_content_list->selectedItems();
     if (!selected.isEmpty()) {
         qDeleteAll(ui->external_content_list->selectedItems());
     }
 }
 
-void ConfigureGeneral::changeEvent(QEvent* event) {
+void ConfigureGeneral::changeEvent(QEvent* event)
+{
     if (event->type() == QEvent::LanguageChange) {
         RetranslateUI();
     }
@@ -174,6 +186,7 @@ void ConfigureGeneral::changeEvent(QEvent* event) {
     QWidget::changeEvent(event);
 }
 
-void ConfigureGeneral::RetranslateUI() {
+void ConfigureGeneral::RetranslateUI()
+{
     ui->retranslateUi(this);
 }

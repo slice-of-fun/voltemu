@@ -12,9 +12,7 @@ namespace AudioCore::Renderer {
  * Represents an array of bits used for nodes and edges for the mixing graph.
  */
 struct BitArray {
-    void reset() {
-        buffer.assign(buffer.size(), false);
-    }
+    void reset() { buffer.assign(buffer.size(), false); }
 
     /// Bits
     std::vector<bool> buffer{};

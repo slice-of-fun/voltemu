@@ -1,16 +1,19 @@
 // SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+#include "android_config.h"
+
 #include <common/fs/path_util.h>
 #include <common/logging.h>
 #include <common/settings.h>
 #include <input_common/main.h>
-#include "android_config.h"
+
 #include "android_settings.h"
 #include "common/settings_setting.h"
 
 AndroidConfig::AndroidConfig(const std::string& config_name, ConfigType config_type)
-    : Config(config_type) {
+    : Config(config_type)
+{
     Initialize(config_name);
     if (config_type != ConfigType::InputProfile) {
         ReadAndroidValues();
@@ -18,7 +21,8 @@ AndroidConfig::AndroidConfig(const std::string& config_name, ConfigType config_t
     }
 }
 
-void AndroidConfig::ReloadAllValues() {
+void AndroidConfig::ReloadAllValues()
+{
     // Ensure the INI file is current before reloading values.
     SetUpIni();
 
@@ -27,20 +31,21 @@ void AndroidConfig::ReloadAllValues() {
     SaveAndroidValues();
 }
 
-void AndroidConfig::SaveAllValues() {
+void AndroidConfig::SaveAllValues()
+{
     SaveValues();
     SaveAndroidValues();
 }
 
-void AndroidConfig::ReadAndroidValues() {
+void AndroidConfig::ReadAndroidValues()
+{
     if (global) {
         ReadAndroidUIValues();
         ReadUIValues();
         BeginGroup(Settings::TranslateCategory(Settings::Category::DataStorage));
         Settings::values.ext_content_from_game_dirs = ReadBooleanSetting(
             std::string("ext_content_from_game_dirs"),
-            std::make_optional(
-                Settings::values.ext_content_from_game_dirs.GetDefault()));
+            std::make_optional(Settings::values.ext_content_from_game_dirs.GetDefault()));
         EndGroup();
         ReadOverlayValues();
     }
@@ -48,7 +53,8 @@ void AndroidConfig::ReadAndroidValues() {
     ReadAndroidControlValues();
 }
 
-void AndroidConfig::ReadAndroidUIValues() {
+void AndroidConfig::ReadAndroidUIValues()
+{
     BeginGroup(Settings::TranslateCategory(Settings::Category::Android));
 
     ReadCategory(Settings::Category::Android);
@@ -56,7 +62,8 @@ void AndroidConfig::ReadAndroidUIValues() {
     EndGroup();
 }
 
-void AndroidConfig::ReadUIValues() {
+void AndroidConfig::ReadUIValues()
+{
     BeginGroup(Settings::TranslateCategory(Settings::Category::Ui));
 
     ReadPathValues();
@@ -64,7 +71,8 @@ void AndroidConfig::ReadUIValues() {
     EndGroup();
 }
 
-void AndroidConfig::ReadPathValues() {
+void AndroidConfig::ReadPathValues()
+{
     BeginGroup(Settings::TranslateCategory(Settings::Category::Paths));
 
     AndroidSettings::values.game_dirs.clear();
@@ -104,7 +112,7 @@ void AndroidConfig::ReadPathValues() {
     const auto save_dir_setting = ReadStringSetting(std::string("save_directory"));
     if (save_dir_setting.empty()) {
         Common::FS::SetVoltPath(Common::FS::VoltPath::SaveDir,
-            Common::FS::GetVoltPathString(Common::FS::VoltPath::NANDDir));
+                                Common::FS::GetVoltPathString(Common::FS::VoltPath::NANDDir));
     } else {
         Common::FS::SetVoltPath(Common::FS::VoltPath::SaveDir, save_dir_setting);
     }
@@ -112,7 +120,8 @@ void AndroidConfig::ReadPathValues() {
     EndGroup();
 }
 
-void AndroidConfig::ReadDriverValues() {
+void AndroidConfig::ReadDriverValues()
+{
     BeginGroup(Settings::TranslateCategory(Settings::Category::GpuDriver));
 
     ReadCategory(Settings::Category::GpuDriver);
@@ -120,7 +129,8 @@ void AndroidConfig::ReadDriverValues() {
     EndGroup();
 }
 
-void AndroidConfig::ReadOverlayValues() {
+void AndroidConfig::ReadOverlayValues()
+{
     BeginGroup(Settings::TranslateCategory(Settings::Category::Overlay));
 
     ReadCategory(Settings::Category::Overlay);
@@ -144,7 +154,8 @@ void AndroidConfig::ReadOverlayValues() {
             ReadDoubleSetting(std::string("foldable\\x_position"));
         control_data.foldable_position.second =
             ReadDoubleSetting(std::string("foldable\\y_position"));
-        control_data.individual_scale = static_cast<float>(ReadDoubleSetting(std::string("individual_scale")));
+        control_data.individual_scale =
+            static_cast<float>(ReadDoubleSetting(std::string("individual_scale")));
         AndroidSettings::values.overlay_control_data.push_back(control_data);
     }
     EndArray();
@@ -152,7 +163,8 @@ void AndroidConfig::ReadOverlayValues() {
     EndGroup();
 }
 
-void AndroidConfig::ReadAndroidPlayerValues(std::size_t player_index) {
+void AndroidConfig::ReadAndroidPlayerValues(std::size_t player_index)
+{
     std::string player_prefix;
     if (type != ConfigType::InputProfile) {
         player_prefix.append("player_").append(ToString(player_index)).append("_");
@@ -205,7 +217,8 @@ void AndroidConfig::ReadAndroidPlayerValues(std::size_t player_index) {
         std::string(player_prefix).append("use_system_vibrator"), player_index == 0);
 }
 
-void AndroidConfig::ReadAndroidControlValues() {
+void AndroidConfig::ReadAndroidControlValues()
+{
     BeginGroup(Settings::TranslateCategory(Settings::Category::Controls));
 
     Settings::values.players.SetGlobal(!IsCustomConfig());
@@ -222,7 +235,8 @@ void AndroidConfig::ReadAndroidControlValues() {
     EndGroup();
 }
 
-void AndroidConfig::SaveAndroidValues() {
+void AndroidConfig::SaveAndroidValues()
+{
     if (global) {
         SaveAndroidUIValues();
         SaveUIValues();
@@ -234,7 +248,8 @@ void AndroidConfig::SaveAndroidValues() {
     WriteToIni();
 }
 
-void AndroidConfig::SaveAndroidUIValues() {
+void AndroidConfig::SaveAndroidUIValues()
+{
     BeginGroup(Settings::TranslateCategory(Settings::Category::Android));
 
     WriteCategory(Settings::Category::Android);
@@ -242,7 +257,8 @@ void AndroidConfig::SaveAndroidUIValues() {
     EndGroup();
 }
 
-void AndroidConfig::SaveUIValues() {
+void AndroidConfig::SaveUIValues()
+{
     BeginGroup(Settings::TranslateCategory(Settings::Category::Ui));
 
     SavePathValues();
@@ -250,7 +266,8 @@ void AndroidConfig::SaveUIValues() {
     EndGroup();
 }
 
-void AndroidConfig::SavePathValues() {
+void AndroidConfig::SavePathValues()
+{
     BeginGroup(Settings::TranslateCategory(Settings::Category::Paths));
 
     BeginArray(std::string("gamedirs"));
@@ -294,7 +311,8 @@ void AndroidConfig::SavePathValues() {
     EndGroup();
 }
 
-void AndroidConfig::SaveDriverValues() {
+void AndroidConfig::SaveDriverValues()
+{
     BeginGroup(Settings::TranslateCategory(Settings::Category::GpuDriver));
 
     WriteCategory(Settings::Category::GpuDriver);
@@ -302,7 +320,8 @@ void AndroidConfig::SaveDriverValues() {
     EndGroup();
 }
 
-void AndroidConfig::SaveOverlayValues() {
+void AndroidConfig::SaveOverlayValues()
+{
     BeginGroup(Settings::TranslateCategory(Settings::Category::Overlay));
 
     WriteCategory(Settings::Category::Overlay);
@@ -325,14 +344,16 @@ void AndroidConfig::SaveOverlayValues() {
                            control_data.foldable_position.first);
         WriteDoubleSetting(std::string("foldable\\y_position"),
                            control_data.foldable_position.second);
-        WriteDoubleSetting(std::string("individual_scale"), static_cast<double>(control_data.individual_scale));
+        WriteDoubleSetting(std::string("individual_scale"),
+                           static_cast<double>(control_data.individual_scale));
     }
     EndArray();
 
     EndGroup();
 }
 
-void AndroidConfig::SaveAndroidPlayerValues(std::size_t player_index) {
+void AndroidConfig::SaveAndroidPlayerValues(std::size_t player_index)
+{
     std::string player_prefix;
     if (type != ConfigType::InputProfile) {
         player_prefix = std::string("player_").append(ToString(player_index)).append("_");
@@ -361,7 +382,8 @@ void AndroidConfig::SaveAndroidPlayerValues(std::size_t player_index) {
                         player.use_system_vibrator, std::make_optional(player_index == 0));
 }
 
-void AndroidConfig::SaveAndroidControlValues() {
+void AndroidConfig::SaveAndroidControlValues()
+{
     BeginGroup(Settings::TranslateCategory(Settings::Category::Controls));
 
     Settings::values.players.SetGlobal(!IsCustomConfig());
@@ -378,7 +400,8 @@ void AndroidConfig::SaveAndroidControlValues() {
     EndGroup();
 }
 
-std::vector<Settings::BasicSetting*>& AndroidConfig::FindRelevantList(Settings::Category category) {
+std::vector<Settings::BasicSetting*>& AndroidConfig::FindRelevantList(Settings::Category category)
+{
     auto& map = Settings::values.linkage.by_category;
     if (map.contains(category)) {
         return Settings::values.linkage.by_category[category];
@@ -386,7 +409,8 @@ std::vector<Settings::BasicSetting*>& AndroidConfig::FindRelevantList(Settings::
     return AndroidSettings::values.linkage.by_category[category];
 }
 
-void AndroidConfig::ReadAndroidControlPlayerValues(std::size_t player_index) {
+void AndroidConfig::ReadAndroidControlPlayerValues(std::size_t player_index)
+{
     BeginGroup(Settings::TranslateCategory(Settings::Category::Controls));
 
     ReadPlayerValues(player_index);
@@ -395,7 +419,8 @@ void AndroidConfig::ReadAndroidControlPlayerValues(std::size_t player_index) {
     EndGroup();
 }
 
-void AndroidConfig::SaveAndroidControlPlayerValues(std::size_t player_index) {
+void AndroidConfig::SaveAndroidControlPlayerValues(std::size_t player_index)
+{
     BeginGroup(Settings::TranslateCategory(Settings::Category::Controls));
 
     LOG_DEBUG(Config, "Saving players control configuration values");

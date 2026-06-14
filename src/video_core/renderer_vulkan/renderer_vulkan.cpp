@@ -4,18 +4,20 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "video_core/renderer_vulkan/renderer_vulkan.h"
+
+#include <fmt/ranges.h>
+
 #include <algorithm>
 #include <array>
 #include <cstring>
 #include <memory>
 #include <optional>
+#include <ranges>
 #include <string>
 #include <vector>
 
-#include <fmt/ranges.h>
-
 #include "common/logging.h"
-#include <ranges>
 #include "common/scope_exit.h"
 #include "common/settings.h"
 #include "core/core_timing.h"
@@ -24,7 +26,6 @@
 #include "video_core/gpu.h"
 #include "video_core/present.h"
 #include "video_core/renderer_vulkan/present/util.h"
-#include "video_core/renderer_vulkan/renderer_vulkan.h"
 #include "video_core/renderer_vulkan/vk_blit_screen.h"
 #include "video_core/renderer_vulkan/vk_rasterizer.h"
 #include "video_core/renderer_vulkan/vk_scheduler.h"
@@ -57,12 +58,14 @@ constexpr VkExtent3D CaptureImageExtent{
 
 constexpr VkFormat CaptureFormat = VK_FORMAT_A8B8G8R8_UNORM_PACK32;
 
-std::string GetReadableVersion(u32 version) {
+std::string GetReadableVersion(u32 version)
+{
     return fmt::format("{}.{}.{}", VK_VERSION_MAJOR(version), VK_VERSION_MINOR(version),
                        VK_VERSION_PATCH(version));
 }
 
-std::string GetDriverVersion(const Device& device) {
+std::string GetDriverVersion(const Device& device)
+{
     // Extracted from
     // https://github.com/SaschaWillems/vulkan.gpuinfo.org/blob/5dddea46ea1120b0df14eef8f15ff8e318e35462/functions.php#L308-L314
     const u32 version = device.GetDriverVersion();
@@ -82,14 +85,17 @@ std::string GetDriverVersion(const Device& device) {
     return GetReadableVersion(version);
 }
 
-std::string BuildCommaSeparatedExtensions(
-    const std::set<std::string, std::less<>>& available_extensions) {
+std::string
+BuildCommaSeparatedExtensions(const std::set<std::string, std::less<>>& available_extensions)
+{
     return fmt::format("{}", fmt::join(available_extensions, ","));
 }
 
 } // Anonymous namespace
 
-Device CreateDevice(const vk::Instance& instance, const vk::InstanceDispatch& dld, VkSurfaceKHR surface) {
+Device CreateDevice(const vk::Instance& instance, const vk::InstanceDispatch& dld,
+                    VkSurfaceKHR surface)
+{
     const std::vector<VkPhysicalDevice> devices = instance.EnumeratePhysicalDevices();
     const u32 device_index = Settings::values.vulkan_device.GetValue();
     if (device_index >= u32(devices.size())) {
@@ -101,61 +107,36 @@ Device CreateDevice(const vk::Instance& instance, const vk::InstanceDispatch& dl
 }
 
 RendererVulkan::RendererVulkan(Core::Frontend::EmuWindow& emu_window,
-                               Tegra::MaxwellDeviceMemoryManager& device_memory_,
-                               Tegra::GPU& gpu_,
+                               Tegra::MaxwellDeviceMemoryManager& device_memory_, Tegra::GPU& gpu_,
                                std::unique_ptr<Core::Frontend::GraphicsContext> context_)
-try
-    : RendererBase(emu_window, std::move(context_))
-    , device_memory(device_memory_)
-    , gpu(gpu_)
-    , library(OpenLibrary(context.get()))
-    , dld()
+try : RendererBase(emu_window, std::move(context_)), device_memory(device_memory_), gpu(gpu_),
+    library(OpenLibrary(context.get())),
+    dld()
     // Create raw Vulkan instance first
-    , instance(CreateInstance(*library,
-                            dld,
-                            VK_API_VERSION_1_1,
-                            render_window.GetWindowInfo().type,
+    ,
+    instance(CreateInstance(*library, dld, VK_API_VERSION_1_1, render_window.GetWindowInfo().type,
                             Settings::values.renderer_debug.GetValue()))
     // Create debug messenger if debug is enabled
-    , debug_messenger(Settings::values.renderer_debug ? CreateDebugUtilsCallback(instance)
+    ,
+    debug_messenger(Settings::values.renderer_debug ? CreateDebugUtilsCallback(instance)
                                                     : vk::DebugUtilsMessenger{})
     // Create surface
-    , surface(CreateSurface(instance, render_window.GetWindowInfo()))
-    , device(CreateDevice(instance, dld, *surface))
-    , memory_allocator(device)
-    , state_tracker()
-    , scheduler(device, state_tracker)
-    , swapchain(*surface,
-                device,
-                scheduler,
-               render_window.GetFramebufferLayout().width,
-               render_window.GetFramebufferLayout().height)
-    , present_manager(instance,
-                      render_window,
-                      device,
-                      memory_allocator,
-                      scheduler,
-                      swapchain,
-                      surface)
-    , blit_swapchain(device_memory,
-                   device,
-                   memory_allocator,
-                   present_manager,
-                   scheduler,
-                   PresentFiltersForDisplay)
-    , blit_capture(device_memory,
-                   device,
-                   memory_allocator,
-                   present_manager,
-                   scheduler,
-                   PresentFiltersForDisplay)
-    , blit_applet(device_memory,
-                  device,
-                  memory_allocator,
-                  present_manager,
-                  scheduler,
-                  PresentFiltersForAppletCapture)
-    , rasterizer(render_window, gpu, device_memory, device, memory_allocator, state_tracker, scheduler) {
+    ,
+    surface(CreateSurface(instance, render_window.GetWindowInfo())),
+    device(CreateDevice(instance, dld, *surface)), memory_allocator(device), state_tracker(),
+    scheduler(device, state_tracker),
+    swapchain(*surface, device, scheduler, render_window.GetFramebufferLayout().width,
+              render_window.GetFramebufferLayout().height),
+    present_manager(instance, render_window, device, memory_allocator, scheduler, swapchain,
+                    surface),
+    blit_swapchain(device_memory, device, memory_allocator, present_manager, scheduler,
+                   PresentFiltersForDisplay),
+    blit_capture(device_memory, device, memory_allocator, present_manager, scheduler,
+                 PresentFiltersForDisplay),
+    blit_applet(device_memory, device, memory_allocator, present_manager, scheduler,
+                PresentFiltersForAppletCapture),
+    rasterizer(render_window, gpu, device_memory, device, memory_allocator, state_tracker,
+               scheduler) {
 
     if (Settings::values.renderer_force_max_clock.GetValue() && device.ShouldBoostClocks()) {
         turbo_mode.emplace(instance, dld);
@@ -168,13 +149,16 @@ try
     throw std::runtime_error{fmt::format("Vulkan initialization error {}", exception.what())};
 }
 
-RendererVulkan::~RendererVulkan() {
+RendererVulkan::~RendererVulkan()
+{
     scheduler.RegisterOnSubmit([] {});
     void(device.GetLogical().WaitIdle());
 }
 
-void RendererVulkan::Composite(std::span<const Tegra::FramebufferConfig> framebuffers) {
-    SCOPE_EXIT {
+void RendererVulkan::Composite(std::span<const Tegra::FramebufferConfig> framebuffers)
+{
+    SCOPE_EXIT
+    {
         render_window.OnFrameDisplayed();
     };
 
@@ -199,7 +183,8 @@ void RendererVulkan::Composite(std::span<const Tegra::FramebufferConfig> framebu
     rasterizer.TickFrame();
 }
 
-void RendererVulkan::Report() const {
+void RendererVulkan::Report() const
+{
     using namespace Common::Literals;
     const std::string vendor_name{device.GetVendorName()};
     const std::string model_name{device.GetModelName()};
@@ -220,7 +205,8 @@ void RendererVulkan::Report() const {
 
 vk::Buffer RendererVulkan::RenderToBuffer(std::span<const Tegra::FramebufferConfig> framebuffers,
                                           const Layout::FramebufferLayout& layout, VkFormat format,
-                                          VkDeviceSize buffer_size) {
+                                          VkDeviceSize buffer_size)
+{
     auto frame = [&]() {
         Frame f{};
         f.image =
@@ -247,7 +233,8 @@ vk::Buffer RendererVulkan::RenderToBuffer(std::span<const Tegra::FramebufferConf
     return dst_buffer;
 }
 
-void RendererVulkan::RenderScreenshot(std::span<const Tegra::FramebufferConfig> framebuffers) {
+void RendererVulkan::RenderScreenshot(std::span<const Tegra::FramebufferConfig> framebuffers)
+{
     if (!renderer_settings.screenshot_requested) {
         return;
     }
@@ -262,7 +249,8 @@ void RendererVulkan::RenderScreenshot(std::span<const Tegra::FramebufferConfig> 
     renderer_settings.screenshot_requested = false;
 }
 
-std::vector<u8> RendererVulkan::GetAppletCaptureBuffer() {
+std::vector<u8> RendererVulkan::GetAppletCaptureBuffer()
+{
     using namespace VideoCore::Capture;
 
     std::vector<u8> out(VideoCore::Capture::TiledSize);
@@ -291,7 +279,8 @@ std::vector<u8> RendererVulkan::GetAppletCaptureBuffer() {
 }
 
 void RendererVulkan::RenderAppletCaptureLayer(
-    std::span<const Tegra::FramebufferConfig> framebuffers) {
+    std::span<const Tegra::FramebufferConfig> framebuffers)
+{
     if (!applet_frame.image) {
         applet_frame.image = CreateWrappedImage(memory_allocator, CaptureImageSize, CaptureFormat);
         applet_frame.image_view = CreateWrappedImageView(device, applet_frame.image, CaptureFormat);

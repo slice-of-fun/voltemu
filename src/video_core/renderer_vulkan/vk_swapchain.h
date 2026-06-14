@@ -22,19 +22,12 @@ class Scheduler;
 
 class Swapchain {
 public:
-    explicit Swapchain(
-        VkSurfaceKHR_T* surface,
-        const Device& device,
-        Scheduler& scheduler,
-        u32 width,
-        u32 height);
+    explicit Swapchain(VkSurfaceKHR_T* surface, const Device& device, Scheduler& scheduler,
+                       u32 width, u32 height);
     ~Swapchain();
 
     /// Creates (or recreates) the swapchain with a given size.
-    void Create(
-        VkSurfaceKHR_T* surface,
-        u32 width,
-        u32 height);
+    void Create(VkSurfaceKHR_T* surface, u32 width, u32 height);
 
     /// Acquires the next image in the swapchain, waits as needed.
     bool AcquireNextImage();
@@ -43,71 +36,39 @@ public:
     void Present(VkSemaphore render_semaphore);
 
     /// Returns true when the swapchain needs to be recreated.
-    bool NeedsRecreation() const {
-        return IsSubOptimal() || NeedsPresentModeUpdate();
-    }
+    bool NeedsRecreation() const { return IsSubOptimal() || NeedsPresentModeUpdate(); }
 
     /// Returns true when the swapchain is outdated.
-    bool IsOutDated() const {
-        return is_outdated;
-    }
+    bool IsOutDated() const { return is_outdated; }
 
     /// Returns true when the swapchain is suboptimal.
-    bool IsSubOptimal() const {
-        return is_suboptimal;
-    }
+    bool IsSubOptimal() const { return is_suboptimal; }
 
-    VkExtent2D GetSize() const {
-        return extent;
-    }
+    VkExtent2D GetSize() const { return extent; }
 
-    std::size_t GetImageCount() const {
-        return image_count;
-    }
+    std::size_t GetImageCount() const { return image_count; }
 
-    std::size_t GetImageIndex() const {
-        return image_index;
-    }
+    std::size_t GetImageIndex() const { return image_index; }
 
-    std::size_t GetFrameIndex() const {
-        return frame_index;
-    }
+    std::size_t GetFrameIndex() const { return frame_index; }
 
-    VkImage GetImageIndex(std::size_t index) const {
-        return images[index];
-    }
+    VkImage GetImageIndex(std::size_t index) const { return images[index]; }
 
-    VkImage CurrentImage() const {
-        return images[image_index];
-    }
+    VkImage CurrentImage() const { return images[image_index]; }
 
-    VkFormat GetImageViewFormat() const {
-        return image_view_format;
-    }
+    VkFormat GetImageViewFormat() const { return image_view_format; }
 
-    VkFormat GetImageFormat() const {
-        return surface_format.format;
-    }
+    VkFormat GetImageFormat() const { return surface_format.format; }
 
-    VkSemaphore CurrentPresentSemaphore() const {
-        return *present_semaphores[frame_index];
-    }
+    VkSemaphore CurrentPresentSemaphore() const { return *present_semaphores[frame_index]; }
 
-    VkSemaphore CurrentRenderSemaphore() const {
-        return *render_semaphores[image_index];
-    }
+    VkSemaphore CurrentRenderSemaphore() const { return *render_semaphores[image_index]; }
 
-    u32 GetWidth() const {
-        return width;
-    }
+    u32 GetWidth() const { return width; }
 
-    u32 GetHeight() const {
-        return height;
-    }
+    u32 GetHeight() const { return height; }
 
-    VkExtent2D GetExtent() const {
-        return extent;
-    }
+    VkExtent2D GetExtent() const { return extent; }
 
 private:
     void CreateSwapchain(const VkSurfaceCapabilitiesKHR& capabilities);

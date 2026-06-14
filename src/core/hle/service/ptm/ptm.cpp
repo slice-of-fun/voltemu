@@ -1,17 +1,19 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+#include "core/hle/service/ptm/ptm.h"
+
 #include <memory>
 
 #include "core/core.h"
 #include "core/hle/service/ptm/psm.h"
-#include "core/hle/service/ptm/ptm.h"
 #include "core/hle/service/ptm/ts.h"
 #include "core/hle/service/server_manager.h"
 
 namespace Service::PTM {
 
-void LoopProcess(Core::System& system) {
+void LoopProcess(Core::System& system)
+{
     auto server_manager = std::make_unique<ServerManager>(system);
 
     server_manager->RegisterNamedService("psm", std::make_shared<PSM>(system));

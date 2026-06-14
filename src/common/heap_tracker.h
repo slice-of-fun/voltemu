@@ -25,7 +25,8 @@ struct SeparateHeapMap {
 };
 
 struct SeparateHeapMapAddrComparator {
-    static constexpr int Compare(const SeparateHeapMap& lhs, const SeparateHeapMap& rhs) {
+    static constexpr int Compare(const SeparateHeapMap& lhs, const SeparateHeapMap& rhs)
+    {
         if (lhs.vaddr < rhs.vaddr) {
             return -1;
         } else if (lhs.vaddr <= (rhs.vaddr + rhs.size - 1)) {
@@ -37,7 +38,8 @@ struct SeparateHeapMapAddrComparator {
 };
 
 struct SeparateHeapMapTickComparator {
-    static constexpr int Compare(const SeparateHeapMap& lhs, const SeparateHeapMap& rhs) {
+    static constexpr int Compare(const SeparateHeapMap& lhs, const SeparateHeapMap& rhs)
+    {
         if (lhs.tick < rhs.tick) {
             return -1;
         } else if (lhs.tick > rhs.tick) {
@@ -57,9 +59,7 @@ public:
              bool is_separate_heap);
     void Unmap(size_t virtual_offset, size_t size, bool is_separate_heap);
     void Protect(size_t virtual_offset, size_t length, MemoryPermission perm);
-    u8* VirtualBasePointer() {
-        return m_buffer.VirtualBasePointer();
-    }
+    u8* VirtualBasePointer() { return m_buffer.VirtualBasePointer(); }
 
     bool DeferredMapSeparateHeap(u8* fault_address);
     bool DeferredMapSeparateHeap(size_t virtual_offset);

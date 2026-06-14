@@ -172,24 +172,22 @@ struct Ssid {
 
     Ssid() = default;
 
-    constexpr explicit Ssid(std::string_view data) {
+    constexpr explicit Ssid(std::string_view data)
+    {
         length = static_cast<u8>((std::min)(data.size(), SsidLengthMax));
         raw = {};
         data.copy(raw.data(), length);
         raw[length] = 0;
     }
 
-    std::string GetStringValue() const {
-        return std::string(raw.data());
-    }
+    std::string GetStringValue() const { return std::string(raw.data()); }
 
-    bool operator==(const Ssid& b) const {
+    bool operator==(const Ssid& b) const
+    {
         return (length == b.length) && (std::memcmp(raw.data(), b.raw.data(), length) == 0);
     }
 
-    bool operator!=(const Ssid& b) const {
-        return !operator==(b);
-    }
+    bool operator!=(const Ssid& b) const { return !operator==(b); }
 };
 static_assert(sizeof(Ssid) == 0x22, "Ssid is an invalid size");
 
@@ -204,7 +202,8 @@ struct MacAddress {
 static_assert(sizeof(MacAddress) == 0x6, "MacAddress is an invalid size");
 
 struct MACAddressHash {
-    size_t operator()(const MacAddress& address) const {
+    size_t operator()(const MacAddress& address) const
+    {
         u64 value{};
         std::memcpy(&value, address.raw.data(), sizeof(address.raw));
         return value;

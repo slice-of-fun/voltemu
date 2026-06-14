@@ -1,17 +1,21 @@
 // SPDX-FileCopyrightText: Copyright 2024 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#include <set>
+#include "input_common/drivers/android.h"
+
 #include <common/settings_input.h>
 #include <common/thread.h>
 #include <jni.h>
+
+#include <set>
+
 #include "common/android/android_common.h"
 #include "common/android/id_cache.h"
-#include "input_common/drivers/android.h"
 
 namespace InputCommon {
 
-Android::Android(std::string input_engine_) : InputEngine(std::move(input_engine_)) {
+Android::Android(std::string input_engine_) : InputEngine(std::move(input_engine_))
+{
     vibration_thread = std::jthread([this](std::stop_token token) {
         Common::SetCurrentThreadName("Android_Vibration");
         auto env = Common::Android::GetEnvForThread();
@@ -24,7 +28,8 @@ Android::Android(std::string input_engine_) : InputEngine(std::move(input_engine
 
 Android::~Android() = default;
 
-void Android::RegisterController(jobject j_input_device) {
+void Android::RegisterController(jobject j_input_device)
+{
     auto env = Common::Android::GetEnvForThread();
     const std::string guid = Common::Android::GetJString(
         env, static_cast<jstring>(
@@ -40,19 +45,22 @@ void Android::RegisterController(jobject j_input_device) {
     input_devices[identifier] = new_device;
 }
 
-void Android::SetButtonState(std::string guid, size_t port, int button_id, bool value) {
+void Android::SetButtonState(std::string guid, size_t port, int button_id, bool value)
+{
     const auto identifier = GetIdentifier(guid, port);
     SetButton(identifier, button_id, value);
 }
 
-void Android::SetAxisPosition(std::string guid, size_t port, int axis_id, float value) {
+void Android::SetAxisPosition(std::string guid, size_t port, int axis_id, float value)
+{
     const auto identifier = GetIdentifier(guid, port);
     SetAxis(identifier, axis_id, value);
 }
 
 void Android::SetMotionState(std::string guid, size_t port, u64 delta_timestamp, float gyro_x,
                              float gyro_y, float gyro_z, float accel_x, float accel_y,
-                             float accel_z) {
+                             float accel_z)
+{
     const auto identifier = GetIdentifier(guid, port);
     const BasicMotion motion_data{
         .gyro_x = gyro_x,
@@ -66,9 +74,10 @@ void Android::SetMotionState(std::string guid, size_t port, u64 delta_timestamp,
     SetMotion(identifier, 0, motion_data);
 }
 
-Common::Input::DriverResult Android::SetVibration(
-    [[maybe_unused]] const PadIdentifier& identifier,
-    [[maybe_unused]] const Common::Input::VibrationStatus& vibration) {
+Common::Input::DriverResult
+Android::SetVibration([[maybe_unused]] const PadIdentifier& identifier,
+                      [[maybe_unused]] const Common::Input::VibrationStatus& vibration)
+{
     vibration_queue.Push(VibrationRequest{
         .identifier = identifier,
         .vibration = vibration,
@@ -76,7 +85,8 @@ Common::Input::DriverResult Android::SetVibration(
     return Common::Input::DriverResult::Success;
 }
 
-bool Android::IsVibrationEnabled([[maybe_unused]] const PadIdentifier& identifier) {
+bool Android::IsVibrationEnabled([[maybe_unused]] const PadIdentifier& identifier)
+{
     auto device = input_devices.find(identifier);
     if (device != input_devices.end()) {
         return Common::Android::RunJNIOnFiber<bool>([&](JNIEnv* env) {
@@ -87,7 +97,8 @@ bool Android::IsVibrationEnabled([[maybe_unused]] const PadIdentifier& identifie
     return false;
 }
 
-std::vector<Common::ParamPackage> Android::GetInputDevices() const {
+std::vector<Common::ParamPackage> Android::GetInputDevices() const
+{
     std::vector<Common::ParamPackage> devices;
     auto env = Common::Android::GetEnvForThread();
     for (const auto& [key, value] : input_devices) {
@@ -105,7 +116,8 @@ std::vector<Common::ParamPackage> Android::GetInputDevices() const {
     return devices;
 }
 
-std::set<s32> Android::GetDeviceAxes(JNIEnv* env, jobject& j_device) const {
+std::set<s32> Android::GetDeviceAxes(JNIEnv* env, jobject& j_device) const
+{
     auto j_axes = static_cast<jobjectArray>(
         env->CallObjectMethod(j_device, Common::Android::GetYuzuDeviceGetAxes()));
     std::set<s32> axes;
@@ -117,7 +129,8 @@ std::set<s32> Android::GetDeviceAxes(JNIEnv* env, jobject& j_device) const {
 }
 
 Common::ParamPackage Android::BuildParamPackageForAnalog(PadIdentifier identifier, int axis_x,
-                                                         int axis_y) const {
+                                                         int axis_y) const
+{
     Common::ParamPackage params;
     params.Set("engine", GetEngineName());
     params.Set("port", static_cast<int>(identifier.port));
@@ -134,7 +147,8 @@ Common::ParamPackage Android::BuildParamPackageForAnalog(PadIdentifier identifie
 }
 
 Common::ParamPackage Android::BuildAnalogParamPackageForButton(PadIdentifier identifier, s32 axis,
-                                                               bool invert) const {
+                                                               bool invert) const
+{
     Common::ParamPackage params{};
     params.Set("engine", GetEngineName());
     params.Set("port", static_cast<int>(identifier.port));
@@ -146,7 +160,8 @@ Common::ParamPackage Android::BuildAnalogParamPackageForButton(PadIdentifier ide
 }
 
 Common::ParamPackage Android::BuildButtonParamPackageForButton(PadIdentifier identifier,
-                                                               s32 button) const {
+                                                               s32 button) const
+{
     Common::ParamPackage params{};
     params.Set("engine", GetEngineName());
     params.Set("port", static_cast<int>(identifier.port));
@@ -155,7 +170,8 @@ Common::ParamPackage Android::BuildButtonParamPackageForButton(PadIdentifier ide
     return params;
 }
 
-bool Android::MatchVID(Common::UUID device, const std::vector<std::string>& vids) const {
+bool Android::MatchVID(Common::UUID device, const std::vector<std::string>& vids) const
+{
     for (size_t i = 0; i < vids.size(); ++i) {
         auto fucker = device.RawString();
         if (fucker.find(vids[i]) != std::string::npos) {
@@ -165,7 +181,8 @@ bool Android::MatchVID(Common::UUID device, const std::vector<std::string>& vids
     return false;
 }
 
-AnalogMapping Android::GetAnalogMappingForDevice(const Common::ParamPackage& params) {
+AnalogMapping Android::GetAnalogMappingForDevice(const Common::ParamPackage& params)
+{
     if (!params.Has("guid") || !params.Has("port")) {
         return {};
     }
@@ -199,7 +216,8 @@ AnalogMapping Android::GetAnalogMappingForDevice(const Common::ParamPackage& par
     return mapping;
 }
 
-ButtonMapping Android::GetButtonMappingForDevice(const Common::ParamPackage& params) {
+ButtonMapping Android::GetButtonMappingForDevice(const Common::ParamPackage& params)
+{
     if (!params.Has("guid") || !params.Has("port")) {
         return {};
     }
@@ -340,12 +358,14 @@ ButtonMapping Android::GetButtonMappingForDevice(const Common::ParamPackage& par
     return mapping;
 }
 
-Common::Input::ButtonNames Android::GetUIName(
-    [[maybe_unused]] const Common::ParamPackage& params) const {
+Common::Input::ButtonNames
+Android::GetUIName([[maybe_unused]] const Common::ParamPackage& params) const
+{
     return Common::Input::ButtonNames::Value;
 }
 
-PadIdentifier Android::GetIdentifier(const std::string& guid, size_t port) const {
+PadIdentifier Android::GetIdentifier(const std::string& guid, size_t port) const
+{
     return {
         .guid = Common::UUID{guid},
         .port = port,
@@ -353,7 +373,8 @@ PadIdentifier Android::GetIdentifier(const std::string& guid, size_t port) const
     };
 }
 
-void Android::SendVibrations(JNIEnv* env, std::stop_token token) {
+void Android::SendVibrations(JNIEnv* env, std::stop_token token)
+{
     VibrationRequest request = vibration_queue.PopWait(token);
     auto device = input_devices.find(request.identifier);
     if (device != input_devices.end()) {

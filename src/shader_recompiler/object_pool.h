@@ -9,21 +9,24 @@
 
 namespace Shader {
 
-template <typename T>
-    requires std::is_destructible_v<T>
+template<typename T>
+requires std::is_destructible_v<T>
 class ObjectPool {
 public:
-    explicit ObjectPool(size_t chunk_size = 8192) : new_chunk_size{chunk_size} {
+    explicit ObjectPool(size_t chunk_size = 8192) : new_chunk_size{chunk_size}
+    {
         node = &chunks.emplace_back(new_chunk_size);
     }
 
-    template <typename... Args>
-        requires std::is_constructible_v<T, Args...>
-    [[nodiscard]] T* Create(Args&&... args) {
+    template<typename... Args>
+    requires std::is_constructible_v<T, Args...>
+    [[nodiscard]] T* Create(Args&&... args)
+    {
         return std::construct_at(Memory(), std::forward<Args>(args)...);
     }
 
-    void ReleaseContents() {
+    void ReleaseContents()
+    {
         if (chunks.empty()) {
             return;
         }
@@ -56,10 +59,12 @@ private:
 
     struct Chunk {
         explicit Chunk() = default;
-        explicit Chunk(size_t size)
-            : num_objects{size}, storage{std::make_unique<Storage[]>(size)} {}
+        explicit Chunk(size_t size) : num_objects{size}, storage{std::make_unique<Storage[]>(size)}
+        {
+        }
 
-        Chunk& operator=(Chunk&& rhs) noexcept {
+        Chunk& operator=(Chunk&& rhs) noexcept
+        {
             Release();
             used_objects = std::exchange(rhs.used_objects, 0);
             num_objects = std::exchange(rhs.num_objects, 0);
@@ -69,13 +74,14 @@ private:
 
         Chunk(Chunk&& rhs) noexcept
             : used_objects{std::exchange(rhs.used_objects, 0)},
-              num_objects{std::exchange(rhs.num_objects, 0)}, storage{std::move(rhs.storage)} {}
-
-        ~Chunk() {
-            Release();
+              num_objects{std::exchange(rhs.num_objects, 0)}, storage{std::move(rhs.storage)}
+        {
         }
 
-        void Release() {
+        ~Chunk() { Release(); }
+
+        void Release()
+        {
             std::destroy_n(storage.get(), used_objects);
             used_objects = 0;
         }
@@ -85,12 +91,14 @@ private:
         std::unique_ptr<Storage[]> storage;
     };
 
-    [[nodiscard]] T* Memory() {
+    [[nodiscard]] T* Memory()
+    {
         Chunk* const chunk{FreeChunk()};
         return &chunk->storage[chunk->used_objects++].object;
     }
 
-    [[nodiscard]] Chunk* FreeChunk() {
+    [[nodiscard]] Chunk* FreeChunk()
+    {
         if (node->used_objects != node->num_objects) {
             return node;
         }

@@ -13,7 +13,8 @@ class DisplayList {
 public:
     constexpr DisplayList() = default;
 
-    bool CreateDisplay(const DisplayName& name) {
+    bool CreateDisplay(const DisplayName& name)
+    {
         Display* const display = this->GetFreeDisplay();
         if (!display) {
             return false;
@@ -23,7 +24,8 @@ public:
         return true;
     }
 
-    bool DestroyDisplay(u64 display_id) {
+    bool DestroyDisplay(u64 display_id)
+    {
         Display* display = this->GetDisplayById(display_id);
         if (!display) {
             return false;
@@ -33,7 +35,8 @@ public:
         return true;
     }
 
-    Display* GetDisplayByName(const DisplayName& name) {
+    Display* GetDisplayByName(const DisplayName& name)
+    {
         for (auto& display : m_displays) {
             if (display.IsInitialized() &&
                 std::strncmp(name.data(), display.GetDisplayName().data(), sizeof(DisplayName)) ==
@@ -45,7 +48,8 @@ public:
         return nullptr;
     }
 
-    Display* GetDisplayById(u64 display_id) {
+    Display* GetDisplayById(u64 display_id)
+    {
         for (auto& display : m_displays) {
             if (display.IsInitialized() && display.GetId() == display_id) {
                 return &display;
@@ -55,8 +59,8 @@ public:
         return nullptr;
     }
 
-    template <typename F>
-    void ForEachDisplay(F&& cb) {
+    template<typename F> void ForEachDisplay(F&& cb)
+    {
         for (auto& display : m_displays) {
             if (display.IsInitialized()) {
                 cb(display);
@@ -65,7 +69,8 @@ public:
     }
 
 private:
-    Display* GetFreeDisplay() {
+    Display* GetFreeDisplay()
+    {
         for (auto& display : m_displays) {
             if (!display.IsInitialized()) {
                 return &display;

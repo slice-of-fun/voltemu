@@ -13,7 +13,8 @@ constexpr inline u32 SdkAddonVersionMin = 0x000B0000;
 constexpr inline size_t Aes128KeySize = 0x10;
 constexpr const std::array<u8, Aes128KeySize> ZeroKey{};
 
-constexpr Result CheckNcaMagic(u32 magic) {
+constexpr Result CheckNcaMagic(u32 magic)
+{
     // Verify the magic is not a deprecated one.
     R_UNLESS(magic != NcaHeader::Magic0, ResultUnsupportedSdkVersion);
     R_UNLESS(magic != NcaHeader::Magic1, ResultUnsupportedSdkVersion);
@@ -30,16 +31,20 @@ constexpr Result CheckNcaMagic(u32 magic) {
 NcaReader::NcaReader()
     : m_body_storage(), m_header_storage(), m_is_software_aes_prioritized(false),
       m_is_available_sw_key(false), m_header_encryption_type(NcaHeader::EncryptionType::Auto),
-      m_get_decompressor() {
+      m_get_decompressor()
+{
     std::memset(std::addressof(m_header), 0, sizeof(m_header));
     std::memset(std::addressof(m_decryption_keys), 0, sizeof(m_decryption_keys));
     std::memset(std::addressof(m_external_decryption_key), 0, sizeof(m_external_decryption_key));
 }
 
-NcaReader::~NcaReader() {}
+NcaReader::~NcaReader()
+{
+}
 
 Result NcaReader::Initialize(VirtualFile base_storage, const NcaCryptoConfiguration& crypto_cfg,
-                             const NcaCompressionConfiguration& compression_cfg) {
+                             const NcaCompressionConfiguration& compression_cfg)
+{
     // Validate preconditions.
     ASSERT(base_storage != nullptr);
     ASSERT(m_body_storage == nullptr);
@@ -166,74 +171,88 @@ Result NcaReader::Initialize(VirtualFile base_storage, const NcaCryptoConfigurat
     R_SUCCEED();
 }
 
-VirtualFile NcaReader::GetSharedBodyStorage() {
+VirtualFile NcaReader::GetSharedBodyStorage()
+{
     ASSERT(m_body_storage != nullptr);
     return m_body_storage;
 }
 
-u32 NcaReader::GetMagic() const {
+u32 NcaReader::GetMagic() const
+{
     ASSERT(m_body_storage != nullptr);
     return m_header.magic;
 }
 
-NcaHeader::DistributionType NcaReader::GetDistributionType() const {
+NcaHeader::DistributionType NcaReader::GetDistributionType() const
+{
     ASSERT(m_body_storage != nullptr);
     return m_header.distribution_type;
 }
 
-NcaHeader::ContentType NcaReader::GetContentType() const {
+NcaHeader::ContentType NcaReader::GetContentType() const
+{
     ASSERT(m_body_storage != nullptr);
     return m_header.content_type;
 }
 
-u8 NcaReader::GetHeaderSign1KeyGeneration() const {
+u8 NcaReader::GetHeaderSign1KeyGeneration() const
+{
     ASSERT(m_body_storage != nullptr);
     return m_header.header1_signature_key_generation;
 }
 
-u8 NcaReader::GetKeyGeneration() const {
+u8 NcaReader::GetKeyGeneration() const
+{
     ASSERT(m_body_storage != nullptr);
     return m_header.GetProperKeyGeneration();
 }
 
-u8 NcaReader::GetKeyIndex() const {
+u8 NcaReader::GetKeyIndex() const
+{
     ASSERT(m_body_storage != nullptr);
     return m_header.key_index;
 }
 
-u64 NcaReader::GetContentSize() const {
+u64 NcaReader::GetContentSize() const
+{
     ASSERT(m_body_storage != nullptr);
     return m_header.content_size;
 }
 
-u64 NcaReader::GetProgramId() const {
+u64 NcaReader::GetProgramId() const
+{
     ASSERT(m_body_storage != nullptr);
     return m_header.program_id;
 }
 
-u32 NcaReader::GetContentIndex() const {
+u32 NcaReader::GetContentIndex() const
+{
     ASSERT(m_body_storage != nullptr);
     return m_header.content_index;
 }
 
-u32 NcaReader::GetSdkAddonVersion() const {
+u32 NcaReader::GetSdkAddonVersion() const
+{
     ASSERT(m_body_storage != nullptr);
     return m_header.sdk_addon_version;
 }
 
-void NcaReader::GetRightsId(u8* dst, size_t dst_size) const {
+void NcaReader::GetRightsId(u8* dst, size_t dst_size) const
+{
     ASSERT(dst != nullptr);
     ASSERT(dst_size >= NcaHeader::RightsIdSize);
 
     std::memcpy(dst, m_header.rights_id.data(), NcaHeader::RightsIdSize);
 }
 
-bool NcaReader::HasFsInfo(s32 index) const {
+bool NcaReader::HasFsInfo(s32 index) const
+{
     ASSERT(0 <= index && index < NcaHeader::FsCountMax);
     return m_header.fs_info[index].start_sector != 0 || m_header.fs_info[index].end_sector != 0;
 }
 
-s32 NcaReader::GetFsCount() const {
+s32 NcaReader::GetFsCount() const
+{
     ASSERT(m_body_storage != nullptr);
     for (s32 i = 0; i < NcaHeader::FsCountMax; i++) {
         if (!this->HasFsInfo(i)) {
@@ -243,46 +262,53 @@ s32 NcaReader::GetFsCount() const {
     return NcaHeader::FsCountMax;
 }
 
-const Hash& NcaReader::GetFsHeaderHash(s32 index) const {
+const Hash& NcaReader::GetFsHeaderHash(s32 index) const
+{
     ASSERT(m_body_storage != nullptr);
     ASSERT(0 <= index && index < NcaHeader::FsCountMax);
     return m_header.fs_header_hash[index];
 }
 
-void NcaReader::GetFsHeaderHash(Hash* dst, s32 index) const {
+void NcaReader::GetFsHeaderHash(Hash* dst, s32 index) const
+{
     ASSERT(m_body_storage != nullptr);
     ASSERT(0 <= index && index < NcaHeader::FsCountMax);
     ASSERT(dst != nullptr);
     std::memcpy(dst, std::addressof(m_header.fs_header_hash[index]), sizeof(*dst));
 }
 
-void NcaReader::GetFsInfo(NcaHeader::FsInfo* dst, s32 index) const {
+void NcaReader::GetFsInfo(NcaHeader::FsInfo* dst, s32 index) const
+{
     ASSERT(m_body_storage != nullptr);
     ASSERT(0 <= index && index < NcaHeader::FsCountMax);
     ASSERT(dst != nullptr);
     std::memcpy(dst, std::addressof(m_header.fs_info[index]), sizeof(*dst));
 }
 
-u64 NcaReader::GetFsOffset(s32 index) const {
+u64 NcaReader::GetFsOffset(s32 index) const
+{
     ASSERT(m_body_storage != nullptr);
     ASSERT(0 <= index && index < NcaHeader::FsCountMax);
     return NcaHeader::SectorToByte(m_header.fs_info[index].start_sector);
 }
 
-u64 NcaReader::GetFsEndOffset(s32 index) const {
+u64 NcaReader::GetFsEndOffset(s32 index) const
+{
     ASSERT(m_body_storage != nullptr);
     ASSERT(0 <= index && index < NcaHeader::FsCountMax);
     return NcaHeader::SectorToByte(m_header.fs_info[index].end_sector);
 }
 
-u64 NcaReader::GetFsSize(s32 index) const {
+u64 NcaReader::GetFsSize(s32 index) const
+{
     ASSERT(m_body_storage != nullptr);
     ASSERT(0 <= index && index < NcaHeader::FsCountMax);
     return NcaHeader::SectorToByte(m_header.fs_info[index].end_sector -
                                    m_header.fs_info[index].start_sector);
 }
 
-void NcaReader::GetEncryptedKey(void* dst, size_t size) const {
+void NcaReader::GetEncryptedKey(void* dst, size_t size) const
+{
     ASSERT(m_body_storage != nullptr);
     ASSERT(dst != nullptr);
     ASSERT(size >= NcaHeader::EncryptedKeyAreaSize);
@@ -290,13 +316,15 @@ void NcaReader::GetEncryptedKey(void* dst, size_t size) const {
     std::memcpy(dst, m_header.encrypted_key_area.data(), NcaHeader::EncryptedKeyAreaSize);
 }
 
-const void* NcaReader::GetDecryptionKey(s32 index) const {
+const void* NcaReader::GetDecryptionKey(s32 index) const
+{
     ASSERT(m_body_storage != nullptr);
     ASSERT(0 <= index && index < NcaHeader::DecryptionKey_Count);
     return m_decryption_keys[index].data();
 }
 
-bool NcaReader::HasValidInternalKey() const {
+bool NcaReader::HasValidInternalKey() const
+{
     for (s32 i = 0; i < NcaHeader::DecryptionKey_Count; i++) {
         if (std::memcmp(ZeroKey.data(), m_header.encrypted_key_area.data() + i * Aes128KeySize,
                         Aes128KeySize) != 0) {
@@ -306,39 +334,47 @@ bool NcaReader::HasValidInternalKey() const {
     return false;
 }
 
-bool NcaReader::HasInternalDecryptionKeyForAesHw() const {
+bool NcaReader::HasInternalDecryptionKeyForAesHw() const
+{
     return std::memcmp(ZeroKey.data(), this->GetDecryptionKey(NcaHeader::DecryptionKey_AesCtrHw),
                        Aes128KeySize) != 0;
 }
 
-bool NcaReader::IsSoftwareAesPrioritized() const {
+bool NcaReader::IsSoftwareAesPrioritized() const
+{
     return m_is_software_aes_prioritized;
 }
 
-void NcaReader::PrioritizeSoftwareAes() {
+void NcaReader::PrioritizeSoftwareAes()
+{
     m_is_software_aes_prioritized = true;
 }
 
-bool NcaReader::IsAvailableSwKey() const {
+bool NcaReader::IsAvailableSwKey() const
+{
     return m_is_available_sw_key;
 }
 
-bool NcaReader::HasExternalDecryptionKey() const {
+bool NcaReader::HasExternalDecryptionKey() const
+{
     return std::memcmp(ZeroKey.data(), this->GetExternalDecryptionKey(), Aes128KeySize) != 0;
 }
 
-const void* NcaReader::GetExternalDecryptionKey() const {
+const void* NcaReader::GetExternalDecryptionKey() const
+{
     return m_external_decryption_key.data();
 }
 
-void NcaReader::SetExternalDecryptionKey(const void* src, size_t size) {
+void NcaReader::SetExternalDecryptionKey(const void* src, size_t size)
+{
     ASSERT(src != nullptr);
     ASSERT(size == sizeof(m_external_decryption_key));
 
     std::memcpy(m_external_decryption_key.data(), src, sizeof(m_external_decryption_key));
 }
 
-void NcaReader::GetRawData(void* dst, size_t dst_size) const {
+void NcaReader::GetRawData(void* dst, size_t dst_size) const
+{
     ASSERT(m_body_storage != nullptr);
     ASSERT(dst != nullptr);
     ASSERT(dst_size >= sizeof(NcaHeader));
@@ -346,16 +382,19 @@ void NcaReader::GetRawData(void* dst, size_t dst_size) const {
     std::memcpy(dst, std::addressof(m_header), sizeof(NcaHeader));
 }
 
-GetDecompressorFunction NcaReader::GetDecompressor() const {
+GetDecompressorFunction NcaReader::GetDecompressor() const
+{
     ASSERT(m_get_decompressor != nullptr);
     return m_get_decompressor;
 }
 
-NcaHeader::EncryptionType NcaReader::GetEncryptionType() const {
+NcaHeader::EncryptionType NcaReader::GetEncryptionType() const
+{
     return m_header_encryption_type;
 }
 
-Result NcaReader::ReadHeader(NcaFsHeader* dst, s32 index) const {
+Result NcaReader::ReadHeader(NcaFsHeader* dst, s32 index) const
+{
     ASSERT(dst != nullptr);
     ASSERT(0 <= index && index < NcaHeader::FsCountMax);
 
@@ -365,18 +404,21 @@ Result NcaReader::ReadHeader(NcaFsHeader* dst, s32 index) const {
     R_SUCCEED();
 }
 
-bool NcaReader::GetHeaderSign1Valid() const {
+bool NcaReader::GetHeaderSign1Valid() const
+{
     return m_is_header_sign1_signature_valid;
 }
 
-void NcaReader::GetHeaderSign2(void* dst, size_t size) const {
+void NcaReader::GetHeaderSign2(void* dst, size_t size) const
+{
     ASSERT(dst != nullptr);
     ASSERT(size == NcaHeader::HeaderSignSize);
 
     std::memcpy(dst, m_header.header_sign_2.data(), size);
 }
 
-Result NcaFsHeaderReader::Initialize(const NcaReader& reader, s32 index) {
+Result NcaFsHeaderReader::Initialize(const NcaReader& reader, s32 index)
+{
     // Reset ourselves to uninitialized.
     m_fs_index = -1;
 
@@ -388,7 +430,8 @@ Result NcaFsHeaderReader::Initialize(const NcaReader& reader, s32 index) {
     R_SUCCEED();
 }
 
-void NcaFsHeaderReader::GetRawData(void* dst, size_t dst_size) const {
+void NcaFsHeaderReader::GetRawData(void* dst, size_t dst_size) const
+{
     ASSERT(this->IsInitialized());
     ASSERT(dst != nullptr);
     ASSERT(dst_size >= sizeof(NcaFsHeader));
@@ -396,134 +439,160 @@ void NcaFsHeaderReader::GetRawData(void* dst, size_t dst_size) const {
     std::memcpy(dst, std::addressof(m_data), sizeof(NcaFsHeader));
 }
 
-NcaFsHeader::HashData& NcaFsHeaderReader::GetHashData() {
+NcaFsHeader::HashData& NcaFsHeaderReader::GetHashData()
+{
     ASSERT(this->IsInitialized());
     return m_data.hash_data;
 }
 
-const NcaFsHeader::HashData& NcaFsHeaderReader::GetHashData() const {
+const NcaFsHeader::HashData& NcaFsHeaderReader::GetHashData() const
+{
     ASSERT(this->IsInitialized());
     return m_data.hash_data;
 }
 
-u16 NcaFsHeaderReader::GetVersion() const {
+u16 NcaFsHeaderReader::GetVersion() const
+{
     ASSERT(this->IsInitialized());
     return m_data.version;
 }
 
-s32 NcaFsHeaderReader::GetFsIndex() const {
+s32 NcaFsHeaderReader::GetFsIndex() const
+{
     ASSERT(this->IsInitialized());
     return m_fs_index;
 }
 
-NcaFsHeader::FsType NcaFsHeaderReader::GetFsType() const {
+NcaFsHeader::FsType NcaFsHeaderReader::GetFsType() const
+{
     ASSERT(this->IsInitialized());
     return m_data.fs_type;
 }
 
-NcaFsHeader::HashType NcaFsHeaderReader::GetHashType() const {
+NcaFsHeader::HashType NcaFsHeaderReader::GetHashType() const
+{
     ASSERT(this->IsInitialized());
     return m_data.hash_type;
 }
 
-NcaFsHeader::EncryptionType NcaFsHeaderReader::GetEncryptionType() const {
+NcaFsHeader::EncryptionType NcaFsHeaderReader::GetEncryptionType() const
+{
     ASSERT(this->IsInitialized());
     return m_data.encryption_type;
 }
 
-NcaPatchInfo& NcaFsHeaderReader::GetPatchInfo() {
+NcaPatchInfo& NcaFsHeaderReader::GetPatchInfo()
+{
     ASSERT(this->IsInitialized());
     return m_data.patch_info;
 }
 
-const NcaPatchInfo& NcaFsHeaderReader::GetPatchInfo() const {
+const NcaPatchInfo& NcaFsHeaderReader::GetPatchInfo() const
+{
     ASSERT(this->IsInitialized());
     return m_data.patch_info;
 }
 
-const NcaAesCtrUpperIv NcaFsHeaderReader::GetAesCtrUpperIv() const {
+const NcaAesCtrUpperIv NcaFsHeaderReader::GetAesCtrUpperIv() const
+{
     ASSERT(this->IsInitialized());
     return m_data.aes_ctr_upper_iv;
 }
 
-bool NcaFsHeaderReader::IsSkipLayerHashEncryption() const {
+bool NcaFsHeaderReader::IsSkipLayerHashEncryption() const
+{
     ASSERT(this->IsInitialized());
     return m_data.IsSkipLayerHashEncryption();
 }
 
-Result NcaFsHeaderReader::GetHashTargetOffset(s64* out) const {
+Result NcaFsHeaderReader::GetHashTargetOffset(s64* out) const
+{
     ASSERT(out != nullptr);
     ASSERT(this->IsInitialized());
 
     R_RETURN(m_data.GetHashTargetOffset(out));
 }
 
-bool NcaFsHeaderReader::ExistsSparseLayer() const {
+bool NcaFsHeaderReader::ExistsSparseLayer() const
+{
     ASSERT(this->IsInitialized());
     return m_data.sparse_info.generation != 0;
 }
 
-NcaSparseInfo& NcaFsHeaderReader::GetSparseInfo() {
+NcaSparseInfo& NcaFsHeaderReader::GetSparseInfo()
+{
     ASSERT(this->IsInitialized());
     return m_data.sparse_info;
 }
 
-const NcaSparseInfo& NcaFsHeaderReader::GetSparseInfo() const {
+const NcaSparseInfo& NcaFsHeaderReader::GetSparseInfo() const
+{
     ASSERT(this->IsInitialized());
     return m_data.sparse_info;
 }
 
-bool NcaFsHeaderReader::ExistsCompressionLayer() const {
+bool NcaFsHeaderReader::ExistsCompressionLayer() const
+{
     ASSERT(this->IsInitialized());
     return m_data.compression_info.bucket.offset != 0 && m_data.compression_info.bucket.size != 0;
 }
 
-NcaCompressionInfo& NcaFsHeaderReader::GetCompressionInfo() {
+NcaCompressionInfo& NcaFsHeaderReader::GetCompressionInfo()
+{
     ASSERT(this->IsInitialized());
     return m_data.compression_info;
 }
 
-const NcaCompressionInfo& NcaFsHeaderReader::GetCompressionInfo() const {
+const NcaCompressionInfo& NcaFsHeaderReader::GetCompressionInfo() const
+{
     ASSERT(this->IsInitialized());
     return m_data.compression_info;
 }
 
-bool NcaFsHeaderReader::ExistsPatchMetaHashLayer() const {
+bool NcaFsHeaderReader::ExistsPatchMetaHashLayer() const
+{
     ASSERT(this->IsInitialized());
     return m_data.meta_data_hash_data_info.size != 0 && this->GetPatchInfo().HasIndirectTable();
 }
 
-NcaMetaDataHashDataInfo& NcaFsHeaderReader::GetPatchMetaDataHashDataInfo() {
+NcaMetaDataHashDataInfo& NcaFsHeaderReader::GetPatchMetaDataHashDataInfo()
+{
     ASSERT(this->IsInitialized());
     return m_data.meta_data_hash_data_info;
 }
 
-const NcaMetaDataHashDataInfo& NcaFsHeaderReader::GetPatchMetaDataHashDataInfo() const {
+const NcaMetaDataHashDataInfo& NcaFsHeaderReader::GetPatchMetaDataHashDataInfo() const
+{
     ASSERT(this->IsInitialized());
     return m_data.meta_data_hash_data_info;
 }
 
-NcaFsHeader::MetaDataHashType NcaFsHeaderReader::GetPatchMetaHashType() const {
+NcaFsHeader::MetaDataHashType NcaFsHeaderReader::GetPatchMetaHashType() const
+{
     ASSERT(this->IsInitialized());
     return m_data.meta_data_hash_type;
 }
 
-bool NcaFsHeaderReader::ExistsSparseMetaHashLayer() const {
+bool NcaFsHeaderReader::ExistsSparseMetaHashLayer() const
+{
     ASSERT(this->IsInitialized());
     return m_data.meta_data_hash_data_info.size != 0 && this->ExistsSparseLayer();
 }
 
-NcaMetaDataHashDataInfo& NcaFsHeaderReader::GetSparseMetaDataHashDataInfo() {
+NcaMetaDataHashDataInfo& NcaFsHeaderReader::GetSparseMetaDataHashDataInfo()
+{
     ASSERT(this->IsInitialized());
     return m_data.meta_data_hash_data_info;
 }
 
-const NcaMetaDataHashDataInfo& NcaFsHeaderReader::GetSparseMetaDataHashDataInfo() const {
+const NcaMetaDataHashDataInfo& NcaFsHeaderReader::GetSparseMetaDataHashDataInfo() const
+{
     ASSERT(this->IsInitialized());
     return m_data.meta_data_hash_data_info;
 }
 
-NcaFsHeader::MetaDataHashType NcaFsHeaderReader::GetSparseMetaHashType() const {
+NcaFsHeader::MetaDataHashType NcaFsHeaderReader::GetSparseMetaHashType() const
+{
     ASSERT(this->IsInitialized());
     return m_data.meta_data_hash_type;
 }

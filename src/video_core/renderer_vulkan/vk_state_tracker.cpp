@@ -4,6 +4,8 @@
 // SPDX-FileCopyrightText: Copyright 2020 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "video_core/renderer_vulkan/vk_state_tracker.h"
+
 #include <algorithm>
 #include <array>
 #include <cstddef>
@@ -13,7 +15,6 @@
 #include "video_core/control/channel_state.h"
 #include "video_core/dirty_flags.h"
 #include "video_core/engines/maxwell_3d.h"
-#include "video_core/renderer_vulkan/vk_state_tracker.h"
 
 #define OFF(field_name) MAXWELL3D_REG_INDEX(field_name)
 #define NUM(field_name) (sizeof(Maxwell3D::Regs::field_name) / (sizeof(u32)))
@@ -25,7 +26,8 @@ using namespace VideoCommon::Dirty;
 using Tegra::Engines::Maxwell3D;
 using Regs = Maxwell3D::Regs;
 
-Maxwell3D::DirtyState::Flags MakeInvalidationFlags() {
+Maxwell3D::DirtyState::Flags MakeInvalidationFlags()
+{
     static constexpr int INVALIDATION_FLAGS[]{
         Viewports,
         Scissors,
@@ -81,7 +83,8 @@ Maxwell3D::DirtyState::Flags MakeInvalidationFlags() {
     return flags;
 }
 
-void SetupDirtyViewports(Maxwell3D::DirtyState::Tables& tables) {
+void SetupDirtyViewports(Maxwell3D::DirtyState::Tables& tables)
+{
     FillBlock(tables[0], OFF(viewport_transform), NUM(viewport_transform), Viewports);
     FillBlock(tables[0], OFF(viewports), NUM(viewports), Viewports);
     FillBlock(tables[1], OFF(surface_clip), NUM(surface_clip), Viewports);
@@ -89,26 +92,31 @@ void SetupDirtyViewports(Maxwell3D::DirtyState::Tables& tables) {
     tables[1][OFF(window_origin)] = Viewports;
 }
 
-void SetupDirtyScissors(Maxwell3D::DirtyState::Tables& tables) {
+void SetupDirtyScissors(Maxwell3D::DirtyState::Tables& tables)
+{
     FillBlock(tables[0], OFF(scissor_test), NUM(scissor_test), Scissors);
 }
 
-void SetupDirtyDepthBias(Maxwell3D::DirtyState::Tables& tables) {
+void SetupDirtyDepthBias(Maxwell3D::DirtyState::Tables& tables)
+{
     auto& table = tables[0];
     table[OFF(depth_bias)] = DepthBias;
     table[OFF(depth_bias_clamp)] = DepthBias;
     table[OFF(slope_scale_depth_bias)] = DepthBias;
 }
 
-void SetupDirtyBlendConstants(Maxwell3D::DirtyState::Tables& tables) {
+void SetupDirtyBlendConstants(Maxwell3D::DirtyState::Tables& tables)
+{
     FillBlock(tables[0], OFF(blend_color), NUM(blend_color), BlendConstants);
 }
 
-void SetupDirtyDepthBounds(Maxwell3D::DirtyState::Tables& tables) {
+void SetupDirtyDepthBounds(Maxwell3D::DirtyState::Tables& tables)
+{
     FillBlock(tables[0], OFF(depth_bounds), NUM(depth_bounds), DepthBounds);
 }
 
-void SetupDirtyStencilProperties(Maxwell3D::DirtyState::Tables& tables) {
+void SetupDirtyStencilProperties(Maxwell3D::DirtyState::Tables& tables)
+{
     const auto setup = [&](size_t position, u8 flag) {
         tables[0][position] = flag;
         tables[1][position] = StencilProperties;
@@ -122,18 +130,21 @@ void SetupDirtyStencilProperties(Maxwell3D::DirtyState::Tables& tables) {
     setup(OFF(stencil_back_func_mask), StencilCompare);
 }
 
-void SetupDirtyLineWidth(Maxwell3D::DirtyState::Tables& tables) {
+void SetupDirtyLineWidth(Maxwell3D::DirtyState::Tables& tables)
+{
     tables[0][OFF(line_width_smooth)] = LineWidth;
     tables[0][OFF(line_width_aliased)] = LineWidth;
 }
 
-void SetupDirtyCullMode(Maxwell3D::DirtyState::Tables& tables) {
+void SetupDirtyCullMode(Maxwell3D::DirtyState::Tables& tables)
+{
     auto& table = tables[0];
     table[OFF(gl_cull_face)] = CullMode;
     table[OFF(gl_cull_test_enabled)] = CullMode;
 }
 
-void SetupDirtyStateEnable(Maxwell3D::DirtyState::Tables& tables) {
+void SetupDirtyStateEnable(Maxwell3D::DirtyState::Tables& tables)
+{
     const auto setup = [&](size_t position, u8 flag) {
         tables[0][position] = flag;
         tables[1][position] = StateEnable;
@@ -154,17 +165,20 @@ void SetupDirtyStateEnable(Maxwell3D::DirtyState::Tables& tables) {
     setup(OFF(anti_alias_alpha_control.alpha_to_one), AlphaToOneEnable);
 }
 
-void SetupDirtyDepthCompareOp(Maxwell3D::DirtyState::Tables& tables) {
+void SetupDirtyDepthCompareOp(Maxwell3D::DirtyState::Tables& tables)
+{
     tables[0][OFF(depth_test_func)] = DepthCompareOp;
 }
 
-void SetupDirtyFrontFace(Maxwell3D::DirtyState::Tables& tables) {
+void SetupDirtyFrontFace(Maxwell3D::DirtyState::Tables& tables)
+{
     auto& table = tables[0];
     table[OFF(gl_front_face)] = FrontFace;
     table[OFF(window_origin)] = FrontFace;
 }
 
-void SetupDirtyStencilOp(Maxwell3D::DirtyState::Tables& tables) {
+void SetupDirtyStencilOp(Maxwell3D::DirtyState::Tables& tables)
+{
     auto& table = tables[0];
     table[OFF(stencil_front_op.fail)] = StencilOp;
     table[OFF(stencil_front_op.zfail)] = StencilOp;
@@ -179,7 +193,8 @@ void SetupDirtyStencilOp(Maxwell3D::DirtyState::Tables& tables) {
     tables[1][OFF(stencil_two_side_enable)] = StencilOp;
 }
 
-void SetupDirtyBlending(Maxwell3D::DirtyState::Tables& tables) {
+void SetupDirtyBlending(Maxwell3D::DirtyState::Tables& tables)
+{
     tables[0][OFF(color_mask_common)] = Blending;
     tables[1][OFF(color_mask_common)] = ColorMask;
     tables[0][OFF(blend_per_target_enabled)] = Blending;
@@ -193,11 +208,13 @@ void SetupDirtyBlending(Maxwell3D::DirtyState::Tables& tables) {
     FillBlock(tables[1], OFF(blend_per_target), NUM(blend_per_target), BlendEquations);
 }
 
-void SetupDirtySpecialOps(Maxwell3D::DirtyState::Tables& tables) {
+void SetupDirtySpecialOps(Maxwell3D::DirtyState::Tables& tables)
+{
     tables[0][OFF(logic_op.op)] = LogicOp;
 }
 
-void SetupDirtyViewportSwizzles(Maxwell3D::DirtyState::Tables& tables) {
+void SetupDirtyViewportSwizzles(Maxwell3D::DirtyState::Tables& tables)
+{
     static constexpr size_t swizzle_offset = 6;
     for (size_t index = 0; index < Regs::NumViewports; ++index) {
         tables[1][OFF(viewport_transform) + index * NUM(viewport_transform[0]) + swizzle_offset] =
@@ -205,7 +222,8 @@ void SetupDirtyViewportSwizzles(Maxwell3D::DirtyState::Tables& tables) {
     }
 }
 
-void SetupDirtyVertexAttributes(Maxwell3D::DirtyState::Tables& tables) {
+void SetupDirtyVertexAttributes(Maxwell3D::DirtyState::Tables& tables)
+{
     for (size_t i = 0; i < Regs::NumVertexAttributes; ++i) {
         const size_t offset = OFF(vertex_attrib_format) + i * NUM(vertex_attrib_format[0]);
         FillBlock(tables[0], offset, NUM(vertex_attrib_format[0]), VertexAttribute0 + i);
@@ -213,7 +231,8 @@ void SetupDirtyVertexAttributes(Maxwell3D::DirtyState::Tables& tables) {
     FillBlock(tables[1], OFF(vertex_attrib_format), Regs::NumVertexAttributes, VertexInput);
 }
 
-void SetupDirtyVertexBindings(Maxwell3D::DirtyState::Tables& tables) {
+void SetupDirtyVertexBindings(Maxwell3D::DirtyState::Tables& tables)
+{
     // Do NOT include stride here, it's implicit in VertexBuffer
     static constexpr size_t divisor_offset = 3;
     for (size_t i = 0; i < Regs::NumVertexArrays; ++i) {
@@ -225,7 +244,8 @@ void SetupDirtyVertexBindings(Maxwell3D::DirtyState::Tables& tables) {
     }
 }
 
-void SetupRasterModes(Maxwell3D::DirtyState::Tables &tables) {
+void SetupRasterModes(Maxwell3D::DirtyState::Tables& tables)
+{
     auto& table = tables[0];
 
     table[OFF(line_stipple_params)] = LineStippleParams;
@@ -234,7 +254,8 @@ void SetupRasterModes(Maxwell3D::DirtyState::Tables &tables) {
 }
 } // Anonymous namespace
 
-void StateTracker::SetupTables(Tegra::Control::ChannelState& channel_state) {
+void StateTracker::SetupTables(Tegra::Control::ChannelState& channel_state)
+{
     auto& tables{channel_state.maxwell_3d->dirty.tables};
     SetupDirtyFlags(tables);
     SetupDirtyViewports(tables);
@@ -257,17 +278,21 @@ void StateTracker::SetupTables(Tegra::Control::ChannelState& channel_state) {
     SetupRasterModes(tables);
 }
 
-void StateTracker::ChangeChannel(Tegra::Control::ChannelState& channel_state) {
+void StateTracker::ChangeChannel(Tegra::Control::ChannelState& channel_state)
+{
     flags = &channel_state.maxwell_3d->dirty.flags;
 }
 
-void StateTracker::InvalidateState() {
+void StateTracker::InvalidateState()
+{
     flags->set();
     current_topology = INVALID_TOPOLOGY;
     stencil_reset = true;
 }
 
 StateTracker::StateTracker()
-    : flags{&default_flags}, default_flags{}, invalidation_flags{MakeInvalidationFlags()} {}
+    : flags{&default_flags}, default_flags{}, invalidation_flags{MakeInvalidationFlags()}
+{
+}
 
 } // namespace Vulkan

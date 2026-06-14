@@ -4,16 +4,18 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "audio_core/renderer/command/sink/device.h"
+
 #include <algorithm>
 
 #include "audio_core/adsp/apps/audio_renderer/command_list_processor.h"
-#include "audio_core/renderer/command/sink/device.h"
 #include "audio_core/sink/sink.h"
 
 namespace AudioCore::Renderer {
 
 void DeviceSinkCommand::Dump([[maybe_unused]] const AudioRenderer::CommandListProcessor& processor,
-                             std::string& string) {
+                             std::string& string)
+{
     string += fmt::format("DeviceSinkCommand\n\t{} session {} input_count {}\n\tinputs: ",
                           std::string_view(name), session_id, input_count);
     for (u32 i = 0; i < input_count; i++) {
@@ -22,7 +24,8 @@ void DeviceSinkCommand::Dump([[maybe_unused]] const AudioRenderer::CommandListPr
     string += "\n";
 }
 
-void DeviceSinkCommand::Process(const AudioRenderer::CommandListProcessor& processor) {
+void DeviceSinkCommand::Process(const AudioRenderer::CommandListProcessor& processor)
+{
     constexpr s32 min = (std::numeric_limits<s16>::min)();
     constexpr s32 max = (std::numeric_limits<s16>::max)();
 
@@ -54,7 +57,8 @@ void DeviceSinkCommand::Process(const AudioRenderer::CommandListProcessor& proce
     }
 }
 
-bool DeviceSinkCommand::Verify(const AudioRenderer::CommandListProcessor& processor) {
+bool DeviceSinkCommand::Verify(const AudioRenderer::CommandListProcessor& processor)
+{
     return true;
 }
 

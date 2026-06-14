@@ -5,7 +5,8 @@
 
 namespace Service::PSC {
 
-IPmControl::IPmControl(Core::System& system_) : ServiceFramework{system_, "psc:c"} {
+IPmControl::IPmControl(Core::System& system_) : ServiceFramework{system_, "psc:c"}
+{
     // clang-format off
     static const FunctionInfo functions[] = {
         {0, nullptr, "Initialize"},

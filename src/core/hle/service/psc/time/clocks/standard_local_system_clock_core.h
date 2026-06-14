@@ -14,7 +14,9 @@ namespace Service::PSC::Time {
 class StandardLocalSystemClockCore : public SystemClockCore {
 public:
     explicit StandardLocalSystemClockCore(SteadyClockCore& steady_clock)
-        : SystemClockCore{steady_clock} {}
+        : SystemClockCore{steady_clock}
+    {
+    }
     ~StandardLocalSystemClockCore() override = default;
 
     void Initialize(const SystemClockContext& context, s64 time);

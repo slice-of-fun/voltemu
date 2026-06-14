@@ -4,12 +4,13 @@
 // SPDX-FileCopyrightText: Copyright 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "video_core/host1x/codecs/h264.h"
+
 #include <array>
 #include <bit>
 
 #include "common/scratch_buffer.h"
 #include "common/settings.h"
-#include "video_core/host1x/codecs/h264.h"
 #include "video_core/host1x/host1x.h"
 #include "video_core/memory_manager.h"
 
@@ -23,7 +24,8 @@ H264::H264(Host1x::Host1x& host1x_, const Host1x::NvdecCommon::NvdecRegisters& r
 
 H264::~H264() = default;
 
-std::tuple<u64, u64> H264::GetProgressiveOffsets() {
+std::tuple<u64, u64> H264::GetProgressiveOffsets()
+{
     auto pic_idx{current_context.h264_parameter_set.curr_pic_idx};
     auto luma{regs.surface_luma_offsets[pic_idx].Address() +
               current_context.h264_parameter_set.luma_frame_offset.Address()};
@@ -32,7 +34,8 @@ std::tuple<u64, u64> H264::GetProgressiveOffsets() {
     return {luma, chroma};
 }
 
-std::tuple<u64, u64, u64, u64> H264::GetInterlacedOffsets() {
+std::tuple<u64, u64, u64, u64> H264::GetInterlacedOffsets()
+{
     auto pic_idx{current_context.h264_parameter_set.curr_pic_idx};
     auto luma_top{regs.surface_luma_offsets[pic_idx].Address() +
                   current_context.h264_parameter_set.luma_top_offset.Address()};
@@ -45,17 +48,21 @@ std::tuple<u64, u64, u64, u64> H264::GetInterlacedOffsets() {
     return {luma_top, luma_bottom, chroma_top, chroma_bottom};
 }
 
-bool H264::IsInterlaced() {
+bool H264::IsInterlaced()
+{
     return current_context.h264_parameter_set.luma_top_offset.Address() != 0 ||
            current_context.h264_parameter_set.luma_bot_offset.Address() != 0;
 }
 
-std::span<const u8> H264::ComposeFrame() {
-    host1x.gmmu_manager.ReadBlock(regs.picture_info_offset.Address(), &current_context, sizeof(H264DecoderContext));
+std::span<const u8> H264::ComposeFrame()
+{
+    host1x.gmmu_manager.ReadBlock(regs.picture_info_offset.Address(), &current_context,
+                                  sizeof(H264DecoderContext));
     const s64 frame_number = current_context.h264_parameter_set.frame_number.Value();
     if (!is_first_frame && frame_number != 0) {
         frame_scratch.resize_destructive(current_context.stream_len);
-        host1x.gmmu_manager.ReadBlock(regs.frame_bitstream_offset.Address(), frame_scratch.data(), frame_scratch.size());
+        host1x.gmmu_manager.ReadBlock(regs.frame_bitstream_offset.Address(), frame_scratch.data(),
+                                      frame_scratch.size());
         return frame_scratch;
     }
 
@@ -104,9 +111,9 @@ std::span<const u8> H264::ComposeFrame() {
 
     u32 max_num_ref_frames =
         (std::max)((std::max)(current_context.h264_parameter_set.num_refidx_l0_default_active,
-                          current_context.h264_parameter_set.num_refidx_l1_default_active) +
-                     1,
-                 4);
+                              current_context.h264_parameter_set.num_refidx_l1_default_active) +
+                       1,
+                   4);
     writer.WriteUe(max_num_ref_frames);
     writer.WriteBit(false);
     writer.WriteUe(current_context.h264_parameter_set.pic_width_in_mbs - 1);
@@ -177,7 +184,9 @@ std::span<const u8> H264::ComposeFrame() {
     const auto& encoded_header = writer.GetByteArray();
     frame_scratch.resize(encoded_header.size() + current_context.stream_len);
     std::memcpy(frame_scratch.data(), encoded_header.data(), encoded_header.size());
-    host1x.gmmu_manager.ReadBlock(regs.frame_bitstream_offset.Address(), frame_scratch.data() + encoded_header.size(), current_context.stream_len);
+    host1x.gmmu_manager.ReadBlock(regs.frame_bitstream_offset.Address(),
+                                  frame_scratch.data() + encoded_header.size(),
+                                  current_context.stream_len);
     return frame_scratch;
 }
 
@@ -185,28 +194,34 @@ H264BitWriter::H264BitWriter() = default;
 
 H264BitWriter::~H264BitWriter() = default;
 
-void H264BitWriter::WriteU(s32 value, s32 value_sz) {
+void H264BitWriter::WriteU(s32 value, s32 value_sz)
+{
     WriteBits(value, value_sz);
 }
 
-void H264BitWriter::WriteSe(s32 value) {
+void H264BitWriter::WriteSe(s32 value)
+{
     WriteExpGolombCodedInt(value);
 }
 
-void H264BitWriter::WriteUe(u32 value) {
+void H264BitWriter::WriteUe(u32 value)
+{
     WriteExpGolombCodedUInt(value);
 }
 
-void H264BitWriter::End() {
+void H264BitWriter::End()
+{
     WriteBit(true);
     Flush();
 }
 
-void H264BitWriter::WriteBit(bool state) {
+void H264BitWriter::WriteBit(bool state)
+{
     WriteBits(state ? 1 : 0, 1);
 }
 
-void H264BitWriter::WriteScalingList(std::span<const u8> list, s32 start, s32 count) {
+void H264BitWriter::WriteScalingList(std::span<const u8> list, s32 start, s32 count)
+{
     if (count == 16) {
         u8 last_scale = 8;
         for (s32 index = 0; index < count; index++) {
@@ -218,17 +233,12 @@ void H264BitWriter::WriteScalingList(std::span<const u8> list, s32 start, s32 co
             last_scale = value;
         }
     } else {
-        // ZigZag LUTs from libavcodec: this is the famous zigzag pattern found in the ffmpeg logo itself!
+        // ZigZag LUTs from libavcodec: this is the famous zigzag pattern found in the ffmpeg logo
+        // itself!
         static constexpr std::array<u8, 64> scan{
-            0,  1,  8,  16, 9,  2,  3,  10,
-            17, 24, 32, 25, 18, 11, 4,
-            5,  12, 19, 26, 33, 40, 48,
-            41, 34, 27, 20, 13, 6,  7,
-            14, 21, 28, 35, 42, 49, 56,
-            57, 50, 43, 36, 29, 22, 15,
-            23, 30, 37, 44, 51, 58, 59,
-            52, 45, 38, 31, 39, 46, 53,
-            60, 61, 54, 47, 55, 62, 63,
+            0,  1,  8,  16, 9,  2,  3,  10, 17, 24, 32, 25, 18, 11, 4,  5,  12, 19, 26, 33, 40, 48,
+            41, 34, 27, 20, 13, 6,  7,  14, 21, 28, 35, 42, 49, 56, 57, 50, 43, 36, 29, 22, 15, 23,
+            30, 37, 44, 51, 58, 59, 52, 45, 38, 31, 39, 46, 53, 60, 61, 54, 47, 55, 62, 63,
         };
         u8 last_scale = 8;
         for (s32 index = 0; index < count; index++) {
@@ -240,15 +250,18 @@ void H264BitWriter::WriteScalingList(std::span<const u8> list, s32 start, s32 co
     }
 }
 
-std::vector<u8>& H264BitWriter::GetByteArray() {
+std::vector<u8>& H264BitWriter::GetByteArray()
+{
     return byte_array;
 }
 
-const std::vector<u8>& H264BitWriter::GetByteArray() const {
+const std::vector<u8>& H264BitWriter::GetByteArray() const
+{
     return byte_array;
 }
 
-void H264BitWriter::WriteBits(s32 value, s32 bit_count) {
+void H264BitWriter::WriteBits(s32 value, s32 bit_count)
+{
     s32 value_pos = 0;
 
     s32 remaining = bit_count;
@@ -275,20 +288,24 @@ void H264BitWriter::WriteBits(s32 value, s32 bit_count) {
     }
 }
 
-void H264BitWriter::WriteExpGolombCodedInt(s32 value) {
+void H264BitWriter::WriteExpGolombCodedInt(s32 value)
+{
     const s32 sign = value <= 0 ? 0 : 1;
-    if (!sign) value = -value;
+    if (!sign)
+        value = -value;
     WriteExpGolombCodedUInt((value << 1) - sign);
 }
 
-void H264BitWriter::WriteExpGolombCodedUInt(u32 value) {
+void H264BitWriter::WriteExpGolombCodedUInt(u32 value)
+{
     const s32 size = 32 - std::countl_zero(value + 1);
     WriteBits(1, size);
     value -= (1U << (size - 1)) - 1;
     WriteBits(s32(value), size - 1);
 }
 
-s32 H264BitWriter::GetFreeBufferBits() {
+s32 H264BitWriter::GetFreeBufferBits()
+{
     if (buffer_pos == buffer_size) {
         Flush();
     }
@@ -296,7 +313,8 @@ s32 H264BitWriter::GetFreeBufferBits() {
     return buffer_size - buffer_pos;
 }
 
-void H264BitWriter::Flush() {
+void H264BitWriter::Flush()
+{
     if (buffer_pos == 0) {
         return;
     }

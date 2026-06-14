@@ -14,12 +14,14 @@ using namespace Common::Literals;
 
 constexpr std::size_t InitialProcessBinarySizeMax = 12_MiB;
 
-static inline KPhysicalAddress GetInitialProcessBinaryPhysicalAddress() {
+static inline KPhysicalAddress GetInitialProcessBinaryPhysicalAddress()
+{
     return Kernel::Board::Nintendo::Nx::KSystemControl::Init::GetKernelPhysicalBaseAddress(
         MainMemoryAddress);
 }
 
-static inline size_t GetInitialProcessBinarySize() {
+static inline size_t GetInitialProcessBinarySize()
+{
     return InitialProcessBinarySizeMax;
 }
 

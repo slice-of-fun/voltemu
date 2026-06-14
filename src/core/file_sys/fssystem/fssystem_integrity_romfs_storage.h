@@ -15,9 +15,7 @@ constexpr inline size_t IntegrityHashLayerBlockSize = 16_KiB;
 class IntegrityRomFsStorage : public IReadOnlyStorage {
 public:
     IntegrityRomFsStorage() {}
-    virtual ~IntegrityRomFsStorage() override {
-        this->Finalize();
-    }
+    virtual ~IntegrityRomFsStorage() override { this->Finalize(); }
 
     Result Initialize(
         HierarchicalIntegrityVerificationInformation level_hash_info, Hash master_hash,
@@ -25,13 +23,12 @@ public:
         int max_data_cache_entries, int max_hash_cache_entries, s8 buffer_level);
     void Finalize();
 
-    virtual size_t Read(u8* buffer, size_t size, size_t offset) const override {
+    virtual size_t Read(u8* buffer, size_t size, size_t offset) const override
+    {
         return m_integrity_storage.Read(buffer, size, offset);
     }
 
-    virtual size_t GetSize() const override {
-        return m_integrity_storage.GetSize();
-    }
+    virtual size_t GetSize() const override { return m_integrity_storage.GetSize(); }
 
 private:
     HierarchicalIntegrityVerificationStorage m_integrity_storage;

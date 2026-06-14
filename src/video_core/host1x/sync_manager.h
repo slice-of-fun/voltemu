@@ -5,6 +5,7 @@
 
 #include <mutex>
 #include <vector>
+
 #include "common/common_types.h"
 
 namespace Tegra {
@@ -20,7 +21,9 @@ struct SyncptIncr {
     bool complete;
 
     SyncptIncr(u32 id_, u32 class_id_, u32 syncpt_id_, bool done = false)
-        : id(id_), class_id(class_id_), syncpt_id(syncpt_id_), complete(done) {}
+        : id(id_), class_id(class_id_), syncpt_id(syncpt_id_), complete(done)
+    {
+    }
 };
 
 class SyncptIncrManager {

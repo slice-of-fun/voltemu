@@ -4,20 +4,23 @@
 // SPDX-FileCopyrightText: 2015 Citra Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "yuzu/util/util.h"
+
 #include <QPainter>
 
 #include "applets/qt_profile_select.h"
 #include "core/frontend/applets/profile_select.h"
 #include "core/hle/service/acc/profile_manager.h"
 #include "qt_common/qt_common.h"
-#include "yuzu/util/util.h"
 
 #ifdef _WIN32
 #include <windows.h>
+
 #include "common/fs/file.h"
 #endif
 
-QFont GetMonospaceFont() {
+QFont GetMonospaceFont()
+{
     QFont font(QStringLiteral("monospace"));
     // Automatic fallback to a monospace font on on platforms without a font called "monospace"
     font.setStyleHint(QFont::Monospace);
@@ -25,7 +28,8 @@ QFont GetMonospaceFont() {
     return font;
 }
 
-const std::optional<Common::UUID> GetProfileID() {
+const std::optional<Common::UUID> GetProfileID()
+{
     // if there's only a single profile, the user probably wants to use that... right?
     const auto& profiles = QtCommon::system->GetProfileManager().FindExistingProfileUUIDs();
     if (profiles.size() == 1) {
@@ -62,7 +66,8 @@ const std::optional<Common::UUID> GetProfileID() {
 
     return uuid;
 }
-std::string GetProfileIDString() {
+std::string GetProfileIDString()
+{
     const auto uuid = GetProfileID();
     if (!uuid)
         return "";

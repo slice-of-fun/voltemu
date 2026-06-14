@@ -4,6 +4,8 @@
 // SPDX-FileCopyrightText: Copyright 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+#include "hid_core/resource_manager.h"
+
 #include "common/logging.h"
 #include "core/core.h"
 #include "core/core_timing.h"
@@ -12,8 +14,6 @@
 #include "core/hle/service/sm/sm.h"
 #include "hid_core/hid_core.h"
 #include "hid_core/hid_util.h"
-#include "hid_core/resource_manager.h"
-
 #include "hid_core/resources/applet_resource.h"
 #include "hid_core/resources/debug_pad/debug_pad.h"
 #include "hid_core/resources/digitizer/digitizer.h"
@@ -52,7 +52,8 @@ constexpr auto motion_update_ns = std::chrono::nanoseconds{5 * 1000 * 1000};    
 
 ResourceManager::ResourceManager(Core::System& system_,
                                  std::shared_ptr<HidFirmwareSettings> settings)
-    : firmware_settings{settings}, system{system_}, service_context{system_, "hid"} {
+    : firmware_settings{settings}, system{system_}, service_context{system_, "hid"}
+{
     applet_resource = std::make_shared<AppletResource>(system);
 
     // Register update callbacks
@@ -85,7 +86,8 @@ ResourceManager::ResourceManager(Core::System& system_,
         });
 }
 
-ResourceManager::~ResourceManager() {
+ResourceManager::~ResourceManager()
+{
     system.CoreTiming().UnscheduleEvent(npad_update_event);
     system.CoreTiming().UnscheduleEvent(default_update_event);
     system.CoreTiming().UnscheduleEvent(mouse_keyboard_update_event);
@@ -94,7 +96,8 @@ ResourceManager::~ResourceManager() {
     input_event->Finalize();
 };
 
-void ResourceManager::Initialize() {
+void ResourceManager::Initialize()
+{
     if (is_initialized) {
         return;
     }
@@ -112,75 +115,93 @@ void ResourceManager::Initialize() {
     is_initialized = true;
 }
 
-std::shared_ptr<AppletResource> ResourceManager::GetAppletResource() const {
+std::shared_ptr<AppletResource> ResourceManager::GetAppletResource() const
+{
     return applet_resource;
 }
 
-std::shared_ptr<CaptureButton> ResourceManager::GetCaptureButton() const {
+std::shared_ptr<CaptureButton> ResourceManager::GetCaptureButton() const
+{
     return capture_button;
 }
 
-std::shared_ptr<ConsoleSixAxis> ResourceManager::GetConsoleSixAxis() const {
+std::shared_ptr<ConsoleSixAxis> ResourceManager::GetConsoleSixAxis() const
+{
     return console_six_axis;
 }
 
-std::shared_ptr<DebugMouse> ResourceManager::GetDebugMouse() const {
+std::shared_ptr<DebugMouse> ResourceManager::GetDebugMouse() const
+{
     return debug_mouse;
 }
 
-std::shared_ptr<DebugPad> ResourceManager::GetDebugPad() const {
+std::shared_ptr<DebugPad> ResourceManager::GetDebugPad() const
+{
     return debug_pad;
 }
 
-std::shared_ptr<Digitizer> ResourceManager::GetDigitizer() const {
+std::shared_ptr<Digitizer> ResourceManager::GetDigitizer() const
+{
     return digitizer;
 }
 
-std::shared_ptr<Gesture> ResourceManager::GetGesture() const {
+std::shared_ptr<Gesture> ResourceManager::GetGesture() const
+{
     return gesture;
 }
 
-std::shared_ptr<HomeButton> ResourceManager::GetHomeButton() const {
+std::shared_ptr<HomeButton> ResourceManager::GetHomeButton() const
+{
     return home_button;
 }
 
-std::shared_ptr<Keyboard> ResourceManager::GetKeyboard() const {
+std::shared_ptr<Keyboard> ResourceManager::GetKeyboard() const
+{
     return keyboard;
 }
 
-std::shared_ptr<Mouse> ResourceManager::GetMouse() const {
+std::shared_ptr<Mouse> ResourceManager::GetMouse() const
+{
     return mouse;
 }
 
-std::shared_ptr<NPad> ResourceManager::GetNpad() const {
+std::shared_ptr<NPad> ResourceManager::GetNpad() const
+{
     return npad;
 }
 
-std::shared_ptr<Palma> ResourceManager::GetPalma() const {
+std::shared_ptr<Palma> ResourceManager::GetPalma() const
+{
     return palma;
 }
 
-std::shared_ptr<SevenSixAxis> ResourceManager::GetSevenSixAxis() const {
+std::shared_ptr<SevenSixAxis> ResourceManager::GetSevenSixAxis() const
+{
     return seven_six_axis;
 }
 
-std::shared_ptr<SixAxis> ResourceManager::GetSixAxis() const {
+std::shared_ptr<SixAxis> ResourceManager::GetSixAxis() const
+{
     return six_axis;
 }
 
-std::shared_ptr<SleepButton> ResourceManager::GetSleepButton() const {
+std::shared_ptr<SleepButton> ResourceManager::GetSleepButton() const
+{
     return sleep_button;
 }
 
-std::shared_ptr<TouchScreen> ResourceManager::GetTouchScreen() const {
+std::shared_ptr<TouchScreen> ResourceManager::GetTouchScreen() const
+{
     return touch_screen;
 }
 
-std::shared_ptr<UniquePad> ResourceManager::GetUniquePad() const {
+std::shared_ptr<UniquePad> ResourceManager::GetUniquePad() const
+{
     return unique_pad;
 }
 
-Result ResourceManager::CreateAppletResource(u64 aruid) {
+Result ResourceManager::CreateAppletResource(u64 aruid)
+{
     if (aruid == SystemAruid) {
         const auto result = RegisterCoreAppletResource();
         if (result.IsError()) {
@@ -203,12 +224,14 @@ Result ResourceManager::CreateAppletResource(u64 aruid) {
     return GetNpad()->ActivateNpadResource(aruid);
 }
 
-Result ResourceManager::CreateAppletResourceImpl(u64 aruid) {
+Result ResourceManager::CreateAppletResourceImpl(u64 aruid)
+{
     std::scoped_lock lock{shared_mutex};
     return applet_resource->CreateAppletResource(aruid);
 }
 
-void ResourceManager::InitializeHandheldConfig() {
+void ResourceManager::InitializeHandheldConfig()
+{
     handheld_config = std::make_shared<HandheldConfig>();
     handheld_config->is_handheld_hid_enabled = true;
     handheld_config->is_joycon_rail_enabled = true;
@@ -219,7 +242,8 @@ void ResourceManager::InitializeHandheldConfig() {
     }
 }
 
-void ResourceManager::InitializeHidCommonSampler() {
+void ResourceManager::InitializeHidCommonSampler()
+{
     debug_pad = std::make_shared<DebugPad>(system.HIDCore());
     mouse = std::make_shared<Mouse>(system.HIDCore());
     debug_mouse = std::make_shared<DebugMouse>(system.HIDCore());
@@ -260,7 +284,8 @@ void ResourceManager::InitializeHidCommonSampler() {
                                              motion_update_event);
 }
 
-void ResourceManager::InitializeTouchScreenSampler() {
+void ResourceManager::InitializeTouchScreenSampler()
+{
     // This is nn.hid.TouchScreenSampler
     touch_resource = std::make_shared<TouchResource>(system);
     touch_driver = std::make_shared<TouchDriver>(system.HIDCore());
@@ -282,28 +307,33 @@ void ResourceManager::InitializeTouchScreenSampler() {
     touch_resource->SetTimerEvent(touch_update_event);
 }
 
-void ResourceManager::InitializeConsoleSixAxisSampler() {
+void ResourceManager::InitializeConsoleSixAxisSampler()
+{
     console_six_axis = std::make_shared<ConsoleSixAxis>(system.HIDCore());
     seven_six_axis = std::make_shared<SevenSixAxis>(system);
 
     console_six_axis->SetAppletResource(applet_resource, &shared_mutex);
 }
 
-void ResourceManager::InitializeAHidSampler() {
+void ResourceManager::InitializeAHidSampler()
+{
     // TODO
 }
 
-Result ResourceManager::RegisterCoreAppletResource() {
+Result ResourceManager::RegisterCoreAppletResource()
+{
     std::scoped_lock lock{shared_mutex};
     return applet_resource->RegisterCoreAppletResource();
 }
 
-Result ResourceManager::UnregisterCoreAppletResource() {
+Result ResourceManager::UnregisterCoreAppletResource()
+{
     std::scoped_lock lock{shared_mutex};
     return applet_resource->UnregisterCoreAppletResource();
 }
 
-Result ResourceManager::RegisterAppletResourceUserId(u64 aruid, bool bool_value) {
+Result ResourceManager::RegisterAppletResourceUserId(u64 aruid, bool bool_value)
+{
     std::scoped_lock lock{shared_mutex};
     auto result = applet_resource->RegisterAppletResourceUserId(aruid, bool_value);
     if (result.IsSuccess()) {
@@ -312,65 +342,77 @@ Result ResourceManager::RegisterAppletResourceUserId(u64 aruid, bool bool_value)
     return result;
 }
 
-void ResourceManager::UnregisterAppletResourceUserId(u64 aruid) {
+void ResourceManager::UnregisterAppletResourceUserId(u64 aruid)
+{
     std::scoped_lock lock{shared_mutex};
     applet_resource->UnregisterAppletResourceUserId(aruid);
     npad->UnregisterAppletResourceUserId(aruid);
     // palma->UnregisterAppletResourceUserId(aruid);
 }
 
-Result ResourceManager::GetSharedMemoryHandle(Kernel::KSharedMemory** out_handle, u64 aruid) {
+Result ResourceManager::GetSharedMemoryHandle(Kernel::KSharedMemory** out_handle, u64 aruid)
+{
     std::scoped_lock lock{shared_mutex};
     return applet_resource->GetSharedMemoryHandle(out_handle, aruid);
 }
 
-void ResourceManager::FreeAppletResourceId(u64 aruid) {
+void ResourceManager::FreeAppletResourceId(u64 aruid)
+{
     std::scoped_lock lock{shared_mutex};
     applet_resource->FreeAppletResourceId(aruid);
     npad->FreeAppletResourceId(aruid);
 }
 
-void ResourceManager::EnableInput(u64 aruid, bool is_enabled) {
+void ResourceManager::EnableInput(u64 aruid, bool is_enabled)
+{
     std::scoped_lock lock{shared_mutex};
     applet_resource->EnableInput(aruid, is_enabled);
 }
 
-void ResourceManager::EnableSixAxisSensor(u64 aruid, bool is_enabled) {
+void ResourceManager::EnableSixAxisSensor(u64 aruid, bool is_enabled)
+{
     std::scoped_lock lock{shared_mutex};
     applet_resource->EnableSixAxisSensor(aruid, is_enabled);
 }
 
-void ResourceManager::EnablePadInput(u64 aruid, bool is_enabled) {
+void ResourceManager::EnablePadInput(u64 aruid, bool is_enabled)
+{
     std::scoped_lock lock{shared_mutex};
     applet_resource->EnablePadInput(aruid, is_enabled);
 }
 
-void ResourceManager::EnableTouchScreen(u64 aruid, bool is_enabled) {
+void ResourceManager::EnableTouchScreen(u64 aruid, bool is_enabled)
+{
     std::scoped_lock lock{shared_mutex};
     applet_resource->EnableTouchScreen(aruid, is_enabled);
 }
 
-NpadVibrationBase* ResourceManager::GetVibrationDevice(
-    const Core::HID::VibrationDeviceHandle& handle) {
+NpadVibrationBase*
+ResourceManager::GetVibrationDevice(const Core::HID::VibrationDeviceHandle& handle)
+{
     return npad->GetVibrationDevice(handle);
 }
 
-NpadN64VibrationDevice* ResourceManager::GetN64VibrationDevice(
-    const Core::HID::VibrationDeviceHandle& handle) {
+NpadN64VibrationDevice*
+ResourceManager::GetN64VibrationDevice(const Core::HID::VibrationDeviceHandle& handle)
+{
     return npad->GetN64VibrationDevice(handle);
 }
 
-NpadVibrationDevice* ResourceManager::GetNSVibrationDevice(
-    const Core::HID::VibrationDeviceHandle& handle) {
+NpadVibrationDevice*
+ResourceManager::GetNSVibrationDevice(const Core::HID::VibrationDeviceHandle& handle)
+{
     return npad->GetNSVibrationDevice(handle);
 }
 
-NpadGcVibrationDevice* ResourceManager::GetGcVibrationDevice(
-    const Core::HID::VibrationDeviceHandle& handle) {
+NpadGcVibrationDevice*
+ResourceManager::GetGcVibrationDevice(const Core::HID::VibrationDeviceHandle& handle)
+{
     return npad->GetGcVibrationDevice(handle);
 }
 
-Result ResourceManager::SetAruidValidForVibration(u64 aruid, bool is_enabled) {
+Result ResourceManager::SetAruidValidForVibration(u64 aruid, bool is_enabled)
+{
     std::scoped_lock lock{shared_mutex};
     const bool has_changed = applet_resource->SetAruidValidForVibration(aruid, is_enabled);
 
@@ -389,18 +431,21 @@ Result ResourceManager::SetAruidValidForVibration(u64 aruid, bool is_enabled) {
     return ResultSuccess;
 }
 
-void ResourceManager::SetForceHandheldStyleVibration(bool is_forced) {
+void ResourceManager::SetForceHandheldStyleVibration(bool is_forced)
+{
     handheld_config->is_force_handheld_style_vibration = is_forced;
 }
 
-Result ResourceManager::IsVibrationAruidActive(u64 aruid, bool& is_active) const {
+Result ResourceManager::IsVibrationAruidActive(u64 aruid, bool& is_active) const
+{
     std::scoped_lock lock{shared_mutex};
     is_active = applet_resource->IsVibrationAruidActive(aruid);
     return ResultSuccess;
 }
 
 Result ResourceManager::GetVibrationDeviceInfo(Core::HID::VibrationDeviceInfo& device_info,
-                                               const Core::HID::VibrationDeviceHandle& handle) {
+                                               const Core::HID::VibrationDeviceHandle& handle)
+{
     bool check_device_index = false;
 
     const Result is_valid = IsVibrationHandleValid(handle);
@@ -448,7 +493,8 @@ Result ResourceManager::GetVibrationDeviceInfo(Core::HID::VibrationDeviceInfo& d
 
 Result ResourceManager::SendVibrationValue(u64 aruid,
                                            const Core::HID::VibrationDeviceHandle& handle,
-                                           const Core::HID::VibrationValue& value) {
+                                           const Core::HID::VibrationValue& value)
+{
     bool has_active_aruid{};
     NpadVibrationDevice* device{nullptr};
     Result result = IsVibrationAruidActive(aruid, has_active_aruid);
@@ -469,11 +515,13 @@ Result ResourceManager::SendVibrationValue(u64 aruid,
     return result;
 }
 
-Result ResourceManager::GetTouchScreenFirmwareVersion(Core::HID::FirmwareVersion& firmware) const {
+Result ResourceManager::GetTouchScreenFirmwareVersion(Core::HID::FirmwareVersion& firmware) const
+{
     return ResultSuccess;
 }
 
-void ResourceManager::UpdateControllers(std::chrono::nanoseconds ns_late) {
+void ResourceManager::UpdateControllers(std::chrono::nanoseconds ns_late)
+{
     auto& core_timing = system.CoreTiming();
     debug_pad->OnUpdate(core_timing);
     digitizer->OnUpdate(core_timing);
@@ -484,19 +532,22 @@ void ResourceManager::UpdateControllers(std::chrono::nanoseconds ns_late) {
     capture_button->OnUpdate(core_timing);
 }
 
-void ResourceManager::UpdateNpad(std::chrono::nanoseconds ns_late) {
+void ResourceManager::UpdateNpad(std::chrono::nanoseconds ns_late)
+{
     auto& core_timing = system.CoreTiming();
     npad->OnUpdate(core_timing);
 }
 
-void ResourceManager::UpdateMouseKeyboard(std::chrono::nanoseconds ns_late) {
+void ResourceManager::UpdateMouseKeyboard(std::chrono::nanoseconds ns_late)
+{
     auto& core_timing = system.CoreTiming();
     mouse->OnUpdate(core_timing);
     debug_mouse->OnUpdate(core_timing);
     keyboard->OnUpdate(core_timing);
 }
 
-void ResourceManager::UpdateMotion(std::chrono::nanoseconds ns_late) {
+void ResourceManager::UpdateMotion(std::chrono::nanoseconds ns_late)
+{
     auto& core_timing = system.CoreTiming();
     six_axis->OnUpdate(core_timing);
     seven_six_axis->OnUpdate(core_timing);

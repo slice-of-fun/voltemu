@@ -17,9 +17,9 @@ public:
 private:
     FileSys::VirtualFile backend;
 
-    Result Read(
-        OutBuffer<BufferAttr_HipcMapAlias | BufferAttr_HipcMapTransferAllowsNonSecure> out_bytes,
-        s64 offset, s64 length);
+    Result
+    Read(OutBuffer<BufferAttr_HipcMapAlias | BufferAttr_HipcMapTransferAllowsNonSecure> out_bytes,
+         s64 offset, s64 length);
     Result GetSize(Out<u64> out_size);
 };
 

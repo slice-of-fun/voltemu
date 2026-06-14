@@ -4,12 +4,13 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/lbl/lbl.h"
+
 #include <cmath>
 #include <memory>
 
 #include "common/logging.h"
 #include "core/hle/service/ipc_helpers.h"
-#include "core/hle/service/lbl/lbl.h"
 #include "core/hle/service/server_manager.h"
 #include "core/hle/service/service.h"
 #include "core/hle/service/sm/sm.h"
@@ -18,7 +19,8 @@ namespace Service::LBL {
 
 class LBL final : public ServiceFramework<LBL> {
 public:
-    explicit LBL(Core::System& system_) : ServiceFramework{system_, "lbl"} {
+    explicit LBL(Core::System& system_) : ServiceFramework{system_, "lbl"}
+    {
         // clang-format off
         static const FunctionInfo functions[] = {
             {0, &LBL::SaveCurrentSetting, "SaveCurrentSetting"},
@@ -63,21 +65,24 @@ private:
         On = 1,
     };
 
-    void SaveCurrentSetting(HLERequestContext& ctx) {
+    void SaveCurrentSetting(HLERequestContext& ctx)
+    {
         LOG_WARNING(Service_LBL, "(STUBBED) called");
 
         IPC::ResponseBuilder rb{ctx, 2};
         rb.Push(ResultSuccess);
     }
 
-    void LoadCurrentSetting(HLERequestContext& ctx) {
+    void LoadCurrentSetting(HLERequestContext& ctx)
+    {
         LOG_WARNING(Service_LBL, "(STUBBED) called");
 
         IPC::ResponseBuilder rb{ctx, 2};
         rb.Push(ResultSuccess);
     }
 
-    void SetCurrentBrightnessSetting(HLERequestContext& ctx) {
+    void SetCurrentBrightnessSetting(HLERequestContext& ctx)
+    {
         IPC::RequestParser rp{ctx};
         auto brightness = rp.Pop<float>();
 
@@ -95,7 +100,8 @@ private:
         rb.Push(ResultSuccess);
     }
 
-    void GetCurrentBrightnessSetting(HLERequestContext& ctx) {
+    void GetCurrentBrightnessSetting(HLERequestContext& ctx)
+    {
         auto brightness = current_brightness;
         if (!std::isfinite(brightness)) {
             LOG_ERROR(Service_LBL, "Brightness is infinite!");
@@ -109,7 +115,8 @@ private:
         rb.Push(brightness);
     }
 
-    void SwitchBacklightOn(HLERequestContext& ctx) {
+    void SwitchBacklightOn(HLERequestContext& ctx)
+    {
         IPC::RequestParser rp{ctx};
         const auto fade_time = rp.Pop<u64_le>();
         LOG_WARNING(Service_LBL, "(STUBBED) called, fade_time={}", fade_time);
@@ -120,7 +127,8 @@ private:
         rb.Push(ResultSuccess);
     }
 
-    void SwitchBacklightOff(HLERequestContext& ctx) {
+    void SwitchBacklightOff(HLERequestContext& ctx)
+    {
         IPC::RequestParser rp{ctx};
         const auto fade_time = rp.Pop<u64_le>();
         LOG_WARNING(Service_LBL, "(STUBBED) called, fade_time={}", fade_time);
@@ -131,7 +139,8 @@ private:
         rb.Push(ResultSuccess);
     }
 
-    void GetBacklightSwitchStatus(HLERequestContext& ctx) {
+    void GetBacklightSwitchStatus(HLERequestContext& ctx)
+    {
         LOG_DEBUG(Service_LBL, "called");
 
         IPC::ResponseBuilder rb{ctx, 3};
@@ -140,7 +149,8 @@ private:
                                                              : BacklightSwitchStatus::Off);
     }
 
-    void EnableDimming(HLERequestContext& ctx) {
+    void EnableDimming(HLERequestContext& ctx)
+    {
         LOG_DEBUG(Service_LBL, "called");
 
         dimming = true;
@@ -149,7 +159,8 @@ private:
         rb.Push(ResultSuccess);
     }
 
-    void DisableDimming(HLERequestContext& ctx) {
+    void DisableDimming(HLERequestContext& ctx)
+    {
         LOG_DEBUG(Service_LBL, "called");
 
         dimming = false;
@@ -158,7 +169,8 @@ private:
         rb.Push(ResultSuccess);
     }
 
-    void IsDimmingEnabled(HLERequestContext& ctx) {
+    void IsDimmingEnabled(HLERequestContext& ctx)
+    {
         LOG_DEBUG(Service_LBL, "called");
 
         IPC::ResponseBuilder rb{ctx, 3};
@@ -166,7 +178,8 @@ private:
         rb.Push(dimming);
     }
 
-    void EnableAutoBrightnessControl(HLERequestContext& ctx) {
+    void EnableAutoBrightnessControl(HLERequestContext& ctx)
+    {
         LOG_DEBUG(Service_LBL, "called");
         auto_brightness = true;
         update_instantly = true;
@@ -175,7 +188,8 @@ private:
         rb.Push(ResultSuccess);
     }
 
-    void DisableAutoBrightnessControl(HLERequestContext& ctx) {
+    void DisableAutoBrightnessControl(HLERequestContext& ctx)
+    {
         LOG_DEBUG(Service_LBL, "called");
         auto_brightness = false;
 
@@ -183,7 +197,8 @@ private:
         rb.Push(ResultSuccess);
     }
 
-    void IsAutoBrightnessControlEnabled(HLERequestContext& ctx) {
+    void IsAutoBrightnessControlEnabled(HLERequestContext& ctx)
+    {
         LOG_DEBUG(Service_LBL, "called");
 
         IPC::ResponseBuilder rb{ctx, 3};
@@ -191,7 +206,8 @@ private:
         rb.Push(auto_brightness);
     }
 
-    void SetAmbientLightSensorValue(HLERequestContext& ctx) {
+    void SetAmbientLightSensorValue(HLERequestContext& ctx)
+    {
         IPC::RequestParser rp{ctx};
         const auto light_value = rp.Pop<float>();
 
@@ -203,7 +219,8 @@ private:
         rb.Push(ResultSuccess);
     }
 
-    void GetAmbientLightSensorValue(HLERequestContext& ctx) {
+    void GetAmbientLightSensorValue(HLERequestContext& ctx)
+    {
         LOG_DEBUG(Service_LBL, "called");
 
         IPC::ResponseBuilder rb{ctx, 3};
@@ -211,7 +228,8 @@ private:
         rb.Push(ambient_light_value);
     }
 
-    void SetBrightnessReflectionDelayLevel(HLERequestContext& ctx) {
+    void SetBrightnessReflectionDelayLevel(HLERequestContext& ctx)
+    {
         // This is Intentional, this function does absolutely nothing
         LOG_DEBUG(Service_LBL, "called");
 
@@ -219,7 +237,8 @@ private:
         rb.Push(ResultSuccess);
     }
 
-    void GetBrightnessReflectionDelayLevel(HLERequestContext& ctx) {
+    void GetBrightnessReflectionDelayLevel(HLERequestContext& ctx)
+    {
         // This is intentional, the function is hard coded to return 0.0f on hardware
         LOG_DEBUG(Service_LBL, "called");
 
@@ -228,7 +247,8 @@ private:
         rb.Push(0.0f);
     }
 
-    void SetCurrentBrightnessMapping(HLERequestContext& ctx) {
+    void SetCurrentBrightnessMapping(HLERequestContext& ctx)
+    {
         // This is Intentional, this function does absolutely nothing
         LOG_DEBUG(Service_LBL, "called");
 
@@ -236,24 +256,8 @@ private:
         rb.Push(ResultSuccess);
     }
 
-    void GetCurrentBrightnessMapping(HLERequestContext& ctx) {
-        // This is Intentional, this function does absolutely nothing
-        LOG_DEBUG(Service_LBL, "called");
-
-        IPC::ResponseBuilder rb{ctx, 2};
-        rb.Push(ResultSuccess);
-        // This function is suppose to return something but it seems like it doesn't
-    }
-
-    void SetCurrentAmbientLightSensorMapping(HLERequestContext& ctx) {
-        // This is Intentional, this function does absolutely nothing
-        LOG_DEBUG(Service_LBL, "called");
-
-        IPC::ResponseBuilder rb{ctx, 2};
-        rb.Push(ResultSuccess);
-    }
-
-    void GetCurrentAmbientLightSensorMapping(HLERequestContext& ctx) {
+    void GetCurrentBrightnessMapping(HLERequestContext& ctx)
+    {
         // This is Intentional, this function does absolutely nothing
         LOG_DEBUG(Service_LBL, "called");
 
@@ -262,7 +266,27 @@ private:
         // This function is suppose to return something but it seems like it doesn't
     }
 
-    void IsAmbientLightSensorAvailable(HLERequestContext& ctx) {
+    void SetCurrentAmbientLightSensorMapping(HLERequestContext& ctx)
+    {
+        // This is Intentional, this function does absolutely nothing
+        LOG_DEBUG(Service_LBL, "called");
+
+        IPC::ResponseBuilder rb{ctx, 2};
+        rb.Push(ResultSuccess);
+    }
+
+    void GetCurrentAmbientLightSensorMapping(HLERequestContext& ctx)
+    {
+        // This is Intentional, this function does absolutely nothing
+        LOG_DEBUG(Service_LBL, "called");
+
+        IPC::ResponseBuilder rb{ctx, 2};
+        rb.Push(ResultSuccess);
+        // This function is suppose to return something but it seems like it doesn't
+    }
+
+    void IsAmbientLightSensorAvailable(HLERequestContext& ctx)
+    {
         LOG_WARNING(Service_LBL, "(STUBBED) called");
         IPC::ResponseBuilder rb{ctx, 3};
         rb.Push(ResultSuccess);
@@ -270,7 +294,8 @@ private:
         rb.Push(true);
     }
 
-    void SetCurrentBrightnessSettingForVrMode(HLERequestContext& ctx) {
+    void SetCurrentBrightnessSettingForVrMode(HLERequestContext& ctx)
+    {
         IPC::RequestParser rp{ctx};
         auto brightness = rp.Pop<float>();
 
@@ -287,7 +312,8 @@ private:
         rb.Push(ResultSuccess);
     }
 
-    void GetCurrentBrightnessSettingForVrMode(HLERequestContext& ctx) {
+    void GetCurrentBrightnessSettingForVrMode(HLERequestContext& ctx)
+    {
         auto brightness = current_vr_brightness;
         if (!std::isfinite(brightness)) {
             LOG_ERROR(Service_LBL, "Brightness is infinite!");
@@ -301,7 +327,8 @@ private:
         rb.Push(brightness);
     }
 
-    void EnableVrMode(HLERequestContext& ctx) {
+    void EnableVrMode(HLERequestContext& ctx)
+    {
         LOG_DEBUG(Service_LBL, "called");
 
         IPC::ResponseBuilder rb{ctx, 2};
@@ -310,7 +337,8 @@ private:
         vr_mode_enabled = true;
     }
 
-    void DisableVrMode(HLERequestContext& ctx) {
+    void DisableVrMode(HLERequestContext& ctx)
+    {
         LOG_DEBUG(Service_LBL, "called");
 
         IPC::ResponseBuilder rb{ctx, 2};
@@ -319,7 +347,8 @@ private:
         vr_mode_enabled = false;
     }
 
-    void IsVrModeEnabled(HLERequestContext& ctx) {
+    void IsVrModeEnabled(HLERequestContext& ctx)
+    {
         LOG_DEBUG(Service_LBL, "called");
 
         IPC::ResponseBuilder rb{ctx, 3};
@@ -327,7 +356,8 @@ private:
         rb.Push(vr_mode_enabled);
     }
 
-    void IsAutoBrightnessControlSupported(HLERequestContext& ctx) {
+    void IsAutoBrightnessControlSupported(HLERequestContext& ctx)
+    {
         LOG_DEBUG(Service_LBL, "called");
 
         IPC::ResponseBuilder rb{ctx, 3};
@@ -346,7 +376,8 @@ private:
     bool auto_brightness_supported = true; // TODO(ogniK): Move to system settings
 };
 
-void LoopProcess(Core::System& system) {
+void LoopProcess(Core::System& system)
+{
     auto server_manager = std::make_unique<ServerManager>(system);
 
     server_manager->RegisterNamedService("lbl", std::make_shared<LBL>(system));

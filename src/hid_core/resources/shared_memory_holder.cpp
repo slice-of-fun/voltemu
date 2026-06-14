@@ -1,21 +1,26 @@
 // SPDX-FileCopyrightText: Copyright 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+#include "hid_core/resources/shared_memory_holder.h"
+
 #include "core/core.h"
 #include "core/hle/kernel/k_shared_memory.h"
 #include "hid_core/hid_result.h"
 #include "hid_core/resources/applet_resource.h"
 #include "hid_core/resources/shared_memory_format.h"
-#include "hid_core/resources/shared_memory_holder.h"
 
 namespace Service::HID {
-SharedMemoryHolder::SharedMemoryHolder() {}
+SharedMemoryHolder::SharedMemoryHolder()
+{
+}
 
-SharedMemoryHolder::~SharedMemoryHolder() {
+SharedMemoryHolder::~SharedMemoryHolder()
+{
     Finalize();
 }
 
-Result SharedMemoryHolder::Initialize(Core::System& system) {
+Result SharedMemoryHolder::Initialize(Core::System& system)
+{
     shared_memory = Kernel::KSharedMemory::Create(system.Kernel());
     const Result result = shared_memory->Initialize(
         system.DeviceMemory(), nullptr, Kernel::Svc::MemoryPermission::None,
@@ -31,7 +36,8 @@ Result SharedMemoryHolder::Initialize(Core::System& system) {
     return ResultSuccess;
 }
 
-void SharedMemoryHolder::Finalize() {
+void SharedMemoryHolder::Finalize()
+{
     if (address != nullptr) {
         shared_memory->Close();
     }
@@ -40,15 +46,18 @@ void SharedMemoryHolder::Finalize() {
     address = nullptr;
 }
 
-bool SharedMemoryHolder::IsMapped() {
+bool SharedMemoryHolder::IsMapped()
+{
     return is_mapped;
 }
 
-SharedMemoryFormat* SharedMemoryHolder::GetAddress() {
+SharedMemoryFormat* SharedMemoryHolder::GetAddress()
+{
     return address;
 }
 
-Kernel::KSharedMemory* SharedMemoryHolder::GetHandle() {
+Kernel::KSharedMemory* SharedMemoryHolder::GetHandle()
+{
     return shared_memory;
 }
 } // namespace Service::HID

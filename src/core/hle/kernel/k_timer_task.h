@@ -9,7 +9,8 @@ namespace Kernel {
 
 class KTimerTask : public Common::IntrusiveRedBlackTreeBaseNode<KTimerTask> {
 public:
-    static constexpr int Compare(const KTimerTask& lhs, const KTimerTask& rhs) {
+    static constexpr int Compare(const KTimerTask& lhs, const KTimerTask& rhs)
+    {
         if (lhs.GetTime() < rhs.GetTime()) {
             return -1;
         } else {
@@ -19,13 +20,9 @@ public:
 
     constexpr explicit KTimerTask() = default;
 
-    constexpr void SetTime(s64 t) {
-        m_time = t;
-    }
+    constexpr void SetTime(s64 t) { m_time = t; }
 
-    constexpr s64 GetTime() const {
-        return m_time;
-    }
+    constexpr s64 GetTime() const { return m_time; }
 
     // NOTE: This is virtual in Nintendo's kernel. Prior to 13.0.0, KWaitObject was also a
     // TimerTask; this is no longer the case. Since this is now KThread exclusive, we have

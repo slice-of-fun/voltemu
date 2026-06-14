@@ -84,12 +84,14 @@ constexpr s32 InvalidProcessOrder = -1;
 constexpr u32 MaxBiquadFilters = 2;
 constexpr u32 MaxEffects = 256;
 
-constexpr bool IsChannelCountValid(u16 channel_count) {
+constexpr bool IsChannelCountValid(u16 channel_count)
+{
     return channel_count <= 6 &&
            (channel_count == 1 || channel_count == 2 || channel_count == 4 || channel_count == 6);
 }
 
-constexpr void UseOldChannelMapping(std::span<s16> inputs, std::span<s16> outputs) {
+constexpr void UseOldChannelMapping(std::span<s16> inputs, std::span<s16> outputs)
+{
     constexpr auto old_center{static_cast<u32>(OldChannels::Center)};
     constexpr auto new_center{static_cast<u32>(Channels::Center)};
     constexpr auto old_lfe{static_cast<u32>(OldChannels::LFE)};
@@ -110,19 +112,23 @@ constexpr void UseOldChannelMapping(std::span<s16> inputs, std::span<s16> output
     outputs[new_lfe] = lfe;
 }
 
-constexpr u32 GetSplitterInParamHeaderMagic() {
+constexpr u32 GetSplitterInParamHeaderMagic()
+{
     return Common::MakeMagic('S', 'N', 'D', 'H');
 }
 
-constexpr u32 GetSplitterInfoMagic() {
+constexpr u32 GetSplitterInfoMagic()
+{
     return Common::MakeMagic('S', 'N', 'D', 'I');
 }
 
-constexpr u32 GetSplitterSendDataMagic() {
+constexpr u32 GetSplitterSendDataMagic()
+{
     return Common::MakeMagic('S', 'N', 'D', 'D');
 }
 
-constexpr size_t GetSampleFormatByteSize(SampleFormat format) {
+constexpr size_t GetSampleFormatByteSize(SampleFormat format)
+{
     switch (format) {
     case SampleFormat::PcmInt8:
         return 1;

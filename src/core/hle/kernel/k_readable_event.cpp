@@ -1,9 +1,10 @@
 // SPDX-FileCopyrightText: Copyright 2021 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/kernel/k_readable_event.h"
+
 #include "common/assert.h"
 #include "core/hle/kernel/k_event.h"
-#include "core/hle/kernel/k_readable_event.h"
 #include "core/hle/kernel/k_scheduler.h"
 #include "core/hle/kernel/k_thread.h"
 #include "core/hle/kernel/kernel.h"
@@ -11,11 +12,14 @@
 
 namespace Kernel {
 
-KReadableEvent::KReadableEvent(KernelCore& kernel) : KSynchronizationObject{kernel} {}
+KReadableEvent::KReadableEvent(KernelCore& kernel) : KSynchronizationObject{kernel}
+{
+}
 
 KReadableEvent::~KReadableEvent() = default;
 
-void KReadableEvent::Initialize(KEvent* parent) {
+void KReadableEvent::Initialize(KEvent* parent)
+{
     m_is_signaled = false;
     m_parent = parent;
 
@@ -24,13 +28,15 @@ void KReadableEvent::Initialize(KEvent* parent) {
     }
 }
 
-bool KReadableEvent::IsSignaled() const {
+bool KReadableEvent::IsSignaled() const
+{
     ASSERT(KScheduler::IsSchedulerLockedByCurrentThread(m_kernel));
 
     return m_is_signaled;
 }
 
-void KReadableEvent::Destroy() {
+void KReadableEvent::Destroy()
+{
     if (m_parent) {
         {
             KScopedSchedulerLock sl{m_kernel};
@@ -40,7 +46,8 @@ void KReadableEvent::Destroy() {
     }
 }
 
-Result KReadableEvent::Signal() {
+Result KReadableEvent::Signal()
+{
     KScopedSchedulerLock lk{m_kernel};
 
     if (!m_is_signaled) {
@@ -51,13 +58,15 @@ Result KReadableEvent::Signal() {
     R_SUCCEED();
 }
 
-Result KReadableEvent::Clear() {
+Result KReadableEvent::Clear()
+{
     this->Reset();
 
     R_SUCCEED();
 }
 
-Result KReadableEvent::Reset() {
+Result KReadableEvent::Reset()
+{
     KScopedSchedulerLock lk{m_kernel};
 
     R_UNLESS(m_is_signaled, ResultInvalidState);

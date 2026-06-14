@@ -34,7 +34,7 @@ public:
     void StartThread();
 
 private:
-    template <typename T>
+    template<typename T>
     T GetSettingsItemValue(const std::string& category, const std::string& name);
 
     void ThreadFunc(std::stop_token stop_token);

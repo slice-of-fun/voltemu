@@ -4,17 +4,19 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+#include "hid_core/irsensor/image_transfer_processor.h"
+
 #include "core/core.h"
 #include "core/memory.h"
 #include "hid_core/frontend/emulated_controller.h"
 #include "hid_core/hid_core.h"
-#include "hid_core/irsensor/image_transfer_processor.h"
 
 namespace Service::IRS {
 ImageTransferProcessor::ImageTransferProcessor(Core::System& system_,
                                                Core::IrSensor::DeviceFormat& device_format,
                                                std::size_t npad_index)
-    : device{device_format}, system{system_} {
+    : device{device_format}, system{system_}
+{
     npad_device = system.HIDCore().GetEmulatedControllerByIndex(npad_index);
 
     Core::HID::ControllerUpdateCallback engine_callback{
@@ -28,11 +30,13 @@ ImageTransferProcessor::ImageTransferProcessor(Core::System& system_,
     device.camera_internal_status = Core::IrSensor::IrCameraInternalStatus::Stopped;
 }
 
-ImageTransferProcessor::~ImageTransferProcessor() {
+ImageTransferProcessor::~ImageTransferProcessor()
+{
     npad_device->DeleteCallback(callback_key);
 };
 
-void ImageTransferProcessor::StartProcessor() {
+void ImageTransferProcessor::StartProcessor()
+{
     is_active = true;
     device.camera_status = Core::IrSensor::IrCameraStatus::Available;
     device.camera_internal_status = Core::IrSensor::IrCameraInternalStatus::Ready;
@@ -40,11 +44,16 @@ void ImageTransferProcessor::StartProcessor() {
     processor_state.ambient_noise_level = Core::IrSensor::CameraAmbientNoiseLevel::Low;
 }
 
-void ImageTransferProcessor::SuspendProcessor() {}
+void ImageTransferProcessor::SuspendProcessor()
+{
+}
 
-void ImageTransferProcessor::StopProcessor() {}
+void ImageTransferProcessor::StopProcessor()
+{
+}
 
-void ImageTransferProcessor::OnControllerUpdate(Core::HID::ControllerTriggerType type) {
+void ImageTransferProcessor::OnControllerUpdate(Core::HID::ControllerTriggerType type)
+{
     if (type != Core::HID::ControllerTriggerType::IrSensor) {
         return;
     }
@@ -110,7 +119,8 @@ void ImageTransferProcessor::OnControllerUpdate(Core::HID::ControllerTriggerType
     }
 }
 
-void ImageTransferProcessor::SetConfig(Core::IrSensor::PackedImageTransferProcessorConfig config) {
+void ImageTransferProcessor::SetConfig(Core::IrSensor::PackedImageTransferProcessorConfig config)
+{
     current_config.camera_config.exposure_time = config.camera_config.exposure_time;
     current_config.camera_config.gain = config.camera_config.gain;
     current_config.camera_config.is_negative_used = config.camera_config.is_negative_used;
@@ -126,8 +136,8 @@ void ImageTransferProcessor::SetConfig(Core::IrSensor::PackedImageTransferProces
     npad_device->SetCameraFormat(current_config.origin_format);
 }
 
-void ImageTransferProcessor::SetConfig(
-    Core::IrSensor::PackedImageTransferProcessorExConfig config) {
+void ImageTransferProcessor::SetConfig(Core::IrSensor::PackedImageTransferProcessorExConfig config)
+{
     current_config.camera_config.exposure_time = config.camera_config.exposure_time;
     current_config.camera_config.gain = config.camera_config.gain;
     current_config.camera_config.is_negative_used = config.camera_config.is_negative_used;
@@ -143,12 +153,14 @@ void ImageTransferProcessor::SetConfig(
     npad_device->SetCameraFormat(current_config.origin_format);
 }
 
-void ImageTransferProcessor::SetTransferMemoryAddress(Common::ProcessAddress t_mem) {
+void ImageTransferProcessor::SetTransferMemoryAddress(Common::ProcessAddress t_mem)
+{
     transfer_memory = t_mem;
 }
 
-Core::IrSensor::ImageTransferProcessorState ImageTransferProcessor::GetState(
-    std::span<u8> data) const {
+Core::IrSensor::ImageTransferProcessorState
+ImageTransferProcessor::GetState(std::span<u8> data) const
+{
     const auto size = (std::min)(GetDataSize(current_config.trimming_format), data.size());
     system.ApplicationMemory().ReadBlock(transfer_memory, data.data(), size);
     return processor_state;

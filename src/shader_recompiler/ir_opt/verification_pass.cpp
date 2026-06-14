@@ -11,7 +11,8 @@
 
 namespace Shader::Optimization {
 
-static void ValidateTypes(const IR::Program& program) {
+static void ValidateTypes(const IR::Program& program)
+{
     for (const auto& block : program.blocks) {
         for (const IR::Inst& inst : *block) {
             if (inst.GetOpcode() == IR::Opcode::Phi) {
@@ -30,7 +31,8 @@ static void ValidateTypes(const IR::Program& program) {
     }
 }
 
-static void ValidateUses(const IR::Program& program) {
+static void ValidateUses(const IR::Program& program)
+{
     std::map<IR::Inst*, int> actual_uses;
     for (const auto& block : program.blocks) {
         for (const IR::Inst& inst : *block) {
@@ -50,7 +52,8 @@ static void ValidateUses(const IR::Program& program) {
     }
 }
 
-static void ValidateForwardDeclarations(const IR::Program& program) {
+static void ValidateForwardDeclarations(const IR::Program& program)
+{
     std::set<const IR::Inst*> definitions;
     for (const IR::Block* const block : program.blocks) {
         for (const IR::Inst& inst : *block) {
@@ -72,7 +75,8 @@ static void ValidateForwardDeclarations(const IR::Program& program) {
     }
 }
 
-static void ValidatePhiNodes(const IR::Program& program) {
+static void ValidatePhiNodes(const IR::Program& program)
+{
     for (const IR::Block* const block : program.blocks) {
         bool no_more_phis{false};
         for (const IR::Inst& inst : *block) {
@@ -87,7 +91,8 @@ static void ValidatePhiNodes(const IR::Program& program) {
     }
 }
 
-void VerificationPass(const IR::Program& program) {
+void VerificationPass(const IR::Program& program)
+{
     ValidateTypes(program);
     ValidateUses(program);
     ValidateForwardDeclarations(program);

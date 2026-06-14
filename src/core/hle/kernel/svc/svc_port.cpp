@@ -13,7 +13,8 @@
 
 namespace Kernel::Svc {
 
-Result ConnectToNamedPort(Core::System& system, Handle* out, u64 user_name) {
+Result ConnectToNamedPort(Core::System& system, Handle* out, u64 user_name)
+{
     // Copy the provided name from user memory to kernel memory.
     auto string_name =
         GetCurrentMemory(system.Kernel()).ReadCString(user_name, KObjectName::NameLengthMax);
@@ -34,7 +35,8 @@ Result ConnectToNamedPort(Core::System& system, Handle* out, u64 user_name) {
     // Reserve a handle for the port.
     // NOTE: Nintendo really does write directly to the output handle here.
     R_TRY(handle_table.Reserve(out));
-    ON_RESULT_FAILURE {
+    ON_RESULT_FAILURE
+    {
         handle_table.Unreserve(*out);
     };
 
@@ -51,7 +53,8 @@ Result ConnectToNamedPort(Core::System& system, Handle* out, u64 user_name) {
 }
 
 Result CreatePort(Core::System& system, Handle* out_server, Handle* out_client,
-                  int32_t max_sessions, bool is_light, uint64_t name) {
+                  int32_t max_sessions, bool is_light, uint64_t name)
+{
     auto& kernel = system.Kernel();
 
     // Ensure max sessions is valid.
@@ -68,7 +71,8 @@ Result CreatePort(Core::System& system, Handle* out_server, Handle* out_client,
     port->Initialize(max_sessions, is_light, name);
 
     // Ensure that we clean up the port (and its only references are handle table) on function end.
-    SCOPE_EXIT {
+    SCOPE_EXIT
+    {
         port->GetServerPort().Close();
         port->GetClientPort().Close();
     };
@@ -80,7 +84,8 @@ Result CreatePort(Core::System& system, Handle* out_server, Handle* out_client,
     R_TRY(handle_table.Add(out_client, std::addressof(port->GetClientPort())));
 
     // Ensure that we maintain a clean handle state on exit.
-    ON_RESULT_FAILURE {
+    ON_RESULT_FAILURE
+    {
         handle_table.Remove(*out_client);
     };
 
@@ -88,7 +93,8 @@ Result CreatePort(Core::System& system, Handle* out_server, Handle* out_client,
     R_RETURN(handle_table.Add(out_server, std::addressof(port->GetServerPort())));
 }
 
-Result ConnectToPort(Core::System& system, Handle* out, Handle port) {
+Result ConnectToPort(Core::System& system, Handle* out, Handle port)
+{
     // Get the current handle table.
     auto& handle_table = GetCurrentProcess(system.Kernel()).GetHandleTable();
 
@@ -99,7 +105,8 @@ Result ConnectToPort(Core::System& system, Handle* out, Handle port) {
     // Reserve a handle for the port.
     // NOTE: Nintendo really does write directly to the output handle here.
     R_TRY(handle_table.Reserve(out));
-    ON_RESULT_FAILURE {
+    ON_RESULT_FAILURE
+    {
         handle_table.Unreserve(*out);
     };
 
@@ -122,7 +129,8 @@ Result ConnectToPort(Core::System& system, Handle* out, Handle port) {
 }
 
 Result ManageNamedPort(Core::System& system, Handle* out_server_handle, uint64_t user_name,
-                       int32_t max_sessions) {
+                       int32_t max_sessions)
+{
     // Copy the provided name from user memory to kernel memory.
     auto string_name =
         GetCurrentMemory(system.Kernel()).ReadCString(user_name, KObjectName::NameLengthMax);
@@ -150,14 +158,16 @@ Result ManageNamedPort(Core::System& system, Handle* out_server_handle, uint64_t
         KPort::Register(system.Kernel(), port);
 
         // Ensure that our only reference to the port is in the handle table when we're done.
-        SCOPE_EXIT {
+        SCOPE_EXIT
+        {
             port->GetClientPort().Close();
             port->GetServerPort().Close();
         };
 
         // Register the handle in the table.
         R_TRY(handle_table.Add(out_server_handle, std::addressof(port->GetServerPort())));
-        ON_RESULT_FAILURE {
+        ON_RESULT_FAILURE
+        {
             handle_table.Remove(*out_server_handle);
         };
 
@@ -178,42 +188,50 @@ Result ManageNamedPort(Core::System& system, Handle* out_server_handle, uint64_t
     R_SUCCEED();
 }
 
-Result ConnectToNamedPort64(Core::System& system, Handle* out_handle, uint64_t name) {
+Result ConnectToNamedPort64(Core::System& system, Handle* out_handle, uint64_t name)
+{
     R_RETURN(ConnectToNamedPort(system, out_handle, name));
 }
 
 Result CreatePort64(Core::System& system, Handle* out_server_handle, Handle* out_client_handle,
-                    int32_t max_sessions, bool is_light, uint64_t name) {
+                    int32_t max_sessions, bool is_light, uint64_t name)
+{
     R_RETURN(
         CreatePort(system, out_server_handle, out_client_handle, max_sessions, is_light, name));
 }
 
 Result ManageNamedPort64(Core::System& system, Handle* out_server_handle, uint64_t name,
-                         int32_t max_sessions) {
+                         int32_t max_sessions)
+{
     R_RETURN(ManageNamedPort(system, out_server_handle, name, max_sessions));
 }
 
-Result ConnectToPort64(Core::System& system, Handle* out_handle, Handle port) {
+Result ConnectToPort64(Core::System& system, Handle* out_handle, Handle port)
+{
     R_RETURN(ConnectToPort(system, out_handle, port));
 }
 
-Result ConnectToNamedPort64From32(Core::System& system, Handle* out_handle, uint32_t name) {
+Result ConnectToNamedPort64From32(Core::System& system, Handle* out_handle, uint32_t name)
+{
     R_RETURN(ConnectToNamedPort(system, out_handle, name));
 }
 
 Result CreatePort64From32(Core::System& system, Handle* out_server_handle,
                           Handle* out_client_handle, int32_t max_sessions, bool is_light,
-                          uint32_t name) {
+                          uint32_t name)
+{
     R_RETURN(
         CreatePort(system, out_server_handle, out_client_handle, max_sessions, is_light, name));
 }
 
 Result ManageNamedPort64From32(Core::System& system, Handle* out_server_handle, uint32_t name,
-                               int32_t max_sessions) {
+                               int32_t max_sessions)
+{
     R_RETURN(ManageNamedPort(system, out_server_handle, name, max_sessions));
 }
 
-Result ConnectToPort64From32(Core::System& system, Handle* out_handle, Handle port) {
+Result ConnectToPort64From32(Core::System& system, Handle* out_handle, Handle port)
+{
     R_RETURN(ConnectToPort(system, out_handle, port));
 }
 

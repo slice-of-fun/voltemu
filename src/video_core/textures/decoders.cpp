@@ -4,6 +4,8 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "video_core/textures/decoders.h"
+
 #include <array>
 #include <cmath>
 #include <cstring>
@@ -14,12 +16,11 @@
 #include "common/bit_util.h"
 #include "common/div_ceil.h"
 #include "video_core/gpu.h"
-#include "video_core/textures/decoders.h"
 
 namespace Tegra::Texture {
 namespace {
-template <u32 mask>
-constexpr u32 pdep(u32 value) {
+template<u32 mask> constexpr u32 pdep(u32 value)
+{
     u32 result = 0;
     u32 m = mask;
     for (u32 bit = 1; m; bit += bit) {
@@ -30,15 +31,16 @@ constexpr u32 pdep(u32 value) {
     return result;
 }
 
-template <u32 mask, u32 incr_amount>
-void incrpdep(u32& value) {
+template<u32 mask, u32 incr_amount> void incrpdep(u32& value)
+{
     static constexpr u32 swizzled_incr = pdep<mask>(incr_amount);
     value = ((value | ~mask) + swizzled_incr) & mask;
 }
 
-template <bool TO_LINEAR, u32 BYTES_PER_PIXEL>
+template<bool TO_LINEAR, u32 BYTES_PER_PIXEL>
 void SwizzleImpl(std::span<u8> output, std::span<const u8> input, u32 width, u32 height, u32 depth,
-                 u32 block_height, u32 block_depth, u32 stride) {
+                 u32 block_height, u32 block_depth, u32 stride)
+{
     // The origin of the transformation can be configured here, leave it as zero as the current API
     // doesn't expose it.
     static constexpr u32 origin_x = 0;
@@ -91,10 +93,11 @@ void SwizzleImpl(std::span<u8> output, std::span<const u8> input, u32 width, u32
     }
 }
 
-template <bool TO_LINEAR, u32 BYTES_PER_PIXEL>
+template<bool TO_LINEAR, u32 BYTES_PER_PIXEL>
 void SwizzleSubrectImpl(std::span<u8> output, std::span<const u8> input, u32 width, u32 height,
                         u32 depth, u32 origin_x, u32 origin_y, u32 extent_x, u32 num_lines,
-                        u32 block_height, u32 block_depth, u32 pitch_linear) {
+                        u32 block_height, u32 block_depth, u32 pitch_linear)
+{
     // The origin of the transformation can be configured here, leave it as zero as the current API
     // doesn't expose it.
     static constexpr u32 origin_z = 0;
@@ -154,9 +157,10 @@ void SwizzleSubrectImpl(std::span<u8> output, std::span<const u8> input, u32 wid
     }
 }
 
-template <bool TO_LINEAR>
+template<bool TO_LINEAR>
 void Swizzle(std::span<u8> output, std::span<const u8> input, u32 bytes_per_pixel, u32 width,
-             u32 height, u32 depth, u32 block_height, u32 block_depth, u32 stride_alignment) {
+             u32 height, u32 depth, u32 block_height, u32 block_depth, u32 stride_alignment)
+{
     switch (bytes_per_pixel) {
 #define BPP_CASE(x)                                                                                \
     case x:                                                                                        \
@@ -181,7 +185,8 @@ void Swizzle(std::span<u8> output, std::span<const u8> input, u32 bytes_per_pixe
 
 void UnswizzleTexture(std::span<u8> output, std::span<const u8> input, u32 bytes_per_pixel,
                       u32 width, u32 height, u32 depth, u32 block_height, u32 block_depth,
-                      u32 stride_alignment) {
+                      u32 stride_alignment)
+{
     const u32 stride = Common::AlignUpLog2(width, stride_alignment) * bytes_per_pixel;
     const u32 new_bpp = (std::min)(4U, static_cast<u32>(std::countr_zero(width * bytes_per_pixel)));
     width = (width * bytes_per_pixel) >> new_bpp;
@@ -191,8 +196,8 @@ void UnswizzleTexture(std::span<u8> output, std::span<const u8> input, u32 bytes
 }
 
 void SwizzleTexture(std::span<u8> output, std::span<const u8> input, u32 bytes_per_pixel, u32 width,
-                    u32 height, u32 depth, u32 block_height, u32 block_depth,
-                    u32 stride_alignment) {
+                    u32 height, u32 depth, u32 block_height, u32 block_depth, u32 stride_alignment)
+{
     const u32 stride = Common::AlignUpLog2(width, stride_alignment) * bytes_per_pixel;
     const u32 new_bpp = (std::min)(4U, static_cast<u32>(std::countr_zero(width * bytes_per_pixel)));
     width = (width * bytes_per_pixel) >> new_bpp;
@@ -203,7 +208,8 @@ void SwizzleTexture(std::span<u8> output, std::span<const u8> input, u32 bytes_p
 
 void SwizzleSubrect(std::span<u8> output, std::span<const u8> input, u32 bytes_per_pixel, u32 width,
                     u32 height, u32 depth, u32 origin_x, u32 origin_y, u32 extent_x, u32 extent_y,
-                    u32 block_height, u32 block_depth, u32 pitch_linear) {
+                    u32 block_height, u32 block_depth, u32 pitch_linear)
+{
     switch (bytes_per_pixel) {
 #define BPP_CASE(x)                                                                                \
     case x:                                                                                        \
@@ -227,7 +233,8 @@ void SwizzleSubrect(std::span<u8> output, std::span<const u8> input, u32 bytes_p
 
 void UnswizzleSubrect(std::span<u8> output, std::span<const u8> input, u32 bytes_per_pixel,
                       u32 width, u32 height, u32 depth, u32 origin_x, u32 origin_y, u32 extent_x,
-                      u32 extent_y, u32 block_height, u32 block_depth, u32 pitch_linear) {
+                      u32 extent_y, u32 block_height, u32 block_depth, u32 pitch_linear)
+{
     switch (bytes_per_pixel) {
 #define BPP_CASE(x)                                                                                \
     case x:                                                                                        \
@@ -250,7 +257,8 @@ void UnswizzleSubrect(std::span<u8> output, std::span<const u8> input, u32 bytes
 }
 
 std::size_t CalculateSize(bool tiled, u32 bytes_per_pixel, u32 width, u32 height, u32 depth,
-                          u32 block_height, u32 block_depth) {
+                          u32 block_height, u32 block_depth)
+{
     if (tiled) {
         const u32 aligned_width = Common::AlignUpLog2(width * bytes_per_pixel, GOB_SIZE_X_SHIFT);
         const u32 aligned_height = Common::AlignUpLog2(height, GOB_SIZE_Y_SHIFT + block_height);
@@ -261,8 +269,8 @@ std::size_t CalculateSize(bool tiled, u32 bytes_per_pixel, u32 width, u32 height
     }
 }
 
-u64 GetGOBOffset(u32 width, u32 height, u32 dst_x, u32 dst_y, u32 block_height,
-                 u32 bytes_per_pixel) {
+u64 GetGOBOffset(u32 width, u32 height, u32 dst_x, u32 dst_y, u32 block_height, u32 bytes_per_pixel)
+{
     auto div_ceil = [](const u32 x, const u32 y) { return ((x + y - 1) / y); };
     const u32 gobs_in_block = 1 << block_height;
     const u32 y_blocks = GOB_SIZE_Y << block_height;

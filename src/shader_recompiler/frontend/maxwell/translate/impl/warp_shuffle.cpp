@@ -19,7 +19,8 @@ enum class ShuffleMode : u64 {
 
 [[nodiscard]] IR::U32 ShuffleOperation(IR::IREmitter& ir, const IR::U32& value,
                                        const IR::U32& index, const IR::U32& mask,
-                                       ShuffleMode shfl_op) {
+                                       ShuffleMode shfl_op)
+{
     const IR::U32 clamp{ir.BitFieldExtract(mask, ir.Imm32(0), ir.Imm32(5))};
     const IR::U32 seg_mask{ir.BitFieldExtract(mask, ir.Imm32(8), ir.Imm32(5))};
     switch (shfl_op) {
@@ -36,7 +37,8 @@ enum class ShuffleMode : u64 {
     }
 }
 
-void Shuffle(TranslatorVisitor& v, u64 insn, const IR::U32& index, const IR::U32& mask) {
+void Shuffle(TranslatorVisitor& v, u64 insn, const IR::U32& index, const IR::U32& mask)
+{
     union {
         u64 insn;
         BitField<0, 8, IR::Reg> dest_reg;
@@ -51,7 +53,8 @@ void Shuffle(TranslatorVisitor& v, u64 insn, const IR::U32& index, const IR::U32
 }
 } // Anonymous namespace
 
-void TranslatorVisitor::SHFL(u64 insn) {
+void TranslatorVisitor::SHFL(u64 insn)
+{
     union {
         u64 insn;
         BitField<20, 5, u64> src_a_imm;

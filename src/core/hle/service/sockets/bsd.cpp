@@ -4,25 +4,26 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/sockets/bsd.h"
+
+#include <common/settings.h>
+#include <fmt/ranges.h>
+
 #include <array>
 #include <memory>
 #include <utility>
 #include <vector>
-
-#include <fmt/ranges.h>
 
 #include "common/logging.h"
 #include "common/socket_types.h"
 #include "core/core.h"
 #include "core/hle/kernel/k_thread.h"
 #include "core/hle/service/ipc_helpers.h"
-#include "core/hle/service/sockets/bsd.h"
 #include "core/hle/service/sockets/sockets_translate.h"
 #include "core/internal_network/network.h"
 #include "core/internal_network/socket_proxy.h"
 #include "core/internal_network/sockets.h"
 #include "network/network.h"
-#include <common/settings.h>
 
 using Common::Expected;
 using Common::Unexpected;
@@ -31,7 +32,8 @@ namespace Service::Sockets {
 
 namespace {
 
-bool IsConnectionBased(Type type) {
+bool IsConnectionBased(Type type)
+{
     switch (type) {
     case Type::STREAM:
         return true;
@@ -43,25 +45,27 @@ bool IsConnectionBased(Type type) {
     }
 }
 
-template <typename T>
-T GetValue(std::span<const u8> buffer) {
+template<typename T> T GetValue(std::span<const u8> buffer)
+{
     T t{};
     std::memcpy(&t, buffer.data(), (std::min)(sizeof(T), buffer.size()));
     return t;
 }
 
-template <typename T>
-void PutValue(std::span<u8> buffer, const T& t) {
+template<typename T> void PutValue(std::span<u8> buffer, const T& t)
+{
     std::memcpy(buffer.data(), &t, (std::min)(sizeof(T), buffer.size()));
 }
 
 } // Anonymous namespace
 
-void BSD::PollWork::Execute(BSD* bsd) {
+void BSD::PollWork::Execute(BSD* bsd)
+{
     std::tie(ret, bsd_errno) = bsd->PollImpl(write_buffer, read_buffer, nfds, timeout);
 }
 
-void BSD::PollWork::Response(HLERequestContext& ctx) {
+void BSD::PollWork::Response(HLERequestContext& ctx)
+{
     if (write_buffer.size() > 0) {
         ctx.WriteBuffer(write_buffer);
     }
@@ -72,11 +76,13 @@ void BSD::PollWork::Response(HLERequestContext& ctx) {
     rb.PushEnum(bsd_errno);
 }
 
-void BSD::AcceptWork::Execute(BSD* bsd) {
+void BSD::AcceptWork::Execute(BSD* bsd)
+{
     std::tie(ret, bsd_errno) = bsd->AcceptImpl(fd, write_buffer);
 }
 
-void BSD::AcceptWork::Response(HLERequestContext& ctx) {
+void BSD::AcceptWork::Response(HLERequestContext& ctx)
+{
     if (write_buffer.size() > 0) {
         ctx.WriteBuffer(write_buffer);
     }
@@ -88,22 +94,26 @@ void BSD::AcceptWork::Response(HLERequestContext& ctx) {
     rb.Push<u32>(static_cast<u32>(write_buffer.size()));
 }
 
-void BSD::ConnectWork::Execute(BSD* bsd) {
+void BSD::ConnectWork::Execute(BSD* bsd)
+{
     bsd_errno = bsd->ConnectImpl(fd, addr);
 }
 
-void BSD::ConnectWork::Response(HLERequestContext& ctx) {
+void BSD::ConnectWork::Response(HLERequestContext& ctx)
+{
     IPC::ResponseBuilder rb{ctx, 4};
     rb.Push(ResultSuccess);
     rb.Push<s32>(bsd_errno == Errno::SUCCESS ? 0 : -1);
     rb.PushEnum(bsd_errno);
 }
 
-void BSD::RecvWork::Execute(BSD* bsd) {
+void BSD::RecvWork::Execute(BSD* bsd)
+{
     std::tie(ret, bsd_errno) = bsd->RecvImpl(fd, flags, message);
 }
 
-void BSD::RecvWork::Response(HLERequestContext& ctx) {
+void BSD::RecvWork::Response(HLERequestContext& ctx)
+{
     ctx.WriteBuffer(message);
 
     IPC::ResponseBuilder rb{ctx, 4};
@@ -112,11 +122,13 @@ void BSD::RecvWork::Response(HLERequestContext& ctx) {
     rb.PushEnum(bsd_errno);
 }
 
-void BSD::RecvFromWork::Execute(BSD* bsd) {
+void BSD::RecvFromWork::Execute(BSD* bsd)
+{
     std::tie(ret, bsd_errno) = bsd->RecvFromImpl(fd, flags, message, addr);
 }
 
-void BSD::RecvFromWork::Response(HLERequestContext& ctx) {
+void BSD::RecvFromWork::Response(HLERequestContext& ctx)
+{
     ctx.WriteBuffer(message, 0);
     if (!addr.empty()) {
         ctx.WriteBuffer(addr, 1);
@@ -129,29 +141,34 @@ void BSD::RecvFromWork::Response(HLERequestContext& ctx) {
     rb.Push<u32>(static_cast<u32>(addr.size()));
 }
 
-void BSD::SendWork::Execute(BSD* bsd) {
+void BSD::SendWork::Execute(BSD* bsd)
+{
     std::tie(ret, bsd_errno) = bsd->SendImpl(fd, flags, message);
 }
 
-void BSD::SendWork::Response(HLERequestContext& ctx) {
+void BSD::SendWork::Response(HLERequestContext& ctx)
+{
     IPC::ResponseBuilder rb{ctx, 4};
     rb.Push(ResultSuccess);
     rb.Push<s32>(ret);
     rb.PushEnum(bsd_errno);
 }
 
-void BSD::SendToWork::Execute(BSD* bsd) {
+void BSD::SendToWork::Execute(BSD* bsd)
+{
     std::tie(ret, bsd_errno) = bsd->SendToImpl(fd, flags, message, addr);
 }
 
-void BSD::SendToWork::Response(HLERequestContext& ctx) {
+void BSD::SendToWork::Response(HLERequestContext& ctx)
+{
     IPC::ResponseBuilder rb{ctx, 4};
     rb.Push(ResultSuccess);
     rb.Push<s32>(ret);
     rb.PushEnum(bsd_errno);
 }
 
-void BSD::RegisterClient(HLERequestContext& ctx) {
+void BSD::RegisterClient(HLERequestContext& ctx)
+{
     LOG_WARNING(Service, "(STUBBED) called");
 
     IPC::ResponseBuilder rb{ctx, 3};
@@ -160,7 +177,8 @@ void BSD::RegisterClient(HLERequestContext& ctx) {
     rb.Push<s32>(0); // bsd errno
 }
 
-void BSD::StartMonitoring(HLERequestContext& ctx) {
+void BSD::StartMonitoring(HLERequestContext& ctx)
+{
     LOG_WARNING(Service, "(STUBBED) called");
 
     IPC::ResponseBuilder rb{ctx, 2};
@@ -168,7 +186,8 @@ void BSD::StartMonitoring(HLERequestContext& ctx) {
     rb.Push(ResultSuccess);
 }
 
-void BSD::Socket(HLERequestContext& ctx) {
+void BSD::Socket(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     const u32 domain = rp.Pop<u32>();
     const u32 type = rp.Pop<u32>();
@@ -185,7 +204,8 @@ void BSD::Socket(HLERequestContext& ctx) {
     rb.PushEnum(bsd_errno);
 }
 
-void BSD::Select(HLERequestContext& ctx) {
+void BSD::Select(HLERequestContext& ctx)
+{
     LOG_DEBUG(Service, "(STUBBED) called");
 
     IPC::ResponseBuilder rb{ctx, 4};
@@ -195,7 +215,8 @@ void BSD::Select(HLERequestContext& ctx) {
     rb.Push<u32>(0); // bsd errno
 }
 
-void BSD::Poll(HLERequestContext& ctx) {
+void BSD::Poll(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     const s32 nfds = rp.Pop<s32>();
     const s32 timeout = rp.Pop<s32>();
@@ -210,7 +231,8 @@ void BSD::Poll(HLERequestContext& ctx) {
                      });
 }
 
-void BSD::Accept(HLERequestContext& ctx) {
+void BSD::Accept(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     const s32 fd = rp.Pop<s32>();
 
@@ -222,7 +244,8 @@ void BSD::Accept(HLERequestContext& ctx) {
                      });
 }
 
-void BSD::Bind(HLERequestContext& ctx) {
+void BSD::Bind(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     const s32 fd = rp.Pop<s32>();
 
@@ -230,7 +253,8 @@ void BSD::Bind(HLERequestContext& ctx) {
     BuildErrnoResponse(ctx, BindImpl(fd, ctx.ReadBuffer()));
 }
 
-void BSD::Connect(HLERequestContext& ctx) {
+void BSD::Connect(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     const s32 fd = rp.Pop<s32>();
 
@@ -242,7 +266,8 @@ void BSD::Connect(HLERequestContext& ctx) {
                      });
 }
 
-void BSD::GetPeerName(HLERequestContext& ctx) {
+void BSD::GetPeerName(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     const s32 fd = rp.Pop<s32>();
 
@@ -260,7 +285,8 @@ void BSD::GetPeerName(HLERequestContext& ctx) {
     rb.Push<u32>(static_cast<u32>(write_buffer.size()));
 }
 
-void BSD::GetSockName(HLERequestContext& ctx) {
+void BSD::GetSockName(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     const s32 fd = rp.Pop<s32>();
 
@@ -278,7 +304,8 @@ void BSD::GetSockName(HLERequestContext& ctx) {
     rb.Push<u32>(static_cast<u32>(write_buffer.size()));
 }
 
-void BSD::GetSockOpt(HLERequestContext& ctx) {
+void BSD::GetSockOpt(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     const s32 fd = rp.Pop<s32>();
     const u32 level = rp.Pop<u32>();
@@ -300,7 +327,8 @@ void BSD::GetSockOpt(HLERequestContext& ctx) {
     rb.Push<u32>(static_cast<u32>(optval.size()));
 }
 
-void BSD::Listen(HLERequestContext& ctx) {
+void BSD::Listen(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     const s32 fd = rp.Pop<s32>();
     const s32 backlog = rp.Pop<s32>();
@@ -310,7 +338,8 @@ void BSD::Listen(HLERequestContext& ctx) {
     BuildErrnoResponse(ctx, ListenImpl(fd, backlog));
 }
 
-void BSD::Fcntl(HLERequestContext& ctx) {
+void BSD::Fcntl(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     const s32 fd = rp.Pop<s32>();
     const s32 cmd = rp.Pop<s32>();
@@ -326,7 +355,8 @@ void BSD::Fcntl(HLERequestContext& ctx) {
     rb.PushEnum(bsd_errno);
 }
 
-void BSD::SetSockOpt(HLERequestContext& ctx) {
+void BSD::SetSockOpt(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
 
     const s32 fd = rp.Pop<s32>();
@@ -340,7 +370,8 @@ void BSD::SetSockOpt(HLERequestContext& ctx) {
     BuildErrnoResponse(ctx, SetSockOptImpl(fd, level, optname, optval));
 }
 
-void BSD::Shutdown(HLERequestContext& ctx) {
+void BSD::Shutdown(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
 
     const s32 fd = rp.Pop<s32>();
@@ -351,7 +382,8 @@ void BSD::Shutdown(HLERequestContext& ctx) {
     BuildErrnoResponse(ctx, ShutdownImpl(fd, how));
 }
 
-void BSD::Recv(HLERequestContext& ctx) {
+void BSD::Recv(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
 
     const s32 fd = rp.Pop<s32>();
@@ -366,7 +398,8 @@ void BSD::Recv(HLERequestContext& ctx) {
                      });
 }
 
-void BSD::RecvFrom(HLERequestContext& ctx) {
+void BSD::RecvFrom(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
 
     const s32 fd = rp.Pop<s32>();
@@ -383,7 +416,8 @@ void BSD::RecvFrom(HLERequestContext& ctx) {
                      });
 }
 
-void BSD::Send(HLERequestContext& ctx) {
+void BSD::Send(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
 
     const s32 fd = rp.Pop<s32>();
@@ -398,7 +432,8 @@ void BSD::Send(HLERequestContext& ctx) {
                      });
 }
 
-void BSD::SendTo(HLERequestContext& ctx) {
+void BSD::SendTo(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     const s32 fd = rp.Pop<s32>();
     const u32 flags = rp.Pop<u32>();
@@ -414,7 +449,8 @@ void BSD::SendTo(HLERequestContext& ctx) {
                      });
 }
 
-void BSD::Write(HLERequestContext& ctx) {
+void BSD::Write(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     const s32 fd = rp.Pop<s32>();
 
@@ -427,7 +463,8 @@ void BSD::Write(HLERequestContext& ctx) {
                      });
 }
 
-void BSD::Read(HLERequestContext& ctx) {
+void BSD::Read(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     const s32 fd = rp.Pop<s32>();
 
@@ -439,7 +476,8 @@ void BSD::Read(HLERequestContext& ctx) {
     rb.Push<u32>(0); // bsd errno
 }
 
-void BSD::Close(HLERequestContext& ctx) {
+void BSD::Close(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     const s32 fd = rp.Pop<s32>();
 
@@ -448,7 +486,8 @@ void BSD::Close(HLERequestContext& ctx) {
     BuildErrnoResponse(ctx, CloseImpl(fd));
 }
 
-void BSD::DuplicateSocket(HLERequestContext& ctx) {
+void BSD::DuplicateSocket(HLERequestContext& ctx)
+{
     struct InputParameters {
         s32 fd;
         u64 reserved;
@@ -473,7 +512,8 @@ void BSD::DuplicateSocket(HLERequestContext& ctx) {
     });
 }
 
-void BSD::EventFd(HLERequestContext& ctx) {
+void BSD::EventFd(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     const u64 initval = rp.Pop<u64>();
     const u32 flags = rp.Pop<u32>();
@@ -483,13 +523,14 @@ void BSD::EventFd(HLERequestContext& ctx) {
     BuildErrnoResponse(ctx, Errno::SUCCESS);
 }
 
-template <typename Work>
-void BSD::ExecuteWork(HLERequestContext& ctx, Work work) {
+template<typename Work> void BSD::ExecuteWork(HLERequestContext& ctx, Work work)
+{
     work.Execute(this);
     work.Response(ctx);
 }
 
-std::pair<s32, Errno> BSD::SocketImpl(Domain domain, Type type, Protocol protocol) {
+std::pair<s32, Errno> BSD::SocketImpl(Domain domain, Type type, Protocol protocol)
+{
 
     if (type == Type::SEQPACKET) {
         UNIMPLEMENTED_MSG("SOCK_SEQPACKET errno management");
@@ -532,7 +573,8 @@ std::pair<s32, Errno> BSD::SocketImpl(Domain domain, Type type, Protocol protoco
 }
 
 std::pair<s32, Errno> BSD::PollImpl(std::vector<u8>& write_buffer, std::span<const u8> read_buffer,
-                                    s32 nfds, s32 timeout) {
+                                    s32 nfds, s32 timeout)
+{
     if (nfds <= 0) {
         // When no entries are provided, -1 is returned with errno zero
         return {-1, Errno::SUCCESS};
@@ -598,7 +640,8 @@ std::pair<s32, Errno> BSD::PollImpl(std::vector<u8>& write_buffer, std::span<con
     return Translate(result);
 }
 
-std::pair<s32, Errno> BSD::AcceptImpl(s32 fd, std::vector<u8>& write_buffer) {
+std::pair<s32, Errno> BSD::AcceptImpl(s32 fd, std::vector<u8>& write_buffer)
+{
     if (!IsFileDescriptorValid(fd)) {
         return {-1, Errno::BADF};
     }
@@ -626,7 +669,8 @@ std::pair<s32, Errno> BSD::AcceptImpl(s32 fd, std::vector<u8>& write_buffer) {
     return {new_fd, Errno::SUCCESS};
 }
 
-Errno BSD::BindImpl(s32 fd, std::span<const u8> addr) {
+Errno BSD::BindImpl(s32 fd, std::span<const u8> addr)
+{
     if (!IsFileDescriptorValid(fd)) {
         return Errno::BADF;
     }
@@ -641,7 +685,8 @@ Errno BSD::BindImpl(s32 fd, std::span<const u8> addr) {
     return Translate(file_descriptors[fd]->socket->Bind(Translate(addr_in)));
 }
 
-Errno BSD::ConnectImpl(s32 fd, std::span<const u8> addr) {
+Errno BSD::ConnectImpl(s32 fd, std::span<const u8> addr)
+{
     if (!IsFileDescriptorValid(fd)) {
         return Errno::BADF;
     }
@@ -664,7 +709,8 @@ Errno BSD::ConnectImpl(s32 fd, std::span<const u8> addr) {
     return result;
 }
 
-Errno BSD::GetPeerNameImpl(s32 fd, std::vector<u8>& write_buffer) {
+Errno BSD::GetPeerNameImpl(s32 fd, std::vector<u8>& write_buffer)
+{
     if (!IsFileDescriptorValid(fd)) {
         return Errno::BADF;
     }
@@ -686,7 +732,8 @@ Errno BSD::GetPeerNameImpl(s32 fd, std::vector<u8>& write_buffer) {
     return Translate(bsd_errno);
 }
 
-Errno BSD::GetSockNameImpl(s32 fd, std::vector<u8>& write_buffer) {
+Errno BSD::GetSockNameImpl(s32 fd, std::vector<u8>& write_buffer)
+{
     if (!IsFileDescriptorValid(fd)) {
         return Errno::BADF;
     }
@@ -708,7 +755,8 @@ Errno BSD::GetSockNameImpl(s32 fd, std::vector<u8>& write_buffer) {
     return Translate(bsd_errno);
 }
 
-Errno BSD::ListenImpl(s32 fd, s32 backlog) {
+Errno BSD::ListenImpl(s32 fd, s32 backlog)
+{
     if (!IsFileDescriptorValid(fd)) {
         return Errno::BADF;
     }
@@ -719,7 +767,8 @@ Errno BSD::ListenImpl(s32 fd, s32 backlog) {
     return Translate(file_descriptors[fd]->socket->Listen(backlog));
 }
 
-std::pair<s32, Errno> BSD::FcntlImpl(s32 fd, FcntlCmd cmd, s32 arg) {
+std::pair<s32, Errno> BSD::FcntlImpl(s32 fd, FcntlCmd cmd, s32 arg)
+{
     if (!IsFileDescriptorValid(fd)) {
         return {-1, Errno::BADF};
     }
@@ -749,7 +798,8 @@ std::pair<s32, Errno> BSD::FcntlImpl(s32 fd, FcntlCmd cmd, s32 arg) {
     }
 }
 
-Errno BSD::GetSockOptImpl(s32 fd, u32 level, OptName optname, std::vector<u8>& optval) {
+Errno BSD::GetSockOptImpl(s32 fd, u32 level, OptName optname, std::vector<u8>& optval)
+{
     if (!IsFileDescriptorValid(fd)) {
         return Errno::BADF;
     }
@@ -784,7 +834,8 @@ Errno BSD::GetSockOptImpl(s32 fd, u32 level, OptName optname, std::vector<u8>& o
     }
 }
 
-Errno BSD::SetSockOptImpl(s32 fd, u32 level, OptName optname, std::span<const u8> optval) {
+Errno BSD::SetSockOptImpl(s32 fd, u32 level, OptName optname, std::span<const u8> optval)
+{
     if (!IsFileDescriptorValid(fd)) {
         return Errno::BADF;
     }
@@ -838,7 +889,8 @@ Errno BSD::SetSockOptImpl(s32 fd, u32 level, OptName optname, std::span<const u8
     }
 }
 
-Errno BSD::ShutdownImpl(s32 fd, s32 how) {
+Errno BSD::ShutdownImpl(s32 fd, s32 how)
+{
     if (!IsFileDescriptorValid(fd)) {
         return Errno::BADF;
     }
@@ -850,7 +902,8 @@ Errno BSD::ShutdownImpl(s32 fd, s32 how) {
     return Translate(file_descriptors[fd]->socket->Shutdown(host_how));
 }
 
-std::pair<s32, Errno> BSD::RecvImpl(s32 fd, u32 flags, std::vector<u8>& message) {
+std::pair<s32, Errno> BSD::RecvImpl(s32 fd, u32 flags, std::vector<u8>& message)
+{
     if (!IsFileDescriptorValid(fd)) {
         return {-1, Errno::BADF};
     }
@@ -878,7 +931,8 @@ std::pair<s32, Errno> BSD::RecvImpl(s32 fd, u32 flags, std::vector<u8>& message)
 }
 
 std::pair<s32, Errno> BSD::RecvFromImpl(s32 fd, u32 flags, std::vector<u8>& message,
-                                        std::vector<u8>& addr) {
+                                        std::vector<u8>& addr)
+{
     if (!IsFileDescriptorValid(fd)) {
         return {-1, Errno::BADF};
     }
@@ -924,7 +978,8 @@ std::pair<s32, Errno> BSD::RecvFromImpl(s32 fd, u32 flags, std::vector<u8>& mess
     return {ret, bsd_errno};
 }
 
-std::pair<s32, Errno> BSD::SendImpl(s32 fd, u32 flags, std::span<const u8> message) {
+std::pair<s32, Errno> BSD::SendImpl(s32 fd, u32 flags, std::span<const u8> message)
+{
     if (!IsFileDescriptorValid(fd)) {
         return {-1, Errno::BADF};
     }
@@ -936,7 +991,8 @@ std::pair<s32, Errno> BSD::SendImpl(s32 fd, u32 flags, std::span<const u8> messa
 }
 
 std::pair<s32, Errno> BSD::SendToImpl(s32 fd, u32 flags, std::span<const u8> message,
-                                      std::span<const u8> addr) {
+                                      std::span<const u8> addr)
+{
     if (!IsFileDescriptorValid(fd)) {
         return {-1, Errno::BADF};
     }
@@ -957,7 +1013,8 @@ std::pair<s32, Errno> BSD::SendToImpl(s32 fd, u32 flags, std::span<const u8> mes
     return Translate(file_descriptors[fd]->socket->SendTo(flags, message, p_addr_in));
 }
 
-Errno BSD::CloseImpl(s32 fd) {
+Errno BSD::CloseImpl(s32 fd)
+{
     if (!IsFileDescriptorValid(fd)) {
         return Errno::BADF;
     }
@@ -977,7 +1034,8 @@ Errno BSD::CloseImpl(s32 fd) {
     return bsd_errno;
 }
 
-Expected<s32, Errno> BSD::DuplicateSocketImpl(s32 fd) {
+Expected<s32, Errno> BSD::DuplicateSocketImpl(s32 fd)
+{
     if (!IsFileDescriptorValid(fd)) {
         return Unexpected(Errno::BADF);
     }
@@ -996,7 +1054,8 @@ Expected<s32, Errno> BSD::DuplicateSocketImpl(s32 fd) {
     return new_fd;
 }
 
-std::optional<std::shared_ptr<Network::SocketBase>> BSD::GetSocket(s32 fd) {
+std::optional<std::shared_ptr<Network::SocketBase>> BSD::GetSocket(s32 fd)
+{
     if (!IsFileDescriptorValid(fd)) {
         return std::nullopt;
     }
@@ -1007,7 +1066,8 @@ std::optional<std::shared_ptr<Network::SocketBase>> BSD::GetSocket(s32 fd) {
     return file_descriptors[fd]->socket;
 }
 
-s32 BSD::FindFreeFileDescriptorHandle() noexcept {
+s32 BSD::FindFreeFileDescriptorHandle() noexcept
+{
     for (s32 fd = 0; fd < static_cast<s32>(file_descriptors.size()); ++fd) {
         if (!file_descriptors[fd]) {
             return fd;
@@ -1016,7 +1076,8 @@ s32 BSD::FindFreeFileDescriptorHandle() noexcept {
     return -1;
 }
 
-bool BSD::IsFileDescriptorValid(s32 fd) const noexcept {
+bool BSD::IsFileDescriptorValid(s32 fd) const noexcept
+{
     if (fd > static_cast<s32>(MAX_FD) || fd < 0) {
         LOG_ERROR(Service, "Invalid file descriptor handle={}", fd);
         return false;
@@ -1028,7 +1089,8 @@ bool BSD::IsFileDescriptorValid(s32 fd) const noexcept {
     return true;
 }
 
-void BSD::BuildErrnoResponse(HLERequestContext& ctx, Errno bsd_errno) const noexcept {
+void BSD::BuildErrnoResponse(HLERequestContext& ctx, Errno bsd_errno) const noexcept
+{
     IPC::ResponseBuilder rb{ctx, 4};
 
     rb.Push(ResultSuccess);
@@ -1036,7 +1098,8 @@ void BSD::BuildErrnoResponse(HLERequestContext& ctx, Errno bsd_errno) const noex
     rb.PushEnum(bsd_errno);
 }
 
-void BSD::OnProxyPacketReceived(const Network::ProxyPacket& packet) {
+void BSD::OnProxyPacketReceived(const Network::ProxyPacket& packet)
+{
     for (auto& optional_descriptor : file_descriptors) {
         if (!optional_descriptor.has_value()) {
             continue;
@@ -1046,8 +1109,8 @@ void BSD::OnProxyPacketReceived(const Network::ProxyPacket& packet) {
     }
 }
 
-BSD::BSD(Core::System& system_, const char* name)
-    : ServiceFramework{system_, name} {
+BSD::BSD(Core::System& system_, const char* name) : ServiceFramework{system_, name}
+{
     // clang-format off
     static const FunctionInfo functions[] = {
         {0, &BSD::RegisterClient, "RegisterClient"},
@@ -1109,17 +1172,20 @@ BSD::BSD(Core::System& system_, const char* name)
     }
 }
 
-BSD::~BSD() {
+BSD::~BSD()
+{
     if (auto room_member = Network::GetRoomMember().lock()) {
         room_member->Unbind(proxy_packet_received);
     }
 }
 
-std::unique_lock<std::mutex> BSD::LockService() noexcept {
+std::unique_lock<std::mutex> BSD::LockService() noexcept
+{
     return {};
 }
 
-BSDCFG::BSDCFG(Core::System& system_) : ServiceFramework{system_, "bsdcfg"} {
+BSDCFG::BSDCFG(Core::System& system_) : ServiceFramework{system_, "bsdcfg"}
+{
     // clang-format off
     static const FunctionInfo functions[] = {
         {0, nullptr, "SetIfUp"},

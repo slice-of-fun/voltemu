@@ -6,61 +6,73 @@
 namespace AudioCore::Renderer {
 
 u32 CommandProcessingTimeEstimatorVersion1::Estimate(
-    const PcmInt16DataSourceVersion1Command& command) const {
+    const PcmInt16DataSourceVersion1Command& command) const
+{
     return static_cast<u32>(command.pitch * 0.25f * 1.2f);
 }
 
 u32 CommandProcessingTimeEstimatorVersion1::Estimate(
-    const PcmInt16DataSourceVersion2Command& command) const {
+    const PcmInt16DataSourceVersion2Command& command) const
+{
     return static_cast<u32>(command.pitch * 0.25f * 1.2f);
 }
 
 u32 CommandProcessingTimeEstimatorVersion1::Estimate(
-    [[maybe_unused]] const PcmFloatDataSourceVersion1Command& command) const {
+    [[maybe_unused]] const PcmFloatDataSourceVersion1Command& command) const
+{
     return 0;
 }
 
 u32 CommandProcessingTimeEstimatorVersion1::Estimate(
-    [[maybe_unused]] const PcmFloatDataSourceVersion2Command& command) const {
+    [[maybe_unused]] const PcmFloatDataSourceVersion2Command& command) const
+{
     return 0;
 }
 
 u32 CommandProcessingTimeEstimatorVersion1::Estimate(
-    const AdpcmDataSourceVersion1Command& command) const {
+    const AdpcmDataSourceVersion1Command& command) const
+{
     return static_cast<u32>(command.pitch * 0.46f * 1.2f);
 }
 
 u32 CommandProcessingTimeEstimatorVersion1::Estimate(
-    const AdpcmDataSourceVersion2Command& command) const {
+    const AdpcmDataSourceVersion2Command& command) const
+{
     return static_cast<u32>(command.pitch * 0.46f * 1.2f);
 }
 
 u32 CommandProcessingTimeEstimatorVersion1::Estimate(
-    [[maybe_unused]] const VolumeCommand& command) const {
+    [[maybe_unused]] const VolumeCommand& command) const
+{
     return static_cast<u32>((static_cast<f32>(sample_count) * 8.8f) * 1.2f);
 }
 
 u32 CommandProcessingTimeEstimatorVersion1::Estimate(
-    [[maybe_unused]] const VolumeRampCommand& command) const {
+    [[maybe_unused]] const VolumeRampCommand& command) const
+{
     return static_cast<u32>((static_cast<f32>(sample_count) * 9.8f) * 1.2f);
 }
 
 u32 CommandProcessingTimeEstimatorVersion1::Estimate(
-    [[maybe_unused]] const BiquadFilterCommand& command) const {
+    [[maybe_unused]] const BiquadFilterCommand& command) const
+{
     return static_cast<u32>((static_cast<f32>(sample_count) * 58.0f) * 1.2f);
 }
 
 u32 CommandProcessingTimeEstimatorVersion1::Estimate(
-    [[maybe_unused]] const MixCommand& command) const {
+    [[maybe_unused]] const MixCommand& command) const
+{
     return static_cast<u32>((static_cast<f32>(sample_count) * 10.0f) * 1.2f);
 }
 
 u32 CommandProcessingTimeEstimatorVersion1::Estimate(
-    [[maybe_unused]] const MixRampCommand& command) const {
+    [[maybe_unused]] const MixRampCommand& command) const
+{
     return static_cast<u32>((static_cast<f32>(sample_count) * 14.4f) * 1.2f);
 }
 
-u32 CommandProcessingTimeEstimatorVersion1::Estimate(const MixRampGroupedCommand& command) const {
+u32 CommandProcessingTimeEstimatorVersion1::Estimate(const MixRampGroupedCommand& command) const
+{
     u32 count{0};
     for (u32 i = 0; i < command.buffer_count; i++) {
         if (command.volumes[i] != 0.0f || command.prev_volumes[i] != 0.0f) {
@@ -73,32 +85,37 @@ u32 CommandProcessingTimeEstimatorVersion1::Estimate(const MixRampGroupedCommand
 }
 
 u32 CommandProcessingTimeEstimatorVersion1::Estimate(
-    [[maybe_unused]] const DepopPrepareCommand& command) const {
+    [[maybe_unused]] const DepopPrepareCommand& command) const
+{
     return 1080;
 }
 
-u32 CommandProcessingTimeEstimatorVersion1::Estimate(
-    const DepopForMixBuffersCommand& command) const {
+u32 CommandProcessingTimeEstimatorVersion1::Estimate(const DepopForMixBuffersCommand& command) const
+{
     return static_cast<u32>((static_cast<f32>(sample_count) * 8.9f) *
                             static_cast<f32>(command.count));
 }
 
-u32 CommandProcessingTimeEstimatorVersion1::Estimate(const DelayCommand& command) const {
+u32 CommandProcessingTimeEstimatorVersion1::Estimate(const DelayCommand& command) const
+{
     return static_cast<u32>((static_cast<f32>(sample_count) * command.parameter.channel_count) *
                             202.5f);
 }
 
 u32 CommandProcessingTimeEstimatorVersion1::Estimate(
-    [[maybe_unused]] const UpsampleCommand& command) const {
+    [[maybe_unused]] const UpsampleCommand& command) const
+{
     return 357915;
 }
 
 u32 CommandProcessingTimeEstimatorVersion1::Estimate(
-    [[maybe_unused]] const DownMix6chTo2chCommand& command) const {
+    [[maybe_unused]] const DownMix6chTo2chCommand& command) const
+{
     return 16108;
 }
 
-u32 CommandProcessingTimeEstimatorVersion1::Estimate(const AuxCommand& command) const {
+u32 CommandProcessingTimeEstimatorVersion1::Estimate(const AuxCommand& command) const
+{
     if (command.enabled) {
         return 15956;
     }
@@ -106,16 +123,19 @@ u32 CommandProcessingTimeEstimatorVersion1::Estimate(const AuxCommand& command) 
 }
 
 u32 CommandProcessingTimeEstimatorVersion1::Estimate(
-    [[maybe_unused]] const DeviceSinkCommand& command) const {
+    [[maybe_unused]] const DeviceSinkCommand& command) const
+{
     return 10042;
 }
 
 u32 CommandProcessingTimeEstimatorVersion1::Estimate(
-    [[maybe_unused]] const CircularBufferSinkCommand& command) const {
+    [[maybe_unused]] const CircularBufferSinkCommand& command) const
+{
     return 55;
 }
 
-u32 CommandProcessingTimeEstimatorVersion1::Estimate(const ReverbCommand& command) const {
+u32 CommandProcessingTimeEstimatorVersion1::Estimate(const ReverbCommand& command) const
+{
     if (command.enabled) {
         return static_cast<u32>(
             (command.parameter.channel_count * static_cast<f32>(sample_count) * 750) * 1.2f);
@@ -123,7 +143,8 @@ u32 CommandProcessingTimeEstimatorVersion1::Estimate(const ReverbCommand& comman
     return 0;
 }
 
-u32 CommandProcessingTimeEstimatorVersion1::Estimate(const I3dl2ReverbCommand& command) const {
+u32 CommandProcessingTimeEstimatorVersion1::Estimate(const I3dl2ReverbCommand& command) const
+{
     if (command.enabled) {
         return static_cast<u32>(
             (command.parameter.channel_count * static_cast<f32>(sample_count) * 530) * 1.2f);
@@ -132,48 +153,57 @@ u32 CommandProcessingTimeEstimatorVersion1::Estimate(const I3dl2ReverbCommand& c
 }
 
 u32 CommandProcessingTimeEstimatorVersion1::Estimate(
-    [[maybe_unused]] const PerformanceCommand& command) const {
+    [[maybe_unused]] const PerformanceCommand& command) const
+{
     return 1454;
 }
 
 u32 CommandProcessingTimeEstimatorVersion1::Estimate(
-    [[maybe_unused]] const ClearMixBufferCommand& command) const {
+    [[maybe_unused]] const ClearMixBufferCommand& command) const
+{
     return static_cast<u32>(
         ((static_cast<f32>(sample_count) * 0.83f) * static_cast<f32>(buffer_count)) * 1.2f);
 }
 
 u32 CommandProcessingTimeEstimatorVersion1::Estimate(
-    [[maybe_unused]] const CopyMixBufferCommand& command) const {
+    [[maybe_unused]] const CopyMixBufferCommand& command) const
+{
     return 0;
 }
 
 u32 CommandProcessingTimeEstimatorVersion1::Estimate(
-    [[maybe_unused]] const LightLimiterVersion1Command& command) const {
+    [[maybe_unused]] const LightLimiterVersion1Command& command) const
+{
     return 0;
 }
 
 u32 CommandProcessingTimeEstimatorVersion1::Estimate(
-    [[maybe_unused]] const LightLimiterVersion2Command& command) const {
+    [[maybe_unused]] const LightLimiterVersion2Command& command) const
+{
     return 0;
 }
 
 u32 CommandProcessingTimeEstimatorVersion1::Estimate(
-    [[maybe_unused]] const MultiTapBiquadFilterCommand& command) const {
+    [[maybe_unused]] const MultiTapBiquadFilterCommand& command) const
+{
     return 0;
 }
 
 u32 CommandProcessingTimeEstimatorVersion1::Estimate(
-    [[maybe_unused]] const CaptureCommand& command) const {
+    [[maybe_unused]] const CaptureCommand& command) const
+{
     return 0;
 }
 
 u32 CommandProcessingTimeEstimatorVersion1::Estimate(
-    [[maybe_unused]] const CompressorCommand& command) const {
+    [[maybe_unused]] const CompressorCommand& command) const
+{
     return 0;
 }
 
 u32 CommandProcessingTimeEstimatorVersion2::Estimate(
-    const PcmInt16DataSourceVersion1Command& command) const {
+    const PcmInt16DataSourceVersion1Command& command) const
+{
     switch (sample_count) {
     case 160:
         return static_cast<u32>(
@@ -192,7 +222,8 @@ u32 CommandProcessingTimeEstimatorVersion2::Estimate(
 }
 
 u32 CommandProcessingTimeEstimatorVersion2::Estimate(
-    const PcmInt16DataSourceVersion2Command& command) const {
+    const PcmInt16DataSourceVersion2Command& command) const
+{
     switch (sample_count) {
     case 160:
         return static_cast<u32>(
@@ -211,7 +242,8 @@ u32 CommandProcessingTimeEstimatorVersion2::Estimate(
 }
 
 u32 CommandProcessingTimeEstimatorVersion2::Estimate(
-    const PcmFloatDataSourceVersion1Command& command) const {
+    const PcmFloatDataSourceVersion1Command& command) const
+{
     switch (sample_count) {
     case 160:
         return static_cast<u32>(
@@ -230,7 +262,8 @@ u32 CommandProcessingTimeEstimatorVersion2::Estimate(
 }
 
 u32 CommandProcessingTimeEstimatorVersion2::Estimate(
-    const PcmFloatDataSourceVersion2Command& command) const {
+    const PcmFloatDataSourceVersion2Command& command) const
+{
     switch (sample_count) {
     case 160:
         return static_cast<u32>(
@@ -249,7 +282,8 @@ u32 CommandProcessingTimeEstimatorVersion2::Estimate(
 }
 
 u32 CommandProcessingTimeEstimatorVersion2::Estimate(
-    const AdpcmDataSourceVersion1Command& command) const {
+    const AdpcmDataSourceVersion1Command& command) const
+{
     switch (sample_count) {
     case 160:
         return static_cast<u32>(
@@ -268,7 +302,8 @@ u32 CommandProcessingTimeEstimatorVersion2::Estimate(
 }
 
 u32 CommandProcessingTimeEstimatorVersion2::Estimate(
-    const AdpcmDataSourceVersion2Command& command) const {
+    const AdpcmDataSourceVersion2Command& command) const
+{
     switch (sample_count) {
     case 160:
         return static_cast<u32>(
@@ -287,7 +322,8 @@ u32 CommandProcessingTimeEstimatorVersion2::Estimate(
 }
 
 u32 CommandProcessingTimeEstimatorVersion2::Estimate(
-    [[maybe_unused]] const VolumeCommand& command) const {
+    [[maybe_unused]] const VolumeCommand& command) const
+{
     switch (sample_count) {
     case 160:
         return static_cast<u32>(1280.3f);
@@ -300,7 +336,8 @@ u32 CommandProcessingTimeEstimatorVersion2::Estimate(
 }
 
 u32 CommandProcessingTimeEstimatorVersion2::Estimate(
-    [[maybe_unused]] const VolumeRampCommand& command) const {
+    [[maybe_unused]] const VolumeRampCommand& command) const
+{
     switch (sample_count) {
     case 160:
         return static_cast<u32>(1403.9f);
@@ -313,7 +350,8 @@ u32 CommandProcessingTimeEstimatorVersion2::Estimate(
 }
 
 u32 CommandProcessingTimeEstimatorVersion2::Estimate(
-    [[maybe_unused]] const BiquadFilterCommand& command) const {
+    [[maybe_unused]] const BiquadFilterCommand& command) const
+{
     switch (sample_count) {
     case 160:
         return static_cast<u32>(4813.2f);
@@ -326,7 +364,8 @@ u32 CommandProcessingTimeEstimatorVersion2::Estimate(
 }
 
 u32 CommandProcessingTimeEstimatorVersion2::Estimate(
-    [[maybe_unused]] const MixCommand& command) const {
+    [[maybe_unused]] const MixCommand& command) const
+{
     switch (sample_count) {
     case 160:
         return static_cast<u32>(1342.2f);
@@ -339,7 +378,8 @@ u32 CommandProcessingTimeEstimatorVersion2::Estimate(
 }
 
 u32 CommandProcessingTimeEstimatorVersion2::Estimate(
-    [[maybe_unused]] const MixRampCommand& command) const {
+    [[maybe_unused]] const MixRampCommand& command) const
+{
     switch (sample_count) {
     case 160:
         return static_cast<u32>(1859.0f);
@@ -351,7 +391,8 @@ u32 CommandProcessingTimeEstimatorVersion2::Estimate(
     }
 }
 
-u32 CommandProcessingTimeEstimatorVersion2::Estimate(const MixRampGroupedCommand& command) const {
+u32 CommandProcessingTimeEstimatorVersion2::Estimate(const MixRampGroupedCommand& command) const
+{
     u32 count{0};
     for (u32 i = 0; i < command.buffer_count; i++) {
         if (command.volumes[i] != 0.0f || command.prev_volumes[i] != 0.0f) {
@@ -373,7 +414,8 @@ u32 CommandProcessingTimeEstimatorVersion2::Estimate(const MixRampGroupedCommand
 }
 
 u32 CommandProcessingTimeEstimatorVersion2::Estimate(
-    [[maybe_unused]] const DepopPrepareCommand& command) const {
+    [[maybe_unused]] const DepopPrepareCommand& command) const
+{
     switch (sample_count) {
     case 160:
         return static_cast<u32>(306.62f);
@@ -386,7 +428,8 @@ u32 CommandProcessingTimeEstimatorVersion2::Estimate(
 }
 
 u32 CommandProcessingTimeEstimatorVersion2::Estimate(
-    [[maybe_unused]] const DepopForMixBuffersCommand& command) const {
+    [[maybe_unused]] const DepopForMixBuffersCommand& command) const
+{
     switch (sample_count) {
     case 160:
         return static_cast<u32>(762.96f);
@@ -398,7 +441,8 @@ u32 CommandProcessingTimeEstimatorVersion2::Estimate(
     }
 }
 
-u32 CommandProcessingTimeEstimatorVersion2::Estimate(const DelayCommand& command) const {
+u32 CommandProcessingTimeEstimatorVersion2::Estimate(const DelayCommand& command) const
+{
     switch (sample_count) {
     case 160:
         if (command.enabled) {
@@ -467,7 +511,8 @@ u32 CommandProcessingTimeEstimatorVersion2::Estimate(const DelayCommand& command
 }
 
 u32 CommandProcessingTimeEstimatorVersion2::Estimate(
-    [[maybe_unused]] const UpsampleCommand& command) const {
+    [[maybe_unused]] const UpsampleCommand& command) const
+{
     switch (sample_count) {
     case 160:
         return static_cast<u32>(292000.0f);
@@ -480,7 +525,8 @@ u32 CommandProcessingTimeEstimatorVersion2::Estimate(
 }
 
 u32 CommandProcessingTimeEstimatorVersion2::Estimate(
-    [[maybe_unused]] const DownMix6chTo2chCommand& command) const {
+    [[maybe_unused]] const DownMix6chTo2chCommand& command) const
+{
     switch (sample_count) {
     case 160:
         return static_cast<u32>(10009.0f);
@@ -492,7 +538,8 @@ u32 CommandProcessingTimeEstimatorVersion2::Estimate(
     }
 }
 
-u32 CommandProcessingTimeEstimatorVersion2::Estimate(const AuxCommand& command) const {
+u32 CommandProcessingTimeEstimatorVersion2::Estimate(const AuxCommand& command) const
+{
     // Is this function bugged, returning the wrong time?
     // Surely the larger time should be returned when enabled...
     // CMP W8, #0
@@ -517,7 +564,8 @@ u32 CommandProcessingTimeEstimatorVersion2::Estimate(const AuxCommand& command) 
     }
 }
 
-u32 CommandProcessingTimeEstimatorVersion2::Estimate(const DeviceSinkCommand& command) const {
+u32 CommandProcessingTimeEstimatorVersion2::Estimate(const DeviceSinkCommand& command) const
+{
     switch (command.input_count) {
     case 2:
         switch (sample_count) {
@@ -545,8 +593,8 @@ u32 CommandProcessingTimeEstimatorVersion2::Estimate(const DeviceSinkCommand& co
     }
 }
 
-u32 CommandProcessingTimeEstimatorVersion2::Estimate(
-    const CircularBufferSinkCommand& command) const {
+u32 CommandProcessingTimeEstimatorVersion2::Estimate(const CircularBufferSinkCommand& command) const
+{
     switch (sample_count) {
     case 160:
         return static_cast<u32>(static_cast<f32>(command.input_count) * 853.629f + 1284.517f);
@@ -558,7 +606,8 @@ u32 CommandProcessingTimeEstimatorVersion2::Estimate(
     }
 }
 
-u32 CommandProcessingTimeEstimatorVersion2::Estimate(const ReverbCommand& command) const {
+u32 CommandProcessingTimeEstimatorVersion2::Estimate(const ReverbCommand& command) const
+{
     switch (sample_count) {
     case 160:
         if (command.enabled) {
@@ -626,7 +675,8 @@ u32 CommandProcessingTimeEstimatorVersion2::Estimate(const ReverbCommand& comman
     }
 }
 
-u32 CommandProcessingTimeEstimatorVersion2::Estimate(const I3dl2ReverbCommand& command) const {
+u32 CommandProcessingTimeEstimatorVersion2::Estimate(const I3dl2ReverbCommand& command) const
+{
     switch (sample_count) {
     case 160:
         if (command.enabled) {
@@ -695,7 +745,8 @@ u32 CommandProcessingTimeEstimatorVersion2::Estimate(const I3dl2ReverbCommand& c
 }
 
 u32 CommandProcessingTimeEstimatorVersion2::Estimate(
-    [[maybe_unused]] const PerformanceCommand& command) const {
+    [[maybe_unused]] const PerformanceCommand& command) const
+{
     switch (sample_count) {
     case 160:
         return static_cast<u32>(489.35f);
@@ -708,7 +759,8 @@ u32 CommandProcessingTimeEstimatorVersion2::Estimate(
 }
 
 u32 CommandProcessingTimeEstimatorVersion2::Estimate(
-    [[maybe_unused]] const ClearMixBufferCommand& command) const {
+    [[maybe_unused]] const ClearMixBufferCommand& command) const
+{
     switch (sample_count) {
     case 160:
         return static_cast<u32>(static_cast<f32>(buffer_count) * 260.4f + 139.65f);
@@ -721,7 +773,8 @@ u32 CommandProcessingTimeEstimatorVersion2::Estimate(
 }
 
 u32 CommandProcessingTimeEstimatorVersion2::Estimate(
-    [[maybe_unused]] const CopyMixBufferCommand& command) const {
+    [[maybe_unused]] const CopyMixBufferCommand& command) const
+{
     switch (sample_count) {
     case 160:
         return static_cast<u32>(836.32f);
@@ -734,32 +787,38 @@ u32 CommandProcessingTimeEstimatorVersion2::Estimate(
 }
 
 u32 CommandProcessingTimeEstimatorVersion2::Estimate(
-    [[maybe_unused]] const LightLimiterVersion1Command& command) const {
+    [[maybe_unused]] const LightLimiterVersion1Command& command) const
+{
     return 0;
 }
 
 u32 CommandProcessingTimeEstimatorVersion2::Estimate(
-    [[maybe_unused]] const LightLimiterVersion2Command& command) const {
+    [[maybe_unused]] const LightLimiterVersion2Command& command) const
+{
     return 0;
 }
 
 u32 CommandProcessingTimeEstimatorVersion2::Estimate(
-    [[maybe_unused]] const MultiTapBiquadFilterCommand& command) const {
+    [[maybe_unused]] const MultiTapBiquadFilterCommand& command) const
+{
     return 0;
 }
 
 u32 CommandProcessingTimeEstimatorVersion2::Estimate(
-    [[maybe_unused]] const CaptureCommand& command) const {
+    [[maybe_unused]] const CaptureCommand& command) const
+{
     return 0;
 }
 
 u32 CommandProcessingTimeEstimatorVersion2::Estimate(
-    [[maybe_unused]] const CompressorCommand& command) const {
+    [[maybe_unused]] const CompressorCommand& command) const
+{
     return 0;
 }
 
 u32 CommandProcessingTimeEstimatorVersion3::Estimate(
-    const PcmInt16DataSourceVersion1Command& command) const {
+    const PcmInt16DataSourceVersion1Command& command) const
+{
     switch (sample_count) {
     case 160:
         return static_cast<u32>(
@@ -780,7 +839,8 @@ u32 CommandProcessingTimeEstimatorVersion3::Estimate(
 }
 
 u32 CommandProcessingTimeEstimatorVersion3::Estimate(
-    const PcmInt16DataSourceVersion2Command& command) const {
+    const PcmInt16DataSourceVersion2Command& command) const
+{
     switch (sample_count) {
     case 160:
         switch (command.src_quality) {
@@ -847,7 +907,8 @@ u32 CommandProcessingTimeEstimatorVersion3::Estimate(
 }
 
 u32 CommandProcessingTimeEstimatorVersion3::Estimate(
-    const PcmFloatDataSourceVersion1Command& command) const {
+    const PcmFloatDataSourceVersion1Command& command) const
+{
     switch (sample_count) {
     case 160:
         return static_cast<u32>(
@@ -868,7 +929,8 @@ u32 CommandProcessingTimeEstimatorVersion3::Estimate(
 }
 
 u32 CommandProcessingTimeEstimatorVersion3::Estimate(
-    const PcmFloatDataSourceVersion2Command& command) const {
+    const PcmFloatDataSourceVersion2Command& command) const
+{
     switch (sample_count) {
     case 160:
         switch (command.src_quality) {
@@ -935,7 +997,8 @@ u32 CommandProcessingTimeEstimatorVersion3::Estimate(
 }
 
 u32 CommandProcessingTimeEstimatorVersion3::Estimate(
-    const AdpcmDataSourceVersion1Command& command) const {
+    const AdpcmDataSourceVersion1Command& command) const
+{
     switch (sample_count) {
     case 160:
         return static_cast<u32>(
@@ -956,7 +1019,8 @@ u32 CommandProcessingTimeEstimatorVersion3::Estimate(
 }
 
 u32 CommandProcessingTimeEstimatorVersion3::Estimate(
-    const AdpcmDataSourceVersion2Command& command) const {
+    const AdpcmDataSourceVersion2Command& command) const
+{
     switch (sample_count) {
     case 160:
         switch (command.src_quality) {
@@ -1023,7 +1087,8 @@ u32 CommandProcessingTimeEstimatorVersion3::Estimate(
 }
 
 u32 CommandProcessingTimeEstimatorVersion3::Estimate(
-    [[maybe_unused]] const VolumeCommand& command) const {
+    [[maybe_unused]] const VolumeCommand& command) const
+{
     switch (sample_count) {
     case 160:
         return static_cast<u32>(1311.1f);
@@ -1036,7 +1101,8 @@ u32 CommandProcessingTimeEstimatorVersion3::Estimate(
 }
 
 u32 CommandProcessingTimeEstimatorVersion3::Estimate(
-    [[maybe_unused]] const VolumeRampCommand& command) const {
+    [[maybe_unused]] const VolumeRampCommand& command) const
+{
     switch (sample_count) {
     case 160:
         return static_cast<u32>(1425.3f);
@@ -1049,7 +1115,8 @@ u32 CommandProcessingTimeEstimatorVersion3::Estimate(
 }
 
 u32 CommandProcessingTimeEstimatorVersion3::Estimate(
-    [[maybe_unused]] const BiquadFilterCommand& command) const {
+    [[maybe_unused]] const BiquadFilterCommand& command) const
+{
     switch (sample_count) {
     case 160:
         return static_cast<u32>(4173.2f);
@@ -1062,7 +1129,8 @@ u32 CommandProcessingTimeEstimatorVersion3::Estimate(
 }
 
 u32 CommandProcessingTimeEstimatorVersion3::Estimate(
-    [[maybe_unused]] const MixCommand& command) const {
+    [[maybe_unused]] const MixCommand& command) const
+{
     switch (sample_count) {
     case 160:
         return static_cast<u32>(1402.8f);
@@ -1075,7 +1143,8 @@ u32 CommandProcessingTimeEstimatorVersion3::Estimate(
 }
 
 u32 CommandProcessingTimeEstimatorVersion3::Estimate(
-    [[maybe_unused]] const MixRampCommand& command) const {
+    [[maybe_unused]] const MixRampCommand& command) const
+{
     switch (sample_count) {
     case 160:
         return static_cast<u32>(1968.7f);
@@ -1087,7 +1156,8 @@ u32 CommandProcessingTimeEstimatorVersion3::Estimate(
     }
 }
 
-u32 CommandProcessingTimeEstimatorVersion3::Estimate(const MixRampGroupedCommand& command) const {
+u32 CommandProcessingTimeEstimatorVersion3::Estimate(const MixRampGroupedCommand& command) const
+{
     u32 count{0};
     for (u32 i = 0; i < command.buffer_count; i++) {
         if (command.volumes[i] != 0.0f || command.prev_volumes[i] != 0.0f) {
@@ -1109,12 +1179,14 @@ u32 CommandProcessingTimeEstimatorVersion3::Estimate(const MixRampGroupedCommand
 }
 
 u32 CommandProcessingTimeEstimatorVersion3::Estimate(
-    [[maybe_unused]] const DepopPrepareCommand& command) const {
+    [[maybe_unused]] const DepopPrepareCommand& command) const
+{
     return 0;
 }
 
 u32 CommandProcessingTimeEstimatorVersion3::Estimate(
-    [[maybe_unused]] const DepopForMixBuffersCommand& command) const {
+    [[maybe_unused]] const DepopForMixBuffersCommand& command) const
+{
     switch (sample_count) {
     case 160:
         return static_cast<u32>(739.64f);
@@ -1126,7 +1198,8 @@ u32 CommandProcessingTimeEstimatorVersion3::Estimate(
     }
 }
 
-u32 CommandProcessingTimeEstimatorVersion3::Estimate(const DelayCommand& command) const {
+u32 CommandProcessingTimeEstimatorVersion3::Estimate(const DelayCommand& command) const
+{
     switch (sample_count) {
     case 160:
         if (command.enabled) {
@@ -1195,7 +1268,8 @@ u32 CommandProcessingTimeEstimatorVersion3::Estimate(const DelayCommand& command
 }
 
 u32 CommandProcessingTimeEstimatorVersion3::Estimate(
-    [[maybe_unused]] const UpsampleCommand& command) const {
+    [[maybe_unused]] const UpsampleCommand& command) const
+{
     switch (sample_count) {
     case 160:
         return static_cast<u32>(312990.0f);
@@ -1208,7 +1282,8 @@ u32 CommandProcessingTimeEstimatorVersion3::Estimate(
 }
 
 u32 CommandProcessingTimeEstimatorVersion3::Estimate(
-    [[maybe_unused]] const DownMix6chTo2chCommand& command) const {
+    [[maybe_unused]] const DownMix6chTo2chCommand& command) const
+{
     switch (sample_count) {
     case 160:
         return static_cast<u32>(9949.7f);
@@ -1220,7 +1295,8 @@ u32 CommandProcessingTimeEstimatorVersion3::Estimate(
     }
 }
 
-u32 CommandProcessingTimeEstimatorVersion3::Estimate(const AuxCommand& command) const {
+u32 CommandProcessingTimeEstimatorVersion3::Estimate(const AuxCommand& command) const
+{
     switch (sample_count) {
     case 160:
         if (command.enabled) {
@@ -1238,7 +1314,8 @@ u32 CommandProcessingTimeEstimatorVersion3::Estimate(const AuxCommand& command) 
     }
 }
 
-u32 CommandProcessingTimeEstimatorVersion3::Estimate(const DeviceSinkCommand& command) const {
+u32 CommandProcessingTimeEstimatorVersion3::Estimate(const DeviceSinkCommand& command) const
+{
     switch (command.input_count) {
     case 2:
         switch (sample_count) {
@@ -1266,8 +1343,8 @@ u32 CommandProcessingTimeEstimatorVersion3::Estimate(const DeviceSinkCommand& co
     }
 }
 
-u32 CommandProcessingTimeEstimatorVersion3::Estimate(
-    const CircularBufferSinkCommand& command) const {
+u32 CommandProcessingTimeEstimatorVersion3::Estimate(const CircularBufferSinkCommand& command) const
+{
     switch (sample_count) {
     case 160:
         return static_cast<u32>(static_cast<f32>(command.input_count) * 531.069f + 0.0f);
@@ -1279,7 +1356,8 @@ u32 CommandProcessingTimeEstimatorVersion3::Estimate(
     }
 }
 
-u32 CommandProcessingTimeEstimatorVersion3::Estimate(const ReverbCommand& command) const {
+u32 CommandProcessingTimeEstimatorVersion3::Estimate(const ReverbCommand& command) const
+{
     switch (sample_count) {
     case 160:
         if (command.enabled) {
@@ -1347,7 +1425,8 @@ u32 CommandProcessingTimeEstimatorVersion3::Estimate(const ReverbCommand& comman
     }
 }
 
-u32 CommandProcessingTimeEstimatorVersion3::Estimate(const I3dl2ReverbCommand& command) const {
+u32 CommandProcessingTimeEstimatorVersion3::Estimate(const I3dl2ReverbCommand& command) const
+{
     switch (sample_count) {
     case 160:
         if (command.enabled) {
@@ -1416,7 +1495,8 @@ u32 CommandProcessingTimeEstimatorVersion3::Estimate(const I3dl2ReverbCommand& c
 }
 
 u32 CommandProcessingTimeEstimatorVersion3::Estimate(
-    [[maybe_unused]] const PerformanceCommand& command) const {
+    [[maybe_unused]] const PerformanceCommand& command) const
+{
     switch (sample_count) {
     case 160:
         return static_cast<u32>(498.17f);
@@ -1429,7 +1509,8 @@ u32 CommandProcessingTimeEstimatorVersion3::Estimate(
 }
 
 u32 CommandProcessingTimeEstimatorVersion3::Estimate(
-    [[maybe_unused]] const ClearMixBufferCommand& command) const {
+    [[maybe_unused]] const ClearMixBufferCommand& command) const
+{
     switch (sample_count) {
     case 160:
         return static_cast<u32>(static_cast<f32>(buffer_count - 1) * 266.645f + 0.0f);
@@ -1442,7 +1523,8 @@ u32 CommandProcessingTimeEstimatorVersion3::Estimate(
 }
 
 u32 CommandProcessingTimeEstimatorVersion3::Estimate(
-    [[maybe_unused]] const CopyMixBufferCommand& command) const {
+    [[maybe_unused]] const CopyMixBufferCommand& command) const
+{
     switch (sample_count) {
     case 160:
         return static_cast<u32>(842.59f);
@@ -1455,7 +1537,8 @@ u32 CommandProcessingTimeEstimatorVersion3::Estimate(
 }
 
 u32 CommandProcessingTimeEstimatorVersion3::Estimate(
-    const LightLimiterVersion1Command& command) const {
+    const LightLimiterVersion1Command& command) const
+{
     switch (sample_count) {
     case 160:
         if (command.enabled) {
@@ -1524,7 +1607,8 @@ u32 CommandProcessingTimeEstimatorVersion3::Estimate(
 }
 
 u32 CommandProcessingTimeEstimatorVersion3::Estimate(
-    const LightLimiterVersion2Command& command) const {
+    const LightLimiterVersion2Command& command) const
+{
     switch (sample_count) {
     case 160:
         if (command.enabled) {
@@ -1625,22 +1709,26 @@ u32 CommandProcessingTimeEstimatorVersion3::Estimate(
 }
 
 u32 CommandProcessingTimeEstimatorVersion3::Estimate(
-    [[maybe_unused]] const MultiTapBiquadFilterCommand& command) const {
+    [[maybe_unused]] const MultiTapBiquadFilterCommand& command) const
+{
     return 0;
 }
 
 u32 CommandProcessingTimeEstimatorVersion3::Estimate(
-    [[maybe_unused]] const CaptureCommand& command) const {
+    [[maybe_unused]] const CaptureCommand& command) const
+{
     return 0;
 }
 
 u32 CommandProcessingTimeEstimatorVersion3::Estimate(
-    [[maybe_unused]] const CompressorCommand& command) const {
+    [[maybe_unused]] const CompressorCommand& command) const
+{
     return 0;
 }
 
 u32 CommandProcessingTimeEstimatorVersion4::Estimate(
-    const PcmInt16DataSourceVersion1Command& command) const {
+    const PcmInt16DataSourceVersion1Command& command) const
+{
     switch (sample_count) {
     case 160:
         return static_cast<u32>(
@@ -1661,7 +1749,8 @@ u32 CommandProcessingTimeEstimatorVersion4::Estimate(
 }
 
 u32 CommandProcessingTimeEstimatorVersion4::Estimate(
-    const PcmInt16DataSourceVersion2Command& command) const {
+    const PcmInt16DataSourceVersion2Command& command) const
+{
     switch (sample_count) {
     case 160:
         switch (command.src_quality) {
@@ -1728,7 +1817,8 @@ u32 CommandProcessingTimeEstimatorVersion4::Estimate(
 }
 
 u32 CommandProcessingTimeEstimatorVersion4::Estimate(
-    const PcmFloatDataSourceVersion1Command& command) const {
+    const PcmFloatDataSourceVersion1Command& command) const
+{
     switch (sample_count) {
     case 160:
         return static_cast<u32>(
@@ -1749,7 +1839,8 @@ u32 CommandProcessingTimeEstimatorVersion4::Estimate(
 }
 
 u32 CommandProcessingTimeEstimatorVersion4::Estimate(
-    const PcmFloatDataSourceVersion2Command& command) const {
+    const PcmFloatDataSourceVersion2Command& command) const
+{
     switch (sample_count) {
     case 160:
         switch (command.src_quality) {
@@ -1816,7 +1907,8 @@ u32 CommandProcessingTimeEstimatorVersion4::Estimate(
 }
 
 u32 CommandProcessingTimeEstimatorVersion4::Estimate(
-    const AdpcmDataSourceVersion1Command& command) const {
+    const AdpcmDataSourceVersion1Command& command) const
+{
     switch (sample_count) {
     case 160:
         return static_cast<u32>(
@@ -1837,7 +1929,8 @@ u32 CommandProcessingTimeEstimatorVersion4::Estimate(
 }
 
 u32 CommandProcessingTimeEstimatorVersion4::Estimate(
-    const AdpcmDataSourceVersion2Command& command) const {
+    const AdpcmDataSourceVersion2Command& command) const
+{
     switch (sample_count) {
     case 160:
         switch (command.src_quality) {
@@ -1904,7 +1997,8 @@ u32 CommandProcessingTimeEstimatorVersion4::Estimate(
 }
 
 u32 CommandProcessingTimeEstimatorVersion4::Estimate(
-    [[maybe_unused]] const VolumeCommand& command) const {
+    [[maybe_unused]] const VolumeCommand& command) const
+{
     switch (sample_count) {
     case 160:
         return static_cast<u32>(1311.1f);
@@ -1917,7 +2011,8 @@ u32 CommandProcessingTimeEstimatorVersion4::Estimate(
 }
 
 u32 CommandProcessingTimeEstimatorVersion4::Estimate(
-    [[maybe_unused]] const VolumeRampCommand& command) const {
+    [[maybe_unused]] const VolumeRampCommand& command) const
+{
     switch (sample_count) {
     case 160:
         return static_cast<u32>(1425.3f);
@@ -1930,7 +2025,8 @@ u32 CommandProcessingTimeEstimatorVersion4::Estimate(
 }
 
 u32 CommandProcessingTimeEstimatorVersion4::Estimate(
-    [[maybe_unused]] const BiquadFilterCommand& command) const {
+    [[maybe_unused]] const BiquadFilterCommand& command) const
+{
     switch (sample_count) {
     case 160:
         return static_cast<u32>(4173.2f);
@@ -1943,7 +2039,8 @@ u32 CommandProcessingTimeEstimatorVersion4::Estimate(
 }
 
 u32 CommandProcessingTimeEstimatorVersion4::Estimate(
-    [[maybe_unused]] const MixCommand& command) const {
+    [[maybe_unused]] const MixCommand& command) const
+{
     switch (sample_count) {
     case 160:
         return static_cast<u32>(1402.8f);
@@ -1956,7 +2053,8 @@ u32 CommandProcessingTimeEstimatorVersion4::Estimate(
 }
 
 u32 CommandProcessingTimeEstimatorVersion4::Estimate(
-    [[maybe_unused]] const MixRampCommand& command) const {
+    [[maybe_unused]] const MixRampCommand& command) const
+{
     switch (sample_count) {
     case 160:
         return static_cast<u32>(1968.7f);
@@ -1968,7 +2066,8 @@ u32 CommandProcessingTimeEstimatorVersion4::Estimate(
     }
 }
 
-u32 CommandProcessingTimeEstimatorVersion4::Estimate(const MixRampGroupedCommand& command) const {
+u32 CommandProcessingTimeEstimatorVersion4::Estimate(const MixRampGroupedCommand& command) const
+{
     u32 count{0};
     for (u32 i = 0; i < command.buffer_count; i++) {
         if (command.volumes[i] != 0.0f || command.prev_volumes[i] != 0.0f) {
@@ -1990,12 +2089,14 @@ u32 CommandProcessingTimeEstimatorVersion4::Estimate(const MixRampGroupedCommand
 }
 
 u32 CommandProcessingTimeEstimatorVersion4::Estimate(
-    [[maybe_unused]] const DepopPrepareCommand& command) const {
+    [[maybe_unused]] const DepopPrepareCommand& command) const
+{
     return 0;
 }
 
 u32 CommandProcessingTimeEstimatorVersion4::Estimate(
-    [[maybe_unused]] const DepopForMixBuffersCommand& command) const {
+    [[maybe_unused]] const DepopForMixBuffersCommand& command) const
+{
     switch (sample_count) {
     case 160:
         return static_cast<u32>(739.64f);
@@ -2007,7 +2108,8 @@ u32 CommandProcessingTimeEstimatorVersion4::Estimate(
     }
 }
 
-u32 CommandProcessingTimeEstimatorVersion4::Estimate(const DelayCommand& command) const {
+u32 CommandProcessingTimeEstimatorVersion4::Estimate(const DelayCommand& command) const
+{
     switch (sample_count) {
     case 160:
         if (command.enabled) {
@@ -2076,7 +2178,8 @@ u32 CommandProcessingTimeEstimatorVersion4::Estimate(const DelayCommand& command
 }
 
 u32 CommandProcessingTimeEstimatorVersion4::Estimate(
-    [[maybe_unused]] const UpsampleCommand& command) const {
+    [[maybe_unused]] const UpsampleCommand& command) const
+{
     switch (sample_count) {
     case 160:
         return static_cast<u32>(312990.0f);
@@ -2089,7 +2192,8 @@ u32 CommandProcessingTimeEstimatorVersion4::Estimate(
 }
 
 u32 CommandProcessingTimeEstimatorVersion4::Estimate(
-    [[maybe_unused]] const DownMix6chTo2chCommand& command) const {
+    [[maybe_unused]] const DownMix6chTo2chCommand& command) const
+{
     switch (sample_count) {
     case 160:
         return static_cast<u32>(9949.7f);
@@ -2101,7 +2205,8 @@ u32 CommandProcessingTimeEstimatorVersion4::Estimate(
     }
 }
 
-u32 CommandProcessingTimeEstimatorVersion4::Estimate(const AuxCommand& command) const {
+u32 CommandProcessingTimeEstimatorVersion4::Estimate(const AuxCommand& command) const
+{
     switch (sample_count) {
     case 160:
         if (command.enabled) {
@@ -2119,7 +2224,8 @@ u32 CommandProcessingTimeEstimatorVersion4::Estimate(const AuxCommand& command) 
     }
 }
 
-u32 CommandProcessingTimeEstimatorVersion4::Estimate(const DeviceSinkCommand& command) const {
+u32 CommandProcessingTimeEstimatorVersion4::Estimate(const DeviceSinkCommand& command) const
+{
     switch (command.input_count) {
     case 2:
         switch (sample_count) {
@@ -2147,8 +2253,8 @@ u32 CommandProcessingTimeEstimatorVersion4::Estimate(const DeviceSinkCommand& co
     }
 }
 
-u32 CommandProcessingTimeEstimatorVersion4::Estimate(
-    const CircularBufferSinkCommand& command) const {
+u32 CommandProcessingTimeEstimatorVersion4::Estimate(const CircularBufferSinkCommand& command) const
+{
     switch (sample_count) {
     case 160:
         return static_cast<u32>(static_cast<f32>(command.input_count) * 531.069f + 0.0f);
@@ -2160,7 +2266,8 @@ u32 CommandProcessingTimeEstimatorVersion4::Estimate(
     }
 }
 
-u32 CommandProcessingTimeEstimatorVersion4::Estimate(const ReverbCommand& command) const {
+u32 CommandProcessingTimeEstimatorVersion4::Estimate(const ReverbCommand& command) const
+{
     switch (sample_count) {
     case 160:
         if (command.enabled) {
@@ -2228,7 +2335,8 @@ u32 CommandProcessingTimeEstimatorVersion4::Estimate(const ReverbCommand& comman
     }
 }
 
-u32 CommandProcessingTimeEstimatorVersion4::Estimate(const I3dl2ReverbCommand& command) const {
+u32 CommandProcessingTimeEstimatorVersion4::Estimate(const I3dl2ReverbCommand& command) const
+{
     switch (sample_count) {
     case 160:
         if (command.enabled) {
@@ -2297,7 +2405,8 @@ u32 CommandProcessingTimeEstimatorVersion4::Estimate(const I3dl2ReverbCommand& c
 }
 
 u32 CommandProcessingTimeEstimatorVersion4::Estimate(
-    [[maybe_unused]] const PerformanceCommand& command) const {
+    [[maybe_unused]] const PerformanceCommand& command) const
+{
     switch (sample_count) {
     case 160:
         return static_cast<u32>(498.17f);
@@ -2310,7 +2419,8 @@ u32 CommandProcessingTimeEstimatorVersion4::Estimate(
 }
 
 u32 CommandProcessingTimeEstimatorVersion4::Estimate(
-    [[maybe_unused]] const ClearMixBufferCommand& command) const {
+    [[maybe_unused]] const ClearMixBufferCommand& command) const
+{
     switch (sample_count) {
     case 160:
         return static_cast<u32>(static_cast<f32>(buffer_count - 1) * 266.645f + 0.0f);
@@ -2323,7 +2433,8 @@ u32 CommandProcessingTimeEstimatorVersion4::Estimate(
 }
 
 u32 CommandProcessingTimeEstimatorVersion4::Estimate(
-    [[maybe_unused]] const CopyMixBufferCommand& command) const {
+    [[maybe_unused]] const CopyMixBufferCommand& command) const
+{
     switch (sample_count) {
     case 160:
         return static_cast<u32>(842.59f);
@@ -2336,7 +2447,8 @@ u32 CommandProcessingTimeEstimatorVersion4::Estimate(
 }
 
 u32 CommandProcessingTimeEstimatorVersion4::Estimate(
-    const LightLimiterVersion1Command& command) const {
+    const LightLimiterVersion1Command& command) const
+{
     switch (sample_count) {
     case 160:
         if (command.enabled) {
@@ -2405,7 +2517,8 @@ u32 CommandProcessingTimeEstimatorVersion4::Estimate(
 }
 
 u32 CommandProcessingTimeEstimatorVersion4::Estimate(
-    const LightLimiterVersion2Command& command) const {
+    const LightLimiterVersion2Command& command) const
+{
     switch (sample_count) {
     case 160:
         if (command.enabled) {
@@ -2506,7 +2619,8 @@ u32 CommandProcessingTimeEstimatorVersion4::Estimate(
 }
 
 u32 CommandProcessingTimeEstimatorVersion4::Estimate(
-    [[maybe_unused]] const MultiTapBiquadFilterCommand& command) const {
+    [[maybe_unused]] const MultiTapBiquadFilterCommand& command) const
+{
     switch (sample_count) {
     case 160:
         return static_cast<u32>(7424.5f);
@@ -2518,7 +2632,8 @@ u32 CommandProcessingTimeEstimatorVersion4::Estimate(
     }
 }
 
-u32 CommandProcessingTimeEstimatorVersion4::Estimate(const CaptureCommand& command) const {
+u32 CommandProcessingTimeEstimatorVersion4::Estimate(const CaptureCommand& command) const
+{
     switch (sample_count) {
     case 160:
         if (command.enabled) {
@@ -2537,12 +2652,14 @@ u32 CommandProcessingTimeEstimatorVersion4::Estimate(const CaptureCommand& comma
 }
 
 u32 CommandProcessingTimeEstimatorVersion4::Estimate(
-    [[maybe_unused]] const CompressorCommand& command) const {
+    [[maybe_unused]] const CompressorCommand& command) const
+{
     return 0;
 }
 
 u32 CommandProcessingTimeEstimatorVersion5::Estimate(
-    const PcmInt16DataSourceVersion1Command& command) const {
+    const PcmInt16DataSourceVersion1Command& command) const
+{
     switch (sample_count) {
     case 160:
         return static_cast<u32>(
@@ -2563,7 +2680,8 @@ u32 CommandProcessingTimeEstimatorVersion5::Estimate(
 }
 
 u32 CommandProcessingTimeEstimatorVersion5::Estimate(
-    const PcmInt16DataSourceVersion2Command& command) const {
+    const PcmInt16DataSourceVersion2Command& command) const
+{
     switch (sample_count) {
     case 160:
         switch (command.src_quality) {
@@ -2630,7 +2748,8 @@ u32 CommandProcessingTimeEstimatorVersion5::Estimate(
 }
 
 u32 CommandProcessingTimeEstimatorVersion5::Estimate(
-    const PcmFloatDataSourceVersion1Command& command) const {
+    const PcmFloatDataSourceVersion1Command& command) const
+{
     switch (sample_count) {
     case 160:
         return static_cast<u32>(
@@ -2651,7 +2770,8 @@ u32 CommandProcessingTimeEstimatorVersion5::Estimate(
 }
 
 u32 CommandProcessingTimeEstimatorVersion5::Estimate(
-    const PcmFloatDataSourceVersion2Command& command) const {
+    const PcmFloatDataSourceVersion2Command& command) const
+{
     switch (sample_count) {
     case 160:
         switch (command.src_quality) {
@@ -2718,7 +2838,8 @@ u32 CommandProcessingTimeEstimatorVersion5::Estimate(
 }
 
 u32 CommandProcessingTimeEstimatorVersion5::Estimate(
-    const AdpcmDataSourceVersion1Command& command) const {
+    const AdpcmDataSourceVersion1Command& command) const
+{
     switch (sample_count) {
     case 160:
         return static_cast<u32>(
@@ -2739,7 +2860,8 @@ u32 CommandProcessingTimeEstimatorVersion5::Estimate(
 }
 
 u32 CommandProcessingTimeEstimatorVersion5::Estimate(
-    const AdpcmDataSourceVersion2Command& command) const {
+    const AdpcmDataSourceVersion2Command& command) const
+{
     switch (sample_count) {
     case 160:
         switch (command.src_quality) {
@@ -2806,7 +2928,8 @@ u32 CommandProcessingTimeEstimatorVersion5::Estimate(
 }
 
 u32 CommandProcessingTimeEstimatorVersion5::Estimate(
-    [[maybe_unused]] const VolumeCommand& command) const {
+    [[maybe_unused]] const VolumeCommand& command) const
+{
     switch (sample_count) {
     case 160:
         return static_cast<u32>(1311.1f);
@@ -2819,7 +2942,8 @@ u32 CommandProcessingTimeEstimatorVersion5::Estimate(
 }
 
 u32 CommandProcessingTimeEstimatorVersion5::Estimate(
-    [[maybe_unused]] const VolumeRampCommand& command) const {
+    [[maybe_unused]] const VolumeRampCommand& command) const
+{
     switch (sample_count) {
     case 160:
         return static_cast<u32>(1425.3f);
@@ -2832,7 +2956,8 @@ u32 CommandProcessingTimeEstimatorVersion5::Estimate(
 }
 
 u32 CommandProcessingTimeEstimatorVersion5::Estimate(
-    [[maybe_unused]] const BiquadFilterCommand& command) const {
+    [[maybe_unused]] const BiquadFilterCommand& command) const
+{
     switch (sample_count) {
     case 160:
         return static_cast<u32>(4173.2f);
@@ -2845,7 +2970,8 @@ u32 CommandProcessingTimeEstimatorVersion5::Estimate(
 }
 
 u32 CommandProcessingTimeEstimatorVersion5::Estimate(
-    [[maybe_unused]] const MixCommand& command) const {
+    [[maybe_unused]] const MixCommand& command) const
+{
     switch (sample_count) {
     case 160:
         return static_cast<u32>(1402.8f);
@@ -2858,7 +2984,8 @@ u32 CommandProcessingTimeEstimatorVersion5::Estimate(
 }
 
 u32 CommandProcessingTimeEstimatorVersion5::Estimate(
-    [[maybe_unused]] const MixRampCommand& command) const {
+    [[maybe_unused]] const MixRampCommand& command) const
+{
     switch (sample_count) {
     case 160:
         return static_cast<u32>(1968.7f);
@@ -2870,7 +2997,8 @@ u32 CommandProcessingTimeEstimatorVersion5::Estimate(
     }
 }
 
-u32 CommandProcessingTimeEstimatorVersion5::Estimate(const MixRampGroupedCommand& command) const {
+u32 CommandProcessingTimeEstimatorVersion5::Estimate(const MixRampGroupedCommand& command) const
+{
     u32 count{0};
     for (u32 i = 0; i < command.buffer_count; i++) {
         if (command.volumes[i] != 0.0f || command.prev_volumes[i] != 0.0f) {
@@ -2892,12 +3020,14 @@ u32 CommandProcessingTimeEstimatorVersion5::Estimate(const MixRampGroupedCommand
 }
 
 u32 CommandProcessingTimeEstimatorVersion5::Estimate(
-    [[maybe_unused]] const DepopPrepareCommand& command) const {
+    [[maybe_unused]] const DepopPrepareCommand& command) const
+{
     return 0;
 }
 
 u32 CommandProcessingTimeEstimatorVersion5::Estimate(
-    [[maybe_unused]] const DepopForMixBuffersCommand& command) const {
+    [[maybe_unused]] const DepopForMixBuffersCommand& command) const
+{
     switch (sample_count) {
     case 160:
         return static_cast<u32>(739.64f);
@@ -2909,7 +3039,8 @@ u32 CommandProcessingTimeEstimatorVersion5::Estimate(
     }
 }
 
-u32 CommandProcessingTimeEstimatorVersion5::Estimate(const DelayCommand& command) const {
+u32 CommandProcessingTimeEstimatorVersion5::Estimate(const DelayCommand& command) const
+{
     switch (sample_count) {
     case 160:
         if (command.enabled) {
@@ -2978,7 +3109,8 @@ u32 CommandProcessingTimeEstimatorVersion5::Estimate(const DelayCommand& command
 }
 
 u32 CommandProcessingTimeEstimatorVersion5::Estimate(
-    [[maybe_unused]] const UpsampleCommand& command) const {
+    [[maybe_unused]] const UpsampleCommand& command) const
+{
     switch (sample_count) {
     case 160:
         return static_cast<u32>(312990.0f);
@@ -2991,7 +3123,8 @@ u32 CommandProcessingTimeEstimatorVersion5::Estimate(
 }
 
 u32 CommandProcessingTimeEstimatorVersion5::Estimate(
-    [[maybe_unused]] const DownMix6chTo2chCommand& command) const {
+    [[maybe_unused]] const DownMix6chTo2chCommand& command) const
+{
     switch (sample_count) {
     case 160:
         return static_cast<u32>(9949.7f);
@@ -3003,7 +3136,8 @@ u32 CommandProcessingTimeEstimatorVersion5::Estimate(
     }
 }
 
-u32 CommandProcessingTimeEstimatorVersion5::Estimate(const AuxCommand& command) const {
+u32 CommandProcessingTimeEstimatorVersion5::Estimate(const AuxCommand& command) const
+{
     switch (sample_count) {
     case 160:
         if (command.enabled) {
@@ -3021,7 +3155,8 @@ u32 CommandProcessingTimeEstimatorVersion5::Estimate(const AuxCommand& command) 
     }
 }
 
-u32 CommandProcessingTimeEstimatorVersion5::Estimate(const DeviceSinkCommand& command) const {
+u32 CommandProcessingTimeEstimatorVersion5::Estimate(const DeviceSinkCommand& command) const
+{
     switch (command.input_count) {
     case 2:
         switch (sample_count) {
@@ -3049,8 +3184,8 @@ u32 CommandProcessingTimeEstimatorVersion5::Estimate(const DeviceSinkCommand& co
     }
 }
 
-u32 CommandProcessingTimeEstimatorVersion5::Estimate(
-    const CircularBufferSinkCommand& command) const {
+u32 CommandProcessingTimeEstimatorVersion5::Estimate(const CircularBufferSinkCommand& command) const
+{
     switch (sample_count) {
     case 160:
         return static_cast<u32>(static_cast<f32>(command.input_count) * 531.069f + 0.0f);
@@ -3062,7 +3197,8 @@ u32 CommandProcessingTimeEstimatorVersion5::Estimate(
     }
 }
 
-u32 CommandProcessingTimeEstimatorVersion5::Estimate(const ReverbCommand& command) const {
+u32 CommandProcessingTimeEstimatorVersion5::Estimate(const ReverbCommand& command) const
+{
     switch (sample_count) {
     case 160:
         if (command.enabled) {
@@ -3130,7 +3266,8 @@ u32 CommandProcessingTimeEstimatorVersion5::Estimate(const ReverbCommand& comman
     }
 }
 
-u32 CommandProcessingTimeEstimatorVersion5::Estimate(const I3dl2ReverbCommand& command) const {
+u32 CommandProcessingTimeEstimatorVersion5::Estimate(const I3dl2ReverbCommand& command) const
+{
     switch (sample_count) {
     case 160:
         if (command.enabled) {
@@ -3199,7 +3336,8 @@ u32 CommandProcessingTimeEstimatorVersion5::Estimate(const I3dl2ReverbCommand& c
 }
 
 u32 CommandProcessingTimeEstimatorVersion5::Estimate(
-    [[maybe_unused]] const PerformanceCommand& command) const {
+    [[maybe_unused]] const PerformanceCommand& command) const
+{
     switch (sample_count) {
     case 160:
         return static_cast<u32>(498.17f);
@@ -3212,7 +3350,8 @@ u32 CommandProcessingTimeEstimatorVersion5::Estimate(
 }
 
 u32 CommandProcessingTimeEstimatorVersion5::Estimate(
-    [[maybe_unused]] const ClearMixBufferCommand& command) const {
+    [[maybe_unused]] const ClearMixBufferCommand& command) const
+{
     switch (sample_count) {
     case 160:
         return static_cast<u32>(static_cast<f32>(buffer_count - 1) * 266.645f + 0.0f);
@@ -3225,7 +3364,8 @@ u32 CommandProcessingTimeEstimatorVersion5::Estimate(
 }
 
 u32 CommandProcessingTimeEstimatorVersion5::Estimate(
-    [[maybe_unused]] const CopyMixBufferCommand& command) const {
+    [[maybe_unused]] const CopyMixBufferCommand& command) const
+{
     switch (sample_count) {
     case 160:
         return static_cast<u32>(842.59f);
@@ -3238,7 +3378,8 @@ u32 CommandProcessingTimeEstimatorVersion5::Estimate(
 }
 
 u32 CommandProcessingTimeEstimatorVersion5::Estimate(
-    const LightLimiterVersion1Command& command) const {
+    const LightLimiterVersion1Command& command) const
+{
     switch (sample_count) {
     case 160:
         if (command.enabled) {
@@ -3307,7 +3448,8 @@ u32 CommandProcessingTimeEstimatorVersion5::Estimate(
 }
 
 u32 CommandProcessingTimeEstimatorVersion5::Estimate(
-    const LightLimiterVersion2Command& command) const {
+    const LightLimiterVersion2Command& command) const
+{
     switch (sample_count) {
     case 160:
         if (command.enabled) {
@@ -3492,7 +3634,8 @@ u32 CommandProcessingTimeEstimatorVersion5::Estimate(
 }
 
 u32 CommandProcessingTimeEstimatorVersion5::Estimate(
-    [[maybe_unused]] const MultiTapBiquadFilterCommand& command) const {
+    [[maybe_unused]] const MultiTapBiquadFilterCommand& command) const
+{
     switch (sample_count) {
     case 160:
         return static_cast<u32>(7424.5f);
@@ -3504,7 +3647,8 @@ u32 CommandProcessingTimeEstimatorVersion5::Estimate(
     }
 }
 
-u32 CommandProcessingTimeEstimatorVersion5::Estimate(const CaptureCommand& command) const {
+u32 CommandProcessingTimeEstimatorVersion5::Estimate(const CaptureCommand& command) const
+{
     switch (sample_count) {
     case 160:
         if (command.enabled) {
@@ -3522,7 +3666,8 @@ u32 CommandProcessingTimeEstimatorVersion5::Estimate(const CaptureCommand& comma
     }
 }
 
-u32 CommandProcessingTimeEstimatorVersion5::Estimate(const CompressorCommand& command) const {
+u32 CommandProcessingTimeEstimatorVersion5::Estimate(const CompressorCommand& command) const
+{
     if (command.enabled) {
         switch (command.parameter.channel_count) {
         case 1:

@@ -1,8 +1,9 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include "audio_core/adsp/apps/audio_renderer/command_list_processor.h"
 #include "audio_core/renderer/command/mix/volume_ramp.h"
+
+#include "audio_core/adsp/apps/audio_renderer/command_list_processor.h"
 #include "common/fixed_point.h"
 
 namespace AudioCore::Renderer {
@@ -16,9 +17,10 @@ namespace AudioCore::Renderer {
  * @param ramp         - Ramp applied to volume every sample.
  * @param sample_count - Number of samples to process.
  */
-template <size_t Q>
+template<size_t Q>
 static void ApplyLinearEnvelopeGain(std::span<s32> output, std::span<const s32> input,
-                                    const f32 volume, const f32 ramp_, const u32 sample_count) {
+                                    const f32 volume, const f32 ramp_, const u32 sample_count)
+{
     if (volume == 0.0f && ramp_ == 0.0f) {
         std::memset(output.data(), 0, output.size_bytes());
     } else if (volume == 1.0f && ramp_ == 0.0f) {
@@ -39,7 +41,8 @@ static void ApplyLinearEnvelopeGain(std::span<s32> output, std::span<const s32> 
 }
 
 void VolumeRampCommand::Dump(const AudioRenderer::CommandListProcessor& processor,
-                             std::string& string) {
+                             std::string& string)
+{
     const auto ramp{(volume - prev_volume) / static_cast<f32>(processor.sample_count)};
     string += fmt::format("VolumeRampCommand");
     string += fmt::format("\n\tinput {:02X}", input_index);
@@ -50,7 +53,8 @@ void VolumeRampCommand::Dump(const AudioRenderer::CommandListProcessor& processo
     string += "\n";
 }
 
-void VolumeRampCommand::Process(const AudioRenderer::CommandListProcessor& processor) {
+void VolumeRampCommand::Process(const AudioRenderer::CommandListProcessor& processor)
+{
     auto output{processor.mix_buffers.subspan(output_index * processor.sample_count,
                                               processor.sample_count)};
     auto input{processor.mix_buffers.subspan(input_index * processor.sample_count,
@@ -78,7 +82,8 @@ void VolumeRampCommand::Process(const AudioRenderer::CommandListProcessor& proce
     }
 }
 
-bool VolumeRampCommand::Verify(const AudioRenderer::CommandListProcessor& processor) {
+bool VolumeRampCommand::Verify(const AudioRenderer::CommandListProcessor& processor)
+{
     return true;
 }
 

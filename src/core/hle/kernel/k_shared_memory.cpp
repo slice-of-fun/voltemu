@@ -1,23 +1,27 @@
 // SPDX-FileCopyrightText: 2014 Citra Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/kernel/k_shared_memory.h"
+
 #include "common/assert.h"
 #include "core/core.h"
 #include "core/hle/kernel/k_page_table.h"
 #include "core/hle/kernel/k_scoped_resource_reservation.h"
-#include "core/hle/kernel/k_shared_memory.h"
 #include "core/hle/kernel/k_system_resource.h"
 #include "core/hle/kernel/kernel.h"
 #include "core/hle/kernel/svc_results.h"
 
 namespace Kernel {
 
-KSharedMemory::KSharedMemory(KernelCore& kernel) : KAutoObjectWithSlabHeapAndContainer{kernel} {}
+KSharedMemory::KSharedMemory(KernelCore& kernel) : KAutoObjectWithSlabHeapAndContainer{kernel}
+{
+}
 KSharedMemory::~KSharedMemory() = default;
 
 Result KSharedMemory::Initialize(Core::DeviceMemory& device_memory, KProcess* owner_process,
                                  Svc::MemoryPermission owner_permission,
-                                 Svc::MemoryPermission user_permission, std::size_t size) {
+                                 Svc::MemoryPermission user_permission, std::size_t size)
+{
     // Set members.
     m_owner_process = owner_process;
     m_device_memory = std::addressof(device_memory);
@@ -66,7 +70,8 @@ Result KSharedMemory::Initialize(Core::DeviceMemory& device_memory, KProcess* ow
     R_SUCCEED();
 }
 
-void KSharedMemory::Finalize() {
+void KSharedMemory::Finalize()
+{
     // Close and finalize the page group.
     m_page_group->Close();
     m_page_group->Finalize();
@@ -77,7 +82,8 @@ void KSharedMemory::Finalize() {
 }
 
 Result KSharedMemory::Map(KProcess& target_process, KProcessAddress address, std::size_t map_size,
-                          Svc::MemoryPermission map_perm) {
+                          Svc::MemoryPermission map_perm)
+{
     // Validate the size.
     R_UNLESS(m_size == map_size, ResultInvalidSize);
 
@@ -95,7 +101,8 @@ Result KSharedMemory::Map(KProcess& target_process, KProcessAddress address, std
 }
 
 Result KSharedMemory::Unmap(KProcess& target_process, KProcessAddress address,
-                            std::size_t unmap_size) {
+                            std::size_t unmap_size)
+{
     // Validate the size.
     R_UNLESS(m_size == unmap_size, ResultInvalidSize);
 

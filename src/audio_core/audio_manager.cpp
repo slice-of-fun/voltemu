@@ -2,22 +2,26 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include "audio_core/audio_manager.h"
+
 #include "core/core.h"
 #include "core/hle/service/audio/errors.h"
 
 namespace AudioCore {
 
-AudioManager::AudioManager() {
+AudioManager::AudioManager()
+{
     thread = std::jthread([this]() { ThreadFunc(); });
 }
 
-void AudioManager::Shutdown() {
+void AudioManager::Shutdown()
+{
     running = false;
     events.SetAudioEvent(Event::Type::Max, true);
     thread.join();
 }
 
-Result AudioManager::SetOutManager(BufferEventFunc buffer_func) {
+Result AudioManager::SetOutManager(BufferEventFunc buffer_func)
+{
     if (!running) {
         return Service::Audio::ResultOperationFailed;
     }
@@ -33,7 +37,8 @@ Result AudioManager::SetOutManager(BufferEventFunc buffer_func) {
     return ResultSuccess;
 }
 
-Result AudioManager::SetInManager(BufferEventFunc buffer_func) {
+Result AudioManager::SetInManager(BufferEventFunc buffer_func)
+{
     if (!running) {
         return Service::Audio::ResultOperationFailed;
     }
@@ -49,11 +54,13 @@ Result AudioManager::SetInManager(BufferEventFunc buffer_func) {
     return ResultSuccess;
 }
 
-void AudioManager::SetEvent(const Event::Type type, const bool signalled) {
+void AudioManager::SetEvent(const Event::Type type, const bool signalled)
+{
     events.SetAudioEvent(type, signalled);
 }
 
-void AudioManager::ThreadFunc() {
+void AudioManager::ThreadFunc()
+{
     std::unique_lock l{events.GetAudioEventLock()};
     events.ClearEvents();
     running = true;

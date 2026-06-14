@@ -6,12 +6,13 @@
 
 #pragma once
 
-#include <atomic>
-#include <memory>
 #include <ankerl/unordered_dense.h>
-
 #include <dynarmic/interface/A64/a64.h>
 #include <dynarmic/interface/code_page.h>
+
+#include <atomic>
+#include <memory>
+
 #include "common/common_types.h"
 #include "common/hash.h"
 #include "core/arm/arm_interface.h"
@@ -24,7 +25,7 @@ class Memory;
 namespace Kernel {
 enum class DebugWatchpointType : u8;
 class KPRocess;
-}
+} // namespace Kernel
 
 namespace Core {
 
@@ -42,8 +43,9 @@ public:
     u64 MemoryRead64(u64 vaddr) override;
     Dynarmic::A64::Vector MemoryRead128(u64 vaddr) override;
     std::optional<u32> MemoryReadCode(u64 vaddr) override;
-    void InstructionSynchronizationBarrierRaised() override {
-        last_code_addr = u64(-1); //reset back, force refetch
+    void InstructionSynchronizationBarrierRaised() override
+    {
+        last_code_addr = u64(-1); // reset back, force refetch
     }
     void MemoryWrite8(u64 vaddr, u8 value) override;
     void MemoryWrite16(u64 vaddr, u16 value) override;
@@ -54,8 +56,10 @@ public:
     bool MemoryWriteExclusive16(u64 vaddr, std::uint16_t value, std::uint16_t expected) override;
     bool MemoryWriteExclusive32(u64 vaddr, std::uint32_t value, std::uint32_t expected) override;
     bool MemoryWriteExclusive64(u64 vaddr, std::uint64_t value, std::uint64_t expected) override;
-    bool MemoryWriteExclusive128(u64 vaddr, Dynarmic::A64::Vector value, Dynarmic::A64::Vector expected) override;
-    void InstructionCacheOperationRaised(Dynarmic::A64::InstructionCacheOperation op, u64 value) override;
+    bool MemoryWriteExclusive128(u64 vaddr, Dynarmic::A64::Vector value,
+                                 Dynarmic::A64::Vector expected) override;
+    void InstructionCacheOperationRaised(Dynarmic::A64::InstructionCacheOperation op,
+                                         u64 value) override;
     void ExceptionRaised(u64 pc, Dynarmic::A64::Exception exception) override;
     void CallSVC(u32 svc) override;
     void AddTicks(u64 ticks) override;
@@ -82,9 +86,7 @@ public:
                   DynarmicExclusiveMonitor& exclusive_monitor, std::size_t core_index);
     ~ArmDynarmic64() override;
 
-    Architecture GetArchitecture() const override {
-        return Architecture::AArch64;
-    }
+    Architecture GetArchitecture() const override { return Architecture::AArch64; }
 
     HaltReason RunThread(Kernel::KThread* thread) override;
     HaltReason StepThread(Kernel::KThread* thread) override;

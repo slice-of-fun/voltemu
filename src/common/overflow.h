@@ -7,24 +7,25 @@
 #pragma once
 
 #include <algorithm>
-#include <type_traits>
-#include <numeric>
 #include <bit>
+#include <numeric>
+#include <type_traits>
 
 namespace Common {
 
-template <typename T>
-    requires(std::is_integral_v<T> && std::is_signed_v<T>)
-inline T WrappingAdd(T lhs, T rhs) {
+template<typename T>
+requires(std::is_integral_v<T>&& std::is_signed_v<T>) inline T WrappingAdd(T lhs, T rhs)
+{
     using U = std::make_unsigned_t<T>;
     U lhs_u = std::bit_cast<U>(lhs);
     U rhs_u = std::bit_cast<U>(rhs);
     return std::bit_cast<T>(lhs_u + rhs_u);
 }
 
-template <typename T>
-    requires(std::is_integral_v<T> && std::is_signed_v<T>)
-inline bool CanAddWithoutOverflow(T lhs, T rhs) {
+template<typename T>
+requires(std::is_integral_v<T>&& std::is_signed_v<T>) inline bool CanAddWithoutOverflow(T lhs,
+                                                                                        T rhs)
+{
 #ifdef _MSC_VER
     if (lhs >= 0 && rhs >= 0) {
         return WrappingAdd(lhs, rhs) >= (std::max)(lhs, rhs);

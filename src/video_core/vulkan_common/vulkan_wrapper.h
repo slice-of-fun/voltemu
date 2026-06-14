@@ -6,16 +6,17 @@
 
 #pragma once
 
+#include <vulkan/vulkan_core.h>
+
 #include <exception>
 #include <limits>
 #include <memory>
 #include <optional>
 #include <span>
+#include <string>
 #include <type_traits>
 #include <utility>
 #include <vector>
-#include <vulkan/vulkan_core.h>
-#include <string>
 
 #include "common/common_types.h"
 #include "video_core/vulkan_common/vulkan.h"
@@ -34,8 +35,7 @@ namespace Vulkan::vk {
  * Based on std::span but optimized for array access instead of iterators.
  * Size returns uint32_t instead of size_t to ease interaction with Vulkan functions.
  */
-template <typename T>
-class Span {
+template<typename T> class Span {
 public:
     using value_type = T;
     using size_type = u32;
@@ -57,56 +57,42 @@ public:
     constexpr Span(const T& value) noexcept : ptr{&value}, num{1} {}
 
     /// Construct a span from a range.
-    template <typename Range>
+    template<typename Range>
     // requires std::data(const Range&)
     // requires std::size(const Range&)
-    constexpr Span(const Range& range) : ptr{std::data(range)}, num{std::size(range)} {}
+    constexpr Span(const Range& range) : ptr{std::data(range)}, num{std::size(range)}
+    {
+    }
 
     /// Construct a span from a pointer and a size.
     /// This is intended for subranges.
     constexpr Span(const T* ptr_, std::size_t num_) noexcept : ptr{ptr_}, num{num_} {}
 
     /// Returns the data pointer by the span.
-    constexpr const T* data() const noexcept {
-        return ptr;
-    }
+    constexpr const T* data() const noexcept { return ptr; }
 
     /// Returns the number of elements in the span.
     /// @note Returns a 32 bits integer because most Vulkan functions expect this type.
-    constexpr u32 size() const noexcept {
-        return static_cast<u32>(num);
-    }
+    constexpr u32 size() const noexcept { return static_cast<u32>(num); }
 
     /// Returns true when the span is empty.
-    constexpr bool empty() const noexcept {
-        return num == 0;
-    }
+    constexpr bool empty() const noexcept { return num == 0; }
 
     /// Returns a reference to the element in the passed index.
     /// @pre: index < size()
-    constexpr const T& operator[](std::size_t index) const noexcept {
-        return ptr[index];
-    }
+    constexpr const T& operator[](std::size_t index) const noexcept { return ptr[index]; }
 
     /// Returns an iterator to the beginning of the span.
-    constexpr const T* begin() const noexcept {
-        return ptr;
-    }
+    constexpr const T* begin() const noexcept { return ptr; }
 
     /// Returns an iterator to the end of the span.
-    constexpr const T* end() const noexcept {
-        return ptr + num;
-    }
+    constexpr const T* end() const noexcept { return ptr + num; }
 
     /// Returns an iterator to the beginning of the span.
-    constexpr const T* cbegin() const noexcept {
-        return ptr;
-    }
+    constexpr const T* cbegin() const noexcept { return ptr; }
 
     /// Returns an iterator to the end of the span.
-    constexpr const T* cend() const noexcept {
-        return ptr + num;
-    }
+    constexpr const T* cend() const noexcept { return ptr + num; }
 
 private:
     const T* ptr = nullptr;
@@ -122,16 +108,15 @@ public:
     virtual ~Exception() = default;
 
     const char* what() const noexcept override;
-    VkResult GetResult() const noexcept {
-        return result;
-    }
+    VkResult GetResult() const noexcept { return result; }
 
 private:
     VkResult result;
 };
 
 /// Throws a Vulkan exception if result is not success.
-inline void Check(VkResult result) {
+inline void Check(VkResult result)
+{
     if (result != VK_SUCCESS) {
         throw Exception(result);
     }
@@ -139,7 +124,8 @@ inline void Check(VkResult result) {
 
 /// Throws a Vulkan exception if result is an error.
 /// @return result
-inline VkResult Filter(VkResult result) {
+inline VkResult Filter(VkResult result)
+{
     if (result < 0) {
         throw Exception(result);
     }
@@ -156,7 +142,6 @@ inline constexpr VkPipelineStageFlags PIPELINE_STAGE_GRAPHICS_COMPUTE_TRANSFER_H
     PIPELINE_STAGE_GRAPHICS_COMPUTE_TRANSFER | VK_PIPELINE_STAGE_HOST_BIT;
 
 inline constexpr VkPipelineStageFlags PIPELINE_STAGE_HOST = VK_PIPELINE_STAGE_HOST_BIT;
-
 
 /// Table holding Vulkan instance function pointers.
 struct InstanceDispatch {
@@ -390,17 +375,17 @@ void Destroy(VkInstance, VkSurfaceKHR, const InstanceDispatch&) noexcept;
 VkResult Free(VkDevice, VkDescriptorPool, Span<VkDescriptorSet>, const DeviceDispatch&) noexcept;
 VkResult Free(VkDevice, VkCommandPool, Span<VkCommandBuffer>, const DeviceDispatch&) noexcept;
 
-template <typename Type, typename OwnerType, typename Dispatch>
-class Handle;
+template<typename Type, typename OwnerType, typename Dispatch> class Handle;
 
 /// Handle with an owning type.
 /// Analogue to std::unique_ptr.
-template <typename Type, typename OwnerType, typename Dispatch>
-class Handle {
+template<typename Type, typename OwnerType, typename Dispatch> class Handle {
 public:
     /// Construct a handle and hold it's ownership.
     explicit Handle(Type handle_, OwnerType owner_, const Dispatch& dld_) noexcept
-        : handle{handle_}, owner{owner_}, dld{&dld_} {}
+        : handle{handle_}, owner{owner_}, dld{&dld_}
+    {
+    }
 
     /// Construct an empty handle.
     Handle() = default;
@@ -414,11 +399,14 @@ public:
 
     /// Construct a handle transferring the ownership from another handle.
     Handle(Handle&& rhs) noexcept
-        : handle{std::exchange(rhs.handle, Type{})}, owner{rhs.owner}, dld{rhs.dld} {}
+        : handle{std::exchange(rhs.handle, Type{})}, owner{rhs.owner}, dld{rhs.dld}
+    {
+    }
 
     /// Assign the current handle transferring the ownership from another handle.
     /// Destroys any previously held object.
-    Handle& operator=(Handle&& rhs) noexcept {
+    Handle& operator=(Handle&& rhs) noexcept
+    {
         Release();
         handle = std::exchange(rhs.handle, Type{});
         owner = rhs.owner;
@@ -427,31 +415,24 @@ public:
     }
 
     /// Destroys the current handle if it existed.
-    ~Handle() noexcept {
-        Release();
-    }
+    ~Handle() noexcept { Release(); }
 
     /// Destroys any held object.
-    void reset() noexcept {
+    void reset() noexcept
+    {
         Release();
         handle = Type{};
     }
 
     /// Returns the address of the held object.
     /// Intended for Vulkan structures that expect a pointer to an array.
-    const Type* address() const noexcept {
-        return std::addressof(handle);
-    }
+    const Type* address() const noexcept { return std::addressof(handle); }
 
     /// Returns the held Vulkan handle.
-    Type operator*() const noexcept {
-        return handle;
-    }
+    Type operator*() const noexcept { return handle; }
 
     /// Returns true when there's a held object.
-    explicit operator bool() const noexcept {
-        return handle != Type{};
-    }
+    explicit operator bool() const noexcept { return handle != Type{}; }
 
 #ifndef __ANDROID__
     /**
@@ -459,7 +440,8 @@ public:
      * The caller is responsible for managing the lifetime of the returned handle.
      * The Handle object becomes invalid after this call.
      */
-    Type release() noexcept {
+    Type release() noexcept
+    {
         return std::exchange(handle, nullptr);
     }
 #endif
@@ -471,7 +453,8 @@ protected:
 
 private:
     /// Destroys the held object if it exists.
-    void Release() noexcept {
+    void Release() noexcept
+    {
         if (handle) {
             Destroy(OwnerType(owner), Type(handle), *dld);
         }
@@ -483,8 +466,7 @@ struct NoOwner {};
 
 /// Handle without an owning type.
 /// Analogue to std::unique_ptr
-template <typename Type, typename Dispatch>
-class Handle<Type, NoOwner, Dispatch> {
+template<typename Type, typename Dispatch> class Handle<Type, NoOwner, Dispatch> {
 public:
     /// Construct a handle and hold it's ownership.
     explicit Handle(Type handle_, const Dispatch& dld_) noexcept : handle{handle_}, dld{&dld_} {}
@@ -501,7 +483,8 @@ public:
 
     /// Assign the current handle transferring the ownership from another handle.
     /// Destroys any previously held object.
-    Handle& operator=(Handle&& rhs) noexcept {
+    Handle& operator=(Handle&& rhs) noexcept
+    {
         Release();
         handle = std::exchange(rhs.handle, nullptr);
         dld = rhs.dld;
@@ -509,31 +492,24 @@ public:
     }
 
     /// Destroys the current handle if it existed.
-    ~Handle() noexcept {
-        Release();
-    }
+    ~Handle() noexcept { Release(); }
 
     /// Destroys any held object.
-    void reset() noexcept {
+    void reset() noexcept
+    {
         Release();
         handle = {};
     }
 
     /// Returns the address of the held object.
     /// Intended for Vulkan structures that expect a pointer to an array.
-    const Type* address() const noexcept {
-        return std::addressof(handle);
-    }
+    const Type* address() const noexcept { return std::addressof(handle); }
 
     /// Returns the held Vulkan handle.
-    Type operator*() const noexcept {
-        return handle;
-    }
+    Type operator*() const noexcept { return handle; }
 
     /// Returns true when there's a held object.
-    explicit operator bool() const noexcept {
-        return handle != Type{};
-    }
+    explicit operator bool() const noexcept { return handle != Type{}; }
 
 #ifndef __ANDROID__
     /**
@@ -541,7 +517,8 @@ public:
      * The caller is responsible for managing the lifetime of the returned handle.
      * The Handle object becomes invalid after this call.
      */
-    Type release() noexcept {
+    Type release() noexcept
+    {
         return std::exchange(handle, nullptr);
     }
 #endif
@@ -552,7 +529,8 @@ protected:
 
 private:
     /// Destroys the held object if it exists.
-    void Release() noexcept {
+    void Release() noexcept
+    {
         if (handle) {
             Destroy(handle, *dld);
         }
@@ -561,8 +539,7 @@ private:
 
 /// Array of a pool allocation.
 /// Analogue to std::vector
-template <typename AllocationType, typename PoolType>
-class PoolAllocations {
+template<typename AllocationType, typename PoolType> class PoolAllocations {
 public:
     /// Construct an empty allocation.
     PoolAllocations() = default;
@@ -570,8 +547,9 @@ public:
     /// Construct an allocation. Errors are reported through IsOutOfPoolMemory().
     explicit PoolAllocations(std::unique_ptr<AllocationType[]> allocations_, std::size_t num_,
                              VkDevice device_, PoolType pool_, const DeviceDispatch& dld_) noexcept
-        : allocations{std::move(allocations_)}, num{num_}, device{device_}, pool{pool_},
-          dld{&dld_} {}
+        : allocations{std::move(allocations_)}, num{num_}, device{device_}, pool{pool_}, dld{&dld_}
+    {
+    }
 
     /// Copying Vulkan allocations is not supported and will never be.
     PoolAllocations(const PoolAllocations&) = delete;
@@ -580,10 +558,13 @@ public:
     /// Construct an allocation transferring ownership from another allocation.
     PoolAllocations(PoolAllocations&& rhs) noexcept
         : allocations{std::move(rhs.allocations)}, num{rhs.num}, device{rhs.device}, pool{rhs.pool},
-          dld{rhs.dld} {}
+          dld{rhs.dld}
+    {
+    }
 
     /// Assign an allocation transferring ownership from another allocation.
-    PoolAllocations& operator=(PoolAllocations&& rhs) noexcept {
+    PoolAllocations& operator=(PoolAllocations&& rhs) noexcept
+    {
         allocations = std::move(rhs.allocations);
         num = rhs.num;
         device = rhs.device;
@@ -593,25 +574,17 @@ public:
     }
 
     /// Returns the number of allocations.
-    std::size_t size() const noexcept {
-        return num;
-    }
+    std::size_t size() const noexcept { return num; }
 
     /// Returns a pointer to the array of allocations.
-    AllocationType const* data() const noexcept {
-        return allocations.get();
-    }
+    AllocationType const* data() const noexcept { return allocations.get(); }
 
     /// Returns the allocation in the specified index.
     /// @pre index < size()
-    AllocationType operator[](std::size_t index) const noexcept {
-        return allocations[index];
-    }
+    AllocationType operator[](std::size_t index) const noexcept { return allocations[index]; }
 
     /// True when a pool fails to construct.
-    bool IsOutOfPoolMemory() const noexcept {
-        return !device;
-    }
+    bool IsOutOfPoolMemory() const noexcept { return !device; }
 
 private:
     std::unique_ptr<AllocationType[]> allocations;
@@ -642,8 +615,8 @@ class Instance : public Handle<VkInstance, NoOwner, InstanceDispatch> {
 public:
     /// Creates a Vulkan instance.
     /// @throw Exception on initialization error.
-    [[nodiscard]] static Instance Create(u32 version, Span<const char*> layers, Span<const char*> extensions,
-                           InstanceDispatch& dispatch);
+    [[nodiscard]] static Instance Create(u32 version, Span<const char*> layers,
+                                         Span<const char*> extensions, InstanceDispatch& dispatch);
 
     /// Enumerates physical devices.
     /// @return Physical devices and an empty handle on failure.
@@ -652,18 +625,16 @@ public:
 
     /// Creates a debug callback messenger.
     /// @throw Exception on creation failure.
-    [[nodiscard]] DebugUtilsMessenger CreateDebugUtilsMessenger(
-        const VkDebugUtilsMessengerCreateInfoEXT& create_info) const;
+    [[nodiscard]] DebugUtilsMessenger
+    CreateDebugUtilsMessenger(const VkDebugUtilsMessengerCreateInfoEXT& create_info) const;
 
     /// Creates a debug report callback.
     /// @throw Exception on creation failure.
-    [[nodiscard]] DebugReportCallback CreateDebugReportCallback(
-        const VkDebugReportCallbackCreateInfoEXT& create_info) const;
+    [[nodiscard]] DebugReportCallback
+    CreateDebugReportCallback(const VkDebugReportCallbackCreateInfoEXT& create_info) const;
 
     /// Returns dispatch table.
-    const InstanceDispatch& Dispatch() const noexcept {
-        return *dld;
-    }
+    const InstanceDispatch& Dispatch() const noexcept { return *dld; }
 };
 
 class Image {
@@ -672,7 +643,9 @@ public:
                    VmaAllocator allocator_, VmaAllocation allocation_,
                    const DeviceDispatch& dld_) noexcept
         : handle{handle_}, usage{usage_}, owner{owner_}, allocator{allocator_},
-          allocation{allocation_}, dld{&dld_} {}
+          allocation{allocation_}, dld{&dld_}
+    {
+    }
     Image() = default;
 
     Image(const Image&) = delete;
@@ -680,9 +653,12 @@ public:
 
     Image(Image&& rhs) noexcept
         : handle{std::exchange(rhs.handle, VkImage{})}, usage{rhs.usage}, owner{rhs.owner},
-          allocator{rhs.allocator}, allocation{rhs.allocation}, dld{rhs.dld} {}
+          allocator{rhs.allocator}, allocation{rhs.allocation}, dld{rhs.dld}
+    {
+    }
 
-    Image& operator=(Image&& rhs) noexcept {
+    Image& operator=(Image&& rhs) noexcept
+    {
         Release();
         handle = std::exchange(rhs.handle, VkImage{});
         usage = rhs.usage;
@@ -693,28 +669,21 @@ public:
         return *this;
     }
 
-    ~Image() noexcept {
-        Release();
-    }
+    ~Image() noexcept { Release(); }
 
-    VkImage operator*() const noexcept {
-        return handle;
-    }
+    VkImage operator*() const noexcept { return handle; }
 
-    void reset() noexcept {
+    void reset() noexcept
+    {
         Release();
         handle = VkImage{};
     }
 
-    explicit operator bool() const noexcept {
-        return handle != VkImage{};
-    }
+    explicit operator bool() const noexcept { return handle != VkImage{}; }
 
     void SetObjectNameEXT(const char* name) const;
 
-    [[nodiscard]] VkImageUsageFlags UsageFlags() const noexcept {
-        return usage;
-    }
+    [[nodiscard]] VkImageUsageFlags UsageFlags() const noexcept { return usage; }
 
 private:
     void Release() const noexcept;
@@ -733,7 +702,9 @@ public:
                     VmaAllocation allocation_, std::span<u8> mapped_, bool is_coherent_,
                     const DeviceDispatch& dld_) noexcept
         : handle{handle_}, owner{owner_}, allocator{allocator_},
-          allocation{allocation_}, mapped{mapped_}, is_coherent{is_coherent_}, dld{&dld_} {}
+          allocation{allocation_}, mapped{mapped_}, is_coherent{is_coherent_}, dld{&dld_}
+    {
+    }
     Buffer() = default;
 
     Buffer(const Buffer&) = delete;
@@ -741,10 +712,12 @@ public:
 
     Buffer(Buffer&& rhs) noexcept
         : handle{std::exchange(rhs.handle, VkBuffer{})}, owner{rhs.owner}, allocator{rhs.allocator},
-          allocation{rhs.allocation}, mapped{rhs.mapped},
-          is_coherent{rhs.is_coherent}, dld{rhs.dld} {}
+          allocation{rhs.allocation}, mapped{rhs.mapped}, is_coherent{rhs.is_coherent}, dld{rhs.dld}
+    {
+    }
 
-    Buffer& operator=(Buffer&& rhs) noexcept {
+    Buffer& operator=(Buffer&& rhs) noexcept
+    {
         Release();
         handle = std::exchange(rhs.handle, VkBuffer{});
         owner = rhs.owner;
@@ -756,36 +729,25 @@ public:
         return *this;
     }
 
-    ~Buffer() noexcept {
-        Release();
-    }
+    ~Buffer() noexcept { Release(); }
 
-    VkBuffer operator*() const noexcept {
-        return handle;
-    }
+    VkBuffer operator*() const noexcept { return handle; }
 
-    void reset() noexcept {
+    void reset() noexcept
+    {
         Release();
         handle = VkBuffer{};
     }
 
-    explicit operator bool() const noexcept {
-        return handle != VkBuffer{};
-    }
+    explicit operator bool() const noexcept { return handle != VkBuffer{}; }
 
     /// Returns the host mapped memory, an empty span otherwise.
-    std::span<u8> Mapped() noexcept {
-        return mapped;
-    }
+    std::span<u8> Mapped() noexcept { return mapped; }
 
-    std::span<const u8> Mapped() const noexcept {
-        return mapped;
-    }
+    std::span<const u8> Mapped() const noexcept { return mapped; }
 
     /// Returns true if the buffer is mapped to the host.
-    bool IsHostVisible() const noexcept {
-        return !mapped.empty();
-    }
+    bool IsHostVisible() const noexcept { return !mapped.empty(); }
 
     void Flush() const;
 
@@ -811,15 +773,17 @@ public:
     constexpr Queue() noexcept = default;
 
     /// Construct a queue handle.
-    constexpr Queue(VkQueue queue_, const DeviceDispatch& dld_) noexcept
-        : queue{queue_}, dld{&dld_} {}
+    constexpr Queue(VkQueue queue_, const DeviceDispatch& dld_) noexcept : queue{queue_}, dld{&dld_}
+    {
+    }
 
-    VkResult Submit(Span<VkSubmitInfo> submit_infos,
-                    VkFence fence = VK_NULL_HANDLE) const noexcept {
+    VkResult Submit(Span<VkSubmitInfo> submit_infos, VkFence fence = VK_NULL_HANDLE) const noexcept
+    {
         return dld->vkQueueSubmit(queue, submit_infos.size(), submit_infos.data(), fence);
     }
 
-    VkResult Present(const VkPresentInfoKHR& present_info) const noexcept {
+    VkResult Present(const VkPresentInfoKHR& present_info) const noexcept
+    {
         return dld->vkQueuePresentKHR(queue, &present_info);
     }
 
@@ -857,13 +821,15 @@ public:
     /// Set object name.
     void SetObjectNameEXT(const char* name) const;
 
-    u8* Map(VkDeviceSize offset, VkDeviceSize size) const {
+    u8* Map(VkDeviceSize offset, VkDeviceSize size) const
+    {
         void* data;
         Check(dld->vkMapMemory(owner, handle, offset, size, 0, &data));
         return static_cast<u8*>(data);
     }
 
-    void Unmap() const noexcept {
+    void Unmap() const noexcept
+    {
         dld->vkUnmapMemory(owner, handle);
     }
 };
@@ -875,17 +841,14 @@ public:
     /// Set object name.
     void SetObjectNameEXT(const char* name) const;
 
-    VkResult Wait(u64 timeout = (std::numeric_limits<u64>::max)()) const noexcept {
+    VkResult Wait(u64 timeout = (std::numeric_limits<u64>::max)()) const noexcept
+    {
         return dld->vkWaitForFences(owner, 1, &handle, true, timeout);
     }
 
-    VkResult GetStatus() const noexcept {
-        return dld->vkGetFenceStatus(owner, handle);
-    }
+    VkResult GetStatus() const noexcept { return dld->vkGetFenceStatus(owner, handle); }
 
-    void Reset() const {
-        Check(dld->vkResetFences(owner, 1, &handle));
-    }
+    void Reset() const { Check(dld->vkResetFences(owner, 1, &handle)); }
 };
 
 class Framebuffer : public Handle<VkFramebuffer, VkDevice, DeviceDispatch> {
@@ -931,9 +894,7 @@ public:
     /// Set object name.
     void SetObjectNameEXT(const char* name) const;
 
-    VkResult GetStatus() const noexcept {
-        return dld->vkGetEventStatus(owner, handle);
-    }
+    VkResult GetStatus() const noexcept { return dld->vkGetEventStatus(owner, handle); }
 };
 
 class ShaderModule : public Handle<VkShaderModule, VkDevice, DeviceDispatch> {
@@ -951,7 +912,8 @@ public:
     /// Set object name.
     void SetObjectNameEXT(const char* name) const;
 
-    VkResult Read(size_t* size, void* data) const noexcept {
+    VkResult Read(size_t* size, void* data) const noexcept
+    {
         return dld->vkGetPipelineCacheData(owner, handle, size, data);
     }
 };
@@ -963,7 +925,8 @@ public:
     /// Set object name.
     void SetObjectNameEXT(const char* name) const;
 
-    [[nodiscard]] u64 GetCounter() const {
+    [[nodiscard]] u64 GetCounter() const
+    {
         u64 value;
         Check(dld->vkGetSemaphoreCounterValue(owner, handle, &value));
         return value;
@@ -976,7 +939,8 @@ public:
      * @param timeout Time in nanoseconds to timeout
      * @return        True on successful wait, false on timeout
      */
-    bool Wait(u64 value, u64 timeout = (std::numeric_limits<u64>::max)()) const {
+    bool Wait(u64 value, u64 timeout = (std::numeric_limits<u64>::max)()) const
+    {
         const VkSemaphoreWaitInfo wait_info{
             .sType = VK_STRUCTURE_TYPE_SEMAPHORE_WAIT_INFO,
             .pNext = nullptr,
@@ -1022,8 +986,8 @@ public:
 
     [[nodiscard]] RenderPass CreateRenderPass(const VkRenderPassCreateInfo& ci) const;
 
-    [[nodiscard]] DescriptorSetLayout CreateDescriptorSetLayout(
-        const VkDescriptorSetLayoutCreateInfo& ci) const;
+    [[nodiscard]] DescriptorSetLayout
+    CreateDescriptorSetLayout(const VkDescriptorSetLayoutCreateInfo& ci) const;
 
     [[nodiscard]] PipelineCache CreatePipelineCache(const VkPipelineCacheCreateInfo& ci) const;
 
@@ -1041,8 +1005,8 @@ public:
 
     [[nodiscard]] CommandPool CreateCommandPool(const VkCommandPoolCreateInfo& ci) const;
 
-    [[nodiscard]] DescriptorUpdateTemplate CreateDescriptorUpdateTemplate(
-        const VkDescriptorUpdateTemplateCreateInfo& ci) const;
+    [[nodiscard]] DescriptorUpdateTemplate
+    CreateDescriptorUpdateTemplate(const VkDescriptorUpdateTemplateCreateInfo& ci) const;
 
     [[nodiscard]] QueryPool CreateQueryPool(const VkQueryPoolCreateInfo& ci) const;
 
@@ -1061,37 +1025,39 @@ public:
 
     VkMemoryRequirements GetImageMemoryRequirements(VkImage image) const noexcept;
 
-    std::vector<VkPipelineExecutablePropertiesKHR> GetPipelineExecutablePropertiesKHR(
-        VkPipeline pipeline) const;
+    std::vector<VkPipelineExecutablePropertiesKHR>
+    GetPipelineExecutablePropertiesKHR(VkPipeline pipeline) const;
 
-    std::vector<VkPipelineExecutableStatisticKHR> GetPipelineExecutableStatisticsKHR(
-        VkPipeline pipeline, u32 executable_index) const;
+    std::vector<VkPipelineExecutableStatisticKHR>
+    GetPipelineExecutableStatisticsKHR(VkPipeline pipeline, u32 executable_index) const;
 
     void UpdateDescriptorSets(Span<VkWriteDescriptorSet> writes,
                               Span<VkCopyDescriptorSet> copies) const noexcept;
 
     void UpdateDescriptorSet(VkDescriptorSet set, VkDescriptorUpdateTemplate update_template,
-                             const void* data) const noexcept {
+                             const void* data) const noexcept
+    {
         dld->vkUpdateDescriptorSetWithTemplate(handle, set, update_template, data);
     }
 
     VkResult AcquireNextImageKHR(VkSwapchainKHR swapchain, u64 timeout, VkSemaphore semaphore,
-                                 VkFence fence, u32* image_index) const noexcept {
+                                 VkFence fence, u32* image_index) const noexcept
+    {
         return dld->vkAcquireNextImageKHR(handle, swapchain, timeout, semaphore, fence,
                                           image_index);
     }
 
-    VkResult WaitIdle() const noexcept {
-        return dld->vkDeviceWaitIdle(handle);
-    }
+    VkResult WaitIdle() const noexcept { return dld->vkDeviceWaitIdle(handle); }
 
-    void ResetQueryPool(VkQueryPool query_pool, u32 first, u32 count) const noexcept {
+    void ResetQueryPool(VkQueryPool query_pool, u32 first, u32 count) const noexcept
+    {
         dld->vkResetQueryPool(handle, query_pool, first, count);
     }
 
     VkResult GetQueryResults(VkQueryPool query_pool, u32 first, u32 count, std::size_t data_size,
                              void* data, VkDeviceSize stride,
-                             VkQueryResultFlags flags) const noexcept {
+                             VkQueryResultFlags flags) const noexcept
+    {
         return dld->vkGetQueryPoolResults(handle, query_pool, first, count, data_size, data, stride,
                                           flags);
     }
@@ -1103,11 +1069,11 @@ public:
 
     constexpr PhysicalDevice(VkPhysicalDevice physical_device_,
                              const InstanceDispatch& dld_) noexcept
-        : physical_device{physical_device_}, dld{&dld_} {}
-
-    constexpr operator VkPhysicalDevice() const noexcept {
-        return physical_device;
+        : physical_device{physical_device_}, dld{&dld_}
+    {
     }
+
+    constexpr operator VkPhysicalDevice() const noexcept { return physical_device; }
 
     VkPhysicalDeviceProperties GetProperties() const noexcept;
 
@@ -1133,8 +1099,8 @@ public:
 
     std::vector<VkPresentModeKHR> GetSurfacePresentModesKHR(VkSurfaceKHR) const;
 
-    VkPhysicalDeviceMemoryProperties2 GetMemoryProperties(
-        void* next_structures = nullptr) const noexcept;
+    VkPhysicalDeviceMemoryProperties2
+    GetMemoryProperties(void* next_structures = nullptr) const noexcept;
 
 private:
     VkPhysicalDevice physical_device = nullptr;
@@ -1146,147 +1112,162 @@ public:
     CommandBuffer() noexcept = default;
 
     explicit CommandBuffer(VkCommandBuffer handle_, const DeviceDispatch& dld_) noexcept
-        : handle{handle_}, dld{&dld_} {}
-
-    const VkCommandBuffer* address() const noexcept {
-        return &handle;
+        : handle{handle_}, dld{&dld_}
+    {
     }
 
-    VkCommandBuffer operator*() const noexcept {
-        return handle;
-    }
-    void Begin(const VkCommandBufferBeginInfo& begin_info) const {
+    const VkCommandBuffer* address() const noexcept { return &handle; }
+
+    VkCommandBuffer operator*() const noexcept { return handle; }
+    void Begin(const VkCommandBufferBeginInfo& begin_info) const
+    {
         Check(dld->vkBeginCommandBuffer(handle, &begin_info));
     }
 
-    void End() const {
-        Check(dld->vkEndCommandBuffer(handle));
-    }
+    void End() const { Check(dld->vkEndCommandBuffer(handle)); }
 
     void BeginRenderPass(const VkRenderPassBeginInfo& renderpass_bi,
-                         VkSubpassContents contents) const noexcept {
+                         VkSubpassContents contents) const noexcept
+    {
         dld->vkCmdBeginRenderPass(handle, &renderpass_bi, contents);
     }
 
-    void EndRenderPass() const noexcept {
-        dld->vkCmdEndRenderPass(handle);
-    }
+    void EndRenderPass() const noexcept { dld->vkCmdEndRenderPass(handle); }
 
-    void BeginQuery(VkQueryPool query_pool, u32 query, VkQueryControlFlags flags) const noexcept {
+    void BeginQuery(VkQueryPool query_pool, u32 query, VkQueryControlFlags flags) const noexcept
+    {
         dld->vkCmdBeginQuery(handle, query_pool, query, flags);
     }
 
-    void EndQuery(VkQueryPool query_pool, u32 query) const noexcept {
+    void EndQuery(VkQueryPool query_pool, u32 query) const noexcept
+    {
         dld->vkCmdEndQuery(handle, query_pool, query);
     }
 
     void BindDescriptorSets(VkPipelineBindPoint bind_point, VkPipelineLayout layout, u32 first,
-                            Span<VkDescriptorSet> sets, Span<u32> dynamic_offsets) const noexcept {
+                            Span<VkDescriptorSet> sets, Span<u32> dynamic_offsets) const noexcept
+    {
         dld->vkCmdBindDescriptorSets(handle, bind_point, layout, first, sets.size(), sets.data(),
                                      dynamic_offsets.size(), dynamic_offsets.data());
     }
 
     void PushDescriptorSetWithTemplateKHR(VkDescriptorUpdateTemplate update_template,
                                           VkPipelineLayout layout, u32 set,
-                                          const void* data) const noexcept {
+                                          const void* data) const noexcept
+    {
         dld->vkCmdPushDescriptorSetWithTemplateKHR(handle, update_template, layout, set, data);
     }
 
-    void BindPipeline(VkPipelineBindPoint bind_point, VkPipeline pipeline) const noexcept {
+    void BindPipeline(VkPipelineBindPoint bind_point, VkPipeline pipeline) const noexcept
+    {
         dld->vkCmdBindPipeline(handle, bind_point, pipeline);
     }
 
     void BindIndexBuffer(VkBuffer buffer, VkDeviceSize offset,
-                         VkIndexType index_type) const noexcept {
+                         VkIndexType index_type) const noexcept
+    {
         dld->vkCmdBindIndexBuffer(handle, buffer, offset, index_type);
     }
 
     void BindVertexBuffers(u32 first, u32 count, const VkBuffer* buffers,
-                           const VkDeviceSize* offsets) const noexcept {
+                           const VkDeviceSize* offsets) const noexcept
+    {
         dld->vkCmdBindVertexBuffers(handle, first, count, buffers, offsets);
     }
 
-    void BindVertexBuffer(u32 binding, VkBuffer buffer, VkDeviceSize offset) const noexcept {
+    void BindVertexBuffer(u32 binding, VkBuffer buffer, VkDeviceSize offset) const noexcept
+    {
         BindVertexBuffers(binding, 1, &buffer, &offset);
     }
 
     void Draw(u32 vertex_count, u32 instance_count, u32 first_vertex,
-              u32 first_instance) const noexcept {
+              u32 first_instance) const noexcept
+    {
         dld->vkCmdDraw(handle, vertex_count, instance_count, first_vertex, first_instance);
     }
 
     void DrawIndexed(u32 index_count, u32 instance_count, u32 first_index, u32 vertex_offset,
-                     u32 first_instance) const noexcept {
+                     u32 first_instance) const noexcept
+    {
         dld->vkCmdDrawIndexed(handle, index_count, instance_count, first_index, vertex_offset,
                               first_instance);
     }
 
     void DrawIndirect(VkBuffer src_buffer, VkDeviceSize src_offset, u32 draw_count,
-                      u32 stride) const noexcept {
+                      u32 stride) const noexcept
+    {
         dld->vkCmdDrawIndirect(handle, src_buffer, src_offset, draw_count, stride);
     }
 
     void DrawIndexedIndirect(VkBuffer src_buffer, VkDeviceSize src_offset, u32 draw_count,
-                             u32 stride) const noexcept {
+                             u32 stride) const noexcept
+    {
         dld->vkCmdDrawIndexedIndirect(handle, src_buffer, src_offset, draw_count, stride);
     }
 
     void DrawIndirectCount(VkBuffer src_buffer, VkDeviceSize src_offset, VkBuffer count_buffer,
-                           VkDeviceSize count_offset, u32 draw_count, u32 stride) const noexcept {
+                           VkDeviceSize count_offset, u32 draw_count, u32 stride) const noexcept
+    {
         dld->vkCmdDrawIndirectCount(handle, src_buffer, src_offset, count_buffer, count_offset,
                                     draw_count, stride);
     }
 
     void DrawIndexedIndirectCount(VkBuffer src_buffer, VkDeviceSize src_offset,
                                   VkBuffer count_buffer, VkDeviceSize count_offset, u32 draw_count,
-                                  u32 stride) const noexcept {
+                                  u32 stride) const noexcept
+    {
         dld->vkCmdDrawIndexedIndirectCount(handle, src_buffer, src_offset, count_buffer,
                                            count_offset, draw_count, stride);
     }
 
     void DrawIndirectByteCountEXT(u32 instance_count, u32 first_instance, VkBuffer counter_buffer,
                                   VkDeviceSize counter_buffer_offset, u32 counter_offset,
-                                  u32 stride) {
+                                  u32 stride)
+    {
         dld->vkCmdDrawIndirectByteCountEXT(handle, instance_count, first_instance, counter_buffer,
                                            counter_buffer_offset, counter_offset, stride);
     }
 
     void ClearAttachments(Span<VkClearAttachment> attachments,
-                          Span<VkClearRect> rects) const noexcept {
+                          Span<VkClearRect> rects) const noexcept
+    {
         dld->vkCmdClearAttachments(handle, attachments.size(), attachments.data(), rects.size(),
                                    rects.data());
     }
 
     void ClearColorImage(VkImage image, VkImageLayout layout, VkClearColorValue color,
-                         Span<VkImageSubresourceRange> ranges) {
+                         Span<VkImageSubresourceRange> ranges)
+    {
         dld->vkCmdClearColorImage(handle, image, layout, &color, ranges.size(), ranges.data());
     }
 
     void BlitImage(VkImage src_image, VkImageLayout src_layout, VkImage dst_image,
                    VkImageLayout dst_layout, Span<VkImageBlit> regions,
-                   VkFilter filter) const noexcept {
+                   VkFilter filter) const noexcept
+    {
         dld->vkCmdBlitImage(handle, src_image, src_layout, dst_image, dst_layout, regions.size(),
                             regions.data(), filter);
     }
 
     void ResolveImage(VkImage src_image, VkImageLayout src_layout, VkImage dst_image,
-                      VkImageLayout dst_layout, Span<VkImageResolve> regions) {
+                      VkImageLayout dst_layout, Span<VkImageResolve> regions)
+    {
         dld->vkCmdResolveImage(handle, src_image, src_layout, dst_image, dst_layout, regions.size(),
                                regions.data());
     }
 
-    void Dispatch(u32 x, u32 y, u32 z) const noexcept {
-        dld->vkCmdDispatch(handle, x, y, z);
-    }
+    void Dispatch(u32 x, u32 y, u32 z) const noexcept { dld->vkCmdDispatch(handle, x, y, z); }
 
-    void DispatchIndirect(VkBuffer indirect_buffer, VkDeviceSize offset) const noexcept {
+    void DispatchIndirect(VkBuffer indirect_buffer, VkDeviceSize offset) const noexcept
+    {
         dld->vkCmdDispatchIndirect(handle, indirect_buffer, offset);
     }
 
     void PipelineBarrier(VkPipelineStageFlags src_stage_mask, VkPipelineStageFlags dst_stage_mask,
                          VkDependencyFlags dependency_flags, Span<VkMemoryBarrier> memory_barriers,
                          Span<VkBufferMemoryBarrier> buffer_barriers,
-                         Span<VkImageMemoryBarrier> image_barriers) const noexcept {
+                         Span<VkImageMemoryBarrier> image_barriers) const noexcept
+    {
         dld->vkCmdPipelineBarrier(handle, src_stage_mask, dst_stage_mask, dependency_flags,
                                   memory_barriers.size(), memory_barriers.data(),
                                   buffer_barriers.size(), buffer_barriers.data(),
@@ -1294,105 +1275,125 @@ public:
     }
 
     void PipelineBarrier(VkPipelineStageFlags src_stage_mask, VkPipelineStageFlags dst_stage_mask,
-                         VkDependencyFlags dependency_flags = 0) const noexcept {
+                         VkDependencyFlags dependency_flags = 0) const noexcept
+    {
         PipelineBarrier(src_stage_mask, dst_stage_mask, dependency_flags, {}, {}, {});
     }
 
     void PipelineBarrier(VkPipelineStageFlags src_stage_mask, VkPipelineStageFlags dst_stage_mask,
                          VkDependencyFlags dependency_flags,
-                         const VkMemoryBarrier& memory_barrier) const noexcept {
+                         const VkMemoryBarrier& memory_barrier) const noexcept
+    {
         PipelineBarrier(src_stage_mask, dst_stage_mask, dependency_flags, memory_barrier, {}, {});
     }
 
     void PipelineBarrier(VkPipelineStageFlags src_stage_mask, VkPipelineStageFlags dst_stage_mask,
                          VkDependencyFlags dependency_flags,
-                         const VkBufferMemoryBarrier& buffer_barrier) const noexcept {
+                         const VkBufferMemoryBarrier& buffer_barrier) const noexcept
+    {
         PipelineBarrier(src_stage_mask, dst_stage_mask, dependency_flags, {}, buffer_barrier, {});
     }
 
     void PipelineBarrier(VkPipelineStageFlags src_stage_mask, VkPipelineStageFlags dst_stage_mask,
                          VkDependencyFlags dependency_flags,
-                         const VkImageMemoryBarrier& image_barrier) const noexcept {
+                         const VkImageMemoryBarrier& image_barrier) const noexcept
+    {
         PipelineBarrier(src_stage_mask, dst_stage_mask, dependency_flags, {}, {}, image_barrier);
     }
 
     void CopyBufferToImage(VkBuffer src_buffer, VkImage dst_image, VkImageLayout dst_image_layout,
-                           Span<VkBufferImageCopy> regions) const noexcept {
+                           Span<VkBufferImageCopy> regions) const noexcept
+    {
         dld->vkCmdCopyBufferToImage(handle, src_buffer, dst_image, dst_image_layout, regions.size(),
                                     regions.data());
     }
 
     void CopyBuffer(VkBuffer src_buffer, VkBuffer dst_buffer,
-                    Span<VkBufferCopy> regions) const noexcept {
+                    Span<VkBufferCopy> regions) const noexcept
+    {
         dld->vkCmdCopyBuffer(handle, src_buffer, dst_buffer, regions.size(), regions.data());
     }
 
     void CopyImage(VkImage src_image, VkImageLayout src_layout, VkImage dst_image,
-                   VkImageLayout dst_layout, Span<VkImageCopy> regions) const noexcept {
+                   VkImageLayout dst_layout, Span<VkImageCopy> regions) const noexcept
+    {
         dld->vkCmdCopyImage(handle, src_image, src_layout, dst_image, dst_layout, regions.size(),
                             regions.data());
     }
 
     void CopyImageToBuffer(VkImage src_image, VkImageLayout src_layout, VkBuffer dst_buffer,
-                           Span<VkBufferImageCopy> regions) const noexcept {
+                           Span<VkBufferImageCopy> regions) const noexcept
+    {
         dld->vkCmdCopyImageToBuffer(handle, src_image, src_layout, dst_buffer, regions.size(),
                                     regions.data());
     }
 
     void CopyQueryPoolResults(VkQueryPool query_pool, u32 first_query, u32 query_count,
                               VkBuffer dst_buffer, VkDeviceSize dst_offset, VkDeviceSize stride,
-                              VkQueryResultFlags flags) const noexcept {
+                              VkQueryResultFlags flags) const noexcept
+    {
         dld->vkCmdCopyQueryPoolResults(handle, query_pool, first_query, query_count, dst_buffer,
                                        dst_offset, stride, flags);
     }
 
     void FillBuffer(VkBuffer dst_buffer, VkDeviceSize dst_offset, VkDeviceSize size,
-                    u32 data) const noexcept {
+                    u32 data) const noexcept
+    {
         dld->vkCmdFillBuffer(handle, dst_buffer, dst_offset, size, data);
     }
 
     void PushConstants(VkPipelineLayout layout, VkShaderStageFlags flags, u32 offset, u32 size,
-                       const void* values) const noexcept {
+                       const void* values) const noexcept
+    {
         dld->vkCmdPushConstants(handle, layout, flags, offset, size, values);
     }
 
-    template <typename T>
+    template<typename T>
     void PushConstants(VkPipelineLayout layout, VkShaderStageFlags flags,
-                       const T& data) const noexcept {
+                       const T& data) const noexcept
+    {
         static_assert(std::is_trivially_copyable_v<T>, "<data> is not trivially copyable");
         dld->vkCmdPushConstants(handle, layout, flags, 0, static_cast<u32>(sizeof(T)), &data);
     }
 
-    void SetViewport(u32 first, Span<VkViewport> viewports) const noexcept {
+    void SetViewport(u32 first, Span<VkViewport> viewports) const noexcept
+    {
         dld->vkCmdSetViewport(handle, first, viewports.size(), viewports.data());
     }
 
-    void SetScissor(u32 first, Span<VkRect2D> scissors) const noexcept {
+    void SetScissor(u32 first, Span<VkRect2D> scissors) const noexcept
+    {
         dld->vkCmdSetScissor(handle, first, scissors.size(), scissors.data());
     }
 
-    void SetBlendConstants(const float blend_constants[4]) const noexcept {
+    void SetBlendConstants(const float blend_constants[4]) const noexcept
+    {
         dld->vkCmdSetBlendConstants(handle, blend_constants);
     }
 
-    void SetStencilCompareMask(VkStencilFaceFlags face_mask, u32 compare_mask) const noexcept {
+    void SetStencilCompareMask(VkStencilFaceFlags face_mask, u32 compare_mask) const noexcept
+    {
         dld->vkCmdSetStencilCompareMask(handle, face_mask, compare_mask);
     }
 
-    void SetStencilReference(VkStencilFaceFlags face_mask, u32 reference) const noexcept {
+    void SetStencilReference(VkStencilFaceFlags face_mask, u32 reference) const noexcept
+    {
         dld->vkCmdSetStencilReference(handle, face_mask, reference);
     }
 
-    void SetStencilWriteMask(VkStencilFaceFlags face_mask, u32 write_mask) const noexcept {
+    void SetStencilWriteMask(VkStencilFaceFlags face_mask, u32 write_mask) const noexcept
+    {
         dld->vkCmdSetStencilWriteMask(handle, face_mask, write_mask);
     }
 
-    void SetDepthBias(float constant_factor, float clamp, float slope_factor) const noexcept {
+    void SetDepthBias(float constant_factor, float clamp, float slope_factor) const noexcept
+    {
         dld->vkCmdSetDepthBias(handle, constant_factor, clamp, slope_factor);
     }
 
     void SetDepthBias(float constant_factor, float clamp, float slope_factor,
-                      VkDepthBiasRepresentationInfoEXT* extra) const noexcept {
+                      VkDepthBiasRepresentationInfoEXT* extra) const noexcept
+    {
         VkDepthBiasInfoEXT info{
             .sType = VK_STRUCTURE_TYPE_DEPTH_BIAS_INFO_EXT,
             .pNext = extra,
@@ -1403,18 +1404,21 @@ public:
         dld->vkCmdSetDepthBias2EXT(handle, &info);
     }
 
-    void SetDepthBounds(float min_depth_bounds, float max_depth_bounds) const noexcept {
+    void SetDepthBounds(float min_depth_bounds, float max_depth_bounds) const noexcept
+    {
         dld->vkCmdSetDepthBounds(handle, min_depth_bounds, max_depth_bounds);
     }
 
-    void SetEvent(VkEvent event, VkPipelineStageFlags stage_flags) const noexcept {
+    void SetEvent(VkEvent event, VkPipelineStageFlags stage_flags) const noexcept
+    {
         dld->vkCmdSetEvent(handle, event, stage_flags);
     }
 
     void WaitEvents(Span<VkEvent> events, VkPipelineStageFlags src_stage_mask,
                     VkPipelineStageFlags dst_stage_mask, Span<VkMemoryBarrier> memory_barriers,
                     Span<VkBufferMemoryBarrier> buffer_barriers,
-                    Span<VkImageMemoryBarrier> image_barriers) const noexcept {
+                    Span<VkImageMemoryBarrier> image_barriers) const noexcept
+    {
         dld->vkCmdWaitEvents(handle, events.size(), events.data(), src_stage_mask, dst_stage_mask,
                              memory_barriers.size(), memory_barriers.data(), buffer_barriers.size(),
                              buffer_barriers.data(), image_barriers.size(), image_barriers.data());
@@ -1422,36 +1426,44 @@ public:
 
     void BindVertexBuffers2EXT(u32 first_binding, u32 binding_count, const VkBuffer* buffers,
                                const VkDeviceSize* offsets, const VkDeviceSize* sizes,
-                               const VkDeviceSize* strides) const noexcept {
+                               const VkDeviceSize* strides) const noexcept
+    {
         dld->vkCmdBindVertexBuffers2EXT(handle, first_binding, binding_count, buffers, offsets,
                                         sizes, strides);
     }
 
-    void SetCullModeEXT(VkCullModeFlags cull_mode) const noexcept {
+    void SetCullModeEXT(VkCullModeFlags cull_mode) const noexcept
+    {
         dld->vkCmdSetCullModeEXT(handle, cull_mode);
     }
 
-    void SetDepthBoundsTestEnableEXT(bool enable) const noexcept {
+    void SetDepthBoundsTestEnableEXT(bool enable) const noexcept
+    {
         dld->vkCmdSetDepthBoundsTestEnableEXT(handle, enable ? VK_TRUE : VK_FALSE);
     }
 
-    void SetDepthCompareOpEXT(VkCompareOp compare_op) const noexcept {
+    void SetDepthCompareOpEXT(VkCompareOp compare_op) const noexcept
+    {
         dld->vkCmdSetDepthCompareOpEXT(handle, compare_op);
     }
 
-    void SetDepthTestEnableEXT(bool enable) const noexcept {
+    void SetDepthTestEnableEXT(bool enable) const noexcept
+    {
         dld->vkCmdSetDepthTestEnableEXT(handle, enable ? VK_TRUE : VK_FALSE);
     }
 
-    void SetDepthWriteEnableEXT(bool enable) const noexcept {
+    void SetDepthWriteEnableEXT(bool enable) const noexcept
+    {
         dld->vkCmdSetDepthWriteEnableEXT(handle, enable ? VK_TRUE : VK_FALSE);
     }
 
-    void SetPrimitiveRestartEnableEXT(bool enable) const noexcept {
+    void SetPrimitiveRestartEnableEXT(bool enable) const noexcept
+    {
         dld->vkCmdSetPrimitiveRestartEnableEXT(handle, enable ? VK_TRUE : VK_FALSE);
     }
 
-    void SetRasterizerDiscardEnableEXT(bool enable) const noexcept {
+    void SetRasterizerDiscardEnableEXT(bool enable) const noexcept
+    {
         dld->vkCmdSetRasterizerDiscardEnableEXT(handle, enable ? VK_TRUE : VK_FALSE);
     }
 
@@ -1475,105 +1487,125 @@ public:
         dld->vkCmdSetLineStippleEXT(handle, factor, pattern);
     }
 
-    void SetDepthBiasEnableEXT(bool enable) const noexcept {
+    void SetDepthBiasEnableEXT(bool enable) const noexcept
+    {
         dld->vkCmdSetDepthBiasEnableEXT(handle, enable ? VK_TRUE : VK_FALSE);
     }
 
-    void SetLogicOpEnableEXT(bool enable) const noexcept {
+    void SetLogicOpEnableEXT(bool enable) const noexcept
+    {
         dld->vkCmdSetLogicOpEnableEXT(handle, enable ? VK_TRUE : VK_FALSE);
     }
 
-    void SetAlphaToCoverageEnableEXT(bool enable) const noexcept {
+    void SetAlphaToCoverageEnableEXT(bool enable) const noexcept
+    {
         dld->vkCmdSetAlphaToCoverageEnableEXT(handle, enable ? VK_TRUE : VK_FALSE);
     }
 
-    void SetAlphaToOneEnableEXT(bool enable) const noexcept {
+    void SetAlphaToOneEnableEXT(bool enable) const noexcept
+    {
         dld->vkCmdSetAlphaToOneEnableEXT(handle, enable ? VK_TRUE : VK_FALSE);
     }
 
-    void SetDepthClampEnableEXT(bool enable) const noexcept {
+    void SetDepthClampEnableEXT(bool enable) const noexcept
+    {
         dld->vkCmdSetDepthClampEnableEXT(handle, enable ? VK_TRUE : VK_FALSE);
     }
 
-    void SetFrontFaceEXT(VkFrontFace front_face) const noexcept {
+    void SetFrontFaceEXT(VkFrontFace front_face) const noexcept
+    {
         dld->vkCmdSetFrontFaceEXT(handle, front_face);
     }
 
-    void SetLogicOpEXT(VkLogicOp logic_op) const noexcept {
+    void SetLogicOpEXT(VkLogicOp logic_op) const noexcept
+    {
         dld->vkCmdSetLogicOpEXT(handle, logic_op);
     }
 
-    void SetPatchControlPointsEXT(uint32_t patch_control_points) const noexcept {
+    void SetPatchControlPointsEXT(uint32_t patch_control_points) const noexcept
+    {
         dld->vkCmdSetPatchControlPointsEXT(handle, patch_control_points);
     }
 
-    void SetColorWriteMaskEXT(u32 first, Span<VkColorComponentFlags> masks) const noexcept {
+    void SetColorWriteMaskEXT(u32 first, Span<VkColorComponentFlags> masks) const noexcept
+    {
         dld->vkCmdSetColorWriteMaskEXT(handle, first, masks.size(), masks.data());
     }
 
-    void SetColorBlendEnableEXT(u32 first, Span<VkBool32> enables) const noexcept {
+    void SetColorBlendEnableEXT(u32 first, Span<VkBool32> enables) const noexcept
+    {
         dld->vkCmdSetColorBlendEnableEXT(handle, first, enables.size(), enables.data());
     }
 
-    void SetColorBlendEquationEXT(u32 first,
-                                  Span<VkColorBlendEquationEXT> equations) const noexcept {
+    void SetColorBlendEquationEXT(u32 first, Span<VkColorBlendEquationEXT> equations) const noexcept
+    {
         dld->vkCmdSetColorBlendEquationEXT(handle, first, equations.size(), equations.data());
     }
 
-    void SetLineWidth(float line_width) const noexcept {
+    void SetLineWidth(float line_width) const noexcept
+    {
         dld->vkCmdSetLineWidth(handle, line_width);
     }
 
-    void SetPrimitiveTopologyEXT(VkPrimitiveTopology primitive_topology) const noexcept {
+    void SetPrimitiveTopologyEXT(VkPrimitiveTopology primitive_topology) const noexcept
+    {
         dld->vkCmdSetPrimitiveTopologyEXT(handle, primitive_topology);
     }
 
     void SetStencilOpEXT(VkStencilFaceFlags face_mask, VkStencilOp fail_op, VkStencilOp pass_op,
-                         VkStencilOp depth_fail_op, VkCompareOp compare_op) const noexcept {
+                         VkStencilOp depth_fail_op, VkCompareOp compare_op) const noexcept
+    {
         dld->vkCmdSetStencilOpEXT(handle, face_mask, fail_op, pass_op, depth_fail_op, compare_op);
     }
 
-    void SetStencilTestEnableEXT(bool enable) const noexcept {
+    void SetStencilTestEnableEXT(bool enable) const noexcept
+    {
         dld->vkCmdSetStencilTestEnableEXT(handle, enable ? VK_TRUE : VK_FALSE);
     }
 
-    void SetVertexInputEXT(
-        vk::Span<VkVertexInputBindingDescription2EXT> bindings,
-        vk::Span<VkVertexInputAttributeDescription2EXT> attributes) const noexcept {
+    void
+    SetVertexInputEXT(vk::Span<VkVertexInputBindingDescription2EXT> bindings,
+                      vk::Span<VkVertexInputAttributeDescription2EXT> attributes) const noexcept
+    {
         dld->vkCmdSetVertexInputEXT(handle, bindings.size(), bindings.data(), attributes.size(),
                                     attributes.data());
     }
 
     void BindTransformFeedbackBuffersEXT(u32 first, u32 count, const VkBuffer* buffers,
                                          const VkDeviceSize* offsets,
-                                         const VkDeviceSize* sizes) const noexcept {
+                                         const VkDeviceSize* sizes) const noexcept
+    {
         dld->vkCmdBindTransformFeedbackBuffersEXT(handle, first, count, buffers, offsets, sizes);
     }
 
     void BeginTransformFeedbackEXT(u32 first_counter_buffer, u32 counter_buffers_count,
                                    const VkBuffer* counter_buffers,
-                                   const VkDeviceSize* counter_buffer_offsets) const noexcept {
+                                   const VkDeviceSize* counter_buffer_offsets) const noexcept
+    {
         dld->vkCmdBeginTransformFeedbackEXT(handle, first_counter_buffer, counter_buffers_count,
                                             counter_buffers, counter_buffer_offsets);
     }
 
     void EndTransformFeedbackEXT(u32 first_counter_buffer, u32 counter_buffers_count,
                                  const VkBuffer* counter_buffers,
-                                 const VkDeviceSize* counter_buffer_offsets) const noexcept {
+                                 const VkDeviceSize* counter_buffer_offsets) const noexcept
+    {
         dld->vkCmdEndTransformFeedbackEXT(handle, first_counter_buffer, counter_buffers_count,
                                           counter_buffers, counter_buffer_offsets);
     }
 
-    void BeginConditionalRenderingEXT(
-        const VkConditionalRenderingBeginInfoEXT& info) const noexcept {
+    void BeginConditionalRenderingEXT(const VkConditionalRenderingBeginInfoEXT& info) const noexcept
+    {
         dld->vkCmdBeginConditionalRenderingEXT(handle, &info);
     }
 
-    void EndConditionalRenderingEXT() const noexcept {
+    void EndConditionalRenderingEXT() const noexcept
+    {
         dld->vkCmdEndConditionalRenderingEXT(handle);
     }
 
-    void BeginDebugUtilsLabelEXT(const char* label, std::span<float, 4> color) const noexcept {
+    void BeginDebugUtilsLabelEXT(const char* label, std::span<float, 4> color) const noexcept
+    {
         const VkDebugUtilsLabelEXT label_info{
             .sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT,
             .pNext = nullptr,
@@ -1583,9 +1615,7 @@ public:
         dld->vkCmdBeginDebugUtilsLabelEXT(handle, &label_info);
     }
 
-    void EndDebugUtilsLabelEXT() const noexcept {
-        dld->vkCmdEndDebugUtilsLabelEXT(handle);
-    }
+    void EndDebugUtilsLabelEXT() const noexcept { dld->vkCmdEndDebugUtilsLabelEXT(handle); }
 
 private:
     VkCommandBuffer handle;
@@ -1594,11 +1624,11 @@ private:
 
 u32 AvailableVersion(const InstanceDispatch& dld) noexcept;
 
-std::optional<std::vector<VkExtensionProperties>> EnumerateInstanceExtensionProperties(
-    const InstanceDispatch& dld);
+std::optional<std::vector<VkExtensionProperties>>
+EnumerateInstanceExtensionProperties(const InstanceDispatch& dld);
 
-std::optional<std::vector<VkLayerProperties>> EnumerateInstanceLayerProperties(
-    const InstanceDispatch& dld);
+std::optional<std::vector<VkLayerProperties>>
+EnumerateInstanceLayerProperties(const InstanceDispatch& dld);
 
 std::string GetDriverName(VkPhysicalDeviceDriverProperties driver);
 

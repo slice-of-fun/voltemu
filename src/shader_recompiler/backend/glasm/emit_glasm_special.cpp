@@ -7,7 +7,8 @@
 
 namespace Shader::Backend::GLASM {
 
-static void DefinePhi(EmitContext& ctx, IR::Inst& phi) {
+static void DefinePhi(EmitContext& ctx, IR::Inst& phi)
+{
     switch (phi.Type()) {
     case IR::Type::U1:
     case IR::Type::U32:
@@ -23,7 +24,8 @@ static void DefinePhi(EmitContext& ctx, IR::Inst& phi) {
     }
 }
 
-void EmitPhi(EmitContext& ctx, IR::Inst& phi) {
+void EmitPhi(EmitContext& ctx, IR::Inst& phi)
+{
     const size_t num_args{phi.NumArgs()};
     for (size_t i = 0; i < num_args; ++i) {
         ctx.reg_alloc.Consume(phi.Arg(i));
@@ -34,13 +36,17 @@ void EmitPhi(EmitContext& ctx, IR::Inst& phi) {
     }
 }
 
-void EmitVoid(EmitContext&) {}
+void EmitVoid(EmitContext&)
+{
+}
 
-void EmitReference(EmitContext& ctx, const IR::Value& value) {
+void EmitReference(EmitContext& ctx, const IR::Value& value)
+{
     ctx.reg_alloc.Consume(value);
 }
 
-void EmitPhiMove(EmitContext& ctx, const IR::Value& phi_value, const IR::Value& value) {
+void EmitPhiMove(EmitContext& ctx, const IR::Value& phi_value, const IR::Value& value)
+{
     IR::Inst& phi{RegAlloc::AliasInst(*phi_value.Inst())};
     if (!phi.Definition<Id>().is_valid) {
         // The phi node wasn't forward defined
@@ -67,15 +73,18 @@ void EmitPhiMove(EmitContext& ctx, const IR::Value& phi_value, const IR::Value& 
     }
 }
 
-void EmitPrologue(EmitContext&) {
+void EmitPrologue(EmitContext&)
+{
     // TODO
 }
 
-void EmitEpilogue(EmitContext&) {
+void EmitEpilogue(EmitContext&)
+{
     // TODO
 }
 
-void EmitEmitVertex(EmitContext& ctx, ScalarS32 stream) {
+void EmitEmitVertex(EmitContext& ctx, ScalarS32 stream)
+{
     if (stream.type == Type::U32 && stream.imm_u32 == 0) {
         ctx.Add("EMIT;");
     } else {
@@ -83,7 +92,8 @@ void EmitEmitVertex(EmitContext& ctx, ScalarS32 stream) {
     }
 }
 
-void EmitEndPrimitive(EmitContext& ctx, const IR::Value& stream) {
+void EmitEndPrimitive(EmitContext& ctx, const IR::Value& stream)
+{
     if (!stream.IsImmediate()) {
         LOG_WARNING(Shader_GLASM, "Stream is not immediate");
     }

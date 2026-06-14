@@ -1,6 +1,8 @@
 // SPDX-FileCopyrightText: Copyright 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/glue/time/time_zone_binary.h"
+
 #include "core/core.h"
 #include "core/file_sys/content_archive.h"
 #include "core/file_sys/nca_metadata.h"
@@ -9,19 +11,20 @@
 #include "core/file_sys/system_archive/system_archive.h"
 #include "core/file_sys/vfs/vfs.h"
 #include "core/hle/service/filesystem/filesystem.h"
-#include "core/hle/service/glue/time/time_zone_binary.h"
 
 namespace Service::Glue::Time {
 constexpr u64 TimeZoneBinaryId = 0x10000000000080E;
 
-void TimeZoneBinary::Reset() {
+void TimeZoneBinary::Reset()
+{
     time_zone_binary_romfs = {};
     time_zone_binary_mount_result = ResultUnknown;
     time_zone_scratch_space.clear();
     time_zone_scratch_space.resize(0x2800, 0);
 }
 
-Result TimeZoneBinary::Mount() {
+Result TimeZoneBinary::Mount()
+{
     Reset();
 
     auto& fsc{system.GetFileSystemController()};
@@ -60,7 +63,8 @@ Result TimeZoneBinary::Mount() {
 }
 
 Result TimeZoneBinary::Read(size_t& out_read_size, std::span<u8> out_buffer, size_t out_buffer_size,
-                            std::string_view path) {
+                            std::string_view path)
+{
     R_UNLESS(time_zone_binary_mount_result == ResultSuccess, time_zone_binary_mount_result);
 
     auto vfs_file{time_zone_binary_romfs->GetFileRelative(path)};
@@ -77,7 +81,8 @@ Result TimeZoneBinary::Read(size_t& out_read_size, std::span<u8> out_buffer, siz
     R_SUCCEED();
 }
 
-void TimeZoneBinary::GetListPath(std::string& out_path) {
+void TimeZoneBinary::GetListPath(std::string& out_path)
+{
     if (time_zone_binary_mount_result != ResultSuccess) {
         return;
     }
@@ -85,7 +90,8 @@ void TimeZoneBinary::GetListPath(std::string& out_path) {
     out_path = "/binaryList.txt";
 }
 
-void TimeZoneBinary::GetVersionPath(std::string& out_path) {
+void TimeZoneBinary::GetVersionPath(std::string& out_path)
+{
     if (time_zone_binary_mount_result != ResultSuccess) {
         return;
     }
@@ -94,7 +100,8 @@ void TimeZoneBinary::GetVersionPath(std::string& out_path) {
 }
 
 void TimeZoneBinary::GetTimeZonePath(std::string& out_path,
-                                     const Service::PSC::Time::LocationName& name) {
+                                     const Service::PSC::Time::LocationName& name)
+{
     if (time_zone_binary_mount_result != ResultSuccess) {
         return;
     }
@@ -102,7 +109,8 @@ void TimeZoneBinary::GetTimeZonePath(std::string& out_path,
     out_path = fmt::format("/zoneinfo/{}", name.data());
 }
 
-bool TimeZoneBinary::IsValid(const Service::PSC::Time::LocationName& name) {
+bool TimeZoneBinary::IsValid(const Service::PSC::Time::LocationName& name)
+{
     std::string path{};
     GetTimeZonePath(path, name);
 
@@ -114,7 +122,8 @@ bool TimeZoneBinary::IsValid(const Service::PSC::Time::LocationName& name) {
     return vfs_file->GetSize() != 0;
 }
 
-u32 TimeZoneBinary::GetTimeZoneCount() {
+u32 TimeZoneBinary::GetTimeZoneCount()
+{
     std::string path{};
     GetListPath(path);
 
@@ -136,7 +145,8 @@ u32 TimeZoneBinary::GetTimeZoneCount() {
     return count;
 }
 
-Result TimeZoneBinary::GetTimeZoneVersion(Service::PSC::Time::RuleVersion& out_rule_version) {
+Result TimeZoneBinary::GetTimeZoneVersion(Service::PSC::Time::RuleVersion& out_rule_version)
+{
     std::string path{};
     GetVersionPath(path);
 
@@ -150,7 +160,8 @@ Result TimeZoneBinary::GetTimeZoneVersion(Service::PSC::Time::RuleVersion& out_r
 }
 
 Result TimeZoneBinary::GetTimeZoneRule(std::span<const u8>& out_rule, size_t& out_rule_size,
-                                       const Service::PSC::Time::LocationName& name) {
+                                       const Service::PSC::Time::LocationName& name)
+{
     std::string path{};
     GetTimeZonePath(path, name);
 
@@ -162,9 +173,11 @@ Result TimeZoneBinary::GetTimeZoneRule(std::span<const u8>& out_rule, size_t& ou
     R_SUCCEED();
 }
 
-Result TimeZoneBinary::GetTimeZoneLocationList(
-    u32& out_count, std::span<Service::PSC::Time::LocationName> out_names, size_t max_names,
-    u32 index) {
+Result
+TimeZoneBinary::GetTimeZoneLocationList(u32& out_count,
+                                        std::span<Service::PSC::Time::LocationName> out_names,
+                                        size_t max_names, u32 index)
+{
     std::string path{};
     GetListPath(path);
 

@@ -4,15 +4,17 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/crypto/partition_data_manager.h"
+
 #include <array>
 #include <cstring>
+
 #include "common/common_funcs.h"
 #include "common/common_types.h"
 #include "common/hex_util.h"
 #include "common/string_util.h"
 #include "common/swap.h"
 #include "core/crypto/key_manager.h"
-#include "core/crypto/partition_data_manager.h"
 #include "core/crypto/xts_encryption_layer.h"
 #include "core/file_sys/kernel_executable.h"
 #include "core/file_sys/vfs/vfs_offset.h"
@@ -42,7 +44,8 @@ static_assert(sizeof(Package2Header) == 0x200, "Package2Header has incorrect siz
 const u8 PartitionDataManager::MAX_KEYBLOB_SOURCE_HASH = 32;
 
 static FileSys::VirtualFile FindFileInDirWithNames(const FileSys::VirtualDir& dir,
-                                                   const std::string& name) {
+                                                   const std::string& name)
+{
     const auto upper = Common::ToUpper(name);
 
     for (const auto& fname : {name, name + ".bin", upper, upper + ".BIN"}) {
@@ -72,27 +75,32 @@ PartitionDataManager::PartitionDataManager(const FileSys::VirtualDir& sysdata_di
       secure_monitor_bytes(secure_monitor == nullptr ? std::vector<u8>{}
                                                      : secure_monitor->ReadAllBytes()),
       package1_decrypted_bytes(package1_decrypted == nullptr ? std::vector<u8>{}
-                                                             : package1_decrypted->ReadAllBytes()) {
+                                                             : package1_decrypted->ReadAllBytes())
+{
 }
 
 PartitionDataManager::~PartitionDataManager() = default;
 
-bool PartitionDataManager::HasBoot0() const {
+bool PartitionDataManager::HasBoot0() const
+{
     return boot0 != nullptr;
 }
 
-FileSys::VirtualFile PartitionDataManager::GetBoot0Raw() const {
+FileSys::VirtualFile PartitionDataManager::GetBoot0Raw() const
+{
     return boot0;
 }
 
-PartitionDataManager::EncryptedKeyBlob PartitionDataManager::GetEncryptedKeyblob(
-    std::size_t index) const {
+PartitionDataManager::EncryptedKeyBlob
+PartitionDataManager::GetEncryptedKeyblob(std::size_t index) const
+{
     if (HasBoot0() && index < NUM_ENCRYPTED_KEYBLOBS)
         return GetEncryptedKeyblobs()[index];
     return {};
 }
 
-PartitionDataManager::EncryptedKeyBlobs PartitionDataManager::GetEncryptedKeyblobs() const {
+PartitionDataManager::EncryptedKeyBlobs PartitionDataManager::GetEncryptedKeyblobs() const
+{
     if (!HasBoot0())
         return {};
 
@@ -102,23 +110,28 @@ PartitionDataManager::EncryptedKeyBlobs PartitionDataManager::GetEncryptedKeyblo
     return out;
 }
 
-std::vector<u8> PartitionDataManager::GetSecureMonitor() const {
+std::vector<u8> PartitionDataManager::GetSecureMonitor() const
+{
     return secure_monitor_bytes;
 }
 
-std::vector<u8> PartitionDataManager::GetPackage1Decrypted() const {
+std::vector<u8> PartitionDataManager::GetPackage1Decrypted() const
+{
     return package1_decrypted_bytes;
 }
 
-bool PartitionDataManager::HasFuses() const {
+bool PartitionDataManager::HasFuses() const
+{
     return fuses != nullptr;
 }
 
-FileSys::VirtualFile PartitionDataManager::GetFusesRaw() const {
+FileSys::VirtualFile PartitionDataManager::GetFusesRaw() const
+{
     return fuses;
 }
 
-std::array<u8, 16> PartitionDataManager::GetSecureBootKey() const {
+std::array<u8, 16> PartitionDataManager::GetSecureBootKey() const
+{
     if (!HasFuses())
         return {};
     Key128 out{};
@@ -126,23 +139,28 @@ std::array<u8, 16> PartitionDataManager::GetSecureBootKey() const {
     return out;
 }
 
-bool PartitionDataManager::HasKFuses() const {
+bool PartitionDataManager::HasKFuses() const
+{
     return kfuses != nullptr;
 }
 
-FileSys::VirtualFile PartitionDataManager::GetKFusesRaw() const {
+FileSys::VirtualFile PartitionDataManager::GetKFusesRaw() const
+{
     return kfuses;
 }
 
-bool PartitionDataManager::HasPackage2(Package2Type type) const {
+bool PartitionDataManager::HasPackage2(Package2Type type) const
+{
     return package2.at(static_cast<size_t>(type)) != nullptr;
 }
 
-FileSys::VirtualFile PartitionDataManager::GetPackage2Raw(Package2Type type) const {
+FileSys::VirtualFile PartitionDataManager::GetPackage2Raw(Package2Type type) const
+{
     return package2.at(static_cast<size_t>(type));
 }
 
-static bool AttemptDecrypt(const std::array<u8, 16>& key, Package2Header& header) {
+static bool AttemptDecrypt(const std::array<u8, 16>& key, Package2Header& header)
+{
     Package2Header temp = header;
     AESCipher<Key128> cipher(key, Mode::CTR);
     cipher.SetIV(header.header_ctr);
@@ -157,7 +175,8 @@ static bool AttemptDecrypt(const std::array<u8, 16>& key, Package2Header& header
 }
 
 void PartitionDataManager::DecryptPackage2(const std::array<Key128, 0x20>& package2_keys,
-                                           Package2Type type) {
+                                           Package2Type type)
+{
     FileSys::VirtualFile file = std::make_shared<FileSys::OffsetVfsFile>(
         package2[static_cast<size_t>(type)],
         package2[static_cast<size_t>(type)]->GetSize() - 0x4000, 0x4000);
@@ -217,34 +236,41 @@ void PartitionDataManager::DecryptPackage2(const std::array<Key128, 0x20>& packa
     }
 }
 
-const std::vector<u8>& PartitionDataManager::GetPackage2FSDecompressed(Package2Type type) const {
+const std::vector<u8>& PartitionDataManager::GetPackage2FSDecompressed(Package2Type type) const
+{
     return package2_fs.at(static_cast<size_t>(type));
 }
 
-const std::vector<u8>& PartitionDataManager::GetPackage2SPLDecompressed(Package2Type type) const {
+const std::vector<u8>& PartitionDataManager::GetPackage2SPLDecompressed(Package2Type type) const
+{
     return package2_spl.at(static_cast<size_t>(type));
 }
 
-bool PartitionDataManager::HasProdInfo() const {
+bool PartitionDataManager::HasProdInfo() const
+{
     return prodinfo != nullptr;
 }
 
-FileSys::VirtualFile PartitionDataManager::GetProdInfoRaw() const {
+FileSys::VirtualFile PartitionDataManager::GetProdInfoRaw() const
+{
     return prodinfo;
 }
 
-void PartitionDataManager::DecryptProdInfo(std::array<u8, 0x20> bis_key) {
+void PartitionDataManager::DecryptProdInfo(std::array<u8, 0x20> bis_key)
+{
     if (prodinfo == nullptr)
         return;
 
     prodinfo_decrypted = std::make_shared<XTSEncryptionLayer>(prodinfo, bis_key);
 }
 
-FileSys::VirtualFile PartitionDataManager::GetDecryptedProdInfo() const {
+FileSys::VirtualFile PartitionDataManager::GetDecryptedProdInfo() const
+{
     return prodinfo_decrypted;
 }
 
-std::array<u8, 576> PartitionDataManager::GetETicketExtendedKek() const {
+std::array<u8, 576> PartitionDataManager::GetETicketExtendedKek() const
+{
     std::array<u8, 0x240> out{};
     if (prodinfo_decrypted != nullptr)
         prodinfo_decrypted->Read(out.data(), out.size(), 0x3890);

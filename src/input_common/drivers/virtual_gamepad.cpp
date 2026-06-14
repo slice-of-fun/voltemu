@@ -6,13 +6,15 @@
 namespace InputCommon {
 constexpr std::size_t PlayerIndexCount = 10;
 
-VirtualGamepad::VirtualGamepad(std::string input_engine_) : InputEngine(std::move(input_engine_)) {
+VirtualGamepad::VirtualGamepad(std::string input_engine_) : InputEngine(std::move(input_engine_))
+{
     for (std::size_t i = 0; i < PlayerIndexCount; i++) {
         PreSetController(GetIdentifier(i));
     }
 }
 
-void VirtualGamepad::SetButtonState(std::size_t player_index, int button_id, bool value) {
+void VirtualGamepad::SetButtonState(std::size_t player_index, int button_id, bool value)
+{
     if (player_index > PlayerIndexCount) {
         return;
     }
@@ -20,12 +22,14 @@ void VirtualGamepad::SetButtonState(std::size_t player_index, int button_id, boo
     SetButton(identifier, button_id, value);
 }
 
-void VirtualGamepad::SetButtonState(std::size_t player_index, VirtualButton button_id, bool value) {
+void VirtualGamepad::SetButtonState(std::size_t player_index, VirtualButton button_id, bool value)
+{
     SetButtonState(player_index, static_cast<int>(button_id), value);
 }
 
 void VirtualGamepad::SetStickPosition(std::size_t player_index, int axis_id, float x_value,
-                                      float y_value) {
+                                      float y_value)
+{
     if (player_index > PlayerIndexCount) {
         return;
     }
@@ -35,13 +39,15 @@ void VirtualGamepad::SetStickPosition(std::size_t player_index, int axis_id, flo
 }
 
 void VirtualGamepad::SetStickPosition(std::size_t player_index, VirtualStick axis_id, float x_value,
-                                      float y_value) {
+                                      float y_value)
+{
     SetStickPosition(player_index, static_cast<int>(axis_id), x_value, y_value);
 }
 
 void VirtualGamepad::SetMotionState(std::size_t player_index, u64 delta_timestamp, float gyro_x,
                                     float gyro_y, float gyro_z, float accel_x, float accel_y,
-                                    float accel_z) {
+                                    float accel_z)
+{
     const auto identifier = GetIdentifier(player_index);
     const BasicMotion motion_data{
         .gyro_x = gyro_x,
@@ -55,7 +61,8 @@ void VirtualGamepad::SetMotionState(std::size_t player_index, u64 delta_timestam
     SetMotion(identifier, 0, motion_data);
 }
 
-void VirtualGamepad::ResetControllers() {
+void VirtualGamepad::ResetControllers()
+{
     for (std::size_t i = 0; i < PlayerIndexCount; i++) {
         SetStickPosition(i, VirtualStick::Left, 0.0f, 0.0f);
         SetStickPosition(i, VirtualStick::Right, 0.0f, 0.0f);
@@ -83,7 +90,8 @@ void VirtualGamepad::ResetControllers() {
     }
 }
 
-PadIdentifier VirtualGamepad::GetIdentifier(std::size_t player_index) const {
+PadIdentifier VirtualGamepad::GetIdentifier(std::size_t player_index) const
+{
     return {
         .guid = Common::UUID{},
         .port = player_index,

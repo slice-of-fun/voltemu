@@ -18,9 +18,7 @@ enum class VideoCodec : u64 {
 };
 
 struct Offset {
-    constexpr u64 Address() const noexcept {
-        return offset << 8;
-    }
+    constexpr u64 Address() const noexcept { return offset << 8; }
 
 private:
     u64 offset;

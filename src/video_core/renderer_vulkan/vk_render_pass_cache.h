@@ -6,8 +6,9 @@
 
 #pragma once
 
-#include <mutex>
 #include <ankerl/unordered_dense.h>
+
+#include <mutex>
 
 #include "video_core/surface.h"
 #include "video_core/vulkan_common/vulkan_wrapper.h"
@@ -25,9 +26,9 @@ struct RenderPassKey {
 } // namespace Vulkan
 
 namespace std {
-template <>
-struct hash<Vulkan::RenderPassKey> {
-    [[nodiscard]] size_t operator()(const Vulkan::RenderPassKey& key) const noexcept {
+template<> struct hash<Vulkan::RenderPassKey> {
+    [[nodiscard]] size_t operator()(const Vulkan::RenderPassKey& key) const noexcept
+    {
         size_t value = static_cast<size_t>(key.depth_format) << 48;
         value ^= static_cast<size_t>(key.samples) << 52;
         for (size_t i = 0; i < key.color_formats.size(); ++i) {

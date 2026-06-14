@@ -18,16 +18,14 @@ public:
                       Kernel::KProcess* handle, u64 applet_resource_user_id);
     ~IAudioIn() override;
 
-    std::shared_ptr<AudioCore::AudioIn::In> GetImpl() {
-        return impl;
-    }
+    std::shared_ptr<AudioCore::AudioIn::In> GetImpl() { return impl; }
 
     Result GetAudioInState(Out<u32> out_state);
     Result Start();
     Result Stop();
-    Result AppendAudioInBuffer(
-        InArray<AudioCore::AudioIn::AudioInBuffer, BufferAttr_HipcMapAlias> buffer,
-        u64 buffer_client_ptr);
+    Result
+    AppendAudioInBuffer(InArray<AudioCore::AudioIn::AudioInBuffer, BufferAttr_HipcMapAlias> buffer,
+                        u64 buffer_client_ptr);
     Result AppendAudioInBufferAuto(
         InArray<AudioCore::AudioIn::AudioInBuffer, BufferAttr_HipcAutoSelect> buffer,
         u64 buffer_client_ptr);

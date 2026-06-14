@@ -15,8 +15,7 @@ namespace Common {
 
 constexpr float PI = 3.1415926535f;
 
-template <class T>
-struct Rectangle {
+template<class T> struct Rectangle {
     T left{};
     T top{};
     T right{};
@@ -27,29 +26,22 @@ struct Rectangle {
     constexpr Rectangle(T width, T height) : right(width), bottom(height) {}
 
     constexpr Rectangle(T left_, T top_, T right_, T bottom_)
-        : left(left_), top(top_), right(right_), bottom(bottom_) {}
-
-    [[nodiscard]] constexpr T Left() const {
-        return left;
+        : left(left_), top(top_), right(right_), bottom(bottom_)
+    {
     }
 
-    [[nodiscard]] constexpr T Top() const {
-        return top;
-    }
+    [[nodiscard]] constexpr T Left() const { return left; }
 
-    [[nodiscard]] constexpr T Right() const {
-        return right;
-    }
+    [[nodiscard]] constexpr T Top() const { return top; }
 
-    [[nodiscard]] constexpr T Bottom() const {
-        return bottom;
-    }
+    [[nodiscard]] constexpr T Right() const { return right; }
 
-    [[nodiscard]] constexpr bool IsEmpty() const {
-        return (GetWidth() <= 0) || (GetHeight() <= 0);
-    }
+    [[nodiscard]] constexpr T Bottom() const { return bottom; }
 
-    [[nodiscard]] constexpr T GetWidth() const {
+    [[nodiscard]] constexpr bool IsEmpty() const { return (GetWidth() <= 0) || (GetHeight() <= 0); }
+
+    [[nodiscard]] constexpr T GetWidth() const
+    {
         if constexpr (std::is_floating_point_v<T>) {
             return std::abs(right - left);
         } else {
@@ -57,7 +49,8 @@ struct Rectangle {
         }
     }
 
-    [[nodiscard]] constexpr T GetHeight() const {
+    [[nodiscard]] constexpr T GetHeight() const
+    {
         if constexpr (std::is_floating_point_v<T>) {
             return std::abs(bottom - top);
         } else {
@@ -65,29 +58,35 @@ struct Rectangle {
         }
     }
 
-    [[nodiscard]] constexpr Rectangle<T> TranslateX(const T x) const {
+    [[nodiscard]] constexpr Rectangle<T> TranslateX(const T x) const
+    {
         return Rectangle{left + x, top, right + x, bottom};
     }
 
-    [[nodiscard]] constexpr Rectangle<T> TranslateY(const T y) const {
+    [[nodiscard]] constexpr Rectangle<T> TranslateY(const T y) const
+    {
         return Rectangle{left, top + y, right, bottom + y};
     }
 
-    [[nodiscard]] constexpr Rectangle<T> Scale(const float s) const {
+    [[nodiscard]] constexpr Rectangle<T> Scale(const float s) const
+    {
         return Rectangle{left, top, static_cast<T>(static_cast<float>(left + GetWidth()) * s),
                          static_cast<T>(static_cast<float>(top + GetHeight()) * s)};
     }
 
-    [[nodiscard]] constexpr bool operator==(const Rectangle<T>& rhs) const {
+    [[nodiscard]] constexpr bool operator==(const Rectangle<T>& rhs) const
+    {
         return (left == rhs.left) && (top == rhs.top) && (right == rhs.right) &&
                (bottom == rhs.bottom);
     }
 
-    [[nodiscard]] constexpr bool operator!=(const Rectangle<T>& rhs) const {
+    [[nodiscard]] constexpr bool operator!=(const Rectangle<T>& rhs) const
+    {
         return !operator==(rhs);
     }
 
-    [[nodiscard]] constexpr bool Intersect(const Rectangle<T>& with, Rectangle<T>* result) const {
+    [[nodiscard]] constexpr bool Intersect(const Rectangle<T>& with, Rectangle<T>* result) const
+    {
         result->left = (std::max)(left, with.left);
         result->top = (std::max)(top, with.top);
         result->right = (std::min)(right, with.right);
@@ -96,7 +95,6 @@ struct Rectangle {
     }
 };
 
-template <typename T>
-Rectangle(T, T, T, T) -> Rectangle<T>;
+template<typename T> Rectangle(T, T, T, T) -> Rectangle<T>;
 
 } // namespace Common

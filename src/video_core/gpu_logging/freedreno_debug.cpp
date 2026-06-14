@@ -4,15 +4,17 @@
 #ifdef __ANDROID__
 
 #include "video_core/gpu_logging/freedreno_debug.h"
-#include "common/logging.h"
 
 #include <cstdlib>
+
+#include "common/logging.h"
 
 namespace GPU::Logging::Freedreno {
 
 bool FreedrenoDebugger::is_initialized = false;
 
-void FreedrenoDebugger::Initialize() {
+void FreedrenoDebugger::Initialize()
+{
     if (is_initialized) {
         return;
     }
@@ -21,7 +23,8 @@ void FreedrenoDebugger::Initialize() {
     LOG_INFO(Render_Vulkan, "[Freedreno Debug] Initialized");
 }
 
-void FreedrenoDebugger::SetTUDebugFlags(const std::string& flags) {
+void FreedrenoDebugger::SetTUDebugFlags(const std::string& flags)
+{
     if (flags.empty()) {
         return;
     }
@@ -33,7 +36,8 @@ void FreedrenoDebugger::SetTUDebugFlags(const std::string& flags) {
     LOG_INFO(Render_Vulkan, "[Freedreno Debug] TU_DEBUG set to: {}", flags);
 }
 
-void FreedrenoDebugger::EnableCommandStreamDump(bool frames_only) {
+void FreedrenoDebugger::EnableCommandStreamDump(bool frames_only)
+{
     // Enable FD_RD_DUMP for command stream capture
     const char* dump_flags = frames_only ? "frames" : "all";
     setenv("FD_RD_DUMP", dump_flags, 1);
@@ -41,7 +45,8 @@ void FreedrenoDebugger::EnableCommandStreamDump(bool frames_only) {
     LOG_INFO(Render_Vulkan, "[Freedreno Debug] Command stream dump enabled: {}", dump_flags);
 }
 
-std::string FreedrenoDebugger::GetBreadcrumbs() {
+std::string FreedrenoDebugger::GetBreadcrumbs()
+{
     // Breadcrumb reading requires driver-specific implementation
     // This is a stub for future implementation
     return "Breadcrumb capture not yet implemented";

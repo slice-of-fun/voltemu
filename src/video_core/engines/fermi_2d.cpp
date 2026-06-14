@@ -4,9 +4,10 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "video_core/engines/fermi_2d.h"
+
 #include "common/assert.h"
 #include "common/logging.h"
-#include "video_core/engines/fermi_2d.h"
 #include "video_core/engines/sw_blitter/blitter.h"
 #include "video_core/memory_manager.h"
 #include "video_core/rasterizer_interface.h"
@@ -20,7 +21,8 @@ namespace Tegra::Engines {
 
 using namespace Texture;
 
-Fermi2D::Fermi2D(MemoryManager& memory_manager_) : memory_manager{memory_manager_} {
+Fermi2D::Fermi2D(MemoryManager& memory_manager_) : memory_manager{memory_manager_}
+{
     sw_blitter = std::make_unique<Blitter::SoftwareBlitEngine>(memory_manager);
     // Nvidia's OpenGL driver seems to assume these values
     regs.src.depth = 1;
@@ -32,11 +34,13 @@ Fermi2D::Fermi2D(MemoryManager& memory_manager_) : memory_manager{memory_manager
 
 Fermi2D::~Fermi2D() = default;
 
-void Fermi2D::BindRasterizer(VideoCore::RasterizerInterface* rasterizer_) {
+void Fermi2D::BindRasterizer(VideoCore::RasterizerInterface* rasterizer_)
+{
     rasterizer = rasterizer_;
 }
 
-void Fermi2D::CallMethod(u32 method, u32 method_argument, bool is_last_call) {
+void Fermi2D::CallMethod(u32 method, u32 method_argument, bool is_last_call)
+{
     ASSERT_MSG(method < Regs::NUM_REGS,
                "Invalid Fermi2D register, increase the size of the Regs structure");
     regs.reg_array[method] = method_argument;
@@ -46,20 +50,23 @@ void Fermi2D::CallMethod(u32 method, u32 method_argument, bool is_last_call) {
     }
 }
 
-void Fermi2D::CallMultiMethod(u32 method, const u32* base_start, u32 amount, u32 methods_pending) {
+void Fermi2D::CallMultiMethod(u32 method, const u32* base_start, u32 amount, u32 methods_pending)
+{
     for (u32 i = 0; i < amount; ++i) {
         CallMethod(method, base_start[i], methods_pending - i <= 1);
     }
 }
 
-void Fermi2D::ConsumeSinkImpl() {
+void Fermi2D::ConsumeSinkImpl()
+{
     for (auto [method, value] : method_sink) {
         regs.reg_array[method] = value;
     }
     method_sink.clear();
 }
 
-void Fermi2D::Blit() {
+void Fermi2D::Blit()
+{
     LOG_DEBUG(HW_GPU, "called. source address=0x{:x}, destination address=0x{:x}",
               regs.src.Address(), regs.dst.Address());
 

@@ -1,22 +1,25 @@
 // SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#include "common/fs/symlink.h"
 #include "migration_worker.h"
 
-#include <filesystem>
 #include <QMap>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/replace.hpp>
+#include <filesystem>
 
 #include "common/fs/path_util.h"
+#include "common/fs/symlink.h"
 
 MigrationWorker::MigrationWorker(const Emulator selected_emu_, const bool clear_shader_cache_,
                                  const MigrationStrategy strategy_)
     : QObject(), selected_emu(selected_emu_), clear_shader_cache(clear_shader_cache_),
-      strategy(strategy_) {}
+      strategy(strategy_)
+{
+}
 
-void MigrationWorker::process() {
+void MigrationWorker::process()
+{
     namespace fs = std::filesystem;
     constexpr auto copy_options = fs::copy_options::update_existing | fs::copy_options::recursive;
 

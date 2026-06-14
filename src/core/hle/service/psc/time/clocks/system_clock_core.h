@@ -15,28 +15,21 @@ public:
     explicit SystemClockCore(SteadyClockCore& steady_clock) : m_steady_clock{steady_clock} {}
     virtual ~SystemClockCore() = default;
 
-    SteadyClockCore& GetSteadyClock() {
-        return m_steady_clock;
-    }
+    SteadyClockCore& GetSteadyClock() { return m_steady_clock; }
 
-    bool IsInitialized() const {
-        return m_initialized;
-    }
+    bool IsInitialized() const { return m_initialized; }
 
-    void SetInitialized() {
-        m_initialized = true;
-    }
+    void SetInitialized() { m_initialized = true; }
 
-    void SetContextWriter(ContextWriter& context_writer) {
-        m_context_writer = &context_writer;
-    }
+    void SetContextWriter(ContextWriter& context_writer) { m_context_writer = &context_writer; }
 
     bool CheckClockSourceMatches();
 
     Result GetCurrentTime(s64* out_time) const;
     Result SetCurrentTime(s64 time);
 
-    Result GetCurrentTimePoint(SteadyClockTimePoint& out_time_point) {
+    Result GetCurrentTimePoint(SteadyClockTimePoint& out_time_point)
+    {
         R_RETURN(m_steady_clock.GetCurrentTimePoint(out_time_point));
     }
 

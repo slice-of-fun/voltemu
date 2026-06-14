@@ -3,9 +3,11 @@
 
 #pragma once
 
+#include <glad/glad.h>
+
 #include <string_view>
 #include <utility>
-#include <glad/glad.h>
+
 #include "common/common_funcs.h"
 
 namespace OpenGL {
@@ -18,11 +20,10 @@ public:
 
     OGLRenderbuffer(OGLRenderbuffer&& o) noexcept : handle(std::exchange(o.handle, 0)) {}
 
-    ~OGLRenderbuffer() {
-        Release();
-    }
+    ~OGLRenderbuffer() { Release(); }
 
-    OGLRenderbuffer& operator=(OGLRenderbuffer&& o) noexcept {
+    OGLRenderbuffer& operator=(OGLRenderbuffer&& o) noexcept
+    {
         Release();
         handle = std::exchange(o.handle, 0);
         return *this;
@@ -45,11 +46,10 @@ public:
 
     OGLTexture(OGLTexture&& o) noexcept : handle(std::exchange(o.handle, 0)) {}
 
-    ~OGLTexture() {
-        Release();
-    }
+    ~OGLTexture() { Release(); }
 
-    OGLTexture& operator=(OGLTexture&& o) noexcept {
+    OGLTexture& operator=(OGLTexture&& o) noexcept
+    {
         Release();
         handle = std::exchange(o.handle, 0);
         return *this;
@@ -72,11 +72,10 @@ public:
 
     OGLTextureView(OGLTextureView&& o) noexcept : handle(std::exchange(o.handle, 0)) {}
 
-    ~OGLTextureView() {
-        Release();
-    }
+    ~OGLTextureView() { Release(); }
 
-    OGLTextureView& operator=(OGLTextureView&& o) noexcept {
+    OGLTextureView& operator=(OGLTextureView&& o) noexcept
+    {
         Release();
         handle = std::exchange(o.handle, 0);
         return *this;
@@ -99,11 +98,10 @@ public:
 
     OGLSampler(OGLSampler&& o) noexcept : handle(std::exchange(o.handle, 0)) {}
 
-    ~OGLSampler() {
-        Release();
-    }
+    ~OGLSampler() { Release(); }
 
-    OGLSampler& operator=(OGLSampler&& o) noexcept {
+    OGLSampler& operator=(OGLSampler&& o) noexcept
+    {
         Release();
         handle = std::exchange(o.handle, 0);
         return *this;
@@ -126,11 +124,10 @@ public:
 
     OGLShader(OGLShader&& o) noexcept : handle(std::exchange(o.handle, 0)) {}
 
-    ~OGLShader() {
-        Release();
-    }
+    ~OGLShader() { Release(); }
 
-    OGLShader& operator=(OGLShader&& o) noexcept {
+    OGLShader& operator=(OGLShader&& o) noexcept
+    {
         Release();
         handle = std::exchange(o.handle, 0);
         return *this;
@@ -149,11 +146,10 @@ public:
 
     OGLProgram(OGLProgram&& o) noexcept : handle(std::exchange(o.handle, 0)) {}
 
-    ~OGLProgram() {
-        Release();
-    }
+    ~OGLProgram() { Release(); }
 
-    OGLProgram& operator=(OGLProgram&& o) noexcept {
+    OGLProgram& operator=(OGLProgram&& o) noexcept
+    {
         Release();
         handle = std::exchange(o.handle, 0);
         return *this;
@@ -173,11 +169,10 @@ public:
 
     OGLAssemblyProgram(OGLAssemblyProgram&& o) noexcept : handle(std::exchange(o.handle, 0)) {}
 
-    ~OGLAssemblyProgram() {
-        Release();
-    }
+    ~OGLAssemblyProgram() { Release(); }
 
-    OGLAssemblyProgram& operator=(OGLAssemblyProgram&& o) noexcept {
+    OGLAssemblyProgram& operator=(OGLAssemblyProgram&& o) noexcept
+    {
         Release();
         handle = std::exchange(o.handle, 0);
         return *this;
@@ -196,10 +191,9 @@ public:
     OGLPipeline() = default;
     OGLPipeline(OGLPipeline&& o) noexcept : handle{std::exchange<GLuint>(o.handle, 0)} {}
 
-    ~OGLPipeline() {
-        Release();
-    }
-    OGLPipeline& operator=(OGLPipeline&& o) noexcept {
+    ~OGLPipeline() { Release(); }
+    OGLPipeline& operator=(OGLPipeline&& o) noexcept
+    {
         handle = std::exchange<GLuint>(o.handle, 0);
         return *this;
     }
@@ -221,11 +215,10 @@ public:
 
     OGLBuffer(OGLBuffer&& o) noexcept : handle(std::exchange(o.handle, 0)) {}
 
-    ~OGLBuffer() {
-        Release();
-    }
+    ~OGLBuffer() { Release(); }
 
-    OGLBuffer& operator=(OGLBuffer&& o) noexcept {
+    OGLBuffer& operator=(OGLBuffer&& o) noexcept
+    {
         Release();
         handle = std::exchange(o.handle, 0);
         return *this;
@@ -248,10 +241,9 @@ public:
 
     OGLSync(OGLSync&& o) noexcept : handle(std::exchange(o.handle, nullptr)) {}
 
-    ~OGLSync() {
-        Release();
-    }
-    OGLSync& operator=(OGLSync&& o) noexcept {
+    ~OGLSync() { Release(); }
+    OGLSync& operator=(OGLSync&& o) noexcept
+    {
         Release();
         handle = std::exchange(o.handle, nullptr);
         return *this;
@@ -277,11 +269,10 @@ public:
 
     OGLFramebuffer(OGLFramebuffer&& o) noexcept : handle(std::exchange(o.handle, 0)) {}
 
-    ~OGLFramebuffer() {
-        Release();
-    }
+    ~OGLFramebuffer() { Release(); }
 
-    OGLFramebuffer& operator=(OGLFramebuffer&& o) noexcept {
+    OGLFramebuffer& operator=(OGLFramebuffer&& o) noexcept
+    {
         Release();
         handle = std::exchange(o.handle, 0);
         return *this;
@@ -304,11 +295,10 @@ public:
 
     OGLQuery(OGLQuery&& o) noexcept : handle(std::exchange(o.handle, 0)) {}
 
-    ~OGLQuery() {
-        Release();
-    }
+    ~OGLQuery() { Release(); }
 
-    OGLQuery& operator=(OGLQuery&& o) noexcept {
+    OGLQuery& operator=(OGLQuery&& o) noexcept
+    {
         Release();
         handle = std::exchange(o.handle, 0);
         return *this;
@@ -331,11 +321,10 @@ public:
 
     OGLTransformFeedback(OGLTransformFeedback&& o) noexcept : handle(std::exchange(o.handle, 0)) {}
 
-    ~OGLTransformFeedback() {
-        Release();
-    }
+    ~OGLTransformFeedback() { Release(); }
 
-    OGLTransformFeedback& operator=(OGLTransformFeedback&& o) noexcept {
+    OGLTransformFeedback& operator=(OGLTransformFeedback&& o) noexcept
+    {
         Release();
         handle = std::exchange(o.handle, 0);
         return *this;

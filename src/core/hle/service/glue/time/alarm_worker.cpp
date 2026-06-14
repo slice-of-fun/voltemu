@@ -1,10 +1,11 @@
 // SPDX-FileCopyrightText: Copyright 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/glue/time/alarm_worker.h"
+
 #include "core/core.h"
 #include "core/core_timing.h"
 #include "core/hle/kernel/svc.h"
-#include "core/hle/service/glue/time/alarm_worker.h"
 #include "core/hle/service/psc/time/service_manager.h"
 #include "core/hle/service/sm/sm.h"
 
@@ -12,15 +13,19 @@ namespace Service::Glue::Time {
 
 AlarmWorker::AlarmWorker(Core::System& system, StandardSteadyClockResource& steady_clock_resource)
     : m_system{system}, m_ctx{system, "Glue:AlarmWorker"}, m_steady_clock_resource{
-                                                               steady_clock_resource} {}
+                                                               steady_clock_resource}
+{
+}
 
-AlarmWorker::~AlarmWorker() {
+AlarmWorker::~AlarmWorker()
+{
     m_system.CoreTiming().UnscheduleEvent(m_timer_timing_event);
 
     m_ctx.CloseEvent(m_timer_event);
 }
 
-void AlarmWorker::Initialize(std::shared_ptr<Service::PSC::Time::ServiceManager> time_m) {
+void AlarmWorker::Initialize(std::shared_ptr<Service::PSC::Time::ServiceManager> time_m)
+{
     m_time_m = std::move(time_m);
 
     m_timer_event = m_ctx.CreateEvent("Glue:AlarmWorker:TimerEvent");
@@ -35,8 +40,8 @@ void AlarmWorker::Initialize(std::shared_ptr<Service::PSC::Time::ServiceManager>
     AttachToClosestAlarmEvent();
 }
 
-bool AlarmWorker::GetClosestAlarmInfo(Service::PSC::Time::AlarmInfo& out_alarm_info,
-                                      s64& out_time) {
+bool AlarmWorker::GetClosestAlarmInfo(Service::PSC::Time::AlarmInfo& out_alarm_info, s64& out_time)
+{
     bool is_valid{};
     Service::PSC::Time::AlarmInfo alarm_info{};
     s64 closest_time{};
@@ -52,7 +57,8 @@ bool AlarmWorker::GetClosestAlarmInfo(Service::PSC::Time::AlarmInfo& out_alarm_i
     return is_valid;
 }
 
-void AlarmWorker::OnPowerStateChanged() {
+void AlarmWorker::OnPowerStateChanged()
+{
     Service::PSC::Time::AlarmInfo closest_alarm_info{};
     s64 closest_time{};
     if (!GetClosestAlarmInfo(closest_alarm_info, closest_time)) {
@@ -74,7 +80,8 @@ void AlarmWorker::OnPowerStateChanged() {
     }
 }
 
-Result AlarmWorker::AttachToClosestAlarmEvent() {
+Result AlarmWorker::AttachToClosestAlarmEvent()
+{
     m_time_m->GetClosestAlarmUpdatedEvent(&m_event);
 
     R_SUCCEED();

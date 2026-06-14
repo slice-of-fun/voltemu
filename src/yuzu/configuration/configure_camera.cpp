@@ -4,8 +4,8 @@
 // Text : Copyright 2022 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#include <memory>
 #include <QtCore>
+#include <memory>
 #if YUZU_USE_QT_MULTIMEDIA
 #include <QCamera>
 #include <QImageCapture>
@@ -23,7 +23,8 @@
 
 ConfigureCamera::ConfigureCamera(QWidget* parent, InputCommon::InputSubsystem* input_subsystem_)
     : QDialog(parent), input_subsystem{input_subsystem_},
-      ui(std::make_unique<Ui::ConfigureCamera>()) {
+      ui(std::make_unique<Ui::ConfigureCamera>())
+{
     ui->setupUi(this);
 
     connect(ui->restore_defaults_button, &QPushButton::clicked, this,
@@ -40,7 +41,8 @@ ConfigureCamera::ConfigureCamera(QWidget* parent, InputCommon::InputSubsystem* i
 
 ConfigureCamera::~ConfigureCamera() = default;
 
-void ConfigureCamera::PreviewCamera() {
+void ConfigureCamera::PreviewCamera()
+{
 #if YUZU_USE_QT_MULTIMEDIA
     const auto index = ui->ir_sensor_combo_box->currentIndex();
     bool camera_found = false;
@@ -99,7 +101,8 @@ void ConfigureCamera::PreviewCamera() {
 #endif
 }
 
-void ConfigureCamera::DisplayCapturedFrame(int requestId, const QImage& img) {
+void ConfigureCamera::DisplayCapturedFrame(int requestId, const QImage& img)
+{
     LOG_INFO(Frontend, "ImageCaptured {} {}", img.width(), img.height());
     const auto converted = img.scaled(320, 240, Qt::AspectRatioMode::IgnoreAspectRatio,
                                       Qt::TransformationMode::SmoothTransformation);
@@ -107,7 +110,8 @@ void ConfigureCamera::DisplayCapturedFrame(int requestId, const QImage& img) {
     pending_snapshots = 0;
 }
 
-void ConfigureCamera::changeEvent(QEvent* event) {
+void ConfigureCamera::changeEvent(QEvent* event)
+{
     if (event->type() == QEvent::LanguageChange) {
         RetranslateUI();
     }
@@ -115,11 +119,13 @@ void ConfigureCamera::changeEvent(QEvent* event) {
     QDialog::changeEvent(event);
 }
 
-void ConfigureCamera::RetranslateUI() {
+void ConfigureCamera::RetranslateUI()
+{
     ui->retranslateUi(this);
 }
 
-void ConfigureCamera::ApplyConfiguration() {
+void ConfigureCamera::ApplyConfiguration()
+{
     std::string current_device = input_devices[ui->ir_sensor_combo_box->currentIndex()];
 #ifdef _WIN32
     // for whatever reason replacing with / isn't enough so we use | for saving
@@ -128,7 +134,8 @@ void ConfigureCamera::ApplyConfiguration() {
     Settings::values.ir_sensor_device.SetValue(current_device);
 }
 
-void ConfigureCamera::LoadConfiguration() {
+void ConfigureCamera::LoadConfiguration()
+{
     input_devices.clear();
     ui->ir_sensor_combo_box->clear();
     input_devices.push_back("auto");
@@ -156,6 +163,7 @@ void ConfigureCamera::LoadConfiguration() {
     ui->ir_sensor_combo_box->setCurrentIndex(device_index);
 }
 
-void ConfigureCamera::RestoreDefaults() {
+void ConfigureCamera::RestoreDefaults()
+{
     ui->ir_sensor_combo_box->setCurrentIndex(0);
 }

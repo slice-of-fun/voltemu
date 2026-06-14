@@ -7,6 +7,7 @@
 #include <memory>
 #include <set>
 #include <vector>
+
 #include "common/common_types.h"
 #include "core/file_sys/nca_metadata.h"
 #include "core/file_sys/vfs/vfs.h"
@@ -47,8 +48,8 @@ public:
     // Type 0 Only (Collection of NCAs + Certificate + Ticket + Meta XML)
     std::vector<std::shared_ptr<NCA>> GetNCAsCollapsed() const;
     std::multimap<u64, std::shared_ptr<NCA>> GetNCAsByTitleID() const;
-    std::map<u64, std::map<std::pair<TitleType, ContentRecordType>, std::shared_ptr<NCA>>> GetNCAs()
-        const;
+    std::map<u64, std::map<std::pair<TitleType, ContentRecordType>, std::shared_ptr<NCA>>>
+    GetNCAs() const;
     std::shared_ptr<NCA> GetNCA(u64 title_id, ContentRecordType type,
                                 TitleType title_type = TitleType::Application) const;
     VirtualFile GetNCAFile(u64 title_id, ContentRecordType type,

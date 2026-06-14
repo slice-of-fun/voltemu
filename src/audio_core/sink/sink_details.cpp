@@ -4,12 +4,12 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "audio_core/sink/sink_details.h"
+
 #include <algorithm>
 #include <memory>
 #include <string>
 #include <vector>
-
-#include "audio_core/sink/sink_details.h"
 #ifdef HAVE_OBOE
 #include "audio_core/sink/oboe_sink.h"
 #endif
@@ -91,7 +91,8 @@ constexpr SinkDetails sink_details[] = {
     },
 };
 
-const SinkDetails& GetOutputSinkDetails(Settings::AudioEngine sink_id) {
+const SinkDetails& GetOutputSinkDetails(Settings::AudioEngine sink_id)
+{
     const auto find_backend{[](Settings::AudioEngine id) {
         return std::find_if(std::begin(sink_details), std::end(sink_details),
                             [&id](const auto& sink_detail) { return sink_detail.id == id; });
@@ -118,7 +119,7 @@ const SinkDetails& GetOutputSinkDetails(Settings::AudioEngine sink_id) {
 #if defined(HAVE_CUBEB) && defined(HAVE_SDL3)
         iter = find_backend(Settings::AudioEngine::Cubeb);
         if (iter->latency() > TargetSampleCount * 3) {
-        iter = find_backend(Settings::AudioEngine::Sdl3);
+            iter = find_backend(Settings::AudioEngine::Sdl3);
         }
 #else
         iter = std::begin(sink_details);
@@ -126,13 +127,13 @@ const SinkDetails& GetOutputSinkDetails(Settings::AudioEngine sink_id) {
         // END REINTRODUCED SECTION FROM 3833 - DIABLO 3 FIX
         LOG_INFO(Service_Audio, "Auto-selecting the {} backend",
                  Settings::CanonicalizeEnum(iter->id));
-    /* BEGIN REMOVED - REVERTING BACK TO 3833, this didn't exist at all. - DIABLO 3 FIX
-    } else {
-        if (iter != std::end(sink_details) && !iter->is_suitable()) {
-            LOG_ERROR(Service_Audio, "Selected backend {} is not suitable, falling back to null",
-                      Settings::CanonicalizeEnum(iter->id));
-            iter = find_backend(Settings::AudioEngine::Null);
-        } */ // END REMOVED REVERT - DIABLO 3 FIX
+        /* BEGIN REMOVED - REVERTING BACK TO 3833, this didn't exist at all. - DIABLO 3 FIX
+        } else {
+            if (iter != std::end(sink_details) && !iter->is_suitable()) {
+                LOG_ERROR(Service_Audio, "Selected backend {} is not suitable, falling back to
+        null", Settings::CanonicalizeEnum(iter->id)); iter =
+        find_backend(Settings::AudioEngine::Null);
+            } */ // END REMOVED REVERT - DIABLO 3 FIX
     }
 
     if (iter == std::end(sink_details)) {
@@ -144,7 +145,8 @@ const SinkDetails& GetOutputSinkDetails(Settings::AudioEngine sink_id) {
 }
 } // Anonymous namespace
 
-std::vector<Settings::AudioEngine> GetSinkIDs() {
+std::vector<Settings::AudioEngine> GetSinkIDs()
+{
     std::vector<Settings::AudioEngine> sink_ids(std::size(sink_details));
 
     std::transform(std::begin(sink_details), std::end(sink_details), std::begin(sink_ids),
@@ -153,11 +155,13 @@ std::vector<Settings::AudioEngine> GetSinkIDs() {
     return sink_ids;
 }
 
-std::vector<std::string> GetDeviceListForSink(Settings::AudioEngine sink_id, bool capture) {
+std::vector<std::string> GetDeviceListForSink(Settings::AudioEngine sink_id, bool capture)
+{
     return GetOutputSinkDetails(sink_id).list_devices(capture);
 }
 
-std::unique_ptr<Sink> CreateSinkFromID(Settings::AudioEngine sink_id, std::string_view device_id) {
+std::unique_ptr<Sink> CreateSinkFromID(Settings::AudioEngine sink_id, std::string_view device_id)
+{
     return GetOutputSinkDetails(sink_id).factory(device_id);
 }
 

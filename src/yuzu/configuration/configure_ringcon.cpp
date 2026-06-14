@@ -4,12 +4,15 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include <memory>
+#include "yuzu/configuration/configure_ringcon.h"
+
+#include <fmt/ranges.h>
+
 #include <QKeyEvent>
 #include <QMenu>
 #include <QMessageBox>
 #include <QTimer>
-#include <fmt/ranges.h>
+#include <memory>
 
 #include "hid_core/frontend/emulated_controller.h"
 #include "hid_core/hid_core.h"
@@ -19,7 +22,6 @@
 #include "qt_common/config/qt_config.h"
 #include "ui_configure_ringcon.h"
 #include "yuzu/bootmanager.h"
-#include "yuzu/configuration/configure_ringcon.h"
 
 const std::array<std::string, ConfigureRingController::ANALOG_SUB_BUTTONS_NUM>
     ConfigureRingController::analog_sub_buttons{{
@@ -29,7 +31,8 @@ const std::array<std::string, ConfigureRingController::ANALOG_SUB_BUTTONS_NUM>
 
 namespace {
 
-QString GetKeyName(int key_code) {
+QString GetKeyName(int key_code)
+{
     switch (key_code) {
     case Qt::Key_Shift:
         return QObject::tr("Shift");
@@ -44,7 +47,8 @@ QString GetKeyName(int key_code) {
     }
 }
 
-QString GetButtonName(Common::Input::ButtonNames button_name) {
+QString GetButtonName(Common::Input::ButtonNames button_name)
+{
     switch (button_name) {
     case Common::Input::ButtonNames::ButtonLeft:
         return QObject::tr("Left");
@@ -100,7 +104,8 @@ QString GetButtonName(Common::Input::ButtonNames button_name) {
 }
 
 void SetAnalogParam(const Common::ParamPackage& input_param, Common::ParamPackage& analog_param,
-                    const std::string& button_name) {
+                    const std::string& button_name)
+{
     // The poller returned a complete axis, so set all the buttons
     if (input_param.Has("axis_x") && input_param.Has("axis_y")) {
         analog_param = input_param;
@@ -123,7 +128,8 @@ ConfigureRingController::ConfigureRingController(QWidget* parent,
     : QDialog(parent), timeout_timer(std::make_unique<QTimer>()),
       poll_timer(std::make_unique<QTimer>()), input_subsystem{input_subsystem_},
 
-      ui(std::make_unique<Ui::ConfigureRingController>()) {
+      ui(std::make_unique<Ui::ConfigureRingController>())
+{
     ui->setupUi(this);
 
     analog_map_buttons = {
@@ -216,7 +222,8 @@ ConfigureRingController::ConfigureRingController(QWidget* parent,
     resize(0, 0);
 }
 
-ConfigureRingController::~ConfigureRingController() {
+ConfigureRingController::~ConfigureRingController()
+{
     emulated_controller->SetPollingMode(Core::HID::EmulatedDeviceIndex::RightIndex,
                                         Common::Input::PollingMode::Active);
     emulated_controller->DisableConfiguration();
@@ -227,7 +234,8 @@ ConfigureRingController::~ConfigureRingController() {
     }
 };
 
-void ConfigureRingController::changeEvent(QEvent* event) {
+void ConfigureRingController::changeEvent(QEvent* event)
+{
     if (event->type() == QEvent::LanguageChange) {
         RetranslateUI();
     }
@@ -235,11 +243,13 @@ void ConfigureRingController::changeEvent(QEvent* event) {
     QDialog::changeEvent(event);
 }
 
-void ConfigureRingController::RetranslateUI() {
+void ConfigureRingController::RetranslateUI()
+{
     ui->retranslateUi(this);
 }
 
-void ConfigureRingController::UpdateUI() {
+void ConfigureRingController::UpdateUI()
+{
     RetranslateUI();
     const Common::ParamPackage param = emulated_controller->GetRingParam();
 
@@ -261,24 +271,28 @@ void ConfigureRingController::UpdateUI() {
     deadzone_slider->setValue(slider_value);
 }
 
-void ConfigureRingController::ApplyConfiguration() {
+void ConfigureRingController::ApplyConfiguration()
+{
     emulated_controller->DisableConfiguration();
     emulated_controller->SaveCurrentConfig();
     emulated_controller->EnableConfiguration();
 }
 
-void ConfigureRingController::LoadConfiguration() {
+void ConfigureRingController::LoadConfiguration()
+{
     UpdateUI();
 }
 
-void ConfigureRingController::RestoreDefaults() {
+void ConfigureRingController::RestoreDefaults()
+{
     const std::string default_ring_string = InputCommon::GenerateAnalogParamFromKeys(
         0, 0, QtConfig::default_ringcon_analogs[0], QtConfig::default_ringcon_analogs[1], 0, 0.05f);
     emulated_controller->SetRingParam(Common::ParamPackage(default_ring_string));
     UpdateUI();
 }
 
-void ConfigureRingController::EnableRingController() {
+void ConfigureRingController::EnableRingController()
+{
     const auto dialog_title = tr("Error enabling ring input");
 
     is_ring_enabled = false;
@@ -320,7 +334,8 @@ void ConfigureRingController::EnableRingController() {
     ui->enable_ring_controller_button->setText(tr("Enable"));
 }
 
-void ConfigureRingController::ControllerUpdate(Core::HID::ControllerTriggerType type) {
+void ConfigureRingController::ControllerUpdate(Core::HID::ControllerTriggerType type)
+{
     if (!is_ring_enabled) {
         return;
     }
@@ -335,7 +350,8 @@ void ConfigureRingController::ControllerUpdate(Core::HID::ControllerTriggerType 
 
 void ConfigureRingController::HandleClick(
     QPushButton* button, std::function<void(const Common::ParamPackage&)> new_input_setter,
-    InputCommon::Polling::InputType type) {
+    InputCommon::Polling::InputType type)
+{
     button->setText(tr("[waiting]"));
     button->setFocus();
 
@@ -350,7 +366,8 @@ void ConfigureRingController::HandleClick(
     poll_timer->start(25);      // Check for new inputs every 25ms
 }
 
-void ConfigureRingController::SetPollingResult(const Common::ParamPackage& params, bool abort) {
+void ConfigureRingController::SetPollingResult(const Common::ParamPackage& params, bool abort)
+{
     timeout_timer->stop();
     poll_timer->stop();
     input_subsystem->StopMapping();
@@ -367,11 +384,13 @@ void ConfigureRingController::SetPollingResult(const Common::ParamPackage& param
     input_setter = std::nullopt;
 }
 
-bool ConfigureRingController::IsInputAcceptable(const Common::ParamPackage& params) const {
+bool ConfigureRingController::IsInputAcceptable(const Common::ParamPackage& params) const
+{
     return true;
 }
 
-void ConfigureRingController::mousePressEvent(QMouseEvent* event) {
+void ConfigureRingController::mousePressEvent(QMouseEvent* event)
+{
     if (!input_setter || !event) {
         return;
     }
@@ -380,7 +399,8 @@ void ConfigureRingController::mousePressEvent(QMouseEvent* event) {
     input_subsystem->GetMouse()->PressButton(0, 0, button);
 }
 
-void ConfigureRingController::keyPressEvent(QKeyEvent* event) {
+void ConfigureRingController::keyPressEvent(QKeyEvent* event)
+{
     if (!input_setter || !event) {
         return;
     }
@@ -390,7 +410,8 @@ void ConfigureRingController::keyPressEvent(QKeyEvent* event) {
     }
 }
 
-QString ConfigureRingController::ButtonToText(const Common::ParamPackage& param) {
+QString ConfigureRingController::ButtonToText(const Common::ParamPackage& param)
+{
     if (!param.Has("engine")) {
         return QObject::tr("[not set]");
     }
@@ -456,7 +477,8 @@ QString ConfigureRingController::ButtonToText(const Common::ParamPackage& param)
 }
 
 QString ConfigureRingController::AnalogToText(const Common::ParamPackage& param,
-                                              const std::string& dir) {
+                                              const std::string& dir)
+{
     if (!param.Has("engine")) {
         return QObject::tr("[not set]");
     }

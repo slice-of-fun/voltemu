@@ -25,7 +25,8 @@ public:
     explicit KAddressArbiter(Core::System& system);
     ~KAddressArbiter();
 
-    Result SignalToAddress(uint64_t addr, Svc::SignalType type, s32 value, s32 count) {
+    Result SignalToAddress(uint64_t addr, Svc::SignalType type, s32 value, s32 count)
+    {
         switch (type) {
         case Svc::SignalType::Signal:
             R_RETURN(this->Signal(addr, count));
@@ -38,7 +39,8 @@ public:
         }
     }
 
-    Result WaitForAddress(uint64_t addr, Svc::ArbitrationType type, s32 value, s64 timeout) {
+    Result WaitForAddress(uint64_t addr, Svc::ArbitrationType type, s32 value, s64 timeout)
+    {
         switch (type) {
         case Svc::ArbitrationType::WaitIfLessThan:
             R_RETURN(WaitIfLessThan(addr, value, false, timeout));

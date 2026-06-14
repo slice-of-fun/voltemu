@@ -4,27 +4,29 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/nifm/nifm.h"
+
+#include <ankerl/unordered_dense.h>
+#include <common/settings.h>
+
+#include <atomic>
+#include <chrono>
 #include <filesystem>
 #include <fstream>
+#include <mutex>
+#include <optional>
+#include <thread>
+
 #include "core/core.h"
 #include "core/hle/kernel/k_event.h"
 #include "core/hle/service/ipc_helpers.h"
 #include "core/hle/service/kernel_helpers.h"
-#include "core/hle/service/nifm/nifm.h"
 #include "core/hle/service/server_manager.h"
 #include "core/internal_network/emu_net_state.h"
 #include "core/internal_network/network.h"
 #include "core/internal_network/network_interface.h"
 #include "core/internal_network/wifi_scanner.h"
 #include "network/network.h"
-
-#include <atomic>
-#include <chrono>
-#include <mutex>
-#include <optional>
-#include <thread>
-#include <ankerl/unordered_dense.h>
-#include <common/settings.h>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -42,7 +44,8 @@ namespace {
 
 // Avoids name conflict with Windows' CreateEvent macro.
 [[nodiscard]] Kernel::KEvent* CreateKEvent(Service::KernelHelpers::ServiceContext& service_context,
-                                           std::string&& name) {
+                                           std::string&& name)
+{
     return service_context.CreateEvent(std::move(name));
 }
 
@@ -50,7 +53,8 @@ namespace {
 
 namespace Service::NIFM {
 
-static u128 MakeUuidFromName(std::string_view name) {
+static u128 MakeUuidFromName(std::string_view name)
+{
     constexpr u64 kOff = 0xcbf29ce484222325ULL;
     constexpr u64 kPrime = 0x100000001b3ULL;
 
@@ -213,7 +217,8 @@ struct NifmNetworkProfileData {
     IpSettingData ip_setting_data{};
 };
 #pragma pack(pop)
-static_assert(sizeof(NifmNetworkProfileData) == 0x18E, "NifmNetworkProfileData has incorrect size.");
+static_assert(sizeof(NifmNetworkProfileData) == 0x18E,
+              "NifmNetworkProfileData has incorrect size.");
 
 struct PendingProfile {
     std::array<char, 0x21> ssid{};
@@ -233,7 +238,8 @@ static std::optional<PendingProfile> g_pending_profile;
 class IScanRequest final : public ServiceFramework<IScanRequest> {
 public:
     explicit IScanRequest(Core::System& system_)
-        : ServiceFramework{system_, "IScanRequest"}, svc_ctx{system_, "IScanRequest"} {
+        : ServiceFramework{system_, "IScanRequest"}, svc_ctx{system_, "IScanRequest"}
+    {
 
         static const FunctionInfo functions[] = {
             {0, &IScanRequest::Submit, "Submit"},
@@ -248,7 +254,8 @@ public:
         evt_processing = CreateKEvent(svc_ctx, "IScanRequest:Processing");
     }
 
-    ~IScanRequest() override {
+    ~IScanRequest() override
+    {
         state.store(State::Idle);
         svc_ctx.CloseEvent(evt_scan_complete);
         svc_ctx.CloseEvent(evt_processing);
@@ -259,7 +266,8 @@ public:
 private:
     std::vector<Network::ScanData> scan_results;
 
-    void Submit(HLERequestContext& ctx) {
+    void Submit(HLERequestContext& ctx)
+    {
 
         if (state.load() == State::Finished) {
             if (worker.joinable())
@@ -291,34 +299,39 @@ private:
         IPC::ResponseBuilder{ctx, 2}.Push(ResultSuccess);
     }
 
-    void IsProcessing(HLERequestContext& ctx) {
+    void IsProcessing(HLERequestContext& ctx)
+    {
         const bool processing = state.load() == State::Processing;
         IPC::ResponseBuilder rb{ctx, 3};
         rb.Push(ResultSuccess);
         rb.Push<u8>(processing);
     }
 
-    void GetResult(HLERequestContext& ctx) {
+    void GetResult(HLERequestContext& ctx)
+    {
         const Result rc = worker_result.load();
         IPC::ResponseBuilder rb{ctx, 2};
         rb.Push(rc);
     }
 
-    void GetSystemEventReadableHandle(HLERequestContext& ctx) {
+    void GetSystemEventReadableHandle(HLERequestContext& ctx)
+    {
         IPC::ResponseBuilder rb{ctx, 2, 2};
         rb.Push(ResultSuccess);
         rb.PushCopyObjects(evt_scan_complete->GetReadableEvent(),
                            evt_processing->GetReadableEvent());
     }
 
-    void SetChannels(HLERequestContext& ctx) {
+    void SetChannels(HLERequestContext& ctx)
+    {
         LOG_WARNING(Service_NIFM, "(STUBBED) called");
         IPC::ResponseBuilder{ctx, 2}.Push(ResultSuccess);
     }
 
     enum class State { Idle, Processing, Finished };
 
-    void Finish(Result rc) {
+    void Finish(Result rc)
+    {
         worker_result.store(rc);
         state.store(State::Finished);
         evt_scan_complete->Signal();
@@ -336,7 +349,8 @@ private:
 class IRequest final : public ServiceFramework<IRequest> {
 public:
     explicit IRequest(Core::System& system_)
-        : ServiceFramework{system_, "IRequest"}, service_context{system_, "IRequest"} {
+        : ServiceFramework{system_, "IRequest"}, service_context{system_, "IRequest"}
+    {
         static const FunctionInfo functions[] = {
             {0, &IRequest::GetRequestState, "GetRequestState"},
             {1, &IRequest::GetResult, "GetResult"},
@@ -363,7 +377,7 @@ public:
             {23, nullptr, "SetKeptInSleep"},
             {24, nullptr, "RegisterSocketDescriptor"},
             {25, nullptr, "UnregisterSocketDescriptor"},
-            {26, nullptr, "GetNetworkAccessStatus"}, //21.0.0+
+            {26, nullptr, "GetNetworkAccessStatus"}, // 21.0.0+
         };
         RegisterHandlers(functions);
 
@@ -372,13 +386,15 @@ public:
         state = RequestState::NotSubmitted;
     }
 
-    ~IRequest() override {
+    ~IRequest() override
+    {
         service_context.CloseEvent(event1);
         service_context.CloseEvent(event2);
     }
 
 private:
-    void Submit(HLERequestContext& ctx) {
+    void Submit(HLERequestContext& ctx)
+    {
         LOG_DEBUG(Service_NIFM, "(STUBBED) called");
 
         if (state == RequestState::NotSubmitted) {
@@ -389,7 +405,8 @@ private:
         rb.Push(ResultSuccess);
     }
 
-    void GetRequestState(HLERequestContext& ctx) {
+    void GetRequestState(HLERequestContext& ctx)
+    {
         LOG_DEBUG(Service_NIFM, "(STUBBED) called");
 
         IPC::ResponseBuilder rb{ctx, 3};
@@ -397,7 +414,8 @@ private:
         rb.PushEnum(state);
     }
 
-    void SetRequirementPreset(HLERequestContext& ctx) {
+    void SetRequirementPreset(HLERequestContext& ctx)
+    {
         IPC::RequestParser rp{ctx};
         const auto param_1 = rp.Pop<u32>();
 
@@ -407,7 +425,8 @@ private:
         rb.Push(ResultSuccess);
     }
 
-    void SetNetworkProfileId(HLERequestContext& ctx) {
+    void SetNetworkProfileId(HLERequestContext& ctx)
+    {
         IPC::RequestParser rp{ctx};
         const auto ssid_length = rp.Pop<u32>();
         if (ssid_length > 0x20) {
@@ -421,7 +440,8 @@ private:
         rb.Push(1);
     }
 
-    void GetResult(HLERequestContext& ctx) {
+    void GetResult(HLERequestContext& ctx)
+    {
         LOG_DEBUG(Service_NIFM, "(STUBBED) called");
 
         const auto result = [this] {
@@ -447,7 +467,8 @@ private:
         rb.Push(result);
     }
 
-    void GetSystemEventReadableHandles(HLERequestContext& ctx) {
+    void GetSystemEventReadableHandles(HLERequestContext& ctx)
+    {
         LOG_WARNING(Service_NIFM, "(STUBBED) called");
 
         IPC::ResponseBuilder rb{ctx, 2, 2};
@@ -455,21 +476,24 @@ private:
         rb.PushCopyObjects(event1->GetReadableEvent(), event2->GetReadableEvent());
     }
 
-    void Cancel(HLERequestContext& ctx) {
+    void Cancel(HLERequestContext& ctx)
+    {
         LOG_WARNING(Service_NIFM, "(STUBBED) called");
 
         IPC::ResponseBuilder rb{ctx, 2};
         rb.Push(ResultSuccess);
     }
 
-    void SetConnectionConfirmationOption(HLERequestContext& ctx) {
+    void SetConnectionConfirmationOption(HLERequestContext& ctx)
+    {
         LOG_WARNING(Service_NIFM, "(STUBBED) called");
 
         IPC::ResponseBuilder rb{ctx, 2};
         rb.Push(ResultSuccess);
     }
 
-    void GetAppletInfo(HLERequestContext& ctx) {
+    void GetAppletInfo(HLERequestContext& ctx)
+    {
         LOG_WARNING(Service_NIFM, "(STUBBED) called");
 
         std::vector<u8> out_buffer(ctx.GetWriteBufferSize());
@@ -483,7 +507,8 @@ private:
         rb.Push<u32>(0);
     }
 
-    void UpdateState(RequestState new_state) {
+    void UpdateState(RequestState new_state)
+    {
         LOG_DEBUG(Service_NIFM, "(STUBBED) called");
         state = new_state;
         event1->Signal();
@@ -503,7 +528,8 @@ private:
 
 class INetworkProfile final : public ServiceFramework<INetworkProfile> {
 public:
-    explicit INetworkProfile(Core::System& system_) : ServiceFramework{system_, "INetworkProfile"} {
+    explicit INetworkProfile(Core::System& system_) : ServiceFramework{system_, "INetworkProfile"}
+    {
         static const FunctionInfo functions[] = {
             {0, nullptr, "Update"},
             {1, nullptr, "PersistOld"},
@@ -513,7 +539,8 @@ public:
     }
 };
 
-void IGeneralService::GetClientId(HLERequestContext& ctx) {
+void IGeneralService::GetClientId(HLERequestContext& ctx)
+{
     static constexpr u32 client_id = 1;
     LOG_WARNING(Service_NIFM, "(STUBBED) called");
 
@@ -522,7 +549,8 @@ void IGeneralService::GetClientId(HLERequestContext& ctx) {
     rb.Push<u64>(client_id); // Client ID needs to be non zero otherwise it's considered invalid
 }
 
-void IGeneralService::CreateScanRequest(HLERequestContext& ctx) {
+void IGeneralService::CreateScanRequest(HLERequestContext& ctx)
+{
     LOG_DEBUG(Service_NIFM, "called");
 
     IPC::ResponseBuilder rb{ctx, 2, 0, 1};
@@ -531,7 +559,8 @@ void IGeneralService::CreateScanRequest(HLERequestContext& ctx) {
     rb.PushIpcInterface<IScanRequest>(system);
 }
 
-void IGeneralService::CreateRequest(HLERequestContext& ctx) {
+void IGeneralService::CreateRequest(HLERequestContext& ctx)
+{
     LOG_DEBUG(Service_NIFM, "called");
 
     IPC::ResponseBuilder rb{ctx, 2, 0, 1};
@@ -540,7 +569,8 @@ void IGeneralService::CreateRequest(HLERequestContext& ctx) {
     rb.PushIpcInterface<IRequest>(system);
 }
 
-void IGeneralService::GetCurrentNetworkProfile(HLERequestContext& ctx) {
+void IGeneralService::GetCurrentNetworkProfile(HLERequestContext& ctx)
+{
 
     Network::RefreshFromHost();
     const auto net_iface = Network::GetSelectedNetworkInterface();
@@ -587,7 +617,8 @@ void IGeneralService::GetCurrentNetworkProfile(HLERequestContext& ctx) {
     rb.Push(ResultSuccess);
 }
 
-void IGeneralService::EnumerateNetworkInterfaces(HLERequestContext& ctx) {
+void IGeneralService::EnumerateNetworkInterfaces(HLERequestContext& ctx)
+{
 
     using Network::HostAdapterKind;
 
@@ -621,7 +652,8 @@ void IGeneralService::EnumerateNetworkInterfaces(HLERequestContext& ctx) {
     rb.Push<u32>(static_cast<u32>(adapters.size()));
 }
 
-void IGeneralService::EnumerateNetworkProfiles(HLERequestContext& ctx) {
+void IGeneralService::EnumerateNetworkProfiles(HLERequestContext& ctx)
+{
     const auto adapter = Network::GetSelectedNetworkInterface();
 
     if (!adapter) {
@@ -649,7 +681,8 @@ void IGeneralService::EnumerateNetworkProfiles(HLERequestContext& ctx) {
     rb.Push(count);
 }
 
-void IGeneralService::GetNetworkProfile(HLERequestContext& ctx) {
+void IGeneralService::GetNetworkProfile(HLERequestContext& ctx)
+{
     LOG_DEBUG(Service_NIFM, "GetNetworkProfile called");
 
     IPC::RequestParser rp{ctx};
@@ -719,7 +752,8 @@ void IGeneralService::GetNetworkProfile(HLERequestContext& ctx) {
     rb.PushIpcInterface<INetworkProfile>(system);
 }
 
-void IGeneralService::SetNetworkProfile(HLERequestContext& ctx) {
+void IGeneralService::SetNetworkProfile(HLERequestContext& ctx)
+{
     LOG_DEBUG(Service_NIFM, "SetNetworkProfile called");
 
     if (!ctx.CanReadBuffer(0) || ctx.GetReadBufferSize() < sizeof(NifmNetworkProfileData)) {
@@ -744,21 +778,24 @@ void IGeneralService::SetNetworkProfile(HLERequestContext& ctx) {
     IPC::ResponseBuilder{ctx, 2}.Push(ResultSuccess);
 }
 
-void IGeneralService::RemoveNetworkProfile(HLERequestContext& ctx) {
+void IGeneralService::RemoveNetworkProfile(HLERequestContext& ctx)
+{
     LOG_WARNING(Service_NIFM, "(STUBBED) called");
 
     IPC::ResponseBuilder rb{ctx, 2};
     rb.Push(ResultSuccess);
 }
 
-void IGeneralService::GetScanData(HLERequestContext& ctx) {
+void IGeneralService::GetScanData(HLERequestContext& ctx)
+{
     LOG_INFO(Service_NIFM, "GetScanData called");
     IPC::ResponseBuilder rb{ctx, 3};
     rb.Push(ResultSuccess);
     rb.Push(0);
 }
 
-void IGeneralService::GetScanDataV2(HLERequestContext& ctx) {
+void IGeneralService::GetScanDataV2(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
 
     std::scoped_lock lk{g_scan_mtx};
@@ -801,7 +838,8 @@ void IGeneralService::GetScanDataV2(HLERequestContext& ctx) {
     rb.Push(static_cast<u32>(scans.size()));
 }
 
-void IGeneralService::GetScanDataV3(HLERequestContext& ctx) {
+void IGeneralService::GetScanDataV3(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
 
     std::scoped_lock lk{g_scan_mtx};
@@ -838,7 +876,8 @@ void IGeneralService::GetScanDataV3(HLERequestContext& ctx) {
     rb.Push(static_cast<u32>(scans.size()));
 }
 
-void IGeneralService::GetCurrentIpAddress(HLERequestContext& ctx) {
+void IGeneralService::GetCurrentIpAddress(HLERequestContext& ctx)
+{
     LOG_WARNING(Service_NIFM, "(STUBBED) called");
 
     auto ipv4 = Network::GetHostIPv4Address();
@@ -858,7 +897,8 @@ void IGeneralService::GetCurrentIpAddress(HLERequestContext& ctx) {
     rb.PushRaw(*ipv4);
 }
 
-void IGeneralService::CreateTemporaryNetworkProfile(HLERequestContext& ctx) {
+void IGeneralService::CreateTemporaryNetworkProfile(HLERequestContext& ctx)
+{
     LOG_DEBUG(Service_NIFM, "called");
 
     ASSERT_MSG(ctx.GetReadBufferSize() == 0x17c, "SfNetworkProfileData is not the correct size");
@@ -873,7 +913,8 @@ void IGeneralService::CreateTemporaryNetworkProfile(HLERequestContext& ctx) {
     rb.PushRaw<u128>(uuid);
 }
 
-void IGeneralService::GetCurrentIpConfigInfo(HLERequestContext& ctx) {
+void IGeneralService::GetCurrentIpConfigInfo(HLERequestContext& ctx)
+{
     Network::RefreshFromHost();
     const auto& st = Network::EmuNetState::Get();
 
@@ -910,7 +951,8 @@ void IGeneralService::GetCurrentIpConfigInfo(HLERequestContext& ctx) {
     rb.PushRaw(info);
 }
 
-void IGeneralService::SetWirelessCommunicationEnabled(HLERequestContext& ctx) {
+void IGeneralService::SetWirelessCommunicationEnabled(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     const u8 enable = rp.Pop<u8>();
 
@@ -919,14 +961,16 @@ void IGeneralService::SetWirelessCommunicationEnabled(HLERequestContext& ctx) {
     IPC::ResponseBuilder{ctx, 2}.Push(ResultSuccess);
 }
 
-void IGeneralService::IsWirelessCommunicationEnabled(HLERequestContext& ctx) {
+void IGeneralService::IsWirelessCommunicationEnabled(HLERequestContext& ctx)
+{
     const bool en = !Settings::values.airplane_mode.GetValue();
     IPC::ResponseBuilder rb{ctx, 3};
     rb.Push(ResultSuccess);
     rb.Push<u8>(en);
 }
 
-void IGeneralService::GetInternetConnectionStatus(HLERequestContext& ctx) {
+void IGeneralService::GetInternetConnectionStatus(HLERequestContext& ctx)
+{
 
     Network::RefreshFromHost();
 
@@ -953,7 +997,8 @@ void IGeneralService::GetInternetConnectionStatus(HLERequestContext& ctx) {
     rb.PushRaw(out);
 }
 
-void IGeneralService::SetEthernetCommunicationEnabled(HLERequestContext& ctx) {
+void IGeneralService::SetEthernetCommunicationEnabled(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     const u8 enable = rp.Pop<u8>();
 
@@ -962,7 +1007,8 @@ void IGeneralService::SetEthernetCommunicationEnabled(HLERequestContext& ctx) {
     IPC::ResponseBuilder{ctx, 2}.Push(ResultSuccess);
 }
 
-void IGeneralService::IsEthernetCommunicationEnabled(HLERequestContext& ctx) {
+void IGeneralService::IsEthernetCommunicationEnabled(HLERequestContext& ctx)
+{
     LOG_WARNING(Service_NIFM, "(STUBBED) called");
 
     IPC::ResponseBuilder rb{ctx, 3};
@@ -974,7 +1020,8 @@ void IGeneralService::IsEthernetCommunicationEnabled(HLERequestContext& ctx) {
     }
 }
 
-void IGeneralService::IsAnyInternetRequestAccepted(HLERequestContext& ctx) {
+void IGeneralService::IsAnyInternetRequestAccepted(HLERequestContext& ctx)
+{
     LOG_ERROR(Service_NIFM, "(STUBBED) called");
 
     IPC::ResponseBuilder rb{ctx, 3};
@@ -986,7 +1033,8 @@ void IGeneralService::IsAnyInternetRequestAccepted(HLERequestContext& ctx) {
     }
 }
 
-void IGeneralService::IsAnyForegroundRequestAccepted(HLERequestContext& ctx) {
+void IGeneralService::IsAnyForegroundRequestAccepted(HLERequestContext& ctx)
+{
     const bool is_accepted{};
 
     LOG_WARNING(Service_NIFM, "(STUBBED) called, is_accepted={}", is_accepted);
@@ -996,7 +1044,8 @@ void IGeneralService::IsAnyForegroundRequestAccepted(HLERequestContext& ctx) {
     rb.Push<u8>(is_accepted);
 }
 
-void IGeneralService::GetSsidListVersion(HLERequestContext& ctx) {
+void IGeneralService::GetSsidListVersion(HLERequestContext& ctx)
+{
     LOG_WARNING(Service_NIFM, "(STUBBED) called");
 
     constexpr u32 ssid_list_version = 0;
@@ -1006,7 +1055,8 @@ void IGeneralService::GetSsidListVersion(HLERequestContext& ctx) {
     rb.Push(ssid_list_version);
 }
 
-void IGeneralService::ConfirmSystemAvailability(HLERequestContext& ctx) {
+void IGeneralService::ConfirmSystemAvailability(HLERequestContext& ctx)
+{
     LOG_DEBUG(Service_NIFM, "(STUBBED) called.");
 
     // TODO (jarrodnorwell)
@@ -1015,7 +1065,8 @@ void IGeneralService::ConfirmSystemAvailability(HLERequestContext& ctx) {
     rb.Push(ResultSuccess);
 }
 
-void IGeneralService::SetBackgroundRequestEnabled(HLERequestContext& ctx) {
+void IGeneralService::SetBackgroundRequestEnabled(HLERequestContext& ctx)
+{
     LOG_WARNING(Service_NIFM, "(STUBBED) called.");
 
     // TODO (jarrodnorwell)
@@ -1024,7 +1075,8 @@ void IGeneralService::SetBackgroundRequestEnabled(HLERequestContext& ctx) {
     rb.Push(ResultSuccess);
 }
 
-void IGeneralService::GetCurrentAccessPoint(HLERequestContext& ctx) {
+void IGeneralService::GetCurrentAccessPoint(HLERequestContext& ctx)
+{
     Network::RefreshFromHost();
 
     const auto& st = Network::EmuNetState::Get();
@@ -1046,7 +1098,8 @@ void IGeneralService::GetCurrentAccessPoint(HLERequestContext& ctx) {
 }
 
 IGeneralService::IGeneralService(Core::System& system_)
-    : ServiceFramework{system_, "IGeneralService"} {
+    : ServiceFramework{system_, "IGeneralService"}
+{
     // clang-format off
 
     static const FunctionInfo functions[] = {
@@ -1110,7 +1163,8 @@ IGeneralService::~IGeneralService() = default;
 class NetworkInterface final : public ServiceFramework<NetworkInterface> {
 public:
     explicit NetworkInterface(const char* name, Core::System& system_)
-        : ServiceFramework{system_, name} {
+        : ServiceFramework{system_, name}
+    {
         static const FunctionInfo functions[] = {
             {4, &NetworkInterface::CreateGeneralServiceOld, "CreateGeneralServiceOld"},
             {5, &NetworkInterface::CreateGeneralService, "CreateGeneralService"},
@@ -1119,7 +1173,8 @@ public:
     }
 
 private:
-    void CreateGeneralServiceOld(HLERequestContext& ctx) {
+    void CreateGeneralServiceOld(HLERequestContext& ctx)
+    {
         LOG_DEBUG(Service_NIFM, "called");
 
         IPC::ResponseBuilder rb{ctx, 2, 0, 1};
@@ -1127,7 +1182,8 @@ private:
         rb.PushIpcInterface<IGeneralService>(system);
     }
 
-    void CreateGeneralService(HLERequestContext& ctx) {
+    void CreateGeneralService(HLERequestContext& ctx)
+    {
         LOG_DEBUG(Service_NIFM, "called");
 
         IPC::ResponseBuilder rb{ctx, 2, 0, 1};
@@ -1136,7 +1192,8 @@ private:
     }
 };
 
-void LoopProcess(Core::System& system) {
+void LoopProcess(Core::System& system)
+{
     auto server_manager = std::make_unique<ServerManager>(system);
 
     server_manager->RegisterNamedService("nifm:a",

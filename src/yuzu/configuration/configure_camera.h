@@ -6,8 +6,8 @@
 
 #pragma once
 
-#include <memory>
 #include <QDialog>
+#include <memory>
 
 class QTimer;
 class QCamera;

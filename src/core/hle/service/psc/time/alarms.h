@@ -32,27 +32,18 @@ struct Alarm : public Common::IntrusiveListBaseNode<Alarm> {
     Alarm(Core::System& system, KernelHelpers::ServiceContext& ctx, AlarmType type);
     ~Alarm();
 
-    Kernel::KReadableEvent& GetEventHandle() {
-        return m_event->GetReadableEvent();
-    }
+    Kernel::KReadableEvent& GetEventHandle() { return m_event->GetReadableEvent(); }
 
-    s64 GetAlertTime() const {
-        return m_alert_time;
-    }
+    s64 GetAlertTime() const { return m_alert_time; }
 
-    void SetAlertTime(s64 time) {
-        m_alert_time = time;
-    }
+    void SetAlertTime(s64 time) { m_alert_time = time; }
 
-    u32 GetPriority() const {
-        return m_priority;
-    }
+    u32 GetPriority() const { return m_priority; }
 
-    void Signal() {
-        m_event->Signal();
-    }
+    void Signal() { m_event->Signal(); }
 
-    Result Lock() {
+    Result Lock()
+    {
         // TODO
         // if (m_lock_service) {
         //     return m_lock_service->Lock();
@@ -75,13 +66,9 @@ public:
                     PowerStateRequestManager& power_state_request_manager);
     ~Alarms();
 
-    Kernel::KEvent& GetEvent() {
-        return *m_event;
-    }
+    Kernel::KEvent& GetEvent() { return *m_event; }
 
-    s64 GetRawTime() {
-        return m_steady_clock.GetRawTime();
-    }
+    s64 GetRawTime() { return m_steady_clock.GetRawTime(); }
 
     Result Enable(Alarm& alarm, s64 time);
     void Disable(Alarm& alarm);

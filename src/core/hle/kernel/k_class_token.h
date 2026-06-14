@@ -35,10 +35,10 @@ public:
     }();
 
 private:
-    template <TokenBaseType Index>
+    template<TokenBaseType Index>
     static constexpr inline TokenBaseType BaseClassToken = 1U << Index;
 
-    template <TokenBaseType Index>
+    template<TokenBaseType Index>
     static constexpr inline TokenBaseType FinalClassToken = [] {
         TokenBaseType index = 0;
         for (size_t i = 0; i < FinalClassBits; i++) {
@@ -54,8 +54,8 @@ private:
         UNREACHABLE();
     }();
 
-    template <typename T>
-    static constexpr inline TokenBaseType GetClassToken() {
+    template<typename T> static constexpr inline TokenBaseType GetClassToken()
+    {
         static_assert(std::is_base_of<KAutoObject, T>::value);
         if constexpr (std::is_same<T, KAutoObject>::value) {
             static_assert(T::ObjectType == ObjectType::KAutoObject);
@@ -119,13 +119,12 @@ public:
         FinalClassesEnd = FinalClassesStart + NumFinalClasses,
     };
 
-    template <typename T>
-    static constexpr inline TokenBaseType ClassToken = GetClassToken<T>();
+    template<typename T> static constexpr inline TokenBaseType ClassToken = GetClassToken<T>();
 };
 
 using ClassTokenType = KClassTokenGenerator::TokenBaseType;
 
-template <typename T>
+template<typename T>
 static constexpr inline ClassTokenType ClassToken = KClassTokenGenerator::ClassToken<T>;
 
 } // namespace Kernel

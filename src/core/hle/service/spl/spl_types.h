@@ -132,11 +132,13 @@ static_assert(sizeof(BootReasonValue) == sizeof(u32), "BootReasonValue definitio
 struct AesKey {
     std::array<u64, AES_128_KEY_SIZE / sizeof(u64)> data64{};
 
-    std::span<u8> AsBytes() {
+    std::span<u8> AsBytes()
+    {
         return std::span{reinterpret_cast<u8*>(data64.data()), AES_128_KEY_SIZE};
     }
 
-    std::span<const u8> AsBytes() const {
+    std::span<const u8> AsBytes() const
+    {
         return std::span{reinterpret_cast<const u8*>(data64.data()), AES_128_KEY_SIZE};
     }
 };
@@ -145,11 +147,13 @@ static_assert(sizeof(AesKey) == AES_128_KEY_SIZE, "AesKey definition!");
 struct IvCtr {
     std::array<u64, AES_128_KEY_SIZE / sizeof(u64)> data64{};
 
-    std::span<u8> AsBytes() {
+    std::span<u8> AsBytes()
+    {
         return std::span{reinterpret_cast<u8*>(data64.data()), AES_128_KEY_SIZE};
     }
 
-    std::span<const u8> AsBytes() const {
+    std::span<const u8> AsBytes() const
+    {
         return std::span{reinterpret_cast<const u8*>(data64.data()), AES_128_KEY_SIZE};
     }
 };
@@ -158,11 +162,13 @@ static_assert(sizeof(AesKey) == AES_128_KEY_SIZE, "IvCtr definition!");
 struct Cmac {
     std::array<u64, AES_128_KEY_SIZE / sizeof(u64)> data64{};
 
-    std::span<u8> AsBytes() {
+    std::span<u8> AsBytes()
+    {
         return std::span{reinterpret_cast<u8*>(data64.data()), AES_128_KEY_SIZE};
     }
 
-    std::span<const u8> AsBytes() const {
+    std::span<const u8> AsBytes() const
+    {
         return std::span{reinterpret_cast<const u8*>(data64.data()), AES_128_KEY_SIZE};
     }
 };
@@ -171,11 +177,13 @@ static_assert(sizeof(AesKey) == AES_128_KEY_SIZE, "Cmac definition!");
 struct AccessKey {
     std::array<u64, AES_128_KEY_SIZE / sizeof(u64)> data64{};
 
-    std::span<u8> AsBytes() {
+    std::span<u8> AsBytes()
+    {
         return std::span{reinterpret_cast<u8*>(data64.data()), AES_128_KEY_SIZE};
     }
 
-    std::span<const u8> AsBytes() const {
+    std::span<const u8> AsBytes() const
+    {
         return std::span{reinterpret_cast<const u8*>(data64.data()), AES_128_KEY_SIZE};
     }
 };
@@ -184,11 +192,13 @@ static_assert(sizeof(AesKey) == AES_128_KEY_SIZE, "AccessKey definition!");
 struct KeySource {
     std::array<u64, AES_128_KEY_SIZE / sizeof(u64)> data64{};
 
-    std::span<u8> AsBytes() {
+    std::span<u8> AsBytes()
+    {
         return std::span{reinterpret_cast<u8*>(data64.data()), AES_128_KEY_SIZE};
     }
 
-    std::span<const u8> AsBytes() const {
+    std::span<const u8> AsBytes() const
+    {
         return std::span{reinterpret_cast<const u8*>(data64.data()), AES_128_KEY_SIZE};
     }
 };

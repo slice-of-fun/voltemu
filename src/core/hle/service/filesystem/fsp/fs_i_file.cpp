@@ -4,14 +4,16 @@
 // SPDX-FileCopyrightText: Copyright 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/filesystem/fsp/fs_i_file.h"
+
 #include "core/file_sys/errors.h"
 #include "core/hle/service/cmif_serialization.h"
-#include "core/hle/service/filesystem/fsp/fs_i_file.h"
 
 namespace Service::FileSystem {
 
 IFile::IFile(Core::System& system_, FileSys::VirtualFile file_)
-    : ServiceFramework{system_, "IFile"}, backend{std::make_unique<FileSys::Fsa::IFile>(file_)} {
+    : ServiceFramework{system_, "IFile"}, backend{std::make_unique<FileSys::Fsa::IFile>(file_)}
+{
     // clang-format off
     static const FunctionInfo functions[] = {
         {0, D<&IFile::Read>, "Read"},
@@ -29,9 +31,9 @@ IFile::IFile(Core::System& system_, FileSys::VirtualFile file_)
 Result IFile::Read(
     FileSys::ReadOption option, Out<s64> out_size, s64 offset,
     const OutBuffer<BufferAttr_HipcMapAlias | BufferAttr_HipcMapTransferAllowsNonSecure> out_buffer,
-    s64 size) {
-    LOG_DEBUG(Service_FS, "called, option={}, offset={:#X}, length={}", option.value, offset,
-              size);
+    s64 size)
+{
+    LOG_DEBUG(Service_FS, "called, option={}, offset={:#X}, length={}", option.value, offset, size);
 
     // Read the data from the Storage backend
     R_RETURN(
@@ -40,26 +42,29 @@ Result IFile::Read(
 
 Result IFile::Write(
     const InBuffer<BufferAttr_HipcMapAlias | BufferAttr_HipcMapTransferAllowsNonSecure> buffer,
-    FileSys::WriteOption option, s64 offset, s64 size) {
-    LOG_DEBUG(Service_FS, "called, option={}, offset={:#X}, length={}", option.value, offset,
-              size);
+    FileSys::WriteOption option, s64 offset, s64 size)
+{
+    LOG_DEBUG(Service_FS, "called, option={}, offset={:#X}, length={}", option.value, offset, size);
 
     R_RETURN(backend->Write(offset, buffer.data(), size, option));
 }
 
-Result IFile::Flush() {
+Result IFile::Flush()
+{
     LOG_DEBUG(Service_FS, "called");
 
     R_RETURN(backend->Flush());
 }
 
-Result IFile::SetSize(s64 size) {
+Result IFile::SetSize(s64 size)
+{
     LOG_DEBUG(Service_FS, "called, size={}", size);
 
     R_RETURN(backend->SetSize(size));
 }
 
-Result IFile::GetSize(Out<s64> out_size) {
+Result IFile::GetSize(Out<s64> out_size)
+{
     LOG_DEBUG(Service_FS, "called");
 
     R_RETURN(backend->GetSize(out_size));

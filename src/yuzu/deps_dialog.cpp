@@ -1,18 +1,22 @@
 // SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+#include "yuzu/deps_dialog.h"
+
+#include <fmt/ranges.h>
+
 #include <QAbstractTextDocumentLayout>
 #include <QDesktopServices>
 #include <QIcon>
 #include <QPainter>
 #include <QTableWidget>
 #include <QTextEdit>
-#include <fmt/ranges.h>
+
 #include "dep_hashes.h"
 #include "ui_deps_dialog.h"
-#include "yuzu/deps_dialog.h"
 
-DepsDialog::DepsDialog(QWidget* parent) : QDialog(parent), ui{std::make_unique<Ui::DepsDialog>()} {
+DepsDialog::DepsDialog(QWidget* parent) : QDialog(parent), ui{std::make_unique<Ui::DepsDialog>()}
+{
     ui->setupUi(this);
 
     constexpr int rows = (int)Common::dep_hashes.size();
@@ -45,10 +49,13 @@ DepsDialog::DepsDialog(QWidget* parent) : QDialog(parent), ui{std::make_unique<U
 
 DepsDialog::~DepsDialog() = default;
 
-LinkItemDelegate::LinkItemDelegate(QObject* parent) : QStyledItemDelegate(parent) {}
+LinkItemDelegate::LinkItemDelegate(QObject* parent) : QStyledItemDelegate(parent)
+{
+}
 
 void LinkItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option,
-                             const QModelIndex& index) const {
+                             const QModelIndex& index) const
+{
     auto options = option;
     initStyleOption(&options, index);
 
@@ -64,8 +71,8 @@ void LinkItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& opti
     painter->restore();
 }
 
-QSize LinkItemDelegate::sizeHint(const QStyleOptionViewItem& option,
-                                 const QModelIndex& index) const {
+QSize LinkItemDelegate::sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const
+{
     QStyleOptionViewItem options = option;
     initStyleOption(&options, index);
 
@@ -76,7 +83,8 @@ QSize LinkItemDelegate::sizeHint(const QStyleOptionViewItem& option,
 }
 
 bool LinkItemDelegate::editorEvent(QEvent* event, QAbstractItemModel* model,
-                                   const QStyleOptionViewItem& option, const QModelIndex& index) {
+                                   const QStyleOptionViewItem& option, const QModelIndex& index)
+{
     if (event->type() == QEvent::MouseButtonRelease) {
         QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(event);
         if (mouseEvent->button() == Qt::LeftButton) {

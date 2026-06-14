@@ -6,9 +6,8 @@
 
 #pragma once
 
-#include <cstddef>
-
 #include <boost/container/small_vector.hpp>
+#include <cstddef>
 
 #include "common/common_types.h"
 #include "shader_recompiler/backend/spirv/emit_spirv.h"
@@ -26,13 +25,15 @@ class DescriptorLayoutBuilder {
 public:
     DescriptorLayoutBuilder(const Device& device_) : device{&device_} {}
 
-    bool CanUsePushDescriptor() const noexcept {
+    bool CanUsePushDescriptor() const noexcept
+    {
         return device->IsKhrPushDescriptorSupported() &&
                num_descriptors <= device->MaxPushDescriptors();
     }
 
     // TODO(crueter): utilize layout binding flags
-    vk::DescriptorSetLayout CreateDescriptorSetLayout(bool use_push_descriptor) const {
+    vk::DescriptorSetLayout CreateDescriptorSetLayout(bool use_push_descriptor) const
+    {
         if (bindings.empty()) {
             return nullptr;
         }
@@ -49,7 +50,8 @@ public:
 
     vk::DescriptorUpdateTemplate CreateTemplate(VkDescriptorSetLayout descriptor_set_layout,
                                                 VkPipelineLayout pipeline_layout,
-                                                bool use_push_descriptor) const {
+                                                bool use_push_descriptor) const
+    {
         if (entries.empty()) {
             return nullptr;
         }
@@ -71,7 +73,8 @@ public:
         });
     }
 
-    vk::PipelineLayout CreatePipelineLayout(VkDescriptorSetLayout descriptor_set_layout) const {
+    vk::PipelineLayout CreatePipelineLayout(VkDescriptorSetLayout descriptor_set_layout) const
+    {
         using Shader::Backend::SPIRV::RenderAreaLayout;
         using Shader::Backend::SPIRV::RescalingLayout;
         const u32 size_offset = is_compute ? sizeof(RescalingLayout::down_factor) : 0u;
@@ -93,7 +96,8 @@ public:
         });
     }
 
-    void Add(const Shader::Info& info, VkShaderStageFlags stage) {
+    void Add(const Shader::Info& info, VkShaderStageFlags stage)
+    {
         is_compute |= (stage & VK_SHADER_STAGE_COMPUTE_BIT) != 0;
 
         Add(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, stage, info.constant_buffer_descriptors);
@@ -105,8 +109,9 @@ public:
     }
 
 private:
-    template <typename Descriptors>
-    void Add(VkDescriptorType type, VkShaderStageFlags stage, const Descriptors& descriptors) {
+    template<typename Descriptors>
+    void Add(VkDescriptorType type, VkShaderStageFlags stage, const Descriptors& descriptors)
+    {
         const size_t num{descriptors.size()};
         for (size_t i = 0; i < num; ++i) {
             bindings.push_back({
@@ -143,7 +148,8 @@ class RescalingPushConstant {
 public:
     explicit RescalingPushConstant() noexcept {}
 
-    void PushTexture(bool is_rescaled) noexcept {
+    void PushTexture(bool is_rescaled) noexcept
+    {
         *texture_ptr |= is_rescaled ? texture_bit : 0u;
         texture_bit <<= 1u;
         if (texture_bit == 0u) {
@@ -152,7 +158,8 @@ public:
         }
     }
 
-    void PushImage(bool is_rescaled) noexcept {
+    void PushImage(bool is_rescaled) noexcept
+    {
         *image_ptr |= is_rescaled ? image_bit : 0u;
         image_bit <<= 1u;
         if (image_bit == 0u) {
@@ -161,7 +168,8 @@ public:
         }
     }
 
-    const std::array<u32, NUM_TEXTURE_AND_IMAGE_SCALING_WORDS>& Data() const noexcept {
+    const std::array<u32, NUM_TEXTURE_AND_IMAGE_SCALING_WORDS>& Data() const noexcept
+    {
         return words;
     }
 
@@ -183,7 +191,8 @@ inline void PushImageDescriptors(TextureCache& texture_cache,
                                  GuestDescriptorQueue& guest_descriptor_queue,
                                  const Shader::Info& info, RescalingPushConstant& rescaling,
                                  const VideoCommon::SamplerId*& samplers,
-                                 const VideoCommon::ImageViewInOut*& views) {
+                                 const VideoCommon::ImageViewInOut*& views)
+{
     const u32 num_texture_buffers = Shader::NumDescriptors(info.texture_buffer_descriptors);
     const u32 num_image_buffers = Shader::NumDescriptors(info.image_buffer_descriptors);
     views += num_texture_buffers;

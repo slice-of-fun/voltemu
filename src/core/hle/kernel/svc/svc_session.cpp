@@ -13,8 +13,9 @@
 namespace Kernel::Svc {
 namespace {
 
-template <typename T>
-Result CreateSession(Core::System& system, Handle* out_server, Handle* out_client, uint64_t name) {
+template<typename T>
+Result CreateSession(Core::System& system, Handle* out_server, Handle* out_client, uint64_t name)
+{
     auto& process = GetCurrentProcess(system.Kernel());
     auto& handle_table = process.GetHandleTable();
 
@@ -69,7 +70,8 @@ Result CreateSession(Core::System& system, Handle* out_server, Handle* out_clien
 
     // Ensure that we clean up the session (and its only references are handle table) on function
     // end.
-    SCOPE_EXIT {
+    SCOPE_EXIT
+    {
         session->GetClientSession().Close();
         session->GetServerSession().Close();
     };
@@ -81,7 +83,8 @@ Result CreateSession(Core::System& system, Handle* out_server, Handle* out_clien
     R_TRY(handle_table.Add(out_server, std::addressof(session->GetServerSession())));
 
     // Ensure that we maintain a clean handle state on exit.
-    ON_RESULT_FAILURE {
+    ON_RESULT_FAILURE
+    {
         handle_table.Remove(*out_server);
     };
 
@@ -92,7 +95,8 @@ Result CreateSession(Core::System& system, Handle* out_server, Handle* out_clien
 } // namespace
 
 Result CreateSession(Core::System& system, Handle* out_server, Handle* out_client, bool is_light,
-                     u64 name) {
+                     u64 name)
+{
     if (is_light) {
         R_RETURN(CreateSession<KLightSession>(system, out_server, out_client, name));
     } else {
@@ -100,7 +104,8 @@ Result CreateSession(Core::System& system, Handle* out_server, Handle* out_clien
     }
 }
 
-Result AcceptSession(Core::System& system, Handle* out, Handle port_handle) {
+Result AcceptSession(Core::System& system, Handle* out, Handle port_handle)
+{
     // Get the current handle table.
     auto& handle_table = GetCurrentProcess(system.Kernel()).GetHandleTable();
 
@@ -110,7 +115,8 @@ Result AcceptSession(Core::System& system, Handle* out, Handle port_handle) {
 
     // Reserve an entry for the new session.
     R_TRY(handle_table.Reserve(out));
-    ON_RESULT_FAILURE {
+    ON_RESULT_FAILURE
+    {
         handle_table.Unreserve(*out);
     };
 
@@ -133,22 +139,26 @@ Result AcceptSession(Core::System& system, Handle* out, Handle port_handle) {
 }
 
 Result CreateSession64(Core::System& system, Handle* out_server_session_handle,
-                       Handle* out_client_session_handle, bool is_light, uint64_t name) {
+                       Handle* out_client_session_handle, bool is_light, uint64_t name)
+{
     R_RETURN(CreateSession(system, out_server_session_handle, out_client_session_handle, is_light,
                            name));
 }
 
-Result AcceptSession64(Core::System& system, Handle* out_handle, Handle port) {
+Result AcceptSession64(Core::System& system, Handle* out_handle, Handle port)
+{
     R_RETURN(AcceptSession(system, out_handle, port));
 }
 
 Result CreateSession64From32(Core::System& system, Handle* out_server_session_handle,
-                             Handle* out_client_session_handle, bool is_light, uint32_t name) {
+                             Handle* out_client_session_handle, bool is_light, uint32_t name)
+{
     R_RETURN(CreateSession(system, out_server_session_handle, out_client_session_handle, is_light,
                            name));
 }
 
-Result AcceptSession64From32(Core::System& system, Handle* out_handle, Handle port) {
+Result AcceptSession64From32(Core::System& system, Handle* out_handle, Handle port)
+{
     R_RETURN(AcceptSession(system, out_handle, port));
 }
 

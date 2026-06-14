@@ -4,16 +4,20 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "input_common/helpers/joycon_protocol/irs.h"
+
 #include "common/input.h"
 #include "common/logging.h"
-#include "input_common/helpers/joycon_protocol/irs.h"
 
 namespace InputCommon::Joycon {
 
 IrsProtocol::IrsProtocol(std::shared_ptr<JoyconHandle> handle)
-    : JoyconCommonProtocol(std::move(handle)) {}
+    : JoyconCommonProtocol(std::move(handle))
+{
+}
 
-Common::Input::DriverResult IrsProtocol::EnableIrs() {
+Common::Input::DriverResult IrsProtocol::EnableIrs()
+{
     LOG_INFO(Input, "Enable IRS");
     ScopedSetBlocking sb(this);
     Common::Input::DriverResult result{Common::Input::DriverResult::Success};
@@ -55,7 +59,8 @@ Common::Input::DriverResult IrsProtocol::EnableIrs() {
     return result;
 }
 
-Common::Input::DriverResult IrsProtocol::DisableIrs() {
+Common::Input::DriverResult IrsProtocol::DisableIrs()
+{
     LOG_DEBUG(Input, "Disable IRS");
     ScopedSetBlocking sb(this);
     Common::Input::DriverResult result{Common::Input::DriverResult::Success};
@@ -69,7 +74,8 @@ Common::Input::DriverResult IrsProtocol::DisableIrs() {
     return result;
 }
 
-Common::Input::DriverResult IrsProtocol::SetIrsConfig(IrsMode mode, IrsResolution format) {
+Common::Input::DriverResult IrsProtocol::SetIrsConfig(IrsMode mode, IrsResolution format)
+{
     irs_mode = mode;
     switch (format) {
     case IrsResolution::Size320x240:
@@ -109,7 +115,8 @@ Common::Input::DriverResult IrsProtocol::SetIrsConfig(IrsMode mode, IrsResolutio
     return Common::Input::DriverResult::Success;
 }
 
-Common::Input::DriverResult IrsProtocol::RequestImage(std::span<u8> buffer) {
+Common::Input::DriverResult IrsProtocol::RequestImage(std::span<u8> buffer)
+{
     const u8 next_packet_fragment =
         static_cast<u8>((packet_fragment + 1) % (static_cast<u8>(fragments) + 1));
 
@@ -132,7 +139,8 @@ Common::Input::DriverResult IrsProtocol::RequestImage(std::span<u8> buffer) {
     return RequestFrame(packet_fragment);
 }
 
-Common::Input::DriverResult IrsProtocol::ConfigureIrs() {
+Common::Input::DriverResult IrsProtocol::ConfigureIrs()
+{
     LOG_DEBUG(Input, "Configure IRS");
     constexpr std::size_t max_tries = 28;
     SubCommandResponse output{};
@@ -166,7 +174,8 @@ Common::Input::DriverResult IrsProtocol::ConfigureIrs() {
     return Common::Input::DriverResult::Success;
 }
 
-Common::Input::DriverResult IrsProtocol::WriteRegistersStep1() {
+Common::Input::DriverResult IrsProtocol::WriteRegistersStep1()
+{
     LOG_DEBUG(Input, "WriteRegistersStep1");
     Common::Input::DriverResult result{Common::Input::DriverResult::Success};
     constexpr std::size_t max_tries = 28;
@@ -227,7 +236,8 @@ Common::Input::DriverResult IrsProtocol::WriteRegistersStep1() {
     return Common::Input::DriverResult::Success;
 }
 
-Common::Input::DriverResult IrsProtocol::WriteRegistersStep2() {
+Common::Input::DriverResult IrsProtocol::WriteRegistersStep2()
+{
     LOG_DEBUG(Input, "WriteRegistersStep2");
     constexpr std::size_t max_tries = 28;
     SubCommandResponse output{};
@@ -269,7 +279,8 @@ Common::Input::DriverResult IrsProtocol::WriteRegistersStep2() {
     return Common::Input::DriverResult::Success;
 }
 
-Common::Input::DriverResult IrsProtocol::RequestFrame(u8 frame) {
+Common::Input::DriverResult IrsProtocol::RequestFrame(u8 frame)
+{
     std::array<u8, 38> mcu_request{};
     mcu_request[3] = frame;
     mcu_request[36] = CalculateMCU_CRC8(mcu_request.data(), 36);
@@ -277,7 +288,8 @@ Common::Input::DriverResult IrsProtocol::RequestFrame(u8 frame) {
     return SendMCUCommand(SubCommand::SET_REPORT_MODE, mcu_request);
 }
 
-Common::Input::DriverResult IrsProtocol::ResendFrame(u8 frame) {
+Common::Input::DriverResult IrsProtocol::ResendFrame(u8 frame)
+{
     std::array<u8, 38> mcu_request{};
     mcu_request[1] = 0x1;
     mcu_request[2] = frame;
@@ -287,15 +299,18 @@ Common::Input::DriverResult IrsProtocol::ResendFrame(u8 frame) {
     return SendMCUCommand(SubCommand::SET_REPORT_MODE, mcu_request);
 }
 
-std::vector<u8> IrsProtocol::GetImage() const {
+std::vector<u8> IrsProtocol::GetImage() const
+{
     return buf_image;
 }
 
-IrsResolution IrsProtocol::GetIrsFormat() const {
+IrsResolution IrsProtocol::GetIrsFormat() const
+{
     return resolution;
 }
 
-bool IrsProtocol::IsEnabled() const {
+bool IrsProtocol::IsEnabled() const
+{
     return is_enabled;
 }
 

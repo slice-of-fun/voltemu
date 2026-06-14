@@ -1,29 +1,30 @@
 // SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#include "core/file_sys/card_image.h"
 #include "qt_common/util/content.h"
-#include "qt_common/util/game.h"
-
-#include "common/fs/fs.h"
-#include "core/hle/service/acc/profile_manager.h"
-#include "frontend_common/content_manager.h"
-#include "frontend_common/data_manager.h"
-#include "frontend_common/firmware_manager.h"
-
-#include "compress.h"
-#include "qt_common/abstract/frontend.h"
-#include "qt_common/abstract/progress.h"
-#include "qt_common/qt_common.h"
 
 #include <JlCompress.h>
+
 #include <QFuture>
 #include <QFutureWatcher>
 #include <QtConcurrentRun>
 
+#include "common/fs/fs.h"
+#include "compress.h"
+#include "core/file_sys/card_image.h"
+#include "core/hle/service/acc/profile_manager.h"
+#include "frontend_common/content_manager.h"
+#include "frontend_common/data_manager.h"
+#include "frontend_common/firmware_manager.h"
+#include "qt_common/abstract/frontend.h"
+#include "qt_common/abstract/progress.h"
+#include "qt_common/qt_common.h"
+#include "qt_common/util/game.h"
+
 namespace QtCommon::Content {
 
-bool CheckGameFirmware(u64 program_id) {
+bool CheckGameFirmware(u64 program_id)
+{
     if (FirmwareManager::GameRequiresFirmware(program_id) &&
         !FirmwareManager::CheckFirmwarePresence(*system)) {
         auto result = QtCommon::Frontend::Warning(
@@ -39,7 +40,8 @@ bool CheckGameFirmware(u64 program_id) {
     return true;
 }
 
-void InstallFirmware(const QString& location, bool recursive) {
+void InstallFirmware(const QString& location, bool recursive)
+{
     // Initialize a progress dialog.
     auto progress =
         QtCommon::Frontend::newProgressDialog(tr("Installing Firmware..."), tr("Cancel"), 0, 100);
@@ -180,7 +182,8 @@ void InstallFirmware(const QString& location, bool recursive) {
                                                       QString::fromStdString(display_version)));
 }
 
-QString UnzipFirmwareToTmp(const QString& location) {
+QString UnzipFirmwareToTmp(const QString& location)
+{
     namespace fs = std::filesystem;
     fs::path tmp{fs::temp_directory_path() / "eden" / "firmware"};
     std::error_code ec;
@@ -203,7 +206,8 @@ QString UnzipFirmwareToTmp(const QString& location) {
 }
 
 // Content //
-void VerifyGameContents(const std::string& game_path) {
+void VerifyGameContents(const std::string& game_path)
+{
     auto progress =
         QtCommon::Frontend::newProgressDialog(tr("Verifying integrity..."), tr("Cancel"), 0, 100);
     progress->show();
@@ -235,7 +239,8 @@ void VerifyGameContents(const std::string& game_path) {
     }
 }
 
-void InstallKeys() {
+void InstallKeys()
+{
     const QString key_source_location = QtCommon::Frontend::GetOpenFileName(
         tr("Select Dumped Keys Location"), {}, QStringLiteral("Decryption Keys (*.keys)"), {});
 
@@ -258,7 +263,8 @@ void InstallKeys() {
     }
 }
 
-void VerifyInstalledContents() {
+void VerifyInstalledContents()
+{
     // Initialize a progress dialog.
     auto progress =
         QtCommon::Frontend::newProgressDialog(tr("Verifying integrity..."), tr("Cancel"), 0, 100);
@@ -290,7 +296,8 @@ void VerifyInstalledContents() {
     }
 }
 
-void FixProfiles() {
+void FixProfiles()
+{
     // Reset user save files after config is initialized and migration is done.
     // Doing it at init time causes profiles to read from the wrong place entirely if NAND dir is
     // not default
@@ -343,7 +350,8 @@ void FixProfiles() {
     QtCommon::Game::OpenSaveFolder();
 }
 
-void ClearDataDir(FrontendCommon::DataManager::DataDir dir, const std::string& user_id) {
+void ClearDataDir(FrontendCommon::DataManager::DataDir dir, const std::string& user_id)
+{
     using namespace QtCommon::Frontend;
     auto result = Warning(tr("Really clear data?"), tr("Important data may be lost!"), Yes | No);
 
@@ -367,7 +375,8 @@ void ClearDataDir(FrontendCommon::DataManager::DataDir dir, const std::string& u
 }
 
 void ExportDataDir(FrontendCommon::DataManager::DataDir data_dir, const std::string& user_id,
-                   const QString& name, std::function<void()> callback) {
+                   const QString& name, std::function<void()> callback)
+{
     using namespace QtCommon::Frontend;
     const std::string dir = FrontendCommon::DataManager::GetDataDirString(data_dir, user_id);
 
@@ -420,7 +429,8 @@ void ExportDataDir(FrontendCommon::DataManager::DataDir data_dir, const std::str
 }
 
 void ImportDataDir(FrontendCommon::DataManager::DataDir data_dir, const std::string& user_id,
-                   std::function<void()> callback) {
+                   std::function<void()> callback)
+{
     const std::string dir = FrontendCommon::DataManager::GetDataDirString(data_dir, user_id);
 
     using namespace QtCommon::Frontend;
@@ -495,7 +505,8 @@ void ImportDataDir(FrontendCommon::DataManager::DataDir data_dir, const std::str
     });
 }
 
-bool CheckKeys() {
+bool CheckKeys()
+{
     if (!ContentManager::AreKeysPresent()) {
         QtCommon::Frontend::Information(
             tr("Keys not installed"),
@@ -506,7 +517,8 @@ bool CheckKeys() {
     return true;
 }
 
-void InstallFirmware() {
+void InstallFirmware()
+{
     if (!CheckKeys())
         return;
 
@@ -517,7 +529,8 @@ void InstallFirmware() {
         QtCommon::Content::InstallFirmware(firmware_source_location, false);
 }
 
-void InstallFirmwareZip() {
+void InstallFirmwareZip()
+{
     if (!CheckKeys())
         return;
 
@@ -548,7 +561,8 @@ void InstallFirmwareZip() {
     }
 }
 
-void configureFilesystemProvider(const std::string& filepath) {
+void configureFilesystemProvider(const std::string& filepath)
+{
     // Ensure all NCAs are registered before launching the game
     const auto file = QtCommon::vfs->OpenFile(filepath, FileSys::OpenMode::Read);
     if (!file) {

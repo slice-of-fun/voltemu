@@ -6,16 +6,18 @@
 
 #pragma once
 
+#include <qobjectdefs.h>
+#include <vulkan/vulkan_core.h>
+
+#include <QColor>
+#include <QString>
+#include <QWidget>
 #include <functional>
 #include <memory>
 #include <type_traits>
 #include <typeindex>
 #include <vector>
-#include <QColor>
-#include <QString>
-#include <QWidget>
-#include <qobjectdefs.h>
-#include <vulkan/vulkan_core.h>
+
 #include "common/common_types.h"
 #include "common/settings_enums.h"
 #include "qt_common/config/shared_translation.h"

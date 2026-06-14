@@ -1,13 +1,15 @@
 // SPDX-FileCopyrightText: Copyright 2024 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include "core/hle/service/cmif_serialization.h"
 #include "core/hle/service/ns/system_update_control.h"
+
+#include "core/hle/service/cmif_serialization.h"
 
 namespace Service::NS {
 
 ISystemUpdateControl::ISystemUpdateControl(Core::System& system_)
-    : ServiceFramework{system_, "ISystemUpdateControl"} {
+    : ServiceFramework{system_, "ISystemUpdateControl"}
+{
     // clang-format off
     static const FunctionInfo functions[] = {
         {0, nullptr, "HasDownloaded"},

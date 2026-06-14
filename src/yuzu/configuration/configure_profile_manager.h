@@ -6,12 +6,12 @@
 
 #pragma once
 
-#include <functional>
-#include <memory>
-
 #include <QDialog>
 #include <QList>
 #include <QWidget>
+#include <functional>
+#include <memory>
+
 #include "core/file_sys/vfs/vfs_types.h"
 
 class ProfileAvatarDialog;

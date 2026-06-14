@@ -4,12 +4,14 @@
 // SPDX-FileCopyrightText: Copyright 2021 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include <cstring>
+#include "video_core/renderer_opengl/gl_compute_pipeline.h"
+
 #include <bit>
+#include <cstring>
 #include <numeric>
+
 #include "common/cityhash.h"
 #include "common/settings.h"
-#include "video_core/renderer_opengl/gl_compute_pipeline.h"
 #include "video_core/renderer_opengl/gl_shader_manager.h"
 #include "video_core/renderer_opengl/gl_shader_util.h"
 
@@ -22,12 +24,14 @@ using VideoCommon::ImageId;
 constexpr u32 MAX_TEXTURES = 64;
 constexpr u32 MAX_IMAGES = 16;
 
-size_t ComputePipelineKey::Hash() const noexcept {
+size_t ComputePipelineKey::Hash() const noexcept
+{
     return static_cast<size_t>(
         Common::CityHash64(reinterpret_cast<const char*>(this), sizeof *this));
 }
 
-bool ComputePipelineKey::operator==(const ComputePipelineKey& rhs) const noexcept {
+bool ComputePipelineKey::operator==(const ComputePipelineKey& rhs) const noexcept
+{
     return std::memcmp(this, &rhs, sizeof *this) == 0;
 }
 
@@ -36,7 +40,8 @@ ComputePipeline::ComputePipeline(const Device& device, TextureCache& texture_cac
                                  const Shader::Info& info_, std::string code,
                                  std::vector<u32> code_v, bool force_context_flush)
     : texture_cache{texture_cache_}, buffer_cache{buffer_cache_},
-      program_manager{program_manager_}, info{info_} {
+      program_manager{program_manager_}, info{info_}
+{
     switch (::Settings::values.renderer_backend.GetValue()) {
     case Settings::RendererBackend::OpenGL_GLSL:
         source_program = CreateProgram(code, GL_COMPUTE_SHADER);
@@ -50,7 +55,8 @@ ComputePipeline::ComputePipeline(const Device& device, TextureCache& texture_cac
     default:
         UNREACHABLE();
     }
-    std::copy_n(info.constant_buffer_used_sizes.begin(), uniform_buffer_sizes.size(), uniform_buffer_sizes.begin());
+    std::copy_n(info.constant_buffer_used_sizes.begin(), uniform_buffer_sizes.size(),
+                uniform_buffer_sizes.begin());
 
     num_texture_buffers = Shader::NumDescriptors(info.texture_buffer_descriptors);
     num_image_buffers = Shader::NumDescriptors(info.image_buffer_descriptors);
@@ -80,7 +86,8 @@ ComputePipeline::ComputePipeline(const Device& device, TextureCache& texture_cac
     }
 }
 
-void ComputePipeline::Configure() {
+void ComputePipeline::Configure()
+{
     buffer_cache.SetComputeUniformBufferState(info.constant_buffer_mask, &uniform_buffer_sizes);
     buffer_cache.UnbindComputeStorageBuffers();
     size_t ssbo_index{};
@@ -258,7 +265,8 @@ void ComputePipeline::Configure() {
     }
 }
 
-void ComputePipeline::WaitForBuild() {
+void ComputePipeline::WaitForBuild()
+{
     if (built_fence.handle == 0) {
         std::unique_lock lock{built_mutex};
         built_condvar.wait(lock, [this] { return built_fence.handle != 0; });

@@ -22,9 +22,7 @@ public:
 
     void Initialize(KEvent* parent);
 
-    KEvent* GetParent() const {
-        return m_parent;
-    }
+    KEvent* GetParent() const { return m_parent; }
 
     Result Signal();
     Result Clear();

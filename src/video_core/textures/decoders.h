@@ -30,7 +30,8 @@ using SwizzleTable = std::array<std::array<u32, GOB_SIZE_X>, GOB_SIZE_Y>;
  * Calculates the offset of an (x, y) position within a swizzled texture.
  * Taken from the Tegra X1 Technical Reference Manual. pages 1187-1188
  */
-constexpr SwizzleTable MakeSwizzleTable() {
+constexpr SwizzleTable MakeSwizzleTable()
+{
     SwizzleTable table{};
     for (u32 y = 0; y < table.size(); ++y) {
         for (u32 x = 0; x < table[0].size(); ++x) {

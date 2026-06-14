@@ -17,8 +17,9 @@
 
 namespace Common {
 
-template <typename Rep, typename Period>
-bool StoppableTimedWait(std::stop_token token, const std::chrono::duration<Rep, Period>& rel_time) {
+template<typename Rep, typename Period>
+bool StoppableTimedWait(std::stop_token token, const std::chrono::duration<Rep, Period>& rel_time)
+{
     std::condition_variable_any cv;
     std::mutex m;
 

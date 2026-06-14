@@ -1,13 +1,14 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/audio/audio_renderer_manager.h"
+
 #include "audio_core/audio_render_manager.h"
 #include "audio_core/common/feature_support.h"
 #include "core/hle/kernel/k_process.h"
 #include "core/hle/kernel/k_transfer_memory.h"
 #include "core/hle/service/audio/audio_device.h"
 #include "core/hle/service/audio/audio_renderer.h"
-#include "core/hle/service/audio/audio_renderer_manager.h"
 #include "core/hle/service/cmif_serialization.h"
 
 namespace Service::Audio {
@@ -15,7 +16,8 @@ namespace Service::Audio {
 using namespace AudioCore::Renderer;
 
 IAudioRendererManager::IAudioRendererManager(Core::System& system_)
-    : ServiceFramework{system_, "audren:u"}, impl{std::make_unique<Manager>(system_)} {
+    : ServiceFramework{system_, "audren:u"}, impl{std::make_unique<Manager>(system_)}
+{
     // clang-format off
     static const FunctionInfo functions[] = {
         {0, D<&IAudioRendererManager::OpenAudioRenderer>, "OpenAudioRenderer"},
@@ -35,7 +37,8 @@ Result IAudioRendererManager::OpenAudioRenderer(
     Out<SharedPointer<IAudioRenderer>> out_audio_renderer,
     AudioCore::AudioRendererParameterInternal parameter,
     InCopyHandle<Kernel::KTransferMemory> tmem_handle, u64 tmem_size,
-    InCopyHandle<Kernel::KProcess> process_handle, ClientAppletResourceUserId aruid) {
+    InCopyHandle<Kernel::KProcess> process_handle, ClientAppletResourceUserId aruid)
+{
     LOG_DEBUG(Service_Audio, "called");
 
     if (impl->GetSessionCount() + 1 > AudioCore::MaxRendererSessions) {
@@ -59,7 +62,8 @@ Result IAudioRendererManager::OpenAudioRenderer(
 }
 
 Result IAudioRendererManager::GetWorkBufferSize(Out<u64> out_size,
-                                                AudioCore::AudioRendererParameterInternal params) {
+                                                AudioCore::AudioRendererParameterInternal params)
+{
     LOG_DEBUG(Service_Audio, "called");
 
     R_TRY(impl->GetWorkBufferSize(params, *out_size))
@@ -83,8 +87,10 @@ Result IAudioRendererManager::GetWorkBufferSize(Out<u64> out_size,
     R_SUCCEED();
 }
 
-Result IAudioRendererManager::GetAudioDeviceService(
-    Out<SharedPointer<IAudioDevice>> out_audio_device, ClientAppletResourceUserId aruid) {
+Result
+IAudioRendererManager::GetAudioDeviceService(Out<SharedPointer<IAudioDevice>> out_audio_device,
+                                             ClientAppletResourceUserId aruid)
+{
     LOG_DEBUG(Service_Audio, "called, aruid={:#x}", aruid.pid);
     *out_audio_device = std::make_shared<IAudioDevice>(
         system, aruid.pid, Common::MakeMagic('R', 'E', 'V', '1'), num_audio_devices++);
@@ -93,7 +99,8 @@ Result IAudioRendererManager::GetAudioDeviceService(
 
 Result IAudioRendererManager::GetAudioDeviceServiceWithRevisionInfo(
     Out<SharedPointer<IAudioDevice>> out_audio_device, u32 revision,
-    ClientAppletResourceUserId aruid) {
+    ClientAppletResourceUserId aruid)
+{
     LOG_DEBUG(Service_Audio, "called, revision={} aruid={:#x}", AudioCore::GetRevisionNum(revision),
               aruid.pid);
     *out_audio_device =

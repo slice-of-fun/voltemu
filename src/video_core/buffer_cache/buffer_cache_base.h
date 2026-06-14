@@ -6,19 +6,19 @@
 
 #pragma once
 
+#include <ankerl/unordered_dense.h>
+
 #include <algorithm>
 #include <array>
 #include <bit>
+#include <boost/container/small_vector.hpp>
+#include <boost/container/static_vector.hpp>
 #include <functional>
 #include <memory>
 #include <mutex>
 #include <numeric>
 #include <span>
 #include <vector>
-
-#include <ankerl/unordered_dense.h>
-#include <boost/container/static_vector.hpp>
-#include <boost/container/small_vector.hpp>
 
 #include "common/common_types.h"
 #include "common/div_ceil.h"
@@ -32,7 +32,6 @@
 #include "video_core/control/channel_state_cache.h"
 #include "video_core/delayed_destruction_ring.h"
 #include "video_core/dirty_flags.h"
-#include "video_core/engines/maxwell_3d.h"
 #include "video_core/engines/kepler_compute.h"
 #include "video_core/engines/maxwell_3d.h"
 #include "video_core/memory_manager.h"
@@ -95,8 +94,7 @@ static constexpr Binding NULL_BINDING{
     .buffer_id = NULL_BUFFER_ID,
 };
 
-template <typename Buffer>
-struct HostBindings {
+template<typename Buffer> struct HostBindings {
     boost::container::static_vector<Buffer*, NUM_VERTEX_BUFFERS> buffers;
     boost::container::static_vector<u64, NUM_VERTEX_BUFFERS> offsets;
     boost::container::static_vector<u64, NUM_VERTEX_BUFFERS> sizes;
@@ -159,7 +157,7 @@ public:
         uniform_buffer_binding_sizes{};
 };
 
-template <class P>
+template<class P>
 class BufferCache : public VideoCommon::ChannelSetupCaches<BufferCacheChannelInfo> {
     // Page size for caching purposes.
     // This is unrelated to the CPU page size and it can be changed as it seems optimal.
@@ -305,7 +303,8 @@ public:
     [[nodiscard]] bool IsRegionCpuModified(DAddr addr, size_t size);
 
     void SetDrawIndirect(
-        const Tegra::Engines::Maxwell3D::DrawManager::IndirectParams* current_draw_indirect_) {
+        const Tegra::Engines::Maxwell3D::DrawManager::IndirectParams* current_draw_indirect_)
+    {
         current_draw_indirect = current_draw_indirect_;
     }
 
@@ -313,8 +312,8 @@ public:
 
     [[nodiscard]] std::pair<Buffer*, u32> GetDrawIndirectBuffer();
 
-    template <typename Func>
-    void BufferOperations(Func&& func) {
+    template<typename Func> void BufferOperations(Func&& func)
+    {
         do {
             channel_state->has_deleted_buffers = false;
             func();
@@ -326,8 +325,8 @@ public:
     bool any_buffer_uploaded = false;
 
 private:
-    template <typename Func>
-    static void ForEachEnabledBit(u32 enabled_mask, Func&& func) {
+    template<typename Func> static void ForEachEnabledBit(u32 enabled_mask, Func&& func)
+    {
         for (u32 index = 0; enabled_mask != 0; ++index, enabled_mask >>= 1) {
             const int disabled_bits = std::countr_zero(enabled_mask);
             index += disabled_bits;
@@ -336,8 +335,8 @@ private:
         }
     }
 
-    template <typename Func>
-    void ForEachBufferInRange(DAddr device_addr, u64 size, Func&& func) {
+    template<typename Func> void ForEachBufferInRange(DAddr device_addr, u64 size, Func&& func)
+    {
         const u64 page_end = Common::DivCeil(device_addr + size, CACHING_PAGESIZE);
         for (u64 page = device_addr >> CACHING_PAGEBITS; page < page_end;) {
             const BufferId buffer_id = page_table[page];
@@ -353,7 +352,8 @@ private:
         }
     }
 
-    static bool IsRangeGranular(DAddr device_addr, size_t size) {
+    static bool IsRangeGranular(DAddr device_addr, size_t size)
+    {
         return (device_addr & ~Core::DEVICE_PAGEMASK) ==
                ((device_addr + size) & ~Core::DEVICE_PAGEMASK);
     }
@@ -426,8 +426,7 @@ private:
 
     void Unregister(BufferId buffer_id);
 
-    template <bool insert>
-    void ChangeRegister(BufferId buffer_id);
+    template<bool insert> void ChangeRegister(BufferId buffer_id);
 
     void TouchBuffer(Buffer& buffer, BufferId buffer_id) noexcept;
 

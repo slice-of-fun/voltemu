@@ -6,11 +6,10 @@
 
 #pragma once
 
-#include <memory>
-#include <vector>
-
 #include <QList>
 #include <QWidget>
+#include <memory>
+#include <vector>
 
 #include "core/file_sys/vfs/vfs_types.h"
 

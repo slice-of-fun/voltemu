@@ -4,10 +4,11 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/filesystem/fsp/fs_i_save_data_info_reader.h"
+
 #include "common/hex_util.h"
 #include "core/file_sys/savedata_factory.h"
 #include "core/hle/service/cmif_serialization.h"
-#include "core/hle/service/filesystem/fsp/fs_i_save_data_info_reader.h"
 #include "core/hle/service/filesystem/save_data_controller.h"
 
 namespace Service::FileSystem {
@@ -15,8 +16,8 @@ namespace Service::FileSystem {
 ISaveDataInfoReader::ISaveDataInfoReader(Core::System& system_,
                                          std::shared_ptr<SaveDataController> save_data_controller_,
                                          FileSys::SaveDataSpaceId space)
-    : ServiceFramework{system_, "ISaveDataInfoReader"}, save_data_controller{
-                                                            save_data_controller_} {
+    : ServiceFramework{system_, "ISaveDataInfoReader"}, save_data_controller{save_data_controller_}
+{
     static const FunctionInfo functions[] = {
         {0, D<&ISaveDataInfoReader::ReadSaveDataInfo>, "ReadSaveDataInfo"},
     };
@@ -27,7 +28,8 @@ ISaveDataInfoReader::ISaveDataInfoReader(Core::System& system_,
 
 ISaveDataInfoReader::~ISaveDataInfoReader() = default;
 
-static u64 stoull_be(std::string_view str) {
+static u64 stoull_be(std::string_view str)
+{
     if (str.size() != 16) {
         return 0;
     }
@@ -39,8 +41,10 @@ static u64 stoull_be(std::string_view str) {
     return Common::swap64(out);
 }
 
-Result ISaveDataInfoReader::ReadSaveDataInfo(
-    Out<u64> out_count, OutArray<SaveDataInfo, BufferAttr_HipcMapAlias> out_entries) {
+Result
+ISaveDataInfoReader::ReadSaveDataInfo(Out<u64> out_count,
+                                      OutArray<SaveDataInfo, BufferAttr_HipcMapAlias> out_entries)
+{
     LOG_DEBUG(Service_FS, "called");
 
     // Calculate how many entries we can fit in the output buffer
@@ -63,7 +67,8 @@ Result ISaveDataInfoReader::ReadSaveDataInfo(
     R_SUCCEED();
 }
 
-void ISaveDataInfoReader::FindAllSaves(FileSys::SaveDataSpaceId space) {
+void ISaveDataInfoReader::FindAllSaves(FileSys::SaveDataSpaceId space)
+{
     FileSys::VirtualDir save_root{};
     const auto result = save_data_controller->OpenSaveDataSpace(&save_root, space);
 
@@ -82,7 +87,8 @@ void ISaveDataInfoReader::FindAllSaves(FileSys::SaveDataSpaceId space) {
 }
 
 void ISaveDataInfoReader::FindNormalSaves(FileSys::SaveDataSpaceId space,
-                                          const FileSys::VirtualDir& type) {
+                                          const FileSys::VirtualDir& type)
+{
     for (const auto& save_id : type->GetSubdirectories()) {
         for (const auto& user_id : save_id->GetSubdirectories()) {
             // Skip non user id subdirectories
@@ -133,7 +139,8 @@ void ISaveDataInfoReader::FindNormalSaves(FileSys::SaveDataSpaceId space,
 }
 
 void ISaveDataInfoReader::FindTemporaryStorageSaves(FileSys::SaveDataSpaceId space,
-                                                    const FileSys::VirtualDir& type) {
+                                                    const FileSys::VirtualDir& type)
+{
     for (const auto& user_id : type->GetSubdirectories()) {
         // Skip non user id subdirectories
         if (user_id->GetName().size() != 0x20) {

@@ -19,7 +19,9 @@ namespace Service::Glue::Time {
 class TimeZoneBinary {
 public:
     explicit TimeZoneBinary(Core::System& system_)
-        : time_zone_scratch_space(0x2800, 0), system{system_} {}
+        : time_zone_scratch_space(0x2800, 0), system{system_}
+    {
+    }
 
     Result Mount();
     bool IsValid(const Service::PSC::Time::LocationName& name);

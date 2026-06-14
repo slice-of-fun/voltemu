@@ -1,10 +1,11 @@
 // SPDX-FileCopyrightText: 2016 Dolphin Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include <catch2/catch_test_macros.hpp>
+#include "core/core_timing.h"
 
 #include <array>
 #include <bitset>
+#include <catch2/catch_test_macros.hpp>
 #include <chrono>
 #include <cstdlib>
 #include <memory>
@@ -12,7 +13,6 @@
 #include <string>
 
 #include "core/core.h"
-#include "core/core_timing.h"
 
 namespace {
 // Numbers are chosen randomly to make sure the correct one is given.
@@ -21,9 +21,10 @@ std::array<s64, 5> delays{};
 std::bitset<5> callbacks_ran_flags;
 u64 expected_callback = 0;
 
-template <unsigned int IDX>
+template<unsigned int IDX>
 std::optional<std::chrono::nanoseconds> HostCallbackTemplate(s64 time,
-                                                             std::chrono::nanoseconds ns_late) {
+                                                             std::chrono::nanoseconds ns_late)
+{
     static_assert(IDX < callbacks_ran_flags.size(), "IDX out of range");
     callbacks_ran_flags.set(IDX);
     delays[IDX] = ns_late.count();
@@ -32,7 +33,8 @@ std::optional<std::chrono::nanoseconds> HostCallbackTemplate(s64 time,
 }
 
 struct ScopeInit final {
-    ScopeInit() {
+    ScopeInit()
+    {
         core_timing.SetMulticore(true);
         core_timing.Initialize([]() {});
     }
@@ -40,7 +42,8 @@ struct ScopeInit final {
     Core::Timing::CoreTiming core_timing;
 };
 
-u64 TestTimerSpeed(Core::Timing::CoreTiming& core_timing) {
+u64 TestTimerSpeed(Core::Timing::CoreTiming& core_timing)
+{
     const u64 start = core_timing.GetGlobalTimeNs().count();
     volatile u64 placebo = 0;
     for (std::size_t i = 0; i < 1000; i++) {
@@ -52,7 +55,8 @@ u64 TestTimerSpeed(Core::Timing::CoreTiming& core_timing) {
 
 } // Anonymous namespace
 
-TEST_CASE("CoreTiming[BasicOrder]", "[core]") {
+TEST_CASE("CoreTiming[BasicOrder]", "[core]")
+{
     ScopeInit guard;
     auto& core_timing = guard.core_timing;
     std::vector<std::shared_ptr<Core::Timing::EventType>> events{
@@ -92,7 +96,8 @@ TEST_CASE("CoreTiming[BasicOrder]", "[core]") {
     }
 }
 
-TEST_CASE("CoreTiming[BasicOrderNoPausing]", "[core]") {
+TEST_CASE("CoreTiming[BasicOrderNoPausing]", "[core]")
+{
     ScopeInit guard;
     auto& core_timing = guard.core_timing;
     std::vector<std::shared_ptr<Core::Timing::EventType>> events{

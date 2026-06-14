@@ -4,6 +4,7 @@
 #pragma once
 
 #include <QObject>
+
 #include "common/common_types.h"
 
 namespace QtCommon::Path {

@@ -4,26 +4,34 @@
 // SPDX-FileCopyrightText: Copyright 2020 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/kernel/k_resource_limit.h"
+
 #include "common/assert.h"
 #include "common/overflow.h"
 #include "core/core.h"
 #include "core/core_timing.h"
 #include "core/hle/kernel/k_hardware_timer.h"
-#include "core/hle/kernel/k_resource_limit.h"
 #include "core/hle/kernel/svc_results.h"
 
 namespace Kernel {
 constexpr s64 DefaultTimeout = 10000000000; // 10 seconds
 
 KResourceLimit::KResourceLimit(KernelCore& kernel)
-    : KAutoObjectWithSlabHeapAndContainer{kernel}, m_lock{m_kernel}, m_cond_var{m_kernel} {}
+    : KAutoObjectWithSlabHeapAndContainer{kernel}, m_lock{m_kernel}, m_cond_var{m_kernel}
+{
+}
 KResourceLimit::~KResourceLimit() = default;
 
-void KResourceLimit::Initialize() {}
+void KResourceLimit::Initialize()
+{
+}
 
-void KResourceLimit::Finalize() {}
+void KResourceLimit::Finalize()
+{
+}
 
-s64 KResourceLimit::GetLimitValue(LimitableResource which) const {
+s64 KResourceLimit::GetLimitValue(LimitableResource which) const
+{
     const auto index = static_cast<std::size_t>(which);
     s64 value{};
     {
@@ -36,7 +44,8 @@ s64 KResourceLimit::GetLimitValue(LimitableResource which) const {
     return value;
 }
 
-s64 KResourceLimit::GetCurrentValue(LimitableResource which) const {
+s64 KResourceLimit::GetCurrentValue(LimitableResource which) const
+{
     const auto index = static_cast<std::size_t>(which);
     s64 value{};
     {
@@ -49,7 +58,8 @@ s64 KResourceLimit::GetCurrentValue(LimitableResource which) const {
     return value;
 }
 
-s64 KResourceLimit::GetPeakValue(LimitableResource which) const {
+s64 KResourceLimit::GetPeakValue(LimitableResource which) const
+{
     const auto index = static_cast<std::size_t>(which);
     s64 value{};
     {
@@ -62,7 +72,8 @@ s64 KResourceLimit::GetPeakValue(LimitableResource which) const {
     return value;
 }
 
-s64 KResourceLimit::GetFreeValue(LimitableResource which) const {
+s64 KResourceLimit::GetFreeValue(LimitableResource which) const
+{
     const auto index = static_cast<std::size_t>(which);
     s64 value{};
     {
@@ -76,7 +87,8 @@ s64 KResourceLimit::GetFreeValue(LimitableResource which) const {
     return value;
 }
 
-Result KResourceLimit::SetLimitValue(LimitableResource which, s64 value) {
+Result KResourceLimit::SetLimitValue(LimitableResource which, s64 value)
+{
     const auto index = static_cast<std::size_t>(which);
     KScopedLightLock lk(m_lock);
     R_UNLESS(m_current_values[index] <= value, ResultInvalidState);
@@ -87,11 +99,13 @@ Result KResourceLimit::SetLimitValue(LimitableResource which, s64 value) {
     R_SUCCEED();
 }
 
-bool KResourceLimit::Reserve(LimitableResource which, s64 value) {
+bool KResourceLimit::Reserve(LimitableResource which, s64 value)
+{
     return Reserve(which, value, m_kernel.HardwareTimer().GetTick() + DefaultTimeout);
 }
 
-bool KResourceLimit::Reserve(LimitableResource which, s64 value, s64 timeout) {
+bool KResourceLimit::Reserve(LimitableResource which, s64 value, s64 timeout)
+{
     ASSERT(value >= 0);
     const auto index = static_cast<std::size_t>(which);
     KScopedLightLock lk(m_lock);
@@ -131,11 +145,13 @@ bool KResourceLimit::Reserve(LimitableResource which, s64 value, s64 timeout) {
     return false;
 }
 
-void KResourceLimit::Release(LimitableResource which, s64 value) {
+void KResourceLimit::Release(LimitableResource which, s64 value)
+{
     Release(which, value, value);
 }
 
-void KResourceLimit::Release(LimitableResource which, s64 value, s64 hint) {
+void KResourceLimit::Release(LimitableResource which, s64 value, s64 hint)
+{
     ASSERT(value >= 0);
     ASSERT(hint >= 0);
 
@@ -154,7 +170,8 @@ void KResourceLimit::Release(LimitableResource which, s64 value, s64 hint) {
     }
 }
 
-KResourceLimit* CreateResourceLimitForProcess(Core::System& system, s64 physical_memory_size) {
+KResourceLimit* CreateResourceLimitForProcess(Core::System& system, s64 physical_memory_size)
+{
     auto* resource_limit = KResourceLimit::Create(system.Kernel());
     resource_limit->Initialize();
 

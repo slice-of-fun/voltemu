@@ -53,7 +53,8 @@ public:
      * @param offset Offset from the start of the shared memory block to get pointer
      * @return A pointer to the shared memory block from the specified offset
      */
-    u8* GetPointer(std::size_t offset = 0) {
+    u8* GetPointer(std::size_t offset = 0)
+    {
         return m_device_memory->GetPointer<u8>(m_physical_address + offset);
     }
 
@@ -62,15 +63,14 @@ public:
      * @param offset Offset from the start of the shared memory block to get pointer
      * @return A pointer to the shared memory block from the specified offset
      */
-    const u8* GetPointer(std::size_t offset = 0) const {
+    const u8* GetPointer(std::size_t offset = 0) const
+    {
         return m_device_memory->GetPointer<u8>(m_physical_address + offset);
     }
 
     void Finalize() override;
 
-    bool IsInitialized() const override {
-        return m_is_initialized;
-    }
+    bool IsInitialized() const override { return m_is_initialized; }
     static void PostDestroy(uintptr_t arg) {}
 
 private:

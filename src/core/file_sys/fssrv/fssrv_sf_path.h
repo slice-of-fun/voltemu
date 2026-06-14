@@ -10,7 +10,8 @@ namespace FileSys::Sf {
 struct Path {
     char str[EntryNameLengthMax + 1];
 
-    static constexpr Path Encode(const char* p) {
+    static constexpr Path Encode(const char* p)
+    {
         Path path = {};
         for (size_t i = 0; i < sizeof(path) - 1; i++) {
             path.str[i] = p[i];
@@ -21,7 +22,8 @@ struct Path {
         return path;
     }
 
-    static constexpr size_t GetPathLength(const Path& path) {
+    static constexpr size_t GetPathLength(const Path& path)
+    {
         size_t len = 0;
         for (size_t i = 0; i < sizeof(path) - 1 && path.str[i] != '\x00'; i++) {
             len++;

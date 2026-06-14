@@ -4,6 +4,8 @@
 // SPDX-FileCopyrightText: Copyright 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/file_sys/fssystem/fssystem_nca_file_system_driver.h"
+
 #include "core/file_sys/fssystem/fssystem_aes_ctr_counter_extended_storage.h"
 #include "core/file_sys/fssystem/fssystem_aes_ctr_storage.h"
 #include "core/file_sys/fssystem/fssystem_aes_xts_storage.h"
@@ -11,13 +13,12 @@
 #include "core/file_sys/fssystem/fssystem_compressed_storage.h"
 #include "core/file_sys/fssystem/fssystem_hierarchical_integrity_verification_storage.h"
 #include "core/file_sys/fssystem/fssystem_hierarchical_sha256_storage.h"
+#include "core/file_sys/fssystem/fssystem_hierarchical_sha3_storage.h"
 #include "core/file_sys/fssystem/fssystem_indirect_storage.h"
 #include "core/file_sys/fssystem/fssystem_integrity_romfs_storage.h"
 #include "core/file_sys/fssystem/fssystem_memory_resource_buffer_hold_storage.h"
-#include "core/file_sys/fssystem/fssystem_nca_file_system_driver.h"
 #include "core/file_sys/fssystem/fssystem_sparse_storage.h"
 #include "core/file_sys/fssystem/fssystem_switch_storage.h"
-#include "core/file_sys/fssystem/fssystem_hierarchical_sha3_storage.h"
 #include "core/file_sys/vfs/vfs_offset.h"
 #include "core/file_sys/vfs/vfs_vector.h"
 
@@ -41,9 +42,12 @@ private:
 
 public:
     SharedNcaBodyStorage(VirtualFile s, std::shared_ptr<NcaReader> r)
-        : m_storage(std::move(s)), m_nca_reader(std::move(r)) {}
+        : m_storage(std::move(s)), m_nca_reader(std::move(r))
+    {
+    }
 
-    virtual size_t Read(u8* buffer, size_t size, size_t offset) const override {
+    virtual size_t Read(u8* buffer, size_t size, size_t offset) const override
+    {
         // Validate pre-conditions.
         ASSERT(m_storage != nullptr);
 
@@ -51,7 +55,8 @@ public:
         return m_storage->Read(buffer, size, offset);
     }
 
-    virtual size_t GetSize() const override {
+    virtual size_t GetSize() const override
+    {
         // Validate pre-conditions.
         ASSERT(m_storage != nullptr);
 
@@ -59,11 +64,13 @@ public:
     }
 };
 
-inline s64 GetFsOffset(const NcaReader& reader, s32 fs_index) {
+inline s64 GetFsOffset(const NcaReader& reader, s32 fs_index)
+{
     return static_cast<s64>(reader.GetFsOffset(fs_index));
 }
 
-inline s64 GetFsEndOffset(const NcaReader& reader, s32 fs_index) {
+inline s64 GetFsEndOffset(const NcaReader& reader, s32 fs_index)
+{
     return static_cast<s64>(reader.GetFsEndOffset(fs_index));
 }
 
@@ -75,13 +82,15 @@ using IntegrityDataInfo = IntegrityLevelInfo::HierarchicalIntegrityVerificationL
 
 Result NcaFileSystemDriver::OpenStorageWithContext(VirtualFile* out,
                                                    NcaFsHeaderReader* out_header_reader,
-                                                   s32 fs_index, StorageContext* ctx) {
+                                                   s32 fs_index, StorageContext* ctx)
+{
     // Open storage.
     R_RETURN(this->OpenStorageImpl(out, out_header_reader, fs_index, ctx));
 }
 
 Result NcaFileSystemDriver::OpenStorageImpl(VirtualFile* out, NcaFsHeaderReader* out_header_reader,
-                                            s32 fs_index, StorageContext* ctx) {
+                                            s32 fs_index, StorageContext* ctx)
+{
     // Validate preconditions.
     ASSERT(out != nullptr);
     ASSERT(out_header_reader != nullptr);
@@ -295,8 +304,8 @@ Result NcaFileSystemDriver::OpenStorageImpl(VirtualFile* out, NcaFsHeaderReader*
 
 Result NcaFileSystemDriver::CreateStorageByRawStorage(VirtualFile* out,
                                                       const NcaFsHeaderReader* header_reader,
-                                                      VirtualFile raw_storage,
-                                                      StorageContext* ctx) {
+                                                      VirtualFile raw_storage, StorageContext* ctx)
+{
     // Initialize storage as raw storage.
     VirtualFile storage = std::move(raw_storage);
 
@@ -320,7 +329,6 @@ Result NcaFileSystemDriver::CreateStorageByRawStorage(VirtualFile* out,
         R_THROW(ResultInvalidNcaFsHeaderHashType);
     }
 
-
     // Process compression layer.
     if (header_reader->ExistsCompressionLayer()) {
         R_TRY(this->CreateCompressedStorage(
@@ -336,7 +344,8 @@ Result NcaFileSystemDriver::CreateStorageByRawStorage(VirtualFile* out,
 }
 
 Result NcaFileSystemDriver::OpenIndirectableStorageAsOriginal(
-    VirtualFile* out, const NcaFsHeaderReader* header_reader, StorageContext* ctx) {
+    VirtualFile* out, const NcaFsHeaderReader* header_reader, StorageContext* ctx)
+{
     // Get the fs index.
     const auto fs_index = header_reader->GetFsIndex();
 
@@ -404,7 +413,8 @@ Result NcaFileSystemDriver::OpenIndirectableStorageAsOriginal(
     R_SUCCEED();
 }
 
-Result NcaFileSystemDriver::CreateBodySubStorage(VirtualFile* out, s64 offset, s64 size) {
+Result NcaFileSystemDriver::CreateBodySubStorage(VirtualFile* out, s64 offset, s64 size)
+{
     // Create the body storage.
     auto body_storage =
         std::make_shared<SharedNcaBodyStorage>(m_reader->GetSharedBodyStorage(), m_reader);
@@ -425,9 +435,11 @@ Result NcaFileSystemDriver::CreateBodySubStorage(VirtualFile* out, s64 offset, s
     R_SUCCEED();
 }
 
-Result NcaFileSystemDriver::CreateAesCtrStorage(
-    VirtualFile* out, VirtualFile base_storage, s64 offset, const NcaAesCtrUpperIv& upper_iv,
-    AlignmentStorageRequirement alignment_storage_requirement) {
+Result
+NcaFileSystemDriver::CreateAesCtrStorage(VirtualFile* out, VirtualFile base_storage, s64 offset,
+                                         const NcaAesCtrUpperIv& upper_iv,
+                                         AlignmentStorageRequirement alignment_storage_requirement)
+{
     // Check pre-conditions.
     ASSERT(out != nullptr);
     ASSERT(base_storage != nullptr);
@@ -464,7 +476,8 @@ Result NcaFileSystemDriver::CreateAesCtrStorage(
 }
 
 Result NcaFileSystemDriver::CreateAesXtsStorage(VirtualFile* out, VirtualFile base_storage,
-                                                s64 offset) {
+                                                s64 offset)
+{
     // Check pre-conditions.
     ASSERT(out != nullptr);
     ASSERT(base_storage != nullptr);
@@ -494,7 +507,8 @@ Result NcaFileSystemDriver::CreateAesXtsStorage(VirtualFile* out, VirtualFile ba
 Result NcaFileSystemDriver::CreateSparseStorageMetaStorage(VirtualFile* out,
                                                            VirtualFile base_storage, s64 offset,
                                                            const NcaAesCtrUpperIv& upper_iv,
-                                                           const NcaSparseInfo& sparse_info) {
+                                                           const NcaSparseInfo& sparse_info)
+{
     // Validate preconditions.
     ASSERT(out != nullptr);
     ASSERT(base_storage != nullptr);
@@ -534,7 +548,8 @@ Result NcaFileSystemDriver::CreateSparseStorageCore(std::shared_ptr<SparseStorag
                                                     VirtualFile base_storage, s64 base_size,
                                                     VirtualFile meta_storage,
                                                     const NcaSparseInfo& sparse_info,
-                                                    bool external_info) {
+                                                    bool external_info)
+{
     // Validate preconditions.
     ASSERT(out != nullptr);
     ASSERT(base_storage != nullptr);
@@ -579,7 +594,8 @@ Result NcaFileSystemDriver::CreateSparseStorage(VirtualFile* out, s64* out_fs_da
                                                 std::shared_ptr<SparseStorage>* out_sparse_storage,
                                                 VirtualFile* out_meta_storage, s32 index,
                                                 const NcaAesCtrUpperIv& upper_iv,
-                                                const NcaSparseInfo& sparse_info) {
+                                                const NcaSparseInfo& sparse_info)
+{
     // Validate preconditions.
     ASSERT(out != nullptr);
     ASSERT(out_fs_data_offset != nullptr);
@@ -645,7 +661,8 @@ Result NcaFileSystemDriver::CreateSparseStorage(VirtualFile* out, s64* out_fs_da
 Result NcaFileSystemDriver::CreateSparseStorageMetaStorageWithVerification(
     VirtualFile* out, VirtualFile* out_layer_info_storage, VirtualFile base_storage, s64 offset,
     const NcaAesCtrUpperIv& upper_iv, const NcaSparseInfo& sparse_info,
-    const NcaMetaDataHashDataInfo& meta_data_hash_data_info) {
+    const NcaMetaDataHashDataInfo& meta_data_hash_data_info)
+{
     // Validate preconditions.
     ASSERT(out != nullptr);
     ASSERT(base_storage != nullptr);
@@ -715,7 +732,8 @@ Result NcaFileSystemDriver::CreateSparseStorageWithVerification(
     VirtualFile* out_meta_storage, VirtualFile* out_layer_info_storage, s32 index,
     const NcaAesCtrUpperIv& upper_iv, const NcaSparseInfo& sparse_info,
     const NcaMetaDataHashDataInfo& meta_data_hash_data_info,
-    NcaFsHeader::MetaDataHashType meta_data_hash_type) {
+    NcaFsHeader::MetaDataHashType meta_data_hash_type)
+{
     // Validate preconditions.
     ASSERT(out != nullptr);
     ASSERT(out_fs_data_offset != nullptr);
@@ -746,7 +764,10 @@ Result NcaFileSystemDriver::CreateSparseStorageWithVerification(
 
         // Check the meta data hash type.
         if (meta_data_hash_type != NcaFsHeader::MetaDataHashType::HierarchicalIntegrity) {
-            LOG_ERROR(Loader, "Sparse meta hash type {} not supported for verification; mounting sparse data WITHOUT verification (temporary).", static_cast<int>(meta_data_hash_type));
+            LOG_ERROR(Loader,
+                      "Sparse meta hash type {} not supported for verification; mounting sparse "
+                      "data WITHOUT verification (temporary).",
+                      static_cast<int>(meta_data_hash_type));
 
             R_TRY(this->CreateBodySubStorage(std::addressof(body_substorage),
                                              sparse_info.physical_offset,
@@ -805,7 +826,8 @@ Result NcaFileSystemDriver::CreateSparseStorageWithVerification(
 Result NcaFileSystemDriver::CreateAesCtrExStorageMetaStorage(
     VirtualFile* out, VirtualFile base_storage, s64 offset,
     NcaFsHeader::EncryptionType encryption_type, const NcaAesCtrUpperIv& upper_iv,
-    const NcaPatchInfo& patch_info) {
+    const NcaPatchInfo& patch_info)
+{
     // Validate preconditions.
     ASSERT(out != nullptr);
     ASSERT(base_storage != nullptr);
@@ -864,7 +886,8 @@ Result NcaFileSystemDriver::CreateAesCtrExStorageMetaStorage(
 Result NcaFileSystemDriver::CreateAesCtrExStorage(
     VirtualFile* out, std::shared_ptr<AesCtrCounterExtendedStorage>* out_ext,
     VirtualFile base_storage, VirtualFile meta_storage, s64 counter_offset,
-    const NcaAesCtrUpperIv& upper_iv, const NcaPatchInfo& patch_info) {
+    const NcaAesCtrUpperIv& upper_iv, const NcaPatchInfo& patch_info)
+{
     // Validate pre-conditions.
     ASSERT(out != nullptr);
     ASSERT(base_storage != nullptr);
@@ -953,7 +976,8 @@ Result NcaFileSystemDriver::CreateAesCtrExStorage(
 
 Result NcaFileSystemDriver::CreateIndirectStorageMetaStorage(VirtualFile* out,
                                                              VirtualFile base_storage,
-                                                             const NcaPatchInfo& patch_info) {
+                                                             const NcaPatchInfo& patch_info)
+{
     // Validate preconditions.
     ASSERT(out != nullptr);
     ASSERT(base_storage != nullptr);
@@ -985,7 +1009,8 @@ Result NcaFileSystemDriver::CreateIndirectStorageMetaStorage(VirtualFile* out,
 
 Result NcaFileSystemDriver::CreateIndirectStorage(
     VirtualFile* out, std::shared_ptr<IndirectStorage>* out_ind, VirtualFile base_storage,
-    VirtualFile original_data_storage, VirtualFile meta_storage, const NcaPatchInfo& patch_info) {
+    VirtualFile original_data_storage, VirtualFile meta_storage, const NcaPatchInfo& patch_info)
+{
     // Validate preconditions.
     ASSERT(out != nullptr);
     ASSERT(base_storage != nullptr);
@@ -1044,7 +1069,8 @@ Result NcaFileSystemDriver::CreatePatchMetaStorage(
     VirtualFile* out_aes_ctr_ex_meta, VirtualFile* out_indirect_meta,
     VirtualFile* out_layer_info_storage, VirtualFile base_storage, s64 offset,
     const NcaAesCtrUpperIv& upper_iv, const NcaPatchInfo& patch_info,
-    const NcaMetaDataHashDataInfo& meta_data_hash_data_info) {
+    const NcaMetaDataHashDataInfo& meta_data_hash_data_info)
+{
     // Validate preconditions.
     ASSERT(out_aes_ctr_ex_meta != nullptr);
     ASSERT(out_indirect_meta != nullptr);
@@ -1052,8 +1078,10 @@ Result NcaFileSystemDriver::CreatePatchMetaStorage(
     ASSERT(Common::IsAligned<s64>(patch_info.aes_ctr_ex_size, NcaHeader::XtsBlockSize));
 
     // Validate patch info extents.
-    R_UNLESS(patch_info.aes_ctr_ex_size >= 0 && patch_info.HasAesCtrExTable(), ResultInvalidNcaPatchInfoAesCtrExSize);
-    R_UNLESS(patch_info.indirect_size > 0 && patch_info.HasIndirectTable(), ResultInvalidNcaPatchInfoIndirectSize);
+    R_UNLESS(patch_info.aes_ctr_ex_size >= 0 && patch_info.HasAesCtrExTable(),
+             ResultInvalidNcaPatchInfoAesCtrExSize);
+    R_UNLESS(patch_info.indirect_size > 0 && patch_info.HasIndirectTable(),
+             ResultInvalidNcaPatchInfoIndirectSize);
     R_UNLESS(patch_info.indirect_size + patch_info.indirect_offset <= patch_info.aes_ctr_ex_offset,
              ResultInvalidNcaPatchInfoAesCtrExOffset);
     R_UNLESS(patch_info.aes_ctr_ex_offset + patch_info.aes_ctr_ex_size <=
@@ -1122,7 +1150,8 @@ Result NcaFileSystemDriver::CreatePatchMetaStorage(
 
 Result NcaFileSystemDriver::CreateSha3Storage(
     VirtualFile* out, VirtualFile base_storage,
-    const NcaFsHeader::HashData::HierarchicalSha256Data& hash_data) {
+    const NcaFsHeader::HashData::HierarchicalSha256Data& hash_data)
+{
     ASSERT(out != nullptr);
     ASSERT(base_storage != nullptr);
 
@@ -1172,7 +1201,8 @@ Result NcaFileSystemDriver::CreateSha3Storage(
 
 Result NcaFileSystemDriver::CreateSha256Storage(
     VirtualFile* out, VirtualFile base_storage,
-    const NcaFsHeader::HashData::HierarchicalSha256Data& hash_data) {
+    const NcaFsHeader::HashData::HierarchicalSha256Data& hash_data)
+{
     // Validate preconditions.
     ASSERT(out != nullptr);
     ASSERT(base_storage != nullptr);
@@ -1236,7 +1266,8 @@ Result NcaFileSystemDriver::CreateSha256Storage(
 
 Result NcaFileSystemDriver::CreateIntegrityVerificationStorage(
     VirtualFile* out, VirtualFile base_storage,
-    const NcaFsHeader::HashData::IntegrityMetaInfo& meta_info) {
+    const NcaFsHeader::HashData::IntegrityMetaInfo& meta_info)
+{
 
     R_RETURN(this->CreateIntegrityVerificationStorageImpl(
         out, base_storage, meta_info, 0, IntegrityDataCacheCount, IntegrityHashCacheCount,
@@ -1246,7 +1277,8 @@ Result NcaFileSystemDriver::CreateIntegrityVerificationStorage(
 
 Result NcaFileSystemDriver::CreateIntegrityVerificationStorageForMeta(
     VirtualFile* out, VirtualFile* out_layer_info_storage, VirtualFile base_storage, s64 offset,
-    const NcaMetaDataHashDataInfo& meta_data_hash_data_info) {
+    const NcaMetaDataHashDataInfo& meta_data_hash_data_info)
+{
     // Validate preconditions.
     ASSERT(out != nullptr);
 
@@ -1286,7 +1318,8 @@ Result NcaFileSystemDriver::CreateIntegrityVerificationStorageForMeta(
 Result NcaFileSystemDriver::CreateIntegrityVerificationStorageImpl(
     VirtualFile* out, VirtualFile base_storage,
     const NcaFsHeader::HashData::IntegrityMetaInfo& meta_info, s64 layer_info_offset,
-    int max_data_cache_entries, int max_hash_cache_entries, s8 buffer_level) {
+    int max_data_cache_entries, int max_hash_cache_entries, s8 buffer_level)
+{
     // Preconditions
     ASSERT(out != nullptr);
     ASSERT(base_storage != nullptr);
@@ -1298,8 +1331,7 @@ Result NcaFileSystemDriver::CreateIntegrityVerificationStorageImpl(
 
     // Validate the meta info.
     HierarchicalIntegrityVerificationInformation level_hash_info;
-    std::memcpy(std::addressof(level_hash_info),
-                std::addressof(meta_info.level_hash_info),
+    std::memcpy(std::addressof(level_hash_info), std::addressof(meta_info.level_hash_info),
                 sizeof(level_hash_info));
 
     R_UNLESS(IntegrityMinLayerCount <= level_hash_info.max_layers,
@@ -1317,9 +1349,8 @@ Result NcaFileSystemDriver::CreateIntegrityVerificationStorageImpl(
         R_UNLESS(layer_info_offset + layer_info.offset + layer_info.size <= base_storage_size,
                  ResultNcaBaseStorageOutOfRangeD);
 
-        storage_info[i + 1] = std::make_shared<OffsetVfsFile>(base_storage,
-                                                              layer_info.size,
-                                                              layer_info_offset + layer_info.offset);
+        storage_info[i + 1] = std::make_shared<OffsetVfsFile>(
+            base_storage, layer_info.size, layer_info_offset + layer_info.offset);
     }
 
     // Set the last layer info.
@@ -1333,27 +1364,41 @@ Result NcaFileSystemDriver::CreateIntegrityVerificationStorageImpl(
     }
 
     switch (level_hash_info.max_layers - 1) {
-        case FileSys::HierarchicalIntegrityVerificationStorage::HierarchicalStorageInformation::MasterStorage:
-            storage_info.SetMasterHashStorage(std::make_shared<OffsetVfsFile>(std::move(base_storage), layer_info.size, last_layer_info_offset));
-            break;
-        case FileSys::HierarchicalIntegrityVerificationStorage::HierarchicalStorageInformation::Layer1Storage:
-            storage_info.SetLayer1HashStorage(std::make_shared<OffsetVfsFile>(std::move(base_storage), layer_info.size, last_layer_info_offset));
-            break;
-        case FileSys::HierarchicalIntegrityVerificationStorage::HierarchicalStorageInformation::Layer2Storage:
-            storage_info.SetLayer2HashStorage(std::make_shared<OffsetVfsFile>(std::move(base_storage), layer_info.size, last_layer_info_offset));
-            break;
-        case FileSys::HierarchicalIntegrityVerificationStorage::HierarchicalStorageInformation::Layer3Storage:
-            storage_info.SetLayer3HashStorage(std::make_shared<OffsetVfsFile>(std::move(base_storage), layer_info.size, last_layer_info_offset));
-            break;
-        case FileSys::HierarchicalIntegrityVerificationStorage::HierarchicalStorageInformation::Layer4Storage:
-            storage_info.SetLayer4HashStorage(std::make_shared<OffsetVfsFile>(std::move(base_storage), layer_info.size, last_layer_info_offset));
-            break;
-        case FileSys::HierarchicalIntegrityVerificationStorage::HierarchicalStorageInformation::Layer5Storage:
-            storage_info.SetLayer5HashStorage(std::make_shared<OffsetVfsFile>(std::move(base_storage), layer_info.size, last_layer_info_offset));
-            break;
-        case FileSys::HierarchicalIntegrityVerificationStorage::HierarchicalStorageInformation::DataStorage:
-            storage_info.SetDataStorage(std::make_shared<OffsetVfsFile>(std::move(base_storage), layer_info.size, last_layer_info_offset));
-            break;
+    case FileSys::HierarchicalIntegrityVerificationStorage::HierarchicalStorageInformation::
+        MasterStorage:
+        storage_info.SetMasterHashStorage(std::make_shared<OffsetVfsFile>(
+            std::move(base_storage), layer_info.size, last_layer_info_offset));
+        break;
+    case FileSys::HierarchicalIntegrityVerificationStorage::HierarchicalStorageInformation::
+        Layer1Storage:
+        storage_info.SetLayer1HashStorage(std::make_shared<OffsetVfsFile>(
+            std::move(base_storage), layer_info.size, last_layer_info_offset));
+        break;
+    case FileSys::HierarchicalIntegrityVerificationStorage::HierarchicalStorageInformation::
+        Layer2Storage:
+        storage_info.SetLayer2HashStorage(std::make_shared<OffsetVfsFile>(
+            std::move(base_storage), layer_info.size, last_layer_info_offset));
+        break;
+    case FileSys::HierarchicalIntegrityVerificationStorage::HierarchicalStorageInformation::
+        Layer3Storage:
+        storage_info.SetLayer3HashStorage(std::make_shared<OffsetVfsFile>(
+            std::move(base_storage), layer_info.size, last_layer_info_offset));
+        break;
+    case FileSys::HierarchicalIntegrityVerificationStorage::HierarchicalStorageInformation::
+        Layer4Storage:
+        storage_info.SetLayer4HashStorage(std::make_shared<OffsetVfsFile>(
+            std::move(base_storage), layer_info.size, last_layer_info_offset));
+        break;
+    case FileSys::HierarchicalIntegrityVerificationStorage::HierarchicalStorageInformation::
+        Layer5Storage:
+        storage_info.SetLayer5HashStorage(std::make_shared<OffsetVfsFile>(
+            std::move(base_storage), layer_info.size, last_layer_info_offset));
+        break;
+    case FileSys::HierarchicalIntegrityVerificationStorage::HierarchicalStorageInformation::
+        DataStorage:
+        storage_info.SetDataStorage(std::make_shared<OffsetVfsFile>(
+            std::move(base_storage), layer_info.size, last_layer_info_offset));
+        break;
     }
 
     // Make the integrity romfs storage.
@@ -1361,11 +1406,8 @@ Result NcaFileSystemDriver::CreateIntegrityVerificationStorageImpl(
     R_UNLESS(integrity_storage != nullptr, ResultAllocationMemoryFailedAllocateShared);
 
     // Initialize the integrity storage.
-    R_TRY(integrity_storage->Initialize(level_hash_info,
-                                        meta_info.master_hash,
-                                        storage_info,
-                                        max_data_cache_entries,
-                                        max_hash_cache_entries,
+    R_TRY(integrity_storage->Initialize(level_hash_info, meta_info.master_hash, storage_info,
+                                        max_data_cache_entries, max_hash_cache_entries,
                                         buffer_level));
 
     // Set the output.
@@ -1376,7 +1418,8 @@ Result NcaFileSystemDriver::CreateIntegrityVerificationStorageImpl(
 Result NcaFileSystemDriver::CreateRegionSwitchStorage(VirtualFile* out,
                                                       const NcaFsHeaderReader* header_reader,
                                                       VirtualFile inside_storage,
-                                                      VirtualFile outside_storage) {
+                                                      VirtualFile outside_storage)
+{
     // Check pre-conditions.
     ASSERT(header_reader->GetHashType() == NcaFsHeader::HashType::HierarchicalIntegrityHash);
 
@@ -1397,7 +1440,8 @@ Result NcaFileSystemDriver::CreateRegionSwitchStorage(VirtualFile* out,
 Result NcaFileSystemDriver::CreateCompressedStorage(VirtualFile* out,
                                                     std::shared_ptr<CompressedStorage>* out_cmp,
                                                     VirtualFile* out_meta, VirtualFile base_storage,
-                                                    const NcaCompressionInfo& compression_info) {
+                                                    const NcaCompressionInfo& compression_info)
+{
     R_RETURN(this->CreateCompressedStorage(out, out_cmp, out_meta, std::move(base_storage),
                                            compression_info, m_reader->GetDecompressor()));
 }
@@ -1406,7 +1450,8 @@ Result NcaFileSystemDriver::CreateCompressedStorage(VirtualFile* out,
                                                     std::shared_ptr<CompressedStorage>* out_cmp,
                                                     VirtualFile* out_meta, VirtualFile base_storage,
                                                     const NcaCompressionInfo& compression_info,
-                                                    GetDecompressorFunction get_decompressor) {
+                                                    GetDecompressorFunction get_decompressor)
+{
     // Check pre-conditions.
     ASSERT(out != nullptr);
     ASSERT(base_storage != nullptr);

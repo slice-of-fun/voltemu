@@ -9,12 +9,14 @@
 namespace Shader::Maxwell {
 namespace {
 IR::U1 IsetCompare(IR::IREmitter& ir, const IR::U32& operand_1, const IR::U32& operand_2,
-                   CompareOp compare_op, bool is_signed, bool x) {
+                   CompareOp compare_op, bool is_signed, bool x)
+{
     return x ? ExtendedIntegerCompare(ir, operand_1, operand_2, compare_op, is_signed)
              : IntegerCompare(ir, operand_1, operand_2, compare_op, is_signed);
 }
 
-void ISET(TranslatorVisitor& v, u64 insn, const IR::U32& src_b) {
+void ISET(TranslatorVisitor& v, u64 insn, const IR::U32& src_b)
+{
     union {
         u64 insn;
         BitField<0, 8, IR::Reg> dest_reg;
@@ -64,15 +66,18 @@ void ISET(TranslatorVisitor& v, u64 insn, const IR::U32& src_b) {
 }
 } // Anonymous namespace
 
-void TranslatorVisitor::ISET_reg(u64 insn) {
+void TranslatorVisitor::ISET_reg(u64 insn)
+{
     ISET(*this, insn, GetReg20(insn));
 }
 
-void TranslatorVisitor::ISET_cbuf(u64 insn) {
+void TranslatorVisitor::ISET_cbuf(u64 insn)
+{
     ISET(*this, insn, GetCbuf(insn));
 }
 
-void TranslatorVisitor::ISET_imm(u64 insn) {
+void TranslatorVisitor::ISET_imm(u64 insn)
+{
     ISET(*this, insn, GetImm20(insn));
 }
 

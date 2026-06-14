@@ -37,11 +37,13 @@ union Encoding {
     BitField<49, 1, u64> abs;
 };
 
-bool Is64(u64 insn) {
+bool Is64(u64 insn)
+{
     return Encoding{insn}.int_format == IntFormat::U64;
 }
 
-int BitSize(FloatFormat format) {
+int BitSize(FloatFormat format)
+{
     switch (format) {
     case FloatFormat::F16:
         return 16;
@@ -53,7 +55,8 @@ int BitSize(FloatFormat format) {
     throw NotImplementedException("Invalid float format {}", format);
 }
 
-IR::U32 SmallAbs(TranslatorVisitor& v, const IR::U32& value, int bitsize) {
+IR::U32 SmallAbs(TranslatorVisitor& v, const IR::U32& value, int bitsize)
+{
     const IR::U32 least_value{v.ir.Imm32(-(1 << (bitsize - 1)))};
     const IR::U32 mask{v.ir.ShiftRightArithmetic(value, v.ir.Imm32(bitsize - 1))};
     const IR::U32 absolute{v.ir.BitwiseXor(v.ir.IAdd(value, mask), mask)};
@@ -61,7 +64,8 @@ IR::U32 SmallAbs(TranslatorVisitor& v, const IR::U32& value, int bitsize) {
     return IR::U32{v.ir.Select(is_least, value, absolute)};
 }
 
-void I2F(TranslatorVisitor& v, u64 insn, IR::U32U64 src) {
+void I2F(TranslatorVisitor& v, u64 insn, IR::U32U64 src)
+{
     const Encoding i2f{insn};
     if (i2f.cc != 0) {
         throw NotImplementedException("I2F CC");
@@ -70,7 +74,8 @@ void I2F(TranslatorVisitor& v, u64 insn, IR::U32U64 src) {
     int src_bitsize{};
     switch (i2f.int_format) {
     case IntFormat::U8:
-        src = v.ir.BitFieldExtract(src, v.ir.Imm32(u32(i2f.selector) * 8), v.ir.Imm32(8), is_signed);
+        src =
+            v.ir.BitFieldExtract(src, v.ir.Imm32(u32(i2f.selector) * 8), v.ir.Imm32(8), is_signed);
         if (i2f.abs != 0)
             src = SmallAbs(v, src, 8);
         src_bitsize = 8;
@@ -78,7 +83,8 @@ void I2F(TranslatorVisitor& v, u64 insn, IR::U32U64 src) {
     case IntFormat::U16:
         if (i2f.selector == 1 || i2f.selector == 3)
             throw NotImplementedException("Invalid U16 selector {}", i2f.selector.Value());
-        src = v.ir.BitFieldExtract(src, v.ir.Imm32(u32(i2f.selector) * 8), v.ir.Imm32(16), is_signed);
+        src =
+            v.ir.BitFieldExtract(src, v.ir.Imm32(u32(i2f.selector) * 8), v.ir.Imm32(16), is_signed);
         if (i2f.abs != 0)
             src = SmallAbs(v, src, 16);
         src_bitsize = 16;
@@ -99,7 +105,8 @@ void I2F(TranslatorVisitor& v, u64 insn, IR::U32U64 src) {
         .rounding = CastFpRounding(i2f.fp_rounding),
         .fmz_mode = IR::FmzMode::DontCare,
     };
-    auto value{v.ir.ConvertIToF(size_t(dst_bitsize), size_t(conversion_src_bitsize), is_signed, src, fp_control)};
+    auto value{v.ir.ConvertIToF(size_t(dst_bitsize), size_t(conversion_src_bitsize), is_signed, src,
+                                fp_control)};
     if (i2f.neg != 0) {
         if (i2f.abs != 0 || !is_signed) {
             // We know the value is positive
@@ -142,7 +149,8 @@ void I2F(TranslatorVisitor& v, u64 insn, IR::U32U64 src) {
 }
 } // Anonymous namespace
 
-void TranslatorVisitor::I2F_reg(u64 insn) {
+void TranslatorVisitor::I2F_reg(u64 insn)
+{
     if (Is64(insn)) {
         union {
             u64 raw;
@@ -155,7 +163,8 @@ void TranslatorVisitor::I2F_reg(u64 insn) {
     }
 }
 
-void TranslatorVisitor::I2F_cbuf(u64 insn) {
+void TranslatorVisitor::I2F_cbuf(u64 insn)
+{
     if (Is64(insn)) {
         I2F(*this, insn, GetPackedCbuf(insn));
     } else {
@@ -163,7 +172,8 @@ void TranslatorVisitor::I2F_cbuf(u64 insn) {
     }
 }
 
-void TranslatorVisitor::I2F_imm(u64 insn) {
+void TranslatorVisitor::I2F_imm(u64 insn)
+{
     if (Is64(insn)) {
         I2F(*this, insn, GetPackedImm20(insn));
     } else {

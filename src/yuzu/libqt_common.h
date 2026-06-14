@@ -3,9 +3,9 @@
 
 #pragma once
 
-#include "qt_common/abstract/progress.h"
-
 #include <QProgressDialog>
+
+#include "qt_common/abstract/progress.h"
 
 namespace QtCommon::Frontend {
 

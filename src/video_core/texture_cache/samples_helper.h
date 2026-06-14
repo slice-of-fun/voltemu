@@ -10,7 +10,8 @@
 
 namespace VideoCommon {
 
-[[nodiscard]] inline std::pair<int, int> SamplesLog2(int num_samples) {
+[[nodiscard]] inline std::pair<int, int> SamplesLog2(int num_samples)
+{
     switch (num_samples) {
     case 1:
         return {0, 0};
@@ -27,7 +28,8 @@ namespace VideoCommon {
     return {0, 0};
 }
 
-[[nodiscard]] inline int NumSamples(Tegra::Texture::MsaaMode msaa_mode) {
+[[nodiscard]] inline int NumSamples(Tegra::Texture::MsaaMode msaa_mode)
+{
     using Tegra::Texture::MsaaMode;
     switch (msaa_mode) {
     case MsaaMode::Msaa1x1:
@@ -51,7 +53,8 @@ namespace VideoCommon {
     return 1;
 }
 
-[[nodiscard]] inline int NumSamplesX(Tegra::Texture::MsaaMode msaa_mode) {
+[[nodiscard]] inline int NumSamplesX(Tegra::Texture::MsaaMode msaa_mode)
+{
     using Tegra::Texture::MsaaMode;
     switch (msaa_mode) {
     case MsaaMode::Msaa1x1:
@@ -73,7 +76,8 @@ namespace VideoCommon {
     return 1;
 }
 
-[[nodiscard]] inline int NumSamplesY(Tegra::Texture::MsaaMode msaa_mode) {
+[[nodiscard]] inline int NumSamplesY(Tegra::Texture::MsaaMode msaa_mode)
+{
     using Tegra::Texture::MsaaMode;
     switch (msaa_mode) {
     case MsaaMode::Msaa1x1:

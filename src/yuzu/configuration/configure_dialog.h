@@ -6,9 +6,10 @@
 
 #pragma once
 
+#include <QDialog>
 #include <memory>
 #include <vector>
-#include <QDialog>
+
 #include "configuration/shared_widget.h"
 #include "qt_common/config/shared_translation.h"
 #include "qt_common/util/vk.h"

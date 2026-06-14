@@ -15,7 +15,8 @@ enum class Mode : u64 {
     SamplePos = 5,
 };
 
-IR::Value Query(TranslatorVisitor& v, const IR::U32& handle, Mode mode, IR::Reg src_reg, u64 mask) {
+IR::Value Query(TranslatorVisitor& v, const IR::U32& handle, Mode mode, IR::Reg src_reg, u64 mask)
+{
     switch (mode) {
     case Mode::Dimension: {
         const bool needs_num_mips{((mask >> 3) & 1) != 0};
@@ -30,7 +31,8 @@ IR::Value Query(TranslatorVisitor& v, const IR::U32& handle, Mode mode, IR::Reg 
     }
 }
 
-void Impl(TranslatorVisitor& v, u64 insn, std::optional<u32> cbuf_offset) {
+void Impl(TranslatorVisitor& v, u64 insn, std::optional<u32> cbuf_offset)
+{
     union {
         u64 raw;
         BitField<49, 1, u64> nodep;
@@ -60,7 +62,8 @@ void Impl(TranslatorVisitor& v, u64 insn, std::optional<u32> cbuf_offset) {
 }
 } // Anonymous namespace
 
-void TranslatorVisitor::TXQ(u64 insn) {
+void TranslatorVisitor::TXQ(u64 insn)
+{
     union {
         u64 raw;
         BitField<36, 13, u64> cbuf_offset;
@@ -69,7 +72,8 @@ void TranslatorVisitor::TXQ(u64 insn) {
     Impl(*this, insn, static_cast<u32>(txq.cbuf_offset * 4));
 }
 
-void TranslatorVisitor::TXQ_b(u64 insn) {
+void TranslatorVisitor::TXQ_b(u64 insn)
+{
     Impl(*this, insn, std::nullopt);
 }
 

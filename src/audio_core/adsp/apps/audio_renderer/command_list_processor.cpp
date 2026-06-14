@@ -1,9 +1,10 @@
 // SPDX-FileCopyrightText: Copyright 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "audio_core/adsp/apps/audio_renderer/command_list_processor.h"
+
 #include <string>
 
-#include "audio_core/adsp/apps/audio_renderer/command_list_processor.h"
 #include "audio_core/renderer/command/command_list_header.h"
 #include "audio_core/renderer/command/commands.h"
 #include "common/settings.h"
@@ -15,7 +16,8 @@
 namespace AudioCore::ADSP::AudioRenderer {
 
 void CommandListProcessor::Initialize(Core::System& system_, Kernel::KProcess& process,
-                                      CpuAddr buffer, u64 size, Sink::SinkStream* stream_) {
+                                      CpuAddr buffer, u64 size, Sink::SinkStream* stream_)
+{
     system = &system_;
     memory = &process.GetMemory();
     stream = stream_;
@@ -30,19 +32,23 @@ void CommandListProcessor::Initialize(Core::System& system_, Kernel::KProcess& p
     processed_command_count = 0;
 }
 
-void CommandListProcessor::SetProcessTimeMax(const u64 time) {
+void CommandListProcessor::SetProcessTimeMax(const u64 time)
+{
     max_process_time = time;
 }
 
-u32 CommandListProcessor::GetRemainingCommandCount() const {
+u32 CommandListProcessor::GetRemainingCommandCount() const
+{
     return command_count - processed_command_count;
 }
 
-Sink::SinkStream* CommandListProcessor::GetOutputSinkStream() const {
+Sink::SinkStream* CommandListProcessor::GetOutputSinkStream() const
+{
     return stream;
 }
 
-u64 CommandListProcessor::Process(u32 session_id) {
+u64 CommandListProcessor::Process(u32 session_id)
+{
     const auto start_time_{system->CoreTiming().GetGlobalTimeUs().count()};
     const auto command_base{CpuAddr(commands)};
 

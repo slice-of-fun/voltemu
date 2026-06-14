@@ -6,12 +6,12 @@
 
 #pragma once
 
-#include <algorithm>
-#include <array>
-
 #include <fmt/ranges.h>
 
+#include <algorithm>
+#include <array>
 #include <ranges>
+
 #include "shader_recompiler/frontend/ir/type.h"
 
 namespace Shader::IR {
@@ -67,7 +67,8 @@ constexpr OpcodeMeta META_TABLE[]{
 #include "opcodes.inc"
 #undef OPCODE
 };
-constexpr size_t CalculateNumArgsOf(Opcode op) {
+constexpr size_t CalculateNumArgsOf(Opcode op)
+{
     const auto& arg_types{META_TABLE[static_cast<size_t>(op)].arg_types};
     return static_cast<size_t>(
         std::distance(arg_types.begin(), std::ranges::find(arg_types, Type::Void)));
@@ -81,17 +82,20 @@ constexpr u8 NUM_ARGS[]{
 } // namespace Detail
 
 /// Get return type of an opcode
-[[nodiscard]] inline Type TypeOf(Opcode op) noexcept {
+[[nodiscard]] inline Type TypeOf(Opcode op) noexcept
+{
     return Detail::META_TABLE[static_cast<size_t>(op)].type;
 }
 
 /// Get the number of arguments an opcode accepts
-[[nodiscard]] inline size_t NumArgsOf(Opcode op) noexcept {
+[[nodiscard]] inline size_t NumArgsOf(Opcode op) noexcept
+{
     return static_cast<size_t>(Detail::NUM_ARGS[static_cast<size_t>(op)]);
 }
 
 /// Get the required type of an argument of an opcode
-[[nodiscard]] inline Type ArgTypeOf(Opcode op, size_t arg_index) noexcept {
+[[nodiscard]] inline Type ArgTypeOf(Opcode op, size_t arg_index) noexcept
+{
     return Detail::META_TABLE[static_cast<size_t>(op)].arg_types[arg_index];
 }
 
@@ -100,13 +104,11 @@ constexpr u8 NUM_ARGS[]{
 
 } // namespace Shader::IR
 
-template <>
-struct fmt::formatter<Shader::IR::Opcode> {
-    constexpr auto parse(format_parse_context& ctx) {
-        return ctx.begin();
-    }
-    template <typename FormatContext>
-    auto format(const Shader::IR::Opcode& op, FormatContext& ctx) const {
+template<> struct fmt::formatter<Shader::IR::Opcode> {
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(const Shader::IR::Opcode& op, FormatContext& ctx) const
+    {
         return fmt::format_to(ctx.out(), "{}", Shader::IR::NameOf(op));
     }
 };

@@ -1,10 +1,11 @@
 // SPDX-FileCopyrightText: Copyright 2021 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "input_common/drivers/camera.h"
+
 #include <fmt/ranges.h>
 
 #include "common/param_package.h"
-#include "input_common/drivers/camera.h"
 
 namespace InputCommon {
 constexpr PadIdentifier identifier = {
@@ -13,11 +14,13 @@ constexpr PadIdentifier identifier = {
     .pad = 0,
 };
 
-Camera::Camera(std::string input_engine_) : InputEngine(std::move(input_engine_)) {
+Camera::Camera(std::string input_engine_) : InputEngine(std::move(input_engine_))
+{
     PreSetController(identifier);
 }
 
-void Camera::SetCameraData(std::size_t width, std::size_t height, std::span<const u32> data) {
+void Camera::SetCameraData(std::size_t width, std::size_t height, std::span<const u32> data)
+{
     const std::size_t desired_width = getImageWidth();
     const std::size_t desired_height = getImageHeight();
     status.data.resize(desired_width * desired_height);
@@ -36,7 +39,8 @@ void Camera::SetCameraData(std::size_t width, std::size_t height, std::span<cons
     SetCamera(identifier, status);
 }
 
-std::size_t Camera::getImageWidth() const {
+std::size_t Camera::getImageWidth() const
+{
     switch (status.format) {
     case Common::Input::CameraFormat::Size320x240:
         return 320;
@@ -54,7 +58,8 @@ std::size_t Camera::getImageWidth() const {
     }
 }
 
-std::size_t Camera::getImageHeight() const {
+std::size_t Camera::getImageHeight() const
+{
     switch (status.format) {
     case Common::Input::CameraFormat::Size320x240:
         return 240;
@@ -72,9 +77,10 @@ std::size_t Camera::getImageHeight() const {
     }
 }
 
-Common::Input::DriverResult Camera::SetCameraFormat(
-    [[maybe_unused]] const PadIdentifier& identifier_,
-    const Common::Input::CameraFormat camera_format) {
+Common::Input::DriverResult
+Camera::SetCameraFormat([[maybe_unused]] const PadIdentifier& identifier_,
+                        const Common::Input::CameraFormat camera_format)
+{
     status.format = camera_format;
     return Common::Input::DriverResult::Success;
 }

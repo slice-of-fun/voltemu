@@ -38,18 +38,14 @@ struct UUID {
      *
      * @returns True if the stored UUID is valid, false otherwise.
      */
-    constexpr bool IsValid() const {
-        return uuid != std::array<u8, 0x10>{};
-    }
+    constexpr bool IsValid() const { return uuid != std::array<u8, 0x10>{}; }
 
     /**
      * Returns whether the stored UUID is invalid or not.
      *
      * @returns True if the stored UUID is invalid, false otherwise.
      */
-    constexpr bool IsInvalid() const {
-        return !IsValid();
-    }
+    constexpr bool IsInvalid() const { return !IsValid(); }
 
     /**
      * Returns a 32 hexadecimal character string representing the bytes of the UUID.
@@ -80,7 +76,8 @@ struct UUID {
      *
      * @returns A UUID with its bytes set to the ASCII values of "Eden Default UID".
      */
-    static constexpr UUID MakeDefault() {
+    static constexpr UUID MakeDefault()
+    {
         return UUID{
             {'E', 'd', 'e', 'n', ' ', 'D', 'e', 'f', 'a', 'u', 'l', 't', ' ', 'U', 'I', 'D'},
         };
@@ -121,11 +118,8 @@ constexpr UUID InvalidUUID = {};
 
 namespace std {
 
-template <>
-struct hash<Common::UUID> {
-    size_t operator()(const Common::UUID& uuid) const noexcept {
-        return uuid.Hash();
-    }
+template<> struct hash<Common::UUID> {
+    size_t operator()(const Common::UUID& uuid) const noexcept { return uuid.Hash(); }
 };
 
 } // namespace std

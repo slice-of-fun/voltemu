@@ -1,9 +1,10 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/fgm/fgm.h"
+
 #include <memory>
 
-#include "core/hle/service/fgm/fgm.h"
 #include "core/hle/service/ipc_helpers.h"
 #include "core/hle/service/server_manager.h"
 #include "core/hle/service/service.h"
@@ -13,7 +14,8 @@ namespace Service::FGM {
 
 class IRequest final : public ServiceFramework<IRequest> {
 public:
-    explicit IRequest(Core::System& system_) : ServiceFramework{system_, "IRequest"} {
+    explicit IRequest(Core::System& system_) : ServiceFramework{system_, "IRequest"}
+    {
         // clang-format off
         static const FunctionInfo functions[] = {
             {0, nullptr, "Initialize"},
@@ -29,7 +31,8 @@ public:
 
 class FGM final : public ServiceFramework<FGM> {
 public:
-    explicit FGM(Core::System& system_, const char* name) : ServiceFramework{system_, name} {
+    explicit FGM(Core::System& system_, const char* name) : ServiceFramework{system_, name}
+    {
         // clang-format off
         static const FunctionInfo functions[] = {
             {0, &FGM::Initialize, "Initialize"},
@@ -40,7 +43,8 @@ public:
     }
 
 private:
-    void Initialize(HLERequestContext& ctx) {
+    void Initialize(HLERequestContext& ctx)
+    {
         LOG_DEBUG(Service_FGM, "called");
 
         IPC::ResponseBuilder rb{ctx, 2, 0, 1};
@@ -51,7 +55,8 @@ private:
 
 class FGM_DBG final : public ServiceFramework<FGM_DBG> {
 public:
-    explicit FGM_DBG(Core::System& system_) : ServiceFramework{system_, "fgm:dbg"} {
+    explicit FGM_DBG(Core::System& system_) : ServiceFramework{system_, "fgm:dbg"}
+    {
         // clang-format off
         static const FunctionInfo functions[] = {
             {0, nullptr, "Initialize"},
@@ -64,7 +69,8 @@ public:
     }
 };
 
-void LoopProcess(Core::System& system) {
+void LoopProcess(Core::System& system)
+{
     auto server_manager = std::make_unique<ServerManager>(system);
 
     server_manager->RegisterNamedService("fgm", std::make_shared<FGM>(system, "fgm"));

@@ -4,6 +4,11 @@
 // SPDX-FileCopyrightText: 2017 Citra Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/perf_stats.h"
+
+#include <fmt/chrono.h>
+#include <fmt/ranges.h>
+
 #include <algorithm>
 #include <chrono>
 #include <iterator>
@@ -11,13 +16,11 @@
 #include <numeric>
 #include <sstream>
 #include <thread>
-#include <fmt/chrono.h>
-#include <fmt/ranges.h>
+
 #include "common/fs/file.h"
 #include "common/fs/fs.h"
 #include "common/fs/path_util.h"
 #include "common/settings.h"
-#include "core/perf_stats.h"
 
 using namespace std::chrono_literals;
 using DoubleSecs = std::chrono::duration<double, std::chrono::seconds::period>;
@@ -30,9 +33,12 @@ constexpr std::size_t IgnoreFrames = 5;
 
 namespace Core {
 
-PerfStats::PerfStats(u64 title_id_) : title_id(title_id_) {}
+PerfStats::PerfStats(u64 title_id_) : title_id(title_id_)
+{
+}
 
-PerfStats::~PerfStats() {
+PerfStats::~PerfStats()
+{
     if (!Settings::values.record_frame_times || title_id == 0) {
         return;
     }
@@ -44,7 +50,8 @@ PerfStats::~PerfStats() {
 
     const auto path = Common::FS::GetVoltPath(Common::FS::VoltPath::LogDir);
     // %F Date format expanded is "%Y-%m-%d"
-    const auto filename = fmt::format("{}_{:016X}.csv",
+    const auto filename = fmt::format(
+        "{}_{:016X}.csv",
         [&] {
             std::ostringstream oss;
             oss << std::put_time(std::localtime(&t), "%F-%H-%M");
@@ -61,13 +68,15 @@ PerfStats::~PerfStats() {
     }
 }
 
-void PerfStats::BeginSystemFrame() {
+void PerfStats::BeginSystemFrame()
+{
     std::scoped_lock lock{object_mutex};
 
     frame_begin = Clock::now();
 }
 
-void PerfStats::EndSystemFrame() {
+void PerfStats::EndSystemFrame()
+{
     std::scoped_lock lock{object_mutex};
 
     auto frame_end = Clock::now();
@@ -83,11 +92,13 @@ void PerfStats::EndSystemFrame() {
     previous_frame_end = frame_end;
 }
 
-void PerfStats::EndGameFrame() {
+void PerfStats::EndGameFrame()
+{
     game_frames.fetch_add(1, std::memory_order_relaxed);
 }
 
-double PerfStats::GetMeanFrametime() const {
+double PerfStats::GetMeanFrametime() const
+{
     std::scoped_lock lock{object_mutex};
 
     if (current_index <= IgnoreFrames) {
@@ -99,7 +110,8 @@ double PerfStats::GetMeanFrametime() const {
     return sum / static_cast<double>(current_index - IgnoreFrames);
 }
 
-PerfStatsResults PerfStats::GetAndResetStats(microseconds current_system_time_us) {
+PerfStatsResults PerfStats::GetAndResetStats(microseconds current_system_time_us)
+{
     std::scoped_lock lock{object_mutex};
 
     const auto now = Clock::now();
@@ -128,14 +140,16 @@ PerfStatsResults PerfStats::GetAndResetStats(microseconds current_system_time_us
     return results;
 }
 
-double PerfStats::GetLastFrameTimeScale() const {
+double PerfStats::GetLastFrameTimeScale() const
+{
     std::scoped_lock lock{object_mutex};
 
     constexpr double FRAME_LENGTH = 1.0 / 60;
     return duration_cast<DoubleSecs>(previous_frame_length).count() / FRAME_LENGTH;
 }
 
-void SpeedLimiter::DoSpeedLimiting(microseconds current_system_time_us) {
+void SpeedLimiter::DoSpeedLimiting(microseconds current_system_time_us)
+{
     if (Settings::values.use_multi_core.GetValue() ||
         !Settings::values.use_speed_limit.GetValue()) {
         return;

@@ -10,7 +10,8 @@ Backend::~Backend() = default;
 NullBackend::~NullBackend() = default;
 
 UserData NullBackend::LoadUserData([[maybe_unused]] const std::string& verify_uid,
-                                   [[maybe_unused]] const std::string& token) {
+                                   [[maybe_unused]] const std::string& token)
+{
     return {};
 }
 

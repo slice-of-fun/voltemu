@@ -6,9 +6,10 @@
 
 #pragma once
 
+#include <QDialog>
 #include <array>
 #include <memory>
-#include <QDialog>
+
 #include "core/frontend/applets/controller.h"
 
 class MainWindow;
@@ -170,13 +171,13 @@ public:
     ~QtControllerSelector() override;
 
     void Close() const override;
-    void ReconfigureControllers(
-        ReconfigureCallback callback_,
-        const Core::Frontend::ControllerParameters& parameters) const override;
+    void
+    ReconfigureControllers(ReconfigureCallback callback_,
+                           const Core::Frontend::ControllerParameters& parameters) const override;
 
 signals:
-    void MainWindowReconfigureControllers(
-        const Core::Frontend::ControllerParameters& parameters) const;
+    void
+    MainWindowReconfigureControllers(const Core::Frontend::ControllerParameters& parameters) const;
     void MainWindowRequestExit() const;
 
 private:

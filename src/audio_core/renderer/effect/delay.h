@@ -54,11 +54,10 @@ public:
                   "DelayInfo::ParameterVersion2 has the wrong size!");
 
     struct DelayLine {
-        Common::FixedPoint<50, 14> Read() const {
-            return buffer[buffer_pos];
-        }
+        Common::FixedPoint<50, 14> Read() const { return buffer[buffer_pos]; }
 
-        void Write(const Common::FixedPoint<50, 14> value) {
+        void Write(const Common::FixedPoint<50, 14> value)
+        {
             buffer[buffer_pos] = value;
             buffer_pos = static_cast<u32>((buffer_pos + 1) % buffer.size());
         }

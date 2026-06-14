@@ -93,11 +93,13 @@ public:
 
     Result DisconnectNpad(u64 aruid, Core::HID::NpadIdType npad_id);
 
-    Result IsFirmwareUpdateAvailableForSixAxisSensor(
-        u64 aruid, const Core::HID::SixAxisSensorHandle& sixaxis_handle,
-        bool& is_firmware_available) const;
-    Result ResetIsSixAxisSensorDeviceNewlyAssigned(
-        u64 aruid, const Core::HID::SixAxisSensorHandle& sixaxis_handle);
+    Result
+    IsFirmwareUpdateAvailableForSixAxisSensor(u64 aruid,
+                                              const Core::HID::SixAxisSensorHandle& sixaxis_handle,
+                                              bool& is_firmware_available) const;
+    Result
+    ResetIsSixAxisSensorDeviceNewlyAssigned(u64 aruid,
+                                            const Core::HID::SixAxisSensorHandle& sixaxis_handle);
 
     Result IsUnintendedHomeButtonInputProtectionEnabled(bool& out_is_enabled, u64 aruid,
                                                         Core::HID::NpadIdType npad_id) const;
@@ -185,18 +187,18 @@ private:
     void RequestPadStateUpdate(u64 aruid, Core::HID::NpadIdType npad_id);
     void WriteEmptyEntry(NpadInternalState* npad);
 
-    NpadControllerData& GetControllerFromHandle(
-        u64 aruid, const Core::HID::SixAxisSensorHandle& device_handle);
-    const NpadControllerData& GetControllerFromHandle(
-        u64 aruid, const Core::HID::SixAxisSensorHandle& device_handle) const;
+    NpadControllerData&
+    GetControllerFromHandle(u64 aruid, const Core::HID::SixAxisSensorHandle& device_handle);
+    const NpadControllerData&
+    GetControllerFromHandle(u64 aruid, const Core::HID::SixAxisSensorHandle& device_handle) const;
     NpadControllerData& GetControllerFromNpadIdType(u64 aruid, Core::HID::NpadIdType npad_id);
     const NpadControllerData& GetControllerFromNpadIdType(u64 aruid,
                                                           Core::HID::NpadIdType npad_id) const;
 
-    Core::HID::SixAxisSensorProperties& GetSixaxisProperties(
-        u64 aruid, const Core::HID::SixAxisSensorHandle& device_handle);
-    const Core::HID::SixAxisSensorProperties& GetSixaxisProperties(
-        u64 aruid, const Core::HID::SixAxisSensorHandle& device_handle) const;
+    Core::HID::SixAxisSensorProperties&
+    GetSixaxisProperties(u64 aruid, const Core::HID::SixAxisSensorHandle& device_handle);
+    const Core::HID::SixAxisSensorProperties&
+    GetSixaxisProperties(u64 aruid, const Core::HID::SixAxisSensorHandle& device_handle) const;
 
     Core::HID::HIDCore& hid_core;
     KernelHelpers::ServiceContext& service_context;

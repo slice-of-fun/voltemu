@@ -16,14 +16,16 @@ namespace Core {
 
 class GPUDirtyMemoryManager {
 public:
-    GPUDirtyMemoryManager() : current{default_transform} {
+    GPUDirtyMemoryManager() : current{default_transform}
+    {
         back_buffer.reserve(256);
         front_buffer.reserve(256);
     }
 
     ~GPUDirtyMemoryManager() = default;
 
-    void Collect(PAddr address, size_t size) {
+    void Collect(PAddr address, size_t size)
+    {
         TransformAddress t = BuildTransform(address, size);
         TransformAddress tmp, original;
         do {
@@ -47,7 +49,8 @@ public:
                                                 std::memory_order_relaxed));
     }
 
-    void Gather(std::function<void(PAddr, size_t)>& callback) {
+    void Gather(std::function<void(PAddr, size_t)>& callback)
+    {
         {
             std::scoped_lock lk(guard);
             TransformAddress t = current.exchange(default_transform, std::memory_order_relaxed);
@@ -89,12 +92,10 @@ private:
     constexpr static size_t align_mask = align_size - 1;
     constexpr static TransformAddress default_transform = {.address = ~0U, .mask = 0U};
 
-    bool IsValid(PAddr address) {
-        return address < (1ULL << 39);
-    }
+    bool IsValid(PAddr address) { return address < (1ULL << 39); }
 
-    template <typename T>
-    T CreateMask(size_t top_bit, size_t minor_bit) {
+    template<typename T> T CreateMask(size_t top_bit, size_t minor_bit)
+    {
         T mask = ~T(0);
         mask <<= (sizeof(T) * 8 - top_bit);
         mask >>= (sizeof(T) * 8 - top_bit);
@@ -103,7 +104,8 @@ private:
         return mask;
     }
 
-    TransformAddress BuildTransform(PAddr address, size_t size) {
+    TransformAddress BuildTransform(PAddr address, size_t size)
+    {
         const size_t minor_address = address & page_mask;
         const size_t minor_bit = minor_address >> align_bits;
         const size_t top_bit = (minor_address + size + align_mask) >> align_bits;

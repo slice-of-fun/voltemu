@@ -4,14 +4,17 @@
 // SPDX-FileCopyrightText: 2016 Citra Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include <algorithm>
-#include <memory>
-#include <utility>
+#include "yuzu/configuration/configure_input_player.h"
+
 #include <QInputDialog>
 #include <QMenu>
 #include <QMessageBox>
 #include <QMouseEvent>
 #include <QTimer>
+#include <algorithm>
+#include <memory>
+#include <utility>
+
 #include "common/assert.h"
 #include "common/param_package.h"
 #include "hid_core/frontend/emulated_controller.h"
@@ -23,7 +26,6 @@
 #include "qt_common/config/qt_config.h"
 #include "ui_configure_input_player.h"
 #include "yuzu/bootmanager.h"
-#include "yuzu/configuration/configure_input_player.h"
 #include "yuzu/configuration/configure_input_player_widget.h"
 #include "yuzu/configuration/configure_mouse_panning.h"
 #include "yuzu/configuration/input_profiles.h"
@@ -39,7 +41,8 @@ const std::array<std::string, ConfigureInputPlayer::ANALOG_SUB_BUTTONS_NUM>
 
 namespace {
 
-QString GetKeyName(int key_code) {
+QString GetKeyName(int key_code)
+{
     switch (key_code) {
     case Qt::Key_Shift:
         return QObject::tr("Shift");
@@ -54,7 +57,8 @@ QString GetKeyName(int key_code) {
     }
 }
 
-QString GetButtonName(Common::Input::ButtonNames button_name) {
+QString GetButtonName(Common::Input::ButtonNames button_name)
+{
     switch (button_name) {
     case Common::Input::ButtonNames::ButtonLeft:
         return QObject::tr("Left");
@@ -143,7 +147,8 @@ QString GetButtonName(Common::Input::ButtonNames button_name) {
     }
 }
 
-QString GetDirectionName(const std::string& direction) {
+QString GetDirectionName(const std::string& direction)
+{
     if (direction == "left") {
         return QObject::tr("Left");
     }
@@ -161,7 +166,8 @@ QString GetDirectionName(const std::string& direction) {
 }
 
 void SetAnalogParam(const Common::ParamPackage& input_param, Common::ParamPackage& analog_param,
-                    const std::string& button_name) {
+                    const std::string& button_name)
+{
     // The poller returned a complete axis, so set all the buttons
     if (input_param.Has("axis_x") && input_param.Has("axis_y")) {
         analog_param = input_param;
@@ -178,7 +184,8 @@ void SetAnalogParam(const Common::ParamPackage& input_param, Common::ParamPackag
 }
 } // namespace
 
-QString ConfigureInputPlayer::ButtonToText(const Common::ParamPackage& param) {
+QString ConfigureInputPlayer::ButtonToText(const Common::ParamPackage& param)
+{
     if (!param.Has("engine")) {
         return QObject::tr("[not set]");
     }
@@ -246,7 +253,8 @@ QString ConfigureInputPlayer::ButtonToText(const Common::ParamPackage& param) {
 }
 
 QString ConfigureInputPlayer::AnalogToText(const Common::ParamPackage& param,
-                                           const std::string& dir) {
+                                           const std::string& dir)
+{
     if (!param.Has("engine")) {
         return QObject::tr("[not set]");
     }
@@ -294,11 +302,12 @@ ConfigureInputPlayer::ConfigureInputPlayer(QWidget* parent, std::size_t player_i
                                            InputCommon::InputSubsystem* input_subsystem_,
                                            InputProfiles* profiles_, Core::HID::HIDCore& hid_core_,
                                            bool is_powered_on_, bool debug_)
-    : QWidget(parent), ui(std::make_unique<Ui::ConfigureInputPlayer>()),
-      player_index{player_index_}, debug{debug_}, is_powered_on{is_powered_on_},
-      input_subsystem{input_subsystem_}, profiles(profiles_),
-      timeout_timer(std::make_unique<QTimer>()), poll_timer(std::make_unique<QTimer>()),
-      bottom_row{bottom_row_}, hid_core{hid_core_} {
+    : QWidget(parent),
+      ui(std::make_unique<Ui::ConfigureInputPlayer>()), player_index{player_index_}, debug{debug_},
+      is_powered_on{is_powered_on_}, input_subsystem{input_subsystem_}, profiles(profiles_),
+      timeout_timer(std::make_unique<QTimer>()),
+      poll_timer(std::make_unique<QTimer>()), bottom_row{bottom_row_}, hid_core{hid_core_}
+{
     if (player_index == 0) {
         auto* emulated_controller_p1 =
             hid_core.GetEmulatedController(Core::HID::NpadIdType::Player1);
@@ -823,7 +832,8 @@ ConfigureInputPlayer::ConfigureInputPlayer(QWidget* parent, std::size_t player_i
     LoadConfiguration();
 }
 
-ConfigureInputPlayer::~ConfigureInputPlayer() {
+ConfigureInputPlayer::~ConfigureInputPlayer()
+{
     if (player_index == 0) {
         auto* emulated_controller_p1 =
             hid_core.GetEmulatedController(Core::HID::NpadIdType::Player1);
@@ -836,7 +846,8 @@ ConfigureInputPlayer::~ConfigureInputPlayer() {
     }
 }
 
-void ConfigureInputPlayer::ApplyConfiguration() {
+void ConfigureInputPlayer::ApplyConfiguration()
+{
     if (player_index == 0) {
         auto* emulated_controller_p1 =
             hid_core.GetEmulatedController(Core::HID::NpadIdType::Player1);
@@ -855,7 +866,8 @@ void ConfigureInputPlayer::ApplyConfiguration() {
     emulated_controller->EnableConfiguration();
 }
 
-void ConfigureInputPlayer::showEvent(QShowEvent* event) {
+void ConfigureInputPlayer::showEvent(QShowEvent* event)
+{
     if (bottom_row == nullptr) {
         return;
     }
@@ -863,7 +875,8 @@ void ConfigureInputPlayer::showEvent(QShowEvent* event) {
     ui->main->addWidget(bottom_row);
 }
 
-void ConfigureInputPlayer::changeEvent(QEvent* event) {
+void ConfigureInputPlayer::changeEvent(QEvent* event)
+{
     if (event->type() == QEvent::LanguageChange) {
         RetranslateUI();
     }
@@ -871,12 +884,14 @@ void ConfigureInputPlayer::changeEvent(QEvent* event) {
     QWidget::changeEvent(event);
 }
 
-void ConfigureInputPlayer::RetranslateUI() {
+void ConfigureInputPlayer::RetranslateUI()
+{
     ui->retranslateUi(this);
     UpdateUI();
 }
 
-void ConfigureInputPlayer::LoadConfiguration() {
+void ConfigureInputPlayer::LoadConfiguration()
+{
     emulated_controller->ReloadFromSettings();
 
     UpdateUI();
@@ -892,7 +907,8 @@ void ConfigureInputPlayer::LoadConfiguration() {
     ui->groupConnectedController->setChecked(emulated_controller->IsConnected(true));
 }
 
-void ConfigureInputPlayer::ConnectPlayer(bool connected) {
+void ConfigureInputPlayer::ConnectPlayer(bool connected)
+{
     ui->groupConnectedController->setChecked(connected);
     if (connected) {
         emulated_controller->Connect(true);
@@ -901,7 +917,8 @@ void ConfigureInputPlayer::ConnectPlayer(bool connected) {
     }
 }
 
-void ConfigureInputPlayer::UpdateInputDeviceCombobox() {
+void ConfigureInputPlayer::UpdateInputDeviceCombobox()
+{
     // Skip input device persistence if "Input Devices" is set to "Any".
     if (ui->comboDevices->currentIndex() == 0) {
         UpdateInputDevices();
@@ -977,11 +994,13 @@ void ConfigureInputPlayer::UpdateInputDeviceCombobox() {
     }
 }
 
-void ConfigureInputPlayer::RestoreDefaults() {
+void ConfigureInputPlayer::RestoreDefaults()
+{
     UpdateMappingWithDefaults();
 }
 
-void ConfigureInputPlayer::ClearAll() {
+void ConfigureInputPlayer::ClearAll()
+{
     for (int button_id = 0; button_id < Settings::NativeButton::NumButtons; ++button_id) {
         const auto* const button = button_map[button_id];
         if (button == nullptr) {
@@ -1012,7 +1031,8 @@ void ConfigureInputPlayer::ClearAll() {
     UpdateInputDevices();
 }
 
-void ConfigureInputPlayer::UpdateUI() {
+void ConfigureInputPlayer::UpdateUI()
+{
     for (int button = 0; button < Settings::NativeButton::NumButtons; ++button) {
         const Common::ParamPackage param = emulated_controller->GetButtonParam(button);
         button_map[button]->setText(ButtonToText(param));
@@ -1083,7 +1103,8 @@ void ConfigureInputPlayer::UpdateUI() {
     }
 }
 
-void ConfigureInputPlayer::SetConnectableControllers() {
+void ConfigureInputPlayer::SetConnectableControllers()
+{
     const auto npad_style_set = hid_core.GetSupportedStyleTag();
     index_controller_type_pairs.clear();
     ui->comboControllerType->clear();
@@ -1144,7 +1165,8 @@ void ConfigureInputPlayer::SetConnectableControllers() {
     }
 }
 
-Core::HID::NpadStyleIndex ConfigureInputPlayer::GetControllerTypeFromIndex(int index) const {
+Core::HID::NpadStyleIndex ConfigureInputPlayer::GetControllerTypeFromIndex(int index) const
+{
     const auto it =
         std::find_if(index_controller_type_pairs.begin(), index_controller_type_pairs.end(),
                      [index](const auto& pair) { return pair.first == index; });
@@ -1156,7 +1178,8 @@ Core::HID::NpadStyleIndex ConfigureInputPlayer::GetControllerTypeFromIndex(int i
     return it->second;
 }
 
-int ConfigureInputPlayer::GetIndexFromControllerType(Core::HID::NpadStyleIndex type) const {
+int ConfigureInputPlayer::GetIndexFromControllerType(Core::HID::NpadStyleIndex type) const
+{
     const auto it =
         std::find_if(index_controller_type_pairs.begin(), index_controller_type_pairs.end(),
                      [type](const auto& pair) { return pair.second == type; });
@@ -1168,7 +1191,8 @@ int ConfigureInputPlayer::GetIndexFromControllerType(Core::HID::NpadStyleIndex t
     return it->first;
 }
 
-void ConfigureInputPlayer::UpdateInputDevices() {
+void ConfigureInputPlayer::UpdateInputDevices()
+{
     input_devices = input_subsystem->GetInputDevices();
     ui->comboDevices->clear();
     for (const auto& device : input_devices) {
@@ -1176,7 +1200,8 @@ void ConfigureInputPlayer::UpdateInputDevices() {
     }
 }
 
-void ConfigureInputPlayer::UpdateControllerAvailableButtons() {
+void ConfigureInputPlayer::UpdateControllerAvailableButtons()
+{
     auto layout = GetControllerTypeFromIndex(ui->comboControllerType->currentIndex());
     if (debug) {
         layout = Core::HID::NpadStyleIndex::Fullkey;
@@ -1271,7 +1296,8 @@ void ConfigureInputPlayer::UpdateControllerAvailableButtons() {
     }
 }
 
-void ConfigureInputPlayer::UpdateControllerEnabledButtons() {
+void ConfigureInputPlayer::UpdateControllerEnabledButtons()
+{
     auto layout = GetControllerTypeFromIndex(ui->comboControllerType->currentIndex());
     if (debug) {
         layout = Core::HID::NpadStyleIndex::Fullkey;
@@ -1314,7 +1340,8 @@ void ConfigureInputPlayer::UpdateControllerEnabledButtons() {
     }
 }
 
-void ConfigureInputPlayer::UpdateMotionButtons() {
+void ConfigureInputPlayer::UpdateMotionButtons()
+{
     if (debug) {
         // Motion isn't used with the debug controller, hide both groupboxes.
         ui->buttonMotionLeftGroup->hide();
@@ -1350,7 +1377,8 @@ void ConfigureInputPlayer::UpdateMotionButtons() {
     }
 }
 
-void ConfigureInputPlayer::UpdateControllerButtonNames() {
+void ConfigureInputPlayer::UpdateControllerButtonNames()
+{
     auto layout = GetControllerTypeFromIndex(ui->comboControllerType->currentIndex());
     if (debug) {
         layout = Core::HID::NpadStyleIndex::Fullkey;
@@ -1382,7 +1410,8 @@ void ConfigureInputPlayer::UpdateControllerButtonNames() {
     }
 }
 
-void ConfigureInputPlayer::UpdateMappingWithDefaults() {
+void ConfigureInputPlayer::UpdateMappingWithDefaults()
+{
     if (ui->comboDevices->currentIndex() == 0) {
         return;
     }
@@ -1471,7 +1500,8 @@ void ConfigureInputPlayer::UpdateMappingWithDefaults() {
 void ConfigureInputPlayer::HandleClick(
     QPushButton* button, std::size_t button_id,
     std::function<void(const Common::ParamPackage&)> new_input_setter,
-    InputCommon::Polling::InputType type) {
+    InputCommon::Polling::InputType type)
+{
     if (timeout_timer->isActive()) {
         return;
     }
@@ -1499,7 +1529,8 @@ void ConfigureInputPlayer::HandleClick(
     poll_timer->start(25);      // Check for new inputs every 25ms
 }
 
-void ConfigureInputPlayer::SetPollingResult(const Common::ParamPackage& params, bool abort) {
+void ConfigureInputPlayer::SetPollingResult(const Common::ParamPackage& params, bool abort)
+{
     timeout_timer->stop();
     poll_timer->stop();
     input_subsystem->StopMapping();
@@ -1518,7 +1549,8 @@ void ConfigureInputPlayer::SetPollingResult(const Common::ParamPackage& params, 
     input_setter = std::nullopt;
 }
 
-bool ConfigureInputPlayer::IsInputAcceptable(const Common::ParamPackage& params) const {
+bool ConfigureInputPlayer::IsInputAcceptable(const Common::ParamPackage& params) const
+{
     if (ui->comboDevices->currentIndex() == 0) {
         return true;
     }
@@ -1539,7 +1571,8 @@ bool ConfigureInputPlayer::IsInputAcceptable(const Common::ParamPackage& params)
            params.Get("port", 0) == current_input_device.Get("port", 0);
 }
 
-void ConfigureInputPlayer::mousePressEvent(QMouseEvent* event) {
+void ConfigureInputPlayer::mousePressEvent(QMouseEvent* event)
+{
     if (!input_setter || !event) {
         return;
     }
@@ -1548,13 +1581,15 @@ void ConfigureInputPlayer::mousePressEvent(QMouseEvent* event) {
     input_subsystem->GetMouse()->PressButton(0, 0, button);
 }
 
-void ConfigureInputPlayer::wheelEvent(QWheelEvent* event) {
+void ConfigureInputPlayer::wheelEvent(QWheelEvent* event)
+{
     const int x = event->angleDelta().x();
     const int y = event->angleDelta().y();
     input_subsystem->GetMouse()->MouseWheelChange(x, y);
 }
 
-void ConfigureInputPlayer::keyPressEvent(QKeyEvent* event) {
+void ConfigureInputPlayer::keyPressEvent(QKeyEvent* event)
+{
     if (!input_setter || !event) {
         return;
     }
@@ -1564,14 +1599,16 @@ void ConfigureInputPlayer::keyPressEvent(QKeyEvent* event) {
     }
 }
 
-bool ConfigureInputPlayer::eventFilter(QObject* object, QEvent* event) {
+bool ConfigureInputPlayer::eventFilter(QObject* object, QEvent* event)
+{
     if (object == ui->comboDevices && event->type() == QEvent::MouseButtonPress) {
         RefreshInputDevices();
     }
     return object->eventFilter(object, event);
 }
 
-void ConfigureInputPlayer::CreateProfile() {
+void ConfigureInputPlayer::CreateProfile()
+{
     const auto profile_name =
         LimitableInputDialog::GetText(this, tr("New Profile"), tr("Enter a profile name:"), 1, 30,
                                       LimitableInputDialog::InputLimiter::Filesystem);
@@ -1602,7 +1639,8 @@ void ConfigureInputPlayer::CreateProfile() {
     ui->comboProfiles->setCurrentIndex(ui->comboProfiles->count() - 1);
 }
 
-void ConfigureInputPlayer::DeleteProfile() {
+void ConfigureInputPlayer::DeleteProfile()
+{
     const QString profile_name = ui->comboProfiles->itemText(ui->comboProfiles->currentIndex());
 
     if (profile_name.isEmpty()) {
@@ -1623,7 +1661,8 @@ void ConfigureInputPlayer::DeleteProfile() {
     ui->comboProfiles->setCurrentIndex(-1);
 }
 
-void ConfigureInputPlayer::LoadProfile() {
+void ConfigureInputPlayer::LoadProfile()
+{
     const QString profile_name = ui->comboProfiles->itemText(ui->comboProfiles->currentIndex());
 
     if (profile_name.isEmpty()) {
@@ -1643,7 +1682,8 @@ void ConfigureInputPlayer::LoadProfile() {
     LoadConfiguration();
 }
 
-void ConfigureInputPlayer::SaveProfile() {
+void ConfigureInputPlayer::SaveProfile()
+{
     static constexpr size_t HANDHELD_INDEX = 8;
     const QString profile_name = ui->comboProfiles->itemText(ui->comboProfiles->currentIndex());
 
@@ -1667,7 +1707,8 @@ void ConfigureInputPlayer::SaveProfile() {
     }
 }
 
-void ConfigureInputPlayer::UpdateInputProfiles() {
+void ConfigureInputPlayer::UpdateInputProfiles()
+{
     ui->comboProfiles->clear();
 
     // Set current profile as empty by default

@@ -3,8 +3,9 @@
 
 #pragma once
 
-#include <memory>
 #include <QWidget>
+#include <memory>
+
 #include "common/settings_enums.h"
 
 namespace Core {

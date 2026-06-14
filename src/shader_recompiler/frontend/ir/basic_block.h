@@ -6,13 +6,13 @@
 
 #pragma once
 
+#include <bit>
+#include <boost/intrusive/list.hpp>
 #include <initializer_list>
 #include <map>
+#include <numeric>
 #include <span>
 #include <vector>
-#include <bit>
-#include <numeric>
-#include <boost/intrusive/list.hpp>
 
 #include "common/common_types.h"
 #include "shader_recompiler/frontend/ir/condition.h"
@@ -53,120 +53,70 @@ public:
     void AddBranch(Block* block);
 
     /// Gets a mutable reference to the instruction list for this basic block.
-    [[nodiscard]] InstructionList& Instructions() noexcept {
-        return instructions;
-    }
+    [[nodiscard]] InstructionList& Instructions() noexcept { return instructions; }
     /// Gets an immutable reference to the instruction list for this basic block.
-    [[nodiscard]] const InstructionList& Instructions() const noexcept {
-        return instructions;
-    }
+    [[nodiscard]] const InstructionList& Instructions() const noexcept { return instructions; }
 
     /// Gets an immutable span to the immediate predecessors.
-    [[nodiscard]] std::span<Block* const> ImmPredecessors() const noexcept {
+    [[nodiscard]] std::span<Block* const> ImmPredecessors() const noexcept
+    {
         return imm_predecessors;
     }
     /// Gets an immutable span to the immediate successors.
-    [[nodiscard]] std::span<Block* const> ImmSuccessors() const noexcept {
-        return imm_successors;
-    }
+    [[nodiscard]] std::span<Block* const> ImmSuccessors() const noexcept { return imm_successors; }
 
     /// Intrusively store the host definition of this instruction.
-    template <typename DefinitionType>
-    void SetDefinition(DefinitionType def) {
+    template<typename DefinitionType> void SetDefinition(DefinitionType def)
+    {
         definition = std::bit_cast<u32>(def);
     }
 
     /// Return the intrusively stored host definition of this instruction.
-    template <typename DefinitionType>
-    [[nodiscard]] DefinitionType Definition() const noexcept {
+    template<typename DefinitionType> [[nodiscard]] DefinitionType Definition() const noexcept
+    {
         return std::bit_cast<DefinitionType>(definition);
     }
 
-    void SetSsaRegValue(IR::Reg reg, const Value& value) noexcept {
+    void SetSsaRegValue(IR::Reg reg, const Value& value) noexcept
+    {
         ssa_reg_values[RegIndex(reg)] = value;
     }
-    const Value& SsaRegValue(IR::Reg reg) const noexcept {
-        return ssa_reg_values[RegIndex(reg)];
-    }
+    const Value& SsaRegValue(IR::Reg reg) const noexcept { return ssa_reg_values[RegIndex(reg)]; }
 
-    void SsaSeal() noexcept {
-        is_ssa_sealed = true;
-    }
-    [[nodiscard]] bool IsSsaSealed() const noexcept {
-        return is_ssa_sealed;
-    }
+    void SsaSeal() noexcept { is_ssa_sealed = true; }
+    [[nodiscard]] bool IsSsaSealed() const noexcept { return is_ssa_sealed; }
 
-    [[nodiscard]] bool empty() const {
-        return instructions.empty();
-    }
-    [[nodiscard]] size_type size() const {
-        return instructions.size();
-    }
+    [[nodiscard]] bool empty() const { return instructions.empty(); }
+    [[nodiscard]] size_type size() const { return instructions.size(); }
 
-    [[nodiscard]] Inst& front() {
-        return instructions.front();
-    }
-    [[nodiscard]] const Inst& front() const {
-        return instructions.front();
-    }
+    [[nodiscard]] Inst& front() { return instructions.front(); }
+    [[nodiscard]] const Inst& front() const { return instructions.front(); }
 
-    [[nodiscard]] Inst& back() {
-        return instructions.back();
-    }
-    [[nodiscard]] const Inst& back() const {
-        return instructions.back();
-    }
+    [[nodiscard]] Inst& back() { return instructions.back(); }
+    [[nodiscard]] const Inst& back() const { return instructions.back(); }
 
-    [[nodiscard]] iterator begin() {
-        return instructions.begin();
-    }
-    [[nodiscard]] const_iterator begin() const {
-        return instructions.begin();
-    }
-    [[nodiscard]] iterator end() {
-        return instructions.end();
-    }
-    [[nodiscard]] const_iterator end() const {
-        return instructions.end();
-    }
+    [[nodiscard]] iterator begin() { return instructions.begin(); }
+    [[nodiscard]] const_iterator begin() const { return instructions.begin(); }
+    [[nodiscard]] iterator end() { return instructions.end(); }
+    [[nodiscard]] const_iterator end() const { return instructions.end(); }
 
-    [[nodiscard]] reverse_iterator rbegin() {
-        return instructions.rbegin();
-    }
-    [[nodiscard]] const_reverse_iterator rbegin() const {
-        return instructions.rbegin();
-    }
-    [[nodiscard]] reverse_iterator rend() {
-        return instructions.rend();
-    }
-    [[nodiscard]] const_reverse_iterator rend() const {
-        return instructions.rend();
-    }
+    [[nodiscard]] reverse_iterator rbegin() { return instructions.rbegin(); }
+    [[nodiscard]] const_reverse_iterator rbegin() const { return instructions.rbegin(); }
+    [[nodiscard]] reverse_iterator rend() { return instructions.rend(); }
+    [[nodiscard]] const_reverse_iterator rend() const { return instructions.rend(); }
 
-    [[nodiscard]] const_iterator cbegin() const {
-        return instructions.cbegin();
-    }
-    [[nodiscard]] const_iterator cend() const {
-        return instructions.cend();
-    }
+    [[nodiscard]] const_iterator cbegin() const { return instructions.cbegin(); }
+    [[nodiscard]] const_iterator cend() const { return instructions.cend(); }
 
-    [[nodiscard]] const_reverse_iterator crbegin() const {
-        return instructions.crbegin();
-    }
-    [[nodiscard]] const_reverse_iterator crend() const {
-        return instructions.crend();
-    }
+    [[nodiscard]] const_reverse_iterator crbegin() const { return instructions.crbegin(); }
+    [[nodiscard]] const_reverse_iterator crend() const { return instructions.crend(); }
 
     // Set the order of the block, it can be set pre order, the user decides
-    void SetOrder(u32 new_order) {
-        order = new_order;
-    }
+    void SetOrder(u32 new_order) { order = new_order; }
 
     // Get the order of the block.
     // The higher, the closer is the block to the end.
-    [[nodiscard]] u32 GetOrder() const {
-        return order;
-    }
+    [[nodiscard]] u32 GetOrder() const { return order; }
 
 private:
     /// Memory pool for instruction list

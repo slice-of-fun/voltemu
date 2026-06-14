@@ -5,14 +5,16 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "core/hle/service/bcat/news/news_service.h"
-#include "core/hle/service/bcat/news/news_storage.h"
-#include "core/hle/service/cmif_serialization.h"
 
 #include <cstring>
 
+#include "core/hle/service/bcat/news/news_storage.h"
+#include "core/hle/service/cmif_serialization.h"
+
 namespace Service::News {
 
-INewsService::INewsService(Core::System& system_) : ServiceFramework{system_, "INewsService"} {
+INewsService::INewsService(Core::System& system_) : ServiceFramework{system_, "INewsService"}
+{
     // clang-format off
     static const FunctionInfo functions[] = {
         {10100, D<&INewsService::PostLocalNews>, "PostLocalNews"},
@@ -42,35 +44,42 @@ INewsService::INewsService(Core::System& system_) : ServiceFramework{system_, "I
 
 INewsService::~INewsService() = default;
 
-Result INewsService::PostLocalNews(InBuffer<BufferAttr_HipcAutoSelect> buffer_data) {
+Result INewsService::PostLocalNews(InBuffer<BufferAttr_HipcAutoSelect> buffer_data)
+{
     LOG_WARNING(Service_BCAT, "(STUBBED) PostLocalNews size={}", buffer_data.size());
     R_SUCCEED();
 }
 
 Result INewsService::GetSubscriptionStatus(Out<u32> out_status,
-                                           InBuffer<BufferAttr_HipcPointer> buffer_data) {
+                                           InBuffer<BufferAttr_HipcPointer> buffer_data)
+{
     LOG_WARNING(Service_BCAT, "(STUBBED) called, buffer_size={}", buffer_data.size());
     *out_status = 0;
     R_SUCCEED();
 }
 
-Result INewsService::IsSystemUpdateRequired(Out<bool> out_is_system_update_required) {
+Result INewsService::IsSystemUpdateRequired(Out<bool> out_is_system_update_required)
+{
     LOG_WARNING(Service_BCAT, "(STUBBED) called");
     *out_is_system_update_required = false;
     R_SUCCEED();
 }
 
-Result INewsService::RequestAutoSubscription(u64 value) {
+Result INewsService::RequestAutoSubscription(u64 value)
+{
     LOG_WARNING(Service_BCAT, "(STUBBED) called");
     R_SUCCEED();
 }
 
-Result INewsService::SetPassphrase(InBuffer<BufferAttr_HipcPointer> buffer_data) {
+Result INewsService::SetPassphrase(InBuffer<BufferAttr_HipcPointer> buffer_data)
+{
     LOG_WARNING(Service_BCAT, "(STUBBED) SetPassphrase called size={}", buffer_data.size());
     R_SUCCEED();
 }
 
-Result INewsService::GetTopicList(Out<s32> out_count, OutBuffer<BufferAttr_HipcMapAlias> out_topics, s32 filter) {
+Result INewsService::GetTopicList(Out<s32> out_count, OutBuffer<BufferAttr_HipcMapAlias> out_topics,
+                                  s32 filter)
+{
     constexpr size_t TopicIdSize = 32;
     constexpr auto EdenTopicId = "eden";
 
@@ -89,18 +98,21 @@ Result INewsService::GetTopicList(Out<s32> out_count, OutBuffer<BufferAttr_HipcM
     R_SUCCEED();
 }
 
-Result INewsService::ClearStorage() {
+Result INewsService::ClearStorage()
+{
     LOG_WARNING(Service_BCAT, "(STUBBED) called");
     NewsStorage::Instance().Clear();
     R_SUCCEED();
 }
 
-Result INewsService::ClearSubscriptionStatusAll() {
+Result INewsService::ClearSubscriptionStatusAll()
+{
     LOG_WARNING(Service_BCAT, "(STUBBED) called");
     R_SUCCEED();
 }
 
-Result INewsService::GetNewsDatabaseDump() {
+Result INewsService::GetNewsDatabaseDump()
+{
     LOG_WARNING(Service_BCAT, "(STUBBED) called");
     R_SUCCEED();
 }

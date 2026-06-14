@@ -109,7 +109,8 @@ public:
     CDmaPusher() = delete;
     virtual ~CDmaPusher();
 
-    void PushEntries(ChCommandHeaderList&& entries) {
+    void PushEntries(ChCommandHeaderList&& entries)
+    {
         std::scoped_lock l{command_mutex};
         command_lists.push_back(std::move(entries));
         command_cv.notify_one();

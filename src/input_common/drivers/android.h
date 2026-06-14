@@ -6,9 +6,11 @@
 
 #pragma once
 
-#include <set>
 #include <common/threadsafe_queue.h>
 #include <jni.h>
+
+#include <set>
+
 #include "input_common/input_engine.h"
 
 namespace InputCommon {
@@ -57,8 +59,9 @@ public:
     void SetMotionState(std::string guid, size_t port, u64 delta_timestamp, float gyro_x,
                         float gyro_y, float gyro_z, float accel_x, float accel_y, float accel_z);
 
-    Common::Input::DriverResult SetVibration(
-        const PadIdentifier& identifier, const Common::Input::VibrationStatus& vibration) override;
+    Common::Input::DriverResult
+    SetVibration(const PadIdentifier& identifier,
+                 const Common::Input::VibrationStatus& vibration) override;
 
     bool IsVibrationEnabled(const PadIdentifier& identifier) override;
 

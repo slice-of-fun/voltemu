@@ -7,10 +7,11 @@
 // SPDX-FileCopyrightText: Copyright 2024 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "video_core/renderer_opengl/gl_blit_screen.h"
+
 #include "common/settings.h"
 #include "common/settings_enums.h"
 #include "video_core/present.h"
-#include "video_core/renderer_opengl/gl_blit_screen.h"
 #include "video_core/renderer_opengl/gl_state_tracker.h"
 #include "video_core/renderer_opengl/present/filters.h"
 #include "video_core/renderer_opengl/present/layer.h"
@@ -23,12 +24,15 @@ BlitScreen::BlitScreen(RasterizerOpenGL& rasterizer_,
                        StateTracker& state_tracker_, ProgramManager& program_manager_,
                        Device& device_, const PresentFilters& filters_)
     : rasterizer(rasterizer_), device_memory(device_memory_), state_tracker(state_tracker_),
-      program_manager(program_manager_), device(device_), filters(filters_) {}
+      program_manager(program_manager_), device(device_), filters(filters_)
+{
+}
 
 BlitScreen::~BlitScreen() = default;
 
 void BlitScreen::DrawScreen(std::span<const Tegra::FramebufferConfig> framebuffers,
-                            const Layout::FramebufferLayout& layout, bool invert_y) {
+                            const Layout::FramebufferLayout& layout, bool invert_y)
+{
     // TODO: Signal state tracker about these changes
     state_tracker.NotifyScreenDrawVertexArray();
     state_tracker.NotifyPolygonModes();
@@ -74,7 +78,8 @@ void BlitScreen::DrawScreen(std::span<const Tegra::FramebufferConfig> framebuffe
     // program_manager.RestoreGuestPipeline();
 }
 
-void BlitScreen::CreateWindowAdapt() {
+void BlitScreen::CreateWindowAdapt()
+{
     if (window_adapt && filters.get_scaling_filter() == current_window_adapt) {
         return;
     }

@@ -2,11 +2,9 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "data_dialog.h"
-#include "frontend_common/data_manager.h"
-#include "qt_common/qt_string_lookup.h"
-#include "qt_common/util/content.h"
-#include "ui_data_dialog.h"
-#include "util/util.h"
+
+#include <applets/qt_profile_select.h>
+#include <core/frontend/applets/profile_select.h>
 
 #include <QDesktopServices>
 #include <QFileDialog>
@@ -14,11 +12,14 @@
 #include <QProgressDialog>
 #include <QtConcurrentRun>
 
-#include <core/frontend/applets/profile_select.h>
+#include "frontend_common/data_manager.h"
+#include "qt_common/qt_string_lookup.h"
+#include "qt_common/util/content.h"
+#include "ui_data_dialog.h"
+#include "util/util.h"
 
-#include <applets/qt_profile_select.h>
-
-DataDialog::DataDialog(QWidget* parent) : QDialog(parent), ui(std::make_unique<Ui::DataDialog>()) {
+DataDialog::DataDialog(QWidget* parent) : QDialog(parent), ui(std::make_unique<Ui::DataDialog>())
+{
     ui->setupUi(this);
 
     // TODO: Should we make this a single widget that pulls data from a model?
@@ -43,7 +44,8 @@ DataWidget::DataWidget(FrontendCommon::DataManager::DataDir data_dir,
                        QtCommon::StringLookup::StringKey tooltip, const QString& exportName,
                        QWidget* parent)
     : QWidget(parent), ui(std::make_unique<Ui::DataWidget>()), m_dir(data_dir),
-      m_exportName(exportName) {
+      m_exportName(exportName)
+{
     ui->setupUi(this);
 
     ui->tooltip->setText(QtCommon::StringLookup::Lookup(tooltip));
@@ -61,7 +63,8 @@ DataWidget::DataWidget(FrontendCommon::DataManager::DataDir data_dir,
     scan();
 }
 
-void DataWidget::clear() {
+void DataWidget::clear()
+{
     std::optional<std::string> user_id = selectProfile();
     if (!user_id)
         return;
@@ -69,7 +72,8 @@ void DataWidget::clear() {
     scan();
 }
 
-void DataWidget::open() {
+void DataWidget::open()
+{
     std::optional<std::string> user_id = selectProfile();
     if (!user_id)
         return;
@@ -77,21 +81,24 @@ void DataWidget::open() {
         FrontendCommon::DataManager::GetDataDirString(m_dir, user_id.value()))));
 }
 
-void DataWidget::upload() {
+void DataWidget::upload()
+{
     std::optional<std::string> user_id = selectProfile();
     if (!user_id)
         return;
     QtCommon::Content::ExportDataDir(m_dir, user_id.value(), m_exportName);
 }
 
-void DataWidget::download() {
+void DataWidget::download()
+{
     std::optional<std::string> user_id = selectProfile();
     if (!user_id)
         return;
     QtCommon::Content::ImportDataDir(m_dir, user_id.value(), std::bind(&DataWidget::scan, this));
 }
 
-void DataWidget::scan() {
+void DataWidget::scan()
+{
     ui->size->setText(tr("Calculating..."));
 
     QFutureWatcher<u64>* watcher = new QFutureWatcher<u64>(this);
@@ -107,7 +114,8 @@ void DataWidget::scan() {
         QtConcurrent::run([this]() { return FrontendCommon::DataManager::DataDirSize(m_dir); }));
 }
 
-std::optional<std::string> DataWidget::selectProfile() {
+std::optional<std::string> DataWidget::selectProfile()
+{
     std::string user_id{};
     if (m_dir == FrontendCommon::DataManager::DataDir::Saves) {
         user_id = GetProfileIDString();

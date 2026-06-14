@@ -4,4 +4,5 @@
 #pragma once
 
 // TODO
-namespace QtCommon::Applets {}
+namespace QtCommon::Applets {
+}

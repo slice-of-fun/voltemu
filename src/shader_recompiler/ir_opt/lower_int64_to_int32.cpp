@@ -12,7 +12,8 @@
 
 namespace Shader::Optimization {
 namespace {
-std::pair<IR::U32, IR::U32> Unpack(IR::IREmitter& ir, const IR::Value& packed) {
+std::pair<IR::U32, IR::U32> Unpack(IR::IREmitter& ir, const IR::Value& packed)
+{
     if (packed.IsImmediate()) {
         const u64 value{packed.U64()};
         return {
@@ -27,7 +28,8 @@ std::pair<IR::U32, IR::U32> Unpack(IR::IREmitter& ir, const IR::Value& packed) {
     }
 }
 
-void IAdd64To32(IR::Block& block, IR::Inst& inst) {
+void IAdd64To32(IR::Block& block, IR::Inst& inst)
+{
     if (inst.HasAssociatedPseudoOperation()) {
         throw NotImplementedException("IAdd64 emulation with pseudo instructions");
     }
@@ -42,7 +44,8 @@ void IAdd64To32(IR::Block& block, IR::Inst& inst) {
     inst.ReplaceUsesWith(ir.CompositeConstruct(ret_lo, ret_hi));
 }
 
-void ISub64To32(IR::Block& block, IR::Inst& inst) {
+void ISub64To32(IR::Block& block, IR::Inst& inst)
+{
     if (inst.HasAssociatedPseudoOperation()) {
         throw NotImplementedException("ISub64 emulation with pseudo instructions");
     }
@@ -58,7 +61,8 @@ void ISub64To32(IR::Block& block, IR::Inst& inst) {
     inst.ReplaceUsesWith(ir.CompositeConstruct(ret_lo, ret_hi));
 }
 
-void INeg64To32(IR::Block& block, IR::Inst& inst) {
+void INeg64To32(IR::Block& block, IR::Inst& inst)
+{
     if (inst.HasAssociatedPseudoOperation()) {
         throw NotImplementedException("INeg64 emulation with pseudo instructions");
     }
@@ -75,7 +79,8 @@ void INeg64To32(IR::Block& block, IR::Inst& inst) {
     inst.ReplaceUsesWith(ir.CompositeConstruct(lo, hi));
 }
 
-void ShiftLeftLogical64To32(IR::Block& block, IR::Inst& inst) {
+void ShiftLeftLogical64To32(IR::Block& block, IR::Inst& inst)
+{
     if (inst.HasAssociatedPseudoOperation()) {
         throw NotImplementedException("ShiftLeftLogical64 emulation with pseudo instructions");
     }
@@ -109,7 +114,8 @@ void ShiftLeftLogical64To32(IR::Block& block, IR::Inst& inst) {
     inst.ReplaceUsesWith(ir.CompositeConstruct(ret_lo, ret_hi));
 }
 
-void ShiftRightLogical64To32(IR::Block& block, IR::Inst& inst) {
+void ShiftRightLogical64To32(IR::Block& block, IR::Inst& inst)
+{
     if (inst.HasAssociatedPseudoOperation()) {
         throw NotImplementedException("ShiftRightLogical64 emulation with pseudo instructions");
     }
@@ -144,7 +150,8 @@ void ShiftRightLogical64To32(IR::Block& block, IR::Inst& inst) {
     inst.ReplaceUsesWith(ir.CompositeConstruct(ret_lo, ret_hi));
 }
 
-void ShiftRightArithmetic64To32(IR::Block& block, IR::Inst& inst) {
+void ShiftRightArithmetic64To32(IR::Block& block, IR::Inst& inst)
+{
     if (inst.HasAssociatedPseudoOperation()) {
         throw NotImplementedException("ShiftRightArithmetic64 emulation with pseudo instructions");
     }
@@ -181,7 +188,8 @@ void ShiftRightArithmetic64To32(IR::Block& block, IR::Inst& inst) {
     inst.ReplaceUsesWith(ir.CompositeConstruct(ret_lo, ret_hi));
 }
 
-void Lower(IR::Block& block, IR::Inst& inst) {
+void Lower(IR::Block& block, IR::Inst& inst)
+{
     switch (inst.GetOpcode()) {
     case IR::Opcode::PackUint2x32:
     case IR::Opcode::UnpackUint2x32:
@@ -224,7 +232,8 @@ void Lower(IR::Block& block, IR::Inst& inst) {
 }
 } // Anonymous namespace
 
-void LowerInt64ToInt32(IR::Program& program) {
+void LowerInt64ToInt32(IR::Program& program)
+{
     const auto end{program.post_order_blocks.rend()};
     for (auto it = program.post_order_blocks.rbegin(); it != end; ++it) {
         IR::Block* const block{*it};

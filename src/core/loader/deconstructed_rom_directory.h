@@ -7,6 +7,7 @@
 #pragma once
 
 #include <string>
+
 #include "common/common_types.h"
 #include "core/file_sys/program_metadata.h"
 #include "core/loader/loader.h"
@@ -25,9 +26,11 @@ namespace Loader {
  */
 class AppLoader_DeconstructedRomDirectory final : public AppLoader {
 public:
-    explicit AppLoader_DeconstructedRomDirectory(FileSys::VirtualFile main_file, bool override_update_ = false);
+    explicit AppLoader_DeconstructedRomDirectory(FileSys::VirtualFile main_file,
+                                                 bool override_update_ = false);
     // Overload to accept exefs directory. Must contain 'main' and 'main.npdm'
-    explicit AppLoader_DeconstructedRomDirectory(FileSys::VirtualDir directory, bool override_update_ = false);
+    explicit AppLoader_DeconstructedRomDirectory(FileSys::VirtualDir directory,
+                                                 bool override_update_ = false);
 
     /**
      * Identifies whether or not the given file is a deconstructed ROM directory.
@@ -39,9 +42,7 @@ public:
      */
     static FileType IdentifyType(const FileSys::VirtualFile& dir_file);
 
-    FileType GetFileType() const override {
-        return IdentifyType(file);
-    }
+    FileType GetFileType() const override { return IdentifyType(file); }
 
     LoadResult Load(Kernel::KProcess& process, Core::System& system) override;
 

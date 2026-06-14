@@ -1,13 +1,15 @@
 // SPDX-FileCopyrightText: Copyright 2024 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include "core/hle/service/cmif_serialization.h"
 #include "core/hle/service/ns/download_task_interface.h"
+
+#include "core/hle/service/cmif_serialization.h"
 
 namespace Service::NS {
 
 IDownloadTaskInterface::IDownloadTaskInterface(Core::System& system_)
-    : ServiceFramework{system_, "IDownloadTaskInterface"} {
+    : ServiceFramework{system_, "IDownloadTaskInterface"}
+{
     // clang-format off
     static const FunctionInfo functions[] = {
         {701, nullptr, "ClearTaskStatusList"},
@@ -27,11 +29,13 @@ IDownloadTaskInterface::IDownloadTaskInterface(Core::System& system_)
 
 IDownloadTaskInterface::~IDownloadTaskInterface() = default;
 
-Result IDownloadTaskInterface::EnableAutoCommit() {
+Result IDownloadTaskInterface::EnableAutoCommit()
+{
     LOG_WARNING(Service_NS, "(STUBBED) called");
     R_SUCCEED();
 }
-Result IDownloadTaskInterface::DisableAutoCommit() {
+Result IDownloadTaskInterface::DisableAutoCommit()
+{
     LOG_WARNING(Service_NS, "(STUBBED) called");
     R_SUCCEED();
 }

@@ -7,11 +7,11 @@
 
 #pragma once
 
-#include <optional>
-#include <string_view>
 #include <chrono>
 #include <memory>
+#include <optional>
 #include <ratio>
+#include <string_view>
 
 #include "common/common_types.h"
 
@@ -49,29 +49,35 @@ public:
     // @returns Nanoseconds to native ticks
     u64 NsToTicks(std::chrono::nanoseconds ns) const;
 
-    static inline u64 NSToCNTPCT(u64 ns) {
+    static inline u64 NSToCNTPCT(u64 ns)
+    {
         return ns * NsToCNTPCTRatio::num / NsToCNTPCTRatio::den;
     }
 
-    static inline u64 NSToGPUTick(u64 ns) {
+    static inline u64 NSToGPUTick(u64 ns)
+    {
         return ns * NsToGPUTickRatio::num / NsToGPUTickRatio::den;
     }
 
     // Cycle Timing
 
-    static inline u64 CPUTickToNS(u64 cpu_tick) {
+    static inline u64 CPUTickToNS(u64 cpu_tick)
+    {
         return cpu_tick * CPUTickToNsRatio::num / CPUTickToNsRatio::den;
     }
 
-    static inline u64 CPUTickToUS(u64 cpu_tick) {
+    static inline u64 CPUTickToUS(u64 cpu_tick)
+    {
         return cpu_tick * CPUTickToUsRatio::num / CPUTickToUsRatio::den;
     }
 
-    static inline u64 CPUTickToCNTPCT(u64 cpu_tick) {
+    static inline u64 CPUTickToCNTPCT(u64 cpu_tick)
+    {
         return cpu_tick * CPUTickToCNTPCTRatio::num / CPUTickToCNTPCTRatio::den;
     }
 
-    static inline u64 CPUTickToGPUTick(u64 cpu_tick) {
+    static inline u64 CPUTickToGPUTick(u64 cpu_tick)
+    {
         return cpu_tick * CPUTickToGPUTickRatio::num / CPUTickToGPUTickRatio::den;
     }
 
@@ -102,7 +108,8 @@ public:
     bool invariant;
 #elif defined(HAS_NCE)
     using FactorType = unsigned __int128;
-    [[nodiscard]] inline FactorType GetGuestCNTFRQFactor() const {
+    [[nodiscard]] inline FactorType GetGuestCNTFRQFactor() const
+    {
         return guest_cntfrq_factor;
     }
     FactorType ns_cntfrq_factor;

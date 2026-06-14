@@ -1,27 +1,34 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "hid_core/resources/keyboard/keyboard.h"
+
 #include "common/settings.h"
 #include "core/core_timing.h"
 #include "hid_core/frontend/emulated_devices.h"
 #include "hid_core/hid_core.h"
 #include "hid_core/resources/applet_resource.h"
-#include "hid_core/resources/keyboard/keyboard.h"
 #include "hid_core/resources/shared_memory_format.h"
 
 namespace Service::HID {
 
-Keyboard::Keyboard(Core::HID::HIDCore& hid_core_) : ControllerBase{hid_core_} {
+Keyboard::Keyboard(Core::HID::HIDCore& hid_core_) : ControllerBase{hid_core_}
+{
     emulated_devices = hid_core.GetEmulatedDevices();
 }
 
 Keyboard::~Keyboard() = default;
 
-void Keyboard::OnInit() {}
+void Keyboard::OnInit()
+{
+}
 
-void Keyboard::OnRelease() {}
+void Keyboard::OnRelease()
+{
+}
 
-void Keyboard::OnUpdate(const Core::Timing::CoreTiming& core_timing) {
+void Keyboard::OnUpdate(const Core::Timing::CoreTiming& core_timing)
+{
     std::scoped_lock shared_lock{*shared_mutex};
     const u64 aruid = applet_resource->GetActiveAruid();
     auto* data = applet_resource->GetAruidData(aruid);

@@ -2,10 +2,12 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include <QApplication>
+
 #include "startup_checks.h"
 
 #if YUZU_ROOM
 #include <cstring>
+
 #include "dedicated_room/yuzu_room.h"
 #endif
 
@@ -24,7 +26,8 @@
 #ifdef _WIN32
 #include <QScreen>
 
-static void OverrideWindowsFont() {
+static void OverrideWindowsFont()
+{
     // Qt5 chooses these fonts on Windows and they have fairly ugly alphanumeric/cyrillic characters
     // Asking to use "MS Shell Dlg 2" gives better other chars while leaving the Chinese Characters.
     const QString startup_font = QApplication::font().family();
@@ -35,7 +38,8 @@ static void OverrideWindowsFont() {
 }
 #endif
 
-static Qt::HighDpiScaleFactorRoundingPolicy GetHighDpiRoundingPolicy() {
+static Qt::HighDpiScaleFactorRoundingPolicy GetHighDpiRoundingPolicy()
+{
 #ifdef _WIN32
     // For Windows, we want to avoid scaling artifacts on fractional scaling ratios.
     // This is done by setting the optimal scaling policy for the primary screen.
@@ -74,7 +78,8 @@ static Qt::HighDpiScaleFactorRoundingPolicy GetHighDpiRoundingPolicy() {
 #endif
 }
 
-int main(int argc, char* argv[]) {
+int main(int argc, char* argv[])
+{
 #if YUZU_ROOM
     bool launch_room = false;
     for (int i = 1; i < argc; i++) {

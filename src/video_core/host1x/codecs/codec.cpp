@@ -4,9 +4,10 @@
 // SPDX-FileCopyrightText: Copyright 2020 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "video_core/host1x/codecs/codec.h"
+
 #include "common/assert.h"
 #include "common/settings.h"
-#include "video_core/host1x/codecs/codec.h"
 #include "video_core/host1x/codecs/h264.h"
 #include "video_core/host1x/codecs/vp8.h"
 #include "video_core/host1x/codecs/vp9.h"
@@ -16,27 +17,28 @@
 namespace Tegra {
 
 Codec::Codec(Host1x::Host1x& host1x_, const Host1x::NvdecCommon::NvdecRegisters& regs)
-    : host1x(host1x_)
-    , state{regs}
-    , h264_decoder(host1x_)
-    , vp8_decoder(host1x_)
-    , vp9_decoder(host1x_)
-{}
+    : host1x(host1x_), state{regs}, h264_decoder(host1x_), vp8_decoder(host1x_),
+      vp9_decoder(host1x_)
+{
+}
 
 Codec::~Codec() = default;
 
-void Codec::Initialize() {
+void Codec::Initialize()
+{
     initialized = decode_api.Initialize(current_codec);
 }
 
-void Codec::SetTargetCodec(Host1x::NvdecCommon::VideoCodec codec) {
+void Codec::SetTargetCodec(Host1x::NvdecCommon::VideoCodec codec)
+{
     if (current_codec != codec) {
         current_codec = codec;
         LOG_INFO(Service_NVDRV, "NVDEC video codec initialized to {}", GetCurrentCodecName());
     }
 }
 
-void Codec::Decode() {
+void Codec::Decode()
+{
     const bool is_first_frame = !initialized;
     if (is_first_frame)
         Initialize();
@@ -82,7 +84,8 @@ void Codec::Decode() {
     }
 }
 
-std::unique_ptr<FFmpeg::Frame> Codec::GetCurrentFrame() {
+std::unique_ptr<FFmpeg::Frame> Codec::GetCurrentFrame()
+{
     // Sometimes VIC will request more frames than have been decoded.
     // in this case, return a blank frame and don't overwrite previous data.
     if (frames.empty())
@@ -92,7 +95,8 @@ std::unique_ptr<FFmpeg::Frame> Codec::GetCurrentFrame() {
     return frame;
 }
 
-std::string_view Codec::GetCurrentCodecName() const {
+std::string_view Codec::GetCurrentCodecName() const
+{
     switch (current_codec) {
     case Host1x::NvdecCommon::VideoCodec::None:
         return "None";

@@ -11,8 +11,7 @@
 
 namespace Common {
 
-template <typename BaseAddr>
-class MultiLevelPageTable final {
+template<typename BaseAddr> class MultiLevelPageTable final {
 public:
     constexpr MultiLevelPageTable() = default;
     explicit MultiLevelPageTable(std::size_t address_space_bits, std::size_t first_level_bits,
@@ -30,9 +29,12 @@ public:
           first_level_shift{std::exchange(other.first_level_shift, 0)},
           first_level_chunk_size{std::exchange(other.first_level_chunk_size, 0)},
           first_level_map{std::move(other.first_level_map)}, base_ptr{std::exchange(other.base_ptr,
-                                                                                    nullptr)} {}
+                                                                                    nullptr)}
+    {
+    }
 
-    MultiLevelPageTable& operator=(MultiLevelPageTable&& other) noexcept {
+    MultiLevelPageTable& operator=(MultiLevelPageTable&& other) noexcept
+    {
         address_space_bits = std::exchange(other.address_space_bits, 0);
         first_level_bits = std::exchange(other.first_level_bits, 0);
         page_bits = std::exchange(other.page_bits, 0);
@@ -46,21 +48,13 @@ public:
 
     void ReserveRange(u64 start, std::size_t size);
 
-    [[nodiscard]] const BaseAddr& operator[](std::size_t index) const {
-        return base_ptr[index];
-    }
+    [[nodiscard]] const BaseAddr& operator[](std::size_t index) const { return base_ptr[index]; }
 
-    [[nodiscard]] BaseAddr& operator[](std::size_t index) {
-        return base_ptr[index];
-    }
+    [[nodiscard]] BaseAddr& operator[](std::size_t index) { return base_ptr[index]; }
 
-    [[nodiscard]] BaseAddr* data() {
-        return base_ptr;
-    }
+    [[nodiscard]] BaseAddr* data() { return base_ptr; }
 
-    [[nodiscard]] const BaseAddr* data() const {
-        return base_ptr;
-    }
+    [[nodiscard]] const BaseAddr* data() const { return base_ptr; }
 
 private:
     void AllocateLevel(u64 level);

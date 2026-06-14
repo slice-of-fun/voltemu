@@ -36,7 +36,8 @@ public:
     public:
         constexpr WriteBuffer() : m_buffer(nullptr), m_length_and_is_normalized(0) {}
 
-        constexpr ~WriteBuffer() {
+        constexpr ~WriteBuffer()
+        {
             if (m_buffer != nullptr) {
                 Deallocate(m_buffer, this->GetLength());
                 this->ResetBuffer();
@@ -44,11 +45,13 @@ public:
         }
 
         constexpr WriteBuffer(WriteBuffer&& rhs)
-            : m_buffer(rhs.m_buffer), m_length_and_is_normalized(rhs.m_length_and_is_normalized) {
+            : m_buffer(rhs.m_buffer), m_length_and_is_normalized(rhs.m_length_and_is_normalized)
+        {
             rhs.ResetBuffer();
         }
 
-        constexpr WriteBuffer& operator=(WriteBuffer&& rhs) {
+        constexpr WriteBuffer& operator=(WriteBuffer&& rhs)
+        {
             if (m_buffer != nullptr) {
                 Deallocate(m_buffer, this->GetLength());
             }
@@ -61,39 +64,35 @@ public:
             return *this;
         }
 
-        constexpr void ResetBuffer() {
+        constexpr void ResetBuffer()
+        {
             m_buffer = nullptr;
             this->SetLength(0);
         }
 
-        constexpr char* Get() const {
-            return m_buffer;
-        }
+        constexpr char* Get() const { return m_buffer; }
 
-        constexpr size_t GetLength() const {
-            return m_length_and_is_normalized >> 1;
-        }
+        constexpr size_t GetLength() const { return m_length_and_is_normalized >> 1; }
 
-        constexpr bool IsNormalized() const {
+        constexpr bool IsNormalized() const
+        {
             return static_cast<bool>(m_length_and_is_normalized & 1);
         }
 
-        constexpr void SetNormalized() {
-            m_length_and_is_normalized |= static_cast<size_t>(1);
-        }
+        constexpr void SetNormalized() { m_length_and_is_normalized |= static_cast<size_t>(1); }
 
-        constexpr void SetNotNormalized() {
-            m_length_and_is_normalized &= ~static_cast<size_t>(1);
-        }
+        constexpr void SetNotNormalized() { m_length_and_is_normalized &= ~static_cast<size_t>(1); }
 
     private:
         constexpr WriteBuffer(char* buffer, size_t length)
-            : m_buffer(buffer), m_length_and_is_normalized(0) {
+            : m_buffer(buffer), m_length_and_is_normalized(0)
+        {
             this->SetLength(length);
         }
 
     public:
-        static WriteBuffer Make(size_t length) {
+        static WriteBuffer Make(size_t length)
+        {
             if (void* alloc = Allocate(length); alloc != nullptr) {
                 return WriteBuffer(static_cast<char*>(alloc), length);
             } else {
@@ -102,7 +101,8 @@ public:
         }
 
     private:
-        constexpr void SetLength(size_t size) {
+        constexpr void SetLength(size_t size)
+        {
             m_length_and_is_normalized = (m_length_and_is_normalized & 1) | (size << 1);
         }
     };
@@ -114,13 +114,12 @@ private:
 public:
     constexpr Path() : m_str(EmptyPath), m_write_buffer() {}
 
-    constexpr Path(const char* s) : m_str(s), m_write_buffer() {
-        m_write_buffer.SetNormalized();
-    }
+    constexpr Path(const char* s) : m_str(s), m_write_buffer() { m_write_buffer.SetNormalized(); }
 
     constexpr ~Path() = default;
 
-    constexpr Result SetShallowBuffer(const char* buffer) {
+    constexpr Result SetShallowBuffer(const char* buffer)
+    {
         // Check pre-conditions
         ASSERT(m_write_buffer.GetLength() == 0);
 
@@ -136,14 +135,16 @@ public:
         R_SUCCEED();
     }
 
-    constexpr const char* GetString() const {
+    constexpr const char* GetString() const
+    {
         // Check pre-conditions
         ASSERT(this->IsNormalized());
 
         return m_str;
     }
 
-    constexpr size_t GetLength() const {
+    constexpr size_t GetLength() const
+    {
         if (std::is_constant_evaluated()) {
             return Strlen(this->GetString());
         } else {
@@ -151,15 +152,15 @@ public:
         }
     }
 
-    constexpr bool IsEmpty() const {
-        return *m_str == '\x00';
-    }
+    constexpr bool IsEmpty() const { return *m_str == '\x00'; }
 
-    constexpr bool IsMatchHead(const char* p, size_t len) const {
+    constexpr bool IsMatchHead(const char* p, size_t len) const
+    {
         return Strncmp(this->GetString(), p, len) == 0;
     }
 
-    Result Initialize(const Path& rhs) {
+    Result Initialize(const Path& rhs)
+    {
         // Check the other path is normalized
         const bool normalized = rhs.IsNormalized();
         R_UNLESS(normalized, ResultNotNormalized);
@@ -177,7 +178,8 @@ public:
         R_SUCCEED();
     }
 
-    Result Initialize(const char* path, size_t len) {
+    Result Initialize(const char* path, size_t len)
+    {
         // Check the path is valid
         R_UNLESS(path != nullptr, ResultNullptrArgument);
 
@@ -190,14 +192,16 @@ public:
         R_SUCCEED();
     }
 
-    Result Initialize(const char* path) {
+    Result Initialize(const char* path)
+    {
         // Check the path is valid
         R_UNLESS(path != nullptr, ResultNullptrArgument);
 
         R_RETURN(this->Initialize(path, std::strlen(path)));
     }
 
-    Result InitializeWithReplaceBackslash(const char* path) {
+    Result InitializeWithReplaceBackslash(const char* path)
+    {
         // Check the path is valid
         R_UNLESS(path != nullptr, ResultNullptrArgument);
 
@@ -215,7 +219,8 @@ public:
         R_SUCCEED();
     }
 
-    Result InitializeWithReplaceForwardSlashes(const char* path) {
+    Result InitializeWithReplaceForwardSlashes(const char* path)
+    {
         // Check the path is valid
         R_UNLESS(path != nullptr, ResultNullptrArgument);
 
@@ -236,7 +241,8 @@ public:
         R_SUCCEED();
     }
 
-    Result InitializeWithNormalization(const char* path, size_t size) {
+    Result InitializeWithNormalization(const char* path, size_t size)
+    {
         // Check the path is valid
         R_UNLESS(path != nullptr, ResultNullptrArgument);
 
@@ -272,14 +278,16 @@ public:
         R_SUCCEED();
     }
 
-    Result InitializeWithNormalization(const char* path) {
+    Result InitializeWithNormalization(const char* path)
+    {
         // Check the path is valid
         R_UNLESS(path != nullptr, ResultNullptrArgument);
 
         R_RETURN(this->InitializeWithNormalization(path, std::strlen(path)));
     }
 
-    Result InitializeAsEmpty() {
+    Result InitializeAsEmpty()
+    {
         // Clear our buffer
         this->ClearBuffer();
 
@@ -289,7 +297,8 @@ public:
         R_SUCCEED();
     }
 
-    Result AppendChild(const char* child) {
+    Result AppendChild(const char* child)
+    {
         // Check the path is valid
         R_UNLESS(child != nullptr, ResultNullptrArgument);
 
@@ -344,11 +353,10 @@ public:
         R_SUCCEED();
     }
 
-    Result AppendChild(const Path& rhs) {
-        R_RETURN(this->AppendChild(rhs.GetString()));
-    }
+    Result AppendChild(const Path& rhs) { R_RETURN(this->AppendChild(rhs.GetString())); }
 
-    Result Combine(const Path& parent, const Path& child) {
+    Result Combine(const Path& parent, const Path& child)
+    {
         // Get the lengths
         const auto p_len = parent.GetLength();
         const auto c_len = child.GetLength();
@@ -370,7 +378,8 @@ public:
         R_SUCCEED();
     }
 
-    Result RemoveChild() {
+    Result RemoveChild()
+    {
         // If we don't have a write-buffer, ensure that we have one
         if (m_write_buffer.Get() == nullptr) {
             if (const auto len = std::strlen(m_str); len > 0) {
@@ -408,7 +417,8 @@ public:
         R_SUCCEED();
     }
 
-    Result Normalize(const PathFlags& flags) {
+    Result Normalize(const PathFlags& flags)
+    {
         // If we're already normalized, nothing to do
         R_SUCCEED_IF(this->IsNormalized());
 
@@ -448,12 +458,14 @@ public:
     }
 
 private:
-    void ClearBuffer() {
+    void ClearBuffer()
+    {
         m_write_buffer.ResetBuffer();
         m_str = EmptyPath;
     }
 
-    void SetModifiableBuffer(WriteBuffer&& buffer) {
+    void SetModifiableBuffer(WriteBuffer&& buffer)
+    {
         // Check pre-conditions
         ASSERT(buffer.Get() != nullptr);
         ASSERT(buffer.GetLength() > 0);
@@ -471,12 +483,14 @@ private:
         m_str = m_write_buffer.Get();
     }
 
-    constexpr void SetReadOnlyBuffer(const char* buffer) {
+    constexpr void SetReadOnlyBuffer(const char* buffer)
+    {
         m_str = buffer;
         m_write_buffer.ResetBuffer();
     }
 
-    Result Preallocate(size_t length) {
+    Result Preallocate(size_t length)
+    {
         // Allocate additional space, if needed
         if (length > m_write_buffer.GetLength()) {
             // Allocate buffer
@@ -491,7 +505,8 @@ private:
         R_SUCCEED();
     }
 
-    Result InitializeImpl(const char* path, size_t size) {
+    Result InitializeImpl(const char* path, size_t size)
+    {
         if (size > 0 && path[0]) {
             // Pre allocate a buffer for the path
             R_TRY(this->Preallocate(size + 1));
@@ -507,43 +522,32 @@ private:
         R_SUCCEED();
     }
 
-    constexpr char* GetWriteBuffer() {
+    constexpr char* GetWriteBuffer()
+    {
         ASSERT(m_write_buffer.Get() != nullptr);
         return m_write_buffer.Get();
     }
 
-    constexpr size_t GetWriteBufferLength() const {
-        return m_write_buffer.GetLength();
-    }
+    constexpr size_t GetWriteBufferLength() const { return m_write_buffer.GetLength(); }
 
-    constexpr bool IsNormalized() const {
-        return m_write_buffer.IsNormalized();
-    }
+    constexpr bool IsNormalized() const { return m_write_buffer.IsNormalized(); }
 
-    constexpr void SetNormalized() {
-        m_write_buffer.SetNormalized();
-    }
+    constexpr void SetNormalized() { m_write_buffer.SetNormalized(); }
 
-    constexpr void SetNotNormalized() {
-        m_write_buffer.SetNotNormalized();
-    }
+    constexpr void SetNotNormalized() { m_write_buffer.SetNotNormalized(); }
 
 public:
-    bool operator==(const FileSys::Path& rhs) const {
+    bool operator==(const FileSys::Path& rhs) const
+    {
         return std::strcmp(this->GetString(), rhs.GetString()) == 0;
     }
-    bool operator!=(const FileSys::Path& rhs) const {
-        return !(*this == rhs);
-    }
-    bool operator==(const char* p) const {
-        return std::strcmp(this->GetString(), p) == 0;
-    }
-    bool operator!=(const char* p) const {
-        return !(*this == p);
-    }
+    bool operator!=(const FileSys::Path& rhs) const { return !(*this == rhs); }
+    bool operator==(const char* p) const { return std::strcmp(this->GetString(), p) == 0; }
+    bool operator!=(const char* p) const { return !(*this == p); }
 };
 
-inline Result SetUpFixedPath(FileSys::Path* out, const char* s) {
+inline Result SetUpFixedPath(FileSys::Path* out, const char* s)
+{
     // Verify the path is normalized
     bool normalized;
     size_t dummy;
@@ -555,7 +559,8 @@ inline Result SetUpFixedPath(FileSys::Path* out, const char* s) {
     R_RETURN(out->SetShallowBuffer(s));
 }
 
-constexpr inline bool IsWindowsDriveRootPath(const FileSys::Path& path) {
+constexpr inline bool IsWindowsDriveRootPath(const FileSys::Path& path)
+{
     const char* const str = path.GetString();
     return IsWindowsDrive(str) &&
            (str[2] == StringTraits::DirectorySeparator ||

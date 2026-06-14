@@ -1,12 +1,13 @@
 // SPDX-FileCopyrightText: Copyright 2021 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/kernel/k_synchronization_object.h"
+
 #include "common/assert.h"
 #include "common/common_types.h"
 #include "common/scratch_buffer.h"
 #include "core/hle/kernel/k_scheduler.h"
 #include "core/hle/kernel/k_scoped_scheduler_lock_and_sleep.h"
-#include "core/hle/kernel/k_synchronization_object.h"
 #include "core/hle/kernel/k_thread.h"
 #include "core/hle/kernel/k_thread_queue.h"
 #include "core/hle/kernel/kernel.h"
@@ -20,10 +21,13 @@ class ThreadQueueImplForKSynchronizationObjectWait final : public KThreadQueueWi
 public:
     ThreadQueueImplForKSynchronizationObjectWait(KernelCore& kernel, KSynchronizationObject** o,
                                                  KSynchronizationObject::ThreadListNode* n, s32 c)
-        : KThreadQueueWithoutEndWait(kernel), m_objects(o), m_nodes(n), m_count(c) {}
+        : KThreadQueueWithoutEndWait(kernel), m_objects(o), m_nodes(n), m_count(c)
+    {
+    }
 
     void NotifyAvailable(KThread* waiting_thread, KSynchronizationObject* signaled_object,
-                         Result wait_result) override {
+                         Result wait_result) override
+    {
         // Determine the sync index, and unlink all nodes.
         s32 sync_index = -1;
         for (auto i = 0; i < m_count; ++i) {
@@ -46,7 +50,8 @@ public:
         KThreadQueue::EndWait(waiting_thread, wait_result);
     }
 
-    void CancelWait(KThread* waiting_thread, Result wait_result, bool cancel_timer_task) override {
+    void CancelWait(KThread* waiting_thread, Result wait_result, bool cancel_timer_task) override
+    {
         // Remove all nodes from our list.
         for (auto i = 0; i < m_count; ++i) {
             m_objects[i]->UnlinkNode(std::addressof(m_nodes[i]));
@@ -67,14 +72,16 @@ private:
 
 } // namespace
 
-void KSynchronizationObject::Finalize() {
+void KSynchronizationObject::Finalize()
+{
     this->OnFinalizeSynchronizationObject();
     KAutoObject::Finalize();
 }
 
 Result KSynchronizationObject::Wait(KernelCore& kernel, s32* out_index,
                                     KSynchronizationObject** objects, const s32 num_objects,
-                                    s64 timeout) {
+                                    s64 timeout)
+{
     // Allocate space on stack for thread nodes.
     std::array<ThreadListNode, Svc::ArgumentHandleCountMax> thread_nodes;
 
@@ -145,11 +152,14 @@ Result KSynchronizationObject::Wait(KernelCore& kernel, s32* out_index,
     R_RETURN(thread->GetWaitResult());
 }
 
-KSynchronizationObject::KSynchronizationObject(KernelCore& kernel) : KAutoObjectWithList{kernel} {}
+KSynchronizationObject::KSynchronizationObject(KernelCore& kernel) : KAutoObjectWithList{kernel}
+{
+}
 
 KSynchronizationObject::~KSynchronizationObject() = default;
 
-void KSynchronizationObject::NotifyAvailable(Result result) {
+void KSynchronizationObject::NotifyAvailable(Result result)
+{
     KScopedSchedulerLock sl(m_kernel);
 
     // If we're not signaled, we've nothing to notify.
@@ -163,7 +173,8 @@ void KSynchronizationObject::NotifyAvailable(Result result) {
     }
 }
 
-std::vector<KThread*> KSynchronizationObject::GetWaitingThreadsForDebugging() const {
+std::vector<KThread*> KSynchronizationObject::GetWaitingThreadsForDebugging() const
+{
     std::vector<KThread*> threads;
 
     // If debugging, dump the list of waiters.

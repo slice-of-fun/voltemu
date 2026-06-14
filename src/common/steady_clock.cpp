@@ -15,20 +15,24 @@
 namespace Common {
 
 #ifdef _WIN32
-static s64 WindowsQueryPerformanceFrequency() {
+static s64 WindowsQueryPerformanceFrequency()
+{
     LARGE_INTEGER frequency;
     QueryPerformanceFrequency(&frequency);
     return frequency.QuadPart;
 }
 
-static s64 WindowsQueryPerformanceCounter() {
+static s64 WindowsQueryPerformanceCounter()
+{
     LARGE_INTEGER counter;
     QueryPerformanceCounter(&counter);
     return counter.QuadPart;
 }
 
-static s64 GetSystemTimeNS() {
-    static auto pf = (decltype(&GetSystemTimePreciseAsFileTime))(void*)GetProcAddress(GetModuleHandle(TEXT("Kernel32.dll")), "GetSystemTimePreciseAsFileTime"); // Windows 8+
+static s64 GetSystemTimeNS()
+{
+    static auto pf = (decltype(&GetSystemTimePreciseAsFileTime))(void*)GetProcAddress(
+        GetModuleHandle(TEXT("Kernel32.dll")), "GetSystemTimePreciseAsFileTime"); // Windows 8+
     if (pf) {
         // GetSystemTimePreciseAsFileTime returns the file time in 100ns units.
         constexpr s64 Multiplier = 100;
@@ -36,7 +40,8 @@ static s64 GetSystemTimeNS() {
         constexpr s64 WindowsEpochToUnixEpoch = 0x19DB1DED53E8000LL;
         FILETIME filetime;
         pf(&filetime);
-        return Multiplier * ((s64(filetime.dwHighDateTime) << 32) + s64(filetime.dwLowDateTime) - WindowsEpochToUnixEpoch);
+        return Multiplier * ((s64(filetime.dwHighDateTime) << 32) + s64(filetime.dwLowDateTime) -
+                             WindowsEpochToUnixEpoch);
     } else {
         // Only Windows XP and below error out here
         LARGE_INTEGER ticks;
@@ -46,7 +51,8 @@ static s64 GetSystemTimeNS() {
 }
 #endif
 
-SteadyClock::time_point SteadyClock::Now() noexcept {
+SteadyClock::time_point SteadyClock::Now() noexcept
+{
 #if defined(_WIN32)
     static const auto freq = WindowsQueryPerformanceFrequency();
     const auto counter = WindowsQueryPerformanceCounter();
@@ -74,7 +80,8 @@ SteadyClock::time_point SteadyClock::Now() noexcept {
 #endif
 }
 
-RealTimeClock::time_point RealTimeClock::Now() noexcept {
+RealTimeClock::time_point RealTimeClock::Now() noexcept
+{
 #if defined(_WIN32)
     return time_point{duration{GetSystemTimeNS()}};
 #elif defined(__APPLE__)

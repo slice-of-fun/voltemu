@@ -12,8 +12,7 @@
 
 namespace FileSys {
 
-template <size_t DataAlign_, size_t BufferAlign_>
-class AlignmentMatchingStorage : public IStorage {
+template<size_t DataAlign_, size_t BufferAlign_> class AlignmentMatchingStorage : public IStorage {
     YUZU_NON_COPYABLE(AlignmentMatchingStorage);
     YUZU_NON_MOVEABLE(AlignmentMatchingStorage);
 
@@ -33,7 +32,8 @@ private:
 public:
     explicit AlignmentMatchingStorage(VirtualFile bs) : m_base_storage(std::move(bs)) {}
 
-    virtual size_t Read(u8* buffer, size_t size, size_t offset) const override {
+    virtual size_t Read(u8* buffer, size_t size, size_t offset) const override
+    {
         // Allocate a work buffer on stack.
         alignas(DataAlignMax) std::array<char, DataAlign> work_buf;
 
@@ -52,7 +52,8 @@ public:
                                                   DataAlign, BufferAlign, offset, buffer, size);
     }
 
-    virtual size_t Write(const u8* buffer, size_t size, size_t offset) override {
+    virtual size_t Write(const u8* buffer, size_t size, size_t offset) override
+    {
         // Allocate a work buffer on stack.
         alignas(DataAlignMax) std::array<char, DataAlign> work_buf;
 
@@ -71,13 +72,10 @@ public:
                                                    DataAlign, BufferAlign, offset, buffer, size);
     }
 
-    virtual size_t GetSize() const override {
-        return m_base_storage->GetSize();
-    }
+    virtual size_t GetSize() const override { return m_base_storage->GetSize(); }
 };
 
-template <size_t BufferAlign_>
-class AlignmentMatchingStoragePooledBuffer : public IStorage {
+template<size_t BufferAlign_> class AlignmentMatchingStoragePooledBuffer : public IStorage {
     YUZU_NON_COPYABLE(AlignmentMatchingStoragePooledBuffer);
     YUZU_NON_MOVEABLE(AlignmentMatchingStoragePooledBuffer);
 
@@ -94,11 +92,13 @@ private:
 
 public:
     explicit AlignmentMatchingStoragePooledBuffer(VirtualFile bs, size_t da)
-        : m_base_storage(std::move(bs)), m_data_align(da), work_buffer(da) {
+        : m_base_storage(std::move(bs)), m_data_align(da), work_buffer(da)
+    {
         ASSERT(Common::IsPowerOfTwo(da));
     }
 
-    virtual size_t Read(u8* buffer, size_t size, size_t offset) const override {
+    virtual size_t Read(u8* buffer, size_t size, size_t offset) const override
+    {
         // Succeed if zero size.
         if (size == 0) {
             return size;
@@ -109,11 +109,12 @@ public:
         s64 bs_size = this->GetSize();
         ASSERT(R_SUCCEEDED(IStorage::CheckAccessRange(offset, size, bs_size)));
         return AlignmentMatchingStorageImpl::Read(m_base_storage, work_buffer.data(),
-                                                  work_buffer.size(), m_data_align,
-                                                  BufferAlign, offset, buffer, size);
+                                                  work_buffer.size(), m_data_align, BufferAlign,
+                                                  offset, buffer, size);
     }
 
-    virtual size_t Write(const u8* buffer, size_t size, size_t offset) override {
+    virtual size_t Write(const u8* buffer, size_t size, size_t offset) override
+    {
         // Succeed if zero size.
         if (size == 0) {
             return size;
@@ -124,13 +125,11 @@ public:
         s64 bs_size = this->GetSize();
         ASSERT(R_SUCCEEDED(IStorage::CheckAccessRange(offset, size, bs_size)));
         return AlignmentMatchingStorageImpl::Write(m_base_storage, work_buffer.data(),
-                                                   work_buffer.size(), m_data_align,
-                                                   BufferAlign, offset, buffer, size);
+                                                   work_buffer.size(), m_data_align, BufferAlign,
+                                                   offset, buffer, size);
     }
 
-    virtual size_t GetSize() const override {
-        return m_base_storage->GetSize();
-    }
+    virtual size_t GetSize() const override { return m_base_storage->GetSize(); }
 };
 
 } // namespace FileSys

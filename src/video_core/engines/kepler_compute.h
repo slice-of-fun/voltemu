@@ -7,6 +7,7 @@
 #include <cstddef>
 #include <optional>
 #include <vector>
+
 #include "common/bit_field.h"
 #include "common/common_funcs.h"
 #include "common/common_types.h"
@@ -71,9 +72,7 @@ public:
 
                 struct {
                     u32 address;
-                    GPUVAddr Address() const {
-                        return GPUVAddr{address} << 8;
-                    }
+                    GPUVAddr Address() const { return GPUVAddr{address} << 8; }
                 } launch_desc_loc;
 
                 INSERT_PADDING_WORDS_NOINIT(0x1);
@@ -86,7 +85,8 @@ public:
                     u32 address_high;
                     u32 address_low;
                     u32 limit;
-                    GPUVAddr Address() const {
+                    GPUVAddr Address() const
+                    {
                         return (GPUVAddr{address_high} << 32) | GPUVAddr{address_low};
                     }
                 } tsc;
@@ -97,7 +97,8 @@ public:
                     u32 address_high;
                     u32 address_low;
                     u32 limit;
-                    GPUVAddr Address() const {
+                    GPUVAddr Address() const
+                    {
                         return (GPUVAddr{address_high} << 32) | GPUVAddr{address_low};
                     }
                 } tic;
@@ -107,7 +108,8 @@ public:
                 struct {
                     u32 address_high;
                     u32 address_low;
-                    GPUVAddr Address() const {
+                    GPUVAddr Address() const
+                    {
                         return (GPUVAddr{address_high} << 32) | GPUVAddr{address_low};
                     }
                 } code_loc;
@@ -162,7 +164,8 @@ public:
                 BitField<0, 8, u32> address_high;
                 BitField<15, 17, u32> size;
             };
-            GPUVAddr Address() const {
+            GPUVAddr Address() const
+            {
                 return (GPUVAddr{address_high.Value()} << 32) | GPUVAddr{address_low};
             }
         };
@@ -205,9 +208,7 @@ public:
     void CallMultiMethod(u32 method, const u32* base_start, u32 amount,
                          u32 methods_pending) override;
 
-    std::optional<GPUVAddr> GetIndirectComputeAddress() const {
-        return indirect_compute;
-    }
+    std::optional<GPUVAddr> GetIndirectComputeAddress() const { return indirect_compute; }
 
 private:
     void ProcessLaunch();

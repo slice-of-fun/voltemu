@@ -3,8 +3,8 @@
 
 #pragma once
 
-#include <filesystem>
 #include <QDialog>
+#include <filesystem>
 
 namespace Ui {
 class RyujinxDialog;

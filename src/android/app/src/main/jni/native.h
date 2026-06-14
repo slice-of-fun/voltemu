@@ -5,6 +5,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include <android/native_window_jni.h>
+
 #include "common/android/applets/software_keyboard.h"
 #include "common/detached_tasks.h"
 #include "core/core.h"

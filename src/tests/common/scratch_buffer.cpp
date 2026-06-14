@@ -1,17 +1,20 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "common/scratch_buffer.h"
+
 #include <algorithm>
 #include <array>
+#include <catch2/catch_test_macros.hpp>
 #include <cstring>
 #include <span>
-#include <catch2/catch_test_macros.hpp>
+
 #include "common/common_types.h"
-#include "common/scratch_buffer.h"
 
 namespace Common {
 
-TEST_CASE("ScratchBuffer: Basic Test", "[common]") {
+TEST_CASE("ScratchBuffer: Basic Test", "[common]")
+{
     ScratchBuffer<u8> buf;
 
     REQUIRE(buf.size() == 0U);
@@ -30,7 +33,8 @@ TEST_CASE("ScratchBuffer: Basic Test", "[common]") {
     }
 }
 
-TEST_CASE("ScratchBuffer: resize_destructive Grow", "[common]") {
+TEST_CASE("ScratchBuffer: resize_destructive Grow", "[common]")
+{
     std::array<u8, 10> payload;
     payload.fill(66);
 
@@ -46,7 +50,8 @@ TEST_CASE("ScratchBuffer: resize_destructive Grow", "[common]") {
     // Since the buffer is not value initialized, reading its data will be garbage
 }
 
-TEST_CASE("ScratchBuffer: resize_destructive Shrink", "[common]") {
+TEST_CASE("ScratchBuffer: resize_destructive Shrink", "[common]")
+{
     std::array<u8, 10> payload;
     payload.fill(66);
 
@@ -70,7 +75,8 @@ TEST_CASE("ScratchBuffer: resize_destructive Shrink", "[common]") {
     }
 }
 
-TEST_CASE("ScratchBuffer: resize Grow u8", "[common]") {
+TEST_CASE("ScratchBuffer: resize Grow u8", "[common]")
+{
     std::array<u8, 10> payload;
     payload.fill(66);
 
@@ -94,7 +100,8 @@ TEST_CASE("ScratchBuffer: resize Grow u8", "[common]") {
     }
 }
 
-TEST_CASE("ScratchBuffer: resize Grow u64", "[common]") {
+TEST_CASE("ScratchBuffer: resize Grow u64", "[common]")
+{
     std::array<u64, 10> payload;
     payload.fill(6666);
 
@@ -118,7 +125,8 @@ TEST_CASE("ScratchBuffer: resize Grow u64", "[common]") {
     }
 }
 
-TEST_CASE("ScratchBuffer: resize Shrink", "[common]") {
+TEST_CASE("ScratchBuffer: resize Shrink", "[common]")
+{
     std::array<u8, 10> payload;
     payload.fill(66);
 
@@ -142,7 +150,8 @@ TEST_CASE("ScratchBuffer: resize Shrink", "[common]") {
     }
 }
 
-TEST_CASE("ScratchBuffer: Span Size", "[common]") {
+TEST_CASE("ScratchBuffer: Span Size", "[common]")
+{
     std::array<u8, 10> payload;
     payload.fill(66);
 
@@ -169,7 +178,8 @@ TEST_CASE("ScratchBuffer: Span Size", "[common]") {
     }
 }
 
-TEST_CASE("ScratchBuffer: Span Writes", "[common]") {
+TEST_CASE("ScratchBuffer: Span Writes", "[common]")
+{
     std::array<u8, 10> payload;
     payload.fill(66);
 

@@ -1,12 +1,13 @@
 // SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+#include "core/core.h"
+
 #include <array>
 #include <atomic>
 #include <memory>
 #include <utility>
 
-#include "game_settings.h"
 #include "audio_core/audio_core.h"
 #include "common/fs/fs.h"
 #include "common/logging.h"
@@ -14,9 +15,6 @@
 #include "common/settings_enums.h"
 #include "common/string_util.h"
 #include "core/arm/exclusive_monitor.h"
-#include "core/core.h"
-
-#include "launch_timestamp_cache.h"
 #include "core/core_timing.h"
 #include "core/cpu_manager.h"
 #include "core/debugger/debugger.h"
@@ -59,7 +57,9 @@
 #include "core/reporter.h"
 #include "core/tools/freezer.h"
 #include "core/tools/renderdoc.h"
+#include "game_settings.h"
 #include "hid_core/hid_core.h"
+#include "launch_timestamp_cache.h"
 #include "network/network.h"
 #include "video_core/host1x/host1x.h"
 #include "video_core/renderer_base.h"
@@ -68,7 +68,8 @@
 namespace Core {
 
 FileSys::VirtualFile GetGameFileFromPath(const FileSys::VirtualFilesystem& vfs,
-                                         const std::string& path) {
+                                         const std::string& path)
+{
     // To account for split 00+01+etc files.
     std::string dir_name;
     std::string filename;
@@ -108,16 +109,20 @@ FileSys::VirtualFile GetGameFileFromPath(const FileSys::VirtualFilesystem& vfs,
 
 struct System::Impl {
     explicit Impl(System& system)
-        : kernel{system}, fs_controller{system}, hid_core{}, cpu_manager{system},
-          reporter{system}, applet_manager{system}, frontend_applets{system}, profile_manager{} {}
+        : kernel{system}, fs_controller{system}, hid_core{}, cpu_manager{system}, reporter{system},
+          applet_manager{system}, frontend_applets{system}, profile_manager{}
+    {
+    }
 
     u64 program_id;
 
-    void Initialize(System& system) {
+    void Initialize(System& system)
+    {
         device_memory.emplace();
 
         is_multicore = Settings::values.use_multi_core.GetValue();
-        extended_memory_layout = Settings::values.memory_layout_mode.GetValue() != Settings::MemoryLayout::Memory_4Gb;
+        extended_memory_layout =
+            Settings::values.memory_layout_mode.GetValue() != Settings::MemoryLayout::Memory_4Gb;
 
         core_timing.SetMulticore(is_multicore);
         core_timing.Initialize([&system]() { system.RegisterHostThread(); });
@@ -140,7 +145,8 @@ struct System::Impl {
         cpu_manager.SetAsyncGpu(is_async_gpu);
     }
 
-    void ReinitializeIfNecessary(System& system) {
+    void ReinitializeIfNecessary(System& system)
+    {
         const bool must_reinitialize =
             !device_memory.has_value() ||
             is_multicore != Settings::values.use_multi_core.GetValue() ||
@@ -160,7 +166,8 @@ struct System::Impl {
         Initialize(system);
     }
 
-    void RefreshTime(System& system) {
+    void RefreshTime(System& system)
+    {
         if (!system.IsPoweredOn()) {
             return;
         }
@@ -213,7 +220,8 @@ struct System::Impl {
         network_clock->SetCurrentTime(new_time);
     }
 
-    void Run() {
+    void Run()
+    {
         std::unique_lock<std::mutex> lk(suspend_guard);
 
         kernel.SuspendEmulation(false);
@@ -221,7 +229,8 @@ struct System::Impl {
         is_paused.store(false, std::memory_order_relaxed);
     }
 
-    void Pause() {
+    void Pause()
+    {
         std::unique_lock<std::mutex> lk(suspend_guard);
 
         core_timing.SyncPause(true);
@@ -229,37 +238,32 @@ struct System::Impl {
         is_paused.store(true, std::memory_order_relaxed);
     }
 
-    bool IsPaused() const {
-        return is_paused.load(std::memory_order_relaxed);
-    }
+    bool IsPaused() const { return is_paused.load(std::memory_order_relaxed); }
 
-    std::unique_lock<std::mutex> StallApplication() {
+    std::unique_lock<std::mutex> StallApplication()
+    {
         std::unique_lock<std::mutex> lk(suspend_guard);
         kernel.SuspendEmulation(true);
         core_timing.SyncPause(true);
         return lk;
     }
 
-    void UnstallApplication() {
+    void UnstallApplication()
+    {
         if (!IsPaused()) {
             core_timing.SyncPause(false);
             kernel.SuspendEmulation(false);
         }
     }
 
-    void SetNVDECActive(bool is_nvdec_active) {
-        nvdec_active = is_nvdec_active;
-    }
+    void SetNVDECActive(bool is_nvdec_active) { nvdec_active = is_nvdec_active; }
 
-    bool GetNVDECActive() {
-        return nvdec_active;
-    }
+    bool GetNVDECActive() { return nvdec_active; }
 
-    void InitializeDebugger(System& system, u16 port) {
-        debugger.emplace(system, port);
-    }
+    void InitializeDebugger(System& system, u16 port) { debugger.emplace(system, port); }
 
-    void InitializeKernel(System& system) {
+    void InitializeKernel(System& system)
+    {
         LOG_DEBUG(Core, "initialized OK");
 
         // Setting changes may require a full system reinitialization (e.g., disabling multicore).
@@ -269,7 +273,8 @@ struct System::Impl {
         cpu_manager.Initialize();
     }
 
-    SystemResultStatus SetupForApplicationProcess(System& system, Frontend::EmuWindow& emu_window) {
+    SystemResultStatus SetupForApplicationProcess(System& system, Frontend::EmuWindow& emu_window)
+    {
         host1x_core.emplace(system);
         gpu_core = VideoCore::CreateGPU(emu_window, system);
         if (!gpu_core)
@@ -295,7 +300,8 @@ struct System::Impl {
 
     SystemResultStatus Load(System& system, Frontend::EmuWindow& emu_window,
                             const std::string& filepath,
-                            Service::AM::FrontendAppletParameters& params) {
+                            Service::AM::FrontendAppletParameters& params)
+    {
         InitializeKernel(system);
 
         const auto file = GetGameFileFromPath(virtual_filesystem, filepath);
@@ -303,7 +309,9 @@ struct System::Impl {
         // Create the application process
         Loader::ResultStatus load_result{};
         std::vector<u8> control;
-        auto process = Service::AM::CreateApplicationProcess(control, app_loader, load_result, system, file, params.program_id, params.program_index);
+        auto process =
+            Service::AM::CreateApplicationProcess(control, app_loader, load_result, system, file,
+                                                  params.program_id, params.program_index);
         if (load_result != Loader::ResultStatus::Success) {
             LOG_CRITICAL(Core, "Failed to load ROM (Error {})!", load_result);
             ShutdownMainProcess();
@@ -363,9 +371,11 @@ struct System::Impl {
         GetAndResetPerfStats();
         perf_stats->BeginSystemFrame();
 
-        const FileSys::PatchManager pm(params.program_id, system.GetFileSystemController(), system.GetContentProvider());
+        const FileSys::PatchManager pm(params.program_id, system.GetFileSystemController(),
+                                       system.GetContentProvider());
         auto const metadata = pm.GetControlMetadata();
-        std::string title_version = metadata.first != nullptr ? metadata.first->GetVersionString() : "";
+        std::string title_version =
+            metadata.first != nullptr ? metadata.first->GetVersionString() : "";
 
         if (app_loader->ReadProgramId(program_id) != Loader::ResultStatus::Success) {
             LOG_ERROR(Core, "Failed to find program id for ROM");
@@ -382,7 +392,8 @@ struct System::Impl {
         return SystemResultStatus::Success;
     }
 
-    void ShutdownMainProcess() {
+    void ShutdownMainProcess()
+    {
         SetShuttingDown(true);
 
         // Reset per-game flags
@@ -429,19 +440,17 @@ struct System::Impl {
         LOG_DEBUG(Core, "Shutdown OK");
     }
 
-    bool IsShuttingDown() const {
-        return is_shutting_down;
-    }
+    bool IsShuttingDown() const { return is_shutting_down; }
 
-    void SetShuttingDown(bool shutting_down) {
-        is_shutting_down = shutting_down;
-    }
+    void SetShuttingDown(bool shutting_down) { is_shutting_down = shutting_down; }
 
-    Loader::ResultStatus GetGameName(std::string& out) const {
+    Loader::ResultStatus GetGameName(std::string& out) const
+    {
         return app_loader ? app_loader->ReadTitle(out) : Loader::ResultStatus::ErrorNotInitialized;
     }
 
-    PerfStatsResults GetAndResetPerfStats() {
+    PerfStatsResults GetAndResetPerfStats()
+    {
         return perf_stats->GetAndResetStats(core_timing.GetGlobalTimeUs());
     }
 
@@ -479,7 +488,8 @@ struct System::Impl {
     std::optional<Tools::Freezer> memory_freezer;
     std::optional<Tools::RenderdocAPI> renderdoc_api;
 
-    std::array<Core::GPUDirtyMemoryManager, Core::Hardware::NUM_CPU_CORES> gpu_dirty_memory_managers;
+    std::array<Core::GPUDirtyMemoryManager, Core::Hardware::NUM_CPU_CORES>
+        gpu_dirty_memory_managers;
     std::vector<std::vector<u8>> user_channel;
     std::vector<std::vector<u8>> general_channel;
 
@@ -506,7 +516,8 @@ struct System::Impl {
     bool exit_requested : 1 = false;
     bool nvdec_active : 1 = false;
 
-    void EnsureGeneralChannelInitialized(System& system) {
+    void EnsureGeneralChannelInitialized(System& system)
+    {
         if (!general_channel_event) {
             general_channel_context.emplace(system, "GeneralChannel");
             general_channel_event.emplace(*general_channel_context);
@@ -514,394 +525,490 @@ struct System::Impl {
     }
 };
 
-System::System() : impl{std::make_unique<Impl>(*this)} {}
+System::System() : impl{std::make_unique<Impl>(*this)}
+{
+}
 
 System::~System() = default;
 
-CpuManager& System::GetCpuManager() {
+CpuManager& System::GetCpuManager()
+{
     return impl->cpu_manager;
 }
 
-const CpuManager& System::GetCpuManager() const {
+const CpuManager& System::GetCpuManager() const
+{
     return impl->cpu_manager;
 }
 
-void System::Initialize() {
+void System::Initialize()
+{
     impl->Initialize(*this);
 }
 
-void System::Run() {
+void System::Run()
+{
     impl->Run();
 }
 
-void System::Pause() {
+void System::Pause()
+{
     impl->Pause();
 }
 
-bool System::IsPaused() const {
+bool System::IsPaused() const
+{
     return impl->IsPaused();
 }
 
-void System::ShutdownMainProcess() {
+void System::ShutdownMainProcess()
+{
     impl->ShutdownMainProcess();
 }
 
-bool System::IsShuttingDown() const {
+bool System::IsShuttingDown() const
+{
     return impl->IsShuttingDown();
 }
 
-void System::SetShuttingDown(bool shutting_down) {
+void System::SetShuttingDown(bool shutting_down)
+{
     impl->SetShuttingDown(shutting_down);
 }
 
-void System::DetachDebugger() {
+void System::DetachDebugger()
+{
     if (impl->debugger) {
         impl->debugger->NotifyShutdown();
     }
 }
 
-std::unique_lock<std::mutex> System::StallApplication() {
+std::unique_lock<std::mutex> System::StallApplication()
+{
     return impl->StallApplication();
 }
 
-void System::UnstallApplication() {
+void System::UnstallApplication()
+{
     impl->UnstallApplication();
 }
 
-void System::SetNVDECActive(bool is_nvdec_active) {
+void System::SetNVDECActive(bool is_nvdec_active)
+{
     impl->SetNVDECActive(is_nvdec_active);
 }
 
-bool System::GetNVDECActive() {
+bool System::GetNVDECActive()
+{
     return impl->GetNVDECActive();
 }
 
-void System::InitializeDebugger() {
+void System::InitializeDebugger()
+{
     impl->InitializeDebugger(*this, Settings::values.gdbstub_port.GetValue());
 }
 
 SystemResultStatus System::Load(Frontend::EmuWindow& emu_window, const std::string& filepath,
-                                Service::AM::FrontendAppletParameters& params) {
+                                Service::AM::FrontendAppletParameters& params)
+{
     return impl->Load(*this, emu_window, filepath, params);
 }
 
-bool System::IsPoweredOn() const {
+bool System::IsPoweredOn() const
+{
     return impl->is_powered_on.load(std::memory_order::relaxed);
 }
 
-void System::PrepareReschedule(const u32 core_index) {
+void System::PrepareReschedule(const u32 core_index)
+{
     impl->kernel.PrepareReschedule(core_index);
 }
 
-size_t System::GetCurrentHostThreadID() const {
+size_t System::GetCurrentHostThreadID() const
+{
     return impl->kernel.GetCurrentHostThreadID();
 }
 
-std::span<GPUDirtyMemoryManager> System::GetGPUDirtyMemoryManager() {
+std::span<GPUDirtyMemoryManager> System::GetGPUDirtyMemoryManager()
+{
     return impl->gpu_dirty_memory_managers;
 }
 
-void System::GatherGPUDirtyMemory(std::function<void(PAddr, size_t)>& callback) {
+void System::GatherGPUDirtyMemory(std::function<void(PAddr, size_t)>& callback)
+{
     for (auto& manager : impl->gpu_dirty_memory_managers) {
         manager.Gather(callback);
     }
 }
 
-PerfStatsResults System::GetAndResetPerfStats() {
+PerfStatsResults System::GetAndResetPerfStats()
+{
     return impl->GetAndResetPerfStats();
 }
 
-Kernel::PhysicalCore& System::CurrentPhysicalCore() {
+Kernel::PhysicalCore& System::CurrentPhysicalCore()
+{
     return impl->kernel.CurrentPhysicalCore();
 }
 
-const Kernel::PhysicalCore& System::CurrentPhysicalCore() const {
+const Kernel::PhysicalCore& System::CurrentPhysicalCore() const
+{
     return impl->kernel.CurrentPhysicalCore();
 }
 
 /// Gets the global scheduler
-Kernel::GlobalSchedulerContext& System::GlobalSchedulerContext() {
+Kernel::GlobalSchedulerContext& System::GlobalSchedulerContext()
+{
     return impl->kernel.GlobalSchedulerContext();
 }
 
 /// Gets the global scheduler
-const Kernel::GlobalSchedulerContext& System::GlobalSchedulerContext() const {
+const Kernel::GlobalSchedulerContext& System::GlobalSchedulerContext() const
+{
     return impl->kernel.GlobalSchedulerContext();
 }
 
-Kernel::KProcess* System::ApplicationProcess() {
+Kernel::KProcess* System::ApplicationProcess()
+{
     return impl->kernel.ApplicationProcess();
 }
 
-Core::DeviceMemory& System::DeviceMemory() {
+Core::DeviceMemory& System::DeviceMemory()
+{
     return *impl->device_memory;
 }
 
-const Core::DeviceMemory& System::DeviceMemory() const {
+const Core::DeviceMemory& System::DeviceMemory() const
+{
     return *impl->device_memory;
 }
 
-const Kernel::KProcess* System::ApplicationProcess() const {
+const Kernel::KProcess* System::ApplicationProcess() const
+{
     return impl->kernel.ApplicationProcess();
 }
 
-Memory::Memory& System::ApplicationMemory() {
+Memory::Memory& System::ApplicationMemory()
+{
     return impl->kernel.ApplicationProcess()->GetMemory();
 }
 
-const Core::Memory::Memory& System::ApplicationMemory() const {
+const Core::Memory::Memory& System::ApplicationMemory() const
+{
     return impl->kernel.ApplicationProcess()->GetMemory();
 }
 
-Tegra::GPU& System::GPU() {
+Tegra::GPU& System::GPU()
+{
     return *impl->gpu_core;
 }
 
-const Tegra::GPU& System::GPU() const {
+const Tegra::GPU& System::GPU() const
+{
     return *impl->gpu_core;
 }
 
-Tegra::Host1x::Host1x& System::Host1x() {
+Tegra::Host1x::Host1x& System::Host1x()
+{
     return *impl->host1x_core;
 }
 
-const Tegra::Host1x::Host1x& System::Host1x() const {
+const Tegra::Host1x::Host1x& System::Host1x() const
+{
     return *impl->host1x_core;
 }
 
-VideoCore::RendererBase& System::Renderer() {
+VideoCore::RendererBase& System::Renderer()
+{
     return impl->gpu_core->Renderer();
 }
 
-const VideoCore::RendererBase& System::Renderer() const {
+const VideoCore::RendererBase& System::Renderer() const
+{
     return impl->gpu_core->Renderer();
 }
 
-Kernel::KernelCore& System::Kernel() {
+Kernel::KernelCore& System::Kernel()
+{
     return impl->kernel;
 }
 
-const Kernel::KernelCore& System::Kernel() const {
+const Kernel::KernelCore& System::Kernel() const
+{
     return impl->kernel;
 }
 
-HID::HIDCore& System::HIDCore() {
+HID::HIDCore& System::HIDCore()
+{
     return impl->hid_core;
 }
 
-const HID::HIDCore& System::HIDCore() const {
+const HID::HIDCore& System::HIDCore() const
+{
     return impl->hid_core;
 }
 
-AudioCore::AudioCore& System::AudioCore() {
+AudioCore::AudioCore& System::AudioCore()
+{
     return *impl->audio_core;
 }
 
-const AudioCore::AudioCore& System::AudioCore() const {
+const AudioCore::AudioCore& System::AudioCore() const
+{
     return *impl->audio_core;
 }
 
-Timing::CoreTiming& System::CoreTiming() {
+Timing::CoreTiming& System::CoreTiming()
+{
     return impl->core_timing;
 }
 
-const Timing::CoreTiming& System::CoreTiming() const {
+const Timing::CoreTiming& System::CoreTiming() const
+{
     return impl->core_timing;
 }
 
-Core::PerfStats& System::GetPerfStats() {
+Core::PerfStats& System::GetPerfStats()
+{
     return *impl->perf_stats;
 }
 
-const Core::PerfStats& System::GetPerfStats() const {
+const Core::PerfStats& System::GetPerfStats() const
+{
     return *impl->perf_stats;
 }
 
-Core::SpeedLimiter& System::SpeedLimiter() {
+Core::SpeedLimiter& System::SpeedLimiter()
+{
     return impl->speed_limiter;
 }
 
-const Core::SpeedLimiter& System::SpeedLimiter() const {
+const Core::SpeedLimiter& System::SpeedLimiter() const
+{
     return impl->speed_limiter;
 }
 
-u64 System::GetApplicationProcessProgramID() const {
+u64 System::GetApplicationProcessProgramID() const
+{
     return impl->kernel.ApplicationProcess()->GetProgramId();
 }
 
-Loader::ResultStatus System::GetGameName(std::string& out) const {
+Loader::ResultStatus System::GetGameName(std::string& out) const
+{
     return impl->GetGameName(out);
 }
 
-Loader::AppLoader& System::GetAppLoader() {
+Loader::AppLoader& System::GetAppLoader()
+{
     return *impl->app_loader;
 }
 
-const Loader::AppLoader& System::GetAppLoader() const {
+const Loader::AppLoader& System::GetAppLoader() const
+{
     return *impl->app_loader;
 }
 
-void System::SetFilesystem(FileSys::VirtualFilesystem vfs) {
+void System::SetFilesystem(FileSys::VirtualFilesystem vfs)
+{
     impl->virtual_filesystem = std::move(vfs);
 }
 
-FileSys::VirtualFilesystem System::GetFilesystem() const {
+FileSys::VirtualFilesystem System::GetFilesystem() const
+{
     return impl->virtual_filesystem;
 }
 
 void System::RegisterCheatList(const std::vector<Memory::CheatEntry>& list,
                                const std::array<u8, 32>& build_id, u64 main_region_begin,
-                               u64 main_region_size) {
+                               u64 main_region_size)
+{
     impl->cheat_engine.emplace(*this, list, build_id);
     impl->cheat_engine->SetMainMemoryParameters(main_region_begin, main_region_size);
 }
 
-void System::SetFrontendAppletSet(Service::AM::Frontend::FrontendAppletSet&& set) {
+void System::SetFrontendAppletSet(Service::AM::Frontend::FrontendAppletSet&& set)
+{
     impl->frontend_applets.SetFrontendAppletSet(std::move(set));
 }
 
-Service::AM::Frontend::FrontendAppletHolder& System::GetFrontendAppletHolder() {
+Service::AM::Frontend::FrontendAppletHolder& System::GetFrontendAppletHolder()
+{
     return impl->frontend_applets;
 }
 
-const Service::AM::Frontend::FrontendAppletHolder& System::GetFrontendAppletHolder() const {
+const Service::AM::Frontend::FrontendAppletHolder& System::GetFrontendAppletHolder() const
+{
     return impl->frontend_applets;
 }
 
-Service::AM::AppletManager& System::GetAppletManager() {
+Service::AM::AppletManager& System::GetAppletManager()
+{
     return impl->applet_manager;
 }
 
-void System::SetContentProvider(std::unique_ptr<FileSys::ContentProviderUnion> provider) {
+void System::SetContentProvider(std::unique_ptr<FileSys::ContentProviderUnion> provider)
+{
     impl->content_provider = std::move(provider);
 }
 
-FileSys::ContentProvider& System::GetContentProvider() {
+FileSys::ContentProvider& System::GetContentProvider()
+{
     return *impl->content_provider;
 }
 
-const FileSys::ContentProvider& System::GetContentProvider() const {
+const FileSys::ContentProvider& System::GetContentProvider() const
+{
     return *impl->content_provider;
 }
 
-FileSys::ContentProviderUnion& System::GetContentProviderUnion() {
+FileSys::ContentProviderUnion& System::GetContentProviderUnion()
+{
     return *impl->content_provider;
 }
 
-const FileSys::ContentProviderUnion& System::GetContentProviderUnion() const {
+const FileSys::ContentProviderUnion& System::GetContentProviderUnion() const
+{
     return *impl->content_provider;
 }
 
-Service::FileSystem::FileSystemController& System::GetFileSystemController() {
+Service::FileSystem::FileSystemController& System::GetFileSystemController()
+{
     return impl->fs_controller;
 }
 
-const Service::FileSystem::FileSystemController& System::GetFileSystemController() const {
+const Service::FileSystem::FileSystemController& System::GetFileSystemController() const
+{
     return impl->fs_controller;
 }
 
 void System::RegisterContentProvider(FileSys::ContentProviderUnionSlot slot,
-                                     FileSys::ContentProvider* provider) {
+                                     FileSys::ContentProvider* provider)
+{
     impl->content_provider->SetSlot(slot, provider);
 }
 
-const Reporter& System::GetReporter() const {
+const Reporter& System::GetReporter() const
+{
     return impl->reporter;
 }
 
-Service::Glue::ARPManager& System::GetARPManager() {
+Service::Glue::ARPManager& System::GetARPManager()
+{
     return impl->arp_manager;
 }
 
-const Service::Glue::ARPManager& System::GetARPManager() const {
+const Service::Glue::ARPManager& System::GetARPManager() const
+{
     return impl->arp_manager;
 }
 
-Service::APM::Controller& System::GetAPMController() {
+Service::APM::Controller& System::GetAPMController()
+{
     return impl->apm_controller;
 }
 
-const Service::APM::Controller& System::GetAPMController() const {
+const Service::APM::Controller& System::GetAPMController() const
+{
     return impl->apm_controller;
 }
 
-Service::Account::ProfileManager& System::GetProfileManager() {
+Service::Account::ProfileManager& System::GetProfileManager()
+{
     return impl->profile_manager;
 }
 
-const Service::Account::ProfileManager& System::GetProfileManager() const {
+const Service::Account::ProfileManager& System::GetProfileManager() const
+{
     return impl->profile_manager;
 }
 
-void System::SetExitLocked(bool locked) {
+void System::SetExitLocked(bool locked)
+{
     impl->exit_locked = locked;
 }
 
-bool System::GetExitLocked() const {
+bool System::GetExitLocked() const
+{
     return impl->exit_locked;
 }
 
-void System::SetExitRequested(bool requested) {
+void System::SetExitRequested(bool requested)
+{
     impl->exit_requested = requested;
 }
 
-bool System::GetExitRequested() const {
+bool System::GetExitRequested() const
+{
     return impl->exit_requested;
 }
 
-void System::SetApplicationProcessBuildID(const CurrentBuildProcessID& id) {
+void System::SetApplicationProcessBuildID(const CurrentBuildProcessID& id)
+{
     impl->build_id = id;
 }
 
-const System::CurrentBuildProcessID& System::GetApplicationProcessBuildID() const {
+const System::CurrentBuildProcessID& System::GetApplicationProcessBuildID() const
+{
     return impl->build_id;
 }
 
-Service::SM::ServiceManager& System::ServiceManager() {
+Service::SM::ServiceManager& System::ServiceManager()
+{
     return *impl->service_manager;
 }
 
-const Service::SM::ServiceManager& System::ServiceManager() const {
+const Service::SM::ServiceManager& System::ServiceManager() const
+{
     return *impl->service_manager;
 }
 
-void System::RegisterCoreThread(std::size_t id) {
+void System::RegisterCoreThread(std::size_t id)
+{
     impl->kernel.RegisterCoreThread(id);
 }
 
-void System::RegisterHostThread() {
+void System::RegisterHostThread()
+{
     impl->kernel.RegisterHostThread();
 }
 
-bool System::IsMulticore() const {
+bool System::IsMulticore() const
+{
     return impl->is_multicore;
 }
 
-bool System::DebuggerEnabled() const {
+bool System::DebuggerEnabled() const
+{
     return Settings::values.use_gdbstub.GetValue();
 }
 
-Core::Debugger& System::GetDebugger() {
+Core::Debugger& System::GetDebugger()
+{
     return *impl->debugger;
 }
 
-const Core::Debugger& System::GetDebugger() const {
+const Core::Debugger& System::GetDebugger() const
+{
     return *impl->debugger;
 }
 
-Tools::RenderdocAPI& System::GetRenderdocAPI() {
+Tools::RenderdocAPI& System::GetRenderdocAPI()
+{
     return *impl->renderdoc_api;
 }
 
-void System::RunServer(std::unique_ptr<Service::ServerManager>&& server_manager) {
+void System::RunServer(std::unique_ptr<Service::ServerManager>&& server_manager)
+{
     return impl->kernel.RunServer(std::move(server_manager));
 }
 
-void System::RegisterExecuteProgramCallback(ExecuteProgramCallback&& callback) {
+void System::RegisterExecuteProgramCallback(ExecuteProgramCallback&& callback)
+{
     impl->execute_program_callback = std::move(callback);
 }
 
-void System::ExecuteProgram(std::size_t program_index) {
+void System::ExecuteProgram(std::size_t program_index)
+{
     if (impl->execute_program_callback) {
         impl->execute_program_callback(program_index);
     } else {
@@ -911,15 +1018,18 @@ void System::ExecuteProgram(std::size_t program_index) {
 
 /// @brief Gets a reference to the user channel stack.
 /// It is used to transfer data between programs.
-std::vector<std::vector<u8>>& System::GetUserChannel() {
+std::vector<std::vector<u8>>& System::GetUserChannel()
+{
     return impl->user_channel;
 }
 
-std::vector<std::vector<u8>>& System::GetGeneralChannel() {
+std::vector<std::vector<u8>>& System::GetGeneralChannel()
+{
     return impl->general_channel;
 }
 
-void System::PushGeneralChannelData(std::vector<u8>&& data) {
+void System::PushGeneralChannelData(std::vector<u8>&& data)
+{
     std::scoped_lock lk{impl->general_channel_mutex};
     impl->EnsureGeneralChannelInitialized(*this);
     const bool was_empty = impl->general_channel.empty();
@@ -929,7 +1039,8 @@ void System::PushGeneralChannelData(std::vector<u8>&& data) {
     }
 }
 
-bool System::TryPopGeneralChannel(std::vector<u8>& out_data) {
+bool System::TryPopGeneralChannel(std::vector<u8>& out_data)
+{
     std::scoped_lock lk{impl->general_channel_mutex};
     if (!impl->general_channel_event || impl->general_channel.empty()) {
         return false;
@@ -942,17 +1053,20 @@ bool System::TryPopGeneralChannel(std::vector<u8>& out_data) {
     return true;
 }
 
-Service::Event& System::GetGeneralChannelEvent() {
+Service::Event& System::GetGeneralChannelEvent()
+{
     std::scoped_lock lk{impl->general_channel_mutex};
     impl->EnsureGeneralChannelInitialized(*this);
     return *impl->general_channel_event;
 }
 
-void System::RegisterExitCallback(ExitCallback&& callback) {
+void System::RegisterExitCallback(ExitCallback&& callback)
+{
     impl->exit_callback = std::move(callback);
 }
 
-void System::Exit() {
+void System::Exit()
+{
     if (impl->exit_callback) {
         impl->exit_callback();
     } else {
@@ -960,7 +1074,8 @@ void System::Exit() {
     }
 }
 
-void System::ApplySettings() {
+void System::ApplySettings()
+{
     impl->RefreshTime(*this);
 
     if (IsPoweredOn()) {

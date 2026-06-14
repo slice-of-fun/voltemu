@@ -7,18 +7,21 @@
 // SPDX-FileCopyrightText: Copyright 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include "common/alignment.h"
 #include "core/file_sys/fssystem/fssystem_integrity_verification_storage.h"
+
+#include "common/alignment.h"
 
 namespace FileSys {
 
-constexpr inline u32 ILog2(u32 val) {
+constexpr inline u32 ILog2(u32 val)
+{
     ASSERT(val > 0);
     return static_cast<u32>((sizeof(u32) * 8) - 1 - std::countl_zero<u32>(val));
 }
 
 void IntegrityVerificationStorage::Initialize(VirtualFile hs, VirtualFile ds, s64 verif_block_size,
-                                              s64 upper_layer_verif_block_size, bool is_real_data) {
+                                              s64 upper_layer_verif_block_size, bool is_real_data)
+{
     // Validate preconditions.
     ASSERT(verif_block_size >= HashSize);
 
@@ -48,12 +51,14 @@ void IntegrityVerificationStorage::Initialize(VirtualFile hs, VirtualFile ds, s6
     m_is_real_data = is_real_data;
 }
 
-void IntegrityVerificationStorage::Finalize() {
+void IntegrityVerificationStorage::Finalize()
+{
     m_hash_storage = VirtualFile();
     m_data_storage = VirtualFile();
 }
 
-size_t IntegrityVerificationStorage::Read(u8* buffer, size_t size, size_t offset) const {
+size_t IntegrityVerificationStorage::Read(u8* buffer, size_t size, size_t offset) const
+{
     // Succeed if zero size.
     if (size == 0) {
         return size;
@@ -90,7 +95,8 @@ size_t IntegrityVerificationStorage::Read(u8* buffer, size_t size, size_t offset
     return m_data_storage->Read(buffer, read_size, offset);
 }
 
-size_t IntegrityVerificationStorage::GetSize() const {
+size_t IntegrityVerificationStorage::GetSize() const
+{
     return m_data_storage->GetSize();
 }
 

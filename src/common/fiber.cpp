@@ -4,14 +4,14 @@
 // SPDX-FileCopyrightText: Copyright 2020 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include <thread>
-#include <mutex>
-
-#include "common/assert.h"
 #include "common/fiber.h"
-#include "common/virtual_buffer.h"
 
 #include <boost/context/detail/fcontext.hpp>
+#include <mutex>
+#include <thread>
+
+#include "common/assert.h"
+#include "common/virtual_buffer.h"
 
 namespace Common {
 
@@ -44,31 +44,38 @@ struct Fiber::FiberImpl {
     bool released = false;
 };
 
-void Fiber::SetRewindPoint(std::function<void()>&& rewind_func) {
+void Fiber::SetRewindPoint(std::function<void()>&& rewind_func)
+{
     impl->rewind_point = std::move(rewind_func);
 }
 
-Fiber::Fiber(std::function<void()>&& entry_point_func) : impl{std::make_unique<FiberImpl>()} {
+Fiber::Fiber(std::function<void()>&& entry_point_func) : impl{std::make_unique<FiberImpl>()}
+{
     impl->entry_point = std::move(entry_point_func);
     impl->stack_limit = impl->stack.data();
     impl->rewind_stack_limit = impl->rewind_stack.data();
     u8* stack_base = impl->stack_limit + DEFAULT_STACK_SIZE;
-    impl->context = boost::context::detail::make_fcontext(stack_base, impl->stack.size(), [](boost::context::detail::transfer_t transfer) -> void {
-        auto* fiber = static_cast<Fiber*>(transfer.data);
-        ASSERT(fiber && fiber->impl && fiber->impl->previous_fiber && fiber->impl->previous_fiber->impl);
-        ASSERT(fiber->impl->canary_1 == CANARY_VALUE);
-        ASSERT(fiber->impl->canary_2 == CANARY_VALUE);
-        fiber->impl->previous_fiber->impl->context = transfer.fctx;
-        fiber->impl->previous_fiber->impl->guard.unlock();
-        fiber->impl->previous_fiber.reset();
-        fiber->impl->entry_point();
-        UNREACHABLE();
-    });
+    impl->context = boost::context::detail::make_fcontext(
+        stack_base, impl->stack.size(), [](boost::context::detail::transfer_t transfer) -> void {
+            auto* fiber = static_cast<Fiber*>(transfer.data);
+            ASSERT(fiber && fiber->impl && fiber->impl->previous_fiber &&
+                   fiber->impl->previous_fiber->impl);
+            ASSERT(fiber->impl->canary_1 == CANARY_VALUE);
+            ASSERT(fiber->impl->canary_2 == CANARY_VALUE);
+            fiber->impl->previous_fiber->impl->context = transfer.fctx;
+            fiber->impl->previous_fiber->impl->guard.unlock();
+            fiber->impl->previous_fiber.reset();
+            fiber->impl->entry_point();
+            UNREACHABLE();
+        });
 }
 
-Fiber::Fiber() : impl{std::make_unique<FiberImpl>()} {}
+Fiber::Fiber() : impl{std::make_unique<FiberImpl>()}
+{
+}
 
-Fiber::~Fiber() {
+Fiber::~Fiber()
+{
     if (!impl->released) {
         // Make sure the Fiber is not being used
         const bool locked = impl->guard.try_lock();
@@ -79,7 +86,8 @@ Fiber::~Fiber() {
     }
 }
 
-void Fiber::Exit() {
+void Fiber::Exit()
+{
     ASSERT_MSG(impl->is_thread_fiber, "Exiting non main thread fiber");
     if (impl->is_thread_fiber) {
         impl->guard.unlock();
@@ -87,7 +95,8 @@ void Fiber::Exit() {
     }
 }
 
-void Fiber::YieldTo(std::weak_ptr<Fiber> weak_from, Fiber& to) {
+void Fiber::YieldTo(std::weak_ptr<Fiber> weak_from, Fiber& to)
+{
     to.impl->guard.lock();
     to.impl->previous_fiber = weak_from.lock();
 
@@ -104,7 +113,8 @@ void Fiber::YieldTo(std::weak_ptr<Fiber> weak_from, Fiber& to) {
     }
 }
 
-std::shared_ptr<Fiber> Fiber::ThreadToFiber() {
+std::shared_ptr<Fiber> Fiber::ThreadToFiber()
+{
     std::shared_ptr<Fiber> fiber = std::shared_ptr<Fiber>{new Fiber()};
     fiber->impl->guard.lock();
     fiber->impl->is_thread_fiber = true;

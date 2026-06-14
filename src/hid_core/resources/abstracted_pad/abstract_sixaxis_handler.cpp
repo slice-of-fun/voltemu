@@ -4,38 +4,46 @@
 // SPDX-FileCopyrightText: Copyright 2024 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+#include "hid_core/resources/abstracted_pad/abstract_sixaxis_handler.h"
+
 #include "hid_core/hid_result.h"
 #include "hid_core/hid_util.h"
 #include "hid_core/resources/abstracted_pad/abstract_pad_holder.h"
 #include "hid_core/resources/abstracted_pad/abstract_properties_handler.h"
-#include "hid_core/resources/abstracted_pad/abstract_sixaxis_handler.h"
 #include "hid_core/resources/applet_resource.h"
 #include "hid_core/resources/npad/npad_types.h"
 #include "hid_core/resources/shared_memory_format.h"
 
 namespace Service::HID {
 
-NpadAbstractSixAxisHandler::NpadAbstractSixAxisHandler() {}
+NpadAbstractSixAxisHandler::NpadAbstractSixAxisHandler()
+{
+}
 
 NpadAbstractSixAxisHandler::~NpadAbstractSixAxisHandler() = default;
 
-void NpadAbstractSixAxisHandler::SetAbstractPadHolder(NpadAbstractedPadHolder* holder) {
+void NpadAbstractSixAxisHandler::SetAbstractPadHolder(NpadAbstractedPadHolder* holder)
+{
     abstract_pad_holder = holder;
 }
 
-void NpadAbstractSixAxisHandler::SetAppletResource(AppletResourceHolder* applet_resource) {
+void NpadAbstractSixAxisHandler::SetAppletResource(AppletResourceHolder* applet_resource)
+{
     applet_resource_holder = applet_resource;
 }
 
-void NpadAbstractSixAxisHandler::SetPropertiesHandler(NpadAbstractPropertiesHandler* handler) {
+void NpadAbstractSixAxisHandler::SetPropertiesHandler(NpadAbstractPropertiesHandler* handler)
+{
     properties_handler = handler;
 }
 
-void NpadAbstractSixAxisHandler::SetSixaxisResource(SixAxisResource* resource) {
+void NpadAbstractSixAxisHandler::SetSixaxisResource(SixAxisResource* resource)
+{
     six_axis_resource = resource;
 }
 
-Result NpadAbstractSixAxisHandler::IncrementRefCounter() {
+Result NpadAbstractSixAxisHandler::IncrementRefCounter()
+{
     if (ref_counter == (std::numeric_limits<s32>::max)() - 1) {
         return ResultNpadHandlerOverflow;
     }
@@ -43,7 +51,8 @@ Result NpadAbstractSixAxisHandler::IncrementRefCounter() {
     return ResultSuccess;
 }
 
-Result NpadAbstractSixAxisHandler::DecrementRefCounter() {
+Result NpadAbstractSixAxisHandler::DecrementRefCounter()
+{
     if (ref_counter == 0) {
         return ResultNpadHandlerNotInitialized;
     }
@@ -51,12 +60,14 @@ Result NpadAbstractSixAxisHandler::DecrementRefCounter() {
     return ResultSuccess;
 }
 
-u64 NpadAbstractSixAxisHandler::IsFirmwareUpdateAvailable() {
+u64 NpadAbstractSixAxisHandler::IsFirmwareUpdateAvailable()
+{
     // TODO
     return false;
 }
 
-Result NpadAbstractSixAxisHandler::UpdateSixAxisState() {
+Result NpadAbstractSixAxisHandler::UpdateSixAxisState()
+{
     Core::HID::NpadIdType npad_id = properties_handler->GetNpadId();
     for (std::size_t i = 0; i < AruidIndexMax; i++) {
         auto* data = applet_resource_holder->applet_resource->GetAruidDataByIndex(i);
@@ -70,7 +81,8 @@ Result NpadAbstractSixAxisHandler::UpdateSixAxisState() {
     return ResultSuccess;
 }
 
-Result NpadAbstractSixAxisHandler::UpdateSixAxisState(u64 aruid) {
+Result NpadAbstractSixAxisHandler::UpdateSixAxisState(u64 aruid)
+{
     Core::HID::NpadIdType npad_id = properties_handler->GetNpadId();
     auto* data = applet_resource_holder->applet_resource->GetAruidData(aruid);
     if (data == nullptr) {
@@ -82,7 +94,8 @@ Result NpadAbstractSixAxisHandler::UpdateSixAxisState(u64 aruid) {
     return ResultSuccess;
 }
 
-Result NpadAbstractSixAxisHandler::UpdateSixAxisState2(u64 aruid) {
+Result NpadAbstractSixAxisHandler::UpdateSixAxisState2(u64 aruid)
+{
     const auto npad_index = NpadIdTypeToIndex(properties_handler->GetNpadId());
     AruidData* aruid_data = applet_resource_holder->applet_resource->GetAruidData(aruid);
     if (aruid_data == nullptr) {
@@ -95,7 +108,8 @@ Result NpadAbstractSixAxisHandler::UpdateSixAxisState2(u64 aruid) {
 }
 
 void NpadAbstractSixAxisHandler::UpdateSixaxisInternalState(NpadSharedMemoryEntry& npad_entry,
-                                                            u64 aruid, bool is_sensor_enabled) {
+                                                            u64 aruid, bool is_sensor_enabled)
+{
     const Core::HID::NpadStyleTag style_tag{properties_handler->GetStyleSet(aruid)};
 
     if (!style_tag.palma) {
@@ -120,37 +134,43 @@ void NpadAbstractSixAxisHandler::UpdateSixaxisInternalState(NpadSharedMemoryEntr
 
 void NpadAbstractSixAxisHandler::UpdateSixaxisFullkeyLifo(Core::HID::NpadStyleTag style_tag,
                                                           NpadSixAxisSensorLifo& sensor_lifo,
-                                                          bool is_sensor_enabled) {
+                                                          bool is_sensor_enabled)
+{
     // TODO
 }
 
 void NpadAbstractSixAxisHandler::UpdateSixAxisPalmaLifo(Core::HID::NpadStyleTag style_tag,
                                                         NpadSixAxisSensorLifo& sensor_lifo,
-                                                        bool is_sensor_enabled) {
+                                                        bool is_sensor_enabled)
+{
     // TODO
 }
 
 void NpadAbstractSixAxisHandler::UpdateSixaxisHandheldLifo(Core::HID::NpadStyleTag style_tag,
                                                            NpadSixAxisSensorLifo& sensor_lifo,
-                                                           bool is_sensor_enabled) {
+                                                           bool is_sensor_enabled)
+{
     // TODO
 }
 
 void NpadAbstractSixAxisHandler::UpdateSixaxisDualLifo(Core::HID::NpadStyleTag style_tag,
                                                        NpadSixAxisSensorLifo& sensor_lifo,
-                                                       bool is_sensor_enabled) {
+                                                       bool is_sensor_enabled)
+{
     // TODO
 }
 
 void NpadAbstractSixAxisHandler::UpdateSixaxisLeftLifo(Core::HID::NpadStyleTag style_tag,
                                                        NpadSixAxisSensorLifo& sensor_lifo,
-                                                       bool is_sensor_enabled) {
+                                                       bool is_sensor_enabled)
+{
     // TODO
 }
 
 void NpadAbstractSixAxisHandler::UpdateSixaxisRightLifo(Core::HID::NpadStyleTag style_tag,
                                                         NpadSixAxisSensorLifo& sensor_lifo,
-                                                        bool is_sensor_enabled) {
+                                                        bool is_sensor_enabled)
+{
     // TODO
 }
 

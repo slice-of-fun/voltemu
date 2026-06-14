@@ -1,13 +1,15 @@
 // SPDX-FileCopyrightText: Copyright 2020 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "yuzu/configuration/configure_cpu_debug.h"
+
 #include "common/settings.h"
 #include "core/core.h"
 #include "ui_configure_cpu_debug.h"
-#include "yuzu/configuration/configure_cpu_debug.h"
 
 ConfigureCpuDebug::ConfigureCpuDebug(const Core::System& system_, QWidget* parent)
-    : QWidget(parent), ui{std::make_unique<Ui::ConfigureCpuDebug>()}, system{system_} {
+    : QWidget(parent), ui{std::make_unique<Ui::ConfigureCpuDebug>()}, system{system_}
+{
     ui->setupUi(this);
 
     SetConfiguration();
@@ -15,7 +17,8 @@ ConfigureCpuDebug::ConfigureCpuDebug(const Core::System& system_, QWidget* paren
 
 ConfigureCpuDebug::~ConfigureCpuDebug() = default;
 
-void ConfigureCpuDebug::SetConfiguration() {
+void ConfigureCpuDebug::SetConfiguration()
+{
     const bool runtime_lock = !system.IsPoweredOn();
 
     ui->cpuopt_page_tables->setEnabled(runtime_lock);
@@ -50,7 +53,8 @@ void ConfigureCpuDebug::SetConfiguration() {
         Settings::values.cpuopt_ignore_memory_aborts.GetValue());
 }
 
-void ConfigureCpuDebug::ApplyConfiguration() {
+void ConfigureCpuDebug::ApplyConfiguration()
+{
     Settings::values.cpuopt_page_tables = ui->cpuopt_page_tables->isChecked();
     Settings::values.cpuopt_block_linking = ui->cpuopt_block_linking->isChecked();
     Settings::values.cpuopt_return_stack_buffer = ui->cpuopt_return_stack_buffer->isChecked();
@@ -65,7 +69,8 @@ void ConfigureCpuDebug::ApplyConfiguration() {
     Settings::values.cpuopt_ignore_memory_aborts = ui->cpuopt_ignore_memory_aborts->isChecked();
 }
 
-void ConfigureCpuDebug::changeEvent(QEvent* event) {
+void ConfigureCpuDebug::changeEvent(QEvent* event)
+{
     if (event->type() == QEvent::LanguageChange) {
         RetranslateUI();
     }
@@ -73,6 +78,7 @@ void ConfigureCpuDebug::changeEvent(QEvent* event) {
     QWidget::changeEvent(event);
 }
 
-void ConfigureCpuDebug::RetranslateUI() {
+void ConfigureCpuDebug::RetranslateUI()
+{
     ui->retranslateUi(this);
 }

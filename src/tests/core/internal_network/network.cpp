@@ -1,12 +1,14 @@
 // SPDX-FileCopyrightText: Copyright 2021 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/internal_network/network.h"
+
 #include <catch2/catch_test_macros.hpp>
 
-#include "core/internal_network/network.h"
 #include "core/internal_network/sockets.h"
 
-TEST_CASE("Network::Errors", "[core]") {
+TEST_CASE("Network::Errors", "[core]")
+{
     Network::NetworkInstance network_instance; // initialize network
 
     Network::Socket socks[2];

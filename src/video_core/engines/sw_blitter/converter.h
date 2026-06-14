@@ -7,7 +7,6 @@
 #include <span>
 
 #include "common/common_types.h"
-
 #include "video_core/gpu.h"
 
 namespace Tegra::Engines::Blitter {

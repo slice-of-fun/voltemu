@@ -4,15 +4,17 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#include <cstring>
+#include "input_common/drivers/virtual_amiibo.h"
+
 #include <fmt/ranges.h>
+
+#include <cstring>
 
 #include "common/fs/file.h"
 #include "common/fs/fs.h"
 #include "common/fs/path_util.h"
 #include "common/logging.h"
 #include "common/settings.h"
-#include "input_common/drivers/virtual_amiibo.h"
 
 namespace InputCommon {
 constexpr PadIdentifier identifier = {
@@ -21,13 +23,16 @@ constexpr PadIdentifier identifier = {
     .pad = 0,
 };
 
-VirtualAmiibo::VirtualAmiibo(std::string input_engine_) : InputEngine(std::move(input_engine_)) {}
+VirtualAmiibo::VirtualAmiibo(std::string input_engine_) : InputEngine(std::move(input_engine_))
+{
+}
 
 VirtualAmiibo::~VirtualAmiibo() = default;
 
-Common::Input::DriverResult VirtualAmiibo::SetPollingMode(
-    [[maybe_unused]] const PadIdentifier& identifier_,
-    const Common::Input::PollingMode polling_mode_) {
+Common::Input::DriverResult
+VirtualAmiibo::SetPollingMode([[maybe_unused]] const PadIdentifier& identifier_,
+                              const Common::Input::PollingMode polling_mode_)
+{
     polling_mode = polling_mode_;
 
     switch (polling_mode) {
@@ -43,11 +48,13 @@ Common::Input::DriverResult VirtualAmiibo::SetPollingMode(
     }
 }
 
-Common::Input::NfcState VirtualAmiibo::SupportsNfc(
-    [[maybe_unused]] const PadIdentifier& identifier_) const {
+Common::Input::NfcState
+VirtualAmiibo::SupportsNfc([[maybe_unused]] const PadIdentifier& identifier_) const
+{
     return Common::Input::NfcState::Success;
 }
-Common::Input::NfcState VirtualAmiibo::StartNfcPolling(const PadIdentifier& identifier_) {
+Common::Input::NfcState VirtualAmiibo::StartNfcPolling(const PadIdentifier& identifier_)
+{
     if (state != State::Initialized) {
         return Common::Input::NfcState::WrongDeviceState;
     }
@@ -55,7 +62,8 @@ Common::Input::NfcState VirtualAmiibo::StartNfcPolling(const PadIdentifier& iden
     return Common::Input::NfcState::Success;
 }
 
-Common::Input::NfcState VirtualAmiibo::StopNfcPolling(const PadIdentifier& identifier_) {
+Common::Input::NfcState VirtualAmiibo::StopNfcPolling(const PadIdentifier& identifier_)
+{
     if (state == State::Disabled) {
         return Common::Input::NfcState::WrongDeviceState;
     }
@@ -67,7 +75,8 @@ Common::Input::NfcState VirtualAmiibo::StopNfcPolling(const PadIdentifier& ident
 }
 
 Common::Input::NfcState VirtualAmiibo::ReadAmiiboData(const PadIdentifier& identifier_,
-                                                      std::vector<u8>& out_data) {
+                                                      std::vector<u8>& out_data)
+{
     if (state != State::TagNearby) {
         return Common::Input::NfcState::WrongDeviceState;
     }
@@ -81,8 +90,10 @@ Common::Input::NfcState VirtualAmiibo::ReadAmiiboData(const PadIdentifier& ident
     return Common::Input::NfcState::Success;
 }
 
-Common::Input::NfcState VirtualAmiibo::WriteNfcData(
-    [[maybe_unused]] const PadIdentifier& identifier_, const std::vector<u8>& data) {
+Common::Input::NfcState
+VirtualAmiibo::WriteNfcData([[maybe_unused]] const PadIdentifier& identifier_,
+                            const std::vector<u8>& data)
+{
     const Common::FS::IOFile nfc_file{file_path, Common::FS::FileAccessMode::ReadWrite,
                                       Common::FS::FileType::BinaryFile};
 
@@ -103,7 +114,8 @@ Common::Input::NfcState VirtualAmiibo::WriteNfcData(
 
 Common::Input::NfcState VirtualAmiibo::ReadMifareData(const PadIdentifier& identifier_,
                                                       const Common::Input::MifareRequest& request,
-                                                      Common::Input::MifareRequest& out_data) {
+                                                      Common::Input::MifareRequest& out_data)
+{
     if (state != State::TagNearby) {
         return Common::Input::NfcState::WrongDeviceState;
     }
@@ -134,8 +146,9 @@ Common::Input::NfcState VirtualAmiibo::ReadMifareData(const PadIdentifier& ident
     return Common::Input::NfcState::Success;
 }
 
-Common::Input::NfcState VirtualAmiibo::WriteMifareData(
-    const PadIdentifier& identifier_, const Common::Input::MifareRequest& request) {
+Common::Input::NfcState VirtualAmiibo::WriteMifareData(const PadIdentifier& identifier_,
+                                                       const Common::Input::MifareRequest& request)
+{
     if (state != State::TagNearby) {
         return Common::Input::NfcState::WrongDeviceState;
     }
@@ -164,11 +177,13 @@ Common::Input::NfcState VirtualAmiibo::WriteMifareData(
     return Common::Input::NfcState::Success;
 }
 
-VirtualAmiibo::State VirtualAmiibo::GetCurrentState() const {
+VirtualAmiibo::State VirtualAmiibo::GetCurrentState() const
+{
     return state;
 }
 
-VirtualAmiibo::Info VirtualAmiibo::LoadAmiibo(const std::string& filename) {
+VirtualAmiibo::Info VirtualAmiibo::LoadAmiibo(const std::string& filename)
+{
     const Common::FS::IOFile nfc_file{filename, Common::FS::FileAccessMode::Read,
                                       Common::FS::FileType::BinaryFile};
     std::vector<u8> data{};
@@ -200,7 +215,8 @@ VirtualAmiibo::Info VirtualAmiibo::LoadAmiibo(const std::string& filename) {
     return LoadAmiibo(data);
 }
 
-VirtualAmiibo::Info VirtualAmiibo::LoadAmiibo(std::span<u8> data) {
+VirtualAmiibo::Info VirtualAmiibo::LoadAmiibo(std::span<u8> data)
+{
     if (state != State::WaitingForAmiibo) {
         return Info::WrongDeviceState;
     }
@@ -232,7 +248,8 @@ VirtualAmiibo::Info VirtualAmiibo::LoadAmiibo(std::span<u8> data) {
     return Info::Success;
 }
 
-VirtualAmiibo::Info VirtualAmiibo::ReloadAmiibo() {
+VirtualAmiibo::Info VirtualAmiibo::ReloadAmiibo()
+{
     if (state == State::TagNearby) {
         SetNfc(identifier, status);
         return Info::Success;
@@ -241,7 +258,8 @@ VirtualAmiibo::Info VirtualAmiibo::ReloadAmiibo() {
     return LoadAmiibo(file_path);
 }
 
-VirtualAmiibo::Info VirtualAmiibo::CloseAmiibo() {
+VirtualAmiibo::Info VirtualAmiibo::CloseAmiibo()
+{
     if (state != State::TagNearby) {
         return Info::Success;
     }
@@ -253,7 +271,8 @@ VirtualAmiibo::Info VirtualAmiibo::CloseAmiibo() {
     return Info::Success;
 }
 
-std::string VirtualAmiibo::GetLastFilePath() const {
+std::string VirtualAmiibo::GetLastFilePath() const
+{
     return file_path;
 }
 

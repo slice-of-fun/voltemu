@@ -4,6 +4,8 @@
 // SPDX-FileCopyrightText: Copyright 2020 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/am/frontend/applet_web_browser.h"
+
 #include "common/assert.h"
 #include "common/fs/file.h"
 #include "common/fs/fs.h"
@@ -23,7 +25,6 @@
 #include "core/frontend/applets/web_browser.h"
 #include "core/hle/result.h"
 #include "core/hle/service/am/am.h"
-#include "core/hle/service/am/frontend/applet_web_browser.h"
 #include "core/hle/service/am/service/storage.h"
 #include "core/hle/service/filesystem/filesystem.h"
 #include "core/hle/service/ns/platform_service_manager.h"
@@ -33,25 +34,28 @@ namespace Service::AM::Frontend {
 
 namespace {
 
-template <typename T>
-void ParseRawValue(T& value, std::span<const u8> data) {
+template<typename T> void ParseRawValue(T& value, std::span<const u8> data)
+{
     static_assert(std::is_trivially_copyable_v<T>,
                   "It's undefined behavior to use memcpy with non-trivially copyable objects");
     std::memcpy(&value, data.data(), data.size());
 }
 
-template <typename T>
-T ParseRawValue(std::span<const u8> data) {
+template<typename T> T ParseRawValue(std::span<const u8> data)
+{
     T value;
     ParseRawValue(value, data);
     return value;
 }
 
-std::string ParseStringValue(std::span<const u8> data) {
-    return Common::StringFromFixedZeroTerminatedBuffer(reinterpret_cast<const char*>(data.data()), data.size());
+std::string ParseStringValue(std::span<const u8> data)
+{
+    return Common::StringFromFixedZeroTerminatedBuffer(reinterpret_cast<const char*>(data.data()),
+                                                       data.size());
 }
 
-std::string GetMainURL(const std::string& url) {
+std::string GetMainURL(const std::string& url)
+{
     const auto index = url.find('?');
 
     if (index == std::string::npos) {
@@ -61,7 +65,8 @@ std::string GetMainURL(const std::string& url) {
     return url.substr(0, index);
 }
 
-std::string ResolveURL(const std::string& url) {
+std::string ResolveURL(const std::string& url)
+{
     const auto index = url.find_first_of('%');
 
     if (index == std::string::npos) {
@@ -71,7 +76,8 @@ std::string ResolveURL(const std::string& url) {
     return url.substr(0, index) + "lp1" + url.substr(index + 1);
 }
 
-WebArgInputTLVMap ReadWebArgs(std::span<const u8> web_arg, WebArgHeader& web_arg_header) {
+WebArgInputTLVMap ReadWebArgs(std::span<const u8> web_arg, WebArgHeader& web_arg_header)
+{
     std::memcpy(&web_arg_header, web_arg.data(), sizeof(WebArgHeader));
 
     if (web_arg.size() == sizeof(WebArgHeader)) {
@@ -108,7 +114,8 @@ WebArgInputTLVMap ReadWebArgs(std::span<const u8> web_arg, WebArgHeader& web_arg
 }
 
 FileSys::VirtualFile GetOfflineRomFS(Core::System& system, u64 title_id,
-                                     FileSys::ContentRecordType nca_type) {
+                                     FileSys::ContentRecordType nca_type)
+{
     if (nca_type == FileSys::ContentRecordType::Data) {
         const auto nca =
             system.GetFileSystemController().GetSystemNANDContents()->GetEntry(title_id, nca_type);
@@ -147,7 +154,8 @@ FileSys::VirtualFile GetOfflineRomFS(Core::System& system, u64 title_id,
     }
 }
 
-void ExtractSharedFonts(Core::System& system) {
+void ExtractSharedFonts(Core::System& system)
+{
     static constexpr std::array<const char*, 7> DECRYPTED_SHARED_FONTS{
         "FontStandard.ttf",
         "FontChineseSimplified.ttf",
@@ -230,11 +238,14 @@ void ExtractSharedFonts(Core::System& system) {
 WebBrowser::WebBrowser(Core::System& system_, std::shared_ptr<Applet> applet_,
                        LibraryAppletMode applet_mode_,
                        const Core::Frontend::WebBrowserApplet& frontend_)
-    : FrontendApplet{system_, applet_, applet_mode_}, frontend(frontend_) {}
+    : FrontendApplet{system_, applet_, applet_mode_}, frontend(frontend_)
+{
+}
 
 WebBrowser::~WebBrowser() = default;
 
-void WebBrowser::Initialize() {
+void WebBrowser::Initialize()
+{
     FrontendApplet::Initialize();
 
     LOG_INFO(Service_AM, "Initializing Web Browser Applet.");
@@ -259,8 +270,7 @@ void WebBrowser::Initialize() {
     LOG_DEBUG(Service_AM, "WebArgHeader: total_tlv_entries={}, shim_kind={}",
               web_arg_header.total_tlv_entries, web_arg_header.shim_kind);
 
-    if (Settings::values.disable_web_applet &&
-        web_arg_header.shim_kind != ShimKind::Web &&
+    if (Settings::values.disable_web_applet && web_arg_header.shim_kind != ShimKind::Web &&
         web_arg_header.shim_kind != ShimKind::Lhub) {
         return;
     }
@@ -298,15 +308,18 @@ void WebBrowser::Initialize() {
     }
 }
 
-Result WebBrowser::GetStatus() const {
+Result WebBrowser::GetStatus() const
+{
     return status;
 }
 
-void WebBrowser::ExecuteInteractive() {
+void WebBrowser::ExecuteInteractive()
+{
     UNIMPLEMENTED_MSG("WebSession is not implemented");
 }
 
-void WebBrowser::Execute() {
+void WebBrowser::Execute()
+{
     if (web_arg_header.shim_kind == ShimKind::Web) {
         ExecuteWeb();
         return;
@@ -356,7 +369,8 @@ void WebBrowser::Execute() {
     }
 }
 
-void WebBrowser::ExtractOfflineRomFS() {
+void WebBrowser::ExtractOfflineRomFS()
+{
     LOG_DEBUG(Service_AM, "Extracting RomFS to {}",
               Common::FS::PathToUTF8String(offline_cache_dir));
 
@@ -368,13 +382,13 @@ void WebBrowser::ExtractOfflineRomFS() {
     FileSys::VfsRawCopyD(extracted_romfs_dir, temp_dir);
 }
 
-void WebBrowser::WebBrowserExit(WebExitReason exit_reason, std::string last_url) {
-    const bool use_tlv_output =
-        (web_arg_header.shim_kind == ShimKind::Share &&
-         web_applet_version >= WebAppletVersion::Version196608) ||
-        (web_arg_header.shim_kind == ShimKind::Web &&
-         web_applet_version >= WebAppletVersion::Version524288) ||
-        (web_arg_header.shim_kind == ShimKind::Lhub);
+void WebBrowser::WebBrowserExit(WebExitReason exit_reason, std::string last_url)
+{
+    const bool use_tlv_output = (web_arg_header.shim_kind == ShimKind::Share &&
+                                 web_applet_version >= WebAppletVersion::Version196608) ||
+                                (web_arg_header.shim_kind == ShimKind::Web &&
+                                 web_applet_version >= WebAppletVersion::Version524288) ||
+                                (web_arg_header.shim_kind == ShimKind::Lhub);
 
     // https://switchbrew.org/wiki/Internet_Browser#TLVs
     if (use_tlv_output) {
@@ -474,16 +488,19 @@ void WebBrowser::WebBrowserExit(WebExitReason exit_reason, std::string last_url)
     Exit();
 }
 
-Result WebBrowser::RequestExit() {
+Result WebBrowser::RequestExit()
+{
     frontend.Close();
     R_SUCCEED();
 }
 
-bool WebBrowser::InputTLVExistsInMap(WebArgInputTLVType input_tlv_type) const {
+bool WebBrowser::InputTLVExistsInMap(WebArgInputTLVType input_tlv_type) const
+{
     return web_arg_input_tlv_map.find(input_tlv_type) != web_arg_input_tlv_map.end();
 }
 
-std::optional<std::vector<u8>> WebBrowser::GetInputTLVData(WebArgInputTLVType input_tlv_type) {
+std::optional<std::vector<u8>> WebBrowser::GetInputTLVData(WebArgInputTLVType input_tlv_type)
+{
     const auto map_it = web_arg_input_tlv_map.find(input_tlv_type);
 
     if (map_it == web_arg_input_tlv_map.end()) {
@@ -493,11 +510,16 @@ std::optional<std::vector<u8>> WebBrowser::GetInputTLVData(WebArgInputTLVType in
     return map_it->second;
 }
 
-void WebBrowser::InitializeShop() {}
+void WebBrowser::InitializeShop()
+{
+}
 
-void WebBrowser::InitializeLogin() {}
+void WebBrowser::InitializeLogin()
+{
+}
 
-void WebBrowser::InitializeOffline() {
+void WebBrowser::InitializeOffline()
+{
     const auto document_path =
         ParseStringValue(GetInputTLVData(WebArgInputTLVType::DocumentPath).value());
 
@@ -537,30 +559,40 @@ void WebBrowser::InitializeOffline() {
         offline_cache_dir, fmt::format("{}/{}", additional_paths, document_path));
 }
 
-void WebBrowser::InitializeShare() {}
+void WebBrowser::InitializeShare()
+{
+}
 
-void WebBrowser::InitializeWeb() {
+void WebBrowser::InitializeWeb()
+{
     external_url = ParseStringValue(GetInputTLVData(WebArgInputTLVType::InitialURL).value());
 
     // Resolve Nintendo CDN URLs.
     external_url = ResolveURL(external_url);
 }
 
-void WebBrowser::InitializeWifi() {}
+void WebBrowser::InitializeWifi()
+{
+}
 
-void WebBrowser::InitializeLobby() {}
+void WebBrowser::InitializeLobby()
+{
+}
 
-void WebBrowser::ExecuteShop() {
+void WebBrowser::ExecuteShop()
+{
     LOG_WARNING(Service_AM, "(STUBBED) called, Shop Applet is not implemented");
     WebBrowserExit(WebExitReason::EndButtonPressed);
 }
 
-void WebBrowser::ExecuteLogin() {
+void WebBrowser::ExecuteLogin()
+{
     LOG_WARNING(Service_AM, "(STUBBED) called, Login Applet is not implemented");
     WebBrowserExit(WebExitReason::EndButtonPressed);
 }
 
-void WebBrowser::ExecuteOffline() {
+void WebBrowser::ExecuteOffline()
+{
     // TODO (Morph): This is a hack for WebSession foreground web applets such as those used by
     //               Super Mario 3D All-Stars.
     // TODO (Morph): Implement WebSession.
@@ -593,12 +625,14 @@ void WebBrowser::ExecuteOffline() {
         });
 }
 
-void WebBrowser::ExecuteShare() {
+void WebBrowser::ExecuteShare()
+{
     LOG_WARNING(Service_AM, "(STUBBED) called, Share Applet is not implemented");
     WebBrowserExit(WebExitReason::EndButtonPressed);
 }
 
-void WebBrowser::ExecuteWeb() {
+void WebBrowser::ExecuteWeb()
+{
     LOG_INFO(Service_AM, "Opening external URL at {}", external_url);
 
     frontend.OpenExternalWebPage(external_url,
@@ -607,22 +641,26 @@ void WebBrowser::ExecuteWeb() {
                                  });
 }
 
-void WebBrowser::ExecuteWifi() {
+void WebBrowser::ExecuteWifi()
+{
     LOG_WARNING(Service_AM, "(STUBBED) called, Wifi Applet is not implemented");
     WebBrowserExit(WebExitReason::EndButtonPressed);
 }
 
-void WebBrowser::ExecuteLobby() {
+void WebBrowser::ExecuteLobby()
+{
     LOG_WARNING(Service_AM, "(STUBBED) called, Lobby Applet is not implemented");
     WebBrowserExit(WebExitReason::EndButtonPressed);
 }
 
-void WebBrowser::InitializeLhub() {}
+void WebBrowser::InitializeLhub()
+{
+}
 
-void WebBrowser::ExecuteLhub() {
+void WebBrowser::ExecuteLhub()
+{
     LOG_INFO(Service_AM, "(STUBBED) called, Lhub Applet is not implemented");
     WebBrowserExit(WebExitReason::EndButtonPressed);
 }
-
 
 } // namespace Service::AM::Frontend

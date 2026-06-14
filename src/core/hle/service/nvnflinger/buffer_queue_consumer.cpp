@@ -7,10 +7,11 @@
 // Parts of this implementation were based on:
 // https://cs.android.com/android/platform/superproject/+/android-5.1.1_r38:frameworks/native/libs/gui/BufferQueueConsumer.cpp
 
+#include "core/hle/service/nvnflinger/buffer_queue_consumer.h"
+
 #include "common/assert.h"
 #include "common/logging.h"
 #include "core/hle/service/nvnflinger/buffer_item.h"
-#include "core/hle/service/nvnflinger/buffer_queue_consumer.h"
 #include "core/hle/service/nvnflinger/buffer_queue_core.h"
 #include "core/hle/service/nvnflinger/parcel.h"
 #include "core/hle/service/nvnflinger/producer_listener.h"
@@ -18,12 +19,15 @@
 namespace Service::android {
 
 BufferQueueConsumer::BufferQueueConsumer(std::shared_ptr<BufferQueueCore> core_)
-    : core{std::move(core_)}, slots{core->slots} {}
+    : core{std::move(core_)}, slots{core->slots}
+{
+}
 
 BufferQueueConsumer::~BufferQueueConsumer() = default;
 
 Status BufferQueueConsumer::AcquireBuffer(BufferItem* out_buffer,
-                                          std::chrono::nanoseconds expected_present) {
+                                          std::chrono::nanoseconds expected_present)
+{
     std::scoped_lock lock{core->mutex};
 
     // Check that the consumer doesn't currently have the maximum number of buffers acquired.
@@ -116,7 +120,8 @@ Status BufferQueueConsumer::AcquireBuffer(BufferItem* out_buffer,
     return Status::NoError;
 }
 
-Status BufferQueueConsumer::ReleaseBuffer(s32 slot, u64 frame_number, const Fence& release_fence) {
+Status BufferQueueConsumer::ReleaseBuffer(s32 slot, u64 frame_number, const Fence& release_fence)
+{
     if (slot < 0 || slot >= BufferQueueDefs::NUM_BUFFER_SLOTS) {
         LOG_ERROR(Service_Nvnflinger, "slot {} out of range", slot);
         return Status::BadValue;
@@ -178,7 +183,8 @@ Status BufferQueueConsumer::ReleaseBuffer(s32 slot, u64 frame_number, const Fenc
 }
 
 Status BufferQueueConsumer::Connect(std::shared_ptr<IConsumerListener> consumer_listener,
-                                    bool controlled_by_app) {
+                                    bool controlled_by_app)
+{
     if (consumer_listener == nullptr) {
         LOG_ERROR(Service_Nvnflinger, "consumer_listener may not be nullptr");
         return Status::BadValue;
@@ -199,7 +205,8 @@ Status BufferQueueConsumer::Connect(std::shared_ptr<IConsumerListener> consumer_
     return Status::NoError;
 }
 
-Status BufferQueueConsumer::Disconnect() {
+Status BufferQueueConsumer::Disconnect()
+{
     LOG_DEBUG(Service_Nvnflinger, "called");
 
     std::scoped_lock lock{core->mutex};
@@ -218,7 +225,8 @@ Status BufferQueueConsumer::Disconnect() {
     return Status::NoError;
 }
 
-Status BufferQueueConsumer::GetReleasedBuffers(u64* out_slot_mask) {
+Status BufferQueueConsumer::GetReleasedBuffers(u64* out_slot_mask)
+{
     if (out_slot_mask == nullptr) {
         LOG_ERROR(Service_Nvnflinger, "out_slot_mask may not be nullptr");
         return Status::BadValue;
@@ -254,7 +262,8 @@ Status BufferQueueConsumer::GetReleasedBuffers(u64* out_slot_mask) {
 }
 
 void BufferQueueConsumer::Transact(u32 code, std::span<const u8> parcel_data,
-                                   std::span<u8> parcel_reply, u32 flags) {
+                                   std::span<u8> parcel_reply, u32 flags)
+{
     // Values used by BnGraphicBufferConsumer onTransact
     enum class TransactionId {
         AcquireBuffer = 1,
@@ -321,7 +330,8 @@ void BufferQueueConsumer::Transact(u32 code, std::span<const u8> parcel_data,
                 (std::min)(parcel_reply.size(), serialized.size()));
 }
 
-Kernel::KReadableEvent* BufferQueueConsumer::GetNativeHandle(u32 type_id) {
+Kernel::KReadableEvent* BufferQueueConsumer::GetNativeHandle(u32 type_id)
+{
     ASSERT_MSG(false, "called, type_id={}", type_id);
     return nullptr;
 }

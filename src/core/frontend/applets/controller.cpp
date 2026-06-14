@@ -4,11 +4,12 @@
 // SPDX-FileCopyrightText: Copyright 2020 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/frontend/applets/controller.h"
+
 #include "common/assert.h"
 #include "common/logging.h"
 #include "common/settings.h"
 #include "common/settings_enums.h"
-#include "core/frontend/applets/controller.h"
 #include "hid_core/frontend/emulated_controller.h"
 #include "hid_core/hid_core.h"
 #include "hid_core/hid_types.h"
@@ -17,14 +18,19 @@ namespace Core::Frontend {
 
 ControllerApplet::~ControllerApplet() = default;
 
-DefaultControllerApplet::DefaultControllerApplet(HID::HIDCore& hid_core_) : hid_core{hid_core_} {}
+DefaultControllerApplet::DefaultControllerApplet(HID::HIDCore& hid_core_) : hid_core{hid_core_}
+{
+}
 
 DefaultControllerApplet::~DefaultControllerApplet() = default;
 
-void DefaultControllerApplet::Close() const {}
+void DefaultControllerApplet::Close() const
+{
+}
 
 void DefaultControllerApplet::ReconfigureControllers(ReconfigureCallback callback,
-                                                     const ControllerParameters& parameters) const {
+                                                     const ControllerParameters& parameters) const
+{
     LOG_INFO(Service_HID, "called, deducing the best configuration based on the given parameters!");
 
     const std::size_t min_supported_players =

@@ -20,9 +20,7 @@ public:
 
     void Initialize(Common::UUID* out_source_id, Common::UUID* external_source_id);
 
-    s64 GetTime() const {
-        return m_time;
-    }
+    s64 GetTime() const { return m_time; }
 
     bool GetResetDetected();
     Result SetCurrentTime();

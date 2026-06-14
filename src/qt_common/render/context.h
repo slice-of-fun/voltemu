@@ -4,6 +4,7 @@
 #pragma once
 
 #include <QSurface>
+
 #include "common/logging.h"
 #include "common/settings.h"
 #include "core/frontend/graphics_context.h"
@@ -17,7 +18,8 @@
 class OpenGLSharedContext : public Core::Frontend::GraphicsContext {
 public:
     /// Create the original context that should be shared from
-    explicit OpenGLSharedContext(QSurface* surface_) : surface{surface_} {
+    explicit OpenGLSharedContext(QSurface* surface_) : surface{surface_}
+    {
         QSurfaceFormat format;
         format.setVersion(4, 6);
         format.setProfile(QSurfaceFormat::CompatibilityProfile);
@@ -37,7 +39,8 @@ public:
     }
 
     /// Create the shared contexts for rendering and presentation
-    explicit OpenGLSharedContext(QOpenGLContext* share_context, QSurface* main_surface = nullptr) {
+    explicit OpenGLSharedContext(QOpenGLContext* share_context, QSurface* main_surface = nullptr)
+    {
 
         // disable vsync for any shared contexts
         auto format = share_context->format();
@@ -63,15 +66,12 @@ public:
         }
     }
 
-    ~OpenGLSharedContext() {
-        DoneCurrent();
-    }
+    ~OpenGLSharedContext() { DoneCurrent(); }
 
-    void SwapBuffers() override {
-        context->swapBuffers(surface);
-    }
+    void SwapBuffers() override { context->swapBuffers(surface); }
 
-    void MakeCurrent() override {
+    void MakeCurrent() override
+    {
         // We can't track the current state of the underlying context in this wrapper class because
         // Qt may make the underlying context not current for one reason or another. In particular,
         // the WebBrowser uses GL, so it seems to conflict if we aren't careful.
@@ -83,17 +83,11 @@ public:
         }
     }
 
-    void DoneCurrent() override {
-        context->doneCurrent();
-    }
+    void DoneCurrent() override { context->doneCurrent(); }
 
-    QOpenGLContext* GetShareContext() {
-        return context.get();
-    }
+    QOpenGLContext* GetShareContext() { return context.get(); }
 
-    const QOpenGLContext* GetShareContext() const {
-        return context.get();
-    }
+    const QOpenGLContext* GetShareContext() const { return context.get(); }
 
 private:
     // Avoid using Qt parent system here since we might move the QObjects to new threads

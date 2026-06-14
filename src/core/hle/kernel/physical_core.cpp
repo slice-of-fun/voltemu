@@ -4,6 +4,8 @@
 // SPDX-FileCopyrightText: Copyright 2020 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/kernel/physical_core.h"
+
 #include "common/scope_exit.h"
 #include "common/settings.h"
 #include "core/core.h"
@@ -11,18 +13,19 @@
 #include "core/hle/kernel/k_process.h"
 #include "core/hle/kernel/k_thread.h"
 #include "core/hle/kernel/kernel.h"
-#include "core/hle/kernel/physical_core.h"
 #include "core/hle/kernel/svc.h"
 
 namespace Kernel {
 
 PhysicalCore::PhysicalCore(KernelCore& kernel, std::size_t core_index)
-    : m_kernel{kernel}, m_core_index{core_index} {
+    : m_kernel{kernel}, m_core_index{core_index}
+{
     m_is_single_core = !kernel.IsMulticore();
 }
 PhysicalCore::~PhysicalCore() = default;
 
-void PhysicalCore::RunThread(Kernel::KThread* thread) {
+void PhysicalCore::RunThread(Kernel::KThread* thread)
+{
     auto* process = thread->GetOwnerProcess();
     auto& system = m_kernel.System();
     auto* interface = process->GetArmInterface(m_core_index);
@@ -108,11 +111,12 @@ void PhysicalCore::RunThread(Kernel::KThread* thread) {
         // If a step completed successfully, skip other halt reason handlers —
         // the step takes priority (e.g. step may also set InstructionBreakpoint
         // if the next instruction happens to be a breakpoint).
-        const bool step_completed = True(hr & Core::HaltReason::StepThread)
-                                    && thread->GetStepState() == StepState::StepPerformed;
+        const bool step_completed = True(hr & Core::HaltReason::StepThread) &&
+                                    thread->GetStepState() == StepState::StepPerformed;
         const bool supervisor_call = !step_completed && True(hr & Core::HaltReason::SupervisorCall);
         const bool prefetch_abort = !step_completed && True(hr & Core::HaltReason::PrefetchAbort);
-        const bool breakpoint = !step_completed && True(hr & Core::HaltReason::InstructionBreakpoint);
+        const bool breakpoint =
+            !step_completed && True(hr & Core::HaltReason::InstructionBreakpoint);
         const bool data_abort = !step_completed && True(hr & Core::HaltReason::DataAbort);
         const bool interrupt = !step_completed && True(hr & Core::HaltReason::BreakLoop);
 
@@ -162,7 +166,8 @@ void PhysicalCore::RunThread(Kernel::KThread* thread) {
     }
 }
 
-void PhysicalCore::LoadContext(const KThread* thread) {
+void PhysicalCore::LoadContext(const KThread* thread)
+{
     auto* const process = thread->GetOwnerProcess();
     if (!process) {
         // Kernel threads do not run on emulated CPU cores.
@@ -177,11 +182,13 @@ void PhysicalCore::LoadContext(const KThread* thread) {
     }
 }
 
-void PhysicalCore::LoadSvcArguments(const KProcess& process, std::span<const uint64_t, 8> args) {
+void PhysicalCore::LoadSvcArguments(const KProcess& process, std::span<const uint64_t, 8> args)
+{
     process.GetArmInterface(m_core_index)->SetSvcArguments(args);
 }
 
-void PhysicalCore::SaveContext(KThread* thread) const {
+void PhysicalCore::SaveContext(KThread* thread) const
+{
     auto* const process = thread->GetOwnerProcess();
     if (!process) {
         // Kernel threads do not run on emulated CPU cores.
@@ -194,11 +201,13 @@ void PhysicalCore::SaveContext(KThread* thread) const {
     }
 }
 
-void PhysicalCore::SaveSvcArguments(KProcess& process, std::span<uint64_t, 8> args) const {
+void PhysicalCore::SaveSvcArguments(KProcess& process, std::span<uint64_t, 8> args) const
+{
     process.GetArmInterface(m_core_index)->GetSvcArguments(args);
 }
 
-void PhysicalCore::CloneFpuStatus(KThread* dst) const {
+void PhysicalCore::CloneFpuStatus(KThread* dst) const
+{
     auto* process = dst->GetOwnerProcess();
 
     Svc::ThreadContext ctx{};
@@ -208,7 +217,8 @@ void PhysicalCore::CloneFpuStatus(KThread* dst) const {
     dst->GetContext().fpsr = ctx.fpsr;
 }
 
-void PhysicalCore::LogBacktrace() {
+void PhysicalCore::LogBacktrace()
+{
     auto* process = GetCurrentProcessPointer(m_kernel);
     if (!process) {
         return;
@@ -220,16 +230,19 @@ void PhysicalCore::LogBacktrace() {
     }
 }
 
-void PhysicalCore::Idle() {
+void PhysicalCore::Idle()
+{
     std::unique_lock lk{m_guard};
     m_on_interrupt.wait(lk, [this] { return m_is_interrupted; });
 }
 
-bool PhysicalCore::IsInterrupted() const {
+bool PhysicalCore::IsInterrupted() const
+{
     return m_is_interrupted;
 }
 
-void PhysicalCore::Interrupt() {
+void PhysicalCore::Interrupt()
+{
     // Lock core context.
     std::scoped_lock lk{m_guard};
 
@@ -252,7 +265,8 @@ void PhysicalCore::Interrupt() {
     arm_interface->SignalInterrupt(thread);
 }
 
-void PhysicalCore::ClearInterrupt() {
+void PhysicalCore::ClearInterrupt()
+{
     std::scoped_lock lk{m_guard};
     m_is_interrupted = false;
 }

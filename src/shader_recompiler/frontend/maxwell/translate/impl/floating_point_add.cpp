@@ -9,7 +9,8 @@
 namespace Shader::Maxwell {
 namespace {
 void FADD(TranslatorVisitor& v, u64 insn, bool sat, bool cc, bool ftz, FpRounding fp_rounding,
-          const IR::F32& src_b, bool abs_a, bool neg_a, bool abs_b, bool neg_b) {
+          const IR::F32& src_b, bool abs_a, bool neg_a, bool abs_b, bool neg_b)
+{
     union {
         u64 raw;
         BitField<0, 8, IR::Reg> dest_reg;
@@ -33,7 +34,8 @@ void FADD(TranslatorVisitor& v, u64 insn, bool sat, bool cc, bool ftz, FpRoundin
     v.F(fadd.dest_reg, value);
 }
 
-void FADD(TranslatorVisitor& v, u64 insn, const IR::F32& src_b) {
+void FADD(TranslatorVisitor& v, u64 insn, const IR::F32& src_b)
+{
     union {
         u64 raw;
         BitField<39, 2, FpRounding> fp_rounding;
@@ -51,19 +53,23 @@ void FADD(TranslatorVisitor& v, u64 insn, const IR::F32& src_b) {
 }
 } // Anonymous namespace
 
-void TranslatorVisitor::FADD_reg(u64 insn) {
+void TranslatorVisitor::FADD_reg(u64 insn)
+{
     FADD(*this, insn, GetFloatReg20(insn));
 }
 
-void TranslatorVisitor::FADD_cbuf(u64 insn) {
+void TranslatorVisitor::FADD_cbuf(u64 insn)
+{
     FADD(*this, insn, GetFloatCbuf(insn));
 }
 
-void TranslatorVisitor::FADD_imm(u64 insn) {
+void TranslatorVisitor::FADD_imm(u64 insn)
+{
     FADD(*this, insn, GetFloatImm20(insn));
 }
 
-void TranslatorVisitor::FADD32I(u64 insn) {
+void TranslatorVisitor::FADD32I(u64 insn)
+{
     union {
         u64 raw;
         BitField<55, 1, u64> ftz;

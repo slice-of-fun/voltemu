@@ -25,18 +25,25 @@ public:
 
     constexpr KMemoryRegion() = default;
     constexpr KMemoryRegion(u64 address, u64 last_address)
-        : m_address{address}, m_last_address{last_address} {}
+        : m_address{address}, m_last_address{last_address}
+    {
+    }
     constexpr KMemoryRegion(u64 address, u64 last_address, u64 pair_address, u32 attributes,
                             u32 type_id)
         : m_address(address), m_last_address(last_address), m_pair_address(pair_address),
-          m_attributes(attributes), m_type_id(type_id) {}
+          m_attributes(attributes), m_type_id(type_id)
+    {
+    }
     constexpr KMemoryRegion(u64 address, u64 last_address, u32 attributes, u32 type_id)
         : KMemoryRegion(address, last_address, (std::numeric_limits<u64>::max)(), attributes,
-                        type_id) {}
+                        type_id)
+    {
+    }
 
     ~KMemoryRegion() = default;
 
-    static constexpr int Compare(const KMemoryRegion& lhs, const KMemoryRegion& rhs) {
+    static constexpr int Compare(const KMemoryRegion& lhs, const KMemoryRegion& rhs)
+    {
         if (lhs.GetAddress() < rhs.GetAddress()) {
             return -1;
         } else if (lhs.GetAddress() <= rhs.GetLastAddress()) {
@@ -46,66 +53,51 @@ public:
         }
     }
 
-    constexpr u64 GetAddress() const {
-        return m_address;
-    }
+    constexpr u64 GetAddress() const { return m_address; }
 
-    constexpr u64 GetPairAddress() const {
-        return m_pair_address;
-    }
+    constexpr u64 GetPairAddress() const { return m_pair_address; }
 
-    constexpr u64 GetLastAddress() const {
-        return m_last_address;
-    }
+    constexpr u64 GetLastAddress() const { return m_last_address; }
 
-    constexpr u64 GetEndAddress() const {
-        return this->GetLastAddress() + 1;
-    }
+    constexpr u64 GetEndAddress() const { return this->GetLastAddress() + 1; }
 
-    constexpr size_t GetSize() const {
-        return this->GetEndAddress() - this->GetAddress();
-    }
+    constexpr size_t GetSize() const { return this->GetEndAddress() - this->GetAddress(); }
 
-    constexpr u32 GetAttributes() const {
-        return m_attributes;
-    }
+    constexpr u32 GetAttributes() const { return m_attributes; }
 
-    constexpr u32 GetType() const {
-        return m_type_id;
-    }
+    constexpr u32 GetType() const { return m_type_id; }
 
-    constexpr void SetType(u32 type) {
+    constexpr void SetType(u32 type)
+    {
         ASSERT(this->CanDerive(type));
         m_type_id = type;
     }
 
-    constexpr bool Contains(u64 addr) const {
+    constexpr bool Contains(u64 addr) const
+    {
         ASSERT(this->GetEndAddress() != 0);
         return this->GetAddress() <= addr && addr <= this->GetLastAddress();
     }
 
-    constexpr bool IsDerivedFrom(u32 type) const {
+    constexpr bool IsDerivedFrom(u32 type) const
+    {
         return (this->GetType() | type) == this->GetType();
     }
 
-    constexpr bool HasTypeAttribute(u32 attr) const {
+    constexpr bool HasTypeAttribute(u32 attr) const
+    {
         return (this->GetType() | attr) == this->GetType();
     }
 
-    constexpr bool CanDerive(u32 type) const {
-        return (this->GetType() | type) == type;
-    }
+    constexpr bool CanDerive(u32 type) const { return (this->GetType() | type) == type; }
 
-    constexpr void SetPairAddress(u64 a) {
-        m_pair_address = a;
-    }
+    constexpr void SetPairAddress(u64 a) { m_pair_address = a; }
 
-    constexpr void SetTypeAttribute(u32 attr) {
-        m_type_id |= attr;
-    }
+    constexpr void SetTypeAttribute(u32 attr) { m_type_id |= attr; }
 
 private:
-    constexpr void Reset(u64 a, u64 la, u64 p, u32 r, u32 t) {
+    constexpr void Reset(u64 a, u64 la, u64 p, u32 r, u32 t)
+    {
         m_address = a;
         m_pair_address = p;
         m_last_address = la;
@@ -145,27 +137,20 @@ public:
 
         constexpr DerivedRegionExtents() = default;
 
-        constexpr u64 GetAddress() const {
-            return this->first_region->GetAddress();
-        }
+        constexpr u64 GetAddress() const { return this->first_region->GetAddress(); }
 
-        constexpr u64 GetLastAddress() const {
-            return this->last_region->GetLastAddress();
-        }
+        constexpr u64 GetLastAddress() const { return this->last_region->GetLastAddress(); }
 
-        constexpr u64 GetEndAddress() const {
-            return this->GetLastAddress() + 1;
-        }
+        constexpr u64 GetEndAddress() const { return this->GetLastAddress() + 1; }
 
-        constexpr size_t GetSize() const {
-            return this->GetEndAddress() - this->GetAddress();
-        }
+        constexpr size_t GetSize() const { return this->GetEndAddress() - this->GetAddress(); }
     };
 
     explicit KMemoryRegionTree(KMemoryRegionAllocator& memory_region_allocator_);
     ~KMemoryRegionTree() = default;
 
-    KMemoryRegion* FindModifiable(u64 address) {
+    KMemoryRegion* FindModifiable(u64 address)
+    {
         if (auto it = this->find(KMemoryRegion(address, address, 0, 0)); it != this->end()) {
             return std::addressof(*it);
         } else {
@@ -173,7 +158,8 @@ public:
         }
     }
 
-    const KMemoryRegion* Find(u64 address) const {
+    const KMemoryRegion* Find(u64 address) const
+    {
         if (auto it = this->find(KMemoryRegion(address, address, 0, 0)); it != this->cend()) {
             return std::addressof(*it);
         } else {
@@ -181,7 +167,8 @@ public:
         }
     }
 
-    const KMemoryRegion* FindByType(KMemoryRegionType type_id) const {
+    const KMemoryRegion* FindByType(KMemoryRegionType type_id) const
+    {
         for (auto it = this->cbegin(); it != this->cend(); ++it) {
             if (it->GetType() == static_cast<u32>(type_id)) {
                 return std::addressof(*it);
@@ -190,7 +177,8 @@ public:
         return nullptr;
     }
 
-    const KMemoryRegion* FindByTypeAndAttribute(u32 type_id, u32 attr) const {
+    const KMemoryRegion* FindByTypeAndAttribute(u32 type_id, u32 attr) const
+    {
         for (auto it = this->cbegin(); it != this->cend(); ++it) {
             if (it->GetType() == type_id && it->GetAttributes() == attr) {
                 return std::addressof(*it);
@@ -199,7 +187,8 @@ public:
         return nullptr;
     }
 
-    const KMemoryRegion* FindFirstDerived(KMemoryRegionType type_id) const {
+    const KMemoryRegion* FindFirstDerived(KMemoryRegionType type_id) const
+    {
         for (auto it = this->cbegin(); it != this->cend(); it++) {
             if (it->IsDerivedFrom(type_id)) {
                 return std::addressof(*it);
@@ -208,7 +197,8 @@ public:
         return nullptr;
     }
 
-    const KMemoryRegion* FindLastDerived(KMemoryRegionType type_id) const {
+    const KMemoryRegion* FindLastDerived(KMemoryRegionType type_id) const
+    {
         const KMemoryRegion* region = nullptr;
         for (auto it = this->begin(); it != this->end(); it++) {
             if (it->IsDerivedFrom(type_id)) {
@@ -218,7 +208,8 @@ public:
         return region;
     }
 
-    DerivedRegionExtents GetDerivedRegionExtents(KMemoryRegionType type_id) const {
+    DerivedRegionExtents GetDerivedRegionExtents(KMemoryRegionType type_id) const
+    {
         DerivedRegionExtents extents;
 
         ASSERT(extents.first_region == nullptr);
@@ -239,7 +230,8 @@ public:
         return extents;
     }
 
-    DerivedRegionExtents GetDerivedRegionExtents(u32 type_id) const {
+    DerivedRegionExtents GetDerivedRegionExtents(u32 type_id) const
+    {
         return GetDerivedRegionExtents(static_cast<KMemoryRegionType>(type_id));
     }
 
@@ -249,79 +241,46 @@ public:
     KVirtualAddress GetRandomAlignedRegion(size_t size, size_t alignment, u32 type_id);
 
     KVirtualAddress GetRandomAlignedRegionWithGuard(size_t size, size_t alignment, u32 type_id,
-                                                    size_t guard_size) {
+                                                    size_t guard_size)
+    {
         return this->GetRandomAlignedRegion(size + 2 * guard_size, alignment, type_id) + guard_size;
     }
 
     // Iterator accessors.
-    iterator begin() {
-        return m_tree.begin();
-    }
+    iterator begin() { return m_tree.begin(); }
 
-    const_iterator begin() const {
-        return m_tree.begin();
-    }
+    const_iterator begin() const { return m_tree.begin(); }
 
-    iterator end() {
-        return m_tree.end();
-    }
+    iterator end() { return m_tree.end(); }
 
-    const_iterator end() const {
-        return m_tree.end();
-    }
+    const_iterator end() const { return m_tree.end(); }
 
-    const_iterator cbegin() const {
-        return this->begin();
-    }
+    const_iterator cbegin() const { return this->begin(); }
 
-    const_iterator cend() const {
-        return this->end();
-    }
+    const_iterator cend() const { return this->end(); }
 
-    iterator iterator_to(reference ref) {
-        return m_tree.iterator_to(ref);
-    }
+    iterator iterator_to(reference ref) { return m_tree.iterator_to(ref); }
 
-    const_iterator iterator_to(const_reference ref) const {
-        return m_tree.iterator_to(ref);
-    }
+    const_iterator iterator_to(const_reference ref) const { return m_tree.iterator_to(ref); }
 
     // Content management.
-    bool empty() const {
-        return m_tree.empty();
-    }
+    bool empty() const { return m_tree.empty(); }
 
-    reference back() {
-        return m_tree.back();
-    }
+    reference back() { return m_tree.back(); }
 
-    const_reference back() const {
-        return m_tree.back();
-    }
+    const_reference back() const { return m_tree.back(); }
 
-    reference front() {
-        return m_tree.front();
-    }
+    reference front() { return m_tree.front(); }
 
-    const_reference front() const {
-        return m_tree.front();
-    }
+    const_reference front() const { return m_tree.front(); }
 
-    iterator insert(reference ref) {
-        return m_tree.insert(ref);
-    }
+    iterator insert(reference ref) { return m_tree.insert(ref); }
 
-    iterator erase(iterator it) {
-        return m_tree.erase(it);
-    }
+    iterator erase(iterator it) { return m_tree.erase(it); }
 
-    iterator find(const_reference ref) const {
-        return m_tree.find(ref);
-    }
+    iterator find(const_reference ref) const { return m_tree.find(ref); }
 
-    iterator nfind(const_reference ref) const {
-        return m_tree.nfind(ref);
-    }
+    iterator nfind(const_reference ref) const { return m_tree.nfind(ref); }
 
 private:
     TreeType m_tree{};
@@ -338,8 +297,8 @@ public:
     constexpr KMemoryRegionAllocator() = default;
     constexpr ~KMemoryRegionAllocator() = default;
 
-    template <typename... Args>
-    KMemoryRegion* Allocate(Args&&... args) {
+    template<typename... Args> KMemoryRegion* Allocate(Args&&... args)
+    {
         // Ensure we stay within the bounds of our heap.
         ASSERT(m_num_regions < MaxMemoryRegions);
 

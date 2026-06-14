@@ -1,18 +1,22 @@
 // SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#include "game/game_list.h"
 #include "game/search_field.h"
 
 #include <QKeyEvent>
 #include <QToolButton>
 
+#include "game/game_list.h"
+
 // TODO: Remove GameList dependence?
 GameListSearchField::KeyReleaseEater::KeyReleaseEater(GameList* gamelist_, QObject* parent)
-    : QObject(parent), gamelist{gamelist_} {}
+    : QObject(parent), gamelist{gamelist_}
+{
+}
 
 // EventFilter in order to process systemkeys while editing the searchfield
-bool GameListSearchField::KeyReleaseEater::eventFilter(QObject* obj, QEvent* event) {
+bool GameListSearchField::KeyReleaseEater::eventFilter(QObject* obj, QEvent* event)
+{
     // If it isn't a KeyRelease event then continue with standard event processing
     if (event->type() != QEvent::KeyRelease)
         return QObject::eventFilter(obj, event);
@@ -60,28 +64,33 @@ bool GameListSearchField::KeyReleaseEater::eventFilter(QObject* obj, QEvent* eve
     return QObject::eventFilter(obj, event);
 }
 
-void GameListSearchField::setFilterResult(int visible_, int total_) {
+void GameListSearchField::setFilterResult(int visible_, int total_)
+{
     visible = visible_;
     total = total_;
 
     label_filter_result->setText(tr("%1 of %n result(s)", "", total).arg(visible));
 }
 
-QString GameListSearchField::filterText() const {
+QString GameListSearchField::filterText() const
+{
     return edit_filter->text();
 }
 
-void GameListSearchField::clear() {
+void GameListSearchField::clear()
+{
     edit_filter->clear();
 }
 
-void GameListSearchField::setFocus() {
+void GameListSearchField::setFocus()
+{
     if (edit_filter->isVisible()) {
         edit_filter->setFocus();
     }
 }
 
-GameListSearchField::GameListSearchField(GameList* parent) : QWidget{parent} {
+GameListSearchField::GameListSearchField(GameList* parent) : QWidget{parent}
+{
     auto* const key_release_eater = new KeyReleaseEater(parent, this);
     layout_filter = new QHBoxLayout;
     layout_filter->setContentsMargins(8, 8, 8, 8);
@@ -110,7 +119,8 @@ GameListSearchField::GameListSearchField(GameList* parent) : QWidget{parent} {
     RetranslateUI();
 }
 
-void GameListSearchField::changeEvent(QEvent* event) {
+void GameListSearchField::changeEvent(QEvent* event)
+{
     if (event->type() == QEvent::LanguageChange) {
         RetranslateUI();
     }
@@ -118,7 +128,8 @@ void GameListSearchField::changeEvent(QEvent* event) {
     QWidget::changeEvent(event);
 }
 
-void GameListSearchField::RetranslateUI() {
+void GameListSearchField::RetranslateUI()
+{
     label_filter->setText(tr("Filter:"));
     edit_filter->setPlaceholderText(tr("Enter pattern to filter"));
 }

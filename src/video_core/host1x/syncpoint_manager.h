@@ -18,30 +18,36 @@ namespace Host1x {
 
 class SyncpointManager {
 public:
-    u32 GetGuestSyncpointValue(u32 id) const {
+    u32 GetGuestSyncpointValue(u32 id) const
+    {
         return syncpoints_guest[id].load(std::memory_order_acquire);
     }
 
-    u32 GetHostSyncpointValue(u32 id) const {
+    u32 GetHostSyncpointValue(u32 id) const
+    {
         return syncpoints_host[id].load(std::memory_order_acquire);
     }
 
     struct RegisteredAction {
         explicit RegisteredAction(u32 expected_value_, std::function<void()>&& action_)
-            : expected_value{expected_value_}, action{std::move(action_)} {}
+            : expected_value{expected_value_}, action{std::move(action_)}
+        {
+        }
         u32 expected_value;
         std::function<void()> action;
     };
     using ActionHandle = std::list<RegisteredAction>::iterator;
 
-    template <typename Func>
-    ActionHandle RegisterGuestAction(u32 syncpoint_id, u32 expected_value, Func&& action) {
+    template<typename Func>
+    ActionHandle RegisterGuestAction(u32 syncpoint_id, u32 expected_value, Func&& action)
+    {
         return RegisterAction(syncpoints_guest[syncpoint_id], guest_action_storage[syncpoint_id],
                               expected_value, std::move(action));
     }
 
-    template <typename Func>
-    ActionHandle RegisterHostAction(u32 syncpoint_id, u32 expected_value, Func&& action) {
+    template<typename Func>
+    ActionHandle RegisterHostAction(u32 syncpoint_id, u32 expected_value, Func&& action)
+    {
         return RegisterAction(syncpoints_host[syncpoint_id], host_action_storage[syncpoint_id],
                               expected_value, std::move(action));
     }
@@ -58,11 +64,13 @@ public:
 
     void WaitHost(u32 syncpoint_id, u32 expected_value);
 
-    bool IsReadyGuest(u32 syncpoint_id, u32 expected_value) const {
+    bool IsReadyGuest(u32 syncpoint_id, u32 expected_value) const
+    {
         return syncpoints_guest[syncpoint_id].load(std::memory_order_acquire) >= expected_value;
     }
 
-    bool IsReadyHost(u32 syncpoint_id, u32 expected_value) const {
+    bool IsReadyHost(u32 syncpoint_id, u32 expected_value) const
+    {
         return syncpoints_host[syncpoint_id].load(std::memory_order_acquire) >= expected_value;
     }
 

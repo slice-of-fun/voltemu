@@ -8,7 +8,8 @@
 namespace Shader::Maxwell {
 namespace {
 void IADD(TranslatorVisitor& v, u64 insn, const IR::U32 op_b, bool neg_a, bool po, bool sat, bool x,
-          bool cc) {
+          bool cc)
+{
     union {
         u64 raw;
         BitField<0, 8, IR::Reg> dest_reg;
@@ -55,7 +56,8 @@ void IADD(TranslatorVisitor& v, u64 insn, const IR::U32 op_b, bool neg_a, bool p
     v.X(iadd.dest_reg, result);
 }
 
-void IADD(TranslatorVisitor& v, u64 insn, IR::U32 op_b) {
+void IADD(TranslatorVisitor& v, u64 insn, IR::U32 op_b)
+{
     union {
         u64 insn;
         BitField<43, 1, u64> x;
@@ -74,19 +76,23 @@ void IADD(TranslatorVisitor& v, u64 insn, IR::U32 op_b) {
 }
 } // Anonymous namespace
 
-void TranslatorVisitor::IADD_reg(u64 insn) {
+void TranslatorVisitor::IADD_reg(u64 insn)
+{
     IADD(*this, insn, GetReg20(insn));
 }
 
-void TranslatorVisitor::IADD_cbuf(u64 insn) {
+void TranslatorVisitor::IADD_cbuf(u64 insn)
+{
     IADD(*this, insn, GetCbuf(insn));
 }
 
-void TranslatorVisitor::IADD_imm(u64 insn) {
+void TranslatorVisitor::IADD_imm(u64 insn)
+{
     IADD(*this, insn, GetImm20(insn));
 }
 
-void TranslatorVisitor::IADD32I(u64 insn) {
+void TranslatorVisitor::IADD32I(u64 insn)
+{
     union {
         u64 raw;
         BitField<52, 1, u64> cc;

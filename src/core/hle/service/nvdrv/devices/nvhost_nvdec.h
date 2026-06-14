@@ -4,6 +4,7 @@
 #pragma once
 
 #include <memory>
+
 #include "core/hle/service/nvdrv/devices/nvhost_nvdec_common.h"
 
 namespace Service::Nvidia::Devices {

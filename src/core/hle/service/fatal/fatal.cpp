@@ -4,15 +4,18 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/fatal/fatal.h"
+
+#include <fmt/chrono.h>
+
 #include <array>
 #include <cstring>
 #include <ctime>
-#include <fmt/chrono.h>
+
 #include "common/logging.h"
 #include "common/scm_rev.h"
 #include "common/swap.h"
 #include "core/core.h"
-#include "core/hle/service/fatal/fatal.h"
 #include "core/hle/service/fatal/fatal_p.h"
 #include "core/hle/service/fatal/fatal_u.h"
 #include "core/hle/service/ipc_helpers.h"
@@ -23,7 +26,9 @@ namespace Service::Fatal {
 
 Module::Interface::Interface(std::shared_ptr<Module> module_, Core::System& system_,
                              const char* name)
-    : ServiceFramework{system_, name}, module{std::move(module_)} {}
+    : ServiceFramework{system_, name}, module{std::move(module_)}
+{
+}
 
 Module::Interface::~Interface() = default;
 
@@ -33,7 +38,8 @@ struct FatalInfo {
         AArch32,
     };
 
-    const char* ArchAsString() const {
+    const char* ArchAsString() const
+    {
         return arch == Architecture::AArch64 ? "AArch64" : "AArch32";
     }
 
@@ -66,7 +72,8 @@ enum class FatalType : u32 {
     ErrorScreen = 2,
 };
 
-static void GenerateErrorReport(Core::System& system, Result error_code, const FatalInfo& info) {
+static void GenerateErrorReport(Core::System& system, Result error_code, const FatalInfo& info)
+{
     const auto title_id = system.GetApplicationProcessProgramID();
     std::string crash_report = fmt::format(
         "Eden {}-{} crash report\n"
@@ -110,7 +117,8 @@ static void GenerateErrorReport(Core::System& system, Result error_code, const F
 }
 
 static void ThrowFatalError(Core::System& system, Result error_code, FatalType fatal_type,
-                            const FatalInfo& info) {
+                            const FatalInfo& info)
+{
     LOG_ERROR(Service_Fatal, "Threw fatal error type {} with error code {:#X}", fatal_type,
               error_code.raw);
 
@@ -129,7 +137,8 @@ static void ThrowFatalError(Core::System& system, Result error_code, FatalType f
     }
 }
 
-void Module::Interface::ThrowFatal(HLERequestContext& ctx) {
+void Module::Interface::ThrowFatal(HLERequestContext& ctx)
+{
     LOG_ERROR(Service_Fatal, "called");
     IPC::RequestParser rp{ctx};
     const auto error_code = rp.Pop<Result>();
@@ -139,7 +148,8 @@ void Module::Interface::ThrowFatal(HLERequestContext& ctx) {
     rb.Push(ResultSuccess);
 }
 
-void Module::Interface::ThrowFatalWithPolicy(HLERequestContext& ctx) {
+void Module::Interface::ThrowFatalWithPolicy(HLERequestContext& ctx)
+{
     LOG_ERROR(Service_Fatal, "called");
     IPC::RequestParser rp(ctx);
     const auto error_code = rp.Pop<Result>();
@@ -151,7 +161,8 @@ void Module::Interface::ThrowFatalWithPolicy(HLERequestContext& ctx) {
     rb.Push(ResultSuccess);
 }
 
-void Module::Interface::ThrowFatalWithCpuContext(HLERequestContext& ctx) {
+void Module::Interface::ThrowFatalWithCpuContext(HLERequestContext& ctx)
+{
     LOG_ERROR(Service_Fatal, "called");
     IPC::RequestParser rp(ctx);
     const auto error_code = rp.Pop<Result>();
@@ -167,7 +178,8 @@ void Module::Interface::ThrowFatalWithCpuContext(HLERequestContext& ctx) {
     rb.Push(ResultSuccess);
 }
 
-void LoopProcess(Core::System& system) {
+void LoopProcess(Core::System& system)
+{
     auto server_manager = std::make_unique<ServerManager>(system);
     auto module = std::make_shared<Module>();
 

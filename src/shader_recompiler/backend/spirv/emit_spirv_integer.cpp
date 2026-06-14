@@ -9,7 +9,8 @@
 
 namespace Shader::Backend::SPIRV {
 namespace {
-void SetZeroFlag(EmitContext& ctx, IR::Inst* inst, Id result) {
+void SetZeroFlag(EmitContext& ctx, IR::Inst* inst, Id result)
+{
     IR::Inst* const zero{inst->GetAssociatedPseudoOperation(IR::Opcode::GetZeroFromOp)};
     if (!zero) {
         return;
@@ -18,7 +19,8 @@ void SetZeroFlag(EmitContext& ctx, IR::Inst* inst, Id result) {
     zero->Invalidate();
 }
 
-void SetSignFlag(EmitContext& ctx, IR::Inst* inst, Id result) {
+void SetSignFlag(EmitContext& ctx, IR::Inst* inst, Id result)
+{
     IR::Inst* const sign{inst->GetAssociatedPseudoOperation(IR::Opcode::GetSignFromOp)};
     if (!sign) {
         return;
@@ -28,7 +30,8 @@ void SetSignFlag(EmitContext& ctx, IR::Inst* inst, Id result) {
 }
 } // Anonymous namespace
 
-Id EmitIAdd32(EmitContext& ctx, IR::Inst* inst, Id a, Id b) {
+Id EmitIAdd32(EmitContext& ctx, IR::Inst* inst, Id a, Id b)
+{
     Id result{};
     if (IR::Inst* const carry{inst->GetAssociatedPseudoOperation(IR::Opcode::GetCarryFromOp)}) {
         const Id carry_type{ctx.TypeStruct(ctx.U32[1], ctx.U32[1])};
@@ -58,130 +61,158 @@ Id EmitIAdd32(EmitContext& ctx, IR::Inst* inst, Id a, Id b) {
     return result;
 }
 
-Id EmitIAdd64(EmitContext& ctx, Id a, Id b) {
+Id EmitIAdd64(EmitContext& ctx, Id a, Id b)
+{
     return ctx.OpIAdd(ctx.U64, a, b);
 }
 
-Id EmitISub32(EmitContext& ctx, Id a, Id b) {
+Id EmitISub32(EmitContext& ctx, Id a, Id b)
+{
     return ctx.OpISub(ctx.U32[1], a, b);
 }
 
-Id EmitISub64(EmitContext& ctx, Id a, Id b) {
+Id EmitISub64(EmitContext& ctx, Id a, Id b)
+{
     return ctx.OpISub(ctx.U64, a, b);
 }
 
-Id EmitIMul32(EmitContext& ctx, Id a, Id b) {
+Id EmitIMul32(EmitContext& ctx, Id a, Id b)
+{
     return ctx.OpIMul(ctx.U32[1], a, b);
 }
 
-Id EmitSDiv32(EmitContext& ctx, Id a, Id b) {
+Id EmitSDiv32(EmitContext& ctx, Id a, Id b)
+{
     return ctx.OpSDiv(ctx.U32[1], a, b);
 }
 
-Id EmitUDiv32(EmitContext& ctx, Id a, Id b) {
+Id EmitUDiv32(EmitContext& ctx, Id a, Id b)
+{
     return ctx.OpUDiv(ctx.U32[1], a, b);
 }
 
-Id EmitINeg32(EmitContext& ctx, Id value) {
+Id EmitINeg32(EmitContext& ctx, Id value)
+{
     return ctx.OpSNegate(ctx.U32[1], value);
 }
 
-Id EmitINeg64(EmitContext& ctx, Id value) {
+Id EmitINeg64(EmitContext& ctx, Id value)
+{
     return ctx.OpSNegate(ctx.U64, value);
 }
 
-Id EmitIAbs32(EmitContext& ctx, Id value) {
+Id EmitIAbs32(EmitContext& ctx, Id value)
+{
     return ctx.OpSAbs(ctx.U32[1], value);
 }
 
-Id EmitIAbs64(EmitContext& ctx, Id value) {
+Id EmitIAbs64(EmitContext& ctx, Id value)
+{
     return ctx.OpSAbs(ctx.U64, value);
 }
 
-Id EmitShiftLeftLogical32(EmitContext& ctx, Id base, Id shift) {
+Id EmitShiftLeftLogical32(EmitContext& ctx, Id base, Id shift)
+{
     return ctx.OpShiftLeftLogical(ctx.U32[1], base, shift);
 }
 
-Id EmitShiftLeftLogical64(EmitContext& ctx, Id base, Id shift) {
+Id EmitShiftLeftLogical64(EmitContext& ctx, Id base, Id shift)
+{
     return ctx.OpShiftLeftLogical(ctx.U64, base, shift);
 }
 
-Id EmitShiftRightLogical32(EmitContext& ctx, Id base, Id shift) {
+Id EmitShiftRightLogical32(EmitContext& ctx, Id base, Id shift)
+{
     return ctx.OpShiftRightLogical(ctx.U32[1], base, shift);
 }
 
-Id EmitShiftRightLogical64(EmitContext& ctx, Id base, Id shift) {
+Id EmitShiftRightLogical64(EmitContext& ctx, Id base, Id shift)
+{
     return ctx.OpShiftRightLogical(ctx.U64, base, shift);
 }
 
-Id EmitShiftRightArithmetic32(EmitContext& ctx, Id base, Id shift) {
+Id EmitShiftRightArithmetic32(EmitContext& ctx, Id base, Id shift)
+{
     return ctx.OpShiftRightArithmetic(ctx.U32[1], base, shift);
 }
 
-Id EmitShiftRightArithmetic64(EmitContext& ctx, Id base, Id shift) {
+Id EmitShiftRightArithmetic64(EmitContext& ctx, Id base, Id shift)
+{
     return ctx.OpShiftRightArithmetic(ctx.U64, base, shift);
 }
 
-Id EmitBitwiseAnd32(EmitContext& ctx, IR::Inst* inst, Id a, Id b) {
+Id EmitBitwiseAnd32(EmitContext& ctx, IR::Inst* inst, Id a, Id b)
+{
     const Id result{ctx.OpBitwiseAnd(ctx.U32[1], a, b)};
     SetZeroFlag(ctx, inst, result);
     SetSignFlag(ctx, inst, result);
     return result;
 }
 
-Id EmitBitwiseOr32(EmitContext& ctx, IR::Inst* inst, Id a, Id b) {
+Id EmitBitwiseOr32(EmitContext& ctx, IR::Inst* inst, Id a, Id b)
+{
     const Id result{ctx.OpBitwiseOr(ctx.U32[1], a, b)};
     SetZeroFlag(ctx, inst, result);
     SetSignFlag(ctx, inst, result);
     return result;
 }
 
-Id EmitBitwiseXor32(EmitContext& ctx, IR::Inst* inst, Id a, Id b) {
+Id EmitBitwiseXor32(EmitContext& ctx, IR::Inst* inst, Id a, Id b)
+{
     const Id result{ctx.OpBitwiseXor(ctx.U32[1], a, b)};
     SetZeroFlag(ctx, inst, result);
     SetSignFlag(ctx, inst, result);
     return result;
 }
 
-Id EmitBitFieldInsert(EmitContext& ctx, Id base, Id insert, Id offset, Id count) {
+Id EmitBitFieldInsert(EmitContext& ctx, Id base, Id insert, Id offset, Id count)
+{
     return ctx.OpBitFieldInsert(ctx.U32[1], base, insert, offset, count);
 }
 
-Id EmitBitFieldSExtract(EmitContext& ctx, IR::Inst* inst, Id base, Id offset, Id count) {
+Id EmitBitFieldSExtract(EmitContext& ctx, IR::Inst* inst, Id base, Id offset, Id count)
+{
     const Id result{ctx.OpBitFieldSExtract(ctx.U32[1], base, offset, count)};
     SetZeroFlag(ctx, inst, result);
     SetSignFlag(ctx, inst, result);
     return result;
 }
 
-Id EmitBitFieldUExtract(EmitContext& ctx, IR::Inst* inst, Id base, Id offset, Id count) {
+Id EmitBitFieldUExtract(EmitContext& ctx, IR::Inst* inst, Id base, Id offset, Id count)
+{
     const Id result{ctx.OpBitFieldUExtract(ctx.U32[1], base, offset, count)};
     SetZeroFlag(ctx, inst, result);
     SetSignFlag(ctx, inst, result);
     return result;
 }
 
-Id EmitBitReverse32(EmitContext& ctx, Id value) {
+Id EmitBitReverse32(EmitContext& ctx, Id value)
+{
     return ctx.OpBitReverse(ctx.U32[1], value);
 }
 
-Id EmitBitCount32(EmitContext& ctx, Id value) {
+Id EmitBitCount32(EmitContext& ctx, Id value)
+{
     return ctx.OpBitCount(ctx.U32[1], value);
 }
 
-Id EmitBitwiseNot32(EmitContext& ctx, Id value) {
+Id EmitBitwiseNot32(EmitContext& ctx, Id value)
+{
     return ctx.OpNot(ctx.U32[1], value);
 }
 
-Id EmitFindSMsb32(EmitContext& ctx, Id value) {
+Id EmitFindSMsb32(EmitContext& ctx, Id value)
+{
     return ctx.OpFindSMsb(ctx.U32[1], value);
 }
 
-Id EmitFindUMsb32(EmitContext& ctx, Id value) {
+Id EmitFindUMsb32(EmitContext& ctx, Id value)
+{
     return ctx.OpFindUMsb(ctx.U32[1], value);
 }
 
-Id EmitSMin32(EmitContext& ctx, Id a, Id b) {
+Id EmitSMin32(EmitContext& ctx, Id a, Id b)
+{
     const bool is_broken{ctx.profile.has_broken_signed_operations};
     if (is_broken) {
         a = ctx.OpBitcast(ctx.S32[1], a);
@@ -191,11 +222,13 @@ Id EmitSMin32(EmitContext& ctx, Id a, Id b) {
     return is_broken ? ctx.OpBitcast(ctx.U32[1], result) : result;
 }
 
-Id EmitUMin32(EmitContext& ctx, Id a, Id b) {
+Id EmitUMin32(EmitContext& ctx, Id a, Id b)
+{
     return ctx.OpUMin(ctx.U32[1], a, b);
 }
 
-Id EmitSMax32(EmitContext& ctx, Id a, Id b) {
+Id EmitSMax32(EmitContext& ctx, Id a, Id b)
+{
     const bool is_broken{ctx.profile.has_broken_signed_operations};
     if (is_broken) {
         a = ctx.OpBitcast(ctx.S32[1], a);
@@ -205,11 +238,13 @@ Id EmitSMax32(EmitContext& ctx, Id a, Id b) {
     return is_broken ? ctx.OpBitcast(ctx.U32[1], result) : result;
 }
 
-Id EmitUMax32(EmitContext& ctx, Id a, Id b) {
+Id EmitUMax32(EmitContext& ctx, Id a, Id b)
+{
     return ctx.OpUMax(ctx.U32[1], a, b);
 }
 
-Id EmitSClamp32(EmitContext& ctx, IR::Inst* inst, Id value, Id min, Id max) {
+Id EmitSClamp32(EmitContext& ctx, IR::Inst* inst, Id value, Id min, Id max)
+{
     Id result{};
     if (ctx.profile.has_broken_signed_operations || ctx.profile.has_broken_spirv_clamp) {
         value = ctx.OpBitcast(ctx.S32[1], value);
@@ -229,7 +264,8 @@ Id EmitSClamp32(EmitContext& ctx, IR::Inst* inst, Id value, Id min, Id max) {
     return result;
 }
 
-Id EmitUClamp32(EmitContext& ctx, IR::Inst* inst, Id value, Id min, Id max) {
+Id EmitUClamp32(EmitContext& ctx, IR::Inst* inst, Id value, Id min, Id max)
+{
     Id result{};
     if (ctx.profile.has_broken_spirv_clamp) {
         result = ctx.OpUMax(ctx.U32[1], ctx.OpUMin(ctx.U32[1], value, max), min);
@@ -241,43 +277,53 @@ Id EmitUClamp32(EmitContext& ctx, IR::Inst* inst, Id value, Id min, Id max) {
     return result;
 }
 
-Id EmitSLessThan(EmitContext& ctx, Id lhs, Id rhs) {
+Id EmitSLessThan(EmitContext& ctx, Id lhs, Id rhs)
+{
     return ctx.OpSLessThan(ctx.U1, lhs, rhs);
 }
 
-Id EmitULessThan(EmitContext& ctx, Id lhs, Id rhs) {
+Id EmitULessThan(EmitContext& ctx, Id lhs, Id rhs)
+{
     return ctx.OpULessThan(ctx.U1, lhs, rhs);
 }
 
-Id EmitIEqual(EmitContext& ctx, Id lhs, Id rhs) {
+Id EmitIEqual(EmitContext& ctx, Id lhs, Id rhs)
+{
     return ctx.OpIEqual(ctx.U1, lhs, rhs);
 }
 
-Id EmitSLessThanEqual(EmitContext& ctx, Id lhs, Id rhs) {
+Id EmitSLessThanEqual(EmitContext& ctx, Id lhs, Id rhs)
+{
     return ctx.OpSLessThanEqual(ctx.U1, lhs, rhs);
 }
 
-Id EmitULessThanEqual(EmitContext& ctx, Id lhs, Id rhs) {
+Id EmitULessThanEqual(EmitContext& ctx, Id lhs, Id rhs)
+{
     return ctx.OpULessThanEqual(ctx.U1, lhs, rhs);
 }
 
-Id EmitSGreaterThan(EmitContext& ctx, Id lhs, Id rhs) {
+Id EmitSGreaterThan(EmitContext& ctx, Id lhs, Id rhs)
+{
     return ctx.OpSGreaterThan(ctx.U1, lhs, rhs);
 }
 
-Id EmitUGreaterThan(EmitContext& ctx, Id lhs, Id rhs) {
+Id EmitUGreaterThan(EmitContext& ctx, Id lhs, Id rhs)
+{
     return ctx.OpUGreaterThan(ctx.U1, lhs, rhs);
 }
 
-Id EmitINotEqual(EmitContext& ctx, Id lhs, Id rhs) {
+Id EmitINotEqual(EmitContext& ctx, Id lhs, Id rhs)
+{
     return ctx.OpINotEqual(ctx.U1, lhs, rhs);
 }
 
-Id EmitSGreaterThanEqual(EmitContext& ctx, Id lhs, Id rhs) {
+Id EmitSGreaterThanEqual(EmitContext& ctx, Id lhs, Id rhs)
+{
     return ctx.OpSGreaterThanEqual(ctx.U1, lhs, rhs);
 }
 
-Id EmitUGreaterThanEqual(EmitContext& ctx, Id lhs, Id rhs) {
+Id EmitUGreaterThanEqual(EmitContext& ctx, Id lhs, Id rhs)
+{
     return ctx.OpUGreaterThanEqual(ctx.U1, lhs, rhs);
 }
 

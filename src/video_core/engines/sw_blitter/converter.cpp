@@ -4,14 +4,17 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#include <array>
-#include <cmath>
-#include <span>
-#include <ankerl/unordered_dense.h>
-#include <bit>
-#include <numeric>
-#include "common/assert.h"
 #include "video_core/engines/sw_blitter/converter.h"
+
+#include <ankerl/unordered_dense.h>
+
+#include <array>
+#include <bit>
+#include <cmath>
+#include <numeric>
+#include <span>
+
+#include "common/assert.h"
 #include "video_core/surface.h"
 #include "video_core/textures/decoders.h"
 
@@ -616,8 +619,7 @@ struct X8B8G8R8_SRGBTraits {
         Swizzle::None, Swizzle::B, Swizzle::G, Swizzle::R};
 };
 
-template <class ConverterTraits>
-class ConverterImpl : public Converter {
+template<class ConverterTraits> class ConverterImpl : public Converter {
 private:
     static constexpr size_t num_components = ConverterTraits::num_components;
     static constexpr std::array<ComponentType, num_components> component_types =
@@ -627,7 +629,8 @@ private:
     static constexpr std::array<Swizzle, num_components> component_swizzle =
         ConverterTraits::component_swizzle;
 
-    static constexpr size_t CalculateByteSize() {
+    static constexpr size_t CalculateByteSize()
+    {
         size_t size = 0;
         for (const size_t component_size : component_sizes) {
             size += component_size;
@@ -643,8 +646,9 @@ private:
         (total_bytes_per_pixel + sizeof(u32) - 1U) / sizeof(u32);
     static constexpr size_t components_per_ir_rep = 4;
 
-    template <bool get_offsets>
-    static constexpr std::array<size_t, num_components> GetBoundWordsOffsets() {
+    template<bool get_offsets>
+    static constexpr std::array<size_t, num_components> GetBoundWordsOffsets()
+    {
         std::array<size_t, num_components> result;
         result.fill(0);
         constexpr size_t total_bits_per_word = sizeof(u32) * 8;
@@ -674,7 +678,8 @@ private:
     static constexpr std::array<size_t, num_components> bound_offsets =
         GetBoundWordsOffsets<true>();
 
-    static constexpr std::array<u32, num_components> GetComponentsMask() {
+    static constexpr std::array<u32, num_components> GetComponentsMask()
+    {
         std::array<u32, num_components> result;
         for (size_t i = 0; i < num_components; i++) {
             result[i] = (((u32)~0) >> (8 * sizeof(u32) - component_sizes[i])) << bound_offsets[i];
@@ -686,8 +691,9 @@ private:
 
     // We are forcing inline so the compiler can SIMD the conversations, since it may do 4 function
     // calls, it may fail to detect the benefit of inlining.
-    template <size_t which_component>
-    FORCE_INLINE void ConvertToComponent(u32 which_word, f32& out_component) {
+    template<size_t which_component>
+    FORCE_INLINE void ConvertToComponent(u32 which_word, f32& out_component)
+    {
         const u32 value = (which_word >> bound_offsets[which_component]) &
                           static_cast<u32>((1ULL << component_sizes[which_component]) - 1ULL);
         const auto sign_extend = [](u32 base_value, size_t bits) {
@@ -745,8 +751,8 @@ private:
                 static constexpr u32 sign_mask = 0x8000;
                 static constexpr u32 mantissa_mask = 0x8000;
                 out_component = std::bit_cast<f32>(((value & sign_mask) << 16) |
-                                                     (((value & 0x7c00) + 0x1C000) << 13) |
-                                                     ((value & mantissa_mask) << 13));
+                                                   (((value & 0x7c00) + 0x1C000) << 13) |
+                                                   ((value & mantissa_mask) << 13));
             } else {
                 out_component = from_fp_n(value, component_sizes[which_component],
                                           component_sizes[which_component] - 5);
@@ -766,8 +772,9 @@ private:
 
     // We are forcing inline so the compiler can SIMD the conversations, since it may do 4 function
     // calls, it may fail to detect the benefit of inlining.
-    template <size_t which_component>
-    FORCE_INLINE void ConvertFromComponent(u32& which_word, f32 in_component) {
+    template<size_t which_component>
+    FORCE_INLINE void ConvertFromComponent(u32& which_word, f32 in_component)
+    {
         const auto insert_to_word = [&]<typename T>(T new_word) {
             which_word |= (static_cast<u32>(new_word) << bound_offsets[which_component]) &
                           component_mask[which_component];
@@ -833,7 +840,8 @@ private:
     }
 
 public:
-    void ConvertTo(std::span<const u8> input, std::span<f32> output) override {
+    void ConvertTo(std::span<const u8> input, std::span<f32> output) override
+    {
         const size_t num_pixels = output.size() / components_per_ir_rep;
         for (size_t pixel = 0; pixel < num_pixels; pixel++) {
             std::array<u32, total_words_per_pixel> words{};
@@ -883,7 +891,8 @@ public:
         }
     }
 
-    void ConvertFrom(std::span<const f32> input, std::span<u8> output) override {
+    void ConvertFrom(std::span<const f32> input, std::span<u8> output) override
+    {
         const size_t num_pixels = output.size() / total_bytes_per_pixel;
         for (size_t pixel = 0; pixel < num_pixels; pixel++) {
             std::span<const f32> old_components(&input[pixel * components_per_ir_rep],
@@ -927,13 +936,15 @@ struct ConverterFactory::ConverterFactoryImpl {
     ankerl::unordered_dense::map<RenderTargetFormat, std::unique_ptr<Converter>> converters_cache;
 };
 
-ConverterFactory::ConverterFactory() {
+ConverterFactory::ConverterFactory()
+{
     impl = std::make_unique<ConverterFactoryImpl>();
 }
 
 ConverterFactory::~ConverterFactory() = default;
 
-Converter* ConverterFactory::GetFormatConverter(RenderTargetFormat format) {
+Converter* ConverterFactory::GetFormatConverter(RenderTargetFormat format)
+{
     auto it = impl->converters_cache.find(format);
     if (it == impl->converters_cache.end()) [[unlikely]] {
         return BuildConverter(format);
@@ -943,10 +954,12 @@ Converter* ConverterFactory::GetFormatConverter(RenderTargetFormat format) {
 
 class NullConverter : public Converter {
 public:
-    void ConvertTo([[maybe_unused]] std::span<const u8> input, std::span<f32> output) override {
+    void ConvertTo([[maybe_unused]] std::span<const u8> input, std::span<f32> output) override
+    {
         std::fill(output.begin(), output.end(), 0.0f);
     }
-    void ConvertFrom([[maybe_unused]] std::span<const f32> input, std::span<u8> output) override {
+    void ConvertFrom([[maybe_unused]] std::span<const f32> input, std::span<u8> output) override
+    {
         const u8 fill_value = 0U;
         std::fill(output.begin(), output.end(), fill_value);
     }
@@ -954,7 +967,8 @@ public:
     ~NullConverter() = default;
 };
 
-Converter* ConverterFactory::BuildConverter(RenderTargetFormat format) {
+Converter* ConverterFactory::BuildConverter(RenderTargetFormat format)
+{
     switch (format) {
     case RenderTargetFormat::R32G32B32A32_FLOAT:
         return impl->converters_cache

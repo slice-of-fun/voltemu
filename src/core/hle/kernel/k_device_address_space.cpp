@@ -1,25 +1,30 @@
 // SPDX-FileCopyrightText: Copyright 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/kernel/k_device_address_space.h"
+
 #include "common/assert.h"
 #include "core/core.h"
-#include "core/hle/kernel/k_device_address_space.h"
 #include "core/hle/kernel/kernel.h"
 #include "core/hle/kernel/svc_results.h"
 
 namespace Kernel {
 
 KDeviceAddressSpace::KDeviceAddressSpace(KernelCore& kernel)
-    : KAutoObjectWithSlabHeapAndContainer(kernel), m_lock(kernel), m_is_initialized(false) {}
+    : KAutoObjectWithSlabHeapAndContainer(kernel), m_lock(kernel), m_is_initialized(false)
+{
+}
 KDeviceAddressSpace::~KDeviceAddressSpace() = default;
 
-void KDeviceAddressSpace::Initialize() {
+void KDeviceAddressSpace::Initialize()
+{
     // This just forwards to the device page table manager.
     // KDevicePageTable::Initialize();
 }
 
 // Member functions.
-Result KDeviceAddressSpace::Initialize(u64 address, u64 size) {
+Result KDeviceAddressSpace::Initialize(u64 address, u64 size)
+{
     // Initialize the device page table.
     // R_TRY(m_table.Initialize(address, size));
 
@@ -31,12 +36,14 @@ Result KDeviceAddressSpace::Initialize(u64 address, u64 size) {
     R_SUCCEED();
 }
 
-void KDeviceAddressSpace::Finalize() {
+void KDeviceAddressSpace::Finalize()
+{
     // Finalize the table.
     // m_table.Finalize();
 }
 
-Result KDeviceAddressSpace::Attach(Svc::DeviceName device_name) {
+Result KDeviceAddressSpace::Attach(Svc::DeviceName device_name)
+{
     // Lock the address space.
     KScopedLightLock lk(m_lock);
 
@@ -45,7 +52,8 @@ Result KDeviceAddressSpace::Attach(Svc::DeviceName device_name) {
     R_SUCCEED();
 }
 
-Result KDeviceAddressSpace::Detach(Svc::DeviceName device_name) {
+Result KDeviceAddressSpace::Detach(Svc::DeviceName device_name)
+{
     // Lock the address space.
     KScopedLightLock lk(m_lock);
 
@@ -55,7 +63,8 @@ Result KDeviceAddressSpace::Detach(Svc::DeviceName device_name) {
 }
 
 Result KDeviceAddressSpace::Map(KProcessPageTable* page_table, KProcessAddress process_address,
-                                size_t size, u64 device_address, u32 option, bool is_aligned) {
+                                size_t size, u64 device_address, u32 option, bool is_aligned)
+{
     // Check that the address falls within the space.
     R_UNLESS((m_space_address <= device_address &&
               device_address + size - 1 <= m_space_address + m_space_size - 1),
@@ -85,7 +94,8 @@ Result KDeviceAddressSpace::Map(KProcessPageTable* page_table, KProcessAddress p
                                                    is_aligned, true));
 
     // Ensure that if we fail, we don't keep unmapped pages locked.
-    ON_RESULT_FAILURE {
+    ON_RESULT_FAILURE
+    {
         ASSERT(page_table->UnlockForDeviceAddressSpace(process_address, size) == ResultSuccess);
     };
 
@@ -114,7 +124,8 @@ Result KDeviceAddressSpace::Map(KProcessPageTable* page_table, KProcessAddress p
 }
 
 Result KDeviceAddressSpace::Unmap(KProcessPageTable* page_table, KProcessAddress process_address,
-                                  size_t size, u64 device_address) {
+                                  size_t size, u64 device_address)
+{
     // Check that the address falls within the space.
     R_UNLESS((m_space_address <= device_address &&
               device_address + size - 1 <= m_space_address + m_space_size - 1),

@@ -6,14 +6,15 @@
 
 #pragma once
 
-#include <array>
-#include <chrono>
 #include <fmt/ranges.h>
 
+#include <array>
+#include <chrono>
+
 #include "common/common_types.h"
+#include "common/cpu_features.h"
 #include "common/intrusive_list.h"
 #include "common/uuid.h"
-#include "common/cpu_features.h"
 #include "core/hle/kernel/k_event.h"
 #include "core/hle/service/kernel_helpers.h"
 #include "core/hle/service/psc/time/errors.h"
@@ -32,7 +33,8 @@ enum class TimeType : u8 {
 };
 
 struct SteadyClockTimePoint {
-    constexpr bool IdMatches(const SteadyClockTimePoint& other) const {
+    constexpr bool IdMatches(const SteadyClockTimePoint& other) const
+    {
         return clock_source_id == other.clock_source_id;
     }
     bool operator==(const SteadyClockTimePoint& other) const = default;
@@ -133,7 +135,8 @@ struct OperationEvent : public Common::IntrusiveListBaseNode<OperationEvent> {
     Kernel::KEvent* m_event{};
 };
 
-constexpr inline std::chrono::nanoseconds ConvertToTimeSpan(s64 ticks) {
+constexpr inline std::chrono::nanoseconds ConvertToTimeSpan(s64 ticks)
+{
     constexpr auto one_second_ns{
         std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::seconds(1)).count()};
 
@@ -153,7 +156,8 @@ constexpr inline std::chrono::nanoseconds ConvertToTimeSpan(s64 ticks) {
 }
 
 constexpr inline Result GetSpanBetweenTimePoints(s64* out_seconds, const SteadyClockTimePoint& a,
-                                                 const SteadyClockTimePoint& b) {
+                                                 const SteadyClockTimePoint& b)
+{
     R_UNLESS(out_seconds, ResultInvalidArgument);
     R_UNLESS(a.IdMatches(b), ResultInvalidArgument);
     R_UNLESS(a.time_point >= 0 || b.time_point <= a.time_point + (std::numeric_limits<s64>::max)(),
@@ -167,10 +171,10 @@ constexpr inline Result GetSpanBetweenTimePoints(s64* out_seconds, const SteadyC
 
 } // namespace Service::PSC::Time
 
-template <>
-struct fmt::formatter<Service::PSC::Time::TimeType> : fmt::formatter<fmt::string_view> {
-    template <typename FormatContext>
-    auto format(Service::PSC::Time::TimeType type, FormatContext& ctx) const {
+template<> struct fmt::formatter<Service::PSC::Time::TimeType> : fmt::formatter<fmt::string_view> {
+    template<typename FormatContext>
+    auto format(Service::PSC::Time::TimeType type, FormatContext& ctx) const
+    {
         const string_view name = [type] {
             using Service::PSC::Time::TimeType;
             switch (type) {
@@ -187,66 +191,73 @@ struct fmt::formatter<Service::PSC::Time::TimeType> : fmt::formatter<fmt::string
     }
 };
 
-template <>
+template<>
 struct fmt::formatter<Service::PSC::Time::SteadyClockTimePoint> : fmt::formatter<fmt::string_view> {
-    template <typename FormatContext>
+    template<typename FormatContext>
     auto format(const Service::PSC::Time::SteadyClockTimePoint& time_point,
-                FormatContext& ctx) const {
+                FormatContext& ctx) const
+    {
         return fmt::format_to(ctx.out(), "[time_point={}]", time_point.time_point);
     }
 };
 
-template <>
+template<>
 struct fmt::formatter<Service::PSC::Time::SystemClockContext> : fmt::formatter<fmt::string_view> {
-    template <typename FormatContext>
-    auto format(const Service::PSC::Time::SystemClockContext& context, FormatContext& ctx) const {
+    template<typename FormatContext>
+    auto format(const Service::PSC::Time::SystemClockContext& context, FormatContext& ctx) const
+    {
         return fmt::format_to(ctx.out(), "[offset={} steady_time_point={}]", context.offset,
                               context.steady_time_point.time_point);
     }
 };
 
-template <>
+template<>
 struct fmt::formatter<Service::PSC::Time::CalendarTime> : fmt::formatter<fmt::string_view> {
-    template <typename FormatContext>
-    auto format(const Service::PSC::Time::CalendarTime& calendar, FormatContext& ctx) const {
+    template<typename FormatContext>
+    auto format(const Service::PSC::Time::CalendarTime& calendar, FormatContext& ctx) const
+    {
         return fmt::format_to(ctx.out(), "[{:02}/{:02}/{:04} {:02}:{:02}:{:02}]", u8(calendar.day),
-                              u8(calendar.month), u16(calendar.year), u8(calendar.hour), u8(calendar.minute),
-                              u8(calendar.second));
+                              u8(calendar.month), u16(calendar.year), u8(calendar.hour),
+                              u8(calendar.minute), u8(calendar.second));
     }
 };
 
-template <>
+template<>
 struct fmt::formatter<Service::PSC::Time::CalendarAdditionalInfo>
     : fmt::formatter<fmt::string_view> {
-    template <typename FormatContext>
+    template<typename FormatContext>
     auto format(const Service::PSC::Time::CalendarAdditionalInfo& additional,
-                FormatContext& ctx) const {
+                FormatContext& ctx) const
+    {
         return fmt::format_to(ctx.out(), "[weekday={} yearday={} name={} is_dst={} ut_offset={}]",
                               additional.day_of_week, additional.day_of_year,
                               additional.name.data(), additional.is_dst, additional.ut_offset);
     }
 };
 
-template <>
+template<>
 struct fmt::formatter<Service::PSC::Time::LocationName> : fmt::formatter<fmt::string_view> {
-    template <typename FormatContext>
-    auto format(const Service::PSC::Time::LocationName& name, FormatContext& ctx) const {
+    template<typename FormatContext>
+    auto format(const Service::PSC::Time::LocationName& name, FormatContext& ctx) const
+    {
         return fmt::formatter<string_view>::format(name.data(), ctx);
     }
 };
 
-template <>
+template<>
 struct fmt::formatter<Service::PSC::Time::RuleVersion> : fmt::formatter<fmt::string_view> {
-    template <typename FormatContext>
-    auto format(const Service::PSC::Time::RuleVersion& version, FormatContext& ctx) const {
+    template<typename FormatContext>
+    auto format(const Service::PSC::Time::RuleVersion& version, FormatContext& ctx) const
+    {
         return fmt::formatter<string_view>::format(version.data(), ctx);
     }
 };
 
-template <>
+template<>
 struct fmt::formatter<Service::PSC::Time::ClockSnapshot> : fmt::formatter<fmt::string_view> {
-    template <typename FormatContext>
-    auto format(const Service::PSC::Time::ClockSnapshot& snapshot, FormatContext& ctx) const {
+    template<typename FormatContext>
+    auto format(const Service::PSC::Time::ClockSnapshot& snapshot, FormatContext& ctx) const
+    {
         return fmt::format_to(
             ctx.out(),
             "[user_context={} network_context={} user_time={} network_time={} "
@@ -262,12 +273,13 @@ struct fmt::formatter<Service::PSC::Time::ClockSnapshot> : fmt::formatter<fmt::s
     }
 };
 
-template <>
+template<>
 struct fmt::formatter<Service::PSC::Time::ContinuousAdjustmentTimePoint>
     : fmt::formatter<fmt::string_view> {
-    template <typename FormatContext>
+    template<typename FormatContext>
     auto format(const Service::PSC::Time::ContinuousAdjustmentTimePoint& time_point,
-                FormatContext& ctx) const {
+                FormatContext& ctx) const
+    {
         return fmt::format_to(ctx.out(),
                               "[rtc_offset={} diff_scale={} shift_amount={} lower={} upper={}]",
                               time_point.rtc_offset, time_point.diff_scale, time_point.shift_amount,

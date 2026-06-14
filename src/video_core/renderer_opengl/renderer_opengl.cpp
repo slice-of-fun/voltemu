@@ -4,12 +4,14 @@
 // SPDX-FileCopyrightText: 2014 Citra Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "video_core/renderer_opengl/renderer_opengl.h"
+
+#include <glad/glad.h>
+
 #include <algorithm>
 #include <cstddef>
 #include <cstdlib>
 #include <memory>
-
-#include <glad/glad.h>
 
 #include "common/assert.h"
 #include "common/logging.h"
@@ -22,12 +24,12 @@
 #include "video_core/renderer_opengl/gl_rasterizer.h"
 #include "video_core/renderer_opengl/gl_shader_manager.h"
 #include "video_core/renderer_opengl/gl_shader_util.h"
-#include "video_core/renderer_opengl/renderer_opengl.h"
 #include "video_core/textures/decoders.h"
 
 namespace OpenGL {
 namespace {
-const char* GetSource(GLenum source) {
+const char* GetSource(GLenum source)
+{
     switch (source) {
     case GL_DEBUG_SOURCE_API:
         return "API";
@@ -47,7 +49,8 @@ const char* GetSource(GLenum source) {
     }
 }
 
-const char* GetType(GLenum type) {
+const char* GetType(GLenum type)
+{
     switch (type) {
     case GL_DEBUG_TYPE_ERROR:
         return "ERROR";
@@ -70,7 +73,8 @@ const char* GetType(GLenum type) {
 }
 
 void APIENTRY DebugHandler(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
-                           const GLchar* message, const void* user_param) {
+                           const GLchar* message, const void* user_param)
+{
     constexpr std::string_view format = "{} {} {}: {}";
     const char* const str_source = GetSource(source);
     const char* const str_type = GetType(type);
@@ -96,7 +100,8 @@ RendererOpenGL::RendererOpenGL(Core::Frontend::EmuWindow& emu_window_,
     : RendererBase{emu_window_, std::move(context_)}, emu_window{emu_window_},
       device_memory{device_memory_}, gpu{gpu_}, device{emu_window_}, state_tracker{},
       program_manager{device},
-      rasterizer(emu_window, gpu, device_memory, device, program_manager, state_tracker) {
+      rasterizer(emu_window, gpu, device_memory, device, program_manager, state_tracker)
+{
     if (Settings::values.renderer_debug && GLAD_GL_KHR_debug) {
         glEnable(GL_DEBUG_OUTPUT);
         glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
@@ -134,7 +139,8 @@ RendererOpenGL::RendererOpenGL(Core::Frontend::EmuWindow& emu_window_,
 
 RendererOpenGL::~RendererOpenGL() = default;
 
-void RendererOpenGL::Composite(std::span<const Tegra::FramebufferConfig> framebuffers) {
+void RendererOpenGL::Composite(std::span<const Tegra::FramebufferConfig> framebuffers)
+{
     if (framebuffers.empty()) {
         return;
     }
@@ -154,7 +160,8 @@ void RendererOpenGL::Composite(std::span<const Tegra::FramebufferConfig> framebu
     render_window.OnFrameDisplayed();
 }
 
-void RendererOpenGL::AddTelemetryFields() {
+void RendererOpenGL::AddTelemetryFields()
+{
     const char* const gl_version{reinterpret_cast<char const*>(glGetString(GL_VERSION))};
     const char* const gpu_vendor{reinterpret_cast<char const*>(glGetString(GL_VENDOR))};
     const char* const gpu_model{reinterpret_cast<char const*>(glGetString(GL_RENDERER))};
@@ -165,7 +172,8 @@ void RendererOpenGL::AddTelemetryFields() {
 }
 
 void RendererOpenGL::RenderToBuffer(std::span<const Tegra::FramebufferConfig> framebuffers,
-                                    const Layout::FramebufferLayout& layout, void* dst) {
+                                    const Layout::FramebufferLayout& layout, void* dst)
+{
     GLint old_read_fb;
     GLint old_draw_fb;
     glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &old_read_fb);
@@ -194,7 +202,8 @@ void RendererOpenGL::RenderToBuffer(std::span<const Tegra::FramebufferConfig> fr
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, old_draw_fb);
 }
 
-void RendererOpenGL::RenderScreenshot(std::span<const Tegra::FramebufferConfig> framebuffers) {
+void RendererOpenGL::RenderScreenshot(std::span<const Tegra::FramebufferConfig> framebuffers)
+{
     if (!renderer_settings.screenshot_requested) {
         return;
     }
@@ -207,7 +216,8 @@ void RendererOpenGL::RenderScreenshot(std::span<const Tegra::FramebufferConfig> 
 }
 
 void RendererOpenGL::RenderAppletCaptureLayer(
-    std::span<const Tegra::FramebufferConfig> framebuffers) {
+    std::span<const Tegra::FramebufferConfig> framebuffers)
+{
     GLint old_read_fb;
     GLint old_draw_fb;
     glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &old_read_fb);
@@ -223,7 +233,8 @@ void RendererOpenGL::RenderAppletCaptureLayer(
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, old_draw_fb);
 }
 
-std::vector<u8> RendererOpenGL::GetAppletCaptureBuffer() {
+std::vector<u8> RendererOpenGL::GetAppletCaptureBuffer()
+{
     using namespace VideoCore::Capture;
 
     std::vector<u8> linear(TiledSize);

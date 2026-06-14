@@ -4,17 +4,21 @@
 // SPDX-FileCopyrightText: 2017 Citra Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "yuzu/compatdb.h"
+
+#include <qtconcurrentrun.h>
+
 #include <QButtonGroup>
 #include <QMessageBox>
 #include <QPushButton>
-#include <qtconcurrentrun.h>
+
 #include "common/logging.h"
 #include "ui_compatdb.h"
-#include "yuzu/compatdb.h"
 
 CompatDB::CompatDB(QWidget* parent)
     : QWizard(parent, Qt::WindowTitleHint | Qt::WindowCloseButtonHint | Qt::WindowSystemMenuHint),
-      ui{std::make_unique<Ui::CompatDB>()} {
+      ui{std::make_unique<Ui::CompatDB>()}
+{
     ui->setupUi(this);
 
     connect(ui->radioButton_GameBoot_Yes, &QRadioButton::clicked, this, &CompatDB::EnableNext);
@@ -50,7 +54,8 @@ enum class CompatDBPage {
     Final = 7,
 };
 
-void CompatDB::Submit() {
+void CompatDB::Submit()
+{
     QButtonGroup* compatibility_GameBoot = new QButtonGroup(this);
     compatibility_GameBoot->addButton(ui->radioButton_GameBoot_Yes, 0);
     compatibility_GameBoot->addButton(ui->radioButton_GameBoot_No, 1);
@@ -126,7 +131,8 @@ void CompatDB::Submit() {
     }
 }
 
-int CompatDB::nextId() const {
+int CompatDB::nextId() const
+{
     switch ((static_cast<CompatDBPage>(currentId()))) {
     case CompatDBPage::Intro:
         return static_cast<int>(CompatDBPage::GameBoot);
@@ -162,7 +168,8 @@ int CompatDB::nextId() const {
     }
 }
 
-CompatibilityStatus CompatDB::CalculateCompatibility() const {
+CompatibilityStatus CompatDB::CalculateCompatibility() const
+{
     if (ui->radioButton_GameBoot_No->isChecked()) {
         return CompatibilityStatus::WontBoot;
     }
@@ -186,7 +193,8 @@ CompatibilityStatus CompatDB::CalculateCompatibility() const {
     return CompatibilityStatus::Perfect;
 }
 
-void CompatDB::OnTestcaseSubmitted() {
+void CompatDB::OnTestcaseSubmitted()
+{
     if (!testcase_watcher.result()) {
         QMessageBox::critical(this, tr("Communication error"),
                               tr("An error occurred while sending the Testcase"));
@@ -201,6 +209,7 @@ void CompatDB::OnTestcaseSubmitted() {
     }
 }
 
-void CompatDB::EnableNext() {
+void CompatDB::EnableNext()
+{
     button(NextButton)->setEnabled(true);
 }

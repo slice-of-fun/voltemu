@@ -27,7 +27,8 @@ struct ImageViewInfo {
 
     [[nodiscard]] bool IsRenderTarget() const noexcept;
 
-    [[nodiscard]] std::array<SwizzleSource, 4> Swizzle() const noexcept {
+    [[nodiscard]] std::array<SwizzleSource, 4> Swizzle() const noexcept
+    {
         return std::array{
             static_cast<SwizzleSource>(x_source),
             static_cast<SwizzleSource>(y_source),

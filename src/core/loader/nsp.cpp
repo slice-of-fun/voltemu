@@ -4,6 +4,8 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/loader/nsp.h"
+
 #include <vector>
 
 #include "common/common_types.h"
@@ -19,7 +21,6 @@
 #include "core/hle/service/filesystem/filesystem.h"
 #include "core/loader/deconstructed_rom_directory.h"
 #include "core/loader/nca.h"
-#include "core/loader/nsp.h"
 
 namespace Loader {
 
@@ -27,14 +28,16 @@ AppLoader_NSP::AppLoader_NSP(FileSys::VirtualFile file_,
                              const Service::FileSystem::FileSystemController& fsc,
                              const FileSys::ContentProvider& content_provider, u64 program_id,
                              std::size_t program_index)
-    : AppLoader(file_), nsp(std::make_unique<FileSys::NSP>(file_, program_id, program_index)) {
+    : AppLoader(file_), nsp(std::make_unique<FileSys::NSP>(file_, program_id, program_index))
+{
 
     if (nsp->GetStatus() != ResultStatus::Success) {
         return;
     }
 
     if (nsp->IsExtractedType()) {
-        secondary_loader = std::make_unique<AppLoader_DeconstructedRomDirectory>(nsp->GetExeFS(), false);
+        secondary_loader =
+            std::make_unique<AppLoader_DeconstructedRomDirectory>(nsp->GetExeFS(), false);
     } else {
         const auto control_nca =
             nsp->GetNCA(nsp->GetProgramTitleID(), FileSys::ContentRecordType::Control);
@@ -54,7 +57,8 @@ AppLoader_NSP::AppLoader_NSP(FileSys::VirtualFile file_,
 
 AppLoader_NSP::~AppLoader_NSP() = default;
 
-FileType AppLoader_NSP::IdentifyType(const FileSys::VirtualFile& nsp_file) {
+FileType AppLoader_NSP::IdentifyType(const FileSys::VirtualFile& nsp_file)
+{
     const FileSys::NSP nsp(nsp_file);
 
     if (nsp.GetStatus() != ResultStatus::Success) {
@@ -88,7 +92,8 @@ FileType AppLoader_NSP::IdentifyType(const FileSys::VirtualFile& nsp_file) {
     return FileType::Error;
 }
 
-AppLoader_NSP::LoadResult AppLoader_NSP::Load(Kernel::KProcess& process, Core::System& system) {
+AppLoader_NSP::LoadResult AppLoader_NSP::Load(Kernel::KProcess& process, Core::System& system)
+{
     if (is_loaded) {
         return {ResultStatus::ErrorAlreadyLoaded, {}};
     }
@@ -140,7 +145,8 @@ AppLoader_NSP::LoadResult AppLoader_NSP::Load(Kernel::KProcess& process, Core::S
     return result;
 }
 
-ResultStatus AppLoader_NSP::VerifyIntegrity(std::function<bool(size_t, size_t)> progress_callback) {
+ResultStatus AppLoader_NSP::VerifyIntegrity(std::function<bool(size_t, size_t)> progress_callback)
+{
     // Extracted-type NSPs can't be verified.
     if (nsp->IsExtractedType()) {
         return ResultStatus::ErrorIntegrityVerificationNotImplemented;
@@ -176,11 +182,13 @@ ResultStatus AppLoader_NSP::VerifyIntegrity(std::function<bool(size_t, size_t)> 
     return ResultStatus::Success;
 }
 
-ResultStatus AppLoader_NSP::ReadRomFS(FileSys::VirtualFile& out_file) {
+ResultStatus AppLoader_NSP::ReadRomFS(FileSys::VirtualFile& out_file)
+{
     return secondary_loader->ReadRomFS(out_file);
 }
 
-ResultStatus AppLoader_NSP::ReadUpdateRaw(FileSys::VirtualFile& out_file) {
+ResultStatus AppLoader_NSP::ReadUpdateRaw(FileSys::VirtualFile& out_file)
+{
     if (nsp->IsExtractedType()) {
         return ResultStatus::ErrorNoPackedUpdate;
     }
@@ -201,7 +209,8 @@ ResultStatus AppLoader_NSP::ReadUpdateRaw(FileSys::VirtualFile& out_file) {
     return ResultStatus::Success;
 }
 
-ResultStatus AppLoader_NSP::ReadProgramId(u64& out_program_id) {
+ResultStatus AppLoader_NSP::ReadProgramId(u64& out_program_id)
+{
     out_program_id = nsp->GetProgramTitleID();
     if (out_program_id == 0) {
         return ResultStatus::ErrorNotInitialized;
@@ -209,12 +218,14 @@ ResultStatus AppLoader_NSP::ReadProgramId(u64& out_program_id) {
     return ResultStatus::Success;
 }
 
-ResultStatus AppLoader_NSP::ReadProgramIds(std::vector<u64>& out_program_ids) {
+ResultStatus AppLoader_NSP::ReadProgramIds(std::vector<u64>& out_program_ids)
+{
     out_program_ids = nsp->GetProgramTitleIDs();
     return ResultStatus::Success;
 }
 
-ResultStatus AppLoader_NSP::ReadIcon(std::vector<u8>& buffer) {
+ResultStatus AppLoader_NSP::ReadIcon(std::vector<u8>& buffer)
+{
     if (icon_file == nullptr) {
         return ResultStatus::ErrorNoControl;
     }
@@ -223,7 +234,8 @@ ResultStatus AppLoader_NSP::ReadIcon(std::vector<u8>& buffer) {
     return ResultStatus::Success;
 }
 
-ResultStatus AppLoader_NSP::ReadTitle(std::string& title) {
+ResultStatus AppLoader_NSP::ReadTitle(std::string& title)
+{
     if (nacp_file == nullptr) {
         return ResultStatus::ErrorNoControl;
     }
@@ -232,7 +244,8 @@ ResultStatus AppLoader_NSP::ReadTitle(std::string& title) {
     return ResultStatus::Success;
 }
 
-ResultStatus AppLoader_NSP::ReadControlData(FileSys::NACP& nacp) {
+ResultStatus AppLoader_NSP::ReadControlData(FileSys::NACP& nacp)
+{
     if (nacp_file == nullptr) {
         return ResultStatus::ErrorNoControl;
     }
@@ -241,7 +254,8 @@ ResultStatus AppLoader_NSP::ReadControlData(FileSys::NACP& nacp) {
     return ResultStatus::Success;
 }
 
-ResultStatus AppLoader_NSP::ReadManualRomFS(FileSys::VirtualFile& out_file) {
+ResultStatus AppLoader_NSP::ReadManualRomFS(FileSys::VirtualFile& out_file)
+{
     const auto nca =
         nsp->GetNCA(nsp->GetProgramTitleID(), FileSys::ContentRecordType::HtmlDocument);
     if (nsp->GetStatus() != ResultStatus::Success || nca == nullptr) {
@@ -252,15 +266,18 @@ ResultStatus AppLoader_NSP::ReadManualRomFS(FileSys::VirtualFile& out_file) {
     return out_file == nullptr ? ResultStatus::ErrorNoRomFS : ResultStatus::Success;
 }
 
-ResultStatus AppLoader_NSP::ReadBanner(std::vector<u8>& buffer) {
+ResultStatus AppLoader_NSP::ReadBanner(std::vector<u8>& buffer)
+{
     return secondary_loader->ReadBanner(buffer);
 }
 
-ResultStatus AppLoader_NSP::ReadLogo(std::vector<u8>& buffer) {
+ResultStatus AppLoader_NSP::ReadLogo(std::vector<u8>& buffer)
+{
     return secondary_loader->ReadLogo(buffer);
 }
 
-ResultStatus AppLoader_NSP::ReadNSOModules(Modules& modules) {
+ResultStatus AppLoader_NSP::ReadNSOModules(Modules& modules)
+{
     return secondary_loader->ReadNSOModules(modules);
 }
 

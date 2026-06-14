@@ -5,18 +5,19 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "core/hle/service/bcat/news/news_data_service.h"
+
+#include <cstring>
+
+#include "common/logging.h"
 #include "core/hle/service/bcat/news/builtin_news.h"
 #include "core/hle/service/bcat/news/news_storage.h"
 #include "core/hle/service/cmif_serialization.h"
 
-#include "common/logging.h"
-
-#include <cstring>
-
 namespace Service::News {
 namespace {
 
-std::string_view ToStringView(std::span<const char> buf) {
+std::string_view ToStringView(std::span<const char> buf)
+{
     const std::string_view sv{buf.data(), buf.size()};
     const auto nul = sv.find('\0');
     return nul == std::string_view::npos ? sv : sv.substr(0, nul);
@@ -25,7 +26,8 @@ std::string_view ToStringView(std::span<const char> buf) {
 } // namespace
 
 INewsDataService::INewsDataService(Core::System& system_)
-    : ServiceFramework{system_, "INewsDataService"} {
+    : ServiceFramework{system_, "INewsDataService"}
+{
     static const FunctionInfo functions[] = {
         {0, D<&INewsDataService::Open>, "Open"},
         {1, D<&INewsDataService::OpenWithNewsRecordV1>, "OpenWithNewsRecordV1"},
@@ -38,7 +40,8 @@ INewsDataService::INewsDataService(Core::System& system_)
 
 INewsDataService::~INewsDataService() = default;
 
-bool INewsDataService::TryOpen(std::string_view key, std::string_view user) {
+bool INewsDataService::TryOpen(std::string_view key, std::string_view user)
+{
     opened_payload.clear();
 
     if (auto found = NewsStorage::Instance().FindByNewsId(key, user)) {
@@ -64,7 +67,8 @@ bool INewsDataService::TryOpen(std::string_view key, std::string_view user) {
     return false;
 }
 
-Result INewsDataService::Open(InBuffer<BufferAttr_HipcMapAlias> name) {
+Result INewsDataService::Open(InBuffer<BufferAttr_HipcMapAlias> name)
+{
     EnsureBuiltinNewsLoaded();
 
     const auto key = ToStringView({reinterpret_cast<const char*>(name.data()), name.size()});
@@ -76,7 +80,8 @@ Result INewsDataService::Open(InBuffer<BufferAttr_HipcMapAlias> name) {
     R_RETURN(ResultUnknown);
 }
 
-Result INewsDataService::OpenWithNewsRecordV1(NewsRecordV1 record) {
+Result INewsDataService::OpenWithNewsRecordV1(NewsRecordV1 record)
+{
     EnsureBuiltinNewsLoaded();
 
     const auto key = ToStringView(record.news_id);
@@ -89,7 +94,8 @@ Result INewsDataService::OpenWithNewsRecordV1(NewsRecordV1 record) {
     R_RETURN(ResultUnknown);
 }
 
-Result INewsDataService::OpenWithNewsRecord(NewsRecord record) {
+Result INewsDataService::OpenWithNewsRecord(NewsRecord record)
+{
     EnsureBuiltinNewsLoaded();
 
     const auto key = ToStringView(record.news_id);
@@ -103,7 +109,8 @@ Result INewsDataService::OpenWithNewsRecord(NewsRecord record) {
 }
 
 Result INewsDataService::Read(Out<u64> out_size, s64 offset,
-                              OutBuffer<BufferAttr_HipcMapAlias> out_buffer) {
+                              OutBuffer<BufferAttr_HipcMapAlias> out_buffer)
+{
     const auto off = static_cast<size_t>(std::max<s64>(0, offset));
 
     if (off >= opened_payload.size()) {
@@ -117,7 +124,8 @@ Result INewsDataService::Read(Out<u64> out_size, s64 offset,
     R_SUCCEED();
 }
 
-Result INewsDataService::GetSize(Out<s64> out_size) {
+Result INewsDataService::GetSize(Out<s64> out_size)
+{
     *out_size = static_cast<s64>(opened_payload.size());
     R_SUCCEED();
 }

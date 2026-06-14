@@ -4,8 +4,9 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include "common/logging.h"
 #include "core/frontend/applets/web_browser.h"
+
+#include "common/logging.h"
 
 namespace Core::Frontend {
 
@@ -13,11 +14,14 @@ WebBrowserApplet::~WebBrowserApplet() = default;
 
 DefaultWebBrowserApplet::~DefaultWebBrowserApplet() = default;
 
-void DefaultWebBrowserApplet::Close() const {}
+void DefaultWebBrowserApplet::Close() const
+{
+}
 
 void DefaultWebBrowserApplet::OpenLocalWebPage(const std::string& local_url,
                                                ExtractROMFSCallback extract_romfs_callback,
-                                               OpenWebPageCallback callback) const {
+                                               OpenWebPageCallback callback) const
+{
     LOG_WARNING(Service_AM, "(STUBBED) called, backend requested to open local web page at {}",
                 local_url);
 
@@ -25,7 +29,8 @@ void DefaultWebBrowserApplet::OpenLocalWebPage(const std::string& local_url,
 }
 
 void DefaultWebBrowserApplet::OpenExternalWebPage(const std::string& external_url,
-                                                  OpenWebPageCallback callback) const {
+                                                  OpenWebPageCallback callback) const
+{
     LOG_WARNING(Service_AM, "(STUBBED) called, backend requested to open external web page at {}",
                 external_url);
 

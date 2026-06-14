@@ -6,6 +6,7 @@
 #include <array>
 #include <optional>
 #include <type_traits>
+
 #include "common/common_types.h"
 #include "common/swap.h"
 #include "core/file_sys/patch_manager.h"
@@ -85,9 +86,7 @@ public:
      */
     static FileType IdentifyType(const FileSys::VirtualFile& in_file);
 
-    FileType GetFileType() const override {
-        return IdentifyType(file);
-    }
+    FileType GetFileType() const override { return IdentifyType(file); }
 
     static std::optional<VAddr> LoadModule(Kernel::KProcess& process, Core::System& system,
                                            const FileSys::VfsFile& nso_file, VAddr load_base,

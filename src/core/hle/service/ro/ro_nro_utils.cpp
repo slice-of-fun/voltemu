@@ -1,8 +1,9 @@
 // SPDX-FileCopyrightText: Copyright 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include "core/hle/kernel/k_process.h"
 #include "core/hle/service/ro/ro_nro_utils.h"
+
+#include "core/hle/kernel/k_process.h"
 #include "core/hle/service/ro/ro_results.h"
 
 namespace Service::RO {
@@ -14,7 +15,8 @@ struct ProcessMemoryRegion {
     u64 size;
 };
 
-size_t GetTotalProcessMemoryRegionSize(const ProcessMemoryRegion* regions, size_t num_regions) {
+size_t GetTotalProcessMemoryRegionSize(const ProcessMemoryRegion* regions, size_t num_regions)
+{
     size_t total = 0;
 
     for (size_t i = 0; i < num_regions; ++i) {
@@ -25,7 +27,8 @@ size_t GetTotalProcessMemoryRegionSize(const ProcessMemoryRegion* regions, size_
 }
 
 size_t SetupNroProcessMemoryRegions(ProcessMemoryRegion* regions, u64 nro_heap_address,
-                                    u64 nro_heap_size, u64 bss_heap_address, u64 bss_heap_size) {
+                                    u64 nro_heap_size, u64 bss_heap_address, u64 bss_heap_size)
+{
     // Reset region count.
     size_t num_regions = 0;
 
@@ -41,7 +44,8 @@ size_t SetupNroProcessMemoryRegions(ProcessMemoryRegion* regions, u64 nro_heap_a
 }
 
 Result SetProcessMemoryPermission(Kernel::KProcess* process, u64 address, u64 size,
-                                  Kernel::Svc::MemoryPermission permission) {
+                                  Kernel::Svc::MemoryPermission permission)
+{
     auto& page_table = process->GetPageTable();
 
     // Set permission.
@@ -49,7 +53,8 @@ Result SetProcessMemoryPermission(Kernel::KProcess* process, u64 address, u64 si
 }
 
 Result UnmapProcessCodeMemory(Kernel::KProcess* process, u64 process_code_address,
-                              const ProcessMemoryRegion* regions, size_t num_regions) {
+                              const ProcessMemoryRegion* regions, size_t num_regions)
+{
     // Get the total process memory region size.
     const size_t total_size = GetTotalProcessMemoryRegionSize(regions, num_regions);
 
@@ -72,7 +77,8 @@ Result UnmapProcessCodeMemory(Kernel::KProcess* process, u64 process_code_addres
     R_SUCCEED();
 }
 
-Result EnsureGuardPages(Kernel::KProcessPageTable& page_table, u64 map_address, u64 map_size) {
+Result EnsureGuardPages(Kernel::KProcessPageTable& page_table, u64 map_address, u64 map_size)
+{
     Kernel::KMemoryInfo memory_info;
     Kernel::Svc::PageInfo page_info;
 
@@ -93,7 +99,8 @@ Result EnsureGuardPages(Kernel::KProcessPageTable& page_table, u64 map_address, 
 }
 
 Result MapProcessCodeMemory(u64* out, Kernel::KProcess* process, const ProcessMemoryRegion* regions,
-                            size_t num_regions, std::mt19937_64& generate_random) {
+                            size_t num_regions, std::mt19937_64& generate_random)
+{
     auto& page_table = process->GetPageTable();
     const u64 alias_code_start =
         GetInteger(page_table.GetAliasCodeRegionStart()) / Kernel::PageSize;
@@ -109,7 +116,8 @@ Result MapProcessCodeMemory(u64* out, Kernel::KProcess* process, const ProcessMe
             u64 mapped_size = 0;
             for (size_t i = 0; i < num_regions; ++i) {
                 // If we fail, unmap up to where we've mapped.
-                ON_RESULT_FAILURE {
+                ON_RESULT_FAILURE
+                {
                     R_ASSERT(UnmapProcessCodeMemory(process, mapped_address, regions, i));
                 };
 
@@ -121,7 +129,8 @@ Result MapProcessCodeMemory(u64* out, Kernel::KProcess* process, const ProcessMe
             }
 
             // If we fail, unmap all mapped regions.
-            ON_RESULT_FAILURE {
+            ON_RESULT_FAILURE
+            {
                 R_ASSERT(UnmapProcessCodeMemory(process, mapped_address, regions, num_regions));
             };
 
@@ -144,7 +153,8 @@ Result MapProcessCodeMemory(u64* out, Kernel::KProcess* process, const ProcessMe
 
 Result MapNro(u64* out_base_address, Kernel::KProcess* process, u64 nro_heap_address,
               u64 nro_heap_size, u64 bss_heap_address, u64 bss_heap_size,
-              std::mt19937_64& generate_random) {
+              std::mt19937_64& generate_random)
+{
     // Set up the process memory regions.
     std::array<ProcessMemoryRegion, 2> regions{};
     const size_t num_regions = SetupNroProcessMemoryRegions(
@@ -156,7 +166,8 @@ Result MapNro(u64* out_base_address, Kernel::KProcess* process, u64 nro_heap_add
 }
 
 Result SetNroPerms(Kernel::KProcess* process, u64 base_address, u64 rx_size, u64 ro_size,
-                   u64 rw_size) {
+                   u64 rw_size)
+{
     const u64 rx_offset = 0;
     const u64 ro_offset = rx_offset + rx_size;
     const u64 rw_offset = ro_offset + ro_size;
@@ -172,7 +183,8 @@ Result SetNroPerms(Kernel::KProcess* process, u64 base_address, u64 rx_size, u64
 }
 
 Result UnmapNro(Kernel::KProcess* process, u64 base_address, u64 nro_heap_address,
-                u64 nro_heap_size, u64 bss_heap_address, u64 bss_heap_size) {
+                u64 nro_heap_size, u64 bss_heap_address, u64 bss_heap_size)
+{
     // Set up the process memory regions.
     std::array<ProcessMemoryRegion, 2> regions{};
     const size_t num_regions = SetupNroProcessMemoryRegions(

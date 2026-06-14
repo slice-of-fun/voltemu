@@ -6,8 +6,10 @@
 
 #pragma once
 
-#include <memory>
 #include <SDL3/SDL.h>
+
+#include <memory>
+
 #include "core/frontend/emu_window.h"
 #include "yuzu_cmd/emu_window/emu_window_sdl3.h"
 

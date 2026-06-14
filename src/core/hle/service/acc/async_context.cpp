@@ -1,14 +1,16 @@
 // SPDX-FileCopyrightText: Copyright 2021 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/acc/async_context.h"
+
 #include "core/core.h"
 #include "core/hle/kernel/k_event.h"
-#include "core/hle/service/acc/async_context.h"
 #include "core/hle/service/ipc_helpers.h"
 
 namespace Service::Account {
 IAsyncContext::IAsyncContext(Core::System& system_)
-    : ServiceFramework{system_, "IAsyncContext"}, service_context{system_, "IAsyncContext"} {
+    : ServiceFramework{system_, "IAsyncContext"}, service_context{system_, "IAsyncContext"}
+{
     // clang-format off
     static const FunctionInfo functions[] = {
         {0, &IAsyncContext::GetSystemEvent, "GetSystemEvent"},
@@ -23,11 +25,13 @@ IAsyncContext::IAsyncContext(Core::System& system_)
     completion_event = service_context.CreateEvent("IAsyncContext:CompletionEvent");
 }
 
-IAsyncContext::~IAsyncContext() {
+IAsyncContext::~IAsyncContext()
+{
     service_context.CloseEvent(completion_event);
 }
 
-void IAsyncContext::GetSystemEvent(HLERequestContext& ctx) {
+void IAsyncContext::GetSystemEvent(HLERequestContext& ctx)
+{
     LOG_DEBUG(Service_ACC, "called");
 
     IPC::ResponseBuilder rb{ctx, 2, 1};
@@ -35,7 +39,8 @@ void IAsyncContext::GetSystemEvent(HLERequestContext& ctx) {
     rb.PushCopyObjects(completion_event->GetReadableEvent());
 }
 
-void IAsyncContext::Cancel(HLERequestContext& ctx) {
+void IAsyncContext::Cancel(HLERequestContext& ctx)
+{
     LOG_DEBUG(Service_ACC, "called");
 
     Cancel();
@@ -45,7 +50,8 @@ void IAsyncContext::Cancel(HLERequestContext& ctx) {
     rb.Push(ResultSuccess);
 }
 
-void IAsyncContext::HasDone(HLERequestContext& ctx) {
+void IAsyncContext::HasDone(HLERequestContext& ctx)
+{
     LOG_DEBUG(Service_ACC, "called");
 
     is_complete.store(IsComplete());
@@ -55,14 +61,16 @@ void IAsyncContext::HasDone(HLERequestContext& ctx) {
     rb.Push(is_complete.load());
 }
 
-void IAsyncContext::GetResult(HLERequestContext& ctx) {
+void IAsyncContext::GetResult(HLERequestContext& ctx)
+{
     LOG_DEBUG(Service_ACC, "called");
 
     IPC::ResponseBuilder rb{ctx, 3};
     rb.Push(GetResult());
 }
 
-void IAsyncContext::MarkComplete() {
+void IAsyncContext::MarkComplete()
+{
     is_complete.store(true);
     completion_event->Signal();
 }

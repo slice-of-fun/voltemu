@@ -4,6 +4,8 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "video_core/renderer_opengl/gl_shader_cache.h"
+
 #include <atomic>
 #include <fstream>
 #include <functional>
@@ -25,12 +27,10 @@
 #include "shader_recompiler/frontend/maxwell/control_flow.h"
 #include "shader_recompiler/frontend/maxwell/translate_program.h"
 #include "shader_recompiler/profile.h"
-#include "video_core/engines/maxwell_3d.h"
 #include "video_core/engines/kepler_compute.h"
 #include "video_core/engines/maxwell_3d.h"
 #include "video_core/memory_manager.h"
 #include "video_core/renderer_opengl/gl_rasterizer.h"
-#include "video_core/renderer_opengl/gl_shader_cache.h"
 #include "video_core/renderer_opengl/gl_shader_util.h"
 #include "video_core/renderer_opengl/gl_state_tracker.h"
 #include "video_core/shader_cache.h"
@@ -56,12 +56,13 @@ using Context = ShaderContext::Context;
 
 constexpr u32 CACHE_VERSION = 15;
 
-template <typename Container>
-auto MakeSpan(Container& container) {
+template<typename Container> auto MakeSpan(Container& container)
+{
     return std::span(container.data(), container.size());
 }
 
-Shader::OutputTopology MaxwellToOutputTopology(Maxwell::PrimitiveTopology topology) {
+Shader::OutputTopology MaxwellToOutputTopology(Maxwell::PrimitiveTopology topology)
+{
     switch (topology) {
     case Maxwell::PrimitiveTopology::Points:
         return Shader::OutputTopology::PointList;
@@ -75,7 +76,8 @@ Shader::OutputTopology MaxwellToOutputTopology(Maxwell::PrimitiveTopology topolo
 Shader::RuntimeInfo MakeRuntimeInfo(const GraphicsPipelineKey& key,
                                     const Shader::IR::Program& program,
                                     const Shader::IR::Program* previous_program,
-                                    bool glasm_use_storage_buffers, bool use_assembly_shaders) {
+                                    bool glasm_use_storage_buffers, bool use_assembly_shaders)
+{
     Shader::RuntimeInfo info;
     if (previous_program) {
         info.previous_stage_stores = previous_program->info.stores;
@@ -158,7 +160,8 @@ Shader::RuntimeInfo MakeRuntimeInfo(const GraphicsPipelineKey& key,
     return info;
 }
 
-void SetXfbState(VideoCommon::TransformFeedbackState& state, const Maxwell& regs) {
+void SetXfbState(VideoCommon::TransformFeedbackState& state, const Maxwell& regs)
+{
     std::ranges::transform(regs.transform_feedback.controls, state.layouts.begin(),
                            [](const auto& layout) {
                                return VideoCommon::TransformFeedbackState::Layout{
@@ -250,7 +253,8 @@ ShaderCache::ShaderCache(Tegra::MaxwellDeviceMemoryManager& device_memory_,
           .min_ssbo_alignment = static_cast<u32>(device.GetShaderStorageBufferAlignment()),
           .support_geometry_shader_passthrough = device.HasGeometryShaderPassthrough(),
           .support_conditional_barrier = device.SupportsConditionalBarriers(),
-      } {
+      }
+{
     if (use_asynchronous_shaders) {
         workers = CreateWorkers();
     }
@@ -259,7 +263,8 @@ ShaderCache::ShaderCache(Tegra::MaxwellDeviceMemoryManager& device_memory_,
 ShaderCache::~ShaderCache() = default;
 
 void ShaderCache::LoadDiskResources(u64 title_id, std::stop_token stop_loading,
-                                    const VideoCore::DiskResourceLoadCallback& callback) {
+                                    const VideoCore::DiskResourceLoadCallback& callback)
+{
     if (title_id == 0) {
         return;
     }
@@ -349,7 +354,8 @@ void ShaderCache::LoadDiskResources(u64 title_id, std::stop_token stop_loading,
     }
 }
 
-GraphicsPipeline* ShaderCache::CurrentGraphicsPipeline() {
+GraphicsPipeline* ShaderCache::CurrentGraphicsPipeline()
+{
     if (!RefreshStages(graphics_key.unique_hashes)) {
         current_pipeline = nullptr;
         return nullptr;
@@ -374,7 +380,8 @@ GraphicsPipeline* ShaderCache::CurrentGraphicsPipeline() {
     return CurrentGraphicsPipelineSlowPath();
 }
 
-GraphicsPipeline* ShaderCache::CurrentGraphicsPipelineSlowPath() {
+GraphicsPipeline* ShaderCache::CurrentGraphicsPipelineSlowPath()
+{
     const auto [pair, is_new]{graphics_cache.try_emplace(graphics_key)};
     auto& pipeline{pair->second};
     if (is_new) {
@@ -387,7 +394,8 @@ GraphicsPipeline* ShaderCache::CurrentGraphicsPipelineSlowPath() {
     return BuiltPipeline(current_pipeline);
 }
 
-GraphicsPipeline* ShaderCache::BuiltPipeline(GraphicsPipeline* pipeline) const noexcept {
+GraphicsPipeline* ShaderCache::BuiltPipeline(GraphicsPipeline* pipeline) const noexcept
+{
     if (pipeline->IsBuilt()) {
         return pipeline;
     }
@@ -404,7 +412,8 @@ GraphicsPipeline* ShaderCache::BuiltPipeline(GraphicsPipeline* pipeline) const n
     return nullptr;
 }
 
-ComputePipeline* ShaderCache::CurrentComputePipeline() {
+ComputePipeline* ShaderCache::CurrentComputePipeline()
+{
     const VideoCommon::ShaderInfo* const shader{ComputeShader()};
     if (!shader) {
         return nullptr;
@@ -424,7 +433,8 @@ ComputePipeline* ShaderCache::CurrentComputePipeline() {
     return pipeline.get();
 }
 
-std::unique_ptr<GraphicsPipeline> ShaderCache::CreateGraphicsPipeline() {
+std::unique_ptr<GraphicsPipeline> ShaderCache::CreateGraphicsPipeline()
+{
     GraphicsEnvironments environments;
     GetGraphicsEnvironments(environments, graphics_key.unique_hashes);
 
@@ -446,8 +456,8 @@ std::unique_ptr<GraphicsPipeline> ShaderCache::CreateGraphicsPipeline() {
 
 std::unique_ptr<GraphicsPipeline> ShaderCache::CreateGraphicsPipeline(
     ShaderContext::ShaderPools& pools, const GraphicsPipelineKey& key,
-    std::span<Shader::Environment* const> envs, bool use_shader_workers,
-    bool force_context_flush) try {
+    std::span<Shader::Environment* const> envs, bool use_shader_workers, bool force_context_flush)
+try {
     auto hash = key.Hash();
     LOG_INFO(Render_OpenGL, "0x{:016x}", hash);
     size_t env_index{};
@@ -460,8 +470,8 @@ std::unique_ptr<GraphicsPipeline> ShaderCache::CreateGraphicsPipeline(
     Shader::IR::Program* layer_source_program{};
 
     for (size_t index = 0; index < Maxwell::MaxShaderProgram; ++index) {
-        const bool is_emulated_stage = layer_source_program != nullptr
-            && index == u32(Maxwell::ShaderType::Geometry);
+        const bool is_emulated_stage =
+            layer_source_program != nullptr && index == u32(Maxwell::ShaderType::Geometry);
         if (key.unique_hashes[index] == 0 && is_emulated_stage) {
             auto topology = MaxwellToOutputTopology(key.gs_input_topology);
             programs[index] = GenerateGeometryPassthrough(pools.inst, pools.block, host_info,
@@ -485,12 +495,14 @@ std::unique_ptr<GraphicsPipeline> ShaderCache::CreateGraphicsPipeline(
             // Normal path
             programs[index] = TranslateProgram(pools.inst, pools.block, env, cfg, host_info);
 
-            total_storage_buffers += Shader::NumDescriptors(programs[index].info.storage_buffers_descriptors);
+            total_storage_buffers +=
+                Shader::NumDescriptors(programs[index].info.storage_buffers_descriptors);
         } else {
             // VertexB path when VertexA is present.
             auto& program_va{programs[0]};
             auto program_vb{TranslateProgram(pools.inst, pools.block, env, cfg, host_info)};
-            total_storage_buffers += Shader::NumDescriptors(program_vb.info.storage_buffers_descriptors);
+            total_storage_buffers +=
+                Shader::NumDescriptors(program_vb.info.storage_buffers_descriptors);
             programs[index] = MergeDualVertexPrograms(program_va, program_vb, env);
         }
 
@@ -521,7 +533,8 @@ std::unique_ptr<GraphicsPipeline> ShaderCache::CreateGraphicsPipeline(
         const size_t stage_index{index - 1};
         infos[stage_index] = &program.info;
 
-        const auto runtime_info = MakeRuntimeInfo(key, program, previous_program, glasm_use_storage_buffers, use_glasm);
+        const auto runtime_info =
+            MakeRuntimeInfo(key, program, previous_program, glasm_use_storage_buffers, use_glasm);
         switch (::Settings::values.renderer_backend.GetValue()) {
         case Settings::RendererBackend::OpenGL_GLSL:
             ConvertLegacyToGeneric(program, runtime_info);
@@ -549,8 +562,10 @@ std::unique_ptr<GraphicsPipeline> ShaderCache::CreateGraphicsPipeline(
     return nullptr;
 }
 
-std::unique_ptr<ComputePipeline> ShaderCache::CreateComputePipeline(
-    const ComputePipelineKey& key, const VideoCommon::ShaderInfo* shader) {
+std::unique_ptr<ComputePipeline>
+ShaderCache::CreateComputePipeline(const ComputePipelineKey& key,
+                                   const VideoCommon::ShaderInfo* shader)
+{
     const GPUVAddr program_base{kepler_compute->regs.code_loc.Address()};
     const auto& qmd{kepler_compute->launch_description};
     ComputeEnvironment env{*kepler_compute, *gpu_memory, program_base, qmd.program_start};
@@ -566,9 +581,10 @@ std::unique_ptr<ComputePipeline> ShaderCache::CreateComputePipeline(
     return pipeline;
 }
 
-std::unique_ptr<ComputePipeline> ShaderCache::CreateComputePipeline(
-    ShaderContext::ShaderPools& pools, const ComputePipelineKey& key, Shader::Environment& env,
-    bool force_context_flush) try {
+std::unique_ptr<ComputePipeline>
+ShaderCache::CreateComputePipeline(ShaderContext::ShaderPools& pools, const ComputePipelineKey& key,
+                                   Shader::Environment& env, bool force_context_flush)
+try {
     auto hash = key.Hash();
     LOG_INFO(Render_OpenGL, "0x{:016x}", hash);
 
@@ -598,13 +614,15 @@ std::unique_ptr<ComputePipeline> ShaderCache::CreateComputePipeline(
     default:
         UNREACHABLE();
     }
-    return std::make_unique<ComputePipeline>(device, texture_cache, buffer_cache, program_manager, program.info, code, code_spirv, force_context_flush);
+    return std::make_unique<ComputePipeline>(device, texture_cache, buffer_cache, program_manager,
+                                             program.info, code, code_spirv, force_context_flush);
 } catch (Shader::Exception& exception) {
     LOG_ERROR(Render_OpenGL, "{}", exception.what());
     return nullptr;
 }
 
-std::unique_ptr<ShaderWorker> ShaderCache::CreateWorkers() const {
+std::unique_ptr<ShaderWorker> ShaderCache::CreateWorkers() const
+{
     return std::make_unique<ShaderWorker>((std::max)(std::thread::hardware_concurrency(), 2U) - 1,
                                           "GlShaderBuilder",
                                           [this] { return Context{emu_window}; });

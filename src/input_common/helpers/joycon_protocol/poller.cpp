@@ -4,8 +4,9 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include "common/logging.h"
 #include "input_common/helpers/joycon_protocol/poller.h"
+
+#include "common/logging.h"
 
 namespace InputCommon::Joycon {
 
@@ -13,14 +14,18 @@ JoyconPoller::JoyconPoller(ControllerType device_type_, JoyStickCalibration left
                            JoyStickCalibration right_stick_calibration_,
                            MotionCalibration motion_calibration_)
     : device_type{device_type_}, left_stick_calibration{left_stick_calibration_},
-      right_stick_calibration{right_stick_calibration_}, motion_calibration{motion_calibration_} {}
+      right_stick_calibration{right_stick_calibration_}, motion_calibration{motion_calibration_}
+{
+}
 
-void JoyconPoller::SetCallbacks(const JoyconCallbacks& callbacks_) {
+void JoyconPoller::SetCallbacks(const JoyconCallbacks& callbacks_)
+{
     callbacks = std::move(callbacks_);
 }
 
 void JoyconPoller::ReadActiveMode(std::span<u8> buffer, const MotionStatus& motion_status,
-                                  const RingStatus& ring_status) {
+                                  const RingStatus& ring_status)
+{
     InputReportActive data{};
     memcpy(&data, buffer.data(), sizeof(InputReportActive));
 
@@ -45,7 +50,8 @@ void JoyconPoller::ReadActiveMode(std::span<u8> buffer, const MotionStatus& moti
     callbacks.on_battery_data(data.battery_status);
 }
 
-void JoyconPoller::ReadPassiveMode(std::span<u8> buffer) {
+void JoyconPoller::ReadPassiveMode(std::span<u8> buffer)
+{
     InputReportPassive data{};
     memcpy(&data, buffer.data(), sizeof(InputReportPassive));
 
@@ -64,24 +70,29 @@ void JoyconPoller::ReadPassiveMode(std::span<u8> buffer) {
     }
 }
 
-void JoyconPoller::ReadNfcIRMode(std::span<u8> buffer, const MotionStatus& motion_status) {
+void JoyconPoller::ReadNfcIRMode(std::span<u8> buffer, const MotionStatus& motion_status)
+{
     // This mode is compatible with the active mode
     ReadActiveMode(buffer, motion_status, {});
 }
 
-void JoyconPoller::UpdateColor(const Color& color) {
+void JoyconPoller::UpdateColor(const Color& color)
+{
     callbacks.on_color_data(color);
 }
 
-void JoyconPoller::UpdateAmiibo(const Joycon::TagInfo& tag_info) {
+void JoyconPoller::UpdateAmiibo(const Joycon::TagInfo& tag_info)
+{
     callbacks.on_amiibo_data(tag_info);
 }
 
-void JoyconPoller::UpdateCamera(const std::vector<u8>& camera_data, IrsResolution format) {
+void JoyconPoller::UpdateCamera(const std::vector<u8>& camera_data, IrsResolution format)
+{
     callbacks.on_camera_data(camera_data, format);
 }
 
-void JoyconPoller::UpdateRing(s16 value, const RingStatus& ring_status) {
+void JoyconPoller::UpdateRing(s16 value, const RingStatus& ring_status)
+{
     float normalized_value = static_cast<float>(value - ring_status.default_value);
     if (normalized_value > 0) {
         normalized_value = normalized_value /
@@ -95,7 +106,8 @@ void JoyconPoller::UpdateRing(s16 value, const RingStatus& ring_status) {
 }
 
 void JoyconPoller::UpdateActiveLeftPadInput(const InputReportActive& input,
-                                            const MotionStatus& motion_status) {
+                                            const MotionStatus& motion_status)
+{
     static constexpr std::array<Joycon::PadButton, 11> left_buttons{
         Joycon::PadButton::Down,    Joycon::PadButton::Up,     Joycon::PadButton::Right,
         Joycon::PadButton::Left,    Joycon::PadButton::LeftSL, Joycon::PadButton::LeftSR,
@@ -131,7 +143,8 @@ void JoyconPoller::UpdateActiveLeftPadInput(const InputReportActive& input,
 }
 
 void JoyconPoller::UpdateActiveRightPadInput(const InputReportActive& input,
-                                             const MotionStatus& motion_status) {
+                                             const MotionStatus& motion_status)
+{
     static constexpr std::array<Joycon::PadButton, 11> right_buttons{
         Joycon::PadButton::Y,    Joycon::PadButton::X,       Joycon::PadButton::B,
         Joycon::PadButton::A,    Joycon::PadButton::RightSL, Joycon::PadButton::RightSR,
@@ -167,7 +180,8 @@ void JoyconPoller::UpdateActiveRightPadInput(const InputReportActive& input,
 }
 
 void JoyconPoller::UpdateActiveProPadInput(const InputReportActive& input,
-                                           const MotionStatus& motion_status) {
+                                           const MotionStatus& motion_status)
+{
     static constexpr std::array<Joycon::PadButton, 18> pro_buttons{
         Joycon::PadButton::Down,  Joycon::PadButton::Up,      Joycon::PadButton::Right,
         Joycon::PadButton::Left,  Joycon::PadButton::L,       Joycon::PadButton::ZL,
@@ -213,7 +227,8 @@ void JoyconPoller::UpdateActiveProPadInput(const InputReportActive& input,
     }
 }
 
-void JoyconPoller::UpdatePassiveLeftPadInput(const InputReportPassive& input) {
+void JoyconPoller::UpdatePassiveLeftPadInput(const InputReportPassive& input)
+{
     static constexpr std::array<PassivePadButton, 11> left_buttons{
         PassivePadButton::Down_A,  PassivePadButton::Right_X, PassivePadButton::Left_B,
         PassivePadButton::Up_Y,    PassivePadButton::SL,      PassivePadButton::SR,
@@ -233,7 +248,8 @@ void JoyconPoller::UpdatePassiveLeftPadInput(const InputReportPassive& input) {
     callbacks.on_stick_data(static_cast<int>(PadAxes::LeftStickY), left_axis_y);
 }
 
-void JoyconPoller::UpdatePassiveRightPadInput(const InputReportPassive& input) {
+void JoyconPoller::UpdatePassiveRightPadInput(const InputReportPassive& input)
+{
     static constexpr std::array<PassivePadButton, 11> right_buttons{
         PassivePadButton::Down_A, PassivePadButton::Right_X, PassivePadButton::Left_B,
         PassivePadButton::Up_Y,   PassivePadButton::SL,      PassivePadButton::SR,
@@ -253,7 +269,8 @@ void JoyconPoller::UpdatePassiveRightPadInput(const InputReportPassive& input) {
     callbacks.on_stick_data(static_cast<int>(PadAxes::RightStickY), right_axis_y);
 }
 
-void JoyconPoller::UpdatePassiveProPadInput(const InputReportPassive& input) {
+void JoyconPoller::UpdatePassiveProPadInput(const InputReportPassive& input)
+{
     static constexpr std::array<PassivePadButton, 14> pro_buttons{
         PassivePadButton::Down_A, PassivePadButton::Right_X, PassivePadButton::Left_B,
         PassivePadButton::Up_Y,   PassivePadButton::SL,      PassivePadButton::SR,
@@ -278,7 +295,8 @@ void JoyconPoller::UpdatePassiveProPadInput(const InputReportPassive& input) {
     callbacks.on_stick_data(static_cast<int>(PadAxes::RightStickY), right_axis_y);
 }
 
-f32 JoyconPoller::GetAxisValue(u16 raw_value, Joycon::JoyStickAxisCalibration calibration) const {
+f32 JoyconPoller::GetAxisValue(u16 raw_value, Joycon::JoyStickAxisCalibration calibration) const
+{
     const f32 value = static_cast<f32>(raw_value - calibration.center);
     if (value > 0.0f) {
         return value / calibration.max;
@@ -286,7 +304,8 @@ f32 JoyconPoller::GetAxisValue(u16 raw_value, Joycon::JoyStickAxisCalibration ca
     return value / calibration.min;
 }
 
-std::pair<f32, f32> JoyconPoller::GetPassiveAxisValue(PassivePadStick raw_value) const {
+std::pair<f32, f32> JoyconPoller::GetPassiveAxisValue(PassivePadStick raw_value) const
+{
     switch (raw_value) {
     case PassivePadStick::Right:
         return {1.0f, 0.0f};
@@ -311,7 +330,8 @@ std::pair<f32, f32> JoyconPoller::GetPassiveAxisValue(PassivePadStick raw_value)
 }
 
 f32 JoyconPoller::GetAccelerometerValue(s16 raw, const MotionSensorCalibration& cal,
-                                        AccelerometerSensitivity sensitivity) const {
+                                        AccelerometerSensitivity sensitivity) const
+{
     const f32 value = raw * (1.0f / (cal.scale - cal.offset)) * 4;
     switch (sensitivity) {
     case Joycon::AccelerometerSensitivity::G2:
@@ -327,7 +347,8 @@ f32 JoyconPoller::GetAccelerometerValue(s16 raw, const MotionSensorCalibration& 
 }
 
 f32 JoyconPoller::GetGyroValue(s16 raw, const MotionSensorCalibration& cal,
-                               GyroSensitivity sensitivity) const {
+                               GyroSensitivity sensitivity) const
+{
     const f32 value = (raw - cal.offset) * (936.0f / (cal.scale - cal.offset)) / 360.0f;
     switch (sensitivity) {
     case Joycon::GyroSensitivity::DPS250:
@@ -343,12 +364,14 @@ f32 JoyconPoller::GetGyroValue(s16 raw, const MotionSensorCalibration& cal,
 }
 
 s16 JoyconPoller::GetRawIMUValues(std::size_t sensor, size_t axis,
-                                  const InputReportActive& input) const {
+                                  const InputReportActive& input) const
+{
     return input.motion_input[(sensor * 3) + axis];
 }
 
 MotionData JoyconPoller::GetMotionInput(const InputReportActive& input,
-                                        const MotionStatus& motion_status) const {
+                                        const MotionStatus& motion_status) const
+{
     MotionData motion{};
     const auto& accel_cal = motion_calibration.accelerometer;
     const auto& gyro_cal = motion_calibration.gyro;

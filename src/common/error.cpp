@@ -17,7 +17,8 @@
 
 namespace Common {
 
-std::string NativeErrorToString(int e) {
+std::string NativeErrorToString(int e)
+{
 #ifdef _WIN32
     LPSTR err_str;
 
@@ -33,7 +34,7 @@ std::string NativeErrorToString(int e) {
     return ret;
 #else
     char err_str[255];
-#if defined(__ANDROID__) ||                                                                            \
+#if defined(__ANDROID__) ||                                                                        \
     (defined(__GLIBC__) && (_GNU_SOURCE || (_POSIX_C_SOURCE < 200112L && _XOPEN_SOURCE < 600)))
     // Thread safe (GNU-specific)
     const char* str = strerror_r(e, err_str, sizeof(err_str));
@@ -49,7 +50,8 @@ std::string NativeErrorToString(int e) {
 #endif // _WIN32
 }
 
-std::string GetLastErrorMsg() {
+std::string GetLastErrorMsg()
+{
 #ifdef _WIN32
     return NativeErrorToString(GetLastError());
 #else

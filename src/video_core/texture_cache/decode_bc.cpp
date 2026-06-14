@@ -4,13 +4,15 @@
 // SPDX-FileCopyrightText: Copyright 2020 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "video_core/texture_cache/decode_bc.h"
+
+#include <bc_decoder.h>
+
 #include <algorithm>
 #include <array>
 #include <span>
-#include <bc_decoder.h>
 
 #include "common/common_types.h"
-#include "video_core/texture_cache/decode_bc.h"
 
 namespace VideoCommon {
 
@@ -19,7 +21,8 @@ constexpr u32 BLOCK_SIZE = 4;
 
 using VideoCore::Surface::PixelFormat;
 
-constexpr bool IsSigned(PixelFormat pixel_format) {
+constexpr bool IsSigned(PixelFormat pixel_format)
+{
     switch (pixel_format) {
     case PixelFormat::BC4_SNORM:
     case PixelFormat::BC4_UNORM:
@@ -33,7 +36,8 @@ constexpr bool IsSigned(PixelFormat pixel_format) {
     }
 }
 
-constexpr u32 BlockSize(PixelFormat pixel_format) {
+constexpr u32 BlockSize(PixelFormat pixel_format)
+{
     switch (pixel_format) {
     case PixelFormat::BC1_RGBA_SRGB:
     case PixelFormat::BC1_RGBA_UNORM:
@@ -46,7 +50,8 @@ constexpr u32 BlockSize(PixelFormat pixel_format) {
 }
 } // Anonymous namespace
 
-u32 ConvertedBytesPerBlock(VideoCore::Surface::PixelFormat pixel_format) {
+u32 ConvertedBytesPerBlock(VideoCore::Surface::PixelFormat pixel_format)
+{
     switch (pixel_format) {
     case PixelFormat::BC4_SNORM:
     case PixelFormat::BC4_UNORM:
@@ -62,9 +67,10 @@ u32 ConvertedBytesPerBlock(VideoCore::Surface::PixelFormat pixel_format) {
     }
 }
 
-template <auto decompress, PixelFormat pixel_format>
+template<auto decompress, PixelFormat pixel_format>
 void DecompressBlocks(std::span<const u8> input, std::span<u8> output, BufferImageCopy& copy,
-                      bool is_signed = false) {
+                      bool is_signed = false)
+{
     const u32 out_bpp = ConvertedBytesPerBlock(pixel_format);
     const u32 block_size = BlockSize(pixel_format);
     const u32 width = copy.image_extent.width;
@@ -97,7 +103,8 @@ void DecompressBlocks(std::span<const u8> input, std::span<u8> output, BufferIma
 }
 
 void DecompressBCn(std::span<const u8> input, std::span<u8> output, BufferImageCopy& copy,
-                   VideoCore::Surface::PixelFormat pixel_format) {
+                   VideoCore::Surface::PixelFormat pixel_format)
+{
     switch (pixel_format) {
     case PixelFormat::BC1_RGBA_UNORM:
     case PixelFormat::BC1_RGBA_SRGB:

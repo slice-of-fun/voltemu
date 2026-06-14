@@ -27,7 +27,8 @@ namespace Vulkan {
 
 namespace {
 
-VkSurfaceFormatKHR ChooseSwapSurfaceFormat(vk::Span<VkSurfaceFormatKHR> formats) {
+VkSurfaceFormatKHR ChooseSwapSurfaceFormat(vk::Span<VkSurfaceFormatKHR> formats)
+{
     if (formats.size() == 1 && formats[0].format == VK_FORMAT_UNDEFINED) {
         VkSurfaceFormatKHR format;
         format.format = VK_FORMAT_B8G8R8A8_UNORM;
@@ -41,8 +42,8 @@ VkSurfaceFormatKHR ChooseSwapSurfaceFormat(vk::Span<VkSurfaceFormatKHR> formats)
     return found != formats.end() ? *found : formats[0];
 }
 
-static VkPresentModeKHR ChooseSwapPresentMode(bool has_imm, bool has_mailbox,
-                                              bool has_fifo_relaxed) {
+static VkPresentModeKHR ChooseSwapPresentMode(bool has_imm, bool has_mailbox, bool has_fifo_relaxed)
+{
     // Mailbox doesn't lock the application like FIFO (vsync)
     // FIFO present mode locks the framerate to the monitor's refresh rate
     Settings::VSyncMode setting = [has_imm, has_mailbox]() {
@@ -87,20 +88,22 @@ static VkPresentModeKHR ChooseSwapPresentMode(bool has_imm, bool has_mailbox,
     }
 }
 
-VkExtent2D ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities, u32 width, u32 height) {
+VkExtent2D ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities, u32 width, u32 height)
+{
     constexpr auto undefined_size{(std::numeric_limits<u32>::max)()};
     if (capabilities.currentExtent.width != undefined_size) {
         return capabilities.currentExtent;
     }
     VkExtent2D extent;
     extent.width = (std::max)(capabilities.minImageExtent.width,
-                            (std::min)(capabilities.maxImageExtent.width, width));
+                              (std::min)(capabilities.maxImageExtent.width, width));
     extent.height = (std::max)(capabilities.minImageExtent.height,
-                             (std::min)(capabilities.maxImageExtent.height, height));
+                               (std::min)(capabilities.maxImageExtent.height, height));
     return extent;
 }
 
-VkCompositeAlphaFlagBitsKHR ChooseAlphaFlags(const VkSurfaceCapabilitiesKHR& capabilities) {
+VkCompositeAlphaFlagBitsKHR ChooseAlphaFlags(const VkSurfaceCapabilitiesKHR& capabilities)
+{
     if (capabilities.supportedCompositeAlpha & VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR) {
         return VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
     } else if (capabilities.supportedCompositeAlpha & VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR) {
@@ -114,25 +117,16 @@ VkCompositeAlphaFlagBitsKHR ChooseAlphaFlags(const VkSurfaceCapabilitiesKHR& cap
 
 } // Anonymous namespace
 
-Swapchain::Swapchain(
-    VkSurfaceKHR_T* surface_,
-    const Device& device_,
-    Scheduler& scheduler_,
-    u32 width_,
-    u32 height_)
-    : surface(surface_)
-    , device{device_}
-    , scheduler{scheduler_}
+Swapchain::Swapchain(VkSurfaceKHR_T* surface_, const Device& device_, Scheduler& scheduler_,
+                     u32 width_, u32 height_)
+    : surface(surface_), device{device_}, scheduler{scheduler_}
 {
     Create(surface, width_, height_);
 }
 
 Swapchain::~Swapchain() = default;
 
-void Swapchain::Create(
-    VkSurfaceKHR_T* surface_,
-    u32 width_,
-    u32 height_)
+void Swapchain::Create(VkSurfaceKHR_T* surface_, u32 width_, u32 height_)
 {
     is_outdated = false;
     is_suboptimal = false;
@@ -155,7 +149,8 @@ void Swapchain::Create(
     resource_ticks.resize(image_count);
 }
 
-bool Swapchain::AcquireNextImage() {
+bool Swapchain::AcquireNextImage()
+{
     const VkResult result = device.GetLogical().AcquireNextImageKHR(
         *swapchain, (std::numeric_limits<u64>::max)(), *present_semaphores[frame_index],
         VK_NULL_HANDLE, &image_index);
@@ -177,23 +172,23 @@ bool Swapchain::AcquireNextImage() {
     }
 
     const auto wait_with_frame_pacing = [this] {
-    switch (Settings::values.frame_pacing_mode.GetValue()) {
-    case Settings::FramePacingMode::Target_Auto:
-        scheduler.Wait(resource_ticks[image_index]);
-        break;
-    case Settings::FramePacingMode::Target_30:
-        scheduler.Wait(resource_ticks[image_index], 30.0);
-        break;
-    case Settings::FramePacingMode::Target_60:
-        scheduler.Wait(resource_ticks[image_index], 60.0);
-        break;
-    case Settings::FramePacingMode::Target_90:
-        scheduler.Wait(resource_ticks[image_index], 90.0);
-        break;
-    case Settings::FramePacingMode::Target_120:
-        scheduler.Wait(resource_ticks[image_index], 120.0);
-        break;
-    }
+        switch (Settings::values.frame_pacing_mode.GetValue()) {
+        case Settings::FramePacingMode::Target_Auto:
+            scheduler.Wait(resource_ticks[image_index]);
+            break;
+        case Settings::FramePacingMode::Target_30:
+            scheduler.Wait(resource_ticks[image_index], 30.0);
+            break;
+        case Settings::FramePacingMode::Target_60:
+            scheduler.Wait(resource_ticks[image_index], 60.0);
+            break;
+        case Settings::FramePacingMode::Target_90:
+            scheduler.Wait(resource_ticks[image_index], 90.0);
+            break;
+        case Settings::FramePacingMode::Target_120:
+            scheduler.Wait(resource_ticks[image_index], 120.0);
+            break;
+        }
     };
 
 #ifdef __ANDROID__
@@ -211,7 +206,8 @@ bool Swapchain::AcquireNextImage() {
     return is_suboptimal || is_outdated;
 }
 
-void Swapchain::Present(VkSemaphore render_semaphore) {
+void Swapchain::Present(VkSemaphore render_semaphore)
+{
     const auto present_queue{device.GetPresentQueue()};
     const VkPresentInfoKHR present_info{
         .sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
@@ -246,13 +242,14 @@ void Swapchain::Present(VkSemaphore render_semaphore) {
     }
 }
 
-void Swapchain::CreateSwapchain(const VkSurfaceCapabilitiesKHR& capabilities) {
+void Swapchain::CreateSwapchain(const VkSurfaceCapabilitiesKHR& capabilities)
+{
     const auto physical_device{device.GetPhysical()};
     const auto formats{physical_device.GetSurfaceFormatsKHR(VkSurfaceKHR(surface))};
     const auto present_modes = physical_device.GetSurfacePresentModesKHR(VkSurfaceKHR(surface));
 
-    has_mailbox = std::find(present_modes.begin(), present_modes.end(), VK_PRESENT_MODE_MAILBOX_KHR)
-                  != present_modes.end();
+    has_mailbox = std::find(present_modes.begin(), present_modes.end(),
+                            VK_PRESENT_MODE_MAILBOX_KHR) != present_modes.end();
     has_imm = std::find(present_modes.begin(), present_modes.end(),
                         VK_PRESENT_MODE_IMMEDIATE_KHR) != present_modes.end();
     has_fifo_relaxed = std::find(present_modes.begin(), present_modes.end(),
@@ -310,11 +307,10 @@ void Swapchain::CreateSwapchain(const VkSurfaceCapabilitiesKHR& capabilities) {
     // According to Vulkan spec, when using VK_SWAPCHAIN_CREATE_MUTABLE_FORMAT_BIT_KHR,
     // the base format (imageFormat) MUST be included in pViewFormats
     const std::array view_formats{
-        swapchain_ci.imageFormat,  // Base format MUST be first
-        VK_FORMAT_B8G8R8A8_UNORM,
-        VK_FORMAT_B8G8R8A8_SRGB,
+        swapchain_ci.imageFormat, // Base format MUST be first
+        VK_FORMAT_B8G8R8A8_UNORM, VK_FORMAT_B8G8R8A8_SRGB,
 #ifdef __ANDROID__
-        VK_FORMAT_R8G8B8A8_UNORM,  // Android may use RGBA
+        VK_FORMAT_R8G8B8A8_UNORM, // Android may use RGBA
         VK_FORMAT_R8G8B8A8_SRGB,
 #endif
     };
@@ -329,7 +325,8 @@ void Swapchain::CreateSwapchain(const VkSurfaceCapabilitiesKHR& capabilities) {
         swapchain_ci.flags |= VK_SWAPCHAIN_CREATE_MUTABLE_FORMAT_BIT_KHR;
     }
     // Request the size again to reduce the possibility of a TOCTOU race condition.
-    const auto updated_capabilities = physical_device.GetSurfaceCapabilitiesKHR(VkSurfaceKHR(surface));
+    const auto updated_capabilities =
+        physical_device.GetSurfaceCapabilitiesKHR(VkSurfaceKHR(surface));
     swapchain_ci.imageExtent = ChooseSwapExtent(updated_capabilities, width, height);
     // Don't add code within this and the swapchain creation.
     swapchain = device.GetLogical().CreateSwapchainKHR(swapchain_ci);
@@ -346,7 +343,8 @@ void Swapchain::CreateSwapchain(const VkSurfaceCapabilitiesKHR& capabilities) {
 #endif
 }
 
-void Swapchain::CreateSemaphores() {
+void Swapchain::CreateSemaphores()
+{
     present_semaphores.resize(image_count);
     std::ranges::generate(present_semaphores,
                           [this] { return device.GetLogical().CreateSemaphore(); });
@@ -355,14 +353,16 @@ void Swapchain::CreateSemaphores() {
                           [this] { return device.GetLogical().CreateSemaphore(); });
 }
 
-void Swapchain::Destroy() {
+void Swapchain::Destroy()
+{
     frame_index = 0;
     present_semaphores.clear();
     render_semaphores.clear();
     swapchain.reset();
 }
 
-bool Swapchain::NeedsPresentModeUpdate() const {
+bool Swapchain::NeedsPresentModeUpdate() const
+{
     const auto requested_mode = ChooseSwapPresentMode(has_imm, has_mailbox, has_fifo_relaxed);
     return present_mode != requested_mode;
 }

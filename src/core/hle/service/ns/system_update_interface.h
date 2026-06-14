@@ -25,8 +25,8 @@ public:
 private:
     Result GetBackgroundNetworkUpdateState(
         Out<BackgroundNetworkUpdateState> out_background_network_update_state);
-    Result OpenSystemUpdateControl(
-        Out<SharedPointer<ISystemUpdateControl>> out_system_update_control);
+    Result
+    OpenSystemUpdateControl(Out<SharedPointer<ISystemUpdateControl>> out_system_update_control);
     Result GetSystemUpdateNotificationEventForContentDelivery(
         OutCopyHandle<Kernel::KReadableEvent> out_event);
 

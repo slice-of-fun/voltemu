@@ -4,11 +4,12 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/hle_ipc.h"
+
 #include <algorithm>
 #include <array>
-#include <sstream>
-
 #include <boost/range/algorithm_ext/erase.hpp>
+#include <sstream>
 
 #include "common/assert.h"
 #include "common/common_funcs.h"
@@ -23,24 +24,28 @@
 #include "core/hle/kernel/k_server_session.h"
 #include "core/hle/kernel/k_thread.h"
 #include "core/hle/kernel/kernel.h"
-#include "core/hle/service/hle_ipc.h"
 #include "core/hle/service/ipc_helpers.h"
 #include "core/memory.h"
 
 namespace Service {
 
 SessionRequestHandler::SessionRequestHandler(Kernel::KernelCore& kernel_, const char* service_name_)
-    : kernel{kernel_} {}
+    : kernel{kernel_}
+{
+}
 
 SessionRequestHandler::~SessionRequestHandler() = default;
 
 SessionRequestManager::SessionRequestManager(Kernel::KernelCore& kernel_,
                                              ServerManager& server_manager_)
-    : kernel{kernel_}, server_manager{server_manager_} {}
+    : kernel{kernel_}, server_manager{server_manager_}
+{
+}
 
 SessionRequestManager::~SessionRequestManager() = default;
 
-bool SessionRequestManager::HasSessionRequestHandler(const HLERequestContext& context) const {
+bool SessionRequestManager::HasSessionRequestHandler(const HLERequestContext& context) const
+{
     if (IsDomain() && context.HasDomainMessageHeader()) {
         const auto& message_header = context.GetDomainMessageHeader();
         const auto object_id = message_header.object_id;
@@ -56,7 +61,8 @@ bool SessionRequestManager::HasSessionRequestHandler(const HLERequestContext& co
 }
 
 Result SessionRequestManager::CompleteSyncRequest(Kernel::KServerSession* server_session,
-                                                  HLERequestContext& context) {
+                                                  HLERequestContext& context)
+{
     Result result = ResultSuccess;
 
     // If the session has been converted to a domain, handle the domain request
@@ -84,7 +90,8 @@ Result SessionRequestManager::CompleteSyncRequest(Kernel::KServerSession* server
 }
 
 Result SessionRequestManager::HandleDomainSyncRequest(Kernel::KServerSession* server_session,
-                                                      HLERequestContext& context) {
+                                                      HLERequestContext& context)
+{
     if (!context.HasDomainMessageHeader()) {
         return ResultSuccess;
     }
@@ -128,18 +135,18 @@ Result SessionRequestManager::HandleDomainSyncRequest(Kernel::KServerSession* se
     return ResultSuccess;
 }
 
-HLERequestContext::HLERequestContext(Kernel::KernelCore& kernel_, Core::Memory::Memory& memory_, Kernel::KServerSession* server_session_, Kernel::KThread* thread_)
-    : server_session(server_session_)
-    , thread(thread_)
-    , kernel{kernel_}
-    , memory{memory_}
+HLERequestContext::HLERequestContext(Kernel::KernelCore& kernel_, Core::Memory::Memory& memory_,
+                                     Kernel::KServerSession* server_session_,
+                                     Kernel::KThread* thread_)
+    : server_session(server_session_), thread(thread_), kernel{kernel_}, memory{memory_}
 {
     cmd_buf[0] = 0;
 }
 
 HLERequestContext::~HLERequestContext() = default;
 
-void HLERequestContext::ParseCommandBuffer(u32_le* src_cmdbuf, bool incoming) {
+void HLERequestContext::ParseCommandBuffer(u32_le* src_cmdbuf, bool incoming)
+{
     IPC::RequestParser rp(src_cmdbuf);
     command_header = rp.PopRaw<IPC::CommandHeader>();
 
@@ -252,7 +259,8 @@ void HLERequestContext::ParseCommandBuffer(u32_le* src_cmdbuf, bool incoming) {
     rp.Skip(1, false); // The command is actually an u64, but we don't use the high part.
 }
 
-Result HLERequestContext::PopulateFromIncomingCommandBuffer(u32_le* src_cmdbuf) {
+Result HLERequestContext::PopulateFromIncomingCommandBuffer(u32_le* src_cmdbuf)
+{
     client_handle_table = &thread->GetOwnerProcess()->GetHandleTable();
 
     ParseCommandBuffer(src_cmdbuf, true);
@@ -267,7 +275,8 @@ Result HLERequestContext::PopulateFromIncomingCommandBuffer(u32_le* src_cmdbuf) 
     return ResultSuccess;
 }
 
-Result HLERequestContext::WriteToOutgoingCommandBuffer() {
+Result HLERequestContext::WriteToOutgoingCommandBuffer()
+{
     auto current_offset = handles_offset;
     auto& owner_process = *thread->GetOwnerProcess();
     auto& handle_table = owner_process.GetHandleTable();
@@ -311,7 +320,8 @@ Result HLERequestContext::WriteToOutgoingCommandBuffer() {
     return ResultSuccess;
 }
 
-std::vector<u8> HLERequestContext::ReadBufferCopy(std::size_t buffer_index) const {
+std::vector<u8> HLERequestContext::ReadBufferCopy(std::size_t buffer_index) const
+{
     const bool is_buffer_a{BufferDescriptorA().size() > buffer_index &&
                            BufferDescriptorA()[buffer_index].Size()};
     if (is_buffer_a) {
@@ -331,7 +341,8 @@ std::vector<u8> HLERequestContext::ReadBufferCopy(std::size_t buffer_index) cons
     }
 }
 
-std::span<const u8> HLERequestContext::ReadBufferA(std::size_t buffer_index) const {
+std::span<const u8> HLERequestContext::ReadBufferA(std::size_t buffer_index) const
+{
     Core::Memory::CpuGuestMemory<u8, Core::Memory::GuestMemoryFlags::UnsafeRead> gm(memory, 0, 0);
 
     ASSERT_OR_EXECUTE_MSG(
@@ -341,7 +352,8 @@ std::span<const u8> HLERequestContext::ReadBufferA(std::size_t buffer_index) con
                    BufferDescriptorA()[buffer_index].Size(), &read_buffer_data_a[buffer_index]);
 }
 
-std::span<const u8> HLERequestContext::ReadBufferX(std::size_t buffer_index) const {
+std::span<const u8> HLERequestContext::ReadBufferX(std::size_t buffer_index) const
+{
     Core::Memory::CpuGuestMemory<u8, Core::Memory::GuestMemoryFlags::UnsafeRead> gm(memory, 0, 0);
 
     ASSERT_OR_EXECUTE_MSG(
@@ -351,7 +363,8 @@ std::span<const u8> HLERequestContext::ReadBufferX(std::size_t buffer_index) con
                    BufferDescriptorX()[buffer_index].Size(), &read_buffer_data_x[buffer_index]);
 }
 
-std::span<const u8> HLERequestContext::ReadBuffer(std::size_t buffer_index) const {
+std::span<const u8> HLERequestContext::ReadBuffer(std::size_t buffer_index) const
+{
     Core::Memory::CpuGuestMemory<u8, Core::Memory::GuestMemoryFlags::UnsafeRead> gm(memory, 0, 0);
 
     const bool is_buffer_a{BufferDescriptorA().size() > buffer_index &&
@@ -381,7 +394,8 @@ std::span<const u8> HLERequestContext::ReadBuffer(std::size_t buffer_index) cons
 }
 
 std::size_t HLERequestContext::WriteBuffer(const void* buffer, std::size_t size,
-                                           std::size_t buffer_index) const {
+                                           std::size_t buffer_index) const
+{
     if (size == 0) {
         LOG_WARNING(Core, "skip empty buffer write");
         return 0;
@@ -414,7 +428,8 @@ std::size_t HLERequestContext::WriteBuffer(const void* buffer, std::size_t size,
 }
 
 std::size_t HLERequestContext::WriteBufferB(const void* buffer, std::size_t size,
-                                            std::size_t buffer_index) const {
+                                            std::size_t buffer_index) const
+{
     if (buffer_index >= BufferDescriptorB().size() || size == 0) {
         return 0;
     }
@@ -431,7 +446,8 @@ std::size_t HLERequestContext::WriteBufferB(const void* buffer, std::size_t size
 }
 
 std::size_t HLERequestContext::WriteBufferC(const void* buffer, std::size_t size,
-                                            std::size_t buffer_index) const {
+                                            std::size_t buffer_index) const
+{
     if (buffer_index >= BufferDescriptorC().size() || size == 0) {
         return 0;
     }
@@ -447,7 +463,8 @@ std::size_t HLERequestContext::WriteBufferC(const void* buffer, std::size_t size
     return size;
 }
 
-std::size_t HLERequestContext::GetReadBufferSize(std::size_t buffer_index) const {
+std::size_t HLERequestContext::GetReadBufferSize(std::size_t buffer_index) const
+{
     const bool is_buffer_a{BufferDescriptorA().size() > buffer_index &&
                            BufferDescriptorA()[buffer_index].Size()};
     if (is_buffer_a) {
@@ -463,7 +480,8 @@ std::size_t HLERequestContext::GetReadBufferSize(std::size_t buffer_index) const
     }
 }
 
-std::size_t HLERequestContext::GetWriteBufferSize(std::size_t buffer_index) const {
+std::size_t HLERequestContext::GetWriteBufferSize(std::size_t buffer_index) const
+{
     const bool is_buffer_b{BufferDescriptorB().size() > buffer_index &&
                            BufferDescriptorB()[buffer_index].Size()};
     if (is_buffer_b) {
@@ -480,7 +498,8 @@ std::size_t HLERequestContext::GetWriteBufferSize(std::size_t buffer_index) cons
     return 0;
 }
 
-bool HLERequestContext::CanReadBuffer(std::size_t buffer_index) const {
+bool HLERequestContext::CanReadBuffer(std::size_t buffer_index) const
+{
     const bool is_buffer_a{BufferDescriptorA().size() > buffer_index &&
                            BufferDescriptorA()[buffer_index].Size()};
 
@@ -491,7 +510,8 @@ bool HLERequestContext::CanReadBuffer(std::size_t buffer_index) const {
     }
 }
 
-bool HLERequestContext::CanWriteBuffer(std::size_t buffer_index) const {
+bool HLERequestContext::CanWriteBuffer(std::size_t buffer_index) const
+{
     const bool is_buffer_b{BufferDescriptorB().size() > buffer_index &&
                            BufferDescriptorB()[buffer_index].Size()};
 
@@ -502,7 +522,8 @@ bool HLERequestContext::CanWriteBuffer(std::size_t buffer_index) const {
     }
 }
 
-void HLERequestContext::AddMoveInterface(SessionRequestHandlerPtr s) {
+void HLERequestContext::AddMoveInterface(SessionRequestHandlerPtr s)
+{
     ASSERT(Kernel::GetCurrentProcess(kernel).GetResourceLimit()->Reserve(
         Kernel::LimitableResource::SessionCountMax, 1));
 
@@ -518,7 +539,8 @@ void HLERequestContext::AddMoveInterface(SessionRequestHandlerPtr s) {
     AddMoveObject(&session->GetClientSession());
 }
 
-std::string HLERequestContext::Description() const {
+std::string HLERequestContext::Description() const
+{
     if (!command_header) {
         return "No command header available";
     }

@@ -4,38 +4,46 @@
 // SPDX-FileCopyrightText: Copyright 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#include "hid_core/hid_util.h"
 #include "hid_core/resources/npad/npad_data.h"
+
+#include "hid_core/hid_util.h"
 
 namespace Service::HID {
 
-NPadData::NPadData() {
+NPadData::NPadData()
+{
     ClearNpadSystemCommonPolicy();
 }
 
 NPadData::~NPadData() = default;
 
-NpadStatus NPadData::GetNpadStatus() const {
+NpadStatus NPadData::GetNpadStatus() const
+{
     return status;
 }
 
-void NPadData::SetNpadAnalogStickUseCenterClamp(bool is_enabled) {
+void NPadData::SetNpadAnalogStickUseCenterClamp(bool is_enabled)
+{
     status.use_center_clamp.Assign(is_enabled);
 }
 
-bool NPadData::GetNpadAnalogStickUseCenterClamp() const {
+bool NPadData::GetNpadAnalogStickUseCenterClamp() const
+{
     return status.use_center_clamp.As<bool>();
 }
 
-void NPadData::SetNpadSystemExtStateEnabled(bool is_enabled) {
+void NPadData::SetNpadSystemExtStateEnabled(bool is_enabled)
+{
     status.system_ext_state.Assign(is_enabled);
 }
 
-bool NPadData::GetNpadSystemExtState() const {
+bool NPadData::GetNpadSystemExtState() const
+{
     return status.system_ext_state.As<bool>();
 }
 
-Result NPadData::SetSupportedNpadIdType(std::span<const Core::HID::NpadIdType> list) {
+Result NPadData::SetSupportedNpadIdType(std::span<const Core::HID::NpadIdType> list)
+{
     // Note: Real limit is 11. But array size is 10. N's bug?
     if (list.size() > MaxSupportedNpadIdTypes) {
         return ResultInvalidArraySize;
@@ -48,7 +56,8 @@ Result NPadData::SetSupportedNpadIdType(std::span<const Core::HID::NpadIdType> l
     return ResultSuccess;
 }
 
-std::size_t NPadData::GetSupportedNpadIdType(std::span<Core::HID::NpadIdType> out_list) const {
+std::size_t NPadData::GetSupportedNpadIdType(std::span<Core::HID::NpadIdType> out_list) const
+{
     std::size_t out_size = (std::min)(supported_npad_id_types_count, out_list.size());
 
     memcpy(out_list.data(), supported_npad_id_types.data(),
@@ -57,7 +66,8 @@ std::size_t NPadData::GetSupportedNpadIdType(std::span<Core::HID::NpadIdType> ou
     return out_size;
 }
 
-bool NPadData::IsNpadIdTypeSupported(Core::HID::NpadIdType npad_id) const {
+bool NPadData::IsNpadIdTypeSupported(Core::HID::NpadIdType npad_id) const
+{
     for (std::size_t i = 0; i < supported_npad_id_types_count; i++) {
         if (supported_npad_id_types[i] == npad_id) {
             return true;
@@ -67,7 +77,8 @@ bool NPadData::IsNpadIdTypeSupported(Core::HID::NpadIdType npad_id) const {
     return false;
 }
 
-void NPadData::SetNpadSystemCommonPolicy(bool is_full_policy) {
+void NPadData::SetNpadSystemCommonPolicy(bool is_full_policy)
+{
     supported_npad_style_set = Core::HID::NpadStyleSet::All;
     handheld_activation_mode = NpadHandheldActivationMode::Dual;
 
@@ -96,7 +107,8 @@ void NPadData::SetNpadSystemCommonPolicy(bool is_full_policy) {
     }
 }
 
-void NPadData::ClearNpadSystemCommonPolicy() {
+void NPadData::ClearNpadSystemCommonPolicy()
+{
     status.raw = 0;
     supported_npad_style_set = Core::HID::NpadStyleSet::All;
     npad_hold_type = NpadJoyHoldType::Vertical;
@@ -123,34 +135,41 @@ void NPadData::ClearNpadSystemCommonPolicy() {
     }
 }
 
-void NPadData::SetNpadJoyHoldType(NpadJoyHoldType hold_type) {
+void NPadData::SetNpadJoyHoldType(NpadJoyHoldType hold_type)
+{
     npad_hold_type = hold_type;
     status.is_hold_type_set.Assign(true);
 }
 
-NpadJoyHoldType NPadData::GetNpadJoyHoldType() const {
+NpadJoyHoldType NPadData::GetNpadJoyHoldType() const
+{
     return npad_hold_type;
 }
 
-void NPadData::SetHandheldActivationMode(NpadHandheldActivationMode activation_mode) {
+void NPadData::SetHandheldActivationMode(NpadHandheldActivationMode activation_mode)
+{
     handheld_activation_mode = activation_mode;
 }
 
-NpadHandheldActivationMode NPadData::GetHandheldActivationMode() const {
+NpadHandheldActivationMode NPadData::GetHandheldActivationMode() const
+{
     return handheld_activation_mode;
 }
 
-void NPadData::SetSupportedNpadStyleSet(Core::HID::NpadStyleSet style_set) {
+void NPadData::SetSupportedNpadStyleSet(Core::HID::NpadStyleSet style_set)
+{
     supported_npad_style_set = style_set;
     status.is_supported_styleset_set.Assign(true);
     status.is_hold_type_set.Assign(true);
 }
 
-Core::HID::NpadStyleSet NPadData::GetSupportedNpadStyleSet() const {
+Core::HID::NpadStyleSet NPadData::GetSupportedNpadStyleSet() const
+{
     return supported_npad_style_set;
 }
 
-bool NPadData::IsNpadStyleIndexSupported(Core::HID::NpadStyleIndex style_index) const {
+bool NPadData::IsNpadStyleIndexSupported(Core::HID::NpadStyleIndex style_index) const
+{
     Core::HID::NpadStyleTag style = {supported_npad_style_set};
     switch (style_index) {
     case Core::HID::NpadStyleIndex::Fullkey:
@@ -180,41 +199,50 @@ bool NPadData::IsNpadStyleIndexSupported(Core::HID::NpadStyleIndex style_index) 
     }
 }
 
-void NPadData::SetLrAssignmentMode(bool is_enabled) {
+void NPadData::SetLrAssignmentMode(bool is_enabled)
+{
     status.lr_assignment_mode.Assign(is_enabled);
 }
 
-bool NPadData::GetLrAssignmentMode() const {
+bool NPadData::GetLrAssignmentMode() const
+{
     return status.lr_assignment_mode.As<bool>();
 }
 
-void NPadData::SetAssigningSingleOnSlSrPress(bool is_enabled) {
+void NPadData::SetAssigningSingleOnSlSrPress(bool is_enabled)
+{
     status.assigning_single_on_sl_sr_press.Assign(is_enabled);
 }
 
-bool NPadData::GetAssigningSingleOnSlSrPress() const {
+bool NPadData::GetAssigningSingleOnSlSrPress() const
+{
     return status.assigning_single_on_sl_sr_press.As<bool>();
 }
 
-void NPadData::SetHomeProtectionEnabled(bool is_enabled, Core::HID::NpadIdType npad_id) {
+void NPadData::SetHomeProtectionEnabled(bool is_enabled, Core::HID::NpadIdType npad_id)
+{
     is_unintended_home_button_input_protection[NpadIdTypeToIndex(npad_id)] = is_enabled;
 }
 
-bool NPadData::GetHomeProtectionEnabled(Core::HID::NpadIdType npad_id) const {
+bool NPadData::GetHomeProtectionEnabled(Core::HID::NpadIdType npad_id) const
+{
     return is_unintended_home_button_input_protection[NpadIdTypeToIndex(npad_id)];
 }
 
 void NPadData::SetCaptureButtonAssignment(Core::HID::NpadButton button_assignment,
-                                          std::size_t style_index) {
+                                          std::size_t style_index)
+{
     npad_button_assignment[style_index] = button_assignment;
 }
 
-Core::HID::NpadButton NPadData::GetCaptureButtonAssignment(std::size_t style_index) const {
+Core::HID::NpadButton NPadData::GetCaptureButtonAssignment(std::size_t style_index) const
+{
     return npad_button_assignment[style_index];
 }
 
-std::size_t NPadData::GetNpadCaptureButtonAssignmentList(
-    std::span<Core::HID::NpadButton> out_list) const {
+std::size_t
+NPadData::GetNpadCaptureButtonAssignmentList(std::span<Core::HID::NpadButton> out_list) const
+{
     for (std::size_t i = 0; i < out_list.size(); i++) {
         Core::HID::NpadStyleSet style_set = GetStylesetByIndex(i);
         if ((style_set & supported_npad_style_set) == Core::HID::NpadStyleSet::None ||

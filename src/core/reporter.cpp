@@ -4,12 +4,14 @@
 // SPDX-FileCopyrightText: Copyright 2019 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include <ctime>
-#include <fstream>
-#include <iomanip>
+#include "core/reporter.h"
 
 #include <fmt/chrono.h>
 #include <fmt/ranges.h>
+
+#include <ctime>
+#include <fstream>
+#include <iomanip>
 #include <nlohmann/json.hpp>
 
 #include "common/fs/file.h"
@@ -26,16 +28,17 @@
 #include "core/hle/result.h"
 #include "core/hle/service/hle_ipc.h"
 #include "core/memory.h"
-#include "core/reporter.h"
 
 namespace {
 
-std::filesystem::path GetPath(std::string_view type, u64 title_id, std::string_view timestamp) {
+std::filesystem::path GetPath(std::string_view type, u64 title_id, std::string_view timestamp)
+{
     return Common::FS::GetVoltPath(Common::FS::VoltPath::LogDir) / type /
            fmt::format("{:016X}_{}.json", title_id, timestamp);
 }
 
-std::string GetTimestamp() {
+std::string GetTimestamp()
+{
     const auto time = std::time(nullptr);
     std::ostringstream oss;
     oss << std::put_time(std::localtime(&time), "%FT%H-%M-%S");
@@ -44,7 +47,8 @@ std::string GetTimestamp() {
 
 using namespace nlohmann;
 
-void SaveToFile(const json& json, const std::filesystem::path& filename) {
+void SaveToFile(const json& json, const std::filesystem::path& filename)
+{
     if (!Common::FS::CreateParentDirs(filename)) {
         LOG_ERROR(Core, "Failed to create path for '{}' to save report!",
                   Common::FS::PathToUTF8String(filename));
@@ -57,7 +61,8 @@ void SaveToFile(const json& json, const std::filesystem::path& filename) {
     file << std::setw(4) << json << std::endl;
 }
 
-json GetYuzuVersionData() {
+json GetYuzuVersionData()
+{
     return {
         {"scm_rev", std::string(Common::g_scm_rev)},
         {"scm_branch", std::string(Common::g_scm_branch)},
@@ -70,7 +75,8 @@ json GetYuzuVersionData() {
 }
 
 json GetReportCommonData(u64 title_id, Result result, const std::string& timestamp,
-                         std::optional<u128> user_id = {}) {
+                         std::optional<u128> user_id = {})
+{
     auto out = json{
         {"title_id", fmt::format("{:016X}", title_id)},
         {"result_raw", fmt::format("{:08X}", result.raw)},
@@ -88,7 +94,8 @@ json GetReportCommonData(u64 title_id, Result result, const std::string& timesta
 
 json GetProcessorStateData(const std::string& architecture, u64 entry_point, u64 sp, u64 pc,
                            u64 pstate, const std::array<u64, 31>& registers,
-                           const std::optional<std::array<u64, 32>>& backtrace = {}) {
+                           const std::optional<std::array<u64, 32>>& backtrace = {})
+{
     auto out = json{
         {"entry_point", fmt::format("{:016X}", entry_point)},
         {"sp", fmt::format("{:016X}", sp)},
@@ -115,7 +122,8 @@ json GetProcessorStateData(const std::string& architecture, u64 entry_point, u64
     return out;
 }
 
-json GetFullDataAuto(const std::string& timestamp, u64 title_id, Core::System& system) {
+json GetFullDataAuto(const std::string& timestamp, u64 title_id, Core::System& system)
+{
     json out;
 
     out["yuzu_version"] = GetYuzuVersionData();
@@ -124,8 +132,11 @@ json GetFullDataAuto(const std::string& timestamp, u64 title_id, Core::System& s
     return out;
 }
 
-template <bool read_value, typename DescriptorType>
-json GetHLEBufferDescriptorData(const boost::container::static_vector<DescriptorType, IPC::MAX_BUFFER_DESCRIPTORS>& buffer, Core::Memory::Memory& memory) {
+template<bool read_value, typename DescriptorType>
+json GetHLEBufferDescriptorData(
+    const boost::container::static_vector<DescriptorType, IPC::MAX_BUFFER_DESCRIPTORS>& buffer,
+    Core::Memory::Memory& memory)
+{
     auto buffer_out = json::array();
     for (const auto& desc : buffer) {
         auto entry = json{
@@ -145,7 +156,8 @@ json GetHLEBufferDescriptorData(const boost::container::static_vector<Descriptor
     return buffer_out;
 }
 
-json GetHLERequestContextData(Service::HLERequestContext& ctx, Core::Memory::Memory& memory) {
+json GetHLERequestContextData(Service::HLERequestContext& ctx, Core::Memory::Memory& memory)
+{
     json out;
 
     auto cmd_buf = json::array();
@@ -167,7 +179,8 @@ json GetHLERequestContextData(Service::HLERequestContext& ctx, Core::Memory::Mem
 
 namespace Core {
 
-Reporter::Reporter(System& system_) : system(system_) {
+Reporter::Reporter(System& system_) : system(system_)
+{
     ClearFSAccessLog();
 }
 
@@ -177,7 +190,8 @@ void Reporter::SaveCrashReport(u64 title_id, Result result, u64 set_flags, u64 e
                                u64 pc, u64 pstate, u64 afsr0, u64 afsr1, u64 esr, u64 far,
                                const std::array<u64, 31>& registers,
                                const std::array<u64, 32>& backtrace, u32 backtrace_size,
-                               const std::string& arch, u32 unk10) const {
+                               const std::string& arch, u32 unk10) const
+{
     if (!IsReportingEnabled()) {
         return;
     }
@@ -203,7 +217,8 @@ void Reporter::SaveCrashReport(u64 title_id, Result result, u64 set_flags, u64 e
 }
 
 void Reporter::SaveSvcBreakReport(u32 type, bool signal_debugger, u64 info1, u64 info2,
-                                  const std::optional<std::vector<u8>>& resolved_buffer) const {
+                                  const std::optional<std::vector<u8>>& resolved_buffer) const
+{
     if (!IsReportingEnabled()) {
         return;
     }
@@ -230,7 +245,8 @@ void Reporter::SaveSvcBreakReport(u32 type, bool signal_debugger, u64 info1, u64
 
 void Reporter::SaveUnimplementedFunctionReport(Service::HLERequestContext& ctx, u32 command_id,
                                                const std::string& name,
-                                               const std::string& service_name) const {
+                                               const std::string& service_name) const
+{
     if (!IsReportingEnabled()) {
         return;
     }
@@ -252,7 +268,8 @@ void Reporter::SaveUnimplementedFunctionReport(Service::HLERequestContext& ctx, 
 void Reporter::SaveUnimplementedAppletReport(
     u32 applet_id, u32 common_args_version, u32 library_version, u32 theme_color,
     bool startup_sound, u64 system_tick, const std::vector<std::vector<u8>>& normal_channel,
-    const std::vector<std::vector<u8>>& interactive_channel) const {
+    const std::vector<std::vector<u8>>& interactive_channel) const
+{
     if (!IsReportingEnabled()) {
         return;
     }
@@ -288,7 +305,8 @@ void Reporter::SaveUnimplementedAppletReport(
 
 void Reporter::SavePlayReport(PlayReportType type, u64 title_id,
                               const std::vector<std::span<const u8>>& data,
-                              std::optional<u64> process_id, std::optional<u128> user_id) const {
+                              std::optional<u64> process_id, std::optional<u128> user_id) const
+{
     if (!IsReportingEnabled()) {
         return;
     }
@@ -316,7 +334,8 @@ void Reporter::SavePlayReport(PlayReportType type, u64 title_id,
 
 void Reporter::SaveErrorReport(u64 title_id, Result result,
                                const std::optional<std::string>& custom_text_main,
-                               const std::optional<std::string>& custom_text_detail) const {
+                               const std::optional<std::string>& custom_text_detail) const
+{
     if (!IsReportingEnabled()) {
         return;
     }
@@ -335,7 +354,8 @@ void Reporter::SaveErrorReport(u64 title_id, Result result,
     SaveToFile(out, GetPath("error_report", title_id, timestamp));
 }
 
-void Reporter::SaveFSAccessLog(std::string_view log_message) const {
+void Reporter::SaveFSAccessLog(std::string_view log_message) const
+{
     const auto access_log_path =
         Common::FS::GetVoltPath(Common::FS::VoltPath::SDMCDir) / "FsAccessLog.txt";
 
@@ -343,7 +363,8 @@ void Reporter::SaveFSAccessLog(std::string_view log_message) const {
                                         log_message));
 }
 
-void Reporter::SaveUserReport() const {
+void Reporter::SaveUserReport() const
+{
     if (!IsReportingEnabled()) {
         return;
     }
@@ -355,7 +376,8 @@ void Reporter::SaveUserReport() const {
                GetPath("user_report", title_id, timestamp));
 }
 
-void Reporter::ClearFSAccessLog() const {
+void Reporter::ClearFSAccessLog() const
+{
     const auto access_log_path =
         Common::FS::GetVoltPath(Common::FS::VoltPath::SDMCDir) / "FsAccessLog.txt";
 
@@ -367,7 +389,8 @@ void Reporter::ClearFSAccessLog() const {
     }
 }
 
-bool Reporter::IsReportingEnabled() const {
+bool Reporter::IsReportingEnabled() const
+{
     return Settings::values.reporting_services.GetValue();
 }
 

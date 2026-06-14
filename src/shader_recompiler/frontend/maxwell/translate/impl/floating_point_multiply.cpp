@@ -21,7 +21,8 @@ enum class Scale : u64 {
     INVALIDSCALE37,
 };
 
-float ScaleFactor(Scale scale) {
+float ScaleFactor(Scale scale)
+{
     switch (scale) {
     case Scale::None:
         return 1.0f;
@@ -44,7 +45,8 @@ float ScaleFactor(Scale scale) {
 }
 
 void FMUL(TranslatorVisitor& v, u64 insn, const IR::F32& src_b, FmzMode fmz_mode,
-          FpRounding fp_rounding, Scale scale, bool sat, bool cc, bool neg_b) {
+          FpRounding fp_rounding, Scale scale, bool sat, bool cc, bool neg_b)
+{
     union {
         u64 raw;
         BitField<0, 8, IR::Reg> dest_reg;
@@ -83,7 +85,8 @@ void FMUL(TranslatorVisitor& v, u64 insn, const IR::F32& src_b, FmzMode fmz_mode
     v.F(fmul.dest_reg, value);
 }
 
-void FMUL(TranslatorVisitor& v, u64 insn, const IR::F32& src_b) {
+void FMUL(TranslatorVisitor& v, u64 insn, const IR::F32& src_b)
+{
     union {
         u64 raw;
         BitField<39, 2, FpRounding> fp_rounding;
@@ -99,19 +102,23 @@ void FMUL(TranslatorVisitor& v, u64 insn, const IR::F32& src_b) {
 }
 } // Anonymous namespace
 
-void TranslatorVisitor::FMUL_reg(u64 insn) {
+void TranslatorVisitor::FMUL_reg(u64 insn)
+{
     return FMUL(*this, insn, GetFloatReg20(insn));
 }
 
-void TranslatorVisitor::FMUL_cbuf(u64 insn) {
+void TranslatorVisitor::FMUL_cbuf(u64 insn)
+{
     return FMUL(*this, insn, GetFloatCbuf(insn));
 }
 
-void TranslatorVisitor::FMUL_imm(u64 insn) {
+void TranslatorVisitor::FMUL_imm(u64 insn)
+{
     return FMUL(*this, insn, GetFloatImm20(insn));
 }
 
-void TranslatorVisitor::FMUL32I(u64 insn) {
+void TranslatorVisitor::FMUL32I(u64 insn)
+{
     union {
         u64 raw;
         BitField<52, 1, u64> cc;

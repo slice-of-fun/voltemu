@@ -106,9 +106,11 @@ struct ApplicationViewData {
 };
 
 inline size_t WriteApplicationView(void* dst, size_t dst_size, const ApplicationViewData& data,
-                                   bool is_fw20) {
+                                   bool is_fw20)
+{
     if (is_fw20) {
-        if (dst_size < sizeof(ApplicationViewV20)) return 0;
+        if (dst_size < sizeof(ApplicationViewV20))
+            return 0;
         auto* out = reinterpret_cast<ApplicationViewV20*>(dst);
         out->application_id = data.application_id;
         out->version = data.version;
@@ -118,7 +120,8 @@ inline size_t WriteApplicationView(void* dst, size_t dst_size, const Application
         out->download_progress = data.download_progress;
         return sizeof(ApplicationViewV20);
     } else {
-        if (dst_size < sizeof(ApplicationViewV19)) return 0;
+        if (dst_size < sizeof(ApplicationViewV19))
+            return 0;
         auto* out = reinterpret_cast<ApplicationViewV19*>(dst);
         out->application_id = data.application_id;
         out->version = data.version;
@@ -136,11 +139,14 @@ struct ApplicationViewWithPromotionData {
 
 inline size_t WriteApplicationViewWithPromotion(void* dst, size_t dst_size,
                                                 const ApplicationViewWithPromotionData& data,
-                                                bool sdk20_plus) {
+                                                bool sdk20_plus)
+{
     const size_t view_written = WriteApplicationView(dst, dst_size, data.view, sdk20_plus);
-    if (view_written == 0) return 0;
+    if (view_written == 0)
+        return 0;
     const size_t remaining = dst_size - view_written;
-    if (remaining < sizeof(PromotionInfo)) return 0;
+    if (remaining < sizeof(PromotionInfo))
+        return 0;
     auto* promo_dst = reinterpret_cast<u8*>(dst) + view_written;
     std::memcpy(promo_dst, &data.promotion, sizeof(PromotionInfo));
     return view_written + sizeof(PromotionInfo);
@@ -176,7 +182,8 @@ struct ApplicationDisplayData {
     std::array<char, 0x200> application_name;
     std::array<char, 0x100> developer_name;
 };
-static_assert(sizeof(ApplicationDisplayData) == 0x300, "ApplicationDisplayData has incorrect size.");
+static_assert(sizeof(ApplicationDisplayData) == 0x300,
+              "ApplicationDisplayData has incorrect size.");
 
 struct LogoPath {
     std::array<char, 0x300> path;

@@ -22,24 +22,23 @@
 
 namespace {
 
-template <typename T>
-struct CFReleaser {
+template<typename T> struct CFReleaser {
     T ptr;
 
     YUZU_NON_COPYABLE(CFReleaser);
     constexpr CFReleaser() : ptr(nullptr) {}
     constexpr CFReleaser(T ptr) : ptr(ptr) {}
-    constexpr operator T() {
-        return ptr;
-    }
-    ~CFReleaser() {
+    constexpr operator T() { return ptr; }
+    ~CFReleaser()
+    {
         if (ptr) {
             CFRelease(ptr);
         }
     }
 };
 
-std::string CFStringToString(CFStringRef cfstr) {
+std::string CFStringToString(CFStringRef cfstr)
+{
     CFReleaser<CFDataRef> cfdata(
         CFStringCreateExternalRepresentation(nullptr, cfstr, kCFStringEncodingUTF8, 0));
     ASSERT_OR_EXECUTE(cfdata, { return "???"; });
@@ -47,7 +46,8 @@ std::string CFStringToString(CFStringRef cfstr) {
                        CFDataGetLength(cfdata));
 }
 
-std::string OSStatusToString(OSStatus status) {
+std::string OSStatusToString(OSStatus status)
+{
     CFReleaser<CFStringRef> cfstr(SecCopyErrorMessageString(status, nullptr));
     if (!cfstr) {
         return "[unknown error]";
@@ -61,7 +61,8 @@ namespace Service::SSL {
 
 class SSLConnectionBackendSecureTransport final : public SSLConnectionBackend {
 public:
-    Result Init() {
+    Result Init()
+    {
         static std::once_flag once_flag;
         std::call_once(once_flag, []() {
             if (getenv("SSLKEYLOGFILE")) {
@@ -88,11 +89,13 @@ public:
         return ResultSuccess;
     }
 
-    void SetSocket(std::shared_ptr<Network::SocketBase> in_socket) override {
+    void SetSocket(std::shared_ptr<Network::SocketBase> in_socket) override
+    {
         socket = std::move(in_socket);
     }
 
-    Result SetHostName(const std::string& hostname) override {
+    Result SetHostName(const std::string& hostname) override
+    {
         OSStatus status = SSLSetPeerDomainName(context, hostname.c_str(), hostname.size());
         if (status) {
             LOG_ERROR(Service_SSL, "SSLSetPeerDomainName failed: {}", OSStatusToString(status));
@@ -101,16 +104,17 @@ public:
         return ResultSuccess;
     }
 
-    void SetVerifyOption(u32 option) override {
+    void SetVerifyOption(u32 option) override
+    {
         skip_cert_verification = (option == 0);
-        LOG_WARNING(Service_SSL, "option={} skip_verification={}", option,
-                    skip_cert_verification);
+        LOG_WARNING(Service_SSL, "option={} skip_verification={}", option, skip_cert_verification);
         if (skip_cert_verification) {
             SSLSetSessionOption(context, kSSLSessionOptionBreakOnServerAuth, true);
         }
     }
 
-    Result DoHandshake() override {
+    Result DoHandshake() override
+    {
         OSStatus status = SSLHandshake(context);
 
         if (skip_cert_verification && status == errSSLServerAuthCompleted) {
@@ -121,17 +125,20 @@ public:
         return HandleReturn("SSLHandshake", 0, status);
     }
 
-    Result Read(size_t* out_size, std::span<u8> data) override {
+    Result Read(size_t* out_size, std::span<u8> data) override
+    {
         OSStatus status = SSLRead(context, data.data(), data.size(), out_size);
         return HandleReturn("SSLRead", out_size, status);
     }
 
-    Result Write(size_t* out_size, std::span<const u8> data) override {
+    Result Write(size_t* out_size, std::span<const u8> data) override
+    {
         OSStatus status = SSLWrite(context, data.data(), data.size(), out_size);
         return HandleReturn("SSLWrite", out_size, status);
     }
 
-    Result HandleReturn(const char* what, size_t* actual, OSStatus status) {
+    Result HandleReturn(const char* what, size_t* actual, OSStatus status)
+    {
         switch (status) {
         case 0:
             return ResultSuccess;
@@ -150,7 +157,8 @@ public:
         }
     }
 
-    Result GetServerCerts(std::vector<std::vector<u8>>* out_certs) override {
+    Result GetServerCerts(std::vector<std::vector<u8>>* out_certs) override
+    {
         CFReleaser<SecTrustRef> trust;
         OSStatus status = SSLCopyPeerTrust(context, &trust.ptr);
         if (status) {
@@ -167,17 +175,19 @@ public:
         return ResultSuccess;
     }
 
-    static OSStatus ReadCallback(SSLConnectionRef connection, void* data, size_t* dataLength) {
+    static OSStatus ReadCallback(SSLConnectionRef connection, void* data, size_t* dataLength)
+    {
         return ReadOrWriteCallback(connection, data, dataLength, true);
     }
 
-    static OSStatus WriteCallback(SSLConnectionRef connection, const void* data,
-                                  size_t* dataLength) {
+    static OSStatus WriteCallback(SSLConnectionRef connection, const void* data, size_t* dataLength)
+    {
         return ReadOrWriteCallback(connection, const_cast<void*>(data), dataLength, false);
     }
 
     static OSStatus ReadOrWriteCallback(SSLConnectionRef connection, void* data, size_t* dataLength,
-                                        bool is_read) {
+                                        bool is_read)
+    {
         auto self =
             static_cast<SSLConnectionBackendSecureTransport*>(const_cast<void*>(connection));
         ASSERT_OR_EXECUTE_MSG(
@@ -224,7 +234,8 @@ private:
     std::shared_ptr<Network::SocketBase> socket;
 };
 
-Result CreateSSLConnectionBackend(std::unique_ptr<SSLConnectionBackend>* out_backend) {
+Result CreateSSLConnectionBackend(std::unique_ptr<SSLConnectionBackend>* out_backend)
+{
     auto conn = std::make_unique<SSLConnectionBackendSecureTransport>();
 
     R_TRY(conn->Init());

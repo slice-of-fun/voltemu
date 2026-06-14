@@ -2,12 +2,13 @@
 // SPDX-FileCopyrightText: 2022 Skyline Team and Contributors
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+#include "core/hle/service/nvdrv/core/container.h"
+
 #include <atomic>
 #include <deque>
 #include <mutex>
 
 #include "core/hle/kernel/k_process.h"
-#include "core/hle/service/nvdrv/core/container.h"
 #include "core/hle/service/nvdrv/core/heap_mapper.h"
 #include "core/hle/service/nvdrv/core/nvmap.h"
 #include "core/hle/service/nvdrv/core/syncpoint_manager.h"
@@ -17,13 +18,17 @@
 namespace Service::Nvidia::NvCore {
 
 Session::Session(SessionId id_, Kernel::KProcess* process_, Core::Asid asid_)
-    : id{id_}, process{process_}, asid{asid_}, has_preallocated_area{}, mapper{}, is_active{} {}
+    : id{id_}, process{process_}, asid{asid_}, has_preallocated_area{}, mapper{}, is_active{}
+{
+}
 
 Session::~Session() = default;
 
 struct ContainerImpl {
     explicit ContainerImpl(Container& core, Tegra::Host1x::Host1x& host1x_)
-        : host1x{host1x_}, file{core, host1x_}, manager{host1x_}, device_file_data{} {}
+        : host1x{host1x_}, file{core, host1x_}, manager{host1x_}, device_file_data{}
+    {
+    }
     Tegra::Host1x::Host1x& host1x;
     NvMap file;
     SyncpointManager manager;
@@ -34,13 +39,15 @@ struct ContainerImpl {
     std::mutex session_guard;
 };
 
-Container::Container(Tegra::Host1x::Host1x& host1x_) {
+Container::Container(Tegra::Host1x::Host1x& host1x_)
+{
     impl = std::make_unique<ContainerImpl>(*this, host1x_);
 }
 
 Container::~Container() = default;
 
-SessionId Container::OpenSession(Kernel::KProcess* process) {
+SessionId Container::OpenSession(Kernel::KProcess* process)
+{
     using namespace Common::Literals;
 
     std::scoped_lock lk(impl->session_guard);
@@ -114,7 +121,8 @@ SessionId Container::OpenSession(Kernel::KProcess* process) {
     return SessionId{new_id};
 }
 
-void Container::CloseSession(SessionId session_id) {
+void Container::CloseSession(SessionId session_id)
+{
     std::scoped_lock lk(impl->session_guard);
     auto& session = impl->sessions[session_id.id];
     if (--session.ref_count > 0) {
@@ -134,32 +142,39 @@ void Container::CloseSession(SessionId session_id) {
     impl->id_pool.emplace_front(session_id.id);
 }
 
-Session* Container::GetSession(SessionId session_id) {
+Session* Container::GetSession(SessionId session_id)
+{
     std::atomic_thread_fence(std::memory_order_acquire);
     return &impl->sessions[session_id.id];
 }
 
-NvMap& Container::GetNvMapFile() {
+NvMap& Container::GetNvMapFile()
+{
     return impl->file;
 }
 
-const NvMap& Container::GetNvMapFile() const {
+const NvMap& Container::GetNvMapFile() const
+{
     return impl->file;
 }
 
-Container::Host1xDeviceFileData& Container::Host1xDeviceFile() {
+Container::Host1xDeviceFileData& Container::Host1xDeviceFile()
+{
     return impl->device_file_data;
 }
 
-const Container::Host1xDeviceFileData& Container::Host1xDeviceFile() const {
+const Container::Host1xDeviceFileData& Container::Host1xDeviceFile() const
+{
     return impl->device_file_data;
 }
 
-SyncpointManager& Container::GetSyncpointManager() {
+SyncpointManager& Container::GetSyncpointManager()
+{
     return impl->manager;
 }
 
-const SyncpointManager& Container::GetSyncpointManager() const {
+const SyncpointManager& Container::GetSyncpointManager() const
+{
     return impl->manager;
 }
 

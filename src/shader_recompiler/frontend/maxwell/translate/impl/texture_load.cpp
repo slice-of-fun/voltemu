@@ -20,7 +20,8 @@ enum class TextureType : u64 {
     ARRAY_CUBE,
 };
 
-Shader::TextureType GetType(TextureType type) {
+Shader::TextureType GetType(TextureType type)
+{
     switch (type) {
     case TextureType::_1D:
         return Shader::TextureType::Color1D;
@@ -42,7 +43,8 @@ Shader::TextureType GetType(TextureType type) {
     throw NotImplementedException("Invalid texture type {}", type);
 }
 
-IR::Value MakeCoords(TranslatorVisitor& v, IR::Reg reg, TextureType type) {
+IR::Value MakeCoords(TranslatorVisitor& v, IR::Reg reg, TextureType type)
+{
     const auto read_array{
         [&]() -> IR::U32 { return v.ir.BitFieldExtract(v.X(reg), v.ir.Imm32(0), v.ir.Imm32(16)); }};
     switch (type) {
@@ -66,7 +68,8 @@ IR::Value MakeCoords(TranslatorVisitor& v, IR::Reg reg, TextureType type) {
     throw NotImplementedException("Invalid texture type {}", type);
 }
 
-IR::Value MakeOffset(TranslatorVisitor& v, IR::Reg& reg, TextureType type) {
+IR::Value MakeOffset(TranslatorVisitor& v, IR::Reg& reg, TextureType type)
+{
     const IR::U32 value{v.X(reg++)};
     switch (type) {
     case TextureType::_1D:
@@ -90,7 +93,8 @@ IR::Value MakeOffset(TranslatorVisitor& v, IR::Reg& reg, TextureType type) {
     throw NotImplementedException("Invalid texture type {}", type);
 }
 
-void Impl(TranslatorVisitor& v, u64 insn, bool is_bindless) {
+void Impl(TranslatorVisitor& v, u64 insn, bool is_bindless)
+{
     union {
         u64 raw;
         BitField<49, 1, u64> nodep;
@@ -151,11 +155,13 @@ void Impl(TranslatorVisitor& v, u64 insn, bool is_bindless) {
 }
 } // Anonymous namespace
 
-void TranslatorVisitor::TLD(u64 insn) {
+void TranslatorVisitor::TLD(u64 insn)
+{
     Impl(*this, insn, false);
 }
 
-void TranslatorVisitor::TLD_b(u64 insn) {
+void TranslatorVisitor::TLD_b(u64 insn)
+{
     Impl(*this, insn, true);
 }
 

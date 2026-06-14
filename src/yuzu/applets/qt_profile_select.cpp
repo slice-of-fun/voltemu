@@ -4,7 +4,8 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include <mutex>
+#include "yuzu/applets/qt_profile_select.h"
+
 #include <QApplication>
 #include <QDialogButtonBox>
 #include <QHeaderView>
@@ -14,31 +15,35 @@
 #include <QStandardItemModel>
 #include <QTreeView>
 #include <QVBoxLayout>
+#include <mutex>
+
 #include "common/fs/path_util.h"
 #include "common/string_util.h"
 #include "core/constants.h"
 #include "core/core.h"
 #include "core/hle/service/acc/profile_manager.h"
-#include "yuzu/applets/qt_profile_select.h"
 #include "yuzu/main_window.h"
 #include "yuzu/util/controller_navigation.h"
 
 namespace {
-QString FormatUserEntryText(const QString& username, Common::UUID uuid) {
+QString FormatUserEntryText(const QString& username, Common::UUID uuid)
+{
     return QtProfileSelectionDialog::tr(
                "%1\n%2", "%1 is the profile username, %2 is the formatted UUID (e.g. "
                          "00112233-4455-6677-8899-AABBCCDDEEFF))")
         .arg(username, QString::fromStdString(uuid.FormattedString()));
 }
 
-QString GetImagePath(Common::UUID uuid) {
+QString GetImagePath(Common::UUID uuid)
+{
     const auto path =
         Common::FS::GetVoltPath(Common::FS::VoltPath::NANDDir) /
         fmt::format("system/save/8000000000000010/su/avators/{}.jpg", uuid.FormattedString());
     return QString::fromStdString(Common::FS::PathToUTF8String(path));
 }
 
-QPixmap GetIcon(Common::UUID uuid) {
+QPixmap GetIcon(Common::UUID uuid)
+{
     QPixmap icon{GetImagePath(uuid)};
 
     if (!icon) {
@@ -54,7 +59,8 @@ QPixmap GetIcon(Common::UUID uuid) {
 QtProfileSelectionDialog::QtProfileSelectionDialog(
     Core::System& system, QWidget* parent,
     const Core::Frontend::ProfileSelectParameters& parameters)
-    : QDialog(parent), profile_manager{system.GetProfileManager()} {
+    : QDialog(parent), profile_manager{system.GetProfileManager()}
+{
     outer_layout = new QVBoxLayout(this);
 
     instruction_label = new QLabel();
@@ -130,11 +136,13 @@ QtProfileSelectionDialog::QtProfileSelectionDialog(
     resize(550, 400);
 }
 
-QtProfileSelectionDialog::~QtProfileSelectionDialog() {
+QtProfileSelectionDialog::~QtProfileSelectionDialog()
+{
     controller_navigation->UnloadController();
 };
 
-int QtProfileSelectionDialog::exec() {
+int QtProfileSelectionDialog::exec()
+{
     // Skip profile selection when there's only one.
     if (profile_manager.GetUserCount() == 1) {
         user_index = 0;
@@ -143,25 +151,30 @@ int QtProfileSelectionDialog::exec() {
     return QDialog::exec();
 }
 
-void QtProfileSelectionDialog::accept() {
+void QtProfileSelectionDialog::accept()
+{
     QDialog::accept();
 }
 
-void QtProfileSelectionDialog::reject() {
+void QtProfileSelectionDialog::reject()
+{
     user_index = 0;
     QDialog::reject();
 }
 
-int QtProfileSelectionDialog::GetIndex() const {
+int QtProfileSelectionDialog::GetIndex() const
+{
     return user_index;
 }
 
-void QtProfileSelectionDialog::SelectUser(const QModelIndex& index) {
+void QtProfileSelectionDialog::SelectUser(const QModelIndex& index)
+{
     user_index = index.row();
 }
 
 void QtProfileSelectionDialog::SetWindowTitle(
-    const Core::Frontend::ProfileSelectParameters& parameters) {
+    const Core::Frontend::ProfileSelectParameters& parameters)
+{
     using Service::AM::Frontend::UiMode;
     switch (parameters.mode) {
     case UiMode::UserCreator:
@@ -192,7 +205,8 @@ void QtProfileSelectionDialog::SetWindowTitle(
 }
 
 void QtProfileSelectionDialog::SetDialogPurpose(
-    const Core::Frontend::ProfileSelectParameters& parameters) {
+    const Core::Frontend::ProfileSelectParameters& parameters)
+{
     using Service::AM::Frontend::UserSelectionPurpose;
 
     switch (parameters.purpose) {
@@ -230,7 +244,8 @@ void QtProfileSelectionDialog::SetDialogPurpose(
     }
 }
 
-QtProfileSelector::QtProfileSelector(MainWindow& parent) {
+QtProfileSelector::QtProfileSelector(MainWindow& parent)
+{
     connect(this, &QtProfileSelector::MainWindowSelectProfile, &parent,
             &MainWindow::ProfileSelectorSelectProfile, Qt::QueuedConnection);
     connect(this, &QtProfileSelector::MainWindowRequestExit, &parent,
@@ -241,19 +256,22 @@ QtProfileSelector::QtProfileSelector(MainWindow& parent) {
 
 QtProfileSelector::~QtProfileSelector() = default;
 
-void QtProfileSelector::Close() const {
+void QtProfileSelector::Close() const
+{
     callback = {};
     emit MainWindowRequestExit();
 }
 
 void QtProfileSelector::SelectProfile(
     SelectProfileCallback callback_,
-    const Core::Frontend::ProfileSelectParameters& parameters) const {
+    const Core::Frontend::ProfileSelectParameters& parameters) const
+{
     callback = std::move(callback_);
     emit MainWindowSelectProfile(parameters);
 }
 
-void QtProfileSelector::MainWindowFinishedSelection(std::optional<Common::UUID> uuid) {
+void QtProfileSelector::MainWindowFinishedSelection(std::optional<Common::UUID> uuid)
+{
     if (callback) {
         callback(uuid);
     }

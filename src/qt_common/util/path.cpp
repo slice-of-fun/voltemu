@@ -1,18 +1,22 @@
 // SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+#include "qt_common/util/path.h"
+
+#include <fmt/format.h>
+
 #include <QDesktopServices>
 #include <QString>
 #include <QUrl>
-#include <fmt/format.h>
+
 #include "common/fs/fs.h"
 #include "common/fs/path_util.h"
 #include "qt_common/abstract/frontend.h"
-#include "qt_common/util/path.h"
 
 namespace QtCommon::Path {
 
-bool OpenShaderCache(u64 program_id, QObject* parent) {
+bool OpenShaderCache(u64 program_id, QObject* parent)
+{
     const auto shader_cache_dir = Common::FS::GetVoltPath(Common::FS::VoltPath::ShaderDir);
     const auto shader_cache_folder_path{shader_cache_dir / fmt::format("{:016x}", program_id)};
     if (!Common::FS::CreateDirs(shader_cache_folder_path)) {

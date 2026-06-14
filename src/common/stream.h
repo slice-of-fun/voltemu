@@ -4,6 +4,7 @@
 #pragma once
 
 #include <vector>
+
 #include "common/common_types.h"
 
 namespace Common {
@@ -35,17 +36,11 @@ public:
     /// Writes byte at current position
     void WriteByte(u8 byte);
 
-    [[nodiscard]] std::size_t GetPosition() const {
-        return position;
-    }
+    [[nodiscard]] std::size_t GetPosition() const { return position; }
 
-    [[nodiscard]] std::vector<u8>& GetBuffer() {
-        return buffer;
-    }
+    [[nodiscard]] std::vector<u8>& GetBuffer() { return buffer; }
 
-    [[nodiscard]] const std::vector<u8>& GetBuffer() const {
-        return buffer;
-    }
+    [[nodiscard]] const std::vector<u8>& GetBuffer() const { return buffer; }
 
 private:
     std::vector<u8> buffer;

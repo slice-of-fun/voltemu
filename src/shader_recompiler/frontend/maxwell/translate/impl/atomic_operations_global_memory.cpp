@@ -32,7 +32,9 @@ enum class AtomSize : u64 {
     S64,
 };
 
-IR::U32U64 ApplyIntegerAtomOp(IR::IREmitter& ir, const IR::U32U64& offset, const IR::U32U64& op_b, AtomOp op, AtomSize size) {
+IR::U32U64 ApplyIntegerAtomOp(IR::IREmitter& ir, const IR::U32U64& offset, const IR::U32U64& op_b,
+                              AtomOp op, AtomSize size)
+{
     bool const is_signed = size == AtomSize::S64 || size == AtomSize::S32;
     switch (op) {
     case AtomOp::ADD:
@@ -59,7 +61,8 @@ IR::U32U64 ApplyIntegerAtomOp(IR::IREmitter& ir, const IR::U32U64& offset, const
 }
 
 IR::Value ApplyFpAtomOp(IR::IREmitter& ir, const IR::U64& offset, const IR::Value& op_b, AtomOp op,
-                        AtomSize size) {
+                        AtomSize size)
+{
     static constexpr IR::FpControl f16_control{
         .no_contraction = false,
         .rounding = IR::FpRounding::RN,
@@ -73,7 +76,7 @@ IR::Value ApplyFpAtomOp(IR::IREmitter& ir, const IR::U64& offset, const IR::Valu
     switch (op) {
     case AtomOp::ADD:
         return size == AtomSize::F32 ? ir.GlobalAtomicF32Add(offset, op_b, f32_control)
-            : ir.GlobalAtomicF16x2Add(offset, op_b, f16_control);
+                                     : ir.GlobalAtomicF16x2Add(offset, op_b, f16_control);
     case AtomOp::MIN:
         return ir.GlobalAtomicF16x2Min(offset, op_b, f16_control);
     case AtomOp::MAX:
@@ -83,7 +86,8 @@ IR::Value ApplyFpAtomOp(IR::IREmitter& ir, const IR::U64& offset, const IR::Valu
     }
 }
 
-IR::U64 AtomOffset(TranslatorVisitor& v, u64 insn) {
+IR::U64 AtomOffset(TranslatorVisitor& v, u64 insn)
+{
     union {
         u64 raw;
         BitField<8, 8, IR::Reg> addr_reg;
@@ -112,7 +116,8 @@ IR::U64 AtomOffset(TranslatorVisitor& v, u64 insn) {
 // ADD, INC, DEC for S64 does nothing
 // Only ADD does something for F32
 // Only ADD, MIN and MAX does something for F16x2
-bool AtomOpNotApplicable(AtomSize size, AtomOp op) {
+bool AtomOpNotApplicable(AtomSize size, AtomOp op)
+{
     // TODO: SAFEADD
     switch (size) {
     case AtomSize::U32:
@@ -130,7 +135,8 @@ bool AtomOpNotApplicable(AtomSize size, AtomOp op) {
     }
 }
 
-IR::U32U64 LoadGlobal(IR::IREmitter& ir, const IR::U64& offset, AtomSize size) {
+IR::U32U64 LoadGlobal(IR::IREmitter& ir, const IR::U64& offset, AtomSize size)
+{
     switch (size) {
     case AtomSize::U32:
     case AtomSize::S32:
@@ -145,7 +151,8 @@ IR::U32U64 LoadGlobal(IR::IREmitter& ir, const IR::U64& offset, AtomSize size) {
     }
 }
 
-void StoreResult(TranslatorVisitor& v, IR::Reg dest_reg, const IR::Value& result, AtomSize size) {
+void StoreResult(TranslatorVisitor& v, IR::Reg dest_reg, const IR::Value& result, AtomSize size)
+{
     switch (size) {
     case AtomSize::U32:
     case AtomSize::S32:
@@ -162,7 +169,8 @@ void StoreResult(TranslatorVisitor& v, IR::Reg dest_reg, const IR::Value& result
 }
 
 IR::Value ApplyAtomOp(TranslatorVisitor& v, IR::Reg operand_reg, const IR::U64& offset,
-                      AtomSize size, AtomOp op) {
+                      AtomSize size, AtomOp op)
+{
     switch (size) {
     case AtomSize::U32:
     case AtomSize::S32:
@@ -180,16 +188,18 @@ IR::Value ApplyAtomOp(TranslatorVisitor& v, IR::Reg operand_reg, const IR::U64& 
 }
 
 void GlobalAtomic(TranslatorVisitor& v, IR::Reg dest_reg, IR::Reg operand_reg,
-                  const IR::U64& offset, AtomSize size, AtomOp op, bool write_dest) {
+                  const IR::U64& offset, AtomSize size, AtomOp op, bool write_dest)
+{
     IR::Value result = AtomOpNotApplicable(size, op)
-        ? LoadGlobal(v.ir, offset, size)
-        : ApplyAtomOp(v, operand_reg, offset, size, op);
+                           ? LoadGlobal(v.ir, offset, size)
+                           : ApplyAtomOp(v, operand_reg, offset, size, op);
     if (write_dest)
         StoreResult(v, dest_reg, result, size);
 }
 } // Anonymous namespace
 
-void TranslatorVisitor::ATOM(u64 insn) {
+void TranslatorVisitor::ATOM(u64 insn)
+{
     union {
         u64 raw;
         BitField<0, 8, IR::Reg> dest_reg;
@@ -201,7 +211,8 @@ void TranslatorVisitor::ATOM(u64 insn) {
     GlobalAtomic(*this, atom.dest_reg, atom.operand_reg, offset, atom.size, atom.op, true);
 }
 
-void TranslatorVisitor::RED(u64 insn) {
+void TranslatorVisitor::RED(u64 insn)
+{
     union {
         u64 raw;
         BitField<0, 8, IR::Reg> operand_reg;

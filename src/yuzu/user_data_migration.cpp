@@ -5,25 +5,28 @@
 // Licensed under GPLv2 or any later version
 // Refer to the license.txt file included.
 
+#include "user_data_migration.h"
+
 #include <QMessageBox>
 #include <QPushButton>
 #include <QString>
 #include <QTranslator>
+
 #include "common/fs/path_util.h"
 #include "qt_common/qt_string_lookup.h"
-#include "user_data_migration.h"
 #include "yuzu/migration_dialog.h"
 
 // Needs to be included at the end due to https://bugreports.qt.io/browse/QTBUG-73263
-#include <filesystem>
 #include <QButtonGroup>
 #include <QCheckBox>
 #include <QGuiApplication>
 #include <QProgressDialog>
 #include <QRadioButton>
 #include <QThread>
+#include <filesystem>
 
-UserDataMigrator::UserDataMigrator(QMainWindow* main_window) {
+UserDataMigrator::UserDataMigrator(QMainWindow* main_window)
+{
     // NOTE: Logging is not initialized yet, do not produce logs here.
 
     // Check migration if config directory does not exist
@@ -35,7 +38,8 @@ UserDataMigrator::UserDataMigrator(QMainWindow* main_window) {
     }
 }
 
-void UserDataMigrator::ShowMigrationPrompt(QMainWindow* main_window) {
+void UserDataMigrator::ShowMigrationPrompt(QMainWindow* main_window)
+{
     namespace fs = std::filesystem;
     using namespace QtCommon::StringLookup;
 
@@ -117,7 +121,8 @@ void UserDataMigrator::ShowMigrationPrompt(QMainWindow* main_window) {
     MigrateUserData(main_window, clear_shaders->isChecked(), strategy);
 }
 
-void UserDataMigrator::ShowMigrationCancelledMessage(QMainWindow* main_window) {
+void UserDataMigrator::ShowMigrationCancelledMessage(QMainWindow* main_window)
+{
     QMessageBox::information(main_window, QObject::tr("Migration"),
                              QObject::tr("You can manually re-trigger this prompt by deleting the "
                                          "new config directory:\n%1")
@@ -127,7 +132,8 @@ void UserDataMigrator::ShowMigrationCancelledMessage(QMainWindow* main_window) {
 }
 
 void UserDataMigrator::MigrateUserData(QMainWindow* main_window, const bool clear_shader_cache,
-                                       const MigrationWorker::MigrationStrategy strategy) {
+                                       const MigrationWorker::MigrationStrategy strategy)
+{
     // Create a dialog to let the user know it's migrating
     QProgressDialog* progress = new QProgressDialog(main_window);
     progress->setWindowTitle(QObject::tr("Migrating"));

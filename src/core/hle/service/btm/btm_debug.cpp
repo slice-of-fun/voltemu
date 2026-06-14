@@ -8,7 +8,8 @@
 
 namespace Service::BTM {
 
-IBtmDebug::IBtmDebug(Core::System& system_) : ServiceFramework{system_, "btm:dbg"} {
+IBtmDebug::IBtmDebug(Core::System& system_) : ServiceFramework{system_, "btm:dbg"}
+{
     // clang-format off
     static const FunctionInfo functions[] = {
         {0, nullptr, "AcquireDiscoveryEvent"},

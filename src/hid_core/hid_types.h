@@ -404,10 +404,9 @@ struct NpadPowerInfo {
 static_assert(sizeof(NpadPowerInfo) == 0xC, "NpadPowerInfo is an invalid size");
 
 struct LedPattern {
-    LedPattern() {
-        raw = 0;
-    }
-    LedPattern(u64 light1, u64 light2, u64 light3, u64 light4) {
+    LedPattern() { raw = 0; }
+    LedPattern(u64 light1, u64 light2, u64 light3, u64 light4)
+    {
         position1.Assign(light1);
         position2.Assign(light2);
         position3.Assign(light3);
@@ -626,7 +625,8 @@ struct VibrationValue {
     f32 low_frequency{};
     f32 high_amplitude{};
     f32 high_frequency{};
-    bool operator==(const VibrationValue& b) {
+    bool operator==(const VibrationValue& b)
+    {
         if (low_amplitude != b.low_amplitude || high_amplitude != b.high_amplitude) {
             return false;
         }

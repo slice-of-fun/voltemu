@@ -1,21 +1,24 @@
 // SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+#include "yuzu/configuration/configure_touch_from_button.h"
+
 #include <QInputDialog>
 #include <QKeyEvent>
 #include <QMessageBox>
 #include <QMouseEvent>
 #include <QStandardItemModel>
 #include <QTimer>
+
 #include "common/param_package.h"
 #include "common/settings.h"
 #include "core/frontend/framebuffer_layout.h"
 #include "input_common/main.h"
 #include "ui_configure_touch_from_button.h"
-#include "yuzu/configuration/configure_touch_from_button.h"
 #include "yuzu/configuration/configure_touch_widget.h"
 
-static QString GetKeyName(int key_code) {
+static QString GetKeyName(int key_code)
+{
     switch (key_code) {
     case Qt::Key_Shift:
         return QObject::tr("Shift");
@@ -30,7 +33,8 @@ static QString GetKeyName(int key_code) {
     }
 }
 
-static QString ButtonToText(const Common::ParamPackage& param) {
+static QString ButtonToText(const Common::ParamPackage& param)
+{
     if (!param.Has("engine")) {
         return QObject::tr("[not set]");
     }
@@ -71,7 +75,8 @@ ConfigureTouchFromButton::ConfigureTouchFromButton(
     InputCommon::InputSubsystem* input_subsystem_, const int default_index)
     : QDialog(parent), ui(std::make_unique<Ui::ConfigureTouchFromButton>()),
       touch_maps{touch_maps_}, input_subsystem{input_subsystem_}, selected_index{default_index},
-      timeout_timer(std::make_unique<QTimer>()), poll_timer(std::make_unique<QTimer>()) {
+      timeout_timer(std::make_unique<QTimer>()), poll_timer(std::make_unique<QTimer>())
+{
     ui->setupUi(this);
     binding_list_model = new QStandardItemModel(0, 3, this);
     binding_list_model->setHorizontalHeaderLabels(
@@ -86,7 +91,8 @@ ConfigureTouchFromButton::ConfigureTouchFromButton(
 
 ConfigureTouchFromButton::~ConfigureTouchFromButton() = default;
 
-void ConfigureTouchFromButton::showEvent(QShowEvent* ev) {
+void ConfigureTouchFromButton::showEvent(QShowEvent* ev)
+{
     QWidget::showEvent(ev);
 
     // width values are not valid in the constructor
@@ -100,7 +106,8 @@ void ConfigureTouchFromButton::showEvent(QShowEvent* ev) {
     ui->binding_list->setColumnWidth(2, w);
 }
 
-void ConfigureTouchFromButton::SetConfiguration() {
+void ConfigureTouchFromButton::SetConfiguration()
+{
     for (const auto& touch_map : touch_maps) {
         ui->mapping->addItem(QString::fromStdString(touch_map.name));
     }
@@ -108,7 +115,8 @@ void ConfigureTouchFromButton::SetConfiguration() {
     ui->mapping->setCurrentIndex(selected_index);
 }
 
-void ConfigureTouchFromButton::UpdateUiDisplay() {
+void ConfigureTouchFromButton::UpdateUiDisplay()
+{
     ui->button_delete->setEnabled(touch_maps.size() > 1);
     ui->button_delete_bind->setEnabled(false);
 
@@ -128,7 +136,8 @@ void ConfigureTouchFromButton::UpdateUiDisplay() {
     }
 }
 
-void ConfigureTouchFromButton::ConnectEvents() {
+void ConfigureTouchFromButton::ConnectEvents()
+{
     connect(ui->mapping, qOverload<int>(&QComboBox::currentIndexChanged), this, [this](int index) {
         SaveCurrentMapping();
         selected_index = index;
@@ -169,7 +178,8 @@ void ConfigureTouchFromButton::ConnectEvents() {
     });
 }
 
-void ConfigureTouchFromButton::SaveCurrentMapping() {
+void ConfigureTouchFromButton::SaveCurrentMapping()
+{
     auto& map = touch_maps[selected_index];
     map.buttons.clear();
     for (int i = 0, rc = binding_list_model->rowCount(); i < rc; ++i) {
@@ -190,7 +200,8 @@ void ConfigureTouchFromButton::SaveCurrentMapping() {
     }
 }
 
-void ConfigureTouchFromButton::NewMapping() {
+void ConfigureTouchFromButton::NewMapping()
+{
     const QString name =
         QInputDialog::getText(this, tr("New Profile"), tr("Enter the name for the new profile."));
     if (name.isEmpty()) {
@@ -201,7 +212,8 @@ void ConfigureTouchFromButton::NewMapping() {
     ui->mapping->setCurrentIndex(ui->mapping->count() - 1);
 }
 
-void ConfigureTouchFromButton::DeleteMapping() {
+void ConfigureTouchFromButton::DeleteMapping()
+{
     const auto answer = QMessageBox::question(
         this, tr("Delete Profile"), tr("Delete profile %1?").arg(ui->mapping->currentText()));
     if (answer != QMessageBox::Yes) {
@@ -215,7 +227,8 @@ void ConfigureTouchFromButton::DeleteMapping() {
     UpdateUiDisplay();
 }
 
-void ConfigureTouchFromButton::RenameMapping() {
+void ConfigureTouchFromButton::RenameMapping()
+{
     const QString new_name = QInputDialog::getText(this, tr("Rename Profile"), tr("New name:"));
     if (new_name.isEmpty()) {
         return;
@@ -224,7 +237,8 @@ void ConfigureTouchFromButton::RenameMapping() {
     touch_maps[selected_index].name = new_name.toStdString();
 }
 
-void ConfigureTouchFromButton::GetButtonInput(const int row_index, const bool is_new) {
+void ConfigureTouchFromButton::GetButtonInput(const int row_index, const bool is_new)
+{
     if (timeout_timer->isActive()) {
         return;
     }
@@ -255,7 +269,8 @@ void ConfigureTouchFromButton::GetButtonInput(const int row_index, const bool is
     poll_timer->start(200);     // Check for new inputs every 200ms
 }
 
-void ConfigureTouchFromButton::NewBinding(const QPoint& pos) {
+void ConfigureTouchFromButton::NewBinding(const QPoint& pos)
+{
     auto* button = new QStandardItem();
     button->setEditable(false);
     auto* x_coord = new QStandardItem(QString::number(pos.x()));
@@ -271,13 +286,15 @@ void ConfigureTouchFromButton::NewBinding(const QPoint& pos) {
     GetButtonInput(binding_list_model->rowCount() - 1, true);
 }
 
-void ConfigureTouchFromButton::EditBinding(const QModelIndex& qi) {
+void ConfigureTouchFromButton::EditBinding(const QModelIndex& qi)
+{
     if (qi.row() >= 0 && qi.column() == 0) {
         GetButtonInput(qi.row(), false);
     }
 }
 
-void ConfigureTouchFromButton::DeleteBinding() {
+void ConfigureTouchFromButton::DeleteBinding()
+{
     const int row_index = ui->binding_list->currentIndex().row();
     if (row_index < 0) {
         return;
@@ -287,7 +304,8 @@ void ConfigureTouchFromButton::DeleteBinding() {
 }
 
 void ConfigureTouchFromButton::OnBindingSelection(const QItemSelection& selected,
-                                                  const QItemSelection& deselected) {
+                                                  const QItemSelection& deselected)
+{
     ui->button_delete_bind->setEnabled(!selected.isEmpty());
     if (!selected.isEmpty()) {
         const auto dot_data = selected.indexes().first().data(DataRoleDot);
@@ -303,7 +321,8 @@ void ConfigureTouchFromButton::OnBindingSelection(const QItemSelection& selected
     }
 }
 
-void ConfigureTouchFromButton::OnBindingChanged(QStandardItem* item) {
+void ConfigureTouchFromButton::OnBindingChanged(QStandardItem* item)
+{
     if (item->column() == 0) {
         return;
     }
@@ -324,7 +343,8 @@ void ConfigureTouchFromButton::OnBindingChanged(QStandardItem* item) {
     }
 }
 
-void ConfigureTouchFromButton::OnBindingDeleted(const QModelIndex& parent, int first, int last) {
+void ConfigureTouchFromButton::OnBindingDeleted(const QModelIndex& parent, int first, int last)
+{
     for (int i = first; i <= last; ++i) {
         const auto ix = binding_list_model->index(i, 0);
         if (!ix.isValid()) {
@@ -337,7 +357,8 @@ void ConfigureTouchFromButton::OnBindingDeleted(const QModelIndex& parent, int f
     }
 }
 
-void ConfigureTouchFromButton::SetActiveBinding(const int dot_id) {
+void ConfigureTouchFromButton::SetActiveBinding(const int dot_id)
+{
     for (int i = 0; i < binding_list_model->rowCount(); ++i) {
         if (binding_list_model->index(i, 0).data(DataRoleDot) == dot_id) {
             ui->binding_list->setCurrentIndex(binding_list_model->index(i, 0));
@@ -347,7 +368,8 @@ void ConfigureTouchFromButton::SetActiveBinding(const int dot_id) {
     }
 }
 
-void ConfigureTouchFromButton::SetCoordinates(const int dot_id, const QPoint& pos) {
+void ConfigureTouchFromButton::SetCoordinates(const int dot_id, const QPoint& pos)
+{
     for (int i = 0; i < binding_list_model->rowCount(); ++i) {
         if (binding_list_model->item(i, 0)->data(DataRoleDot) == dot_id) {
             binding_list_model->item(i, 1)->setText(QString::number(pos.x()));
@@ -358,7 +380,8 @@ void ConfigureTouchFromButton::SetCoordinates(const int dot_id, const QPoint& po
 }
 
 void ConfigureTouchFromButton::SetPollingResult(const Common::ParamPackage& params,
-                                                const bool cancel) {
+                                                const bool cancel)
+{
     timeout_timer->stop();
     poll_timer->stop();
     input_subsystem->StopMapping();
@@ -373,7 +396,8 @@ void ConfigureTouchFromButton::SetPollingResult(const Common::ParamPackage& para
     }
 }
 
-void ConfigureTouchFromButton::keyPressEvent(QKeyEvent* event) {
+void ConfigureTouchFromButton::keyPressEvent(QKeyEvent* event)
+{
     if (!input_setter && event->key() == Qt::Key_Delete) {
         DeleteBinding();
         return;
@@ -391,30 +415,36 @@ void ConfigureTouchFromButton::keyPressEvent(QKeyEvent* event) {
     }
 }
 
-void ConfigureTouchFromButton::ApplyConfiguration() {
+void ConfigureTouchFromButton::ApplyConfiguration()
+{
     SaveCurrentMapping();
     accept();
 }
 
-int ConfigureTouchFromButton::GetSelectedIndex() const {
+int ConfigureTouchFromButton::GetSelectedIndex() const
+{
     return selected_index;
 }
 
-std::vector<Settings::TouchFromButtonMap> ConfigureTouchFromButton::GetMaps() const {
+std::vector<Settings::TouchFromButtonMap> ConfigureTouchFromButton::GetMaps() const
+{
     return touch_maps;
 }
 
-TouchScreenPreview::TouchScreenPreview(QWidget* parent) : QFrame(parent) {
+TouchScreenPreview::TouchScreenPreview(QWidget* parent) : QFrame(parent)
+{
     setBackgroundRole(QPalette::ColorRole::Base);
 }
 
 TouchScreenPreview::~TouchScreenPreview() = default;
 
-void TouchScreenPreview::SetCoordLabel(QLabel* const label) {
+void TouchScreenPreview::SetCoordLabel(QLabel* const label)
+{
     coord_label = label;
 }
 
-int TouchScreenPreview::AddDot(const int device_x, const int device_y) {
+int TouchScreenPreview::AddDot(const int device_x, const int device_y)
+{
     QFont dot_font{QStringLiteral("monospace")};
     dot_font.setStyleHint(QFont::Monospace);
     dot_font.setPointSize(20);
@@ -436,7 +466,8 @@ int TouchScreenPreview::AddDot(const int device_x, const int device_y) {
     return max_dot_id;
 }
 
-void TouchScreenPreview::RemoveDot(const int id) {
+void TouchScreenPreview::RemoveDot(const int id)
+{
     const auto iter = std::find_if(dots.begin(), dots.end(),
                                    [id](const auto& entry) { return entry.first == id; });
     if (iter == dots.cend()) {
@@ -447,7 +478,8 @@ void TouchScreenPreview::RemoveDot(const int id) {
     dots.erase(iter);
 }
 
-void TouchScreenPreview::HighlightDot(const int id, const bool active) const {
+void TouchScreenPreview::HighlightDot(const int id, const bool active) const
+{
     for (const auto& dot : dots) {
         if (dot.first == id) {
             // use color property from the stylesheet, or fall back to the default palette
@@ -467,7 +499,8 @@ void TouchScreenPreview::HighlightDot(const int id, const bool active) const {
     }
 }
 
-void TouchScreenPreview::MoveDot(const int id, const int device_x, const int device_y) const {
+void TouchScreenPreview::MoveDot(const int id, const int device_x, const int device_y) const
+{
     const auto iter = std::find_if(dots.begin(), dots.end(),
                                    [id](const auto& entry) { return entry.first == id; });
     if (iter == dots.cend()) {
@@ -479,7 +512,8 @@ void TouchScreenPreview::MoveDot(const int id, const int device_x, const int dev
     PositionDot(iter->second, device_x, device_y);
 }
 
-void TouchScreenPreview::resizeEvent(QResizeEvent* event) {
+void TouchScreenPreview::resizeEvent(QResizeEvent* event)
+{
     if (ignore_resize) {
         return;
     }
@@ -501,7 +535,8 @@ void TouchScreenPreview::resizeEvent(QResizeEvent* event) {
     }
 }
 
-void TouchScreenPreview::mouseMoveEvent(QMouseEvent* event) {
+void TouchScreenPreview::mouseMoveEvent(QMouseEvent* event)
+{
     if (!coord_label) {
         return;
     }
@@ -513,13 +548,15 @@ void TouchScreenPreview::mouseMoveEvent(QMouseEvent* event) {
     }
 }
 
-void TouchScreenPreview::leaveEvent(QEvent* event) {
+void TouchScreenPreview::leaveEvent(QEvent* event)
+{
     if (coord_label) {
         coord_label->clear();
     }
 }
 
-void TouchScreenPreview::mousePressEvent(QMouseEvent* event) {
+void TouchScreenPreview::mousePressEvent(QMouseEvent* event)
+{
     if (event->button() != Qt::MouseButton::LeftButton) {
         return;
     }
@@ -529,7 +566,8 @@ void TouchScreenPreview::mousePressEvent(QMouseEvent* event) {
     }
 }
 
-bool TouchScreenPreview::eventFilter(QObject* obj, QEvent* event) {
+bool TouchScreenPreview::eventFilter(QObject* obj, QEvent* event)
+{
     switch (event->type()) {
     case QEvent::Type::MouseButtonPress: {
         const auto mouse_event = static_cast<QMouseEvent*>(event);
@@ -584,7 +622,8 @@ bool TouchScreenPreview::eventFilter(QObject* obj, QEvent* event) {
 }
 
 std::optional<QPoint> TouchScreenPreview::MapToDeviceCoords(const int screen_x,
-                                                            const int screen_y) const {
+                                                            const int screen_y) const
+{
     const float t_x = 0.5f + static_cast<float>(screen_x - contentsMargins().left()) *
                                  (Layout::ScreenUndocked::Width - 1) / (contentsRect().width() - 1);
     const float t_y = 0.5f + static_cast<float>(screen_y - contentsMargins().top()) *
@@ -599,7 +638,8 @@ std::optional<QPoint> TouchScreenPreview::MapToDeviceCoords(const int screen_x,
 }
 
 void TouchScreenPreview::PositionDot(QLabel* const dot, const int device_x,
-                                     const int device_y) const {
+                                     const int device_y) const
+{
     const float device_coord_x =
         static_cast<float>(device_x >= 0 ? device_x : dot->property(PropX).toInt());
     int x_coord = static_cast<int>(

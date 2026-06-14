@@ -1,8 +1,9 @@
 // SPDX-FileCopyrightText: Copyright 2019 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include "core/hle/service/glue/errors.h"
 #include "core/hle/service/glue/glue_manager.h"
+
+#include "core/hle/service/glue/errors.h"
 
 namespace Service::Glue {
 
@@ -16,7 +17,8 @@ ARPManager::ARPManager() = default;
 ARPManager::~ARPManager() = default;
 
 Result ARPManager::GetLaunchProperty(ApplicationLaunchProperty* out_launch_property,
-                                     u64 title_id) const {
+                                     u64 title_id) const
+{
     if (title_id == 0) {
         return Glue::ResultInvalidProcessId;
     }
@@ -30,7 +32,8 @@ Result ARPManager::GetLaunchProperty(ApplicationLaunchProperty* out_launch_prope
     return ResultSuccess;
 }
 
-Result ARPManager::GetControlProperty(std::vector<u8>* out_control_property, u64 title_id) const {
+Result ARPManager::GetControlProperty(std::vector<u8>* out_control_property, u64 title_id) const
+{
     if (title_id == 0) {
         return Glue::ResultInvalidProcessId;
     }
@@ -44,8 +47,8 @@ Result ARPManager::GetControlProperty(std::vector<u8>* out_control_property, u64
     return ResultSuccess;
 }
 
-Result ARPManager::Register(u64 title_id, ApplicationLaunchProperty launch,
-                            std::vector<u8> control) {
+Result ARPManager::Register(u64 title_id, ApplicationLaunchProperty launch, std::vector<u8> control)
+{
     if (title_id == 0) {
         return Glue::ResultInvalidProcessId;
     }
@@ -59,7 +62,8 @@ Result ARPManager::Register(u64 title_id, ApplicationLaunchProperty launch,
     return ResultSuccess;
 }
 
-Result ARPManager::Unregister(u64 title_id) {
+Result ARPManager::Unregister(u64 title_id)
+{
     if (title_id == 0) {
         return Glue::ResultInvalidProcessId;
     }
@@ -73,7 +77,8 @@ Result ARPManager::Unregister(u64 title_id) {
     return ResultSuccess;
 }
 
-void ARPManager::ResetAll() {
+void ARPManager::ResetAll()
+{
     entries.clear();
 }
 

@@ -38,8 +38,9 @@ public:
     ~VirtualAmiibo() override;
 
     // Sets polling mode to a controller
-    Common::Input::DriverResult SetPollingMode(
-        const PadIdentifier& identifier_, const Common::Input::PollingMode polling_mode_) override;
+    Common::Input::DriverResult
+    SetPollingMode(const PadIdentifier& identifier_,
+                   const Common::Input::PollingMode polling_mode_) override;
 
     Common::Input::NfcState SupportsNfc(const PadIdentifier& identifier_) const override;
     Common::Input::NfcState StartNfcPolling(const PadIdentifier& identifier_) override;

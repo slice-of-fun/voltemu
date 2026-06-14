@@ -11,7 +11,8 @@
 namespace Shader::Backend::GLASM {
 namespace {
 void BitwiseLogicalOp(EmitContext& ctx, IR::Inst& inst, ScalarS32 a, ScalarS32 b,
-                      std::string_view lop) {
+                      std::string_view lop)
+{
     const auto zero = inst.GetAssociatedPseudoOperation(IR::Opcode::GetZeroFromOp);
     const auto sign = inst.GetAssociatedPseudoOperation(IR::Opcode::GetSignFromOp);
     if (zero) {
@@ -34,7 +35,8 @@ void BitwiseLogicalOp(EmitContext& ctx, IR::Inst& inst, ScalarS32 a, ScalarS32 b
 }
 } // Anonymous namespace
 
-void EmitIAdd32(EmitContext& ctx, IR::Inst& inst, ScalarS32 a, ScalarS32 b) {
+void EmitIAdd32(EmitContext& ctx, IR::Inst& inst, ScalarS32 a, ScalarS32 b)
+{
     const std::array flags{
         inst.GetAssociatedPseudoOperation(IR::Opcode::GetZeroFromOp),
         inst.GetAssociatedPseudoOperation(IR::Opcode::GetSignFromOp),
@@ -76,31 +78,38 @@ void EmitIAdd32(EmitContext& ctx, IR::Inst& inst, ScalarS32 a, ScalarS32 b) {
     }
 }
 
-void EmitIAdd64(EmitContext& ctx, IR::Inst& inst, Register a, Register b) {
+void EmitIAdd64(EmitContext& ctx, IR::Inst& inst, Register a, Register b)
+{
     ctx.LongAdd("ADD.S64 {}.x,{}.x,{}.x;", inst, a, b);
 }
 
-void EmitISub32(EmitContext& ctx, IR::Inst& inst, ScalarS32 a, ScalarS32 b) {
+void EmitISub32(EmitContext& ctx, IR::Inst& inst, ScalarS32 a, ScalarS32 b)
+{
     ctx.Add("SUB.S {}.x,{},{};", inst, a, b);
 }
 
-void EmitISub64(EmitContext& ctx, IR::Inst& inst, Register a, Register b) {
+void EmitISub64(EmitContext& ctx, IR::Inst& inst, Register a, Register b)
+{
     ctx.LongAdd("SUB.S64 {}.x,{}.x,{}.x;", inst, a, b);
 }
 
-void EmitIMul32(EmitContext& ctx, IR::Inst& inst, ScalarS32 a, ScalarS32 b) {
+void EmitIMul32(EmitContext& ctx, IR::Inst& inst, ScalarS32 a, ScalarS32 b)
+{
     ctx.Add("MUL.S {}.x,{},{};", inst, a, b);
 }
 
-void EmitSDiv32(EmitContext& ctx, IR::Inst& inst, ScalarS32 a, ScalarS32 b) {
+void EmitSDiv32(EmitContext& ctx, IR::Inst& inst, ScalarS32 a, ScalarS32 b)
+{
     ctx.Add("DIV.S {}.x,{},{};", inst, a, b);
 }
 
-void EmitUDiv32(EmitContext& ctx, IR::Inst& inst, ScalarU32 a, ScalarU32 b) {
+void EmitUDiv32(EmitContext& ctx, IR::Inst& inst, ScalarU32 a, ScalarU32 b)
+{
     ctx.Add("DIV.U {}.x,{},{};", inst, a, b);
 }
 
-void EmitINeg32(EmitContext& ctx, IR::Inst& inst, ScalarS32 value) {
+void EmitINeg32(EmitContext& ctx, IR::Inst& inst, ScalarS32 value)
+{
     if (value.type != Type::Register && static_cast<s32>(value.imm_u32) < 0) {
         ctx.Add("MOV.S {},{};", inst, -static_cast<s32>(value.imm_u32));
     } else {
@@ -108,59 +117,70 @@ void EmitINeg32(EmitContext& ctx, IR::Inst& inst, ScalarS32 value) {
     }
 }
 
-void EmitINeg64(EmitContext& ctx, IR::Inst& inst, Register value) {
+void EmitINeg64(EmitContext& ctx, IR::Inst& inst, Register value)
+{
     ctx.LongAdd("MOV.S64 {},-{};", inst, value);
 }
 
-void EmitIAbs32(EmitContext& ctx, IR::Inst& inst, ScalarS32 value) {
+void EmitIAbs32(EmitContext& ctx, IR::Inst& inst, ScalarS32 value)
+{
     ctx.Add("ABS.S {},{};", inst, value);
 }
 
-void EmitIAbs64(EmitContext& ctx, IR::Inst& inst, ScalarS32 value) {
+void EmitIAbs64(EmitContext& ctx, IR::Inst& inst, ScalarS32 value)
+{
     ctx.Add("ABS.S64 {},{};", inst, value);
 }
 
-void EmitShiftLeftLogical32(EmitContext& ctx, IR::Inst& inst, ScalarU32 base, ScalarU32 shift) {
+void EmitShiftLeftLogical32(EmitContext& ctx, IR::Inst& inst, ScalarU32 base, ScalarU32 shift)
+{
     ctx.Add("SHL.U {}.x,{},{};", inst, base, shift);
 }
 
-void EmitShiftLeftLogical64(EmitContext& ctx, IR::Inst& inst, ScalarRegister base,
-                            ScalarU32 shift) {
+void EmitShiftLeftLogical64(EmitContext& ctx, IR::Inst& inst, ScalarRegister base, ScalarU32 shift)
+{
     ctx.LongAdd("SHL.U64 {}.x,{},{};", inst, base, shift);
 }
 
-void EmitShiftRightLogical32(EmitContext& ctx, IR::Inst& inst, ScalarU32 base, ScalarU32 shift) {
+void EmitShiftRightLogical32(EmitContext& ctx, IR::Inst& inst, ScalarU32 base, ScalarU32 shift)
+{
     ctx.Add("SHR.U {}.x,{},{};", inst, base, shift);
 }
 
-void EmitShiftRightLogical64(EmitContext& ctx, IR::Inst& inst, ScalarRegister base,
-                             ScalarU32 shift) {
+void EmitShiftRightLogical64(EmitContext& ctx, IR::Inst& inst, ScalarRegister base, ScalarU32 shift)
+{
     ctx.LongAdd("SHR.U64 {}.x,{},{};", inst, base, shift);
 }
 
-void EmitShiftRightArithmetic32(EmitContext& ctx, IR::Inst& inst, ScalarS32 base, ScalarS32 shift) {
+void EmitShiftRightArithmetic32(EmitContext& ctx, IR::Inst& inst, ScalarS32 base, ScalarS32 shift)
+{
     ctx.Add("SHR.S {}.x,{},{};", inst, base, shift);
 }
 
 void EmitShiftRightArithmetic64(EmitContext& ctx, IR::Inst& inst, ScalarRegister base,
-                                ScalarS32 shift) {
+                                ScalarS32 shift)
+{
     ctx.LongAdd("SHR.S64 {}.x,{},{};", inst, base, shift);
 }
 
-void EmitBitwiseAnd32(EmitContext& ctx, IR::Inst& inst, ScalarS32 a, ScalarS32 b) {
+void EmitBitwiseAnd32(EmitContext& ctx, IR::Inst& inst, ScalarS32 a, ScalarS32 b)
+{
     BitwiseLogicalOp(ctx, inst, a, b, "AND");
 }
 
-void EmitBitwiseOr32(EmitContext& ctx, IR::Inst& inst, ScalarS32 a, ScalarS32 b) {
+void EmitBitwiseOr32(EmitContext& ctx, IR::Inst& inst, ScalarS32 a, ScalarS32 b)
+{
     BitwiseLogicalOp(ctx, inst, a, b, "OR");
 }
 
-void EmitBitwiseXor32(EmitContext& ctx, IR::Inst& inst, ScalarS32 a, ScalarS32 b) {
+void EmitBitwiseXor32(EmitContext& ctx, IR::Inst& inst, ScalarS32 a, ScalarS32 b)
+{
     BitwiseLogicalOp(ctx, inst, a, b, "XOR");
 }
 
 void EmitBitFieldInsert(EmitContext& ctx, IR::Inst& inst, ScalarS32 base, ScalarS32 insert,
-                        ScalarS32 offset, ScalarS32 count) {
+                        ScalarS32 offset, ScalarS32 count)
+{
     const Register ret{ctx.reg_alloc.Define(inst)};
     if (count.type != Type::Register && offset.type != Type::Register) {
         ctx.Add("BFI.S {},{{{},{},0,0}},{},{};", ret, count, offset, insert, base);
@@ -173,7 +193,8 @@ void EmitBitFieldInsert(EmitContext& ctx, IR::Inst& inst, ScalarS32 base, Scalar
 }
 
 void EmitBitFieldSExtract(EmitContext& ctx, IR::Inst& inst, ScalarS32 base, ScalarS32 offset,
-                          ScalarS32 count) {
+                          ScalarS32 count)
+{
     const Register ret{ctx.reg_alloc.Define(inst)};
     if (count.type != Type::Register && offset.type != Type::Register) {
         ctx.Add("BFE.S {},{{{},{},0,0}},{};", ret, count, offset, base);
@@ -186,7 +207,8 @@ void EmitBitFieldSExtract(EmitContext& ctx, IR::Inst& inst, ScalarS32 base, Scal
 }
 
 void EmitBitFieldUExtract(EmitContext& ctx, IR::Inst& inst, ScalarU32 base, ScalarU32 offset,
-                          ScalarU32 count) {
+                          ScalarU32 count)
+{
     const auto zero = inst.GetAssociatedPseudoOperation(IR::Opcode::GetZeroFromOp);
     const auto sign = inst.GetAssociatedPseudoOperation(IR::Opcode::GetSignFromOp);
     if (zero) {
@@ -215,93 +237,114 @@ void EmitBitFieldUExtract(EmitContext& ctx, IR::Inst& inst, ScalarU32 base, Scal
     }
 }
 
-void EmitBitReverse32(EmitContext& ctx, IR::Inst& inst, ScalarS32 value) {
+void EmitBitReverse32(EmitContext& ctx, IR::Inst& inst, ScalarS32 value)
+{
     ctx.Add("BFR {},{};", inst, value);
 }
 
-void EmitBitCount32(EmitContext& ctx, IR::Inst& inst, ScalarS32 value) {
+void EmitBitCount32(EmitContext& ctx, IR::Inst& inst, ScalarS32 value)
+{
     ctx.Add("BTC {},{};", inst, value);
 }
 
-void EmitBitwiseNot32(EmitContext& ctx, IR::Inst& inst, ScalarS32 value) {
+void EmitBitwiseNot32(EmitContext& ctx, IR::Inst& inst, ScalarS32 value)
+{
     ctx.Add("NOT.S {},{};", inst, value);
 }
 
-void EmitFindSMsb32(EmitContext& ctx, IR::Inst& inst, ScalarS32 value) {
+void EmitFindSMsb32(EmitContext& ctx, IR::Inst& inst, ScalarS32 value)
+{
     ctx.Add("BTFM.S {},{};", inst, value);
 }
 
-void EmitFindUMsb32(EmitContext& ctx, IR::Inst& inst, ScalarU32 value) {
+void EmitFindUMsb32(EmitContext& ctx, IR::Inst& inst, ScalarU32 value)
+{
     ctx.Add("BTFM.U {},{};", inst, value);
 }
 
-void EmitSMin32(EmitContext& ctx, IR::Inst& inst, ScalarS32 a, ScalarS32 b) {
+void EmitSMin32(EmitContext& ctx, IR::Inst& inst, ScalarS32 a, ScalarS32 b)
+{
     ctx.Add("MIN.S {},{},{};", inst, a, b);
 }
 
-void EmitUMin32(EmitContext& ctx, IR::Inst& inst, ScalarU32 a, ScalarU32 b) {
+void EmitUMin32(EmitContext& ctx, IR::Inst& inst, ScalarU32 a, ScalarU32 b)
+{
     ctx.Add("MIN.U {},{},{};", inst, a, b);
 }
 
-void EmitSMax32(EmitContext& ctx, IR::Inst& inst, ScalarS32 a, ScalarS32 b) {
+void EmitSMax32(EmitContext& ctx, IR::Inst& inst, ScalarS32 a, ScalarS32 b)
+{
     ctx.Add("MAX.S {},{},{};", inst, a, b);
 }
 
-void EmitUMax32(EmitContext& ctx, IR::Inst& inst, ScalarU32 a, ScalarU32 b) {
+void EmitUMax32(EmitContext& ctx, IR::Inst& inst, ScalarU32 a, ScalarU32 b)
+{
     ctx.Add("MAX.U {},{},{};", inst, a, b);
 }
 
-void EmitSClamp32(EmitContext& ctx, IR::Inst& inst, ScalarS32 value, ScalarS32 min, ScalarS32 max) {
+void EmitSClamp32(EmitContext& ctx, IR::Inst& inst, ScalarS32 value, ScalarS32 min, ScalarS32 max)
+{
     const Register ret{ctx.reg_alloc.Define(inst)};
     ctx.Add("MIN.S RC.x,{},{};"
             "MAX.S {}.x,RC.x,{};",
             max, value, ret, min);
 }
 
-void EmitUClamp32(EmitContext& ctx, IR::Inst& inst, ScalarU32 value, ScalarU32 min, ScalarU32 max) {
+void EmitUClamp32(EmitContext& ctx, IR::Inst& inst, ScalarU32 value, ScalarU32 min, ScalarU32 max)
+{
     const Register ret{ctx.reg_alloc.Define(inst)};
     ctx.Add("MIN.U RC.x,{},{};"
             "MAX.U {}.x,RC.x,{};",
             max, value, ret, min);
 }
 
-void EmitSLessThan(EmitContext& ctx, IR::Inst& inst, ScalarS32 lhs, ScalarS32 rhs) {
+void EmitSLessThan(EmitContext& ctx, IR::Inst& inst, ScalarS32 lhs, ScalarS32 rhs)
+{
     ctx.Add("SLT.S {}.x,{},{};", inst, lhs, rhs);
 }
 
-void EmitULessThan(EmitContext& ctx, IR::Inst& inst, ScalarU32 lhs, ScalarU32 rhs) {
+void EmitULessThan(EmitContext& ctx, IR::Inst& inst, ScalarU32 lhs, ScalarU32 rhs)
+{
     ctx.Add("SLT.U {}.x,{},{};", inst, lhs, rhs);
 }
 
-void EmitIEqual(EmitContext& ctx, IR::Inst& inst, ScalarS32 lhs, ScalarS32 rhs) {
+void EmitIEqual(EmitContext& ctx, IR::Inst& inst, ScalarS32 lhs, ScalarS32 rhs)
+{
     ctx.Add("SEQ.S {}.x,{},{};", inst, lhs, rhs);
 }
 
-void EmitSLessThanEqual(EmitContext& ctx, IR::Inst& inst, ScalarS32 lhs, ScalarS32 rhs) {
+void EmitSLessThanEqual(EmitContext& ctx, IR::Inst& inst, ScalarS32 lhs, ScalarS32 rhs)
+{
     ctx.Add("SLE.S {}.x,{},{};", inst, lhs, rhs);
 }
 
-void EmitULessThanEqual(EmitContext& ctx, IR::Inst& inst, ScalarU32 lhs, ScalarU32 rhs) {
+void EmitULessThanEqual(EmitContext& ctx, IR::Inst& inst, ScalarU32 lhs, ScalarU32 rhs)
+{
     ctx.Add("SLE.U {}.x,{},{};", inst, lhs, rhs);
 }
 
-void EmitSGreaterThan(EmitContext& ctx, IR::Inst& inst, ScalarS32 lhs, ScalarS32 rhs) {
+void EmitSGreaterThan(EmitContext& ctx, IR::Inst& inst, ScalarS32 lhs, ScalarS32 rhs)
+{
     ctx.Add("SGT.S {}.x,{},{};", inst, lhs, rhs);
 }
 
-void EmitUGreaterThan(EmitContext& ctx, IR::Inst& inst, ScalarU32 lhs, ScalarU32 rhs) {
+void EmitUGreaterThan(EmitContext& ctx, IR::Inst& inst, ScalarU32 lhs, ScalarU32 rhs)
+{
     ctx.Add("SGT.U {}.x,{},{};", inst, lhs, rhs);
 }
 
-void EmitINotEqual(EmitContext& ctx, IR::Inst& inst, ScalarS32 lhs, ScalarS32 rhs) {
+void EmitINotEqual(EmitContext& ctx, IR::Inst& inst, ScalarS32 lhs, ScalarS32 rhs)
+{
     ctx.Add("SNE.U {}.x,{},{};", inst, lhs, rhs);
 }
 
-void EmitSGreaterThanEqual(EmitContext& ctx, IR::Inst& inst, ScalarS32 lhs, ScalarS32 rhs) {
+void EmitSGreaterThanEqual(EmitContext& ctx, IR::Inst& inst, ScalarS32 lhs, ScalarS32 rhs)
+{
     ctx.Add("SGE.S {}.x,{},{};", inst, lhs, rhs);
 }
 
-void EmitUGreaterThanEqual(EmitContext& ctx, IR::Inst& inst, ScalarU32 lhs, ScalarU32 rhs) {
+void EmitUGreaterThanEqual(EmitContext& ctx, IR::Inst& inst, ScalarU32 lhs, ScalarU32 rhs)
+{
     ctx.Add("SGE.U {}.x,{},{};", inst, lhs, rhs);
 }
 

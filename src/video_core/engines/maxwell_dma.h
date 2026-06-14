@@ -101,7 +101,8 @@ public:
         u32 upper;
         u32 lower;
 
-        constexpr operator GPUVAddr() const noexcept {
+        constexpr operator GPUVAddr() const noexcept
+        {
             return (static_cast<GPUVAddr>(upper & 0xff) << 32) | lower;
         }
     };
@@ -229,7 +230,8 @@ public:
             BitField<24, 2, u32> num_dst_components_minus_one;
         };
 
-        Swizzle GetComponent(size_t i) const {
+        Swizzle GetComponent(size_t i) const
+        {
             const u32 raw = dst_components_raw;
             return static_cast<Swizzle>((raw >> (i * 3)) & 0x7);
         }

@@ -1,12 +1,12 @@
 // SPDX-FileCopyrightText: 2019 Dolphin Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include <string>
-#include <utility>
+#include "common/dynamic_library.h"
 
 #include <fmt/ranges.h>
 
-#include "common/dynamic_library.h"
+#include <string>
+#include <utility>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -18,26 +18,34 @@ namespace Common {
 
 DynamicLibrary::DynamicLibrary() = default;
 
-DynamicLibrary::DynamicLibrary(const char* filename) {
+DynamicLibrary::DynamicLibrary(const char* filename)
+{
     void(Open(filename));
 }
 
-DynamicLibrary::DynamicLibrary(void* handle_) : handle{handle_} {}
+DynamicLibrary::DynamicLibrary(void* handle_) : handle{handle_}
+{
+}
 
 DynamicLibrary::DynamicLibrary(DynamicLibrary&& rhs) noexcept
-    : handle{std::exchange(rhs.handle, nullptr)} {}
+    : handle{std::exchange(rhs.handle, nullptr)}
+{
+}
 
-DynamicLibrary& DynamicLibrary::operator=(DynamicLibrary&& rhs) noexcept {
+DynamicLibrary& DynamicLibrary::operator=(DynamicLibrary&& rhs) noexcept
+{
     Close();
     handle = std::exchange(rhs.handle, nullptr);
     return *this;
 }
 
-DynamicLibrary::~DynamicLibrary() {
+DynamicLibrary::~DynamicLibrary()
+{
     Close();
 }
 
-std::string DynamicLibrary::GetUnprefixedFilename(const char* filename) {
+std::string DynamicLibrary::GetUnprefixedFilename(const char* filename)
+{
 #if defined(_WIN32)
     return std::string(filename) + ".dll";
 #elif defined(__APPLE__)
@@ -47,7 +55,8 @@ std::string DynamicLibrary::GetUnprefixedFilename(const char* filename) {
 #endif
 }
 
-std::string DynamicLibrary::GetVersionedFilename(const char* libname, int major, int minor) {
+std::string DynamicLibrary::GetVersionedFilename(const char* libname, int major, int minor)
+{
 #if defined(_WIN32)
     if (major >= 0 && minor >= 0)
         return fmt::format("{}-{}-{}.dll", libname, major, minor);
@@ -74,7 +83,8 @@ std::string DynamicLibrary::GetVersionedFilename(const char* libname, int major,
 #endif
 }
 
-bool DynamicLibrary::Open(const char* filename) {
+bool DynamicLibrary::Open(const char* filename)
+{
 #ifdef _WIN32
     handle = reinterpret_cast<void*>(LoadLibraryA(filename));
 #else
@@ -83,7 +93,8 @@ bool DynamicLibrary::Open(const char* filename) {
     return handle != nullptr;
 }
 
-void DynamicLibrary::Close() {
+void DynamicLibrary::Close()
+{
     if (!IsOpen())
         return;
 
@@ -95,7 +106,8 @@ void DynamicLibrary::Close() {
     handle = nullptr;
 }
 
-void* DynamicLibrary::GetSymbolAddress(const char* name) const {
+void* DynamicLibrary::GetSymbolAddress(const char* name) const
+{
 #ifdef _WIN32
     return reinterpret_cast<void*>(GetProcAddress(reinterpret_cast<HMODULE>(handle), name));
 #else

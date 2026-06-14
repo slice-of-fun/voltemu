@@ -4,11 +4,12 @@
 // SPDX-FileCopyrightText: Copyright 2020 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "video_core/texture_cache/formatter.h"
+
 #include <algorithm>
+#include <ranges>
 #include <string>
 
-#include <ranges>
-#include "video_core/texture_cache/formatter.h"
 #include "video_core/texture_cache/image_base.h"
 #include "video_core/texture_cache/image_info.h"
 #include "video_core/texture_cache/image_view_base.h"
@@ -17,7 +18,8 @@
 
 namespace VideoCommon {
 
-std::string Name(const ImageBase& image) {
+std::string Name(const ImageBase& image)
+{
     const GPUVAddr gpu_addr = image.gpu_addr;
     const ImageInfo& info = image.info;
     u32 width = info.size.width;
@@ -53,7 +55,8 @@ std::string Name(const ImageBase& image) {
     return "Invalid";
 }
 
-std::string Name(const ImageViewBase& image_view, GPUVAddr addr) {
+std::string Name(const ImageViewBase& image_view, GPUVAddr addr)
+{
     const u32 width = image_view.size.width;
     const u32 height = image_view.size.height;
     const u32 depth = image_view.size.depth;
@@ -86,7 +89,8 @@ std::string Name(const ImageViewBase& image_view, GPUVAddr addr) {
     return "Invalid";
 }
 
-std::string Name(const RenderTargets& render_targets) {
+std::string Name(const RenderTargets& render_targets)
+{
     std::string_view debug_prefix;
     const auto num_color = std::ranges::count_if(
         render_targets.color_buffer_ids, [](ImageViewId id) { return static_cast<bool>(id); });

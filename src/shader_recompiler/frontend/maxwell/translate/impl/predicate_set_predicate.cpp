@@ -7,7 +7,8 @@
 #include "shader_recompiler/frontend/maxwell/translate/impl/impl.h"
 
 namespace Shader::Maxwell {
-void TranslatorVisitor::PSETP(u64 insn) {
+void TranslatorVisitor::PSETP(u64 insn)
+{
     union {
         u64 raw;
         BitField<0, 3, IR::Pred> dest_pred_b;

@@ -35,10 +35,10 @@ struct BlockLinearSwizzle3DParams {
     u32 block_depth_mask;
 };
 
-[[nodiscard]] BlockLinearSwizzle2DParams MakeBlockLinearSwizzle2DParams(
-    const SwizzleParameters& swizzle, const ImageInfo& info);
+[[nodiscard]] BlockLinearSwizzle2DParams
+MakeBlockLinearSwizzle2DParams(const SwizzleParameters& swizzle, const ImageInfo& info);
 
-[[nodiscard]] BlockLinearSwizzle3DParams MakeBlockLinearSwizzle3DParams(
-    const SwizzleParameters& swizzle, const ImageInfo& info);
+[[nodiscard]] BlockLinearSwizzle3DParams
+MakeBlockLinearSwizzle3DParams(const SwizzleParameters& swizzle, const ImageInfo& info);
 
 } // namespace VideoCommon::Accelerated

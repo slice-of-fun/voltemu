@@ -7,9 +7,8 @@
 #pragma once
 
 #include <QRandomGenerator>
-
-#include <memory>
 #include <QWidget>
+#include <memory>
 
 namespace Ui {
 class ConfigureWeb;

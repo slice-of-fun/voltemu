@@ -11,7 +11,6 @@
 
 #include "common/bit_field.h"
 #include "common/common_types.h"
-
 #include "video_core/engines/maxwell_3d.h"
 #include "video_core/surface.h"
 #include "video_core/transform_feedback.h"
@@ -80,31 +79,38 @@ struct FixedPipelineState {
 
         void Refresh(const Maxwell& regs, size_t index);
 
-        std::array<bool, 4> Mask() const noexcept {
+        std::array<bool, 4> Mask() const noexcept
+        {
             return {mask_r != 0, mask_g != 0, mask_b != 0, mask_a != 0};
         }
 
-        Maxwell::Blend::Equation EquationRGB() const noexcept {
+        Maxwell::Blend::Equation EquationRGB() const noexcept
+        {
             return UnpackBlendEquation(equation_rgb.Value());
         }
 
-        Maxwell::Blend::Equation EquationAlpha() const noexcept {
+        Maxwell::Blend::Equation EquationAlpha() const noexcept
+        {
             return UnpackBlendEquation(equation_a.Value());
         }
 
-        Maxwell::Blend::Factor SourceRGBFactor() const noexcept {
+        Maxwell::Blend::Factor SourceRGBFactor() const noexcept
+        {
             return UnpackBlendFactor(factor_source_rgb.Value());
         }
 
-        Maxwell::Blend::Factor DestRGBFactor() const noexcept {
+        Maxwell::Blend::Factor DestRGBFactor() const noexcept
+        {
             return UnpackBlendFactor(factor_dest_rgb.Value());
         }
 
-        Maxwell::Blend::Factor SourceAlphaFactor() const noexcept {
+        Maxwell::Blend::Factor SourceAlphaFactor() const noexcept
+        {
             return UnpackBlendFactor(factor_source_a.Value());
         }
 
-        Maxwell::Blend::Factor DestAlphaFactor() const noexcept {
+        Maxwell::Blend::Factor DestAlphaFactor() const noexcept
+        {
             return UnpackBlendFactor(factor_dest_a.Value());
         }
     };
@@ -117,37 +123,39 @@ struct FixedPipelineState {
         BitField<20, 3, u32> type;
         BitField<23, 6, u32> size;
 
-        Maxwell::VertexAttribute::Type Type() const noexcept {
+        Maxwell::VertexAttribute::Type Type() const noexcept
+        {
             return static_cast<Maxwell::VertexAttribute::Type>(type.Value());
         }
 
-        Maxwell::VertexAttribute::Size Size() const noexcept {
+        Maxwell::VertexAttribute::Size Size() const noexcept
+        {
             return static_cast<Maxwell::VertexAttribute::Size>(size.Value());
         }
     };
 
-    template <size_t Position>
-    union StencilFace {
+    template<size_t Position> union StencilFace {
         BitField<Position + 0, 3, u32> action_stencil_fail;
         BitField<Position + 3, 3, u32> action_depth_fail;
         BitField<Position + 6, 3, u32> action_depth_pass;
         BitField<Position + 9, 3, u32> test_func;
 
-        Maxwell::StencilOp::Op ActionStencilFail() const noexcept {
+        Maxwell::StencilOp::Op ActionStencilFail() const noexcept
+        {
             return UnpackStencilOp(action_stencil_fail);
         }
 
-        Maxwell::StencilOp::Op ActionDepthFail() const noexcept {
+        Maxwell::StencilOp::Op ActionDepthFail() const noexcept
+        {
             return UnpackStencilOp(action_depth_fail);
         }
 
-        Maxwell::StencilOp::Op ActionDepthPass() const noexcept {
+        Maxwell::StencilOp::Op ActionDepthPass() const noexcept
+        {
             return UnpackStencilOp(action_depth_pass);
         }
 
-        Maxwell::ComparisonOp TestFunc() const noexcept {
-            return UnpackComparisonOp(test_func);
-        }
+        Maxwell::ComparisonOp TestFunc() const noexcept { return UnpackComparisonOp(test_func); }
     };
 
     struct DynamicState {
@@ -180,15 +188,15 @@ struct FixedPipelineState {
                       bool base_features_supported);
         void Refresh3(const Maxwell& regs, const DynamicFeatures& features);
 
-        Maxwell::ComparisonOp DepthTestFunc() const noexcept {
+        Maxwell::ComparisonOp DepthTestFunc() const noexcept
+        {
             return UnpackComparisonOp(depth_test_func);
         }
 
-        Maxwell::CullFace CullFace() const noexcept {
-            return UnpackCullFace(cull_face.Value());
-        }
+        Maxwell::CullFace CullFace() const noexcept { return UnpackCullFace(cull_face.Value()); }
 
-        Maxwell::FrontFace FrontFace() const noexcept {
+        Maxwell::FrontFace FrontFace() const noexcept
+        {
             return UnpackFrontFace(front_face.Value());
         }
     };
@@ -258,11 +266,10 @@ struct FixedPipelineState {
 
     bool operator==(const FixedPipelineState& rhs) const noexcept;
 
-    bool operator!=(const FixedPipelineState& rhs) const noexcept {
-        return !operator==(rhs);
-    }
+    bool operator!=(const FixedPipelineState& rhs) const noexcept { return !operator==(rhs); }
 
-    size_t Size() const noexcept {
+    size_t Size() const noexcept
+    {
         if (xfb_enabled) {
             // When transform feedback is enabled, use the whole struct
             return sizeof(*this);
@@ -282,7 +289,8 @@ struct FixedPipelineState {
         return offsetof(FixedPipelineState, xfb_state);
     }
 
-    u32 DynamicAttributeType(size_t index) const noexcept {
+    u32 DynamicAttributeType(size_t index) const noexcept
+    {
         return (attribute_types >> (index * 2)) & 0b11;
     }
 };
@@ -294,11 +302,8 @@ static_assert(std::is_trivially_constructible_v<FixedPipelineState>);
 
 namespace std {
 
-template <>
-struct hash<Vulkan::FixedPipelineState> {
-    size_t operator()(const Vulkan::FixedPipelineState& k) const noexcept {
-        return k.Hash();
-    }
+template<> struct hash<Vulkan::FixedPipelineState> {
+    size_t operator()(const Vulkan::FixedPipelineState& k) const noexcept { return k.Hash(); }
 };
 
 } // namespace std

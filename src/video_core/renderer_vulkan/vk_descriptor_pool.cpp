@@ -4,14 +4,15 @@
 // SPDX-FileCopyrightText: Copyright 2019 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "video_core/renderer_vulkan/vk_descriptor_pool.h"
+
 #include <algorithm>
 #include <mutex>
+#include <ranges>
 #include <span>
 #include <vector>
 
 #include "common/common_types.h"
-#include <ranges>
-#include "video_core/renderer_vulkan/vk_descriptor_pool.h"
 #include "video_core/renderer_vulkan/vk_resource_pool.h"
 #include "video_core/renderer_vulkan/vk_scheduler.h"
 #include "video_core/vulkan_common/vulkan_device.h"
@@ -28,14 +29,15 @@ struct DescriptorBank {
     std::vector<vk::DescriptorPool> pools;
 };
 
-bool DescriptorBankInfo::IsSuperset(const DescriptorBankInfo& subset) const noexcept {
+bool DescriptorBankInfo::IsSuperset(const DescriptorBankInfo& subset) const noexcept
+{
     return uniform_buffers >= subset.uniform_buffers && storage_buffers >= subset.storage_buffers &&
            texture_buffers >= subset.texture_buffers && image_buffers >= subset.image_buffers &&
            textures >= subset.textures && images >= subset.images;
 }
 
-template <typename Descriptors>
-static u32 Accumulate(const Descriptors& descriptors) {
+template<typename Descriptors> static u32 Accumulate(const Descriptors& descriptors)
+{
     u32 count = 0;
     for (const auto& descriptor : descriptors) {
         count += descriptor.count;
@@ -43,7 +45,8 @@ static u32 Accumulate(const Descriptors& descriptors) {
     return count;
 }
 
-static DescriptorBankInfo MakeBankInfo(std::span<const Shader::Info> infos) {
+static DescriptorBankInfo MakeBankInfo(std::span<const Shader::Info> infos)
+{
     DescriptorBankInfo bank;
     for (const Shader::Info& info : infos) {
         bank.uniform_buffers += Accumulate(info.constant_buffer_descriptors);
@@ -58,7 +61,8 @@ static DescriptorBankInfo MakeBankInfo(std::span<const Shader::Info> infos) {
     return bank;
 }
 
-static void AllocatePool(const Device& device, DescriptorBank& bank) {
+static void AllocatePool(const Device& device, DescriptorBank& bank)
+{
     std::array<VkDescriptorPoolSize, 6> pool_sizes;
     size_t pool_cursor{};
     const u32 sets_per_pool = device.GetSetsPerPool();
@@ -89,19 +93,24 @@ static void AllocatePool(const Device& device, DescriptorBank& bank) {
 
 DescriptorAllocator::DescriptorAllocator(const Device& device_, MasterSemaphore& master_semaphore_,
                                          DescriptorBank& bank_, VkDescriptorSetLayout layout_)
-    : ResourcePool(master_semaphore_, SETS_GROW_RATE), device{&device_}, bank{&bank_},
-      layout{layout_} {}
+    : ResourcePool(master_semaphore_, SETS_GROW_RATE), device{&device_}, bank{&bank_}, layout{
+                                                                                           layout_}
+{
+}
 
-VkDescriptorSet DescriptorAllocator::Commit() {
+VkDescriptorSet DescriptorAllocator::Commit()
+{
     const size_t index = CommitResource();
     return sets[index / SETS_GROW_RATE][index % SETS_GROW_RATE];
 }
 
-void DescriptorAllocator::Allocate(size_t begin, size_t end) {
+void DescriptorAllocator::Allocate(size_t begin, size_t end)
+{
     sets.push_back(AllocateDescriptors(end - begin));
 }
 
-vk::DescriptorSets DescriptorAllocator::AllocateDescriptors(size_t count) {
+vk::DescriptorSets DescriptorAllocator::AllocateDescriptors(size_t count)
+{
     const std::vector<VkDescriptorSetLayout> layouts(count, layout);
     VkDescriptorSetAllocateInfo allocate_info{
         .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
@@ -126,26 +135,32 @@ vk::DescriptorSets DescriptorAllocator::AllocateDescriptors(size_t count) {
 }
 
 DescriptorPool::DescriptorPool(const Device& device_, Scheduler& scheduler)
-    : device{device_}, master_semaphore{scheduler.GetMasterSemaphore()} {}
+    : device{device_}, master_semaphore{scheduler.GetMasterSemaphore()}
+{
+}
 
 DescriptorPool::~DescriptorPool() = default;
 
 DescriptorAllocator DescriptorPool::Allocator(VkDescriptorSetLayout layout,
-                                              std::span<const Shader::Info> infos) {
+                                              std::span<const Shader::Info> infos)
+{
     return Allocator(layout, MakeBankInfo(infos));
 }
 
 DescriptorAllocator DescriptorPool::Allocator(VkDescriptorSetLayout layout,
-                                              const Shader::Info& info) {
+                                              const Shader::Info& info)
+{
     return Allocator(layout, MakeBankInfo(std::array{info}));
 }
 
 DescriptorAllocator DescriptorPool::Allocator(VkDescriptorSetLayout layout,
-                                              const DescriptorBankInfo& info) {
+                                              const DescriptorBankInfo& info)
+{
     return DescriptorAllocator(device, master_semaphore, Bank(info), layout);
 }
 
-DescriptorBank& DescriptorPool::Bank(const DescriptorBankInfo& reqs) {
+DescriptorBank& DescriptorPool::Bank(const DescriptorBankInfo& reqs)
+{
     std::shared_lock read_lock{banks_mutex};
     const auto it = std::ranges::find_if(bank_infos, [&reqs](const DescriptorBankInfo& bank) {
         return std::abs(bank.score - reqs.score) < SCORE_THRESHOLD && bank.IsSuperset(reqs);

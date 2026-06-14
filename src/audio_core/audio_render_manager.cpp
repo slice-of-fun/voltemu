@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include "audio_core/audio_render_manager.h"
+
 #include "audio_core/common/audio_renderer_parameter.h"
 #include "audio_core/common/feature_support.h"
 #include "core/core.h"
@@ -9,24 +10,29 @@
 namespace AudioCore::Renderer {
 
 Manager::Manager(Core::System& system_)
-    : system{system_}, system_manager{std::make_unique<SystemManager>(system)} {
+    : system{system_}, system_manager{std::make_unique<SystemManager>(system)}
+{
     std::iota(session_ids.begin(), session_ids.end(), 0);
 }
 
-Manager::~Manager() {
+Manager::~Manager()
+{
     Stop();
 }
 
-void Manager::Stop() {
+void Manager::Stop()
+{
     system_manager->Stop();
 }
 
-SystemManager& Manager::GetSystemManager() {
+SystemManager& Manager::GetSystemManager()
+{
     return *system_manager;
 }
 
 Result Manager::GetWorkBufferSize(const AudioRendererParameterInternal& params,
-                                  u64& out_count) const {
+                                  u64& out_count) const
+{
     if (!CheckValidRevision(params.revision)) {
         return Service::Audio::ResultInvalidRevision;
     }
@@ -36,7 +42,8 @@ Result Manager::GetWorkBufferSize(const AudioRendererParameterInternal& params,
     return ResultSuccess;
 }
 
-s32 Manager::GetSessionId() {
+s32 Manager::GetSessionId()
+{
     std::scoped_lock l{session_lock};
     auto session_id{session_ids[session_count]};
 
@@ -49,21 +56,25 @@ s32 Manager::GetSessionId() {
     return session_id;
 }
 
-void Manager::ReleaseSessionId(const s32 session_id) {
+void Manager::ReleaseSessionId(const s32 session_id)
+{
     std::scoped_lock l{session_lock};
     session_ids[--session_count] = session_id;
 }
 
-u32 Manager::GetSessionCount() const {
+u32 Manager::GetSessionCount() const
+{
     std::scoped_lock l{session_lock};
     return session_count;
 }
 
-bool Manager::AddSystem(System& system_) {
+bool Manager::AddSystem(System& system_)
+{
     return system_manager->Add(system_);
 }
 
-bool Manager::RemoveSystem(System& system_) {
+bool Manager::RemoveSystem(System& system_)
+{
     return system_manager->Remove(system_);
 }
 

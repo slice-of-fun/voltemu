@@ -6,7 +6,8 @@
 namespace AudioCore::Renderer {
 
 void AuxInfo::Update(BehaviorInfo::ErrorInfo& error_info, const InParameterVersion1& in_params,
-                     const PoolMapper& pool_mapper) {
+                     const PoolMapper& pool_mapper)
+{
     auto in_specific{reinterpret_cast<const ParameterVersion1*>(in_params.specific.data())};
     auto params{reinterpret_cast<ParameterVersion1*>(parameter.data())};
 
@@ -40,7 +41,8 @@ void AuxInfo::Update(BehaviorInfo::ErrorInfo& error_info, const InParameterVersi
 }
 
 void AuxInfo::Update(BehaviorInfo::ErrorInfo& error_info, const InParameterVersion2& in_params,
-                     const PoolMapper& pool_mapper) {
+                     const PoolMapper& pool_mapper)
+{
     auto in_specific{reinterpret_cast<const ParameterVersion2*>(in_params.specific.data())};
     auto params{reinterpret_cast<ParameterVersion2*>(parameter.data())};
 
@@ -74,7 +76,8 @@ void AuxInfo::Update(BehaviorInfo::ErrorInfo& error_info, const InParameterVersi
     }
 }
 
-void AuxInfo::UpdateForCommandGeneration() {
+void AuxInfo::UpdateForCommandGeneration()
+{
     if (enabled) {
         usage_state = UsageState::Enabled;
     } else {
@@ -82,11 +85,16 @@ void AuxInfo::UpdateForCommandGeneration() {
     }
 }
 
-void AuxInfo::InitializeResultState(EffectResultState& result_state) {}
+void AuxInfo::InitializeResultState(EffectResultState& result_state)
+{
+}
 
-void AuxInfo::UpdateResultState(EffectResultState& cpu_state, EffectResultState& dsp_state) {}
+void AuxInfo::UpdateResultState(EffectResultState& cpu_state, EffectResultState& dsp_state)
+{
+}
 
-CpuAddr AuxInfo::GetWorkbuffer(s32 index) {
+CpuAddr AuxInfo::GetWorkbuffer(s32 index)
+{
     return workbuffers[index].GetReference(true);
 }
 

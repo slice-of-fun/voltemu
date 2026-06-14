@@ -6,12 +6,13 @@
 
 #pragma once
 
+#include <ankerl/unordered_dense.h>
+
 #include <array>
 #include <functional>
 #include <list>
 #include <memory>
 #include <string>
-#include <ankerl/unordered_dense.h>
 #include <vector>
 
 #include "common/polyfill_thread.h"
@@ -80,8 +81,7 @@ namespace Init {
 struct KSlabResourceCounts;
 }
 
-template <typename T>
-class KSlabHeap;
+template<typename T> class KSlabHeap;
 
 /// Represents a single instance of the kernel.
 class KernelCore {
@@ -282,8 +282,7 @@ public:
     const Core::System& System() const;
 
     /// Gets the slab heap for the specified kernel object type.
-    template <typename T>
-    KSlabHeap<T>& SlabHeap();
+    template<typename T> KSlabHeap<T>& SlabHeap();
 
     /// Gets the current slab resource counts.
     Init::KSlabResourceCounts& SlabResourceCounts();

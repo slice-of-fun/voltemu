@@ -37,21 +37,13 @@ public:
     explicit AppletDataBroker(Core::System& system_);
     ~AppletDataBroker();
 
-    AppletStorageChannel& GetInData() {
-        return in_data;
-    }
+    AppletStorageChannel& GetInData() { return in_data; }
 
-    AppletStorageChannel& GetInteractiveInData() {
-        return interactive_in_data;
-    }
+    AppletStorageChannel& GetInteractiveInData() { return interactive_in_data; }
 
-    AppletStorageChannel& GetOutData() {
-        return out_data;
-    }
+    AppletStorageChannel& GetOutData() { return out_data; }
 
-    AppletStorageChannel& GetInteractiveOutData() {
-        return interactive_out_data;
-    }
+    AppletStorageChannel& GetInteractiveOutData() { return interactive_out_data; }
 
 private:
     Core::System& system;

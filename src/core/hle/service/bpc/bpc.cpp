@@ -1,9 +1,10 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/bpc/bpc.h"
+
 #include <memory>
 
-#include "core/hle/service/bpc/bpc.h"
 #include "core/hle/service/server_manager.h"
 #include "core/hle/service/service.h"
 
@@ -11,7 +12,8 @@ namespace Service::BPC {
 
 class BPC final : public ServiceFramework<BPC> {
 public:
-    explicit BPC(Core::System& system_) : ServiceFramework{system_, "bpc"} {
+    explicit BPC(Core::System& system_) : ServiceFramework{system_, "bpc"}
+    {
         // clang-format off
         static const FunctionInfo functions[] = {
             {0, nullptr, "ShutdownSystem"},
@@ -39,7 +41,8 @@ public:
 
 class BPC_R final : public ServiceFramework<BPC_R> {
 public:
-    explicit BPC_R(Core::System& system_) : ServiceFramework{system_, "bpc:r"} {
+    explicit BPC_R(Core::System& system_) : ServiceFramework{system_, "bpc:r"}
+    {
         // clang-format off
         static const FunctionInfo functions[] = {
             {0, nullptr, "GetRtcTime"},
@@ -54,7 +57,8 @@ public:
     }
 };
 
-void LoopProcess(Core::System& system) {
+void LoopProcess(Core::System& system)
+{
     auto server_manager = std::make_unique<ServerManager>(system);
 
     server_manager->RegisterNamedService("bpc", std::make_shared<BPC>(system));

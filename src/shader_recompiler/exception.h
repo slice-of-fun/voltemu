@@ -18,17 +18,11 @@ class Exception : public std::exception {
 public:
     explicit Exception(std::string message) noexcept : err_message{std::move(message)} {}
 
-    [[nodiscard]] const char* what() const noexcept override {
-        return err_message.c_str();
-    }
+    [[nodiscard]] const char* what() const noexcept override { return err_message.c_str(); }
 
-    void Prepend(std::string_view prepend) {
-        err_message.insert(0, prepend);
-    }
+    void Prepend(std::string_view prepend) { err_message.insert(0, prepend); }
 
-    void Append(std::string_view append) {
-        err_message += append;
-    }
+    void Append(std::string_view append) { err_message += append; }
 
 private:
     std::string err_message;
@@ -36,32 +30,39 @@ private:
 
 class LogicError : public Exception {
 public:
-    template <typename... Args>
+    template<typename... Args>
     explicit LogicError(const char* message, Args&&... args)
-        : Exception{fmt::format(fmt::runtime(message), std::forward<Args>(args)...)} {}
+        : Exception{fmt::format(fmt::runtime(message), std::forward<Args>(args)...)}
+    {
+    }
 };
 
 class RuntimeError : public Exception {
 public:
-    template <typename... Args>
+    template<typename... Args>
     explicit RuntimeError(const char* message, Args&&... args)
-        : Exception{fmt::format(fmt::runtime(message), std::forward<Args>(args)...)} {}
+        : Exception{fmt::format(fmt::runtime(message), std::forward<Args>(args)...)}
+    {
+    }
 };
 
 class NotImplementedException : public Exception {
 public:
-    template <typename... Args>
+    template<typename... Args>
     explicit NotImplementedException(const char* message, Args&&... args)
-        : Exception{fmt::format(fmt::runtime(message), std::forward<Args>(args)...)} {
+        : Exception{fmt::format(fmt::runtime(message), std::forward<Args>(args)...)}
+    {
         Append(" is not implemented");
     }
 };
 
 class InvalidArgument : public Exception {
 public:
-    template <typename... Args>
+    template<typename... Args>
     explicit InvalidArgument(const char* message, Args&&... args)
-        : Exception{fmt::format(fmt::runtime(message), std::forward<Args>(args)...)} {}
+        : Exception{fmt::format(fmt::runtime(message), std::forward<Args>(args)...)}
+    {
+    }
 };
 
 } // namespace Shader

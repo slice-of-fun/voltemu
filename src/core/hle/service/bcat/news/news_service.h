@@ -27,7 +27,8 @@ private:
 
     Result GetSubscriptionStatus(Out<u32> out_status, InBuffer<BufferAttr_HipcPointer> buffer_data);
 
-    Result GetTopicList(Out<s32> out_count, OutBuffer<BufferAttr_HipcMapAlias> out_topics, s32 filter);
+    Result GetTopicList(Out<s32> out_count, OutBuffer<BufferAttr_HipcMapAlias> out_topics,
+                        s32 filter);
 
     Result IsSystemUpdateRequired(Out<bool> out_is_system_update_required);
 

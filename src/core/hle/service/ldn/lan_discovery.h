@@ -6,6 +6,8 @@
 
 #pragma once
 
+#include <ankerl/unordered_dense.h>
+
 #include <array>
 #include <cstring>
 #include <functional>
@@ -15,7 +17,6 @@
 #include <random>
 #include <span>
 #include <thread>
-#include <ankerl/unordered_dense.h>
 
 #include "common/logging.h"
 #include "common/socket_types.h"
@@ -103,11 +104,10 @@ protected:
                        u16 local_communication_version);
 
     Network::IPv4Address GetLocalIp() const;
-    template <typename Data>
+    template<typename Data>
     void SendPacket(Network::LDNPacketType type, const Data& data, Ipv4Address remote_ip);
     void SendPacket(Network::LDNPacketType type, Ipv4Address remote_ip);
-    template <typename Data>
-    void SendBroadcast(Network::LDNPacketType type, const Data& data);
+    template<typename Data> void SendBroadcast(Network::LDNPacketType type, const Data& data);
     void SendBroadcast(Network::LDNPacketType type);
     void SendPacket(const Network::LDNPacket& packet);
 

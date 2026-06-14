@@ -2,12 +2,14 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include "core/file_sys/vfs/vfs_cached.h"
+
 #include "core/file_sys/vfs/vfs_types.h"
 
 namespace FileSys {
 
 CachedVfsDirectory::CachedVfsDirectory(VirtualDir&& source_dir)
-    : name(source_dir->GetName()), parent(source_dir->GetParentDirectory()) {
+    : name(source_dir->GetName()), parent(source_dir->GetParentDirectory())
+{
     for (auto& dir : source_dir->GetSubdirectories()) {
         dirs.emplace(dir->GetName(), std::make_shared<CachedVfsDirectory>(std::move(dir)));
     }
@@ -18,7 +20,8 @@ CachedVfsDirectory::CachedVfsDirectory(VirtualDir&& source_dir)
 
 CachedVfsDirectory::~CachedVfsDirectory() = default;
 
-VirtualFile CachedVfsDirectory::GetFile(std::string_view file_name) const {
+VirtualFile CachedVfsDirectory::GetFile(std::string_view file_name) const
+{
     auto it = files.find(file_name);
     if (it != files.end()) {
         return it->second;
@@ -27,7 +30,8 @@ VirtualFile CachedVfsDirectory::GetFile(std::string_view file_name) const {
     return nullptr;
 }
 
-VirtualDir CachedVfsDirectory::GetSubdirectory(std::string_view dir_name) const {
+VirtualDir CachedVfsDirectory::GetSubdirectory(std::string_view dir_name) const
+{
     auto it = dirs.find(dir_name);
     if (it != dirs.end()) {
         return it->second;
@@ -36,7 +40,8 @@ VirtualDir CachedVfsDirectory::GetSubdirectory(std::string_view dir_name) const 
     return nullptr;
 }
 
-std::vector<VirtualFile> CachedVfsDirectory::GetFiles() const {
+std::vector<VirtualFile> CachedVfsDirectory::GetFiles() const
+{
     std::vector<VirtualFile> out;
     for (auto& [file_name, file] : files) {
         out.push_back(file);
@@ -44,7 +49,8 @@ std::vector<VirtualFile> CachedVfsDirectory::GetFiles() const {
     return out;
 }
 
-std::vector<VirtualDir> CachedVfsDirectory::GetSubdirectories() const {
+std::vector<VirtualDir> CachedVfsDirectory::GetSubdirectories() const
+{
     std::vector<VirtualDir> out;
     for (auto& [dir_name, dir] : dirs) {
         out.push_back(dir);
@@ -52,11 +58,13 @@ std::vector<VirtualDir> CachedVfsDirectory::GetSubdirectories() const {
     return out;
 }
 
-std::string CachedVfsDirectory::GetName() const {
+std::string CachedVfsDirectory::GetName() const
+{
     return name;
 }
 
-VirtualDir CachedVfsDirectory::GetParentDirectory() const {
+VirtualDir CachedVfsDirectory::GetParentDirectory() const
+{
     return parent;
 }
 

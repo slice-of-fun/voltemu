@@ -4,6 +4,7 @@
 #pragma once
 
 #include <string_view>
+
 #include "common/common_funcs.h"
 #include "common/common_types.h"
 
@@ -13,7 +14,8 @@ constexpr inline size_t EntryNameLengthMax = 0x300;
 
 struct DirectoryEntry {
     DirectoryEntry(std::string_view view, s8 entry_type, u64 entry_size)
-        : type{entry_type}, file_size{static_cast<s64>(entry_size)} {
+        : type{entry_type}, file_size{static_cast<s64>(entry_size)}
+    {
         const std::size_t copy_size = view.copy(name, std::size(name) - 1);
         name[copy_size] = '\0';
     }

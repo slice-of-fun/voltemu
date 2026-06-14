@@ -16,7 +16,8 @@
 namespace Kernel::Svc {
 
 /// Break program execution
-void Break(Core::System& system, BreakReason reason, u64 info1, u64 info2) {
+void Break(Core::System& system, BreakReason reason, u64 info1, u64 info2)
+{
     BreakReason break_reason =
         reason & static_cast<BreakReason>(~BreakReason::NotificationOnlyFlag);
     bool notification_only = True(reason & BreakReason::NotificationOnlyFlag);
@@ -117,23 +118,28 @@ void Break(Core::System& system, BreakReason reason, u64 info1, u64 info2) {
     }
 }
 
-void ReturnFromException(Core::System& system, Result result) {
+void ReturnFromException(Core::System& system, Result result)
+{
     UNIMPLEMENTED();
 }
 
-void Break64(Core::System& system, BreakReason break_reason, uint64_t arg, uint64_t size) {
+void Break64(Core::System& system, BreakReason break_reason, uint64_t arg, uint64_t size)
+{
     Break(system, break_reason, arg, size);
 }
 
-void Break64From32(Core::System& system, BreakReason break_reason, uint32_t arg, uint32_t size) {
+void Break64From32(Core::System& system, BreakReason break_reason, uint32_t arg, uint32_t size)
+{
     Break(system, break_reason, arg, size);
 }
 
-void ReturnFromException64(Core::System& system, Result result) {
+void ReturnFromException64(Core::System& system, Result result)
+{
     ReturnFromException(system, result);
 }
 
-void ReturnFromException64From32(Core::System& system, Result result) {
+void ReturnFromException64From32(Core::System& system, Result result)
+{
     ReturnFromException(system, result);
 }
 

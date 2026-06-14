@@ -6,11 +6,13 @@
 
 namespace Shader::Backend::SPIRV {
 
-void EmitJoin(EmitContext&) {
+void EmitJoin(EmitContext&)
+{
     throw NotImplementedException("Join shouldn't be emitted");
 }
 
-void EmitDemoteToHelperInvocation(EmitContext& ctx) {
+void EmitDemoteToHelperInvocation(EmitContext& ctx)
+{
     if (ctx.profile.support_demote_to_helper_invocation) {
         ctx.OpDemoteToHelperInvocationEXT();
     } else {

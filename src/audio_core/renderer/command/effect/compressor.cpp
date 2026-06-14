@@ -1,18 +1,20 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "audio_core/renderer/command/effect/compressor.h"
+
 #include <cmath>
 #include <span>
 #include <vector>
 
 #include "audio_core/adsp/apps/audio_renderer/command_list_processor.h"
-#include "audio_core/renderer/command/effect/compressor.h"
 #include "audio_core/renderer/effect/compressor.h"
 
 namespace AudioCore::Renderer {
 
 static void SetCompressorEffectParameter(const CompressorInfo::ParameterVersion2& params,
-                                         CompressorInfo::State& state) {
+                                         CompressorInfo::State& state)
+{
     const auto ratio{1.0f / params.compressor_ratio};
     auto makeup_gain{0.0f};
     if (params.makeup_gain_enabled) {
@@ -32,7 +34,8 @@ static void SetCompressorEffectParameter(const CompressorInfo::ParameterVersion2
 }
 
 static void InitializeCompressorEffect(const CompressorInfo::ParameterVersion2& params,
-                                       CompressorInfo::State& state) {
+                                       CompressorInfo::State& state)
+{
     state = {};
 
     state.unk_00 = 0;
@@ -45,7 +48,8 @@ static void InitializeCompressorEffect(const CompressorInfo::ParameterVersion2& 
 static void ApplyCompressorEffect(const CompressorInfo::ParameterVersion2& params,
                                   CompressorInfo::State& state, bool enabled,
                                   std::span<std::span<const s32>> input_buffers,
-                                  std::span<std::span<s32>> output_buffers, u32 sample_count) {
+                                  std::span<std::span<s32>> output_buffers, u32 sample_count)
+{
     if (enabled) {
         auto state_00{state.unk_00};
         auto state_04{state.unk_04};
@@ -111,7 +115,8 @@ static void ApplyCompressorEffect(const CompressorInfo::ParameterVersion2& param
 }
 
 void CompressorCommand::Dump([[maybe_unused]] const AudioRenderer::CommandListProcessor& processor,
-                             std::string& string) {
+                             std::string& string)
+{
     string += fmt::format("CompressorCommand\n\tenabled {} \n\tinputs: ", effect_enabled);
     for (s16 i = 0; i < parameter.channel_count; i++) {
         string += fmt::format("{:02X}, ", inputs[i]);
@@ -123,7 +128,8 @@ void CompressorCommand::Dump([[maybe_unused]] const AudioRenderer::CommandListPr
     string += "\n";
 }
 
-void CompressorCommand::Process(const AudioRenderer::CommandListProcessor& processor) {
+void CompressorCommand::Process(const AudioRenderer::CommandListProcessor& processor)
+{
     std::array<std::span<const s32>, MaxChannels> input_buffers{};
     std::array<std::span<s32>, MaxChannels> output_buffers{};
 
@@ -148,7 +154,8 @@ void CompressorCommand::Process(const AudioRenderer::CommandListProcessor& proce
                           processor.sample_count);
 }
 
-bool CompressorCommand::Verify(const AudioRenderer::CommandListProcessor& processor) {
+bool CompressorCommand::Verify(const AudioRenderer::CommandListProcessor& processor)
+{
     return true;
 }
 

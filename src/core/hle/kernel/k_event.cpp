@@ -2,17 +2,21 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include "core/hle/kernel/k_event.h"
+
 #include "core/hle/kernel/k_process.h"
 #include "core/hle/kernel/k_resource_limit.h"
 
 namespace Kernel {
 
 KEvent::KEvent(KernelCore& kernel)
-    : KAutoObjectWithSlabHeapAndContainer{kernel}, m_readable_event{kernel} {}
+    : KAutoObjectWithSlabHeapAndContainer{kernel}, m_readable_event{kernel}
+{
+}
 
 KEvent::~KEvent() = default;
 
-void KEvent::Initialize(KProcess* owner) {
+void KEvent::Initialize(KProcess* owner)
+{
     // Create our readable event.
     KAutoObject::Create(std::addressof(m_readable_event));
 
@@ -31,11 +35,13 @@ void KEvent::Initialize(KProcess* owner) {
     m_initialized = true;
 }
 
-void KEvent::Finalize() {
+void KEvent::Finalize()
+{
     KAutoObjectWithSlabHeapAndContainer<KEvent, KAutoObjectWithList>::Finalize();
 }
 
-Result KEvent::Signal() {
+Result KEvent::Signal()
+{
     KScopedSchedulerLock sl{m_kernel};
 
     R_SUCCEED_IF(m_readable_event_destroyed);
@@ -43,7 +49,8 @@ Result KEvent::Signal() {
     return m_readable_event.Signal();
 }
 
-Result KEvent::Clear() {
+Result KEvent::Clear()
+{
     KScopedSchedulerLock sl{m_kernel};
 
     R_SUCCEED_IF(m_readable_event_destroyed);
@@ -51,7 +58,8 @@ Result KEvent::Clear() {
     return m_readable_event.Clear();
 }
 
-void KEvent::PostDestroy(uintptr_t arg) {
+void KEvent::PostDestroy(uintptr_t arg)
+{
     // Release the event count resource the owner process holds.
     KProcess* owner = reinterpret_cast<KProcess*>(arg);
 

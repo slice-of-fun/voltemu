@@ -5,12 +5,14 @@
 
 #pragma once
 
-#include <memory>
+#include <ankerl/unordered_dense.h>
+
 #include <QDialog>
 #include <QSortFilterProxyModel>
 #include <QStandardItemModel>
 #include <QVariant>
-#include <ankerl/unordered_dense.h>
+#include <memory>
+
 #include "network/network.h"
 
 namespace Ui {

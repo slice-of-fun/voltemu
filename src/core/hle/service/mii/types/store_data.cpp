@@ -1,14 +1,16 @@
 // SPDX-FileCopyrightText: Copyright 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/mii/types/store_data.h"
+
 #include "core/hle/service/mii/mii_result.h"
 #include "core/hle/service/mii/mii_util.h"
 #include "core/hle/service/mii/types/raw_data.h"
-#include "core/hle/service/mii/types/store_data.h"
 
 namespace Service::Mii {
 
-void StoreData::BuildDefault(u32 mii_index) {
+void StoreData::BuildDefault(u32 mii_index)
+{
     const auto& default_mii = RawData::DefaultMii[mii_index];
     core_data.SetDefault();
 
@@ -80,7 +82,8 @@ void StoreData::BuildDefault(u32 mii_index) {
     SetChecksum();
 }
 
-void StoreData::BuildBase(Gender gender) {
+void StoreData::BuildBase(Gender gender)
+{
     const auto& default_mii = RawData::BaseMii[gender == Gender::Female ? 1 : 0];
     core_data.SetDefault();
 
@@ -152,30 +155,35 @@ void StoreData::BuildBase(Gender gender) {
     SetChecksum();
 }
 
-void StoreData::BuildRandom(Age age, Gender gender, Race race) {
+void StoreData::BuildRandom(Age age, Gender gender, Race race)
+{
     core_data.BuildRandom(age, gender, race);
     create_id = MiiUtil::MakeCreateId();
     SetChecksum();
 }
 
-void StoreData::BuildWithCharInfo(const CharInfo& char_info) {
+void StoreData::BuildWithCharInfo(const CharInfo& char_info)
+{
     core_data.BuildFromCharInfo(char_info);
     create_id = MiiUtil::MakeCreateId();
     SetChecksum();
 }
 
-void StoreData::BuildWithCoreData(const CoreData& in_core_data) {
+void StoreData::BuildWithCoreData(const CoreData& in_core_data)
+{
     core_data = in_core_data;
     create_id = MiiUtil::MakeCreateId();
     SetChecksum();
 }
 
-Result StoreData::Restore() {
+Result StoreData::Restore()
+{
     // TODO: Implement this
     return ResultNotUpdated;
 }
 
-ValidationResult StoreData::IsValid() const {
+ValidationResult StoreData::IsValid() const
+{
     if (core_data.IsValid() != ValidationResult::NoErrors) {
         return core_data.IsValid();
     }
@@ -189,435 +197,542 @@ ValidationResult StoreData::IsValid() const {
     return ValidationResult::NoErrors;
 }
 
-bool StoreData::IsSpecial() const {
+bool StoreData::IsSpecial() const
+{
     return GetType() == 1;
 }
 
-void StoreData::SetFontRegion(FontRegion value) {
+void StoreData::SetFontRegion(FontRegion value)
+{
     core_data.SetFontRegion(value);
 }
 
-void StoreData::SetFavoriteColor(FavoriteColor value) {
+void StoreData::SetFavoriteColor(FavoriteColor value)
+{
     core_data.SetFavoriteColor(value);
 }
 
-void StoreData::SetGender(Gender value) {
+void StoreData::SetGender(Gender value)
+{
     core_data.SetGender(value);
 }
 
-void StoreData::SetHeight(u8 value) {
+void StoreData::SetHeight(u8 value)
+{
     core_data.SetHeight(value);
 }
 
-void StoreData::SetBuild(u8 value) {
+void StoreData::SetBuild(u8 value)
+{
     core_data.SetBuild(value);
 }
 
-void StoreData::SetType(u8 value) {
+void StoreData::SetType(u8 value)
+{
     core_data.SetType(value);
 }
 
-void StoreData::SetRegionMove(u8 value) {
+void StoreData::SetRegionMove(u8 value)
+{
     core_data.SetRegionMove(value);
 }
 
-void StoreData::SetFacelineType(FacelineType value) {
+void StoreData::SetFacelineType(FacelineType value)
+{
     core_data.SetFacelineType(value);
 }
 
-void StoreData::SetFacelineColor(FacelineColor value) {
+void StoreData::SetFacelineColor(FacelineColor value)
+{
     core_data.SetFacelineColor(value);
 }
 
-void StoreData::SetFacelineWrinkle(FacelineWrinkle value) {
+void StoreData::SetFacelineWrinkle(FacelineWrinkle value)
+{
     core_data.SetFacelineWrinkle(value);
 }
 
-void StoreData::SetFacelineMake(FacelineMake value) {
+void StoreData::SetFacelineMake(FacelineMake value)
+{
     core_data.SetFacelineMake(value);
 }
 
-void StoreData::SetHairType(HairType value) {
+void StoreData::SetHairType(HairType value)
+{
     core_data.SetHairType(value);
 }
 
-void StoreData::SetHairColor(CommonColor value) {
+void StoreData::SetHairColor(CommonColor value)
+{
     core_data.SetHairColor(value);
 }
 
-void StoreData::SetHairFlip(HairFlip value) {
+void StoreData::SetHairFlip(HairFlip value)
+{
     core_data.SetHairFlip(value);
 }
 
-void StoreData::SetEyeType(EyeType value) {
+void StoreData::SetEyeType(EyeType value)
+{
     core_data.SetEyeType(value);
 }
 
-void StoreData::SetEyeColor(CommonColor value) {
+void StoreData::SetEyeColor(CommonColor value)
+{
     core_data.SetEyeColor(value);
 }
 
-void StoreData::SetEyeScale(u8 value) {
+void StoreData::SetEyeScale(u8 value)
+{
     core_data.SetEyeScale(value);
 }
 
-void StoreData::SetEyeAspect(u8 value) {
+void StoreData::SetEyeAspect(u8 value)
+{
     core_data.SetEyeAspect(value);
 }
 
-void StoreData::SetEyeRotate(u8 value) {
+void StoreData::SetEyeRotate(u8 value)
+{
     core_data.SetEyeRotate(value);
 }
 
-void StoreData::SetEyeX(u8 value) {
+void StoreData::SetEyeX(u8 value)
+{
     core_data.SetEyeX(value);
 }
 
-void StoreData::SetEyeY(u8 value) {
+void StoreData::SetEyeY(u8 value)
+{
     core_data.SetEyeY(value);
 }
 
-void StoreData::SetEyebrowType(EyebrowType value) {
+void StoreData::SetEyebrowType(EyebrowType value)
+{
     core_data.SetEyebrowType(value);
 }
 
-void StoreData::SetEyebrowColor(CommonColor value) {
+void StoreData::SetEyebrowColor(CommonColor value)
+{
     core_data.SetEyebrowColor(value);
 }
 
-void StoreData::SetEyebrowScale(u8 value) {
+void StoreData::SetEyebrowScale(u8 value)
+{
     core_data.SetEyebrowScale(value);
 }
 
-void StoreData::SetEyebrowAspect(u8 value) {
+void StoreData::SetEyebrowAspect(u8 value)
+{
     core_data.SetEyebrowAspect(value);
 }
 
-void StoreData::SetEyebrowRotate(u8 value) {
+void StoreData::SetEyebrowRotate(u8 value)
+{
     core_data.SetEyebrowRotate(value);
 }
 
-void StoreData::SetEyebrowX(u8 value) {
+void StoreData::SetEyebrowX(u8 value)
+{
     core_data.SetEyebrowX(value);
 }
 
-void StoreData::SetEyebrowY(u8 value) {
+void StoreData::SetEyebrowY(u8 value)
+{
     core_data.SetEyebrowY(value);
 }
 
-void StoreData::SetNoseType(NoseType value) {
+void StoreData::SetNoseType(NoseType value)
+{
     core_data.SetNoseType(value);
 }
 
-void StoreData::SetNoseScale(u8 value) {
+void StoreData::SetNoseScale(u8 value)
+{
     core_data.SetNoseScale(value);
 }
 
-void StoreData::SetNoseY(u8 value) {
+void StoreData::SetNoseY(u8 value)
+{
     core_data.SetNoseY(value);
 }
 
-void StoreData::SetMouthType(MouthType value) {
+void StoreData::SetMouthType(MouthType value)
+{
     core_data.SetMouthType(value);
 }
 
-void StoreData::SetMouthColor(CommonColor value) {
+void StoreData::SetMouthColor(CommonColor value)
+{
     core_data.SetMouthColor(value);
 }
 
-void StoreData::SetMouthScale(u8 value) {
+void StoreData::SetMouthScale(u8 value)
+{
     core_data.SetMouthScale(value);
 }
 
-void StoreData::SetMouthAspect(u8 value) {
+void StoreData::SetMouthAspect(u8 value)
+{
     core_data.SetMouthAspect(value);
 }
 
-void StoreData::SetMouthY(u8 value) {
+void StoreData::SetMouthY(u8 value)
+{
     core_data.SetMouthY(value);
 }
 
-void StoreData::SetBeardColor(CommonColor value) {
+void StoreData::SetBeardColor(CommonColor value)
+{
     core_data.SetBeardColor(value);
 }
 
-void StoreData::SetBeardType(BeardType value) {
+void StoreData::SetBeardType(BeardType value)
+{
     core_data.SetBeardType(value);
 }
 
-void StoreData::SetMustacheType(MustacheType value) {
+void StoreData::SetMustacheType(MustacheType value)
+{
     core_data.SetMustacheType(value);
 }
 
-void StoreData::SetMustacheScale(u8 value) {
+void StoreData::SetMustacheScale(u8 value)
+{
     core_data.SetMustacheScale(value);
 }
 
-void StoreData::SetMustacheY(u8 value) {
+void StoreData::SetMustacheY(u8 value)
+{
     core_data.SetMustacheY(value);
 }
 
-void StoreData::SetGlassType(GlassType value) {
+void StoreData::SetGlassType(GlassType value)
+{
     core_data.SetGlassType(value);
 }
 
-void StoreData::SetGlassColor(CommonColor value) {
+void StoreData::SetGlassColor(CommonColor value)
+{
     core_data.SetGlassColor(value);
 }
 
-void StoreData::SetGlassScale(u8 value) {
+void StoreData::SetGlassScale(u8 value)
+{
     core_data.SetGlassScale(value);
 }
 
-void StoreData::SetGlassY(u8 value) {
+void StoreData::SetGlassY(u8 value)
+{
     core_data.SetGlassY(value);
 }
 
-void StoreData::SetMoleType(MoleType value) {
+void StoreData::SetMoleType(MoleType value)
+{
     core_data.SetMoleType(value);
 }
 
-void StoreData::SetMoleScale(u8 value) {
+void StoreData::SetMoleScale(u8 value)
+{
     core_data.SetMoleScale(value);
 }
 
-void StoreData::SetMoleX(u8 value) {
+void StoreData::SetMoleX(u8 value)
+{
     core_data.SetMoleX(value);
 }
 
-void StoreData::SetMoleY(u8 value) {
+void StoreData::SetMoleY(u8 value)
+{
     core_data.SetMoleY(value);
 }
 
-void StoreData::SetNickname(Nickname value) {
+void StoreData::SetNickname(Nickname value)
+{
     core_data.SetNickname(value);
 }
 
-void StoreData::SetInvalidName() {
+void StoreData::SetInvalidName()
+{
     const auto& invalid_name = core_data.GetInvalidNickname();
     core_data.SetNickname(invalid_name);
     SetChecksum();
 }
 
-void StoreData::SetChecksum() {
+void StoreData::SetChecksum()
+{
     SetDataChecksum();
     SetDeviceChecksum();
 }
 
-void StoreData::SetDataChecksum() {
+void StoreData::SetDataChecksum()
+{
     data_crc = MiiUtil::CalculateCrc16(&core_data, sizeof(CoreData) + sizeof(Common::UUID));
 }
 
-void StoreData::SetDeviceChecksum() {
+void StoreData::SetDeviceChecksum()
+{
     const auto device_id = MiiUtil::GetDeviceId();
     device_crc = MiiUtil::CalculateDeviceCrc16(device_id, sizeof(StoreData));
 }
 
-Common::UUID StoreData::GetCreateId() const {
+Common::UUID StoreData::GetCreateId() const
+{
     return create_id;
 }
 
-FontRegion StoreData::GetFontRegion() const {
+FontRegion StoreData::GetFontRegion() const
+{
     return static_cast<FontRegion>(core_data.GetFontRegion());
 }
 
-FavoriteColor StoreData::GetFavoriteColor() const {
+FavoriteColor StoreData::GetFavoriteColor() const
+{
     return core_data.GetFavoriteColor();
 }
 
-Gender StoreData::GetGender() const {
+Gender StoreData::GetGender() const
+{
     return core_data.GetGender();
 }
 
-u8 StoreData::GetHeight() const {
+u8 StoreData::GetHeight() const
+{
     return core_data.GetHeight();
 }
 
-u8 StoreData::GetBuild() const {
+u8 StoreData::GetBuild() const
+{
     return core_data.GetBuild();
 }
 
-u8 StoreData::GetType() const {
+u8 StoreData::GetType() const
+{
     return core_data.GetType();
 }
 
-u8 StoreData::GetRegionMove() const {
+u8 StoreData::GetRegionMove() const
+{
     return core_data.GetRegionMove();
 }
 
-FacelineType StoreData::GetFacelineType() const {
+FacelineType StoreData::GetFacelineType() const
+{
     return core_data.GetFacelineType();
 }
 
-FacelineColor StoreData::GetFacelineColor() const {
+FacelineColor StoreData::GetFacelineColor() const
+{
     return core_data.GetFacelineColor();
 }
 
-FacelineWrinkle StoreData::GetFacelineWrinkle() const {
+FacelineWrinkle StoreData::GetFacelineWrinkle() const
+{
     return core_data.GetFacelineWrinkle();
 }
 
-FacelineMake StoreData::GetFacelineMake() const {
+FacelineMake StoreData::GetFacelineMake() const
+{
     return core_data.GetFacelineMake();
 }
 
-HairType StoreData::GetHairType() const {
+HairType StoreData::GetHairType() const
+{
     return core_data.GetHairType();
 }
 
-CommonColor StoreData::GetHairColor() const {
+CommonColor StoreData::GetHairColor() const
+{
     return core_data.GetHairColor();
 }
 
-HairFlip StoreData::GetHairFlip() const {
+HairFlip StoreData::GetHairFlip() const
+{
     return core_data.GetHairFlip();
 }
 
-EyeType StoreData::GetEyeType() const {
+EyeType StoreData::GetEyeType() const
+{
     return core_data.GetEyeType();
 }
 
-CommonColor StoreData::GetEyeColor() const {
+CommonColor StoreData::GetEyeColor() const
+{
     return core_data.GetEyeColor();
 }
 
-u8 StoreData::GetEyeScale() const {
+u8 StoreData::GetEyeScale() const
+{
     return core_data.GetEyeScale();
 }
 
-u8 StoreData::GetEyeAspect() const {
+u8 StoreData::GetEyeAspect() const
+{
     return core_data.GetEyeAspect();
 }
 
-u8 StoreData::GetEyeRotate() const {
+u8 StoreData::GetEyeRotate() const
+{
     return core_data.GetEyeRotate();
 }
 
-u8 StoreData::GetEyeX() const {
+u8 StoreData::GetEyeX() const
+{
     return core_data.GetEyeX();
 }
 
-u8 StoreData::GetEyeY() const {
+u8 StoreData::GetEyeY() const
+{
     return core_data.GetEyeY();
 }
 
-EyebrowType StoreData::GetEyebrowType() const {
+EyebrowType StoreData::GetEyebrowType() const
+{
     return core_data.GetEyebrowType();
 }
 
-CommonColor StoreData::GetEyebrowColor() const {
+CommonColor StoreData::GetEyebrowColor() const
+{
     return core_data.GetEyebrowColor();
 }
 
-u8 StoreData::GetEyebrowScale() const {
+u8 StoreData::GetEyebrowScale() const
+{
     return core_data.GetEyebrowScale();
 }
 
-u8 StoreData::GetEyebrowAspect() const {
+u8 StoreData::GetEyebrowAspect() const
+{
     return core_data.GetEyebrowAspect();
 }
 
-u8 StoreData::GetEyebrowRotate() const {
+u8 StoreData::GetEyebrowRotate() const
+{
     return core_data.GetEyebrowRotate();
 }
 
-u8 StoreData::GetEyebrowX() const {
+u8 StoreData::GetEyebrowX() const
+{
     return core_data.GetEyebrowX();
 }
 
-u8 StoreData::GetEyebrowY() const {
+u8 StoreData::GetEyebrowY() const
+{
     return core_data.GetEyebrowY();
 }
 
-NoseType StoreData::GetNoseType() const {
+NoseType StoreData::GetNoseType() const
+{
     return core_data.GetNoseType();
 }
 
-u8 StoreData::GetNoseScale() const {
+u8 StoreData::GetNoseScale() const
+{
     return core_data.GetNoseScale();
 }
 
-u8 StoreData::GetNoseY() const {
+u8 StoreData::GetNoseY() const
+{
     return core_data.GetNoseY();
 }
 
-MouthType StoreData::GetMouthType() const {
+MouthType StoreData::GetMouthType() const
+{
     return core_data.GetMouthType();
 }
 
-CommonColor StoreData::GetMouthColor() const {
+CommonColor StoreData::GetMouthColor() const
+{
     return core_data.GetMouthColor();
 }
 
-u8 StoreData::GetMouthScale() const {
+u8 StoreData::GetMouthScale() const
+{
     return core_data.GetMouthScale();
 }
 
-u8 StoreData::GetMouthAspect() const {
+u8 StoreData::GetMouthAspect() const
+{
     return core_data.GetMouthAspect();
 }
 
-u8 StoreData::GetMouthY() const {
+u8 StoreData::GetMouthY() const
+{
     return core_data.GetMouthY();
 }
 
-CommonColor StoreData::GetBeardColor() const {
+CommonColor StoreData::GetBeardColor() const
+{
     return core_data.GetBeardColor();
 }
 
-BeardType StoreData::GetBeardType() const {
+BeardType StoreData::GetBeardType() const
+{
     return core_data.GetBeardType();
 }
 
-MustacheType StoreData::GetMustacheType() const {
+MustacheType StoreData::GetMustacheType() const
+{
     return core_data.GetMustacheType();
 }
 
-u8 StoreData::GetMustacheScale() const {
+u8 StoreData::GetMustacheScale() const
+{
     return core_data.GetMustacheScale();
 }
 
-u8 StoreData::GetMustacheY() const {
+u8 StoreData::GetMustacheY() const
+{
     return core_data.GetMustacheY();
 }
 
-GlassType StoreData::GetGlassType() const {
+GlassType StoreData::GetGlassType() const
+{
     return core_data.GetGlassType();
 }
 
-CommonColor StoreData::GetGlassColor() const {
+CommonColor StoreData::GetGlassColor() const
+{
     return core_data.GetGlassColor();
 }
 
-u8 StoreData::GetGlassScale() const {
+u8 StoreData::GetGlassScale() const
+{
     return core_data.GetGlassScale();
 }
 
-u8 StoreData::GetGlassY() const {
+u8 StoreData::GetGlassY() const
+{
     return core_data.GetGlassY();
 }
 
-MoleType StoreData::GetMoleType() const {
+MoleType StoreData::GetMoleType() const
+{
     return core_data.GetMoleType();
 }
 
-u8 StoreData::GetMoleScale() const {
+u8 StoreData::GetMoleScale() const
+{
     return core_data.GetMoleScale();
 }
 
-u8 StoreData::GetMoleX() const {
+u8 StoreData::GetMoleX() const
+{
     return core_data.GetMoleX();
 }
 
-u8 StoreData::GetMoleY() const {
+u8 StoreData::GetMoleY() const
+{
     return core_data.GetMoleY();
 }
 
-Nickname StoreData::GetNickname() const {
+Nickname StoreData::GetNickname() const
+{
     return core_data.GetNickname();
 }
 
-bool StoreData::operator==(const StoreData& data) {
+bool StoreData::operator==(const StoreData& data)
+{
     bool is_identical = data.core_data.IsValid() == ValidationResult::NoErrors;
     is_identical &= core_data.GetNickname().data == data.core_data.GetNickname().data;
     is_identical &= GetCreateId() == data.GetCreateId();

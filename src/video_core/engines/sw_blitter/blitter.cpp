@@ -1,12 +1,13 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+#include "video_core/engines/sw_blitter/blitter.h"
+
 #include <algorithm>
 #include <cmath>
 #include <vector>
 
 #include "common/scratch_buffer.h"
-#include "video_core/engines/sw_blitter/blitter.h"
 #include "video_core/engines/sw_blitter/converter.h"
 #include "video_core/guest_memory.h"
 #include "video_core/memory_manager.h"
@@ -29,7 +30,8 @@ namespace {
 constexpr size_t ir_components = 4;
 
 void NearestNeighbor(std::span<const u8> input, std::span<u8> output, u32 src_width, u32 src_height,
-                     u32 dst_width, u32 dst_height, size_t bpp) {
+                     u32 dst_width, u32 dst_height, size_t bpp)
+{
     const size_t dx_du = std::llround((static_cast<f64>(src_width) / dst_width) * (1ULL << 32));
     const size_t dy_dv = std::llround((static_cast<f64>(src_height) / dst_height) * (1ULL << 32));
     size_t src_y = 0;
@@ -47,7 +49,8 @@ void NearestNeighbor(std::span<const u8> input, std::span<u8> output, u32 src_wi
 }
 
 void NearestNeighborFast(std::span<const f32> input, std::span<f32> output, u32 src_width,
-                         u32 src_height, u32 dst_width, u32 dst_height) {
+                         u32 src_height, u32 dst_width, u32 dst_height)
+{
     const size_t dx_du = std::llround((static_cast<f64>(src_width) / dst_width) * (1ULL << 32));
     const size_t dy_dv = std::llround((static_cast<f64>(src_height) / dst_height) * (1ULL << 32));
     size_t src_y = 0;
@@ -65,7 +68,8 @@ void NearestNeighborFast(std::span<const f32> input, std::span<f32> output, u32 
 }
 
 void Bilinear(std::span<const f32> input, std::span<f32> output, size_t src_width,
-              size_t src_height, size_t dst_width, size_t dst_height) {
+              size_t src_height, size_t dst_width, size_t dst_height)
+{
     const auto bilinear_sample = [](std::span<const f32> x0_y0, std::span<const f32> x1_y0,
                                     std::span<const f32> x0_y1, std::span<const f32> x1_y1,
                                     f32 weight_x, f32 weight_y) {
@@ -111,9 +115,10 @@ void Bilinear(std::span<const f32> input, std::span<f32> output, size_t src_widt
     }
 }
 
-template <bool unpack>
+template<bool unpack>
 void ProcessPitchLinear(std::span<const u8> input, std::span<u8> output, size_t extent_x,
-                        size_t extent_y, u32 pitch, u32 x0, u32 y0, size_t bpp) {
+                        size_t extent_y, u32 pitch, u32 x0, u32 y0, size_t bpp)
+{
     const size_t base_offset = x0 * bpp;
     const size_t copy_size = extent_x * bpp;
     for (size_t y = 0; y < extent_y; y++) {
@@ -137,14 +142,15 @@ struct SoftwareBlitEngine::BlitEngineImpl {
 };
 
 SoftwareBlitEngine::SoftwareBlitEngine(MemoryManager& memory_manager_)
-    : memory_manager{memory_manager_} {
+    : memory_manager{memory_manager_}
+{
     impl = std::make_unique<BlitEngineImpl>();
 }
 
 SoftwareBlitEngine::~SoftwareBlitEngine() = default;
 
-bool SoftwareBlitEngine::Blit(Fermi2D::Surface& src, Fermi2D::Surface& dst,
-                              Fermi2D::Config& config) {
+bool SoftwareBlitEngine::Blit(Fermi2D::Surface& src, Fermi2D::Surface& dst, Fermi2D::Config& config)
+{
     const auto get_surface_size = [](Fermi2D::Surface& surface, u32 bytes_per_pixel) {
         if (surface.linear == Fermi2D::MemoryLayout::BlockLinear) {
             return CalculateSize(true, bytes_per_pixel, surface.width, surface.height,

@@ -1,18 +1,18 @@
 // SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#include <optional>
+#include "net.h"
+
+#include <fmt/format.h>
+
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/algorithm/string/split.hpp>
-
-#include <fmt/format.h>
-#include "common/scm_rev.h"
-#include "net.h"
-
-#include "common/logging.h"
+#include <optional>
 
 #include "common/httplib.h"
+#include "common/logging.h"
+#include "common/scm_rev.h"
 
 #ifdef YUZU_BUNDLED_OPENSSL
 #include <openssl/cert.h>
@@ -22,7 +22,8 @@
 
 namespace Common::Net {
 
-std::vector<Asset> Release::GetPlatformAssets() const {
+std::vector<Asset> Release::GetPlatformAssets() const
+{
     // TODO(crueter): Need better handling for this as a whole.
 #ifdef NIGHTLY_BUILD
     std::vector<std::string> result;
@@ -64,7 +65,7 @@ std::vector<Asset> Release::GetPlatformAssets() const {
 #ifdef ARCHITECTURE_x86_64
 #ifdef _MSC_VER
     find_asset("Standard", {"amd64-msvc-standard.exe", "amd64-msvc-standard.zip"});
-#else // _MSC_VER
+#else  // _MSC_VER
     find_asset("Standard", {BUILD_ID "-gcc-standard.exe", BUILD_ID "-gcc-standard.zip"});
     find_asset("PGO", {BUILD_ID "-clang-pgo.exe", BUILD_ID "-clang-pgo.zip"});
 #endif // _MSC_VER
@@ -93,7 +94,8 @@ std::vector<Asset> Release::GetPlatformAssets() const {
     return found_assets;
 }
 
-static inline u64 ParseIsoTimestamp(const std::string& iso) {
+static inline u64 ParseIsoTimestamp(const std::string& iso)
+{
     if (iso.empty())
         return 0;
 
@@ -115,7 +117,8 @@ static inline u64 ParseIsoTimestamp(const std::string& iso) {
 }
 
 std::optional<Release> Release::FromJson(const nlohmann::json& json, const std::string& host,
-                                         const std::string& repo) {
+                                         const std::string& repo)
+{
     Release rel;
     if (!json.is_object())
         return std::nullopt;
@@ -144,7 +147,8 @@ std::optional<Release> Release::FromJson(const nlohmann::json& json, const std::
 
     // This is our own "fake" API.
     if (json.contains("base")) {
-        const auto base = json.value("base", fmt::format("https://{}", Common::g_build_auto_update_api));
+        const auto base =
+            json.value("base", fmt::format("https://{}", Common::g_build_auto_update_api));
         rel.base_download_url = fmt::format("{}/{}", base, rel.tag);
 
         // Assets are easy :)
@@ -157,7 +161,7 @@ std::optional<Release> Release::FromJson(const nlohmann::json& json, const std::
         // assets are a bit more complex here. :(
         std::vector<std::string> assets;
         const nlohmann::json& arr = json["assets"];
-        for (const auto &obj : arr) {
+        for (const auto& obj : arr) {
             const auto url = obj.value("browser_download_url", std::string{});
             assets.emplace_back(url);
         }
@@ -169,7 +173,8 @@ std::optional<Release> Release::FromJson(const nlohmann::json& json, const std::
 }
 
 std::optional<Release> Release::FromJson(const std::string_view& json, const std::string& host,
-                                         const std::string& repo) {
+                                         const std::string& repo)
+{
     try {
         return FromJson(nlohmann::json::parse(json), host, repo);
     } catch (std::exception& e) {
@@ -180,7 +185,8 @@ std::optional<Release> Release::FromJson(const std::string_view& json, const std
 }
 
 std::vector<Release> Release::ListFromJson(const nlohmann::json& json, const std::string& host,
-                                           const std::string& repo) {
+                                           const std::string& repo)
+{
     if (!json.is_array())
         return {};
 
@@ -194,7 +200,8 @@ std::vector<Release> Release::ListFromJson(const nlohmann::json& json, const std
 }
 
 std::vector<Release> Release::ListFromJson(const std::string_view& json, const std::string& host,
-                                           const std::string& repo) {
+                                           const std::string& repo)
+{
     try {
         return ListFromJson(nlohmann::json::parse(json), host, repo);
     } catch (std::exception& e) {
@@ -204,7 +211,8 @@ std::vector<Release> Release::ListFromJson(const std::string_view& json, const s
     return {};
 }
 
-std::optional<std::string> MakeRequest(const std::string& url, const std::string& path) {
+std::optional<std::string> MakeRequest(const std::string& url, const std::string& path)
+{
     try {
         constexpr std::size_t timeout_seconds = 15;
 
@@ -253,7 +261,8 @@ std::optional<std::string> MakeRequest(const std::string& url, const std::string
     }
 }
 
-std::vector<Release> GetReleases() {
+std::vector<Release> GetReleases()
+{
     const auto body = GetReleasesBody();
 
     if (!body) {
@@ -266,8 +275,9 @@ std::vector<Release> GetReleases() {
     return Release::ListFromJson(body_str, url, Common::g_build_auto_update_stable_repo);
 }
 
-std::optional<Release> GetLatestRelease() {
-    const auto releases_path =  Common::g_build_auto_update_api_path;
+std::optional<Release> GetLatestRelease()
+{
+    const auto releases_path = Common::g_build_auto_update_api_path;
     const auto url = fmt::format("https://{}", Common::g_build_auto_update_api);
 
     const auto body = MakeRequest(url, releases_path);
@@ -280,7 +290,8 @@ std::optional<Release> GetLatestRelease() {
     return Release::FromJson(body_str, url, Common::g_build_auto_update_repo);
 }
 
-std::optional<std::string> GetReleasesBody() {
+std::optional<std::string> GetReleasesBody()
+{
     const auto releases_path =
         fmt::format("/{}/{}/releases", Common::g_build_auto_update_stable_api_path,
                     Common::g_build_auto_update_stable_repo);

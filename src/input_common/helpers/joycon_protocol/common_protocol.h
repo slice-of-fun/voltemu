@@ -59,9 +59,10 @@ public:
      */
     Common::Input::DriverResult SendRawData(std::span<const u8> buffer);
 
-    template <typename Output>
-        requires std::is_trivially_copyable_v<Output>
-    Common::Input::DriverResult SendData(const Output& output) {
+    template<typename Output>
+    requires std::is_trivially_copyable_v<Output> Common::Input::DriverResult
+    SendData(const Output& output)
+    {
         std::array<u8, sizeof(Output)> buffer;
         std::memcpy(buffer.data(), &output, sizeof(Output));
         return SendRawData(buffer);
@@ -116,9 +117,10 @@ public:
      * @param Initial address location
      * @returns output object containing the response
      */
-    template <typename Output>
-        requires std::is_trivially_copyable_v<Output>
-    Common::Input::DriverResult ReadSPI(SpiAddress addr, Output& output) {
+    template<typename Output>
+    requires std::is_trivially_copyable_v<Output> Common::Input::DriverResult
+    ReadSPI(SpiAddress addr, Output& output)
+    {
         std::array<u8, sizeof(Output)> buffer;
         output = {};
 
@@ -189,13 +191,9 @@ private:
 
 class ScopedSetBlocking {
 public:
-    explicit ScopedSetBlocking(JoyconCommonProtocol* self) : m_self{self} {
-        m_self->SetBlocking();
-    }
+    explicit ScopedSetBlocking(JoyconCommonProtocol* self) : m_self{self} { m_self->SetBlocking(); }
 
-    ~ScopedSetBlocking() {
-        m_self->SetNonBlocking();
-    }
+    ~ScopedSetBlocking() { m_self->SetNonBlocking(); }
 
 private:
     JoyconCommonProtocol* m_self{};

@@ -4,16 +4,20 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "input_common/helpers/joycon_protocol/ringcon.h"
+
 #include "common/input.h"
 #include "common/logging.h"
-#include "input_common/helpers/joycon_protocol/ringcon.h"
 
 namespace InputCommon::Joycon {
 
 RingConProtocol::RingConProtocol(std::shared_ptr<JoyconHandle> handle)
-    : JoyconCommonProtocol(std::move(handle)) {}
+    : JoyconCommonProtocol(std::move(handle))
+{
+}
 
-Common::Input::DriverResult RingConProtocol::EnableRingCon() {
+Common::Input::DriverResult RingConProtocol::EnableRingCon()
+{
     LOG_DEBUG(Input, "Enable Ringcon");
     ScopedSetBlocking sb(this);
     Common::Input::DriverResult result{Common::Input::DriverResult::Success};
@@ -37,7 +41,8 @@ Common::Input::DriverResult RingConProtocol::EnableRingCon() {
     return result;
 }
 
-Common::Input::DriverResult RingConProtocol::DisableRingCon() {
+Common::Input::DriverResult RingConProtocol::DisableRingCon()
+{
     LOG_DEBUG(Input, "Disable RingCon");
     ScopedSetBlocking sb(this);
     Common::Input::DriverResult result{Common::Input::DriverResult::Success};
@@ -51,7 +56,8 @@ Common::Input::DriverResult RingConProtocol::DisableRingCon() {
     return result;
 }
 
-Common::Input::DriverResult RingConProtocol::StartRingconPolling() {
+Common::Input::DriverResult RingConProtocol::StartRingconPolling()
+{
     LOG_DEBUG(Input, "Enable Ringcon");
     ScopedSetBlocking sb(this);
     Common::Input::DriverResult result{Common::Input::DriverResult::Success};
@@ -71,7 +77,8 @@ Common::Input::DriverResult RingConProtocol::StartRingconPolling() {
     return result;
 }
 
-Common::Input::DriverResult RingConProtocol::IsRingConnected(bool& is_connected) {
+Common::Input::DriverResult RingConProtocol::IsRingConnected(bool& is_connected)
+{
     LOG_DEBUG(Input, "IsRingConnected");
     constexpr std::size_t max_tries = 42;
     SubCommandResponse output{};
@@ -95,7 +102,8 @@ Common::Input::DriverResult RingConProtocol::IsRingConnected(bool& is_connected)
     return Common::Input::DriverResult::Success;
 }
 
-Common::Input::DriverResult RingConProtocol::ConfigureRing() {
+Common::Input::DriverResult RingConProtocol::ConfigureRing()
+{
     LOG_DEBUG(Input, "ConfigureRing");
 
     static constexpr std::array<u8, 37> ring_config{
@@ -114,7 +122,8 @@ Common::Input::DriverResult RingConProtocol::ConfigureRing() {
     return SendSubCommand(SubCommand::ENABLE_EXTERNAL_POLLING, ringcon_data);
 }
 
-bool RingConProtocol::IsEnabled() const {
+bool RingConProtocol::IsEnabled() const
+{
     return is_enabled;
 }
 

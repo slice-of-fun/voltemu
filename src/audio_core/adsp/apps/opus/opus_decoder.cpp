@@ -22,27 +22,30 @@ namespace AudioCore::ADSP::OpusDecoder {
 namespace {
 constexpr size_t OpusStreamCountMax = 255;
 
-bool IsValidChannelCount(u32 channel_count) {
+bool IsValidChannelCount(u32 channel_count)
+{
     return channel_count == 1 || channel_count == 2;
 }
 
-bool IsValidMultiStreamChannelCount(u32 channel_count) {
+bool IsValidMultiStreamChannelCount(u32 channel_count)
+{
     return channel_count <= OpusStreamCountMax;
 }
 
-bool IsValidMultiStreamStreamCounts(s32 total_stream_count, s32 stereo_stream_count) {
+bool IsValidMultiStreamStreamCounts(s32 total_stream_count, s32 stereo_stream_count)
+{
     return IsValidMultiStreamChannelCount(total_stream_count) && total_stream_count > 0 &&
            stereo_stream_count >= 0 && stereo_stream_count <= total_stream_count;
 }
 } // namespace
 
-OpusDecoder::OpusDecoder(Core::System& system_) : system{system_} {
-    init_thread = std::jthread([this](std::stop_token stop_token) {
-        Init(stop_token);
-    });
+OpusDecoder::OpusDecoder(Core::System& system_) : system{system_}
+{
+    init_thread = std::jthread([this](std::stop_token stop_token) { Init(stop_token); });
 }
 
-OpusDecoder::~OpusDecoder() {
+OpusDecoder::~OpusDecoder()
+{
     if (!running) {
         init_thread.request_stop();
         return;
@@ -58,19 +61,23 @@ OpusDecoder::~OpusDecoder() {
     running = false;
 }
 
-void OpusDecoder::Send(Direction dir, u32 message) {
+void OpusDecoder::Send(Direction dir, u32 message)
+{
     mailbox.Send(dir, std::move(message));
 }
 
-u32 OpusDecoder::Receive(Direction dir, std::stop_token stop_token) {
+u32 OpusDecoder::Receive(Direction dir, std::stop_token stop_token)
+{
     return mailbox.Receive(dir, stop_token);
 }
 
-void OpusDecoder::Init(std::stop_token rc_stop_token) {
+void OpusDecoder::Init(std::stop_token rc_stop_token)
+{
     Common::SetCurrentThreadName("DSP_OpusDecoder_Init");
 
     if (Receive(Direction::DSP, rc_stop_token) != Message::Start) {
-        LOG_ERROR(Service_Audio, "DSP OpusDecoder failed to receive Start message. Opus initialization failed.");
+        LOG_ERROR(Service_Audio,
+                  "DSP OpusDecoder failed to receive Start message. Opus initialization failed.");
         return;
     }
     // Main OpusDecoder thread, responsible for processing the incoming Opus packets.
@@ -88,7 +95,8 @@ void OpusDecoder::Init(std::stop_token rc_stop_token) {
 
                 ASSERT(IsValidChannelCount(channel_count));
 
-                shared_memory->dsp_return_data[0] = OpusDecodeObject::GetWorkBufferSize(channel_count);
+                shared_memory->dsp_return_data[0] =
+                    OpusDecodeObject::GetWorkBufferSize(channel_count);
                 Send(Direction::Host, Message::GetWorkBufferSizeOK);
             } break;
 
@@ -139,8 +147,9 @@ void OpusDecoder::Init(std::stop_token rc_stop_token) {
                 }
 
                 if (error_code == OPUS_OK) {
-                    error_code = decoder_object.Decode(decoded_samples, output_data, output_data_size,
-                                                    input_data, input_data_size);
+                    error_code =
+                        decoder_object.Decode(decoded_samples, output_data, output_data_size,
+                                              input_data, input_data_size);
                 }
 
                 if (error_code == OPUS_OK) {
@@ -187,18 +196,18 @@ void OpusDecoder::Init(std::stop_token rc_stop_token) {
                 auto channel_count = static_cast<s32>(shared_memory->host_send_data[3]);
                 auto total_stream_count = static_cast<s32>(shared_memory->host_send_data[4]);
                 auto stereo_stream_count = static_cast<s32>(shared_memory->host_send_data[5]);
-                // Nintendo seem to have a bug here, they try to use &host_send_data[6] for the channel
-                // mappings, but [6] is never set, and there is not enough room in the argument data for
-                // more than 40 channels, when 255 are possible.
-                // It also means the mapping values are undefined, though likely always 0,
-                // and the mappings given by the game are ignored. The mappings are copied to this
-                // dedicated buffer host side, so let's do as intended.
+                // Nintendo seem to have a bug here, they try to use &host_send_data[6] for the
+                // channel mappings, but [6] is never set, and there is not enough room in the
+                // argument data for more than 40 channels, when 255 are possible. It also means the
+                // mapping values are undefined, though likely always 0, and the mappings given by
+                // the game are ignored. The mappings are copied to this dedicated buffer host side,
+                // so let's do as intended.
                 auto mappings = shared_memory->channel_mapping.data();
 
                 ASSERT(IsValidMultiStreamStreamCounts(total_stream_count, stereo_stream_count));
                 ASSERT(sample_rate >= 0);
                 ASSERT(buffer_size >= OpusMultiStreamDecodeObject::GetWorkBufferSize(
-                                        total_stream_count, stereo_stream_count));
+                                          total_stream_count, stereo_stream_count));
 
                 auto& decoder_object = OpusMultiStreamDecodeObject::Initialize(buffer, buffer);
                 shared_memory->dsp_return_data[0] = decoder_object.InitializeDecoder(
@@ -237,8 +246,9 @@ void OpusDecoder::Init(std::stop_token rc_stop_token) {
                 }
 
                 if (error_code == OPUS_OK) {
-                    error_code = decoder_object.Decode(decoded_samples, output_data, output_data_size,
-                                                    input_data, input_data_size);
+                    error_code =
+                        decoder_object.Decode(decoded_samples, output_data, output_data_size,
+                                              input_data, input_data_size);
                 }
 
                 if (error_code == OPUS_OK) {

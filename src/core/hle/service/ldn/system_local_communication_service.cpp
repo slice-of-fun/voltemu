@@ -1,13 +1,15 @@
 // SPDX-FileCopyrightText: Copyright 2024 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#include "core/hle/service/cmif_serialization.h"
 #include "core/hle/service/ldn/system_local_communication_service.h"
+
+#include "core/hle/service/cmif_serialization.h"
 
 namespace Service::LDN {
 
 ISystemLocalCommunicationService::ISystemLocalCommunicationService(Core::System& system_)
-    : ServiceFramework{system_, "ISystemLocalCommunicationService"} {
+    : ServiceFramework{system_, "ISystemLocalCommunicationService"}
+{
     // clang-format off
         static const FunctionInfo functions[] = {
             {0, nullptr, "GetState"},
@@ -48,7 +50,8 @@ ISystemLocalCommunicationService::ISystemLocalCommunicationService(Core::System&
 
 ISystemLocalCommunicationService::~ISystemLocalCommunicationService() = default;
 
-Result ISystemLocalCommunicationService::InitializeSystem2() {
+Result ISystemLocalCommunicationService::InitializeSystem2()
+{
     LOG_WARNING(Service_LDN, "(STUBBED) called");
     R_SUCCEED();
 }

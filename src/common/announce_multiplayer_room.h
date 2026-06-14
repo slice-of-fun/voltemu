@@ -10,6 +10,7 @@
 #include <functional>
 #include <string>
 #include <vector>
+
 #include "common/common_types.h"
 #include "common/socket_types.h"
 #include "web_service/web_result.h"
@@ -121,20 +122,22 @@ public:
     void SetRoomInformation(const std::string& /*name*/, const std::string& /*description*/,
                             const u16 /*port*/, const u32 /*max_player*/, const u32 /*net_version*/,
                             const bool /*has_password*/,
-                            const GameInfo& /*preferred_game*/) override {}
+                            const GameInfo& /*preferred_game*/) override
+    {
+    }
     void AddPlayer(const Member& /*member*/) override {}
-    WebService::WebResult Update() override {
+    WebService::WebResult Update() override
+    {
         return WebService::WebResult{WebService::WebResult::Code::NoWebservice,
                                      "WebService is missing", ""};
     }
-    WebService::WebResult Register() override {
+    WebService::WebResult Register() override
+    {
         return WebService::WebResult{WebService::WebResult::Code::NoWebservice,
                                      "WebService is missing", ""};
     }
     void ClearPlayers() override {}
-    RoomList GetRoomList() override {
-        return RoomList{};
-    }
+    RoomList GetRoomList() override { return RoomList{}; }
 
     void Delete() override {}
 };

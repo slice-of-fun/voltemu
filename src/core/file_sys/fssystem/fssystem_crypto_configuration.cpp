@@ -4,16 +4,18 @@
 // SPDX-FileCopyrightText: Copyright 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/file_sys/fssystem/fssystem_crypto_configuration.h"
+
 #include "core/crypto/aes_util.h"
 #include "core/crypto/key_manager.h"
-#include "core/file_sys/fssystem/fssystem_crypto_configuration.h"
 
 namespace FileSys {
 
 namespace {
 
 void GenerateKey(void* dst_key, size_t dst_key_size, const void* src_key, size_t src_key_size,
-                 s32 key_type) {
+                 s32 key_type)
+{
     if (key_type == static_cast<s32>(KeyType::ZeroKey)) {
         std::memset(dst_key, 0, dst_key_size);
         return;
@@ -32,7 +34,8 @@ void GenerateKey(void* dst_key, size_t dst_key_size, const void* src_key, size_t
         key_type == static_cast<s32>(KeyType::NcaHeaderKey2)) {
         const s32 key_index = static_cast<s32>(KeyType::NcaHeaderKey2) == key_type;
         const auto key = instance.GetKey(Core::Crypto::S256KeyType::Header);
-        std::memcpy(dst_key, key.data() + key_index * 0x10, (std::min)(dst_key_size, key.size() / 2));
+        std::memcpy(dst_key, key.data() + key_index * 0x10,
+                    (std::min)(dst_key_size, key.size() / 2));
         return;
     }
 
@@ -49,7 +52,8 @@ void GenerateKey(void* dst_key, size_t dst_key_size, const void* src_key, size_t
 
 } // namespace
 
-const NcaCryptoConfiguration& GetCryptoConfiguration() {
+const NcaCryptoConfiguration& GetCryptoConfiguration()
+{
     static const NcaCryptoConfiguration configuration = {
         .header_1_sign_key_moduli{},
         .header_1_sign_key_public_exponent{},

@@ -43,12 +43,8 @@ struct Id {
         BitField<6, 26, u32> index;
     };
 
-    bool operator==(Id rhs) const noexcept {
-        return raw == rhs.raw;
-    }
-    bool operator!=(Id rhs) const noexcept {
-        return !operator==(rhs);
-    }
+    bool operator==(Id rhs) const noexcept { return raw == rhs.raw; }
+    bool operator!=(Id rhs) const noexcept { return !operator==(rhs); }
 };
 static_assert(sizeof(Id) == sizeof(u32));
 

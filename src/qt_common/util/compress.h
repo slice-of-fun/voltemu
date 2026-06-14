@@ -3,10 +3,12 @@
 
 #pragma once
 
-#include <QDir>
-#include <QString>
 #include <quazip.h>
 #include <zlib.h>
+
+#include <QDir>
+#include <QString>
+
 #include "qt_common/qt_common.h"
 
 /** This is a modified version of JlCompress **/
@@ -51,30 +53,29 @@ public:
 
     explicit Options(const QDateTime& dateTime = QDateTime(),
                      const CompressionStrategy& strategy = Default)
-        : m_dateTime(dateTime), m_compressionStrategy(strategy) {}
-
-    QDateTime getDateTime() const {
-        return m_dateTime;
+        : m_dateTime(dateTime), m_compressionStrategy(strategy)
+    {
     }
 
-    void setDateTime(const QDateTime& dateTime) {
-        m_dateTime = dateTime;
-    }
+    QDateTime getDateTime() const { return m_dateTime; }
 
-    CompressionStrategy getCompressionStrategy() const {
-        return m_compressionStrategy;
-    }
+    void setDateTime(const QDateTime& dateTime) { m_dateTime = dateTime; }
 
-    int getCompressionMethod() const {
+    CompressionStrategy getCompressionStrategy() const { return m_compressionStrategy; }
+
+    int getCompressionMethod() const
+    {
         return m_compressionStrategy != Default ? m_compressionStrategy >> 4 : Z_DEFLATED;
     }
 
-    int getCompressionLevel() const {
+    int getCompressionLevel() const
+    {
         return m_compressionStrategy != Default ? m_compressionStrategy & 0x0f
                                                 : Z_DEFAULT_COMPRESSION;
     }
 
-    void setCompressionStrategy(const CompressionStrategy& strategy) {
+    void setCompressionStrategy(const CompressionStrategy& strategy)
+    {
         m_compressionStrategy = strategy;
     }
 

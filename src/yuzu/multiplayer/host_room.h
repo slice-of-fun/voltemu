@@ -5,11 +5,12 @@
 
 #pragma once
 
-#include <memory>
 #include <QDialog>
 #include <QSortFilterProxyModel>
 #include <QStandardItemModel>
 #include <QVariant>
+#include <memory>
+
 #include "network/network.h"
 #include "yuzu/multiplayer/chat_room.h"
 #include "yuzu/multiplayer/validation.h"
@@ -71,9 +72,7 @@ class ComboBoxProxyModel : public QSortFilterProxyModel {
     Q_OBJECT
 
 public:
-    int columnCount(const QModelIndex& idx) const override {
-        return 1;
-    }
+    int columnCount(const QModelIndex& idx) const override { return 1; }
 
     QVariant data(const QModelIndex& idx, int role) const override;
 

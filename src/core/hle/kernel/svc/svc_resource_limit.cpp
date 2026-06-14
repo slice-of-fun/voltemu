@@ -9,7 +9,8 @@
 
 namespace Kernel::Svc {
 
-Result CreateResourceLimit(Core::System& system, Handle* out_handle) {
+Result CreateResourceLimit(Core::System& system, Handle* out_handle)
+{
     LOG_DEBUG(Kernel_SVC, "called");
 
     // Create a new resource limit.
@@ -18,7 +19,8 @@ Result CreateResourceLimit(Core::System& system, Handle* out_handle) {
     R_UNLESS(resource_limit != nullptr, ResultOutOfResource);
 
     // Ensure we don't leak a reference to the limit.
-    SCOPE_EXIT {
+    SCOPE_EXIT
+    {
         resource_limit->Close();
     };
 
@@ -33,7 +35,8 @@ Result CreateResourceLimit(Core::System& system, Handle* out_handle) {
 }
 
 Result GetResourceLimitLimitValue(Core::System& system, s64* out_limit_value,
-                                  Handle resource_limit_handle, LimitableResource which) {
+                                  Handle resource_limit_handle, LimitableResource which)
+{
     LOG_DEBUG(Kernel_SVC, "called, resource_limit_handle={:08X}, which={}", resource_limit_handle,
               which);
 
@@ -53,7 +56,8 @@ Result GetResourceLimitLimitValue(Core::System& system, s64* out_limit_value,
 }
 
 Result GetResourceLimitCurrentValue(Core::System& system, s64* out_current_value,
-                                    Handle resource_limit_handle, LimitableResource which) {
+                                    Handle resource_limit_handle, LimitableResource which)
+{
     LOG_DEBUG(Kernel_SVC, "called, resource_limit_handle={:08X}, which={}", resource_limit_handle,
               which);
 
@@ -73,7 +77,8 @@ Result GetResourceLimitCurrentValue(Core::System& system, s64* out_current_value
 }
 
 Result SetResourceLimitLimitValue(Core::System& system, Handle resource_limit_handle,
-                                  LimitableResource which, s64 limit_value) {
+                                  LimitableResource which, s64 limit_value)
+{
     LOG_DEBUG(Kernel_SVC, "called, resource_limit_handle={:08X}, which={}, limit_value={}",
               resource_limit_handle, which, limit_value);
 
@@ -91,56 +96,67 @@ Result SetResourceLimitLimitValue(Core::System& system, Handle resource_limit_ha
 }
 
 Result GetResourceLimitPeakValue(Core::System& system, int64_t* out_peak_value,
-                                 Handle resource_limit_handle, LimitableResource which) {
+                                 Handle resource_limit_handle, LimitableResource which)
+{
     UNIMPLEMENTED();
     R_THROW(ResultNotImplemented);
 }
 
 Result GetResourceLimitLimitValue64(Core::System& system, int64_t* out_limit_value,
-                                    Handle resource_limit_handle, LimitableResource which) {
+                                    Handle resource_limit_handle, LimitableResource which)
+{
     R_RETURN(GetResourceLimitLimitValue(system, out_limit_value, resource_limit_handle, which));
 }
 
 Result GetResourceLimitCurrentValue64(Core::System& system, int64_t* out_current_value,
-                                      Handle resource_limit_handle, LimitableResource which) {
+                                      Handle resource_limit_handle, LimitableResource which)
+{
     R_RETURN(GetResourceLimitCurrentValue(system, out_current_value, resource_limit_handle, which));
 }
 
 Result GetResourceLimitPeakValue64(Core::System& system, int64_t* out_peak_value,
-                                   Handle resource_limit_handle, LimitableResource which) {
+                                   Handle resource_limit_handle, LimitableResource which)
+{
     R_RETURN(GetResourceLimitPeakValue(system, out_peak_value, resource_limit_handle, which));
 }
 
-Result CreateResourceLimit64(Core::System& system, Handle* out_handle) {
+Result CreateResourceLimit64(Core::System& system, Handle* out_handle)
+{
     R_RETURN(CreateResourceLimit(system, out_handle));
 }
 
 Result SetResourceLimitLimitValue64(Core::System& system, Handle resource_limit_handle,
-                                    LimitableResource which, int64_t limit_value) {
+                                    LimitableResource which, int64_t limit_value)
+{
     R_RETURN(SetResourceLimitLimitValue(system, resource_limit_handle, which, limit_value));
 }
 
 Result GetResourceLimitLimitValue64From32(Core::System& system, int64_t* out_limit_value,
-                                          Handle resource_limit_handle, LimitableResource which) {
+                                          Handle resource_limit_handle, LimitableResource which)
+{
     R_RETURN(GetResourceLimitLimitValue(system, out_limit_value, resource_limit_handle, which));
 }
 
 Result GetResourceLimitCurrentValue64From32(Core::System& system, int64_t* out_current_value,
-                                            Handle resource_limit_handle, LimitableResource which) {
+                                            Handle resource_limit_handle, LimitableResource which)
+{
     R_RETURN(GetResourceLimitCurrentValue(system, out_current_value, resource_limit_handle, which));
 }
 
 Result GetResourceLimitPeakValue64From32(Core::System& system, int64_t* out_peak_value,
-                                         Handle resource_limit_handle, LimitableResource which) {
+                                         Handle resource_limit_handle, LimitableResource which)
+{
     R_RETURN(GetResourceLimitPeakValue(system, out_peak_value, resource_limit_handle, which));
 }
 
-Result CreateResourceLimit64From32(Core::System& system, Handle* out_handle) {
+Result CreateResourceLimit64From32(Core::System& system, Handle* out_handle)
+{
     R_RETURN(CreateResourceLimit(system, out_handle));
 }
 
 Result SetResourceLimitLimitValue64From32(Core::System& system, Handle resource_limit_handle,
-                                          LimitableResource which, int64_t limit_value) {
+                                          LimitableResource which, int64_t limit_value)
+{
     R_RETURN(SetResourceLimitLimitValue(system, resource_limit_handle, which, limit_value));
 }
 

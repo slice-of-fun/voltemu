@@ -13,9 +13,10 @@
 
 namespace Common {
 
-template <class ForwardIt, class T, class Compare = std::less<>>
+template<class ForwardIt, class T, class Compare = std::less<>>
 [[nodiscard]] ForwardIt BinaryFind(ForwardIt first, ForwardIt last, const T& value,
-                                   Compare comp = {}) {
+                                   Compare comp = {})
+{
     // Note: BOTH type T and the type after ForwardIt is dereferenced
     // must be implicitly convertible to BOTH Type1 and Type2, used in Compare.
     // This is stricter than lower_bound requirement (see above)
@@ -24,8 +25,9 @@ template <class ForwardIt, class T, class Compare = std::less<>>
     return first != last && !comp(value, *first) ? first : last;
 }
 
-template <typename T, typename Func, typename... Args>
-T FoldRight(T initial_value, Func&& func, Args&&... args) {
+template<typename T, typename Func, typename... Args>
+T FoldRight(T initial_value, Func&& func, Args&&... args)
+{
     T value{initial_value};
     const auto high_func = [&value, &func]<typename U>(U x) { value = func(value, x); };
     (std::invoke(high_func, std::forward<Args>(args)), ...);

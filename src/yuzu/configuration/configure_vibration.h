@@ -3,9 +3,9 @@
 
 #pragma once
 
+#include <QDialog>
 #include <array>
 #include <memory>
-#include <QDialog>
 
 class QGroupBox;
 class QSpinBox;

@@ -5,15 +5,17 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #define VMA_IMPLEMENTATION
-#include "video_core/vulkan_common/vma.h"
-
-#include <array>
-#include <cstring>
-#include <type_traits>
-#include <catch2/catch_test_macros.hpp>
 #include "common/bit_field.h"
 
-TEST_CASE("BitField", "[common]") {
+#include <array>
+#include <catch2/catch_test_macros.hpp>
+#include <cstring>
+#include <type_traits>
+
+#include "video_core/vulkan_common/vma.h"
+
+TEST_CASE("BitField", "[common]")
+{
     enum class TestEnum : u32 {
         A = 0b10111101,
         B = 0b10101110,

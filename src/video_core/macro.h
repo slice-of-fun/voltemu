@@ -6,11 +6,13 @@
 
 #pragma once
 
+#include <ankerl/unordered_dense.h>
+
 #include <memory>
 #include <span>
 #include <variant>
 #include <vector>
-#include <ankerl/unordered_dense.h>
+
 #include "common/bit_field.h"
 #include "common/common_types.h"
 
@@ -83,13 +85,9 @@ union Opcode {
     BitField<22, 5, u32> bf_size;
     BitField<27, 5, u32> bf_dst_bit;
 
-    u32 GetBitfieldMask() const {
-        return (1 << bf_size) - 1;
-    }
+    u32 GetBitfieldMask() const { return (1 << bf_size) - 1; }
 
-    s32 GetBranchTarget() const {
-        return static_cast<s32>(immediate * sizeof(u32));
-    }
+    s32 GetBranchTarget() const { return static_cast<s32>(immediate * sizeof(u32)); }
 };
 
 union MethodAddress {
@@ -100,13 +98,13 @@ union MethodAddress {
 
 } // namespace Macro
 
-struct HLEMacro {
-};
+struct HLEMacro {};
 /// @note: these macros have two versions, a normal and extended version, with the extended version
 /// also assigning the base vertex/instance.
 struct HLE_DrawArraysIndirect final {
     HLE_DrawArraysIndirect(bool extended_) noexcept : extended{extended_} {}
-    void Execute(Engines::Maxwell3D& maxwell3d, std::span<const u32> parameters, [[maybe_unused]] u32 method);
+    void Execute(Engines::Maxwell3D& maxwell3d, std::span<const u32> parameters,
+                 [[maybe_unused]] u32 method);
     void Fallback(Engines::Maxwell3D& maxwell3d, std::span<const u32> parameters);
     bool extended;
 };
@@ -114,44 +112,55 @@ struct HLE_DrawArraysIndirect final {
 /// also assigning the base vertex/instance.
 struct HLE_DrawIndexedIndirect final {
     explicit HLE_DrawIndexedIndirect(bool extended_) noexcept : extended{extended_} {}
-    void Execute(Engines::Maxwell3D& maxwell3d, std::span<const u32> parameters, [[maybe_unused]] u32 method);
+    void Execute(Engines::Maxwell3D& maxwell3d, std::span<const u32> parameters,
+                 [[maybe_unused]] u32 method);
     void Fallback(Engines::Maxwell3D& maxwell3d, std::span<const u32> parameters);
     bool extended;
 };
 struct HLE_MultiLayerClear final {
-    void Execute(Engines::Maxwell3D& maxwell3d, std::span<const u32> parameters, [[maybe_unused]] u32 method);
+    void Execute(Engines::Maxwell3D& maxwell3d, std::span<const u32> parameters,
+                 [[maybe_unused]] u32 method);
 };
 struct HLE_MultiDrawIndexedIndirectCount final {
-    void Execute(Engines::Maxwell3D& maxwell3d, std::span<const u32> parameters, [[maybe_unused]] u32 method);
+    void Execute(Engines::Maxwell3D& maxwell3d, std::span<const u32> parameters,
+                 [[maybe_unused]] u32 method);
     void Fallback(Engines::Maxwell3D& maxwell3d, std::span<const u32> parameters);
 };
 struct HLE_DrawIndirectByteCount final {
-    void Execute(Engines::Maxwell3D& maxwell3d, std::span<const u32> parameters, [[maybe_unused]] u32 method);
+    void Execute(Engines::Maxwell3D& maxwell3d, std::span<const u32> parameters,
+                 [[maybe_unused]] u32 method);
     void Fallback(Engines::Maxwell3D& maxwell3d, std::span<const u32> parameters);
 };
 struct HLE_C713C83D8F63CCF3 final {
-    void Execute(Engines::Maxwell3D& maxwell3d, std::span<const u32> parameters, [[maybe_unused]] u32 method);
+    void Execute(Engines::Maxwell3D& maxwell3d, std::span<const u32> parameters,
+                 [[maybe_unused]] u32 method);
 };
 struct HLE_D7333D26E0A93EDE final {
-    void Execute(Engines::Maxwell3D& maxwell3d, std::span<const u32> parameters, [[maybe_unused]] u32 method);
+    void Execute(Engines::Maxwell3D& maxwell3d, std::span<const u32> parameters,
+                 [[maybe_unused]] u32 method);
 };
 struct HLE_BindShader final {
-    void Execute(Engines::Maxwell3D& maxwell3d, std::span<const u32> parameters, [[maybe_unused]] u32 method);
+    void Execute(Engines::Maxwell3D& maxwell3d, std::span<const u32> parameters,
+                 [[maybe_unused]] u32 method);
 };
 struct HLE_SetRasterBoundingBox final {
-    void Execute(Engines::Maxwell3D& maxwell3d, std::span<const u32> parameters, [[maybe_unused]] u32 method);
+    void Execute(Engines::Maxwell3D& maxwell3d, std::span<const u32> parameters,
+                 [[maybe_unused]] u32 method);
 };
 struct HLE_ClearConstBuffer final {
     HLE_ClearConstBuffer(size_t base_size_) noexcept : base_size{base_size_} {}
-    void Execute(Engines::Maxwell3D& maxwell3d, std::span<const u32> parameters, [[maybe_unused]] u32 method);
+    void Execute(Engines::Maxwell3D& maxwell3d, std::span<const u32> parameters,
+                 [[maybe_unused]] u32 method);
     size_t base_size;
 };
 struct HLE_ClearMemory final {
-    void Execute(Engines::Maxwell3D& maxwell3d, std::span<const u32> parameters, [[maybe_unused]] u32 method);
+    void Execute(Engines::Maxwell3D& maxwell3d, std::span<const u32> parameters,
+                 [[maybe_unused]] u32 method);
     std::vector<u32> zero_memory;
 };
 struct HLE_TransformFeedbackSetup final {
-    void Execute(Engines::Maxwell3D& maxwell3d, std::span<const u32> parameters, [[maybe_unused]] u32 method);
+    void Execute(Engines::Maxwell3D& maxwell3d, std::span<const u32> parameters,
+                 [[maybe_unused]] u32 method);
 };
 struct MacroInterpreterImpl final {
     MacroInterpreterImpl() {}
@@ -160,13 +169,15 @@ struct MacroInterpreterImpl final {
     void Reset();
     bool Step(Engines::Maxwell3D& maxwell3d, bool is_delay_slot);
     u32 GetALUResult(Macro::ALUOperation operation, u32 src_a, u32 src_b);
-    void ProcessResult(Engines::Maxwell3D& maxwell3d, Macro::ResultOperation operation, u32 reg, u32 result);
+    void ProcessResult(Engines::Maxwell3D& maxwell3d, Macro::ResultOperation operation, u32 reg,
+                       u32 result);
     bool EvaluateBranchCondition(Macro::BranchCondition cond, u32 value) const;
     Macro::Opcode GetOpcode() const;
     u32 GetRegister(u32 register_id) const;
     void SetRegister(u32 register_id, u32 value);
     /// Sets the method address to use for the next Send instruction.
-    [[nodiscard]] inline void SetMethodAddress(u32 address) noexcept {
+    [[nodiscard]] inline void SetMethodAddress(u32 address) noexcept
+    {
         method_address.raw = address;
     }
     void Send(Engines::Maxwell3D& maxwell3d, u32 value);
@@ -192,37 +203,29 @@ struct DynamicCachedMacro {
     /// Executes the macro code with the specified input parameters.
     /// @param parameters The parameters of the macro
     /// @param method     The method to execute
-    virtual void Execute(Engines::Maxwell3D& maxwell3d, std::span<const u32> parameters, u32 method) = 0;
+    virtual void Execute(Engines::Maxwell3D& maxwell3d, std::span<const u32> parameters,
+                         u32 method) = 0;
 };
 
-using AnyCachedMacro = std::variant<
-    std::monostate,
-    HLEMacro,
-    HLE_DrawArraysIndirect,
-    HLE_DrawIndexedIndirect,
-    HLE_MultiDrawIndexedIndirectCount,
-    HLE_MultiLayerClear,
-    HLE_C713C83D8F63CCF3,
-    HLE_D7333D26E0A93EDE,
-    HLE_BindShader,
-    HLE_SetRasterBoundingBox,
-    HLE_ClearConstBuffer,
-    HLE_ClearMemory,
-    HLE_TransformFeedbackSetup,
-    HLE_DrawIndirectByteCount,
-    MacroInterpreterImpl,
-    // Used for JIT x86 macro
-    std::unique_ptr<DynamicCachedMacro>
->;
+using AnyCachedMacro =
+    std::variant<std::monostate, HLEMacro, HLE_DrawArraysIndirect, HLE_DrawIndexedIndirect,
+                 HLE_MultiDrawIndexedIndirectCount, HLE_MultiLayerClear, HLE_C713C83D8F63CCF3,
+                 HLE_D7333D26E0A93EDE, HLE_BindShader, HLE_SetRasterBoundingBox,
+                 HLE_ClearConstBuffer, HLE_ClearMemory, HLE_TransformFeedbackSetup,
+                 HLE_DrawIndirectByteCount, MacroInterpreterImpl,
+                 // Used for JIT x86 macro
+                 std::unique_ptr<DynamicCachedMacro>>;
 
 struct MacroEngine {
     MacroEngine(bool is_interpreted_) noexcept : is_interpreted{is_interpreted_} {}
     // Store the uploaded macro code to compile them when they're called.
-    inline void AddCode(u32 method, u32 data) noexcept {
+    inline void AddCode(u32 method, u32 data) noexcept
+    {
         uploaded_macro_code[method].push_back(data);
     }
     // Clear the code associated with a method.
-    inline void ClearCode(u32 method) noexcept {
+    inline void ClearCode(u32 method) noexcept
+    {
         macro_cache.erase(method);
         uploaded_macro_code.erase(method);
     }

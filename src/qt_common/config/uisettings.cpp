@@ -4,10 +4,12 @@
 // SPDX-FileCopyrightText: 2016 Citra Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "qt_common/config/uisettings.h"
+
 #include <QSettings>
+
 #include "common/fs/fs.h"
 #include "common/fs/path_util.h"
-#include "qt_common/config/uisettings.h"
 
 #ifndef CANNOT_EXPLICITLY_INSTANTIATE
 namespace Settings {
@@ -76,7 +78,8 @@ const Themes themes{{
     {"Midnight Blue Colorful", "colorful_midnight_blue"},
 }};
 
-bool IsDarkTheme() {
+bool IsDarkTheme()
+{
     const auto& theme = UISettings::values.theme;
     return theme == std::string("qdarkstyle") || theme == std::string("qdarkstyle_midnight_blue") ||
            theme == std::string("colorful_dark") || theme == std::string("colorful_midnight_blue");
@@ -84,7 +87,8 @@ bool IsDarkTheme() {
 
 Values values = {};
 
-u32 CalculateWidth(u32 height, Settings::AspectRatio ratio) {
+u32 CalculateWidth(u32 height, Settings::AspectRatio ratio)
+{
     switch (ratio) {
     case Settings::AspectRatio::R4_3:
         return height * 4 / 3;
@@ -100,7 +104,8 @@ u32 CalculateWidth(u32 height, Settings::AspectRatio ratio) {
     return height * 16 / 9;
 }
 
-void SaveWindowState() {
+void SaveWindowState()
+{
     const auto window_state_config_loc =
         FS::PathToUTF8String(FS::GetVoltPath(FS::VoltPath::ConfigDir) / "window_state.ini");
 
@@ -115,7 +120,8 @@ void SaveWindowState() {
     config.sync();
 }
 
-void RestoreWindowState(std::unique_ptr<QtConfig>& qtConfig) {
+void RestoreWindowState(std::unique_ptr<QtConfig>& qtConfig)
+{
     const auto window_state_config_loc =
         FS::PathToUTF8String(FS::GetVoltPath(FS::VoltPath::ConfigDir) / "window_state.ini");
 

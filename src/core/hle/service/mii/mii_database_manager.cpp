@@ -4,14 +4,14 @@
 // SPDX-FileCopyrightText: Copyright 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/mii/mii_database_manager.h"
+
 #include "common/assert.h"
 #include "common/fs/file.h"
 #include "common/fs/fs.h"
 #include "common/fs/path_util.h"
 #include "common/logging.h"
 #include "common/string_util.h"
-
-#include "core/hle/service/mii/mii_database_manager.h"
 #include "core/hle/service/mii/mii_result.h"
 #include "core/hle/service/mii/mii_util.h"
 #include "core/hle/service/mii/types/char_info.h"
@@ -20,9 +20,12 @@
 namespace Service::Mii {
 const char* DbFileName = "MiiDatabase.dat";
 
-DatabaseManager::DatabaseManager() {}
+DatabaseManager::DatabaseManager()
+{
+}
 
-Result DatabaseManager::MountSaveData() {
+Result DatabaseManager::MountSaveData()
+{
     if (!is_save_data_mounted) {
         system_save_dir =
             Common::FS::GetVoltPath(Common::FS::VoltPath::NANDDir) / "system/save/8000000000000030";
@@ -42,7 +45,8 @@ Result DatabaseManager::MountSaveData() {
     return ResultSuccess;
 }
 
-Result DatabaseManager::Initialize(DatabaseSessionMetadata& metadata, bool& is_database_broken) {
+Result DatabaseManager::Initialize(DatabaseSessionMetadata& metadata, bool& is_database_broken)
+{
     is_database_broken = false;
     if (!is_save_data_mounted) {
         return ResultInvalidArgument;
@@ -87,19 +91,23 @@ Result DatabaseManager::Initialize(DatabaseSessionMetadata& metadata, bool& is_d
     return ResultSuccess;
 }
 
-bool DatabaseManager::IsFullDatabase() const {
+bool DatabaseManager::IsFullDatabase() const
+{
     return database.GetDatabaseLength() == MaxDatabaseLength;
 }
 
-bool DatabaseManager::IsModified() const {
+bool DatabaseManager::IsModified() const
+{
     return is_moddified;
 }
 
-u64 DatabaseManager::GetUpdateCounter() const {
+u64 DatabaseManager::GetUpdateCounter() const
+{
     return update_counter;
 }
 
-u32 DatabaseManager::GetCount(const DatabaseSessionMetadata& metadata) const {
+u32 DatabaseManager::GetCount(const DatabaseSessionMetadata& metadata) const
+{
     const u32 database_size = database.GetDatabaseLength();
     if (metadata.magic == MiiMagic) {
         return database_size;
@@ -120,7 +128,8 @@ u32 DatabaseManager::GetCount(const DatabaseSessionMetadata& metadata) const {
 }
 
 void DatabaseManager::Get(StoreData& out_store_data, std::size_t index,
-                          const DatabaseSessionMetadata& metadata) const {
+                          const DatabaseSessionMetadata& metadata) const
+{
     if (metadata.magic == MiiMagic) {
         out_store_data = database.Get(index);
         return;
@@ -148,7 +157,8 @@ void DatabaseManager::Get(StoreData& out_store_data, std::size_t index,
 }
 
 Result DatabaseManager::FindIndex(s32& out_index, const Common::UUID& create_id,
-                                  bool is_special) const {
+                                  bool is_special) const
+{
     u32 index{};
     const bool is_found = database.GetIndexByCreatorId(index, create_id);
 
@@ -181,7 +191,8 @@ Result DatabaseManager::FindIndex(s32& out_index, const Common::UUID& create_id,
 }
 
 Result DatabaseManager::FindIndex(const DatabaseSessionMetadata& metadata, u32& out_index,
-                                  const Common::UUID& create_id) const {
+                                  const Common::UUID& create_id) const
+{
     u32 index{};
     const bool is_found = database.GetIndexByCreatorId(index, create_id);
 
@@ -218,7 +229,8 @@ Result DatabaseManager::FindIndex(const DatabaseSessionMetadata& metadata, u32& 
 }
 
 Result DatabaseManager::FindMoveIndex(u32& out_index, u32 new_index,
-                                      const Common::UUID& create_id) const {
+                                      const Common::UUID& create_id) const
+{
     const auto database_size = database.GetDatabaseLength();
 
     if (database_size >= 1) {
@@ -254,7 +266,8 @@ Result DatabaseManager::FindMoveIndex(u32& out_index, u32 new_index,
 }
 
 Result DatabaseManager::Move(DatabaseSessionMetadata& metadata, u32 new_index,
-                             const Common::UUID& create_id) {
+                             const Common::UUID& create_id)
+{
     u32 current_index{};
     if (metadata.magic == MiiMagic) {
         const bool is_found = database.GetIndexByCreatorId(current_index, create_id);
@@ -279,8 +292,8 @@ Result DatabaseManager::Move(DatabaseSessionMetadata& metadata, u32 new_index,
     return ResultSuccess;
 }
 
-Result DatabaseManager::AddOrReplace(DatabaseSessionMetadata& metadata,
-                                     const StoreData& store_data) {
+Result DatabaseManager::AddOrReplace(DatabaseSessionMetadata& metadata, const StoreData& store_data)
+{
     if (store_data.IsValid() != ValidationResult::NoErrors) {
         return ResultInvalidStoreData;
     }
@@ -312,7 +325,8 @@ Result DatabaseManager::AddOrReplace(DatabaseSessionMetadata& metadata,
     return ResultSuccess;
 }
 
-Result DatabaseManager::Delete(DatabaseSessionMetadata& metadata, const Common::UUID& create_id) {
+Result DatabaseManager::Delete(DatabaseSessionMetadata& metadata, const Common::UUID& create_id)
+{
     u32 index{};
     const bool is_found = database.GetIndexByCreatorId(index, create_id);
     if (!is_found) {
@@ -334,7 +348,8 @@ Result DatabaseManager::Delete(DatabaseSessionMetadata& metadata, const Common::
     return ResultSuccess;
 }
 
-Result DatabaseManager::Append(DatabaseSessionMetadata& metadata, const CharInfo& char_info) {
+Result DatabaseManager::Append(DatabaseSessionMetadata& metadata, const CharInfo& char_info)
+{
     if (char_info.Verify() != ValidationResult::NoErrors) {
         return ResultInvalidCharInfo2;
     }
@@ -359,7 +374,8 @@ Result DatabaseManager::Append(DatabaseSessionMetadata& metadata, const CharInfo
     return result;
 }
 
-Result DatabaseManager::DestroyFile(DatabaseSessionMetadata& metadata) {
+Result DatabaseManager::DestroyFile(DatabaseSessionMetadata& metadata)
+{
     database.CorruptCrc();
 
     is_moddified = true;
@@ -372,20 +388,23 @@ Result DatabaseManager::DestroyFile(DatabaseSessionMetadata& metadata) {
     return result;
 }
 
-Result DatabaseManager::DeleteFile() {
+Result DatabaseManager::DeleteFile()
+{
     const bool result = Common::FS::RemoveFile(system_save_dir / DbFileName);
     // TODO: Return proper FS error here
     return result ? ResultSuccess : ResultUnknown;
 }
 
-void DatabaseManager::Format(DatabaseSessionMetadata& metadata) {
+void DatabaseManager::Format(DatabaseSessionMetadata& metadata)
+{
     database.CleanDatabase();
     is_moddified = true;
     update_counter++;
     metadata.update_counter = update_counter;
 }
 
-Result DatabaseManager::SaveDatabase() {
+Result DatabaseManager::SaveDatabase()
+{
     // TODO: Replace unknown error codes with proper FS error codes when available
 
     if (!Common::FS::Exists(system_save_dir / DbFileName)) {

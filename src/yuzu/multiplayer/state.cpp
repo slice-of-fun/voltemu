@@ -3,11 +3,14 @@
 // SPDX-FileCopyrightText: Copyright 2018 Citra Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "yuzu/multiplayer/state.h"
+
 #include <QAction>
 #include <QApplication>
 #include <QIcon>
 #include <QMessageBox>
 #include <QStandardItemModel>
+
 #include "common/announce_multiplayer_room.h"
 #include "common/logging.h"
 #include "core/core.h"
@@ -18,13 +21,13 @@
 #include "yuzu/multiplayer/host_room.h"
 #include "yuzu/multiplayer/lobby.h"
 #include "yuzu/multiplayer/message.h"
-#include "yuzu/multiplayer/state.h"
 #include "yuzu/util/clickable_label.h"
 
 MultiplayerState::MultiplayerState(QWidget* parent, QStandardItemModel* game_list_model_,
                                    QAction* leave_room_, QAction* show_room_, Core::System& system_)
     : QWidget(parent), game_list_model(game_list_model_), leave_room(leave_room_),
-      show_room(show_room_), system{system_} {
+      show_room(show_room_), system{system_}
+{
     if (auto member = Network::GetRoomMember().lock()) {
         // register the network structs to use in slots and signals
         state_callback_handle = member->BindOnStateChanged(
@@ -62,7 +65,8 @@ MultiplayerState::MultiplayerState(QWidget* parent, QStandardItemModel* game_lis
 
 MultiplayerState::~MultiplayerState() = default;
 
-void MultiplayerState::Close() {
+void MultiplayerState::Close()
+{
     if (state_callback_handle) {
         if (auto member = Network::GetRoomMember().lock()) {
             member->Unbind(state_callback_handle);
@@ -88,7 +92,8 @@ void MultiplayerState::Close() {
     }
 }
 
-void MultiplayerState::retranslateUi() {
+void MultiplayerState::retranslateUi()
+{
     status_text->setToolTip(tr("Current connection status"));
 
     UpdateNotificationStatus();
@@ -107,12 +112,14 @@ void MultiplayerState::retranslateUi() {
     }
 }
 
-void MultiplayerState::SetNotificationStatus(NotificationStatus status) {
+void MultiplayerState::SetNotificationStatus(NotificationStatus status)
+{
     notification_status = status;
     UpdateNotificationStatus();
 }
 
-void MultiplayerState::UpdateNotificationStatus() {
+void MultiplayerState::UpdateNotificationStatus()
+{
     switch (notification_status) {
     case NotificationStatus::Uninitialized:
         status_icon->setPixmap(QIcon::fromTheme(QStringLiteral("disconnected")).pixmap(16));
@@ -147,7 +154,8 @@ void MultiplayerState::UpdateNotificationStatus() {
     }
 }
 
-void MultiplayerState::OnNetworkStateChanged(const Network::RoomMember::State& state) {
+void MultiplayerState::OnNetworkStateChanged(const Network::RoomMember::State& state)
+{
     LOG_DEBUG(Frontend, "Network State: {}", Network::GetStateStr(state));
     if (state == Network::RoomMember::State::Joined ||
         state == Network::RoomMember::State::Moderator) {
@@ -161,7 +169,8 @@ void MultiplayerState::OnNetworkStateChanged(const Network::RoomMember::State& s
     current_state = state;
 }
 
-void MultiplayerState::OnNetworkError(const Network::RoomMember::Error& error) {
+void MultiplayerState::OnNetworkError(const Network::RoomMember::Error& error)
+{
     LOG_DEBUG(Frontend, "Network Error: {}", Network::GetErrorStr(error));
     switch (error) {
     case Network::RoomMember::Error::LostConnection:
@@ -204,7 +213,8 @@ void MultiplayerState::OnNetworkError(const Network::RoomMember::Error& error) {
     }
 }
 
-void MultiplayerState::OnAnnounceFailed(const WebService::WebResult& result) {
+void MultiplayerState::OnAnnounceFailed(const WebService::WebResult& result)
+{
     announce_multiplayer_session->Stop();
     QMessageBox::warning(this, tr("Error"),
                          tr("Failed to update the room information. Please check your Internet "
@@ -213,11 +223,13 @@ void MultiplayerState::OnAnnounceFailed(const WebService::WebResult& result) {
                          QMessageBox::Ok);
 }
 
-void MultiplayerState::OnSaveConfig() {
+void MultiplayerState::OnSaveConfig()
+{
     emit SaveConfig();
 }
 
-void MultiplayerState::UpdateThemedIcons() {
+void MultiplayerState::UpdateThemedIcons()
+{
     if (show_notification) {
         status_icon->setPixmap(
             QIcon::fromTheme(QStringLiteral("connected_notification")).pixmap(16));
@@ -232,13 +244,15 @@ void MultiplayerState::UpdateThemedIcons() {
         client_room->UpdateIconDisplay();
 }
 
-static void BringWidgetToFront(QWidget* widget) {
+static void BringWidgetToFront(QWidget* widget)
+{
     widget->show();
     widget->activateWindow();
     widget->raise();
 }
 
-void MultiplayerState::OnViewLobby() {
+void MultiplayerState::OnViewLobby()
+{
     if (lobby == nullptr) {
         lobby = new Lobby(this, game_list_model, announce_multiplayer_session, system);
         connect(lobby, &Lobby::SaveConfig, this, &MultiplayerState::OnSaveConfig);
@@ -247,7 +261,8 @@ void MultiplayerState::OnViewLobby() {
     BringWidgetToFront(lobby);
 }
 
-void MultiplayerState::OnCreateRoom() {
+void MultiplayerState::OnCreateRoom()
+{
     if (host_room == nullptr) {
         host_room = new HostRoomWindow(this, game_list_model, announce_multiplayer_session, system);
         connect(host_room, &HostRoomWindow::SaveConfig, this, &MultiplayerState::OnSaveConfig);
@@ -255,7 +270,8 @@ void MultiplayerState::OnCreateRoom() {
     BringWidgetToFront(host_room);
 }
 
-bool MultiplayerState::OnCloseRoom() {
+bool MultiplayerState::OnCloseRoom()
+{
     if (!NetworkMessage::WarnCloseRoom())
         return false;
     if (auto room = Network::GetRoom().lock()) {
@@ -279,7 +295,8 @@ bool MultiplayerState::OnCloseRoom() {
     return true;
 }
 
-void MultiplayerState::ShowNotification() {
+void MultiplayerState::ShowNotification()
+{
     if (client_room && client_room->isAncestorOf(QApplication::focusWidget()))
         return; // Do not show notification if the chat window currently has focus
     show_notification = true;
@@ -288,12 +305,14 @@ void MultiplayerState::ShowNotification() {
     SetNotificationStatus(NotificationStatus::Notification);
 }
 
-void MultiplayerState::HideNotification() {
+void MultiplayerState::HideNotification()
+{
     show_notification = false;
     SetNotificationStatus(NotificationStatus::Connected);
 }
 
-void MultiplayerState::OnOpenNetworkRoom() {
+void MultiplayerState::OnOpenNetworkRoom()
+{
     if (auto member = Network::GetRoomMember().lock()) {
         if (member->IsConnected()) {
             if (client_room == nullptr) {
@@ -310,7 +329,8 @@ void MultiplayerState::OnOpenNetworkRoom() {
     OnViewLobby();
 }
 
-void MultiplayerState::OnDirectConnectToRoom() {
+void MultiplayerState::OnDirectConnectToRoom()
+{
     if (direct_connect == nullptr) {
         direct_connect = new DirectConnectWindow(system, this);
         connect(direct_connect, &DirectConnectWindow::SaveConfig, this,
@@ -319,15 +339,18 @@ void MultiplayerState::OnDirectConnectToRoom() {
     BringWidgetToFront(direct_connect);
 }
 
-bool MultiplayerState::IsHostingPublicRoom() const {
+bool MultiplayerState::IsHostingPublicRoom() const
+{
     return announce_multiplayer_session->IsRunning();
 }
 
-void MultiplayerState::UpdateCredentials() {
+void MultiplayerState::UpdateCredentials()
+{
     announce_multiplayer_session->UpdateCredentials();
 }
 
-void MultiplayerState::UpdateGameList(QStandardItemModel* game_list) {
+void MultiplayerState::UpdateGameList(QStandardItemModel* game_list)
+{
     game_list_model = game_list;
     if (lobby) {
         lobby->UpdateGameList(game_list);

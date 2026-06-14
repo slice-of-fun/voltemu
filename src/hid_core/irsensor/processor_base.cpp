@@ -5,14 +5,18 @@
 
 namespace Service::IRS {
 
-ProcessorBase::ProcessorBase() {}
+ProcessorBase::ProcessorBase()
+{
+}
 ProcessorBase::~ProcessorBase() = default;
 
-bool ProcessorBase::IsProcessorActive() const {
+bool ProcessorBase::IsProcessorActive() const
+{
     return is_active;
 }
 
-std::size_t ProcessorBase::GetDataSize(Core::IrSensor::ImageTransferProcessorFormat format) const {
+std::size_t ProcessorBase::GetDataSize(Core::IrSensor::ImageTransferProcessorFormat format) const
+{
     switch (format) {
     case Core::IrSensor::ImageTransferProcessorFormat::Size320x240:
         return 320 * 240;
@@ -29,7 +33,8 @@ std::size_t ProcessorBase::GetDataSize(Core::IrSensor::ImageTransferProcessorFor
     }
 }
 
-std::size_t ProcessorBase::GetDataWidth(Core::IrSensor::ImageTransferProcessorFormat format) const {
+std::size_t ProcessorBase::GetDataWidth(Core::IrSensor::ImageTransferProcessorFormat format) const
+{
     switch (format) {
     case Core::IrSensor::ImageTransferProcessorFormat::Size320x240:
         return 320;
@@ -46,8 +51,8 @@ std::size_t ProcessorBase::GetDataWidth(Core::IrSensor::ImageTransferProcessorFo
     }
 }
 
-std::size_t ProcessorBase::GetDataHeight(
-    Core::IrSensor::ImageTransferProcessorFormat format) const {
+std::size_t ProcessorBase::GetDataHeight(Core::IrSensor::ImageTransferProcessorFormat format) const
+{
     switch (format) {
     case Core::IrSensor::ImageTransferProcessorFormat::Size320x240:
         return 240;

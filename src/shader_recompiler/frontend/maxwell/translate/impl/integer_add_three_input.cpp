@@ -18,7 +18,8 @@ enum class Half : u64 {
     Upper,
 };
 
-[[nodiscard]] IR::U32 IntegerHalf(IR::IREmitter& ir, const IR::U32& value, Half half) {
+[[nodiscard]] IR::U32 IntegerHalf(IR::IREmitter& ir, const IR::U32& value, Half half)
+{
     constexpr bool is_signed{false};
     switch (half) {
     case Half::All:
@@ -31,7 +32,8 @@ enum class Half : u64 {
     throw NotImplementedException("Invalid half");
 }
 
-[[nodiscard]] IR::U32 IntegerShift(IR::IREmitter& ir, const IR::U32& value, Shift shift) {
+[[nodiscard]] IR::U32 IntegerShift(IR::IREmitter& ir, const IR::U32& value, Shift shift)
+{
     switch (shift) {
     case Shift::None:
         return value;
@@ -48,7 +50,8 @@ enum class Half : u64 {
 }
 
 void IADD3(TranslatorVisitor& v, u64 insn, IR::U32 op_a, IR::U32 op_b, IR::U32 op_c,
-           Shift shift = Shift::None) {
+           Shift shift = Shift::None)
+{
     union {
         u64 insn;
         BitField<0, 8, IR::Reg> dest_reg;
@@ -95,7 +98,8 @@ void IADD3(TranslatorVisitor& v, u64 insn, IR::U32 op_a, IR::U32 op_b, IR::U32 o
 }
 } // Anonymous namespace
 
-void TranslatorVisitor::IADD3_reg(u64 insn) {
+void TranslatorVisitor::IADD3_reg(u64 insn)
+{
     union {
         u64 insn;
         BitField<37, 2, Shift> shift;
@@ -110,11 +114,13 @@ void TranslatorVisitor::IADD3_reg(u64 insn) {
     IADD3(*this, insn, op_a, op_b, op_c, iadd3.shift);
 }
 
-void TranslatorVisitor::IADD3_cbuf(u64 insn) {
+void TranslatorVisitor::IADD3_cbuf(u64 insn)
+{
     IADD3(*this, insn, GetReg8(insn), GetCbuf(insn), GetReg39(insn));
 }
 
-void TranslatorVisitor::IADD3_imm(u64 insn) {
+void TranslatorVisitor::IADD3_imm(u64 insn)
+{
     IADD3(*this, insn, GetReg8(insn), GetImm20(insn), GetReg39(insn));
 }
 

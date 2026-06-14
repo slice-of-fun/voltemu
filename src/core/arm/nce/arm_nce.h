@@ -23,9 +23,7 @@ public:
 
     void Initialize() override;
 
-    Architecture GetArchitecture() const override {
-        return Architecture::AArch64;
-    }
+    Architecture GetArchitecture() const override { return Architecture::AArch64; }
 
     HaltReason RunThread(Kernel::KThread* thread) override;
     HaltReason StepThread(Kernel::KThread* thread) override;
@@ -46,9 +44,7 @@ public:
     void UnlockThread(Kernel::KThread* thread) override;
 
 protected:
-    const Kernel::DebugWatchpoint* HaltedWatchpoint() const override {
-        return nullptr;
-    }
+    const Kernel::DebugWatchpoint* HaltedWatchpoint() const override { return nullptr; }
 
     void RewindBreakpointInstruction() override {}
 

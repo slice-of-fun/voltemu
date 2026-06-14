@@ -1,12 +1,13 @@
 // SPDX-FileCopyrightText: Copyright 2021 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "shader_recompiler/frontend/maxwell/indirect_branch_table_track.h"
+
 #include <optional>
 
 #include "common/common_types.h"
 #include "shader_recompiler/exception.h"
 #include "shader_recompiler/frontend/maxwell/decode.h"
-#include "shader_recompiler/frontend/maxwell/indirect_branch_table_track.h"
 #include "shader_recompiler/frontend/maxwell/opcodes.h"
 #include "shader_recompiler/frontend/maxwell/translate/impl/load_constant.h"
 
@@ -21,8 +22,9 @@ union Encoding {
     BitField<20, 24, s64> brx_offset;
 };
 
-template <typename Callable>
-std::optional<u64> Track(Environment& env, Location block_begin, Location& pos, Callable&& func) {
+template<typename Callable>
+std::optional<u64> Track(Environment& env, Location block_begin, Location& pos, Callable&& func)
+{
     while (pos >= block_begin) {
         const u64 insn{env.ReadInstruction(pos.Offset())};
         --pos;
@@ -33,8 +35,8 @@ std::optional<u64> Track(Environment& env, Location block_begin, Location& pos, 
     return std::nullopt;
 }
 
-std::optional<u64> TrackLDC(Environment& env, Location block_begin, Location& pos,
-                            IR::Reg brx_reg) {
+std::optional<u64> TrackLDC(Environment& env, Location block_begin, Location& pos, IR::Reg brx_reg)
+{
     return Track(env, block_begin, pos, [brx_reg](u64 insn, Opcode opcode) {
         const LDC::Encoding ldc{insn};
         return opcode == Opcode::LDC && ldc.dest_reg == brx_reg && ldc.size == LDC::Size::B32 &&
@@ -42,8 +44,8 @@ std::optional<u64> TrackLDC(Environment& env, Location block_begin, Location& po
     });
 }
 
-std::optional<u64> TrackSHL(Environment& env, Location block_begin, Location& pos,
-                            IR::Reg ldc_reg) {
+std::optional<u64> TrackSHL(Environment& env, Location block_begin, Location& pos, IR::Reg ldc_reg)
+{
     return Track(env, block_begin, pos, [ldc_reg](u64 insn, Opcode opcode) {
         const Encoding shl{insn};
         return opcode == Opcode::SHL_imm && shl.dest_reg == ldc_reg;
@@ -51,7 +53,8 @@ std::optional<u64> TrackSHL(Environment& env, Location block_begin, Location& po
 }
 
 std::optional<u64> TrackIMNMX(Environment& env, Location block_begin, Location& pos,
-                              IR::Reg shl_reg) {
+                              IR::Reg shl_reg)
+{
     return Track(env, block_begin, pos, [shl_reg](u64 insn, Opcode opcode) {
         const Encoding imnmx{insn};
         return opcode == Opcode::IMNMX_imm && imnmx.dest_reg == shl_reg;
@@ -60,7 +63,8 @@ std::optional<u64> TrackIMNMX(Environment& env, Location block_begin, Location& 
 } // Anonymous namespace
 
 std::optional<IndirectBranchTableInfo> TrackIndirectBranchTable(Environment& env, Location brx_pos,
-                                                                Location block_begin) {
+                                                                Location block_begin)
+{
     const u64 brx_insn{env.ReadInstruction(brx_pos.Offset())};
     const Opcode brx_opcode{Decode(brx_insn)};
     if (brx_opcode != Opcode::BRX && brx_opcode != Opcode::JMX) {

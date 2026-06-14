@@ -75,7 +75,8 @@ enum class StoreCache : u64 {
     WT, // Cache write-through (to system memory, volatile?)
 };
 
-ImageFormat Format(Size size) {
+ImageFormat Format(Size size)
+{
     switch (size) {
     case Size::U8:
         return ImageFormat::R8_UINT;
@@ -95,7 +96,8 @@ ImageFormat Format(Size size) {
     throw NotImplementedException("Invalid size {}", size);
 }
 
-int SizeInRegs(Size size) {
+int SizeInRegs(Size size)
+{
     switch (size) {
     case Size::U8:
     case Size::S8:
@@ -111,7 +113,8 @@ int SizeInRegs(Size size) {
     throw NotImplementedException("Invalid size {}", size);
 }
 
-TextureType GetType(Type type) {
+TextureType GetType(Type type)
+{
     switch (type) {
     case Type::_1D:
         return TextureType::Color1D;
@@ -129,7 +132,8 @@ TextureType GetType(Type type) {
     throw NotImplementedException("Invalid type {}", type);
 }
 
-IR::Value MakeCoords(TranslatorVisitor& v, IR::Reg reg, Type type) {
+IR::Value MakeCoords(TranslatorVisitor& v, IR::Reg reg, Type type)
+{
     const auto array{[&](int index) {
         return v.ir.BitFieldExtract(v.X(reg + index), v.ir.Imm32(0), v.ir.Imm32(16));
     }};
@@ -149,14 +153,16 @@ IR::Value MakeCoords(TranslatorVisitor& v, IR::Reg reg, Type type) {
     throw NotImplementedException("Invalid type {}", type);
 }
 
-unsigned SwizzleMask(u64 swizzle) {
+unsigned SwizzleMask(u64 swizzle)
+{
     if (swizzle == 0 || swizzle >= MASK.size()) {
         throw NotImplementedException("Invalid swizzle {}", swizzle);
     }
     return MASK[swizzle];
 }
 
-IR::Value MakeColor(IR::IREmitter& ir, IR::Reg reg, int num_regs) {
+IR::Value MakeColor(IR::IREmitter& ir, IR::Reg reg, int num_regs)
+{
     std::array<IR::U32, 4> colors;
     for (int i = 0; i < num_regs; ++i) {
         colors[static_cast<size_t>(i)] = ir.GetReg(reg + i);
@@ -168,7 +174,8 @@ IR::Value MakeColor(IR::IREmitter& ir, IR::Reg reg, int num_regs) {
 }
 } // Anonymous namespace
 
-void TranslatorVisitor::SULD(u64 insn) {
+void TranslatorVisitor::SULD(u64 insn)
+{
     union {
         u64 raw;
         BitField<51, 1, u64> is_bound;
@@ -228,7 +235,8 @@ void TranslatorVisitor::SULD(u64 insn) {
     }
 }
 
-void TranslatorVisitor::SUST(u64 insn) {
+void TranslatorVisitor::SUST(u64 insn)
+{
     union {
         u64 raw;
         BitField<51, 1, u64> is_bound;

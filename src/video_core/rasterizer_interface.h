@@ -7,6 +7,7 @@
 #include <optional>
 #include <span>
 #include <utility>
+
 #include "common/common_types.h"
 #include "common/polyfill_thread.h"
 #include "common/settings.h"
@@ -100,7 +101,8 @@ public:
     virtual void InvalidateRegion(DAddr addr, u64 size,
                                   VideoCommon::CacheType which = VideoCommon::CacheType::All) = 0;
 
-    virtual void InnerInvalidation(std::span<const std::pair<DAddr, std::size_t>> sequences) {
+    virtual void InnerInvalidation(std::span<const std::pair<DAddr, std::size_t>> sequences)
+    {
         if (!Settings::values.skip_cpu_inner_invalidation.GetValue()) {
             for (const auto& [cpu_addr, size] : sequences) {
                 InvalidateRegion(cpu_addr, size);
@@ -124,8 +126,9 @@ public:
 
     /// Notify rasterizer that any caches of the specified region should be flushed to Switch memory
     /// and invalidated
-    virtual void FlushAndInvalidateRegion(
-        DAddr addr, u64 size, VideoCommon::CacheType which = VideoCommon::CacheType::All) = 0;
+    virtual void
+    FlushAndInvalidateRegion(DAddr addr, u64 size,
+                             VideoCommon::CacheType which = VideoCommon::CacheType::All) = 0;
 
     /// Notify the host renderer to wait for previous primitive and compute operations.
     virtual void WaitForIdle() = 0;
@@ -142,14 +145,14 @@ public:
     /// Notify rasterizer that a frame is about to finish
     virtual void TickFrame() = 0;
 
-    virtual bool AccelerateConditionalRendering() {
-        return false;
-    }
+    virtual bool AccelerateConditionalRendering() { return false; }
 
     /// Attempt to use a faster method to perform a surface copy
-    [[nodiscard]] virtual bool AccelerateSurfaceCopy(
-        const Tegra::Engines::Fermi2D::Surface& src, const Tegra::Engines::Fermi2D::Surface& dst,
-        const Tegra::Engines::Fermi2D::Config& copy_config) {
+    [[nodiscard]] virtual bool
+    AccelerateSurfaceCopy(const Tegra::Engines::Fermi2D::Surface& src,
+                          const Tegra::Engines::Fermi2D::Surface& dst,
+                          const Tegra::Engines::Fermi2D::Config& copy_config)
+    {
         return false;
     }
 
@@ -160,7 +163,9 @@ public:
 
     /// Initialize disk cached resources for the game being emulated
     virtual void LoadDiskResources(u64 title_id, std::stop_token stop_loading,
-                                   const DiskResourceLoadCallback& callback) {}
+                                   const DiskResourceLoadCallback& callback)
+    {
+    }
 
     virtual void InitializeChannel(Tegra::Control::ChannelState& channel) {}
 
@@ -172,8 +177,6 @@ public:
     virtual void RegisterTransformFeedback(GPUVAddr tfb_object_addr) {}
 
     /// Returns true when the rasterizer has Draw Transform Feedback capabilities
-    virtual bool HasDrawTransformFeedback() {
-        return false;
-    }
+    virtual bool HasDrawTransformFeedback() { return false; }
 };
 } // namespace VideoCore

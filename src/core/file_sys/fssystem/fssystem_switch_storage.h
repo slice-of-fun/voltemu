@@ -19,10 +19,12 @@ public:
 
 public:
     RegionSwitchStorage(VirtualFile&& i, VirtualFile&& o, Region r)
-        : m_inside_region_storage(std::move(i)), m_outside_region_storage(std::move(o)),
-          m_region(r) {}
+        : m_inside_region_storage(std::move(i)), m_outside_region_storage(std::move(o)), m_region(r)
+    {
+    }
 
-    virtual size_t Read(u8* buffer, size_t size, size_t offset) const override {
+    virtual size_t Read(u8* buffer, size_t size, size_t offset) const override
+    {
         // Process until we're done.
         size_t processed = 0;
         while (processed < size) {
@@ -42,12 +44,11 @@ public:
         return size;
     }
 
-    virtual size_t GetSize() const override {
-        return m_inside_region_storage->GetSize();
-    }
+    virtual size_t GetSize() const override { return m_inside_region_storage->GetSize(); }
 
 private:
-    bool CheckRegions(s64* out_current_size, s64 offset, s64 size) const {
+    bool CheckRegions(s64* out_current_size, s64 offset, s64 size) const
+    {
         // Check if our region contains the access.
         if (m_region.offset <= offset) {
             if (offset < m_region.offset + m_region.size) {

@@ -6,6 +6,8 @@
 
 #pragma once
 
+#include <ankerl/unordered_dense.h>
+
 #include <array>
 #include <filesystem>
 #include <iosfwd>
@@ -14,7 +16,6 @@
 #include <optional>
 #include <span>
 #include <type_traits>
-#include <ankerl/unordered_dense.h>
 #include <vector>
 
 #include "common/common_types.h"
@@ -65,9 +66,7 @@ public:
 
     void Serialize(std::ofstream& file) const;
 
-    bool HasHLEMacroState() const override {
-        return has_hle_engine_state;
-    }
+    bool HasHLEMacroState() const override { return has_hle_engine_state; }
 
 protected:
     std::optional<u64> TryFindSize();
@@ -148,8 +147,9 @@ public:
 
     u32 ReadViewportTransformState() override;
 
-    std::optional<Shader::ReplaceConstant> GetReplaceConstBuffer(
-        [[maybe_unused]] u32 bank, [[maybe_unused]] u32 offset) override {
+    std::optional<Shader::ReplaceConstant>
+    GetReplaceConstBuffer([[maybe_unused]] u32 bank, [[maybe_unused]] u32 offset) override
+    {
         return std::nullopt;
     }
 
@@ -193,9 +193,7 @@ public:
     [[nodiscard]] std::optional<Shader::ReplaceConstant> GetReplaceConstBuffer(u32 bank,
                                                                                u32 offset) override;
 
-    [[nodiscard]] bool HasHLEMacroState() const override {
-        return cbuf_replacements.size() != 0;
-    }
+    [[nodiscard]] bool HasHLEMacroState() const override { return cbuf_replacements.size() != 0; }
 
     void Dump(u64 pipeline_hash, u64 shader_hash) override;
 
@@ -218,9 +216,10 @@ private:
 void SerializePipeline(std::span<const char> key, std::span<const GenericEnvironment* const> envs,
                        const std::filesystem::path& filename, u32 cache_version);
 
-template <typename Key, typename Envs>
+template<typename Key, typename Envs>
 void SerializePipeline(const Key& key, const Envs& envs, const std::filesystem::path& filename,
-                       u32 cache_version) {
+                       u32 cache_version)
+{
     static_assert(std::is_trivially_copyable_v<Key>);
     static_assert(std::has_unique_object_representations_v<Key>);
     SerializePipeline(std::span(reinterpret_cast<const char*>(&key), sizeof(key)),

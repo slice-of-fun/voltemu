@@ -6,12 +6,13 @@
 
 #pragma once
 
+#include <ankerl/unordered_dense.h>
+
 #include <algorithm>
 #include <bit>
 #include <deque>
 #include <limits>
 #include <type_traits>
-#include <ankerl/unordered_dense.h>
 #include <utility>
 
 #include "common/alignment.h"
@@ -20,8 +21,7 @@
 
 namespace VideoCommon {
 
-template <typename DeviceTracker>
-class MemoryTrackerBase {
+template<typename DeviceTracker> class MemoryTrackerBase {
     static constexpr size_t MAX_CPU_PAGE_BITS = 34;
     static constexpr size_t HIGHER_PAGE_BITS = 22;
     static constexpr size_t HIGHER_PAGE_SIZE = 1ULL << HIGHER_PAGE_BITS;
@@ -36,100 +36,130 @@ public:
     ~MemoryTrackerBase() = default;
 
     /// Returns the inclusive CPU modified range in a begin end pair
-    [[nodiscard]] std::pair<u64, u64> ModifiedCpuRegion(VAddr query_cpu_addr, u64 query_size) noexcept {
-        return IteratePairs<true>(query_cpu_addr, query_size, [](Manager* manager, u64 offset, size_t size) {
-            return manager->ModifiedRegion(Type::CPU, offset, size);
-        });
+    [[nodiscard]] std::pair<u64, u64> ModifiedCpuRegion(VAddr query_cpu_addr,
+                                                        u64 query_size) noexcept
+    {
+        return IteratePairs<true>(query_cpu_addr, query_size,
+                                  [](Manager* manager, u64 offset, size_t size) {
+                                      return manager->ModifiedRegion(Type::CPU, offset, size);
+                                  });
     }
 
     /// Returns the inclusive GPU modified range in a begin end pair
-    [[nodiscard]] std::pair<u64, u64> ModifiedGpuRegion(VAddr query_cpu_addr, u64 query_size) noexcept {
-        return IteratePairs<false>(query_cpu_addr, query_size, [](Manager* manager, u64 offset, size_t size) {
-            return manager->ModifiedRegion(Type::GPU, offset, size);
-        });
+    [[nodiscard]] std::pair<u64, u64> ModifiedGpuRegion(VAddr query_cpu_addr,
+                                                        u64 query_size) noexcept
+    {
+        return IteratePairs<false>(query_cpu_addr, query_size,
+                                   [](Manager* manager, u64 offset, size_t size) {
+                                       return manager->ModifiedRegion(Type::GPU, offset, size);
+                                   });
     }
 
     /// Returns true if a region has been modified from the CPU
-    [[nodiscard]] bool IsRegionCpuModified(VAddr query_cpu_addr, u64 query_size) noexcept {
-        return IteratePages<true>(query_cpu_addr, query_size, [](Manager* manager, u64 offset, size_t size) {
-            return manager->IsRegionModified(Type::CPU, offset, size);
-        });
+    [[nodiscard]] bool IsRegionCpuModified(VAddr query_cpu_addr, u64 query_size) noexcept
+    {
+        return IteratePages<true>(query_cpu_addr, query_size,
+                                  [](Manager* manager, u64 offset, size_t size) {
+                                      return manager->IsRegionModified(Type::CPU, offset, size);
+                                  });
     }
 
     /// Returns true if a region has been modified from the GPU
-    [[nodiscard]] bool IsRegionGpuModified(VAddr query_cpu_addr, u64 query_size) noexcept {
-        return IteratePages<false>(query_cpu_addr, query_size, [](Manager* manager, u64 offset, size_t size) {
-            return manager->IsRegionModified(Type::GPU, offset, size);
-        });
+    [[nodiscard]] bool IsRegionGpuModified(VAddr query_cpu_addr, u64 query_size) noexcept
+    {
+        return IteratePages<false>(query_cpu_addr, query_size,
+                                   [](Manager* manager, u64 offset, size_t size) {
+                                       return manager->IsRegionModified(Type::GPU, offset, size);
+                                   });
     }
 
     /// Returns true if a region has been marked as Preflushable
-    [[nodiscard]] bool IsRegionPreflushable(VAddr query_cpu_addr, u64 query_size) noexcept {
-        return IteratePages<false>(query_cpu_addr, query_size, [](Manager* manager, u64 offset, size_t size) {
-            return manager->IsRegionModified(Type::Preflushable, offset, size);
-        });
+    [[nodiscard]] bool IsRegionPreflushable(VAddr query_cpu_addr, u64 query_size) noexcept
+    {
+        return IteratePages<false>(
+            query_cpu_addr, query_size, [](Manager* manager, u64 offset, size_t size) {
+                return manager->IsRegionModified(Type::Preflushable, offset, size);
+            });
     }
 
     /// Mark region as CPU modified, notifying the device_tracker about this change
-    void MarkRegionAsCpuModified(VAddr dirty_cpu_addr, u64 query_size) {
-        IteratePages<true>(dirty_cpu_addr, query_size, [](Manager* manager, u64 offset, size_t size) {
-            manager->ChangeRegionState(Type::CPU, true, manager->cpu_addr + offset, size);
-        });
+    void MarkRegionAsCpuModified(VAddr dirty_cpu_addr, u64 query_size)
+    {
+        IteratePages<true>(
+            dirty_cpu_addr, query_size, [](Manager* manager, u64 offset, size_t size) {
+                manager->ChangeRegionState(Type::CPU, true, manager->cpu_addr + offset, size);
+            });
     }
 
     /// Unmark region as CPU modified, notifying the device_tracker about this change
-    void UnmarkRegionAsCpuModified(VAddr dirty_cpu_addr, u64 query_size) {
-        IteratePages<true>(dirty_cpu_addr, query_size, [](Manager* manager, u64 offset, size_t size) {
-            manager->ChangeRegionState(Type::CPU, false, manager->cpu_addr + offset, size);
-        });
+    void UnmarkRegionAsCpuModified(VAddr dirty_cpu_addr, u64 query_size)
+    {
+        IteratePages<true>(
+            dirty_cpu_addr, query_size, [](Manager* manager, u64 offset, size_t size) {
+                manager->ChangeRegionState(Type::CPU, false, manager->cpu_addr + offset, size);
+            });
     }
 
     /// Mark region as modified from the host GPU
-    void MarkRegionAsGpuModified(VAddr dirty_cpu_addr, u64 query_size) noexcept {
-        IteratePages<true>(dirty_cpu_addr, query_size, [](Manager* manager, u64 offset, size_t size) {
-            manager->ChangeRegionState(Type::GPU, true, manager->cpu_addr + offset, size);
-        });
+    void MarkRegionAsGpuModified(VAddr dirty_cpu_addr, u64 query_size) noexcept
+    {
+        IteratePages<true>(
+            dirty_cpu_addr, query_size, [](Manager* manager, u64 offset, size_t size) {
+                manager->ChangeRegionState(Type::GPU, true, manager->cpu_addr + offset, size);
+            });
     }
 
     /// Mark region as modified from the host GPU
-    void MarkRegionAsPreflushable(VAddr dirty_cpu_addr, u64 query_size) noexcept {
-        IteratePages<true>(dirty_cpu_addr, query_size, [](Manager* manager, u64 offset, size_t size) {
-            manager->ChangeRegionState(Type::Preflushable, true, manager->cpu_addr + offset, size);
-        });
+    void MarkRegionAsPreflushable(VAddr dirty_cpu_addr, u64 query_size) noexcept
+    {
+        IteratePages<true>(dirty_cpu_addr, query_size,
+                           [](Manager* manager, u64 offset, size_t size) {
+                               manager->ChangeRegionState(Type::Preflushable, true,
+                                                          manager->cpu_addr + offset, size);
+                           });
     }
 
     /// Unmark region as modified from the host GPU
-    void UnmarkRegionAsGpuModified(VAddr dirty_cpu_addr, u64 query_size) noexcept {
-        IteratePages<true>(dirty_cpu_addr, query_size, [](Manager* manager, u64 offset, size_t size) {
-            manager->ChangeRegionState(Type::GPU, false, manager->cpu_addr + offset, size);
-        });
+    void UnmarkRegionAsGpuModified(VAddr dirty_cpu_addr, u64 query_size) noexcept
+    {
+        IteratePages<true>(
+            dirty_cpu_addr, query_size, [](Manager* manager, u64 offset, size_t size) {
+                manager->ChangeRegionState(Type::GPU, false, manager->cpu_addr + offset, size);
+            });
     }
 
     /// Unmark region as modified from the host GPU
-    void UnmarkRegionAsPreflushable(VAddr dirty_cpu_addr, u64 query_size) noexcept {
-        IteratePages<true>(dirty_cpu_addr, query_size, [](Manager* manager, u64 offset, size_t size) {
-            manager->ChangeRegionState(Type::Preflushable, false, manager->cpu_addr + offset, size);
-        });
+    void UnmarkRegionAsPreflushable(VAddr dirty_cpu_addr, u64 query_size) noexcept
+    {
+        IteratePages<true>(dirty_cpu_addr, query_size,
+                           [](Manager* manager, u64 offset, size_t size) {
+                               manager->ChangeRegionState(Type::Preflushable, false,
+                                                          manager->cpu_addr + offset, size);
+                           });
     }
 
     /// Mark region as modified from the CPU
     /// but don't mark it as modified until FlusHCachedWrites is called.
-    void CachedCpuWrite(VAddr dirty_cpu_addr, u64 query_size) {
-        IteratePages<true>(dirty_cpu_addr, query_size, [this](Manager* manager, u64 offset, size_t size) {
-            const VAddr cpu_address = manager->cpu_addr + offset;
-            manager->ChangeRegionState(Type::CachedCPU, true, cpu_address, size);
-            cached_pages.insert(u32(cpu_address >> HIGHER_PAGE_BITS));
-        });
+    void CachedCpuWrite(VAddr dirty_cpu_addr, u64 query_size)
+    {
+        IteratePages<true>(dirty_cpu_addr, query_size,
+                           [this](Manager* manager, u64 offset, size_t size) {
+                               const VAddr cpu_address = manager->cpu_addr + offset;
+                               manager->ChangeRegionState(Type::CachedCPU, true, cpu_address, size);
+                               cached_pages.insert(u32(cpu_address >> HIGHER_PAGE_BITS));
+                           });
     }
 
     /// Flushes cached CPU writes, and notify the device_tracker about the deltas
-    void FlushCachedWrites(VAddr query_cpu_addr, u64 query_size) noexcept {
-        IteratePages<false>(query_cpu_addr, query_size, [](Manager* manager, [[maybe_unused]] u64 offset, [[maybe_unused]] size_t size) {
-            manager->FlushCachedWrites();
-        });
+    void FlushCachedWrites(VAddr query_cpu_addr, u64 query_size) noexcept
+    {
+        IteratePages<false>(query_cpu_addr, query_size,
+                            [](Manager* manager, [[maybe_unused]] u64 offset,
+                               [[maybe_unused]] size_t size) { manager->FlushCachedWrites(); });
     }
 
-    void FlushCachedWrites() noexcept {
+    void FlushCachedWrites() noexcept
+    {
         for (auto id : cached_pages) {
             top_tier[id]->FlushCachedWrites();
         }
@@ -137,31 +167,41 @@ public:
     }
 
     /// Call 'func' for each CPU modified range and unmark those pages as CPU modified
-    template <typename Func>
-    void ForEachUploadRange(VAddr query_cpu_range, u64 query_size, Func&& func) {
-        IteratePages<true>(query_cpu_range, query_size, [&func](Manager* manager, u64 offset, size_t size) {
-            manager->ForEachModifiedRange(Type::CPU, true, manager->cpu_addr + offset, size, func);
-        });
+    template<typename Func>
+    void ForEachUploadRange(VAddr query_cpu_range, u64 query_size, Func&& func)
+    {
+        IteratePages<true>(query_cpu_range, query_size,
+                           [&func](Manager* manager, u64 offset, size_t size) {
+                               manager->ForEachModifiedRange(
+                                   Type::CPU, true, manager->cpu_addr + offset, size, func);
+                           });
     }
 
     /// Call 'func' for each GPU modified range and unmark those pages as GPU modified
-    template <typename Func>
-    void ForEachDownloadRange(VAddr query_cpu_range, u64 query_size, bool clear, Func&& func) {
-        IteratePages<false>(query_cpu_range, query_size, [&func, clear](Manager* manager, u64 offset, size_t size) {
-            manager->ForEachModifiedRange(Type::GPU, clear, manager->cpu_addr + offset, size, func);
-        });
+    template<typename Func>
+    void ForEachDownloadRange(VAddr query_cpu_range, u64 query_size, bool clear, Func&& func)
+    {
+        IteratePages<false>(query_cpu_range, query_size,
+                            [&func, clear](Manager* manager, u64 offset, size_t size) {
+                                manager->ForEachModifiedRange(
+                                    Type::GPU, clear, manager->cpu_addr + offset, size, func);
+                            });
     }
 
-    template <typename Func>
-    void ForEachDownloadRangeAndClear(VAddr query_cpu_range, u64 query_size, Func&& func) {
-        IteratePages<false>(query_cpu_range, query_size, [&func](Manager* manager, u64 offset, size_t size) {
-            manager->ForEachModifiedRange(Type::GPU, true, manager->cpu_addr + offset, size, func);
-        });
+    template<typename Func>
+    void ForEachDownloadRangeAndClear(VAddr query_cpu_range, u64 query_size, Func&& func)
+    {
+        IteratePages<false>(query_cpu_range, query_size,
+                            [&func](Manager* manager, u64 offset, size_t size) {
+                                manager->ForEachModifiedRange(
+                                    Type::GPU, true, manager->cpu_addr + offset, size, func);
+                            });
     }
 
 private:
-    template <bool create_region_on_fail, typename Func>
-    bool IteratePages(VAddr cpu_address, size_t size, Func&& func) {
+    template<bool create_region_on_fail, typename Func>
+    bool IteratePages(VAddr cpu_address, size_t size, Func&& func)
+    {
         using FuncReturn = typename std::invoke_result<Func, Manager*, u64, size_t>::type;
         static constexpr bool BOOL_BREAK = std::is_same_v<FuncReturn, bool>;
         std::size_t remaining_size{size};
@@ -197,8 +237,9 @@ private:
         return false;
     }
 
-    template <bool create_region_on_fail, typename Func>
-    std::pair<u64, u64> IteratePairs(VAddr cpu_address, size_t size, Func&& func) {
+    template<bool create_region_on_fail, typename Func>
+    std::pair<u64, u64> IteratePairs(VAddr cpu_address, size_t size, Func&& func)
+    {
         std::size_t remaining_size{size};
         std::size_t page_index{cpu_address >> HIGHER_PAGE_BITS};
         u64 page_offset{cpu_address & HIGHER_PAGE_MASK};
@@ -234,12 +275,14 @@ private:
         }
     }
 
-    void CreateRegion(std::size_t page_index) {
+    void CreateRegion(std::size_t page_index)
+    {
         const VAddr base_cpu_addr = page_index << HIGHER_PAGE_BITS;
         top_tier[page_index] = GetNewManager(base_cpu_addr);
     }
 
-    Manager* GetNewManager(VAddr base_cpu_address) {
+    Manager* GetNewManager(VAddr base_cpu_address)
+    {
         if (free_managers.empty()) {
             manager_pool.emplace_back();
             auto& last_pool = manager_pool.back();

@@ -3,8 +3,8 @@
 
 #pragma once
 
-#include <memory>
 #include <QScrollArea>
+#include <memory>
 
 class QSpinBox;
 

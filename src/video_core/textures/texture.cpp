@@ -4,11 +4,12 @@
 // SPDX-FileCopyrightText: Copyright 2020 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "video_core/textures/texture.h"
+
 #include <array>
 
 #include "common/cityhash.h"
 #include "common/settings.h"
-#include "video_core/textures/texture.h"
 
 using Tegra::Texture::TICEntry;
 using Tegra::Texture::TSCEntry;
@@ -54,7 +55,8 @@ namespace {
 
 } // Anonymous namespace
 
-std::array<float, 4> TSCEntry::BorderColor() const noexcept {
+std::array<float, 4> TSCEntry::BorderColor() const noexcept
+{
     // TODO: Handle SRGB correctly. Using this breaks shadows in some games (Xenoblade).
     // if (!srgb_conversion) {
     //    return border_color;
@@ -64,12 +66,14 @@ std::array<float, 4> TSCEntry::BorderColor() const noexcept {
     return border_color;
 }
 
-float TSCEntry::MaxAnisotropy() const noexcept {
+float TSCEntry::MaxAnisotropy() const noexcept
+{
     const bool is_suitable_mipmap_filter = mipmap_filter != TextureMipmapFilter::None;
     const bool has_regular_lods = min_lod_clamp == 0 && max_lod_clamp >= 256;
     const bool is_bilinear_filter = min_filter == TextureFilter::Linear &&
                                     reduction_filter == SamplerReduction::WeightedAverage;
-    if (max_anisotropy == 0 && (!is_suitable_mipmap_filter || !has_regular_lods || !is_bilinear_filter || depth_compare_enabled))
+    if (max_anisotropy == 0 && (!is_suitable_mipmap_filter || !has_regular_lods ||
+                                !is_bilinear_filter || depth_compare_enabled))
         return 1.0f;
 
     s32 added_anisotropic{};
@@ -85,21 +89,24 @@ float TSCEntry::MaxAnisotropy() const noexcept {
         added_anisotropic = u32(anisotropic_settings) - 1U;
         break;
     case Settings::AnisotropyMode::Automatic:
-        added_anisotropic = Settings::values.resolution_info.up_scale >> Settings::values.resolution_info.down_shift;
+        added_anisotropic = Settings::values.resolution_info.up_scale >>
+                            Settings::values.resolution_info.down_shift;
         added_anisotropic = (std::max)(added_anisotropic - 1U, 0U);
         break;
     case Settings::AnisotropyMode::None:
-        return 1.0f; //No use of anisotropy
+        return 1.0f; // No use of anisotropy
     }
     return float(1U << (max_anisotropy + added_anisotropic));
 }
 
 } // namespace Tegra::Texture
 
-size_t std::hash<TICEntry>::operator()(const TICEntry& tic) const noexcept {
+size_t std::hash<TICEntry>::operator()(const TICEntry& tic) const noexcept
+{
     return Common::CityHash64(reinterpret_cast<const char*>(&tic), sizeof tic);
 }
 
-size_t std::hash<TSCEntry>::operator()(const TSCEntry& tsc) const noexcept {
+size_t std::hash<TSCEntry>::operator()(const TSCEntry& tsc) const noexcept
+{
     return Common::CityHash64(reinterpret_cast<const char*>(&tsc), sizeof tsc);
 }

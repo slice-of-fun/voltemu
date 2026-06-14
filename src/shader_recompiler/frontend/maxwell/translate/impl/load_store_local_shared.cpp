@@ -17,7 +17,8 @@ enum class Size : u64 {
     B128,
 };
 
-IR::U32 Offset(TranslatorVisitor& v, u64 insn) {
+IR::U32 Offset(TranslatorVisitor& v, u64 insn)
+{
     union {
         u64 raw;
         BitField<8, 8, IR::Reg> offset_reg;
@@ -33,7 +34,8 @@ IR::U32 Offset(TranslatorVisitor& v, u64 insn) {
     }
 }
 
-std::pair<IR::U32, IR::U32> WordOffset(TranslatorVisitor& v, u64 insn) {
+std::pair<IR::U32, IR::U32> WordOffset(TranslatorVisitor& v, u64 insn)
+{
     const IR::U32 offset{Offset(v, insn)};
     if (offset.IsImmediate()) {
         return {v.ir.Imm32(offset.U32() / 4), offset};
@@ -42,7 +44,8 @@ std::pair<IR::U32, IR::U32> WordOffset(TranslatorVisitor& v, u64 insn) {
     }
 }
 
-std::pair<int, bool> GetSize(u64 insn) {
+std::pair<int, bool> GetSize(u64 insn)
+{
     union {
         u64 raw;
         BitField<48, 3, Size> size;
@@ -68,7 +71,8 @@ std::pair<int, bool> GetSize(u64 insn) {
     }
 }
 
-IR::Reg Reg(u64 insn) {
+IR::Reg Reg(u64 insn)
+{
     union {
         u64 raw;
         BitField<0, 8, IR::Reg> reg;
@@ -77,22 +81,26 @@ IR::Reg Reg(u64 insn) {
     return encoding.reg;
 }
 
-IR::U32 ByteOffset(IR::IREmitter& ir, const IR::U32& offset) {
+IR::U32 ByteOffset(IR::IREmitter& ir, const IR::U32& offset)
+{
     return ir.BitwiseAnd(ir.ShiftLeftLogical(offset, ir.Imm32(3)), ir.Imm32(24));
 }
 
-IR::U32 ShortOffset(IR::IREmitter& ir, const IR::U32& offset) {
+IR::U32 ShortOffset(IR::IREmitter& ir, const IR::U32& offset)
+{
     return ir.BitwiseAnd(ir.ShiftLeftLogical(offset, ir.Imm32(3)), ir.Imm32(16));
 }
 
-IR::U32 LoadLocal(TranslatorVisitor& v, const IR::U32& word_offset, const IR::U32& offset) {
+IR::U32 LoadLocal(TranslatorVisitor& v, const IR::U32& word_offset, const IR::U32& offset)
+{
     const IR::U32 local_memory_size{v.ir.Imm32(v.env.LocalMemorySize())};
     const IR::U1 in_bounds{v.ir.ILessThan(offset, local_memory_size, false)};
     return IR::U32{v.ir.Select(in_bounds, v.ir.LoadLocal(word_offset), v.ir.Imm32(0))};
 }
 } // Anonymous namespace
 
-void TranslatorVisitor::LDL(u64 insn) {
+void TranslatorVisitor::LDL(u64 insn)
+{
     const auto [word_offset, offset]{WordOffset(*this, insn)};
     const IR::U32 word{LoadLocal(*this, word_offset, offset)};
     const IR::Reg dest{Reg(insn)};
@@ -124,7 +132,8 @@ void TranslatorVisitor::LDL(u64 insn) {
     }
 }
 
-void TranslatorVisitor::LDS(u64 insn) {
+void TranslatorVisitor::LDS(u64 insn)
+{
     const IR::U32 offset{Offset(*this, insn)};
     const IR::Reg dest{Reg(insn)};
     const auto [bit_size, is_signed]{GetSize(insn)};
@@ -147,7 +156,8 @@ void TranslatorVisitor::LDS(u64 insn) {
     }
 }
 
-void TranslatorVisitor::STL(u64 insn) {
+void TranslatorVisitor::STL(u64 insn)
+{
     const auto [word_offset, offset]{WordOffset(*this, insn)};
     if (offset.IsImmediate()) {
         // TODO: Support storing out of bounds at runtime
@@ -187,7 +197,8 @@ void TranslatorVisitor::STL(u64 insn) {
     }
 }
 
-void TranslatorVisitor::STS(u64 insn) {
+void TranslatorVisitor::STS(u64 insn)
+{
     const IR::U32 offset{Offset(*this, insn)};
     const IR::Reg reg{Reg(insn)};
     const int bit_size{GetSize(insn).first};

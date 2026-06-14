@@ -15,7 +15,8 @@
 namespace Shader::Backend::SPIRV {
 namespace {
 
-[[nodiscard]] bool IsNonUniformDescriptor(EmitContext& ctx, const IR::Value& index) noexcept {
+[[nodiscard]] bool IsNonUniformDescriptor(EmitContext& ctx, const IR::Value& index) noexcept
+{
     return ctx.profile.support_sampled_image_array_nonuniform_indexing && !index.IsImmediate();
 }
 
@@ -27,7 +28,8 @@ public:
     [[maybe_unused]] static constexpr bool ImageGradientOffsetAllowed = false;
 
     explicit ImageOperands(EmitContext& ctx, bool has_bias, bool has_lod, bool has_lod_clamp,
-                           Id lod, const IR::Value& offset) {
+                           Id lod, const IR::Value& offset)
+    {
         if (has_bias) {
             const Id bias{has_lod_clamp ? ctx.OpCompositeExtract(ctx.F32[1], lod, 0) : lod};
             Add(spv::ImageOperandsMask::Bias, bias);
@@ -43,7 +45,8 @@ public:
         }
     }
 
-    explicit ImageOperands(EmitContext& ctx, const IR::Value& offset, const IR::Value& offset2) {
+    explicit ImageOperands(EmitContext& ctx, const IR::Value& offset, const IR::Value& offset2)
+    {
         if (offset2.IsEmpty()) {
             AddOffset(ctx, offset, ImageGatherOffsetAllowed);
             return;
@@ -57,7 +60,9 @@ public:
         if (opcode != values[1]->GetOpcode() || opcode != IR::Opcode::CompositeConstructU32x4) {
             throw LogicError("Invalid PTP arguments");
         }
-        auto read{[&](unsigned int a, unsigned int b) { return static_cast<s32>(values[a]->Arg(b).U32()); }};
+        auto read{[&](unsigned int a, unsigned int b) {
+            return static_cast<s32>(values[a]->Arg(b).U32());
+        }};
 
         const Id offsets{ctx.ConstantComposite(
             ctx.TypeArray(ctx.S32[2], ctx.Const(4U)), ctx.SConst(read(0, 0), read(0, 1)),
@@ -66,7 +71,8 @@ public:
         Add(spv::ImageOperandsMask::ConstOffsets, offsets);
     }
 
-    explicit ImageOperands(Id lod, Id ms) {
+    explicit ImageOperands(Id lod, Id ms)
+    {
         if (Sirit::ValidId(lod)) {
             Add(spv::ImageOperandsMask::Lod, lod);
         }
@@ -76,7 +82,8 @@ public:
     }
 
     explicit ImageOperands(EmitContext& ctx, bool has_lod_clamp, Id derivatives,
-                           u32 num_derivatives, const IR::Value& offset, Id lod_clamp) {
+                           u32 num_derivatives, const IR::Value& offset, Id lod_clamp)
+    {
         if (!Sirit::ValidId(derivatives)) {
             throw LogicError("Derivatives must be present");
         }
@@ -98,7 +105,8 @@ public:
     }
 
     explicit ImageOperands(EmitContext& ctx, bool has_lod_clamp, Id derivatives_1, Id derivatives_2,
-                           const IR::Value& offset, Id lod_clamp) {
+                           const IR::Value& offset, Id lod_clamp)
+    {
         if (!Sirit::ValidId(derivatives_1) || !Sirit::ValidId(derivatives_2)) {
             throw LogicError("Derivatives must be present");
         }
@@ -123,20 +131,21 @@ public:
         }
     }
 
-    std::span<const Id> Span() const noexcept {
+    std::span<const Id> Span() const noexcept
+    {
         return std::span{operands.data(), operands.size()};
     }
 
-    std::optional<spv::ImageOperandsMask> MaskOptional() const noexcept {
+    std::optional<spv::ImageOperandsMask> MaskOptional() const noexcept
+    {
         return mask != spv::ImageOperandsMask{} ? std::make_optional(mask) : std::nullopt;
     }
 
-    spv::ImageOperandsMask Mask() const noexcept {
-        return mask;
-    }
+    spv::ImageOperandsMask Mask() const noexcept { return mask; }
 
 private:
-    void AddOffset(EmitContext& ctx, const IR::Value& offset, bool runtime_offset_allowed) {
+    void AddOffset(EmitContext& ctx, const IR::Value& offset, bool runtime_offset_allowed)
+    {
         if (offset.IsEmpty()) {
             return;
         }
@@ -174,13 +183,15 @@ private:
         }
     }
 
-    void Add(spv::ImageOperandsMask new_mask, Id value) {
+    void Add(spv::ImageOperandsMask new_mask, Id value)
+    {
         mask = static_cast<spv::ImageOperandsMask>(static_cast<unsigned>(mask) |
                                                    static_cast<unsigned>(new_mask));
         operands.push_back(value);
     }
 
-    void Add(spv::ImageOperandsMask new_mask, Id value_1, Id value_2) {
+    void Add(spv::ImageOperandsMask new_mask, Id value_1, Id value_2)
+    {
         mask = static_cast<spv::ImageOperandsMask>(static_cast<unsigned>(mask) |
                                                    static_cast<unsigned>(new_mask));
         operands.push_back(value_1);
@@ -191,7 +202,8 @@ private:
     spv::ImageOperandsMask mask{};
 };
 
-Id Texture(EmitContext& ctx, IR::TextureInstInfo info, [[maybe_unused]] const IR::Value& index) {
+Id Texture(EmitContext& ctx, IR::TextureInstInfo info, [[maybe_unused]] const IR::Value& index)
+{
     const TextureDefinition& def{ctx.textures.at(info.descriptor_index)};
     if (def.count > 1) {
         auto const idx = index.IsImmediate() ? ctx.Const(index.U32()) : ctx.Def(index);
@@ -207,7 +219,8 @@ Id Texture(EmitContext& ctx, IR::TextureInstInfo info, [[maybe_unused]] const IR
     }
 }
 
-Id TextureImage(EmitContext& ctx, IR::TextureInstInfo info, const IR::Value& index) {
+Id TextureImage(EmitContext& ctx, IR::TextureInstInfo info, const IR::Value& index)
+{
     if (info.type == TextureType::Buffer) {
         const TextureBufferDefinition& def{ctx.texture_buffers.at(info.descriptor_index)};
         if (def.count > 1) {
@@ -233,7 +246,8 @@ Id TextureImage(EmitContext& ctx, IR::TextureInstInfo info, const IR::Value& ind
     }
 }
 
-std::pair<Id, bool> Image(EmitContext& ctx, const IR::Value& index, IR::TextureInstInfo info) {
+std::pair<Id, bool> Image(EmitContext& ctx, const IR::Value& index, IR::TextureInstInfo info)
+{
     if (info.type == TextureType::Buffer) {
         const ImageBufferDefinition def{ctx.image_buffers.at(info.descriptor_index)};
         if (def.count > 1) {
@@ -253,14 +267,16 @@ std::pair<Id, bool> Image(EmitContext& ctx, const IR::Value& index, IR::TextureI
     }
 }
 
-bool IsTextureMsaa(EmitContext& ctx, const IR::TextureInstInfo& info) {
+bool IsTextureMsaa(EmitContext& ctx, const IR::TextureInstInfo& info)
+{
     if (info.type == TextureType::Buffer) {
         return false;
     }
     return ctx.textures.at(info.descriptor_index).is_multisample;
 }
 
-Id Decorate(EmitContext& ctx, IR::Inst* inst, Id sample) {
+Id Decorate(EmitContext& ctx, IR::Inst* inst, Id sample)
+{
     const auto info{inst->Flags<IR::TextureInstInfo>()};
     if (info.relaxed_precision != 0) {
         ctx.Decorate(sample, spv::Decoration::RelaxedPrecision);
@@ -268,9 +284,10 @@ Id Decorate(EmitContext& ctx, IR::Inst* inst, Id sample) {
     return sample;
 }
 
-template <typename MethodPtrType, typename... Args>
+template<typename MethodPtrType, typename... Args>
 Id Emit(MethodPtrType sparse_ptr, MethodPtrType non_sparse_ptr, EmitContext& ctx, IR::Inst* inst,
-        Id result_type, Args&&... args) {
+        Id result_type, Args&&... args)
+{
     IR::Inst* const sparse{inst->GetAssociatedPseudoOperation(IR::Opcode::GetSparseFromOp)};
     if (!sparse) {
         return Decorate(ctx, inst, (ctx.*non_sparse_ptr)(result_type, std::forward<Args>(args)...));
@@ -284,7 +301,8 @@ Id Emit(MethodPtrType sparse_ptr, MethodPtrType non_sparse_ptr, EmitContext& ctx
     return ctx.OpCompositeExtract(result_type, sample, 1U);
 }
 
-Id IsScaled(EmitContext& ctx, const IR::Value& index, Id member_index, u32 base_index) {
+Id IsScaled(EmitContext& ctx, const IR::Value& index, Id member_index, u32 base_index)
+{
     const Id push_constant_u32{ctx.TypePointer(spv::StorageClass::PushConstant, ctx.U32[1])};
     Id bit{};
     if (index.IsImmediate()) {
@@ -313,14 +331,16 @@ Id IsScaled(EmitContext& ctx, const IR::Value& index, Id member_index, u32 base_
     return ctx.OpINotEqual(ctx.U1, bit, ctx.u32_zero_value);
 }
 
-Id BitTest(EmitContext& ctx, Id mask, Id bit) {
+Id BitTest(EmitContext& ctx, Id mask, Id bit)
+{
     const Id shifted{ctx.OpShiftRightLogical(ctx.U32[1], mask, bit)};
     const Id bit_value{ctx.OpBitwiseAnd(ctx.U32[1], shifted, ctx.Const(1u))};
     return ctx.OpINotEqual(ctx.U1, bit_value, ctx.u32_zero_value);
 }
 
 Id ImageGatherSubpixelOffset(EmitContext& ctx, const IR::TextureInstInfo& info, Id texture,
-                             Id coords) {
+                             Id coords)
+{
     // Apply a subpixel offset of 1/512 the texel size of the texture to ensure same rounding on
     // AMD hardware as on Maxwell or other Nvidia architectures.
     const auto calculate_coords{[&](size_t dim) {
@@ -344,7 +364,8 @@ Id ImageGatherSubpixelOffset(EmitContext& ctx, const IR::TextureInstInfo& info, 
 }
 
 void AddOffsetToCoordinates(EmitContext& ctx, const IR::TextureInstInfo& info, Id& coords,
-                            Id offset) {
+                            Id offset)
+{
     if (!Sirit::ValidId(offset)) {
         return;
     }
@@ -381,104 +402,129 @@ void AddOffsetToCoordinates(EmitContext& ctx, const IR::TextureInstInfo& info, I
 }
 } // Anonymous namespace
 
-Id EmitBindlessImageSampleImplicitLod(EmitContext&) {
+Id EmitBindlessImageSampleImplicitLod(EmitContext&)
+{
     throw LogicError("Unreachable instruction");
 }
 
-Id EmitBindlessImageSampleExplicitLod(EmitContext&) {
+Id EmitBindlessImageSampleExplicitLod(EmitContext&)
+{
     throw LogicError("Unreachable instruction");
 }
 
-Id EmitBindlessImageSampleDrefImplicitLod(EmitContext&) {
+Id EmitBindlessImageSampleDrefImplicitLod(EmitContext&)
+{
     throw LogicError("Unreachable instruction");
 }
 
-Id EmitBindlessImageSampleDrefExplicitLod(EmitContext&) {
+Id EmitBindlessImageSampleDrefExplicitLod(EmitContext&)
+{
     throw LogicError("Unreachable instruction");
 }
 
-Id EmitBindlessImageGather(EmitContext&) {
+Id EmitBindlessImageGather(EmitContext&)
+{
     throw LogicError("Unreachable instruction");
 }
 
-Id EmitBindlessImageGatherDref(EmitContext&) {
+Id EmitBindlessImageGatherDref(EmitContext&)
+{
     throw LogicError("Unreachable instruction");
 }
 
-Id EmitBindlessImageFetch(EmitContext&) {
+Id EmitBindlessImageFetch(EmitContext&)
+{
     throw LogicError("Unreachable instruction");
 }
 
-Id EmitBindlessImageQueryDimensions(EmitContext&) {
+Id EmitBindlessImageQueryDimensions(EmitContext&)
+{
     throw LogicError("Unreachable instruction");
 }
 
-Id EmitBindlessImageQueryLod(EmitContext&) {
+Id EmitBindlessImageQueryLod(EmitContext&)
+{
     throw LogicError("Unreachable instruction");
 }
 
-Id EmitBindlessImageGradient(EmitContext&) {
+Id EmitBindlessImageGradient(EmitContext&)
+{
     throw LogicError("Unreachable instruction");
 }
 
-Id EmitBindlessImageRead(EmitContext&) {
+Id EmitBindlessImageRead(EmitContext&)
+{
     throw LogicError("Unreachable instruction");
 }
 
-Id EmitBindlessImageWrite(EmitContext&) {
+Id EmitBindlessImageWrite(EmitContext&)
+{
     throw LogicError("Unreachable instruction");
 }
 
-Id EmitBoundImageSampleImplicitLod(EmitContext&) {
+Id EmitBoundImageSampleImplicitLod(EmitContext&)
+{
     throw LogicError("Unreachable instruction");
 }
 
-Id EmitBoundImageSampleExplicitLod(EmitContext&) {
+Id EmitBoundImageSampleExplicitLod(EmitContext&)
+{
     throw LogicError("Unreachable instruction");
 }
 
-Id EmitBoundImageSampleDrefImplicitLod(EmitContext&) {
+Id EmitBoundImageSampleDrefImplicitLod(EmitContext&)
+{
     throw LogicError("Unreachable instruction");
 }
 
-Id EmitBoundImageSampleDrefExplicitLod(EmitContext&) {
+Id EmitBoundImageSampleDrefExplicitLod(EmitContext&)
+{
     throw LogicError("Unreachable instruction");
 }
 
-Id EmitBoundImageGather(EmitContext&) {
+Id EmitBoundImageGather(EmitContext&)
+{
     throw LogicError("Unreachable instruction");
 }
 
-Id EmitBoundImageGatherDref(EmitContext&) {
+Id EmitBoundImageGatherDref(EmitContext&)
+{
     throw LogicError("Unreachable instruction");
 }
 
-Id EmitBoundImageFetch(EmitContext&) {
+Id EmitBoundImageFetch(EmitContext&)
+{
     throw LogicError("Unreachable instruction");
 }
 
-Id EmitBoundImageQueryDimensions(EmitContext&) {
+Id EmitBoundImageQueryDimensions(EmitContext&)
+{
     throw LogicError("Unreachable instruction");
 }
 
-Id EmitBoundImageQueryLod(EmitContext&) {
+Id EmitBoundImageQueryLod(EmitContext&)
+{
     throw LogicError("Unreachable instruction");
 }
 
-Id EmitBoundImageGradient(EmitContext&) {
+Id EmitBoundImageGradient(EmitContext&)
+{
     throw LogicError("Unreachable instruction");
 }
 
-Id EmitBoundImageRead(EmitContext&) {
+Id EmitBoundImageRead(EmitContext&)
+{
     throw LogicError("Unreachable instruction");
 }
 
-Id EmitBoundImageWrite(EmitContext&) {
+Id EmitBoundImageWrite(EmitContext&)
+{
     throw LogicError("Unreachable instruction");
 }
 
 Id EmitImageSampleImplicitLod(EmitContext& ctx, IR::Inst* inst, const IR::Value& index, Id coords,
-                              Id bias_lc, const IR::Value& offset) {
+                              Id bias_lc, const IR::Value& offset)
+{
     const auto info{inst->Flags<IR::TextureInstInfo>()};
     if (ctx.stage == Stage::Fragment) {
         const ImageOperands operands(ctx, info.has_bias != 0, false, info.has_lod_clamp != 0,
@@ -499,7 +545,8 @@ Id EmitImageSampleImplicitLod(EmitContext& ctx, IR::Inst* inst, const IR::Value&
 }
 
 Id EmitImageSampleExplicitLod(EmitContext& ctx, IR::Inst* inst, const IR::Value& index, Id coords,
-                              Id lod, const IR::Value& offset) {
+                              Id lod, const IR::Value& offset)
+{
     const auto info{inst->Flags<IR::TextureInstInfo>()};
     const ImageOperands operands(ctx, false, true, false, lod, offset);
 
@@ -515,7 +562,8 @@ Id EmitImageSampleExplicitLod(EmitContext& ctx, IR::Inst* inst, const IR::Value&
 }
 
 Id EmitImageSampleDrefImplicitLod(EmitContext& ctx, IR::Inst* inst, const IR::Value& index,
-                                  Id coords, Id dref, Id bias_lc, const IR::Value& offset) {
+                                  Id coords, Id dref, Id bias_lc, const IR::Value& offset)
+{
     const auto info{inst->Flags<IR::TextureInstInfo>()};
     if (ctx.stage == Stage::Fragment) {
         const ImageOperands operands(ctx, info.has_bias != 0, false, info.has_lod_clamp != 0,
@@ -536,7 +584,8 @@ Id EmitImageSampleDrefImplicitLod(EmitContext& ctx, IR::Inst* inst, const IR::Va
 }
 
 Id EmitImageSampleDrefExplicitLod(EmitContext& ctx, IR::Inst* inst, const IR::Value& index,
-                                  Id coords, Id dref, Id lod, const IR::Value& offset) {
+                                  Id coords, Id dref, Id lod, const IR::Value& offset)
+{
     const auto info{inst->Flags<IR::TextureInstInfo>()};
     const ImageOperands operands(ctx, false, true, false, lod, offset);
     return Emit(&EmitContext::OpImageSparseSampleDrefExplicitLod,
@@ -545,7 +594,8 @@ Id EmitImageSampleDrefExplicitLod(EmitContext& ctx, IR::Inst* inst, const IR::Va
 }
 
 Id EmitImageGather(EmitContext& ctx, IR::Inst* inst, const IR::Value& index, Id coords,
-                   const IR::Value& offset, const IR::Value& offset2) {
+                   const IR::Value& offset, const IR::Value& offset2)
+{
     const auto info{inst->Flags<IR::TextureInstInfo>()};
     const ImageOperands operands(ctx, offset, offset2);
     if (ctx.profile.need_gather_subpixel_offset) {
@@ -557,7 +607,8 @@ Id EmitImageGather(EmitContext& ctx, IR::Inst* inst, const IR::Value& index, Id 
 }
 
 Id EmitImageGatherDref(EmitContext& ctx, IR::Inst* inst, const IR::Value& index, Id coords,
-                       const IR::Value& offset, const IR::Value& offset2, Id dref) {
+                       const IR::Value& offset, const IR::Value& offset2, Id dref)
+{
     const auto info{inst->Flags<IR::TextureInstInfo>()};
     const ImageOperands operands(ctx, offset, offset2);
     if (ctx.profile.need_gather_subpixel_offset) {
@@ -569,7 +620,8 @@ Id EmitImageGatherDref(EmitContext& ctx, IR::Inst* inst, const IR::Value& index,
 }
 
 Id EmitImageFetch(EmitContext& ctx, IR::Inst* inst, const IR::Value& index, Id coords, Id offset,
-                  Id lod, Id ms) {
+                  Id lod, Id ms)
+{
     const auto info{inst->Flags<IR::TextureInstInfo>()};
     AddOffsetToCoordinates(ctx, info, coords, offset);
     if (info.type == TextureType::Buffer) {
@@ -585,7 +637,8 @@ Id EmitImageFetch(EmitContext& ctx, IR::Inst* inst, const IR::Value& index, Id c
 }
 
 Id EmitImageQueryDimensions(EmitContext& ctx, IR::Inst* inst, const IR::Value& index, Id lod,
-                            const IR::Value& skip_mips_val) {
+                            const IR::Value& skip_mips_val)
+{
     const auto info{inst->Flags<IR::TextureInstInfo>()};
     const Id image{TextureImage(ctx, info, index)};
     const Id zero{ctx.u32_zero_value};
@@ -615,7 +668,8 @@ Id EmitImageQueryDimensions(EmitContext& ctx, IR::Inst* inst, const IR::Value& i
     throw LogicError("Unspecified image type {}", info.type.Value());
 }
 
-Id EmitImageQueryLod(EmitContext& ctx, IR::Inst* inst, const IR::Value& index, Id coords) {
+Id EmitImageQueryLod(EmitContext& ctx, IR::Inst* inst, const IR::Value& index, Id coords)
+{
     const auto info{inst->Flags<IR::TextureInstInfo>()};
     const Id zero{ctx.f32_zero_value};
     const Id sampler{Texture(ctx, info, index)};
@@ -624,7 +678,8 @@ Id EmitImageQueryLod(EmitContext& ctx, IR::Inst* inst, const IR::Value& index, I
 }
 
 Id EmitImageGradient(EmitContext& ctx, IR::Inst* inst, const IR::Value& index, Id coords,
-                     Id derivatives, const IR::Value& offset, Id lod_clamp) {
+                     Id derivatives, const IR::Value& offset, Id lod_clamp)
+{
     const auto info{inst->Flags<IR::TextureInstInfo>()};
     const auto operands = info.num_derivatives == 3
                               ? ImageOperands(ctx, info.has_lod_clamp != 0, derivatives,
@@ -636,7 +691,8 @@ Id EmitImageGradient(EmitContext& ctx, IR::Inst* inst, const IR::Value& index, I
                 Texture(ctx, info, index), coords, operands.Mask(), operands.Span());
 }
 
-Id EmitImageRead(EmitContext& ctx, IR::Inst* inst, const IR::Value& index, Id coords) {
+Id EmitImageRead(EmitContext& ctx, IR::Inst* inst, const IR::Value& index, Id coords)
+{
     const auto info{inst->Flags<IR::TextureInstInfo>()};
     if (info.image_format == ImageFormat::Typeless && !ctx.profile.support_typeless_image_loads) {
         LOG_WARNING(Shader_SPIRV, "Typeless image read not supported by host");
@@ -652,7 +708,8 @@ Id EmitImageRead(EmitContext& ctx, IR::Inst* inst, const IR::Value& index, Id co
     return color;
 }
 
-void EmitImageWrite(EmitContext& ctx, IR::Inst* inst, const IR::Value& index, Id coords, Id color) {
+void EmitImageWrite(EmitContext& ctx, IR::Inst* inst, const IR::Value& index, Id coords, Id color)
+{
     const auto info{inst->Flags<IR::TextureInstInfo>()};
     const auto [image, is_integer] = Image(ctx, index, info);
     if (!is_integer) {
@@ -661,7 +718,8 @@ void EmitImageWrite(EmitContext& ctx, IR::Inst* inst, const IR::Value& index, Id
     ctx.OpImageWrite(image, coords, color);
 }
 
-Id EmitIsTextureScaled(EmitContext& ctx, const IR::Value& index) {
+Id EmitIsTextureScaled(EmitContext& ctx, const IR::Value& index)
+{
     if (ctx.profile.unified_descriptor_binding) {
         const Id member_index{ctx.Const(ctx.rescaling_textures_member_index)};
         return IsScaled(ctx, index, member_index, ctx.texture_rescaling_index);
@@ -673,7 +731,8 @@ Id EmitIsTextureScaled(EmitContext& ctx, const IR::Value& index) {
     }
 }
 
-Id EmitIsImageScaled(EmitContext& ctx, const IR::Value& index) {
+Id EmitIsImageScaled(EmitContext& ctx, const IR::Value& index)
+{
     if (ctx.profile.unified_descriptor_binding) {
         const Id member_index{ctx.Const(ctx.rescaling_images_member_index)};
         return IsScaled(ctx, index, member_index, ctx.image_rescaling_index);

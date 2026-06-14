@@ -22,7 +22,8 @@
 namespace Common {
 
 // Detects the RAM and Swapfile sizes
-static MemoryInfo Detect() {
+static MemoryInfo Detect()
+{
     MemoryInfo mem_info{};
 
 #ifdef _WIN32
@@ -64,7 +65,8 @@ static MemoryInfo Detect() {
     return mem_info;
 }
 
-const MemoryInfo& GetMemInfo() {
+const MemoryInfo& GetMemInfo()
+{
     static MemoryInfo mem_info = Detect();
     return mem_info;
 }

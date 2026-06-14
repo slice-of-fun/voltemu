@@ -4,14 +4,16 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "video_core/engines/maxwell_dma.h"
+
+#include <ranges>
+
 #include "common/algorithm.h"
 #include "common/assert.h"
 #include "common/logging.h"
-#include <ranges>
 #include "common/settings.h"
 #include "core/core.h"
 #include "video_core/engines/maxwell_3d.h"
-#include "video_core/engines/maxwell_dma.h"
 #include "video_core/guest_memory.h"
 #include "video_core/memory_manager.h"
 #include "video_core/renderer_base.h"
@@ -22,25 +24,29 @@ namespace Tegra::Engines {
 using namespace Texture;
 
 MaxwellDMA::MaxwellDMA(Core::System& system_, MemoryManager& memory_manager_)
-    : system{system_}, memory_manager{memory_manager_} {
+    : system{system_}, memory_manager{memory_manager_}
+{
     execution_mask.reset();
     execution_mask[offsetof(Regs, launch_dma) / sizeof(u32)] = true;
 }
 
 MaxwellDMA::~MaxwellDMA() = default;
 
-void MaxwellDMA::BindRasterizer(VideoCore::RasterizerInterface* rasterizer_) {
+void MaxwellDMA::BindRasterizer(VideoCore::RasterizerInterface* rasterizer_)
+{
     rasterizer = rasterizer_;
 }
 
-void MaxwellDMA::ConsumeSinkImpl() {
+void MaxwellDMA::ConsumeSinkImpl()
+{
     for (auto [method, value] : method_sink) {
         regs.reg_array[method] = value;
     }
     method_sink.clear();
 }
 
-void MaxwellDMA::CallMethod(u32 method, u32 method_argument, bool is_last_call) {
+void MaxwellDMA::CallMethod(u32 method, u32 method_argument, bool is_last_call)
+{
     ASSERT_MSG(method < NUM_REGS, "Invalid MaxwellDMA register");
 
     regs.reg_array[method] = method_argument;
@@ -50,14 +56,15 @@ void MaxwellDMA::CallMethod(u32 method, u32 method_argument, bool is_last_call) 
     }
 }
 
-void MaxwellDMA::CallMultiMethod(u32 method, const u32* base_start, u32 amount,
-                                 u32 methods_pending) {
+void MaxwellDMA::CallMultiMethod(u32 method, const u32* base_start, u32 amount, u32 methods_pending)
+{
     for (u32 i = 0; i < amount; ++i) {
         CallMethod(method, base_start[i], methods_pending - i <= 1);
     }
 }
 
-void MaxwellDMA::Launch() {
+void MaxwellDMA::Launch()
+{
     LOG_TRACE(Render_OpenGL, "DMA copy 0x{:x} -> 0x{:x}", static_cast<GPUVAddr>(regs.offset_in),
               static_cast<GPUVAddr>(regs.offset_out));
 
@@ -99,11 +106,16 @@ void MaxwellDMA::Launch() {
             const u32 component_size = regs.remap_const.component_size_minus_one + 1;
             ASSERT(component_size == 1 || component_size == 2 || component_size == 4);
             if (component_size == 4) {
-                accelerate.BufferClear(regs.offset_out, regs.line_length_in, regs.remap_const.remap_consta_value);
+                accelerate.BufferClear(regs.offset_out, regs.line_length_in,
+                                       regs.remap_const.remap_consta_value);
             }
             read_buffer.resize_destructive(regs.line_length_in * sizeof(u32));
-            std::ranges::fill(std::span<u32>(reinterpret_cast<u32*>(read_buffer.data()), regs.line_length_in), regs.remap_const.remap_consta_value);
-            memory_manager.WriteBlockUnsafe(regs.offset_out, reinterpret_cast<u8*>(read_buffer.data()), static_cast<size_t>(regs.line_length_in) * component_size);
+            std::ranges::fill(
+                std::span<u32>(reinterpret_cast<u32*>(read_buffer.data()), regs.line_length_in),
+                regs.remap_const.remap_consta_value);
+            memory_manager.WriteBlockUnsafe(
+                regs.offset_out, reinterpret_cast<u8*>(read_buffer.data()),
+                static_cast<size_t>(regs.line_length_in) * component_size);
         } else {
             memory_manager.FlushCaching();
             const auto convert_linear_2_blocklinear_addr = [](u64 address) {
@@ -154,8 +166,8 @@ void MaxwellDMA::Launch() {
     ReleaseSemaphore();
 }
 
-void MaxwellDMA::CopyBlockLinearToPitch() {
-   
+void MaxwellDMA::CopyBlockLinearToPitch()
+{
 
     u32 bytes_per_pixel = 1;
     DMA::ImageOperand src_operand;
@@ -223,7 +235,8 @@ void MaxwellDMA::CopyBlockLinearToPitch() {
                      block_depth, dst_operand.pitch);
 }
 
-void MaxwellDMA::CopyPitchToBlockLinear() {
+void MaxwellDMA::CopyPitchToBlockLinear()
+{
     UNIMPLEMENTED_IF_MSG(regs.dst_params.block_size.width != 0, "Block width is not one");
     UNIMPLEMENTED_IF(regs.dst_params.layer != 0);
 
@@ -288,7 +301,8 @@ void MaxwellDMA::CopyPitchToBlockLinear() {
                    block_depth, regs.pitch_in);
 }
 
-void MaxwellDMA::CopyBlockLinearToBlockLinear() {
+void MaxwellDMA::CopyBlockLinearToBlockLinear()
+{
     UNIMPLEMENTED_IF(regs.src_params.block_size.width != 0);
 
     const bool is_remapping = regs.launch_dma.remap_enable != 0;
@@ -345,7 +359,8 @@ void MaxwellDMA::CopyBlockLinearToBlockLinear() {
                    dst.block_size.height, dst.block_size.depth, pitch);
 }
 
-void MaxwellDMA::ReleaseSemaphore() {
+void MaxwellDMA::ReleaseSemaphore()
+{
     const auto type = regs.launch_dma.semaphore_type;
     const GPUVAddr address = regs.semaphore.address;
     const u32 payload = regs.semaphore.payload;

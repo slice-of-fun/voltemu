@@ -1,6 +1,8 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/am/frontend/applet_profile_select.h"
+
 #include <cstring>
 
 #include "common/assert.h"
@@ -9,7 +11,6 @@
 #include "core/frontend/applets/profile_select.h"
 #include "core/hle/service/acc/errors.h"
 #include "core/hle/service/am/am.h"
-#include "core/hle/service/am/frontend/applet_profile_select.h"
 #include "core/hle/service/am/service/storage.h"
 
 namespace Service::AM::Frontend {
@@ -17,11 +18,14 @@ namespace Service::AM::Frontend {
 ProfileSelect::ProfileSelect(Core::System& system_, std::shared_ptr<Applet> applet_,
                              LibraryAppletMode applet_mode_,
                              const Core::Frontend::ProfileSelectApplet& frontend_)
-    : FrontendApplet{system_, applet_, applet_mode_}, frontend{frontend_} {}
+    : FrontendApplet{system_, applet_, applet_mode_}, frontend{frontend_}
+{
+}
 
 ProfileSelect::~ProfileSelect() = default;
 
-void ProfileSelect::Initialize() {
+void ProfileSelect::Initialize()
+{
     complete = false;
     status = ResultSuccess;
     final_data.clear();
@@ -52,15 +56,18 @@ void ProfileSelect::Initialize() {
     }
 }
 
-Result ProfileSelect::GetStatus() const {
+Result ProfileSelect::GetStatus() const
+{
     return status;
 }
 
-void ProfileSelect::ExecuteInteractive() {
+void ProfileSelect::ExecuteInteractive()
+{
     ASSERT_MSG(false, "Attempted to call interactive execution on non-interactive applet.");
 }
 
-void ProfileSelect::Execute() {
+void ProfileSelect::Execute()
+{
     if (complete) {
         PushOutData(std::make_shared<IStorage>(system, std::move(final_data)));
         Exit();
@@ -96,7 +103,8 @@ void ProfileSelect::Execute() {
                            parameters);
 }
 
-void ProfileSelect::SelectionComplete(std::optional<Common::UUID> uuid) {
+void ProfileSelect::SelectionComplete(std::optional<Common::UUID> uuid)
+{
     UiReturnArg output{};
 
     if (uuid.has_value() && uuid->IsValid()) {
@@ -115,7 +123,8 @@ void ProfileSelect::SelectionComplete(std::optional<Common::UUID> uuid) {
     Exit();
 }
 
-Result ProfileSelect::RequestExit() {
+Result ProfileSelect::RequestExit()
+{
     frontend.Close();
     R_SUCCEED();
 }

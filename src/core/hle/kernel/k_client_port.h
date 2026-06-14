@@ -27,22 +27,12 @@ public:
     void OnSessionFinalized();
     void OnServerClosed();
 
-    const KPort* GetParent() const {
-        return m_parent;
-    }
-    KPort* GetParent() {
-        return m_parent;
-    }
+    const KPort* GetParent() const { return m_parent; }
+    KPort* GetParent() { return m_parent; }
 
-    s32 GetNumSessions() const {
-        return m_num_sessions;
-    }
-    s32 GetPeakSessions() const {
-        return m_peak_sessions;
-    }
-    s32 GetMaxSessions() const {
-        return m_max_sessions;
-    }
+    s32 GetNumSessions() const { return m_num_sessions; }
+    s32 GetPeakSessions() const { return m_peak_sessions; }
+    s32 GetMaxSessions() const { return m_max_sessions; }
 
     bool IsLight() const;
     bool IsServerClosed() const;

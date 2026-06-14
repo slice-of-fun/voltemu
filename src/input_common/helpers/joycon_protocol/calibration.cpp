@@ -4,19 +4,23 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "input_common/helpers/joycon_protocol/calibration.h"
+
 #include <cstring>
 
 #include "common/input.h"
-#include "input_common/helpers/joycon_protocol/calibration.h"
 #include "input_common/helpers/joycon_protocol/joycon_types.h"
 
 namespace InputCommon::Joycon {
 
 CalibrationProtocol::CalibrationProtocol(std::shared_ptr<JoyconHandle> handle)
-    : JoyconCommonProtocol(std::move(handle)) {}
+    : JoyconCommonProtocol(std::move(handle))
+{
+}
 
-Common::Input::DriverResult CalibrationProtocol::GetLeftJoyStickCalibration(
-    JoyStickCalibration& calibration) {
+Common::Input::DriverResult
+CalibrationProtocol::GetLeftJoyStickCalibration(JoyStickCalibration& calibration)
+{
     ScopedSetBlocking sb(this);
     Common::Input::DriverResult result{Common::Input::DriverResult::Success};
     JoystickLeftSpiCalibration spi_calibration{};
@@ -52,8 +56,9 @@ Common::Input::DriverResult CalibrationProtocol::GetLeftJoyStickCalibration(
     return result;
 }
 
-Common::Input::DriverResult CalibrationProtocol::GetRightJoyStickCalibration(
-    JoyStickCalibration& calibration) {
+Common::Input::DriverResult
+CalibrationProtocol::GetRightJoyStickCalibration(JoyStickCalibration& calibration)
+{
     ScopedSetBlocking sb(this);
     Common::Input::DriverResult result{Common::Input::DriverResult::Success};
     JoystickRightSpiCalibration spi_calibration{};
@@ -89,7 +94,8 @@ Common::Input::DriverResult CalibrationProtocol::GetRightJoyStickCalibration(
     return result;
 }
 
-Common::Input::DriverResult CalibrationProtocol::GetImuCalibration(MotionCalibration& calibration) {
+Common::Input::DriverResult CalibrationProtocol::GetImuCalibration(MotionCalibration& calibration)
+{
     ScopedSetBlocking sb(this);
     Common::Input::DriverResult result{Common::Input::DriverResult::Success};
     ImuSpiCalibration spi_calibration{};
@@ -134,7 +140,8 @@ Common::Input::DriverResult CalibrationProtocol::GetImuCalibration(MotionCalibra
 }
 
 Common::Input::DriverResult CalibrationProtocol::GetRingCalibration(RingCalibration& calibration,
-                                                                    s16 current_value) {
+                                                                    s16 current_value)
+{
     constexpr s16 DefaultRingRange{800};
 
     // TODO: Get default calibration form ring itself
@@ -154,7 +161,8 @@ Common::Input::DriverResult CalibrationProtocol::GetRingCalibration(RingCalibrat
 }
 
 Common::Input::DriverResult CalibrationProtocol::HasUserCalibration(SpiAddress address,
-                                                                    bool& has_user_calibration) {
+                                                                    bool& has_user_calibration)
+{
     MagicSpiCalibration spi_magic{};
     const Common::Input::DriverResult result{ReadSPI(address, spi_magic)};
     has_user_calibration = false;
@@ -165,15 +173,18 @@ Common::Input::DriverResult CalibrationProtocol::HasUserCalibration(SpiAddress a
     return result;
 }
 
-u16 CalibrationProtocol::GetXAxisCalibrationValue(std::span<u8> block) const {
+u16 CalibrationProtocol::GetXAxisCalibrationValue(std::span<u8> block) const
+{
     return static_cast<u16>(((block[1] & 0x0F) << 8) | block[0]);
 }
 
-u16 CalibrationProtocol::GetYAxisCalibrationValue(std::span<u8> block) const {
+u16 CalibrationProtocol::GetYAxisCalibrationValue(std::span<u8> block) const
+{
     return static_cast<u16>((block[2] << 4) | (block[1] >> 4));
 }
 
-void CalibrationProtocol::ValidateCalibration(JoyStickCalibration& calibration) {
+void CalibrationProtocol::ValidateCalibration(JoyStickCalibration& calibration)
+{
     constexpr u16 DefaultStickCenter{0x800};
     constexpr u16 DefaultStickRange{0x6cc};
 
@@ -186,7 +197,8 @@ void CalibrationProtocol::ValidateCalibration(JoyStickCalibration& calibration) 
     calibration.y.min = ValidateValue(calibration.y.min, DefaultStickRange);
 }
 
-void CalibrationProtocol::ValidateCalibration(MotionCalibration& calibration) {
+void CalibrationProtocol::ValidateCalibration(MotionCalibration& calibration)
+{
     constexpr s16 DefaultAccelerometerScale{0x4000};
     constexpr s16 DefaultGyroScale{0x3be7};
     constexpr s16 DefaultOffset{0};
@@ -201,7 +213,8 @@ void CalibrationProtocol::ValidateCalibration(MotionCalibration& calibration) {
     }
 }
 
-u16 CalibrationProtocol::ValidateValue(u16 value, u16 default_value) const {
+u16 CalibrationProtocol::ValidateValue(u16 value, u16 default_value) const
+{
     if (value == 0) {
         return default_value;
     }
@@ -211,7 +224,8 @@ u16 CalibrationProtocol::ValidateValue(u16 value, u16 default_value) const {
     return value;
 }
 
-s16 CalibrationProtocol::ValidateValue(s16 value, s16 default_value) const {
+s16 CalibrationProtocol::ValidateValue(s16 value, s16 default_value) const
+{
     if (value == 0) {
         return default_value;
     }

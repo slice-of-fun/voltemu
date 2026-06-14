@@ -4,9 +4,12 @@
 // SPDX-FileCopyrightText: 2016 Citra Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "yuzu/configuration/configure_debug.h"
+
 #include <QDesktopServices>
 #include <QMessageBox>
 #include <QUrl>
+
 #include "common/fs/path_util.h"
 #include "common/logging.h"
 #include "common/settings.h"
@@ -14,11 +17,11 @@
 #include "core/crypto/key_manager.h"
 #include "qt_common/config/uisettings.h"
 #include "ui_configure_debug.h"
-#include "yuzu/configuration/configure_debug.h"
 #include "yuzu/debugger/console.h"
 
 ConfigureDebug::ConfigureDebug(const Core::System& system_, QWidget* parent)
-    : QScrollArea(parent), ui{std::make_unique<Ui::ConfigureDebug>()}, system{system_} {
+    : QScrollArea(parent), ui{std::make_unique<Ui::ConfigureDebug>()}, system{system_}
+{
     ui->setupUi(this);
     SetConfiguration();
 
@@ -34,7 +37,8 @@ ConfigureDebug::ConfigureDebug(const Core::System& system_, QWidget* parent)
 
 ConfigureDebug::~ConfigureDebug() = default;
 
-void ConfigureDebug::SetConfiguration() {
+void ConfigureDebug::SetConfiguration()
+{
     const bool runtime_lock = !system.IsPoweredOn();
     ui->toggle_gdbstub->setChecked(Settings::values.use_gdbstub.GetValue());
     ui->gdbport_spinbox->setEnabled(Settings::values.use_gdbstub.GetValue());
@@ -100,7 +104,8 @@ void ConfigureDebug::SetConfiguration() {
 #endif
 }
 
-void ConfigureDebug::ApplyConfiguration() {
+void ConfigureDebug::ApplyConfiguration()
+{
     Settings::values.use_gdbstub = ui->toggle_gdbstub->isChecked();
     Settings::values.gdbstub_port = ui->gdbport_spinbox->value();
     UISettings::values.show_console = ui->toggle_console->isChecked();
@@ -140,7 +145,8 @@ void ConfigureDebug::ApplyConfiguration() {
     Core::Crypto::KeyManager::Instance().ReloadKeys();
 }
 
-void ConfigureDebug::changeEvent(QEvent* event) {
+void ConfigureDebug::changeEvent(QEvent* event)
+{
     if (event->type() == QEvent::LanguageChange) {
         RetranslateUI();
     }
@@ -148,6 +154,7 @@ void ConfigureDebug::changeEvent(QEvent* event) {
     QWidget::changeEvent(event);
 }
 
-void ConfigureDebug::RetranslateUI() {
+void ConfigureDebug::RetranslateUI()
+{
     ui->retranslateUi(this);
 }

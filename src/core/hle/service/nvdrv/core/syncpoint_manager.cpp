@@ -2,13 +2,15 @@
 // SPDX-FileCopyrightText: 2022 Skyline Team and Contributors
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#include "common/assert.h"
 #include "core/hle/service/nvdrv/core/syncpoint_manager.h"
+
+#include "common/assert.h"
 #include "video_core/host1x/host1x.h"
 
 namespace Service::Nvidia::NvCore {
 
-SyncpointManager::SyncpointManager(Tegra::Host1x::Host1x& host1x_) : host1x{host1x_} {
+SyncpointManager::SyncpointManager(Tegra::Host1x::Host1x& host1x_) : host1x{host1x_}
+{
     constexpr u32 VBlank0SyncpointId{26};
     constexpr u32 VBlank1SyncpointId{27};
 
@@ -27,7 +29,8 @@ SyncpointManager::SyncpointManager(Tegra::Host1x::Host1x& host1x_) : host1x{host
 
 SyncpointManager::~SyncpointManager() = default;
 
-u32 SyncpointManager::ReserveSyncpoint(u32 id, bool client_managed) {
+u32 SyncpointManager::ReserveSyncpoint(u32 id, bool client_managed)
+{
     auto& syncpoint = syncpoints.at(id);
 
     if (syncpoint.reserved) {
@@ -41,7 +44,8 @@ u32 SyncpointManager::ReserveSyncpoint(u32 id, bool client_managed) {
     return id;
 }
 
-u32 SyncpointManager::FindFreeSyncpoint() {
+u32 SyncpointManager::FindFreeSyncpoint()
+{
     for (u32 i{1}; i < syncpoints.size(); i++) {
         if (!syncpoints[i].reserved) {
             return i;
@@ -51,23 +55,27 @@ u32 SyncpointManager::FindFreeSyncpoint() {
     return 0;
 }
 
-u32 SyncpointManager::AllocateSyncpoint(bool client_managed) {
+u32 SyncpointManager::AllocateSyncpoint(bool client_managed)
+{
     std::lock_guard lock(reservation_lock);
     return ReserveSyncpoint(FindFreeSyncpoint(), client_managed);
 }
 
-void SyncpointManager::FreeSyncpoint(u32 id) {
+void SyncpointManager::FreeSyncpoint(u32 id)
+{
     std::lock_guard lock(reservation_lock);
     auto& syncpoint = syncpoints.at(id);
     ASSERT(syncpoint.reserved);
     syncpoint.reserved = false;
 }
 
-bool SyncpointManager::IsSyncpointAllocated(u32 id) const {
+bool SyncpointManager::IsSyncpointAllocated(u32 id) const
+{
     return (id < SyncpointCount) && syncpoints[id].reserved;
 }
 
-bool SyncpointManager::HasSyncpointExpired(u32 id, u32 threshold) const {
+bool SyncpointManager::HasSyncpointExpired(u32 id, u32 threshold) const
+{
     const SyncpointInfo& syncpoint{syncpoints.at(id)};
 
     if (!syncpoint.reserved) {
@@ -84,7 +92,8 @@ bool SyncpointManager::HasSyncpointExpired(u32 id, u32 threshold) const {
     }
 }
 
-u32 SyncpointManager::IncrementSyncpointMaxExt(u32 id, u32 amount) {
+u32 SyncpointManager::IncrementSyncpointMaxExt(u32 id, u32 amount)
+{
     auto& syncpoint = syncpoints.at(id);
 
     if (!syncpoint.reserved) {
@@ -95,7 +104,8 @@ u32 SyncpointManager::IncrementSyncpointMaxExt(u32 id, u32 amount) {
     return syncpoint.counter_max += amount;
 }
 
-u32 SyncpointManager::ReadSyncpointMinValue(u32 id) {
+u32 SyncpointManager::ReadSyncpointMinValue(u32 id)
+{
     auto& syncpoint = syncpoints.at(id);
 
     if (!syncpoint.reserved) {
@@ -106,7 +116,8 @@ u32 SyncpointManager::ReadSyncpointMinValue(u32 id) {
     return syncpoint.counter_min;
 }
 
-u32 SyncpointManager::UpdateMin(u32 id) {
+u32 SyncpointManager::UpdateMin(u32 id)
+{
     auto& syncpoint = syncpoints.at(id);
 
     if (!syncpoint.reserved) {
@@ -118,7 +129,8 @@ u32 SyncpointManager::UpdateMin(u32 id) {
     return syncpoint.counter_min;
 }
 
-NvFence SyncpointManager::GetSyncpointFence(u32 id) {
+NvFence SyncpointManager::GetSyncpointFence(u32 id)
+{
     auto& syncpoint = syncpoints.at(id);
 
     if (!syncpoint.reserved) {

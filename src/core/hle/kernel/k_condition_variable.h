@@ -4,7 +4,6 @@
 #pragma once
 
 #include "common/assert.h"
-
 #include "core/hle/kernel/k_scheduler.h"
 #include "core/hle/kernel/k_thread.h"
 #include "core/hle/kernel/k_typed_address.h"
@@ -43,14 +42,16 @@ private:
 };
 
 inline void BeforeUpdatePriority(KernelCore& kernel, KConditionVariable::ThreadTree* tree,
-                                 KThread* thread) {
+                                 KThread* thread)
+{
     ASSERT(KScheduler::IsSchedulerLockedByCurrentThread(kernel));
 
     tree->erase(tree->iterator_to(*thread));
 }
 
 inline void AfterUpdatePriority(KernelCore& kernel, KConditionVariable::ThreadTree* tree,
-                                KThread* thread) {
+                                KThread* thread)
+{
     ASSERT(KScheduler::IsSchedulerLockedByCurrentThread(kernel));
 
     tree->insert(*thread);

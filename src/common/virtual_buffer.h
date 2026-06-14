@@ -13,8 +13,7 @@ namespace Common {
 void* AllocateMemoryPages(std::size_t size) noexcept;
 void FreeMemoryPages(void* base, std::size_t size) noexcept;
 
-template <typename T>
-class VirtualBuffer final {
+template<typename T> class VirtualBuffer final {
 public:
     // TODO: Uncomment this and change Common::PageTable::PageInfo to be trivially constructible
     // using std::atomic_ref once libc++ has support for it
@@ -24,31 +23,31 @@ public:
     //     "with the current allocator");
 
     constexpr VirtualBuffer() = default;
-    explicit VirtualBuffer(std::size_t count) noexcept
-        : alloc_size{count * sizeof(T)}
+    explicit VirtualBuffer(std::size_t count) noexcept : alloc_size{count * sizeof(T)}
     {
         base_ptr = reinterpret_cast<T*>(AllocateMemoryPages(alloc_size));
     }
 
-    ~VirtualBuffer() noexcept {
-        FreeMemoryPages(base_ptr, alloc_size);
-    }
+    ~VirtualBuffer() noexcept { FreeMemoryPages(base_ptr, alloc_size); }
 
     VirtualBuffer(const VirtualBuffer&) = delete;
     VirtualBuffer& operator=(const VirtualBuffer&) = delete;
 
     VirtualBuffer(VirtualBuffer&& other) noexcept
-        : alloc_size{std::exchange(other.alloc_size, 0)}
-        , base_ptr{std::exchange(other.base_ptr, nullptr)}
-    {}
+        : alloc_size{std::exchange(other.alloc_size, 0)}, base_ptr{std::exchange(other.base_ptr,
+                                                                                 nullptr)}
+    {
+    }
 
-    VirtualBuffer& operator=(VirtualBuffer&& other) noexcept {
+    VirtualBuffer& operator=(VirtualBuffer&& other) noexcept
+    {
         alloc_size = std::exchange(other.alloc_size, 0);
         base_ptr = std::exchange(other.base_ptr, nullptr);
         return *this;
     }
 
-    void resize(std::size_t count) noexcept {
+    void resize(std::size_t count) noexcept
+    {
         if (auto const new_size = count * sizeof(T); new_size != alloc_size) {
             FreeMemoryPages(base_ptr, alloc_size);
             alloc_size = new_size;
@@ -56,25 +55,18 @@ public:
         }
     }
 
-    [[nodiscard]] constexpr const T& operator[](std::size_t index) const noexcept {
+    [[nodiscard]] constexpr const T& operator[](std::size_t index) const noexcept
+    {
         return base_ptr[index];
     }
 
-    [[nodiscard]] constexpr T& operator[](std::size_t index) noexcept {
-        return base_ptr[index];
-    }
+    [[nodiscard]] constexpr T& operator[](std::size_t index) noexcept { return base_ptr[index]; }
 
-    [[nodiscard]] constexpr T* data() noexcept {
-        return base_ptr;
-    }
+    [[nodiscard]] constexpr T* data() noexcept { return base_ptr; }
 
-    [[nodiscard]] constexpr const T* data() const noexcept {
-        return base_ptr;
-    }
+    [[nodiscard]] constexpr const T* data() const noexcept { return base_ptr; }
 
-    [[nodiscard]] constexpr std::size_t size() const noexcept {
-        return alloc_size / sizeof(T);
-    }
+    [[nodiscard]] constexpr std::size_t size() const noexcept { return alloc_size / sizeof(T); }
 
 private:
     std::size_t alloc_size{};

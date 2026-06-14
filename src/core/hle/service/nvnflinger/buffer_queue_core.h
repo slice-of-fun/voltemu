@@ -9,15 +9,15 @@
 
 #pragma once
 
+#include <algorithm>
 #include <condition_variable>
 #include <deque>
 #include <list>
 #include <memory>
 #include <mutex>
 #include <set>
-#include <vector>
 #include <unordered_map>
-#include <algorithm>
+#include <vector>
 
 #include "core/hle/service/nvnflinger/buffer_item.h"
 #include "core/hle/service/nvnflinger/buffer_queue_defs.h"

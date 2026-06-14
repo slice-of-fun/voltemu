@@ -4,18 +4,20 @@
 // SPDX-FileCopyrightText: Copyright 2021 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+#include "core/hle/service/nvnflinger/hos_binder_driver_server.h"
+
 #include <mutex>
 
 #include "common/common_types.h"
 #include "common/logging.h"
-#include "core/hle/service/nvnflinger/hos_binder_driver_server.h"
 
 namespace Service::Nvnflinger {
 
 HosBinderDriverServer::HosBinderDriverServer() = default;
 HosBinderDriverServer::~HosBinderDriverServer() = default;
 
-s32 HosBinderDriverServer::RegisterBinder(std::shared_ptr<android::IBinder>&& binder) {
+s32 HosBinderDriverServer::RegisterBinder(std::shared_ptr<android::IBinder>&& binder)
+{
     std::scoped_lock lk{lock};
 
     last_id++;
@@ -26,14 +28,16 @@ s32 HosBinderDriverServer::RegisterBinder(std::shared_ptr<android::IBinder>&& bi
     return last_id;
 }
 
-void HosBinderDriverServer::UnregisterBinder(s32 binder_id) {
+void HosBinderDriverServer::UnregisterBinder(s32 binder_id)
+{
     std::scoped_lock lk{lock};
 
     binders.erase(binder_id);
     refcounts.erase(binder_id);
 }
 
-void HosBinderDriverServer::AdjustRefcount(s32 binder_id, s32 delta, bool is_weak) {
+void HosBinderDriverServer::AdjustRefcount(s32 binder_id, s32 delta, bool is_weak)
+{
     std::scoped_lock lk{lock};
 
     auto search_rc = refcounts.find(binder_id);
@@ -55,7 +59,8 @@ void HosBinderDriverServer::AdjustRefcount(s32 binder_id, s32 delta, bool is_wea
     }
 }
 
-std::shared_ptr<android::IBinder> HosBinderDriverServer::TryGetBinder(s32 id) const {
+std::shared_ptr<android::IBinder> HosBinderDriverServer::TryGetBinder(s32 id) const
+{
     std::scoped_lock lk{lock};
 
     if (auto search = binders.find(id); search != binders.end()) {

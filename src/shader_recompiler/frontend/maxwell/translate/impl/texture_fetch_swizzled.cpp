@@ -50,22 +50,25 @@ constexpr std::array RGBA_LUT{
     R | G | B | A, //
 };
 
-void CheckAlignment(IR::Reg reg, size_t alignment) {
+void CheckAlignment(IR::Reg reg, size_t alignment)
+{
     if (!IR::IsAligned(reg, alignment)) {
         throw NotImplementedException("Unaligned source register {}", reg);
     }
 }
 
-template <typename... Args>
-IR::Value Composite(TranslatorVisitor& v, Args... regs) {
+template<typename... Args> IR::Value Composite(TranslatorVisitor& v, Args... regs)
+{
     return v.ir.CompositeConstruct(v.F(regs)...);
 }
 
-IR::F32 ReadArray(TranslatorVisitor& v, const IR::U32& value) {
+IR::F32 ReadArray(TranslatorVisitor& v, const IR::U32& value)
+{
     return v.ir.ConvertUToF(32, 16, v.ir.BitFieldExtract(value, v.ir.Imm32(0), v.ir.Imm32(16)));
 }
 
-IR::Value Sample(TranslatorVisitor& v, u64 insn) {
+IR::Value Sample(TranslatorVisitor& v, u64 insn)
+{
     const Encoding texs{insn};
     const IR::U32 handle{v.ir.Imm32(static_cast<u32>(texs.cbuf_offset * 4))};
     const IR::F32 zero{v.ir.Imm32(0.0f)};
@@ -155,7 +158,8 @@ IR::Value Sample(TranslatorVisitor& v, u64 insn) {
     }
 }
 
-unsigned Swizzle(u64 insn) {
+unsigned Swizzle(u64 insn)
+{
     const Encoding texs{insn};
     const size_t encoding{texs.swizzle};
     if (texs.dest_reg_b == IR::Reg::RZ) {
@@ -171,7 +175,8 @@ unsigned Swizzle(u64 insn) {
     }
 }
 
-IR::F32 Extract(TranslatorVisitor& v, const IR::Value& sample, unsigned component) {
+IR::F32 Extract(TranslatorVisitor& v, const IR::Value& sample, unsigned component)
+{
     const bool is_shadow{sample.Type() == IR::Type::F32};
     if (is_shadow) {
         const bool is_alpha{component == 3};
@@ -181,7 +186,8 @@ IR::F32 Extract(TranslatorVisitor& v, const IR::Value& sample, unsigned componen
     }
 }
 
-IR::Reg RegStoreComponent32(u64 insn, unsigned index) {
+IR::Reg RegStoreComponent32(u64 insn, unsigned index)
+{
     const Encoding texs{insn};
     switch (index) {
     case 0:
@@ -198,7 +204,8 @@ IR::Reg RegStoreComponent32(u64 insn, unsigned index) {
     throw LogicError("Invalid store index {}", index);
 }
 
-void Store32(TranslatorVisitor& v, u64 insn, const IR::Value& sample) {
+void Store32(TranslatorVisitor& v, u64 insn, const IR::Value& sample)
+{
     const unsigned swizzle{Swizzle(insn)};
     unsigned store_index{0};
     for (unsigned component = 0; component < 4; ++component) {
@@ -211,11 +218,13 @@ void Store32(TranslatorVisitor& v, u64 insn, const IR::Value& sample) {
     }
 }
 
-IR::U32 Pack(TranslatorVisitor& v, const IR::F32& lhs, const IR::F32& rhs) {
+IR::U32 Pack(TranslatorVisitor& v, const IR::F32& lhs, const IR::F32& rhs)
+{
     return v.ir.PackHalf2x16(v.ir.CompositeConstruct(lhs, rhs));
 }
 
-void Store16(TranslatorVisitor& v, u64 insn, const IR::Value& sample) {
+void Store16(TranslatorVisitor& v, u64 insn, const IR::Value& sample)
+{
     const unsigned swizzle{Swizzle(insn)};
     unsigned store_index{0};
     std::array<IR::F32, 4> swizzled;
@@ -251,7 +260,8 @@ void Store16(TranslatorVisitor& v, u64 insn, const IR::Value& sample) {
 }
 } // Anonymous namespace
 
-void TranslatorVisitor::TEXS(u64 insn) {
+void TranslatorVisitor::TEXS(u64 insn)
+{
     const IR::Value sample{Sample(*this, insn)};
     if (Encoding{insn}.precision == Precision::F32) {
         Store32(*this, insn, sample);

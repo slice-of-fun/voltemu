@@ -20,125 +20,150 @@ struct FormatTuple {
     GLenum format = GL_NONE;
     GLenum type = GL_NONE;
 };
-#define SURFACE_FORMAT_LIST \
-    SURFACE_FORMAT_ELEM(GL_RGBA8, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8_REV, A8B8G8R8_UNORM) \
-    SURFACE_FORMAT_ELEM(GL_RGBA8_SNORM, GL_RGBA, GL_BYTE, A8B8G8R8_SNORM) \
-    SURFACE_FORMAT_ELEM(GL_RGBA8I, GL_RGBA_INTEGER, GL_BYTE, A8B8G8R8_SINT) \
-    SURFACE_FORMAT_ELEM(GL_RGBA8UI, GL_RGBA_INTEGER, GL_UNSIGNED_BYTE, A8B8G8R8_UINT) \
-    SURFACE_FORMAT_ELEM(GL_RGB565, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, R5G6B5_UNORM) \
-    SURFACE_FORMAT_ELEM(GL_RGB565, GL_RGB, GL_UNSIGNED_SHORT_5_6_5_REV, B5G6R5_UNORM) \
-    SURFACE_FORMAT_ELEM(GL_RGB5_A1, GL_BGRA, GL_UNSIGNED_SHORT_1_5_5_5_REV, A1R5G5B5_UNORM) \
-    SURFACE_FORMAT_ELEM(GL_RGB10_A2, GL_RGBA, GL_UNSIGNED_INT_2_10_10_10_REV, A2B10G10R10_UNORM) \
-    SURFACE_FORMAT_ELEM(GL_RGB10_A2UI, GL_RGBA_INTEGER, GL_UNSIGNED_INT_2_10_10_10_REV, A2B10G10R10_UINT) \
-    SURFACE_FORMAT_ELEM(GL_RGB10_A2, GL_BGRA, GL_UNSIGNED_INT_2_10_10_10_REV, A2R10G10B10_UNORM) \
-    SURFACE_FORMAT_ELEM(GL_RGB5_A1, GL_RGBA, GL_UNSIGNED_SHORT_1_5_5_5_REV, A1B5G5R5_UNORM) \
-    SURFACE_FORMAT_ELEM(GL_RGB5_A1, GL_RGBA, GL_UNSIGNED_SHORT_5_5_5_1, A5B5G5R1_UNORM) \
-    SURFACE_FORMAT_ELEM(GL_R8, GL_RED, GL_UNSIGNED_BYTE, R8_UNORM) \
-    SURFACE_FORMAT_ELEM(GL_R8_SNORM, GL_RED, GL_BYTE, R8_SNORM) \
-    SURFACE_FORMAT_ELEM(GL_R8I, GL_RED_INTEGER, GL_BYTE, R8_SINT) \
-    SURFACE_FORMAT_ELEM(GL_R8UI, GL_RED_INTEGER, GL_UNSIGNED_BYTE, R8_UINT) \
-    SURFACE_FORMAT_ELEM(GL_RGBA16F, GL_RGBA, GL_HALF_FLOAT, R16G16B16A16_FLOAT) \
-    SURFACE_FORMAT_ELEM(GL_RGBA16, GL_RGBA, GL_UNSIGNED_SHORT, R16G16B16A16_UNORM) \
-    SURFACE_FORMAT_ELEM(GL_RGBA16_SNORM, GL_RGBA, GL_SHORT, R16G16B16A16_SNORM) \
-    SURFACE_FORMAT_ELEM(GL_RGBA16I, GL_RGBA_INTEGER, GL_SHORT, R16G16B16A16_SINT) \
-    SURFACE_FORMAT_ELEM(GL_RGBA16UI, GL_RGBA_INTEGER, GL_UNSIGNED_SHORT, R16G16B16A16_UINT) \
-    SURFACE_FORMAT_ELEM(GL_R11F_G11F_B10F, GL_RGB, GL_UNSIGNED_INT_10F_11F_11F_REV, B10G11R11_FLOAT) \
-    SURFACE_FORMAT_ELEM(GL_RGBA32UI, GL_RGBA_INTEGER, GL_UNSIGNED_INT, R32G32B32A32_UINT) \
-    SURFACE_FORMAT_ELEM(GL_COMPRESSED_RGBA_S3TC_DXT1_EXT, GL_NONE, GL_NONE, BC1_RGBA_UNORM) \
-    SURFACE_FORMAT_ELEM(GL_COMPRESSED_RGBA_S3TC_DXT3_EXT, GL_NONE, GL_NONE, BC2_UNORM) \
-    SURFACE_FORMAT_ELEM(GL_COMPRESSED_RGBA_S3TC_DXT5_EXT, GL_NONE, GL_NONE, BC3_UNORM) \
-    SURFACE_FORMAT_ELEM(GL_COMPRESSED_RED_RGTC1, GL_NONE, GL_NONE, BC4_UNORM) \
-    SURFACE_FORMAT_ELEM(GL_COMPRESSED_SIGNED_RED_RGTC1, GL_NONE, GL_NONE, BC4_SNORM) \
-    SURFACE_FORMAT_ELEM(GL_COMPRESSED_RG_RGTC2, GL_NONE, GL_NONE, BC5_UNORM) \
-    SURFACE_FORMAT_ELEM(GL_COMPRESSED_SIGNED_RG_RGTC2, GL_NONE, GL_NONE, BC5_SNORM) \
-    SURFACE_FORMAT_ELEM(GL_COMPRESSED_RGBA_BPTC_UNORM, GL_NONE, GL_NONE, BC7_UNORM) \
-    SURFACE_FORMAT_ELEM(GL_COMPRESSED_RGB_BPTC_UNSIGNED_FLOAT, GL_NONE, GL_NONE, BC6H_UFLOAT) \
-    SURFACE_FORMAT_ELEM(GL_COMPRESSED_RGB_BPTC_SIGNED_FLOAT, GL_NONE, GL_NONE, BC6H_SFLOAT) \
-    SURFACE_FORMAT_ELEM(GL_COMPRESSED_RGBA_ASTC_4x4_KHR, GL_NONE, GL_NONE, ASTC_2D_4X4_UNORM) \
-    SURFACE_FORMAT_ELEM(GL_RGBA8, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, B8G8R8A8_UNORM) \
-    SURFACE_FORMAT_ELEM(GL_RGBA32F, GL_RGBA, GL_FLOAT, R32G32B32A32_FLOAT) \
-    SURFACE_FORMAT_ELEM(GL_RGBA32I, GL_RGBA_INTEGER, GL_INT, R32G32B32A32_SINT) \
-    SURFACE_FORMAT_ELEM(GL_RG32F, GL_RG, GL_FLOAT, R32G32_FLOAT) \
-    SURFACE_FORMAT_ELEM(GL_RG32I, GL_RG_INTEGER, GL_INT, R32G32_SINT) \
-    SURFACE_FORMAT_ELEM(GL_R32F, GL_RED, GL_FLOAT, R32_FLOAT) \
-    SURFACE_FORMAT_ELEM(GL_R16F, GL_RED, GL_HALF_FLOAT, R16_FLOAT) \
-    SURFACE_FORMAT_ELEM(GL_R16, GL_RED, GL_UNSIGNED_SHORT, R16_UNORM) \
-    SURFACE_FORMAT_ELEM(GL_R16_SNORM, GL_RED, GL_SHORT, R16_SNORM) \
-    SURFACE_FORMAT_ELEM(GL_R16UI, GL_RED_INTEGER, GL_UNSIGNED_SHORT, R16_UINT) \
-    SURFACE_FORMAT_ELEM(GL_R16I, GL_RED_INTEGER, GL_SHORT, R16_SINT) \
-    SURFACE_FORMAT_ELEM(GL_RG16, GL_RG, GL_UNSIGNED_SHORT, R16G16_UNORM) \
-    SURFACE_FORMAT_ELEM(GL_RG16F, GL_RG, GL_HALF_FLOAT, R16G16_FLOAT) \
-    SURFACE_FORMAT_ELEM(GL_RG16UI, GL_RG_INTEGER, GL_UNSIGNED_SHORT, R16G16_UINT) \
-    SURFACE_FORMAT_ELEM(GL_RG16I, GL_RG_INTEGER, GL_SHORT, R16G16_SINT) \
-    SURFACE_FORMAT_ELEM(GL_RG16_SNORM, GL_RG, GL_SHORT, R16G16_SNORM) \
-    SURFACE_FORMAT_ELEM(GL_RGB32F, GL_RGB, GL_FLOAT, R32G32B32_FLOAT) \
-    SURFACE_FORMAT_ELEM(GL_SRGB8_ALPHA8, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8_REV, A8B8G8R8_SRGB) \
-    SURFACE_FORMAT_ELEM(GL_RG8, GL_RG, GL_UNSIGNED_BYTE, R8G8_UNORM) \
-    SURFACE_FORMAT_ELEM(GL_RG8_SNORM, GL_RG, GL_BYTE, R8G8_SNORM) \
-    SURFACE_FORMAT_ELEM(GL_RG8I, GL_RG_INTEGER, GL_BYTE, R8G8_SINT) \
-    SURFACE_FORMAT_ELEM(GL_RG8UI, GL_RG_INTEGER, GL_UNSIGNED_BYTE, R8G8_UINT) \
-    SURFACE_FORMAT_ELEM(GL_RG32UI, GL_RG_INTEGER, GL_UNSIGNED_INT, R32G32_UINT) \
-    SURFACE_FORMAT_ELEM(GL_RGB16F, GL_RGBA, GL_HALF_FLOAT, R16G16B16X16_FLOAT) \
-    SURFACE_FORMAT_ELEM(GL_R32UI, GL_RED_INTEGER, GL_UNSIGNED_INT, R32_UINT) \
-    SURFACE_FORMAT_ELEM(GL_R32I, GL_RED_INTEGER, GL_INT, R32_SINT) \
-    SURFACE_FORMAT_ELEM(GL_COMPRESSED_RGBA_ASTC_8x8_KHR, GL_NONE, GL_NONE, ASTC_2D_8X8_UNORM) \
-    SURFACE_FORMAT_ELEM(GL_COMPRESSED_RGBA_ASTC_8x5_KHR, GL_NONE, GL_NONE, ASTC_2D_8X5_UNORM) \
-    SURFACE_FORMAT_ELEM(GL_COMPRESSED_RGBA_ASTC_5x4_KHR, GL_NONE, GL_NONE, ASTC_2D_5X4_UNORM) \
-    SURFACE_FORMAT_ELEM(GL_SRGB8_ALPHA8, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, B8G8R8A8_SRGB) \
-    SURFACE_FORMAT_ELEM(GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT, GL_NONE, GL_NONE, BC1_RGBA_SRGB) \
-    SURFACE_FORMAT_ELEM(GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT, GL_NONE, GL_NONE, BC2_SRGB) \
-    SURFACE_FORMAT_ELEM(GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT, GL_NONE, GL_NONE, BC3_SRGB) \
-    SURFACE_FORMAT_ELEM(GL_COMPRESSED_SRGB_ALPHA_BPTC_UNORM, GL_NONE, GL_NONE, BC7_SRGB) \
-    SURFACE_FORMAT_ELEM(GL_RGBA4, GL_RGBA, GL_UNSIGNED_SHORT_4_4_4_4_REV, A4B4G4R4_UNORM) \
-    SURFACE_FORMAT_ELEM(GL_R8, GL_RED, GL_UNSIGNED_BYTE, G4R4_UNORM) \
-    SURFACE_FORMAT_ELEM(GL_COMPRESSED_SRGB8_ALPHA8_ASTC_4x4_KHR, GL_NONE, GL_NONE, ASTC_2D_4X4_SRGB) \
-    SURFACE_FORMAT_ELEM(GL_COMPRESSED_SRGB8_ALPHA8_ASTC_8x8_KHR, GL_NONE, GL_NONE, ASTC_2D_8X8_SRGB) \
-    SURFACE_FORMAT_ELEM(GL_COMPRESSED_SRGB8_ALPHA8_ASTC_8x5_KHR, GL_NONE, GL_NONE, ASTC_2D_8X5_SRGB) \
-    SURFACE_FORMAT_ELEM(GL_COMPRESSED_SRGB8_ALPHA8_ASTC_5x4_KHR, GL_NONE, GL_NONE, ASTC_2D_5X4_SRGB) \
-    SURFACE_FORMAT_ELEM(GL_COMPRESSED_RGBA_ASTC_5x5_KHR, GL_NONE, GL_NONE, ASTC_2D_5X5_UNORM) \
-    SURFACE_FORMAT_ELEM(GL_COMPRESSED_SRGB8_ALPHA8_ASTC_5x5_KHR, GL_NONE, GL_NONE, ASTC_2D_5X5_SRGB) \
-    SURFACE_FORMAT_ELEM(GL_COMPRESSED_RGBA_ASTC_10x8_KHR, GL_NONE, GL_NONE, ASTC_2D_10X8_UNORM) \
-    SURFACE_FORMAT_ELEM(GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x8_KHR, GL_NONE, GL_NONE, ASTC_2D_10X8_SRGB) \
-    SURFACE_FORMAT_ELEM(GL_COMPRESSED_RGBA_ASTC_6x6_KHR, GL_NONE, GL_NONE, ASTC_2D_6X6_UNORM) \
-    SURFACE_FORMAT_ELEM(GL_COMPRESSED_SRGB8_ALPHA8_ASTC_6x6_KHR, GL_NONE, GL_NONE, ASTC_2D_6X6_SRGB) \
-    SURFACE_FORMAT_ELEM(GL_COMPRESSED_RGBA_ASTC_10x6_KHR, GL_NONE, GL_NONE, ASTC_2D_10X6_UNORM) \
-    SURFACE_FORMAT_ELEM(GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x6_KHR, GL_NONE, GL_NONE, ASTC_2D_10X6_SRGB) \
-    SURFACE_FORMAT_ELEM(GL_COMPRESSED_RGBA_ASTC_10x5_KHR, GL_NONE, GL_NONE, ASTC_2D_10X5_UNORM) \
-    SURFACE_FORMAT_ELEM(GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x5_KHR, GL_NONE, GL_NONE, ASTC_2D_10X5_SRGB) \
-    SURFACE_FORMAT_ELEM(GL_COMPRESSED_RGBA_ASTC_10x10_KHR, GL_NONE, GL_NONE, ASTC_2D_10X10_UNORM) \
-    SURFACE_FORMAT_ELEM(GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x10_KHR, GL_NONE, GL_NONE, ASTC_2D_10X10_SRGB) \
-    SURFACE_FORMAT_ELEM(GL_COMPRESSED_RGBA_ASTC_12x10_KHR, GL_NONE, GL_NONE, ASTC_2D_12X10_UNORM) \
-    SURFACE_FORMAT_ELEM(GL_COMPRESSED_SRGB8_ALPHA8_ASTC_12x10_KHR, GL_NONE, GL_NONE, ASTC_2D_12X10_SRGB) \
-    SURFACE_FORMAT_ELEM(GL_COMPRESSED_RGBA_ASTC_12x12_KHR, GL_NONE, GL_NONE, ASTC_2D_12X12_UNORM) \
-    SURFACE_FORMAT_ELEM(GL_COMPRESSED_SRGB8_ALPHA8_ASTC_12x12_KHR, GL_NONE, GL_NONE, ASTC_2D_12X12_SRGB) \
-    SURFACE_FORMAT_ELEM(GL_COMPRESSED_RGBA_ASTC_8x6_KHR, GL_NONE, GL_NONE, ASTC_2D_8X6_UNORM) \
-    SURFACE_FORMAT_ELEM(GL_COMPRESSED_SRGB8_ALPHA8_ASTC_8x6_KHR, GL_NONE, GL_NONE, ASTC_2D_8X6_SRGB) \
-    SURFACE_FORMAT_ELEM(GL_COMPRESSED_RGBA_ASTC_6x5_KHR, GL_NONE, GL_NONE, ASTC_2D_6X5_UNORM) \
-    SURFACE_FORMAT_ELEM(GL_COMPRESSED_SRGB8_ALPHA8_ASTC_6x5_KHR, GL_NONE, GL_NONE, ASTC_2D_6X5_SRGB) \
-    SURFACE_FORMAT_ELEM(GL_RGB9_E5, GL_RGB, GL_UNSIGNED_INT_5_9_9_9_REV, E5B9G9R9_FLOAT) \
-    SURFACE_FORMAT_ELEM(GL_DEPTH_COMPONENT32F, GL_DEPTH_COMPONENT, GL_FLOAT, D32_FLOAT) \
-    SURFACE_FORMAT_ELEM(GL_DEPTH_COMPONENT16, GL_DEPTH_COMPONENT, GL_UNSIGNED_SHORT, D16_UNORM) \
-    SURFACE_FORMAT_ELEM(GL_DEPTH_COMPONENT24, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT_24_8, X8_D24_UNORM) \
-    SURFACE_FORMAT_ELEM(GL_STENCIL_INDEX8, GL_STENCIL, GL_UNSIGNED_BYTE, S8_UINT) \
-    SURFACE_FORMAT_ELEM(GL_DEPTH24_STENCIL8, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, D24_UNORM_S8_UINT) \
-    SURFACE_FORMAT_ELEM(GL_DEPTH24_STENCIL8, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, S8_UINT_D24_UNORM) \
-    SURFACE_FORMAT_ELEM(GL_DEPTH32F_STENCIL8, GL_DEPTH_STENCIL, GL_FLOAT_32_UNSIGNED_INT_24_8_REV, D32_FLOAT_S8_UINT)
+#define SURFACE_FORMAT_LIST                                                                        \
+    SURFACE_FORMAT_ELEM(GL_RGBA8, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8_REV, A8B8G8R8_UNORM)            \
+    SURFACE_FORMAT_ELEM(GL_RGBA8_SNORM, GL_RGBA, GL_BYTE, A8B8G8R8_SNORM)                          \
+    SURFACE_FORMAT_ELEM(GL_RGBA8I, GL_RGBA_INTEGER, GL_BYTE, A8B8G8R8_SINT)                        \
+    SURFACE_FORMAT_ELEM(GL_RGBA8UI, GL_RGBA_INTEGER, GL_UNSIGNED_BYTE, A8B8G8R8_UINT)              \
+    SURFACE_FORMAT_ELEM(GL_RGB565, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, R5G6B5_UNORM)                  \
+    SURFACE_FORMAT_ELEM(GL_RGB565, GL_RGB, GL_UNSIGNED_SHORT_5_6_5_REV, B5G6R5_UNORM)              \
+    SURFACE_FORMAT_ELEM(GL_RGB5_A1, GL_BGRA, GL_UNSIGNED_SHORT_1_5_5_5_REV, A1R5G5B5_UNORM)        \
+    SURFACE_FORMAT_ELEM(GL_RGB10_A2, GL_RGBA, GL_UNSIGNED_INT_2_10_10_10_REV, A2B10G10R10_UNORM)   \
+    SURFACE_FORMAT_ELEM(GL_RGB10_A2UI, GL_RGBA_INTEGER, GL_UNSIGNED_INT_2_10_10_10_REV,            \
+                        A2B10G10R10_UINT)                                                          \
+    SURFACE_FORMAT_ELEM(GL_RGB10_A2, GL_BGRA, GL_UNSIGNED_INT_2_10_10_10_REV, A2R10G10B10_UNORM)   \
+    SURFACE_FORMAT_ELEM(GL_RGB5_A1, GL_RGBA, GL_UNSIGNED_SHORT_1_5_5_5_REV, A1B5G5R5_UNORM)        \
+    SURFACE_FORMAT_ELEM(GL_RGB5_A1, GL_RGBA, GL_UNSIGNED_SHORT_5_5_5_1, A5B5G5R1_UNORM)            \
+    SURFACE_FORMAT_ELEM(GL_R8, GL_RED, GL_UNSIGNED_BYTE, R8_UNORM)                                 \
+    SURFACE_FORMAT_ELEM(GL_R8_SNORM, GL_RED, GL_BYTE, R8_SNORM)                                    \
+    SURFACE_FORMAT_ELEM(GL_R8I, GL_RED_INTEGER, GL_BYTE, R8_SINT)                                  \
+    SURFACE_FORMAT_ELEM(GL_R8UI, GL_RED_INTEGER, GL_UNSIGNED_BYTE, R8_UINT)                        \
+    SURFACE_FORMAT_ELEM(GL_RGBA16F, GL_RGBA, GL_HALF_FLOAT, R16G16B16A16_FLOAT)                    \
+    SURFACE_FORMAT_ELEM(GL_RGBA16, GL_RGBA, GL_UNSIGNED_SHORT, R16G16B16A16_UNORM)                 \
+    SURFACE_FORMAT_ELEM(GL_RGBA16_SNORM, GL_RGBA, GL_SHORT, R16G16B16A16_SNORM)                    \
+    SURFACE_FORMAT_ELEM(GL_RGBA16I, GL_RGBA_INTEGER, GL_SHORT, R16G16B16A16_SINT)                  \
+    SURFACE_FORMAT_ELEM(GL_RGBA16UI, GL_RGBA_INTEGER, GL_UNSIGNED_SHORT, R16G16B16A16_UINT)        \
+    SURFACE_FORMAT_ELEM(GL_R11F_G11F_B10F, GL_RGB, GL_UNSIGNED_INT_10F_11F_11F_REV,                \
+                        B10G11R11_FLOAT)                                                           \
+    SURFACE_FORMAT_ELEM(GL_RGBA32UI, GL_RGBA_INTEGER, GL_UNSIGNED_INT, R32G32B32A32_UINT)          \
+    SURFACE_FORMAT_ELEM(GL_COMPRESSED_RGBA_S3TC_DXT1_EXT, GL_NONE, GL_NONE, BC1_RGBA_UNORM)        \
+    SURFACE_FORMAT_ELEM(GL_COMPRESSED_RGBA_S3TC_DXT3_EXT, GL_NONE, GL_NONE, BC2_UNORM)             \
+    SURFACE_FORMAT_ELEM(GL_COMPRESSED_RGBA_S3TC_DXT5_EXT, GL_NONE, GL_NONE, BC3_UNORM)             \
+    SURFACE_FORMAT_ELEM(GL_COMPRESSED_RED_RGTC1, GL_NONE, GL_NONE, BC4_UNORM)                      \
+    SURFACE_FORMAT_ELEM(GL_COMPRESSED_SIGNED_RED_RGTC1, GL_NONE, GL_NONE, BC4_SNORM)               \
+    SURFACE_FORMAT_ELEM(GL_COMPRESSED_RG_RGTC2, GL_NONE, GL_NONE, BC5_UNORM)                       \
+    SURFACE_FORMAT_ELEM(GL_COMPRESSED_SIGNED_RG_RGTC2, GL_NONE, GL_NONE, BC5_SNORM)                \
+    SURFACE_FORMAT_ELEM(GL_COMPRESSED_RGBA_BPTC_UNORM, GL_NONE, GL_NONE, BC7_UNORM)                \
+    SURFACE_FORMAT_ELEM(GL_COMPRESSED_RGB_BPTC_UNSIGNED_FLOAT, GL_NONE, GL_NONE, BC6H_UFLOAT)      \
+    SURFACE_FORMAT_ELEM(GL_COMPRESSED_RGB_BPTC_SIGNED_FLOAT, GL_NONE, GL_NONE, BC6H_SFLOAT)        \
+    SURFACE_FORMAT_ELEM(GL_COMPRESSED_RGBA_ASTC_4x4_KHR, GL_NONE, GL_NONE, ASTC_2D_4X4_UNORM)      \
+    SURFACE_FORMAT_ELEM(GL_RGBA8, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, B8G8R8A8_UNORM)            \
+    SURFACE_FORMAT_ELEM(GL_RGBA32F, GL_RGBA, GL_FLOAT, R32G32B32A32_FLOAT)                         \
+    SURFACE_FORMAT_ELEM(GL_RGBA32I, GL_RGBA_INTEGER, GL_INT, R32G32B32A32_SINT)                    \
+    SURFACE_FORMAT_ELEM(GL_RG32F, GL_RG, GL_FLOAT, R32G32_FLOAT)                                   \
+    SURFACE_FORMAT_ELEM(GL_RG32I, GL_RG_INTEGER, GL_INT, R32G32_SINT)                              \
+    SURFACE_FORMAT_ELEM(GL_R32F, GL_RED, GL_FLOAT, R32_FLOAT)                                      \
+    SURFACE_FORMAT_ELEM(GL_R16F, GL_RED, GL_HALF_FLOAT, R16_FLOAT)                                 \
+    SURFACE_FORMAT_ELEM(GL_R16, GL_RED, GL_UNSIGNED_SHORT, R16_UNORM)                              \
+    SURFACE_FORMAT_ELEM(GL_R16_SNORM, GL_RED, GL_SHORT, R16_SNORM)                                 \
+    SURFACE_FORMAT_ELEM(GL_R16UI, GL_RED_INTEGER, GL_UNSIGNED_SHORT, R16_UINT)                     \
+    SURFACE_FORMAT_ELEM(GL_R16I, GL_RED_INTEGER, GL_SHORT, R16_SINT)                               \
+    SURFACE_FORMAT_ELEM(GL_RG16, GL_RG, GL_UNSIGNED_SHORT, R16G16_UNORM)                           \
+    SURFACE_FORMAT_ELEM(GL_RG16F, GL_RG, GL_HALF_FLOAT, R16G16_FLOAT)                              \
+    SURFACE_FORMAT_ELEM(GL_RG16UI, GL_RG_INTEGER, GL_UNSIGNED_SHORT, R16G16_UINT)                  \
+    SURFACE_FORMAT_ELEM(GL_RG16I, GL_RG_INTEGER, GL_SHORT, R16G16_SINT)                            \
+    SURFACE_FORMAT_ELEM(GL_RG16_SNORM, GL_RG, GL_SHORT, R16G16_SNORM)                              \
+    SURFACE_FORMAT_ELEM(GL_RGB32F, GL_RGB, GL_FLOAT, R32G32B32_FLOAT)                              \
+    SURFACE_FORMAT_ELEM(GL_SRGB8_ALPHA8, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8_REV, A8B8G8R8_SRGB)      \
+    SURFACE_FORMAT_ELEM(GL_RG8, GL_RG, GL_UNSIGNED_BYTE, R8G8_UNORM)                               \
+    SURFACE_FORMAT_ELEM(GL_RG8_SNORM, GL_RG, GL_BYTE, R8G8_SNORM)                                  \
+    SURFACE_FORMAT_ELEM(GL_RG8I, GL_RG_INTEGER, GL_BYTE, R8G8_SINT)                                \
+    SURFACE_FORMAT_ELEM(GL_RG8UI, GL_RG_INTEGER, GL_UNSIGNED_BYTE, R8G8_UINT)                      \
+    SURFACE_FORMAT_ELEM(GL_RG32UI, GL_RG_INTEGER, GL_UNSIGNED_INT, R32G32_UINT)                    \
+    SURFACE_FORMAT_ELEM(GL_RGB16F, GL_RGBA, GL_HALF_FLOAT, R16G16B16X16_FLOAT)                     \
+    SURFACE_FORMAT_ELEM(GL_R32UI, GL_RED_INTEGER, GL_UNSIGNED_INT, R32_UINT)                       \
+    SURFACE_FORMAT_ELEM(GL_R32I, GL_RED_INTEGER, GL_INT, R32_SINT)                                 \
+    SURFACE_FORMAT_ELEM(GL_COMPRESSED_RGBA_ASTC_8x8_KHR, GL_NONE, GL_NONE, ASTC_2D_8X8_UNORM)      \
+    SURFACE_FORMAT_ELEM(GL_COMPRESSED_RGBA_ASTC_8x5_KHR, GL_NONE, GL_NONE, ASTC_2D_8X5_UNORM)      \
+    SURFACE_FORMAT_ELEM(GL_COMPRESSED_RGBA_ASTC_5x4_KHR, GL_NONE, GL_NONE, ASTC_2D_5X4_UNORM)      \
+    SURFACE_FORMAT_ELEM(GL_SRGB8_ALPHA8, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, B8G8R8A8_SRGB)      \
+    SURFACE_FORMAT_ELEM(GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT, GL_NONE, GL_NONE, BC1_RGBA_SRGB)   \
+    SURFACE_FORMAT_ELEM(GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT, GL_NONE, GL_NONE, BC2_SRGB)        \
+    SURFACE_FORMAT_ELEM(GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT, GL_NONE, GL_NONE, BC3_SRGB)        \
+    SURFACE_FORMAT_ELEM(GL_COMPRESSED_SRGB_ALPHA_BPTC_UNORM, GL_NONE, GL_NONE, BC7_SRGB)           \
+    SURFACE_FORMAT_ELEM(GL_RGBA4, GL_RGBA, GL_UNSIGNED_SHORT_4_4_4_4_REV, A4B4G4R4_UNORM)          \
+    SURFACE_FORMAT_ELEM(GL_R8, GL_RED, GL_UNSIGNED_BYTE, G4R4_UNORM)                               \
+    SURFACE_FORMAT_ELEM(GL_COMPRESSED_SRGB8_ALPHA8_ASTC_4x4_KHR, GL_NONE, GL_NONE,                 \
+                        ASTC_2D_4X4_SRGB)                                                          \
+    SURFACE_FORMAT_ELEM(GL_COMPRESSED_SRGB8_ALPHA8_ASTC_8x8_KHR, GL_NONE, GL_NONE,                 \
+                        ASTC_2D_8X8_SRGB)                                                          \
+    SURFACE_FORMAT_ELEM(GL_COMPRESSED_SRGB8_ALPHA8_ASTC_8x5_KHR, GL_NONE, GL_NONE,                 \
+                        ASTC_2D_8X5_SRGB)                                                          \
+    SURFACE_FORMAT_ELEM(GL_COMPRESSED_SRGB8_ALPHA8_ASTC_5x4_KHR, GL_NONE, GL_NONE,                 \
+                        ASTC_2D_5X4_SRGB)                                                          \
+    SURFACE_FORMAT_ELEM(GL_COMPRESSED_RGBA_ASTC_5x5_KHR, GL_NONE, GL_NONE, ASTC_2D_5X5_UNORM)      \
+    SURFACE_FORMAT_ELEM(GL_COMPRESSED_SRGB8_ALPHA8_ASTC_5x5_KHR, GL_NONE, GL_NONE,                 \
+                        ASTC_2D_5X5_SRGB)                                                          \
+    SURFACE_FORMAT_ELEM(GL_COMPRESSED_RGBA_ASTC_10x8_KHR, GL_NONE, GL_NONE, ASTC_2D_10X8_UNORM)    \
+    SURFACE_FORMAT_ELEM(GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x8_KHR, GL_NONE, GL_NONE,                \
+                        ASTC_2D_10X8_SRGB)                                                         \
+    SURFACE_FORMAT_ELEM(GL_COMPRESSED_RGBA_ASTC_6x6_KHR, GL_NONE, GL_NONE, ASTC_2D_6X6_UNORM)      \
+    SURFACE_FORMAT_ELEM(GL_COMPRESSED_SRGB8_ALPHA8_ASTC_6x6_KHR, GL_NONE, GL_NONE,                 \
+                        ASTC_2D_6X6_SRGB)                                                          \
+    SURFACE_FORMAT_ELEM(GL_COMPRESSED_RGBA_ASTC_10x6_KHR, GL_NONE, GL_NONE, ASTC_2D_10X6_UNORM)    \
+    SURFACE_FORMAT_ELEM(GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x6_KHR, GL_NONE, GL_NONE,                \
+                        ASTC_2D_10X6_SRGB)                                                         \
+    SURFACE_FORMAT_ELEM(GL_COMPRESSED_RGBA_ASTC_10x5_KHR, GL_NONE, GL_NONE, ASTC_2D_10X5_UNORM)    \
+    SURFACE_FORMAT_ELEM(GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x5_KHR, GL_NONE, GL_NONE,                \
+                        ASTC_2D_10X5_SRGB)                                                         \
+    SURFACE_FORMAT_ELEM(GL_COMPRESSED_RGBA_ASTC_10x10_KHR, GL_NONE, GL_NONE, ASTC_2D_10X10_UNORM)  \
+    SURFACE_FORMAT_ELEM(GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x10_KHR, GL_NONE, GL_NONE,               \
+                        ASTC_2D_10X10_SRGB)                                                        \
+    SURFACE_FORMAT_ELEM(GL_COMPRESSED_RGBA_ASTC_12x10_KHR, GL_NONE, GL_NONE, ASTC_2D_12X10_UNORM)  \
+    SURFACE_FORMAT_ELEM(GL_COMPRESSED_SRGB8_ALPHA8_ASTC_12x10_KHR, GL_NONE, GL_NONE,               \
+                        ASTC_2D_12X10_SRGB)                                                        \
+    SURFACE_FORMAT_ELEM(GL_COMPRESSED_RGBA_ASTC_12x12_KHR, GL_NONE, GL_NONE, ASTC_2D_12X12_UNORM)  \
+    SURFACE_FORMAT_ELEM(GL_COMPRESSED_SRGB8_ALPHA8_ASTC_12x12_KHR, GL_NONE, GL_NONE,               \
+                        ASTC_2D_12X12_SRGB)                                                        \
+    SURFACE_FORMAT_ELEM(GL_COMPRESSED_RGBA_ASTC_8x6_KHR, GL_NONE, GL_NONE, ASTC_2D_8X6_UNORM)      \
+    SURFACE_FORMAT_ELEM(GL_COMPRESSED_SRGB8_ALPHA8_ASTC_8x6_KHR, GL_NONE, GL_NONE,                 \
+                        ASTC_2D_8X6_SRGB)                                                          \
+    SURFACE_FORMAT_ELEM(GL_COMPRESSED_RGBA_ASTC_6x5_KHR, GL_NONE, GL_NONE, ASTC_2D_6X5_UNORM)      \
+    SURFACE_FORMAT_ELEM(GL_COMPRESSED_SRGB8_ALPHA8_ASTC_6x5_KHR, GL_NONE, GL_NONE,                 \
+                        ASTC_2D_6X5_SRGB)                                                          \
+    SURFACE_FORMAT_ELEM(GL_RGB9_E5, GL_RGB, GL_UNSIGNED_INT_5_9_9_9_REV, E5B9G9R9_FLOAT)           \
+    SURFACE_FORMAT_ELEM(GL_DEPTH_COMPONENT32F, GL_DEPTH_COMPONENT, GL_FLOAT, D32_FLOAT)            \
+    SURFACE_FORMAT_ELEM(GL_DEPTH_COMPONENT16, GL_DEPTH_COMPONENT, GL_UNSIGNED_SHORT, D16_UNORM)    \
+    SURFACE_FORMAT_ELEM(GL_DEPTH_COMPONENT24, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT_24_8,            \
+                        X8_D24_UNORM)                                                              \
+    SURFACE_FORMAT_ELEM(GL_STENCIL_INDEX8, GL_STENCIL, GL_UNSIGNED_BYTE, S8_UINT)                  \
+    SURFACE_FORMAT_ELEM(GL_DEPTH24_STENCIL8, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8,               \
+                        D24_UNORM_S8_UINT)                                                         \
+    SURFACE_FORMAT_ELEM(GL_DEPTH24_STENCIL8, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8,               \
+                        S8_UINT_D24_UNORM)                                                         \
+    SURFACE_FORMAT_ELEM(GL_DEPTH32F_STENCIL8, GL_DEPTH_STENCIL, GL_FLOAT_32_UNSIGNED_INT_24_8_REV, \
+                        D32_FLOAT_S8_UINT)
 constexpr std::array<FormatTuple, VideoCore::Surface::MaxPixelFormat> FORMAT_TABLE = {{
 #define SURFACE_FORMAT_ELEM(a1, a2, a3, name) {a1, a2, a3},
     SURFACE_FORMAT_LIST
 #undef SURFACE_FORMAT_ELEM
 }};
-constexpr FormatTuple GetFormatTuple(VideoCore::Surface::PixelFormat pixel_format) noexcept {
+constexpr FormatTuple GetFormatTuple(VideoCore::Surface::PixelFormat pixel_format) noexcept
+{
     switch (pixel_format) {
-#define SURFACE_FORMAT_ELEM(a1, a2, a3, name) case VideoCore::Surface::PixelFormat::name: return {a1, a2, a3};
-    SURFACE_FORMAT_LIST
+#define SURFACE_FORMAT_ELEM(a1, a2, a3, name)                                                      \
+    case VideoCore::Surface::PixelFormat::name:                                                    \
+        return {a1, a2, a3};
+        SURFACE_FORMAT_LIST
 #undef SURFACE_FORMAT_ELEM
 #undef SURFACE_FORMAT_LIST
-    default: UNREACHABLE();
+    default:
+        UNREACHABLE();
     }
 }
 
-inline GLenum VertexFormat(Maxwell::VertexAttribute attrib) {
+inline GLenum VertexFormat(Maxwell::VertexAttribute attrib)
+{
     switch (attrib.type) {
     case Maxwell::VertexAttribute::Type::UnusedEnumDoNotUseBecauseItWillGoAway:
         ASSERT_MSG(false, "Invalid vertex attribute type!");
@@ -223,7 +248,8 @@ inline GLenum VertexFormat(Maxwell::VertexAttribute attrib) {
     return {};
 }
 
-inline GLenum IndexFormat(Maxwell::IndexFormat index_format) {
+inline GLenum IndexFormat(Maxwell::IndexFormat index_format)
+{
     switch (index_format) {
     case Maxwell::IndexFormat::UnsignedByte:
         return GL_UNSIGNED_BYTE;
@@ -236,7 +262,8 @@ inline GLenum IndexFormat(Maxwell::IndexFormat index_format) {
     return {};
 }
 
-inline GLenum PrimitiveTopology(Maxwell::PrimitiveTopology topology) {
+inline GLenum PrimitiveTopology(Maxwell::PrimitiveTopology topology)
+{
     switch (topology) {
     case Maxwell::PrimitiveTopology::Points:
         return GL_POINTS;
@@ -274,7 +301,8 @@ inline GLenum PrimitiveTopology(Maxwell::PrimitiveTopology topology) {
 }
 
 inline GLenum TextureFilterMode(Tegra::Texture::TextureFilter filter_mode,
-                                Tegra::Texture::TextureMipmapFilter mipmap_filter_mode) {
+                                Tegra::Texture::TextureMipmapFilter mipmap_filter_mode)
+{
     switch (filter_mode) {
     case Tegra::Texture::TextureFilter::Nearest:
         switch (mipmap_filter_mode) {
@@ -302,7 +330,8 @@ inline GLenum TextureFilterMode(Tegra::Texture::TextureFilter filter_mode,
     return GL_NEAREST;
 }
 
-inline GLenum WrapMode(Tegra::Texture::WrapMode wrap_mode) {
+inline GLenum WrapMode(Tegra::Texture::WrapMode wrap_mode)
+{
     switch (wrap_mode) {
     case Tegra::Texture::WrapMode::Wrap:
         return GL_REPEAT;
@@ -334,7 +363,8 @@ inline GLenum WrapMode(Tegra::Texture::WrapMode wrap_mode) {
     }
 }
 
-inline GLenum DepthCompareFunc(Tegra::Texture::DepthCompareFunc func) {
+inline GLenum DepthCompareFunc(Tegra::Texture::DepthCompareFunc func)
+{
     switch (func) {
     case Tegra::Texture::DepthCompareFunc::Never:
         return GL_NEVER;
@@ -357,7 +387,8 @@ inline GLenum DepthCompareFunc(Tegra::Texture::DepthCompareFunc func) {
     return GL_GREATER;
 }
 
-inline GLenum BlendEquation(Maxwell::Blend::Equation equation) {
+inline GLenum BlendEquation(Maxwell::Blend::Equation equation)
+{
     switch (equation) {
     case Maxwell::Blend::Equation::Add_D3D:
     case Maxwell::Blend::Equation::Add_GL:
@@ -379,7 +410,8 @@ inline GLenum BlendEquation(Maxwell::Blend::Equation equation) {
     return GL_FUNC_ADD;
 }
 
-inline GLenum BlendFunc(Maxwell::Blend::Factor factor) {
+inline GLenum BlendFunc(Maxwell::Blend::Factor factor)
+{
     switch (factor) {
     case Maxwell::Blend::Factor::Zero_D3D:
     case Maxwell::Blend::Factor::Zero_GL:
@@ -443,7 +475,8 @@ inline GLenum BlendFunc(Maxwell::Blend::Factor factor) {
     return GL_ZERO;
 }
 
-inline GLenum ComparisonOp(Maxwell::ComparisonOp comparison) {
+inline GLenum ComparisonOp(Maxwell::ComparisonOp comparison)
+{
     switch (comparison) {
     case Maxwell::ComparisonOp::Never_D3D:
     case Maxwell::ComparisonOp::Never_GL:
@@ -474,7 +507,8 @@ inline GLenum ComparisonOp(Maxwell::ComparisonOp comparison) {
     return GL_ALWAYS;
 }
 
-inline GLenum StencilOp(Maxwell::StencilOp::Op stencil) {
+inline GLenum StencilOp(Maxwell::StencilOp::Op stencil)
+{
     switch (stencil) {
     case Maxwell::StencilOp::Op::Keep_D3D:
     case Maxwell::StencilOp::Op::Keep_GL:
@@ -505,7 +539,8 @@ inline GLenum StencilOp(Maxwell::StencilOp::Op stencil) {
     return GL_KEEP;
 }
 
-inline GLenum FrontFace(Maxwell::FrontFace front_face) {
+inline GLenum FrontFace(Maxwell::FrontFace front_face)
+{
     switch (front_face) {
     case Maxwell::FrontFace::ClockWise:
         return GL_CW;
@@ -516,7 +551,8 @@ inline GLenum FrontFace(Maxwell::FrontFace front_face) {
     return GL_CCW;
 }
 
-inline GLenum CullFace(Maxwell::CullFace cull_face) {
+inline GLenum CullFace(Maxwell::CullFace cull_face)
+{
     switch (cull_face) {
     case Maxwell::CullFace::Front:
         return GL_FRONT;
@@ -529,7 +565,8 @@ inline GLenum CullFace(Maxwell::CullFace cull_face) {
     return GL_BACK;
 }
 
-inline GLenum LogicOp(Maxwell::LogicOp::Op operation) {
+inline GLenum LogicOp(Maxwell::LogicOp::Op operation)
+{
     switch (operation) {
     case Maxwell::LogicOp::Op::Clear:
         return GL_CLEAR;
@@ -568,7 +605,8 @@ inline GLenum LogicOp(Maxwell::LogicOp::Op operation) {
     return GL_COPY;
 }
 
-inline GLenum PolygonMode(Maxwell::PolygonMode polygon_mode) {
+inline GLenum PolygonMode(Maxwell::PolygonMode polygon_mode)
+{
     switch (polygon_mode) {
     case Maxwell::PolygonMode::Point:
         return GL_POINT;
@@ -581,7 +619,8 @@ inline GLenum PolygonMode(Maxwell::PolygonMode polygon_mode) {
     return GL_FILL;
 }
 
-inline GLenum ReductionFilter(Tegra::Texture::SamplerReduction filter) {
+inline GLenum ReductionFilter(Tegra::Texture::SamplerReduction filter)
+{
     switch (filter) {
     case Tegra::Texture::SamplerReduction::WeightedAverage:
         return GL_WEIGHTED_AVERAGE_ARB;
@@ -594,7 +633,8 @@ inline GLenum ReductionFilter(Tegra::Texture::SamplerReduction filter) {
     return GL_WEIGHTED_AVERAGE_ARB;
 }
 
-inline GLenum ViewportSwizzle(Maxwell::ViewportSwizzle swizzle) {
+inline GLenum ViewportSwizzle(Maxwell::ViewportSwizzle swizzle)
+{
     // Enumeration order matches register order. We can convert it arithmetically.
     return GL_VIEWPORT_SWIZZLE_POSITIVE_X_NV + static_cast<GLenum>(swizzle);
 }

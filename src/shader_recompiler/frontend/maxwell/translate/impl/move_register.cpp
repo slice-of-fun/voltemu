@@ -8,7 +8,8 @@
 
 namespace Shader::Maxwell {
 namespace {
-void MOV(TranslatorVisitor& v, u64 insn, const IR::U32& src, bool is_mov32i = false) {
+void MOV(TranslatorVisitor& v, u64 insn, const IR::U32& src, bool is_mov32i = false)
+{
     union {
         u64 raw;
         BitField<0, 8, IR::Reg> dest_reg;
@@ -25,19 +26,23 @@ void MOV(TranslatorVisitor& v, u64 insn, const IR::U32& src, bool is_mov32i = fa
 }
 } // Anonymous namespace
 
-void TranslatorVisitor::MOV_reg(u64 insn) {
+void TranslatorVisitor::MOV_reg(u64 insn)
+{
     MOV(*this, insn, GetReg20(insn));
 }
 
-void TranslatorVisitor::MOV_cbuf(u64 insn) {
+void TranslatorVisitor::MOV_cbuf(u64 insn)
+{
     MOV(*this, insn, GetCbuf(insn));
 }
 
-void TranslatorVisitor::MOV_imm(u64 insn) {
+void TranslatorVisitor::MOV_imm(u64 insn)
+{
     MOV(*this, insn, GetImm20(insn));
 }
 
-void TranslatorVisitor::MOV32I(u64 insn) {
+void TranslatorVisitor::MOV32I(u64 insn)
+{
     MOV(*this, insn, GetImm32(insn), true);
 }
 

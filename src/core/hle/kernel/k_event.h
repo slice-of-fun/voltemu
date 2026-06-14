@@ -23,30 +23,23 @@ public:
 
     void Finalize() override;
 
-    bool IsInitialized() const override {
-        return m_initialized;
-    }
+    bool IsInitialized() const override { return m_initialized; }
 
-    uintptr_t GetPostDestroyArgument() const override {
+    uintptr_t GetPostDestroyArgument() const override
+    {
         return reinterpret_cast<uintptr_t>(m_owner);
     }
 
-    KProcess* GetOwner() const override {
-        return m_owner;
-    }
+    KProcess* GetOwner() const override { return m_owner; }
 
-    KReadableEvent& GetReadableEvent() {
-        return m_readable_event;
-    }
+    KReadableEvent& GetReadableEvent() { return m_readable_event; }
 
     static void PostDestroy(uintptr_t arg);
 
     Result Signal();
     Result Clear();
 
-    void OnReadableEventDestroyed() {
-        m_readable_event_destroyed = true;
-    }
+    void OnReadableEventDestroyed() { m_readable_event_destroyed = true; }
 
 private:
     KReadableEvent m_readable_event;

@@ -6,7 +6,8 @@
 namespace Service::AM {
 
 IDebugFunctions::IDebugFunctions(Core::System& system_)
-    : ServiceFramework{system_, "IDebugFunctions"} {
+    : ServiceFramework{system_, "IDebugFunctions"}
+{
     // clang-format off
     static const FunctionInfo functions[] = {
         {0, nullptr, "NotifyMessageToHomeMenuForDebug"},

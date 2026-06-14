@@ -6,7 +6,8 @@
 namespace Service::NS {
 
 IAccountProxyInterface::IAccountProxyInterface(Core::System& system_)
-    : ServiceFramework{system_, "IAccountProxyInterface"} {
+    : ServiceFramework{system_, "IAccountProxyInterface"}
+{
     // clang-format off
     static const FunctionInfo functions[] = {
         {0, nullptr, "CreateUserAccount"},

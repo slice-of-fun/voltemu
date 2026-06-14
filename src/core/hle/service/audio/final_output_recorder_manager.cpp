@@ -8,7 +8,8 @@ namespace Service::Audio {
 class IFinalOutputRecorder final : public ServiceFramework<IFinalOutputRecorder> {
 public:
     explicit IFinalOutputRecorder(Core::System& system_)
-        : ServiceFramework{system_, "IFinalOutputRecorder"} {
+        : ServiceFramework{system_, "IFinalOutputRecorder"}
+    {
         // clang-format off
         static const FunctionInfo functions[] = {
             {0, nullptr, "GetFinalOutputRecorderState"},
@@ -31,7 +32,8 @@ public:
 };
 
 IFinalOutputRecorderManager::IFinalOutputRecorderManager(Core::System& system_)
-    : ServiceFramework{system_, "audrec:u"} {
+    : ServiceFramework{system_, "audrec:u"}
+{
     static const FunctionInfo functions[] = {
         {0, nullptr, "OpenFinalOutputRecorder"},
     };

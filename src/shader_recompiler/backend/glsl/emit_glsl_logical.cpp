@@ -7,19 +7,23 @@
 
 namespace Shader::Backend::GLSL {
 
-void EmitLogicalOr(EmitContext& ctx, IR::Inst& inst, std::string_view a, std::string_view b) {
+void EmitLogicalOr(EmitContext& ctx, IR::Inst& inst, std::string_view a, std::string_view b)
+{
     ctx.AddU1("{}={}||{};", inst, a, b);
 }
 
-void EmitLogicalAnd(EmitContext& ctx, IR::Inst& inst, std::string_view a, std::string_view b) {
+void EmitLogicalAnd(EmitContext& ctx, IR::Inst& inst, std::string_view a, std::string_view b)
+{
     ctx.AddU1("{}={}&&{};", inst, a, b);
 }
 
-void EmitLogicalXor(EmitContext& ctx, IR::Inst& inst, std::string_view a, std::string_view b) {
+void EmitLogicalXor(EmitContext& ctx, IR::Inst& inst, std::string_view a, std::string_view b)
+{
     ctx.AddU1("{}={}^^{};", inst, a, b);
 }
 
-void EmitLogicalNot(EmitContext& ctx, IR::Inst& inst, std::string_view value) {
+void EmitLogicalNot(EmitContext& ctx, IR::Inst& inst, std::string_view value)
+{
     ctx.AddU1("{}=!{};", inst, value);
 }
 } // namespace Shader::Backend::GLSL

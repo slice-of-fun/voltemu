@@ -83,135 +83,110 @@ class StateTracker {
 public:
     explicit StateTracker();
 
-    void InvalidateCommandBufferState() {
+    void InvalidateCommandBufferState()
+    {
         (*flags) |= invalidation_flags;
         current_topology = INVALID_TOPOLOGY;
         stencil_reset = true;
     }
 
-    void InvalidateViewports() {
-        (*flags)[Dirty::Viewports] = true;
-    }
+    void InvalidateViewports() { (*flags)[Dirty::Viewports] = true; }
 
-    void InvalidateScissors() {
-        (*flags)[Dirty::Scissors] = true;
-    }
+    void InvalidateScissors() { (*flags)[Dirty::Scissors] = true; }
 
-    void InvalidateStateEnableFlag() {
-        (*flags)[Dirty::StateEnable] = true;
-    }
+    void InvalidateStateEnableFlag() { (*flags)[Dirty::StateEnable] = true; }
 
-    bool TouchViewports() {
+    bool TouchViewports()
+    {
         const bool dirty_viewports = Exchange(Dirty::Viewports, false);
         const bool rescale_viewports = Exchange(VideoCommon::Dirty::RescaleViewports, false);
         return dirty_viewports || rescale_viewports;
     }
 
-    bool TouchScissors() {
+    bool TouchScissors()
+    {
         const bool dirty_scissors = Exchange(Dirty::Scissors, false);
         const bool rescale_scissors = Exchange(VideoCommon::Dirty::RescaleScissors, false);
         return dirty_scissors || rescale_scissors;
     }
 
-    bool TouchDepthBias() {
+    bool TouchDepthBias()
+    {
         return Exchange(Dirty::DepthBias, false) ||
                Exchange(VideoCommon::Dirty::DepthBiasGlobal, false);
     }
 
-    bool TouchBlendConstants() {
-        return Exchange(Dirty::BlendConstants, false);
-    }
+    bool TouchBlendConstants() { return Exchange(Dirty::BlendConstants, false); }
 
-    bool TouchDepthBounds() {
-        return Exchange(Dirty::DepthBounds, false);
-    }
+    bool TouchDepthBounds() { return Exchange(Dirty::DepthBounds, false); }
 
-    bool TouchStencilProperties() {
-        return Exchange(Dirty::StencilProperties, false);
-    }
+    bool TouchStencilProperties() { return Exchange(Dirty::StencilProperties, false); }
 
-    bool TouchStencilReference() {
-        return Exchange(Dirty::StencilReference, false);
-    }
+    bool TouchStencilReference() { return Exchange(Dirty::StencilReference, false); }
 
-    bool TouchStencilWriteMask() {
-        return Exchange(Dirty::StencilWriteMask, false);
-    }
+    bool TouchStencilWriteMask() { return Exchange(Dirty::StencilWriteMask, false); }
 
-    bool TouchStencilCompare() {
-        return Exchange(Dirty::StencilCompare, false);
-    }
+    bool TouchStencilCompare() { return Exchange(Dirty::StencilCompare, false); }
 
-    template <typename T>
-    bool ExchangeCheck(T& old_value, T new_value) {
+    template<typename T> bool ExchangeCheck(T& old_value, T new_value)
+    {
         bool result = old_value != new_value;
         old_value = new_value;
         return result;
     }
 
-    bool TouchStencilSide(bool two_sided_stencil_new) {
+    bool TouchStencilSide(bool two_sided_stencil_new)
+    {
         return ExchangeCheck(two_sided_stencil, two_sided_stencil_new) || stencil_reset;
     }
 
-    bool CheckStencilReferenceFront(u32 new_value) {
+    bool CheckStencilReferenceFront(u32 new_value)
+    {
         return ExchangeCheck(front.ref, new_value) || stencil_reset;
     }
 
-    bool CheckStencilReferenceBack(u32 new_value) {
+    bool CheckStencilReferenceBack(u32 new_value)
+    {
         return ExchangeCheck(back.ref, new_value) || stencil_reset;
     }
 
-    bool CheckStencilWriteMaskFront(u32 new_value) {
+    bool CheckStencilWriteMaskFront(u32 new_value)
+    {
         return ExchangeCheck(front.write_mask, new_value) || stencil_reset;
     }
 
-    bool CheckStencilWriteMaskBack(u32 new_value) {
+    bool CheckStencilWriteMaskBack(u32 new_value)
+    {
         return ExchangeCheck(back.write_mask, new_value) || stencil_reset;
     }
 
-    bool CheckStencilCompareMaskFront(u32 new_value) {
+    bool CheckStencilCompareMaskFront(u32 new_value)
+    {
         return ExchangeCheck(front.compare_mask, new_value) || stencil_reset;
     }
 
-    bool CheckStencilCompareMaskBack(u32 new_value) {
+    bool CheckStencilCompareMaskBack(u32 new_value)
+    {
         return ExchangeCheck(back.compare_mask, new_value) || stencil_reset;
     }
 
-    void ClearStencilReset() {
-        stencil_reset = false;
-    }
+    void ClearStencilReset() { stencil_reset = false; }
 
-    bool TouchLineWidth() const {
-        return Exchange(Dirty::LineWidth, false);
-    }
+    bool TouchLineWidth() const { return Exchange(Dirty::LineWidth, false); }
 
-    bool TouchCullMode() {
-        return Exchange(Dirty::CullMode, false);
-    }
+    bool TouchCullMode() { return Exchange(Dirty::CullMode, false); }
 
-    bool TouchStateEnable() {
-        return Exchange(Dirty::StateEnable, false);
-    }
+    bool TouchStateEnable() { return Exchange(Dirty::StateEnable, false); }
 
-    bool TouchDepthBoundsTestEnable() {
-        return Exchange(Dirty::DepthBoundsEnable, false);
-    }
+    bool TouchDepthBoundsTestEnable() { return Exchange(Dirty::DepthBoundsEnable, false); }
 
-    bool TouchDepthTestEnable() {
-        return Exchange(Dirty::DepthTestEnable, false);
-    }
+    bool TouchDepthTestEnable() { return Exchange(Dirty::DepthTestEnable, false); }
 
-    bool TouchDepthWriteEnable() {
-        return Exchange(Dirty::DepthWriteEnable, false);
-    }
+    bool TouchDepthWriteEnable() { return Exchange(Dirty::DepthWriteEnable, false); }
 
-    bool TouchPrimitiveRestartEnable() {
-        return Exchange(Dirty::PrimitiveRestartEnable, false);
-    }
+    bool TouchPrimitiveRestartEnable() { return Exchange(Dirty::PrimitiveRestartEnable, false); }
 
-    bool TouchRasterizerDiscardEnable() {
-        return Exchange(Dirty::RasterizerDiscardEnable, false);
-    }
+    bool TouchRasterizerDiscardEnable() { return Exchange(Dirty::RasterizerDiscardEnable, false); }
 
     bool TouchConservativeRasterizationMode()
     {
@@ -224,63 +199,36 @@ public:
 
     bool TouchDepthBiasEnable() { return Exchange(Dirty::DepthBiasEnable, false); }
 
-    bool TouchLogicOpEnable() {
-        return Exchange(Dirty::LogicOpEnable, false);
-    }
+    bool TouchLogicOpEnable() { return Exchange(Dirty::LogicOpEnable, false); }
 
-    bool TouchDepthClampEnable() {
-        return Exchange(Dirty::DepthClampEnable, false);
-    }
+    bool TouchDepthClampEnable() { return Exchange(Dirty::DepthClampEnable, false); }
 
-    bool TouchAlphaToCoverageEnable() {
-        return Exchange(Dirty::AlphaToCoverageEnable, false);
-    }
+    bool TouchAlphaToCoverageEnable() { return Exchange(Dirty::AlphaToCoverageEnable, false); }
 
-    bool TouchAlphaToOneEnable() {
-        return Exchange(Dirty::AlphaToOneEnable, false);
-    }
+    bool TouchAlphaToOneEnable() { return Exchange(Dirty::AlphaToOneEnable, false); }
 
-    bool TouchDepthCompareOp() {
-        return Exchange(Dirty::DepthCompareOp, false);
-    }
+    bool TouchDepthCompareOp() { return Exchange(Dirty::DepthCompareOp, false); }
 
-    bool TouchFrontFace() {
-        return Exchange(Dirty::FrontFace, false);
-    }
+    bool TouchFrontFace() { return Exchange(Dirty::FrontFace, false); }
 
-    bool TouchStencilOp() {
-        return Exchange(Dirty::StencilOp, false);
-    }
+    bool TouchStencilOp() { return Exchange(Dirty::StencilOp, false); }
 
-    bool TouchBlending() {
-        return Exchange(Dirty::Blending, false);
-    }
+    bool TouchBlending() { return Exchange(Dirty::Blending, false); }
 
-    bool TouchBlendEnable() {
-        return Exchange(Dirty::BlendEnable, false);
-    }
+    bool TouchBlendEnable() { return Exchange(Dirty::BlendEnable, false); }
 
-    bool TouchBlendEquations() {
-        return Exchange(Dirty::BlendEquations, false);
-    }
+    bool TouchBlendEquations() { return Exchange(Dirty::BlendEquations, false); }
 
-    bool TouchColorMask() {
-        return Exchange(Dirty::ColorMask, false);
-    }
+    bool TouchColorMask() { return Exchange(Dirty::ColorMask, false); }
 
-    bool TouchStencilTestEnable() {
-        return Exchange(Dirty::StencilTestEnable, false);
-    }
+    bool TouchStencilTestEnable() { return Exchange(Dirty::StencilTestEnable, false); }
 
-    bool TouchLogicOp() {
-        return Exchange(Dirty::LogicOp, false);
-    }
+    bool TouchLogicOp() { return Exchange(Dirty::LogicOp, false); }
 
-    bool TouchLineRasterizationMode() {
-        return Exchange(Dirty::LineRasterizationMode, false);
-    }
+    bool TouchLineRasterizationMode() { return Exchange(Dirty::LineRasterizationMode, false); }
 
-    bool ChangePrimitiveTopology(Maxwell::PrimitiveTopology new_topology) {
+    bool ChangePrimitiveTopology(Maxwell::PrimitiveTopology new_topology)
+    {
         const bool has_changed = current_topology != new_topology;
         current_topology = new_topology;
         return has_changed;
@@ -295,7 +243,8 @@ public:
 private:
     static constexpr auto INVALID_TOPOLOGY = static_cast<Maxwell::PrimitiveTopology>(~0u);
 
-    bool Exchange(std::size_t id, bool new_value) const noexcept {
+    bool Exchange(std::size_t id, bool new_value) const noexcept
+    {
         const bool is_dirty = (*flags)[id];
         (*flags)[id] = new_value;
         return is_dirty;

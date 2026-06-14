@@ -1,10 +1,12 @@
 // SPDX-FileCopyrightText: Copyright 2020 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include <span>
-#include <string_view>
+#include "video_core/renderer_opengl/util_shaders.h"
 
 #include <glad/glad.h>
+
+#include <span>
+#include <string_view>
 
 #include "common/assert.h"
 #include "common/common_types.h"
@@ -21,7 +23,6 @@
 #include "video_core/renderer_opengl/gl_shader_util.h"
 #include "video_core/renderer_opengl/gl_staging_buffer_pool.h"
 #include "video_core/renderer_opengl/gl_texture_cache.h"
-#include "video_core/renderer_opengl/util_shaders.h"
 #include "video_core/texture_cache/accelerated_swizzle.h"
 #include "video_core/texture_cache/types.h"
 #include "video_core/texture_cache/util.h"
@@ -43,7 +44,8 @@ using VideoCommon::Accelerated::MakeBlockLinearSwizzle3DParams;
 using VideoCore::Surface::BytesPerBlock;
 
 namespace {
-OGLProgram MakeProgram(std::string_view source) {
+OGLProgram MakeProgram(std::string_view source)
+{
     return CreateProgram(source, GL_COMPUTE_SHADER);
 }
 } // Anonymous namespace
@@ -56,7 +58,8 @@ UtilShaders::UtilShaders(ProgramManager& program_manager_)
       copy_bc4_program(MakeProgram(OPENGL_COPY_BC4_COMP)),
       convert_s8d24_program(MakeProgram(OPENGL_CONVERT_S8D24_COMP)),
       convert_ms_to_nonms_program(MakeProgram(CONVERT_MSAA_TO_NON_MSAA_COMP)),
-      convert_nonms_to_ms_program(MakeProgram(CONVERT_NON_MSAA_TO_MSAA_COMP)) {
+      convert_nonms_to_ms_program(MakeProgram(CONVERT_NON_MSAA_TO_MSAA_COMP))
+{
     const auto swizzle_table = Tegra::Texture::MakeSwizzleTable();
     swizzle_table_buffer.Create();
     glNamedBufferStorage(swizzle_table_buffer.handle, sizeof(swizzle_table), &swizzle_table, 0);
@@ -65,7 +68,8 @@ UtilShaders::UtilShaders(ProgramManager& program_manager_)
 UtilShaders::~UtilShaders() = default;
 
 void UtilShaders::ASTCDecode(Image& image, const StagingBufferMap& map,
-                             std::span<const VideoCommon::SwizzleParameters> swizzles) {
+                             std::span<const VideoCommon::SwizzleParameters> swizzles)
+{
     static constexpr GLuint BINDING_INPUT_BUFFER = 0;
     static constexpr GLuint BINDING_OUTPUT_IMAGE = 0;
     program_manager.LocalMemoryWarmup();
@@ -114,7 +118,8 @@ void UtilShaders::ASTCDecode(Image& image, const StagingBufferMap& map,
 }
 
 void UtilShaders::BlockLinearUpload2D(Image& image, const StagingBufferMap& map,
-                                      std::span<const SwizzleParameters> swizzles) {
+                                      std::span<const SwizzleParameters> swizzles)
+{
     static constexpr Extent3D WORKGROUP_SIZE{32, 32, 1};
     static constexpr GLuint BINDING_SWIZZLE_BUFFER = 0;
     static constexpr GLuint BINDING_INPUT_BUFFER = 1;
@@ -151,7 +156,8 @@ void UtilShaders::BlockLinearUpload2D(Image& image, const StagingBufferMap& map,
 }
 
 void UtilShaders::BlockLinearUpload3D(Image& image, const StagingBufferMap& map,
-                                      std::span<const SwizzleParameters> swizzles) {
+                                      std::span<const SwizzleParameters> swizzles)
+{
     static constexpr Extent3D WORKGROUP_SIZE{16, 8, 8};
 
     static constexpr GLuint BINDING_SWIZZLE_BUFFER = 0;
@@ -192,7 +198,8 @@ void UtilShaders::BlockLinearUpload3D(Image& image, const StagingBufferMap& map,
 }
 
 void UtilShaders::PitchUpload(Image& image, const StagingBufferMap& map,
-                              std::span<const SwizzleParameters> swizzles) {
+                              std::span<const SwizzleParameters> swizzles)
+{
     static constexpr Extent3D WORKGROUP_SIZE{32, 32, 1};
     static constexpr GLuint BINDING_INPUT_BUFFER = 0;
     static constexpr GLuint BINDING_OUTPUT_IMAGE = 0;
@@ -230,7 +237,8 @@ void UtilShaders::PitchUpload(Image& image, const StagingBufferMap& map,
     program_manager.RestoreGuestCompute();
 }
 
-void UtilShaders::CopyBC4(Image& dst_image, Image& src_image, std::span<const ImageCopy> copies) {
+void UtilShaders::CopyBC4(Image& dst_image, Image& src_image, std::span<const ImageCopy> copies)
+{
     static constexpr GLuint BINDING_INPUT_IMAGE = 0;
     static constexpr GLuint BINDING_OUTPUT_IMAGE = 1;
     static constexpr GLuint LOC_SRC_OFFSET = 0;
@@ -255,7 +263,8 @@ void UtilShaders::CopyBC4(Image& dst_image, Image& src_image, std::span<const Im
     program_manager.RestoreGuestCompute();
 }
 
-void UtilShaders::ConvertS8D24(Image& dst_image, std::span<const ImageCopy> copies) {
+void UtilShaders::ConvertS8D24(Image& dst_image, std::span<const ImageCopy> copies)
+{
     static constexpr GLuint BINDING_DESTINATION = 0;
     static constexpr GLuint LOC_SIZE = 0;
 
@@ -276,7 +285,8 @@ void UtilShaders::ConvertS8D24(Image& dst_image, std::span<const ImageCopy> copi
 }
 
 void UtilShaders::CopyMSAA(Image& dst_image, Image& src_image,
-                           std::span<const VideoCommon::ImageCopy> copies) {
+                           std::span<const VideoCommon::ImageCopy> copies)
+{
     const bool is_ms_to_non_ms = src_image.info.num_samples > 1 && dst_image.info.num_samples == 1;
     const auto program_handle =
         is_ms_to_non_ms ? convert_ms_to_nonms_program.handle : convert_nonms_to_ms_program.handle;
@@ -302,7 +312,8 @@ void UtilShaders::CopyMSAA(Image& dst_image, Image& src_image,
     program_manager.RestoreGuestCompute();
 }
 
-GLenum StoreFormat(u32 bytes_per_block) {
+GLenum StoreFormat(u32 bytes_per_block)
+{
     switch (bytes_per_block) {
     case 1:
         return GL_R8UI;

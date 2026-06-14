@@ -4,17 +4,19 @@
 // SPDX-FileCopyrightText: Copyright 2024 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/vi/system_display_service.h"
+
 #include "common/settings.h"
 #include "core/hle/service/cmif_serialization.h"
 #include "core/hle/service/vi/container.h"
-#include "core/hle/service/vi/system_display_service.h"
 #include "core/hle/service/vi/vi_types.h"
 
 namespace Service::VI {
 
 ISystemDisplayService::ISystemDisplayService(Core::System& system_,
                                              std::shared_ptr<Container> container)
-    : ServiceFramework{system_, "ISystemDisplayService"}, m_container{std::move(container)} {
+    : ServiceFramework{system_, "ISystemDisplayService"}, m_container{std::move(container)}
+{
     // clang-format off
     static const FunctionInfo functions[] = {
         {1200, nullptr, "GetZOrderCountMin"},
@@ -71,7 +73,8 @@ ISystemDisplayService::ISystemDisplayService(Core::System& system_,
 
 ISystemDisplayService::~ISystemDisplayService() = default;
 
-Result ISystemDisplayService::GetLayerZ(Out<u64> out_z_value, u64 layer_id) {
+Result ISystemDisplayService::GetLayerZ(Out<u64> out_z_value, u64 layer_id)
+{
     LOG_DEBUG(Service_VI, "called. layer_id={}", layer_id);
     s32 z{};
     const auto res = m_container->GetLayerZIndex(layer_id, &z);
@@ -80,7 +83,8 @@ Result ISystemDisplayService::GetLayerZ(Out<u64> out_z_value, u64 layer_id) {
     R_SUCCEED();
 }
 
-Result ISystemDisplayService::SetLayerZ(u64 layer_id, u64 z_value) {
+Result ISystemDisplayService::SetLayerZ(u64 layer_id, u64 z_value)
+{
     LOG_DEBUG(Service_VI, "called. layer_id={}, z_value={}", layer_id, z_value);
     // Forward to container using internal API when available
     R_RETURN(m_container->SetLayerZIndex(layer_id, static_cast<s32>(z_value)));
@@ -88,14 +92,16 @@ Result ISystemDisplayService::SetLayerZ(u64 layer_id, u64 z_value) {
 
 // This function currently does nothing but return a success error code in
 // the vi library itself, so do the same thing, but log out the passed in values.
-Result ISystemDisplayService::SetLayerVisibility(bool visible, u64 layer_id) {
+Result ISystemDisplayService::SetLayerVisibility(bool visible, u64 layer_id)
+{
     LOG_DEBUG(Service_VI, "called, layer_id={}, visible={}", layer_id, visible);
     R_RETURN(m_container->SetLayerVisibility(layer_id, visible));
 }
 
 Result ISystemDisplayService::ListDisplayModes(
     Out<u64> out_count, u64 display_id,
-    OutArray<DisplayMode, BufferAttr_HipcMapAlias> out_display_modes) {
+    OutArray<DisplayMode, BufferAttr_HipcMapAlias> out_display_modes)
+{
     LOG_WARNING(Service_VI, "(STUBBED) called, display_id={}", display_id);
 
     if (!out_display_modes.empty()) {
@@ -113,7 +119,8 @@ Result ISystemDisplayService::ListDisplayModes(
     R_SUCCEED();
 }
 
-Result ISystemDisplayService::GetDisplayMode(Out<DisplayMode> out_display_mode, u64 display_id) {
+Result ISystemDisplayService::GetDisplayMode(Out<DisplayMode> out_display_mode, u64 display_id)
+{
     LOG_WARNING(Service_VI, "(STUBBED) called, display_id={}", display_id);
 
     if (Settings::IsDockedMode()) {
@@ -133,26 +140,30 @@ Result ISystemDisplayService::GetDisplayMode(Out<DisplayMode> out_display_mode, 
 Result ISystemDisplayService::GetSharedBufferMemoryHandleId(
     Out<s32> out_nvmap_handle, Out<u64> out_size,
     OutLargeData<SharedMemoryPoolLayout, BufferAttr_HipcMapAlias> out_pool_layout, u64 buffer_id,
-    ClientAppletResourceUserId aruid) {
+    ClientAppletResourceUserId aruid)
+{
     LOG_INFO(Service_VI, "called. buffer_id={}, aruid={:#x}", buffer_id, aruid.pid);
 
     R_RETURN(m_container->GetSharedBufferManager()->GetSharedBufferMemoryHandleId(
         out_size, out_nvmap_handle, out_pool_layout, buffer_id, aruid.pid));
 }
 
-Result ISystemDisplayService::OpenSharedLayer(u64 layer_id) {
+Result ISystemDisplayService::OpenSharedLayer(u64 layer_id)
+{
     LOG_INFO(Service_VI, "(STUBBED) called. layer_id={}", layer_id);
     R_SUCCEED();
 }
 
-Result ISystemDisplayService::ConnectSharedLayer(u64 layer_id) {
+Result ISystemDisplayService::ConnectSharedLayer(u64 layer_id)
+{
     LOG_INFO(Service_VI, "(STUBBED) called. layer_id={}", layer_id);
     R_SUCCEED();
 }
 
 Result ISystemDisplayService::AcquireSharedFrameBuffer(Out<android::Fence> out_fence,
                                                        Out<std::array<s32, 4>> out_slots,
-                                                       Out<s64> out_target_slot, u64 layer_id) {
+                                                       Out<s64> out_target_slot, u64 layer_id)
+{
     LOG_DEBUG(Service_VI, "called");
     R_RETURN(m_container->GetSharedBufferManager()->AcquireSharedFrameBuffer(
         out_fence, *out_slots, out_target_slot, layer_id));
@@ -161,20 +172,23 @@ Result ISystemDisplayService::AcquireSharedFrameBuffer(Out<android::Fence> out_f
 Result ISystemDisplayService::PresentSharedFrameBuffer(android::Fence fence,
                                                        Common::Rectangle<s32> crop_region,
                                                        u32 window_transform, s32 swap_interval,
-                                                       u64 layer_id, s64 surface_id) {
+                                                       u64 layer_id, s64 surface_id)
+{
     LOG_DEBUG(Service_VI, "called");
     R_RETURN(m_container->GetSharedBufferManager()->PresentSharedFrameBuffer(
         fence, crop_region, window_transform, swap_interval, layer_id, surface_id));
 }
 
 Result ISystemDisplayService::GetSharedFrameBufferAcquirableEvent(
-    OutCopyHandle<Kernel::KReadableEvent> out_event, u64 layer_id) {
+    OutCopyHandle<Kernel::KReadableEvent> out_event, u64 layer_id)
+{
     LOG_DEBUG(Service_VI, "called");
     R_RETURN(m_container->GetSharedBufferManager()->GetSharedFrameBufferAcquirableEvent(out_event,
                                                                                         layer_id));
 }
 
-Result ISystemDisplayService::CancelSharedFrameBuffer(u64 layer_id, s64 slot) {
+Result ISystemDisplayService::CancelSharedFrameBuffer(u64 layer_id, s64 slot)
+{
     LOG_DEBUG(Service_VI, "called");
     R_RETURN(m_container->GetSharedBufferManager()->CancelSharedFrameBuffer(layer_id, slot));
 }

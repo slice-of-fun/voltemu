@@ -204,9 +204,7 @@ static_assert(sizeof(ConsoleSixAxisSensorSharedMemoryFormat) == 0x20,
 
 // This is nn::hid::detail::SharedMemoryFormat
 struct SharedMemoryFormat {
-    void Initialize() {
-        npad_condition = NpadCondition{};
-    }
+    void Initialize() { npad_condition = NpadCondition{}; }
 
     DebugPadSharedMemoryFormat debug_pad;
     TouchScreenSharedMemoryFormat touch_screen;

@@ -11,31 +11,20 @@ namespace FileSys {
 
 class IStorage : public VfsFile {
 public:
-    virtual std::string GetName() const override {
-        return {};
-    }
+    virtual std::string GetName() const override { return {}; }
 
-    virtual VirtualDir GetContainingDirectory() const override {
-        return {};
-    }
+    virtual VirtualDir GetContainingDirectory() const override { return {}; }
 
-    virtual bool IsWritable() const override {
-        return true;
-    }
+    virtual bool IsWritable() const override { return true; }
 
-    virtual bool IsReadable() const override {
-        return true;
-    }
+    virtual bool IsReadable() const override { return true; }
 
-    virtual bool Resize(size_t size) override {
-        return false;
-    }
+    virtual bool Resize(size_t size) override { return false; }
 
-    virtual bool Rename(std::string_view name) override {
-        return false;
-    }
+    virtual bool Rename(std::string_view name) override { return false; }
 
-    static inline Result CheckAccessRange(s64 offset, s64 size, s64 total_size) {
+    static inline Result CheckAccessRange(s64 offset, s64 size, s64 total_size)
+    {
         R_UNLESS(offset >= 0, ResultInvalidOffset);
         R_UNLESS(size >= 0, ResultInvalidSize);
         R_UNLESS(Common::WrappingAdd(offset, size) >= offset, ResultOutOfRange);
@@ -46,13 +35,9 @@ public:
 
 class IReadOnlyStorage : public IStorage {
 public:
-    virtual bool IsWritable() const override {
-        return false;
-    }
+    virtual bool IsWritable() const override { return false; }
 
-    virtual size_t Write(const u8* buffer, size_t size, size_t offset) override {
-        return 0;
-    }
+    virtual size_t Write(const u8* buffer, size_t size, size_t offset) override { return 0; }
 };
 
 } // namespace FileSys

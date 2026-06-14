@@ -44,11 +44,13 @@ public:
         std::array<u8, 3> reserved;
         s32 generation;
 
-        void SetOffset(s64 value) {
+        void SetOffset(s64 value)
+        {
             std::memcpy(this->offset.data(), std::addressof(value), sizeof(s64));
         }
 
-        s64 GetOffset() const {
+        s64 GetOffset() const
+        {
             s64 value;
             std::memcpy(std::addressof(value), this->offset.data(), sizeof(s64));
             return value;
@@ -59,15 +61,15 @@ public:
     static_assert(std::is_trivial_v<Entry>);
 
 public:
-    static constexpr s64 QueryHeaderStorageSize() {
-        return BucketTree::QueryHeaderStorageSize();
-    }
+    static constexpr s64 QueryHeaderStorageSize() { return BucketTree::QueryHeaderStorageSize(); }
 
-    static constexpr s64 QueryNodeStorageSize(s32 entry_count) {
+    static constexpr s64 QueryNodeStorageSize(s32 entry_count)
+    {
         return BucketTree::QueryNodeStorageSize(NodeSize, sizeof(Entry), entry_count);
     }
 
-    static constexpr s64 QueryEntryStorageSize(s32 entry_count) {
+    static constexpr s64 QueryEntryStorageSize(s32 entry_count)
+    {
         return BucketTree::QueryEntryStorageSize(NodeSize, sizeof(Entry), entry_count);
     }
 
@@ -75,23 +77,22 @@ public:
 
 public:
     AesCtrCounterExtendedStorage()
-        : m_table(), m_data_storage(), m_secure_value(), m_counter_offset(), m_decryptor() {}
-    virtual ~AesCtrCounterExtendedStorage() {
-        this->Finalize();
+        : m_table(), m_data_storage(), m_secure_value(), m_counter_offset(), m_decryptor()
+    {
     }
+    virtual ~AesCtrCounterExtendedStorage() { this->Finalize(); }
 
     Result Initialize(const void* key, size_t key_size, u32 secure_value, s64 counter_offset,
                       VirtualFile data_storage, VirtualFile node_storage, VirtualFile entry_storage,
                       s32 entry_count, std::unique_ptr<IDecryptor>&& decryptor);
     void Finalize();
 
-    bool IsInitialized() const {
-        return m_table.IsInitialized();
-    }
+    bool IsInitialized() const { return m_table.IsInitialized(); }
 
     virtual size_t Read(u8* buffer, size_t size, size_t offset) const override;
 
-    virtual size_t GetSize() const override {
+    virtual size_t GetSize() const override
+    {
         BucketTree::Offsets offsets{};
         ASSERT(R_SUCCEEDED(m_table.GetOffsets(std::addressof(offsets))));
 

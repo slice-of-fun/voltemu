@@ -22,9 +22,7 @@ public:
     s32 ResetDecoder();
     s32 Decode(u32& out_sample_count, u64 output_data, u64 output_data_size, u64 input_data,
                u64 input_data_size);
-    u32 GetFinalRange() const noexcept {
-        return final_range;
-    }
+    u32 GetFinalRange() const noexcept { return final_range; }
 
 private:
     u32 magic;

@@ -13,28 +13,34 @@ namespace Shader::Backend::GLSL {
 namespace {
 constexpr char SWIZZLE[]{"xyzw"};
 
-u32 CbufIndex(u32 offset) {
+u32 CbufIndex(u32 offset)
+{
     return (offset / 4) % 4;
 }
 
-char OffsetSwizzle(u32 offset) {
+char OffsetSwizzle(u32 offset)
+{
     return SWIZZLE[CbufIndex(offset)];
 }
 
-bool IsInputArray(Stage stage) {
+bool IsInputArray(Stage stage)
+{
     return stage == Stage::Geometry || stage == Stage::TessellationControl ||
            stage == Stage::TessellationEval;
 }
 
-std::string InputVertexIndex(EmitContext& ctx, std::string_view vertex) {
+std::string InputVertexIndex(EmitContext& ctx, std::string_view vertex)
+{
     return IsInputArray(ctx.stage) ? fmt::format("[{}]", vertex) : "";
 }
 
-std::string_view OutputVertexIndex(EmitContext& ctx) {
+std::string_view OutputVertexIndex(EmitContext& ctx)
+{
     return ctx.stage == Stage::TessellationControl ? "[gl_InvocationID]" : "";
 }
 
-std::string ChooseCbuf(EmitContext& ctx, const IR::Value& binding, std::string_view index) {
+std::string ChooseCbuf(EmitContext& ctx, const IR::Value& binding, std::string_view index)
+{
     if (binding.IsImmediate()) {
         return fmt::format("{}_cbuf{}[{}]", ctx.stage_name, binding.U32(), index);
     } else {
@@ -45,7 +51,8 @@ std::string ChooseCbuf(EmitContext& ctx, const IR::Value& binding, std::string_v
 
 void GetCbuf(EmitContext& ctx, std::string_view ret, const IR::Value& binding,
              const IR::Value& offset, u32 num_bits, std::string_view cast = {},
-             std::string_view bit_offset = {}) {
+             std::string_view bit_offset = {})
+{
     const bool is_immediate{offset.IsImmediate()};
     const bool component_indexing_bug{!is_immediate && ctx.profile.has_gl_component_indexing_bug};
     if (is_immediate) {
@@ -82,7 +89,8 @@ void GetCbuf(EmitContext& ctx, std::string_view ret, const IR::Value& binding,
 }
 
 void GetCbuf8(EmitContext& ctx, IR::Inst& inst, const IR::Value& binding, const IR::Value& offset,
-              std::string_view cast) {
+              std::string_view cast)
+{
     const auto ret{ctx.var_alloc.Define(inst, GlslVarType::U32)};
     if (offset.IsImmediate()) {
         const auto bit_offset{fmt::format("{}", (offset.U32() % 4) * 8)};
@@ -95,7 +103,8 @@ void GetCbuf8(EmitContext& ctx, IR::Inst& inst, const IR::Value& binding, const 
 }
 
 void GetCbuf16(EmitContext& ctx, IR::Inst& inst, const IR::Value& binding, const IR::Value& offset,
-               std::string_view cast) {
+               std::string_view cast)
+{
     const auto ret{ctx.var_alloc.Define(inst, GlslVarType::U32)};
     if (offset.IsImmediate()) {
         const auto bit_offset{fmt::format("{}", ((offset.U32() / 2) % 2) * 16)};
@@ -109,45 +118,52 @@ void GetCbuf16(EmitContext& ctx, IR::Inst& inst, const IR::Value& binding, const
 } // Anonymous namespace
 
 void EmitGetCbufU8(EmitContext& ctx, IR::Inst& inst, const IR::Value& binding,
-                   const IR::Value& offset) {
+                   const IR::Value& offset)
+{
     const auto cast{ctx.profile.has_gl_cbuf_ftou_bug ? "" : "ftou"};
     GetCbuf8(ctx, inst, binding, offset, cast);
 }
 
 void EmitGetCbufS8(EmitContext& ctx, IR::Inst& inst, const IR::Value& binding,
-                   const IR::Value& offset) {
+                   const IR::Value& offset)
+{
     const auto cast{ctx.profile.has_gl_cbuf_ftou_bug ? "int" : "ftoi"};
     GetCbuf8(ctx, inst, binding, offset, cast);
 }
 
 void EmitGetCbufU16(EmitContext& ctx, IR::Inst& inst, const IR::Value& binding,
-                    const IR::Value& offset) {
+                    const IR::Value& offset)
+{
     const auto cast{ctx.profile.has_gl_cbuf_ftou_bug ? "" : "ftou"};
     GetCbuf16(ctx, inst, binding, offset, cast);
 }
 
 void EmitGetCbufS16(EmitContext& ctx, IR::Inst& inst, const IR::Value& binding,
-                    const IR::Value& offset) {
+                    const IR::Value& offset)
+{
     const auto cast{ctx.profile.has_gl_cbuf_ftou_bug ? "int" : "ftoi"};
     GetCbuf16(ctx, inst, binding, offset, cast);
 }
 
 void EmitGetCbufU32(EmitContext& ctx, IR::Inst& inst, const IR::Value& binding,
-                    const IR::Value& offset) {
+                    const IR::Value& offset)
+{
     const auto ret{ctx.var_alloc.Define(inst, GlslVarType::U32)};
     const auto cast{ctx.profile.has_gl_cbuf_ftou_bug ? "" : "ftou"};
     GetCbuf(ctx, ret, binding, offset, 32, cast);
 }
 
 void EmitGetCbufF32(EmitContext& ctx, IR::Inst& inst, const IR::Value& binding,
-                    const IR::Value& offset) {
+                    const IR::Value& offset)
+{
     const auto ret{ctx.var_alloc.Define(inst, GlslVarType::F32)};
     const auto cast{ctx.profile.has_gl_cbuf_ftou_bug ? "utof" : ""};
     GetCbuf(ctx, ret, binding, offset, 32, cast);
 }
 
 void EmitGetCbufU32x2(EmitContext& ctx, IR::Inst& inst, const IR::Value& binding,
-                      const IR::Value& offset) {
+                      const IR::Value& offset)
+{
     const auto cast{ctx.profile.has_gl_cbuf_ftou_bug ? "" : "ftou"};
     if (offset.IsImmediate()) {
         const auto cbuf{fmt::format("{}_cbuf{}", ctx.stage_name, binding.U32())};
@@ -184,8 +200,8 @@ void EmitGetCbufU32x2(EmitContext& ctx, IR::Inst& inst, const IR::Value& binding
     }
 }
 
-void EmitGetAttribute(EmitContext& ctx, IR::Inst& inst, IR::Attribute attr,
-                      std::string_view vertex) {
+void EmitGetAttribute(EmitContext& ctx, IR::Inst& inst, IR::Attribute attr, std::string_view vertex)
+{
     const u32 element{static_cast<u32>(attr) % 4};
     const char swizzle{"xyzw"[element]};
     if (IR::IsGeneric(attr)) {
@@ -248,7 +264,8 @@ void EmitGetAttribute(EmitContext& ctx, IR::Inst& inst, IR::Attribute attr,
     }
 }
 
-void EmitGetAttributeU32(EmitContext& ctx, IR::Inst& inst, IR::Attribute attr, std::string_view) {
+void EmitGetAttributeU32(EmitContext& ctx, IR::Inst& inst, IR::Attribute attr, std::string_view)
+{
     switch (attr) {
     case IR::Attribute::PrimitiveId:
         ctx.AddU32("{}=uint(gl_PrimitiveID);", inst);
@@ -274,7 +291,8 @@ void EmitGetAttributeU32(EmitContext& ctx, IR::Inst& inst, IR::Attribute attr, s
 }
 
 void EmitSetAttribute(EmitContext& ctx, IR::Attribute attr, std::string_view value,
-                      [[maybe_unused]] std::string_view vertex) {
+                      [[maybe_unused]] std::string_view vertex)
+{
     if (IR::IsGeneric(attr)) {
         const u32 index{IR::GenericAttributeIndex(attr)};
         const u32 attr_element{IR::GenericAttributeElement(attr)};
@@ -345,7 +363,8 @@ void EmitSetAttribute(EmitContext& ctx, IR::Attribute attr, std::string_view val
 }
 
 void EmitGetAttributeIndexed(EmitContext& ctx, IR::Inst& inst, std::string_view offset,
-                             std::string_view vertex) {
+                             std::string_view vertex)
+{
     const bool is_array{ctx.stage == Stage::Geometry};
     const auto vertex_arg{is_array ? fmt::format(",{}", vertex) : ""};
     ctx.AddF32("{}=IndexedAttrLoad(int({}){});", inst, offset, vertex_arg);
@@ -354,11 +373,13 @@ void EmitGetAttributeIndexed(EmitContext& ctx, IR::Inst& inst, std::string_view 
 void EmitSetAttributeIndexed([[maybe_unused]] EmitContext& ctx,
                              [[maybe_unused]] std::string_view offset,
                              [[maybe_unused]] std::string_view value,
-                             [[maybe_unused]] std::string_view vertex) {
+                             [[maybe_unused]] std::string_view vertex)
+{
     NotImplemented();
 }
 
-void EmitGetPatch(EmitContext& ctx, IR::Inst& inst, IR::Patch patch) {
+void EmitGetPatch(EmitContext& ctx, IR::Inst& inst, IR::Patch patch)
+{
     if (!IR::IsGeneric(patch)) {
         throw NotImplementedException("Non-generic patch load");
     }
@@ -368,7 +389,8 @@ void EmitGetPatch(EmitContext& ctx, IR::Inst& inst, IR::Patch patch) {
     ctx.AddF32("{}=patch{}.{};", inst, index, swizzle);
 }
 
-void EmitSetPatch(EmitContext& ctx, IR::Patch patch, std::string_view value) {
+void EmitSetPatch(EmitContext& ctx, IR::Patch patch, std::string_view value)
+{
     if (IR::IsGeneric(patch)) {
         const u32 index{IR::GenericPatchIndex(patch)};
         const u32 element{IR::GenericPatchElement(patch)};
@@ -395,32 +417,39 @@ void EmitSetPatch(EmitContext& ctx, IR::Patch patch, std::string_view value) {
     }
 }
 
-void EmitSetFragColor(EmitContext& ctx, u32 index, u32 component, std::string_view value) {
+void EmitSetFragColor(EmitContext& ctx, u32 index, u32 component, std::string_view value)
+{
     const char swizzle{"xyzw"[component]};
     ctx.Add("frag_color{}.{}={};", index, swizzle, value);
 }
 
-void EmitSetSampleMask(EmitContext& ctx, std::string_view value) {
+void EmitSetSampleMask(EmitContext& ctx, std::string_view value)
+{
     ctx.Add("gl_SampleMask[0]=int({});", value);
 }
 
-void EmitSetFragDepth(EmitContext& ctx, std::string_view value) {
+void EmitSetFragDepth(EmitContext& ctx, std::string_view value)
+{
     ctx.Add("gl_FragDepth={};", value);
 }
 
-void EmitLocalInvocationId(EmitContext& ctx, IR::Inst& inst) {
+void EmitLocalInvocationId(EmitContext& ctx, IR::Inst& inst)
+{
     ctx.AddU32x3("{}=gl_LocalInvocationID;", inst);
 }
 
-void EmitWorkgroupId(EmitContext& ctx, IR::Inst& inst) {
+void EmitWorkgroupId(EmitContext& ctx, IR::Inst& inst)
+{
     ctx.AddU32x3("{}=gl_WorkGroupID;", inst);
 }
 
-void EmitInvocationId(EmitContext& ctx, IR::Inst& inst) {
+void EmitInvocationId(EmitContext& ctx, IR::Inst& inst)
+{
     ctx.AddU32("{}=uint(gl_InvocationID);", inst);
 }
 
-void EmitInvocationInfo(EmitContext& ctx, IR::Inst& inst) {
+void EmitInvocationInfo(EmitContext& ctx, IR::Inst& inst)
+{
     switch (ctx.stage) {
     case Stage::TessellationControl:
     case Stage::TessellationEval:
@@ -436,40 +465,49 @@ void EmitInvocationInfo(EmitContext& ctx, IR::Inst& inst) {
     }
 }
 
-void EmitSampleId(EmitContext& ctx, IR::Inst& inst) {
+void EmitSampleId(EmitContext& ctx, IR::Inst& inst)
+{
     ctx.AddU32("{}=uint(gl_SampleID);", inst);
 }
 
-void EmitIsHelperInvocation(EmitContext& ctx, IR::Inst& inst) {
+void EmitIsHelperInvocation(EmitContext& ctx, IR::Inst& inst)
+{
     ctx.AddU1("{}=gl_HelperInvocation;", inst);
 }
 
-void EmitSR_WScaleFactorXY(EmitContext& ctx, IR::Inst& inst) {
+void EmitSR_WScaleFactorXY(EmitContext& ctx, IR::Inst& inst)
+{
     LOG_WARNING(Shader, "(STUBBED) called");
 }
 
-void EmitSR_WScaleFactorZ(EmitContext& ctx, IR::Inst& inst) {
+void EmitSR_WScaleFactorZ(EmitContext& ctx, IR::Inst& inst)
+{
     LOG_WARNING(Shader, "(STUBBED) called");
 }
 
-void EmitYDirection(EmitContext& ctx, IR::Inst& inst) {
+void EmitYDirection(EmitContext& ctx, IR::Inst& inst)
+{
     ctx.uses_y_direction = true;
     ctx.AddF32("{}=gl_FrontMaterial.ambient.a;", inst);
 }
 
-void EmitResolutionDownFactor(EmitContext& ctx, IR::Inst& inst) {
+void EmitResolutionDownFactor(EmitContext& ctx, IR::Inst& inst)
+{
     ctx.AddF32("{}=scaling.z;", inst);
 }
 
-void EmitRenderArea(EmitContext& ctx, IR::Inst& inst) {
+void EmitRenderArea(EmitContext& ctx, IR::Inst& inst)
+{
     ctx.AddF32x4("{}=render_area;", inst);
 }
 
-void EmitLoadLocal(EmitContext& ctx, IR::Inst& inst, std::string_view word_offset) {
+void EmitLoadLocal(EmitContext& ctx, IR::Inst& inst, std::string_view word_offset)
+{
     ctx.AddU32("{}=lmem[{}];", inst, word_offset);
 }
 
-void EmitWriteLocal(EmitContext& ctx, std::string_view word_offset, std::string_view value) {
+void EmitWriteLocal(EmitContext& ctx, std::string_view word_offset, std::string_view value)
+{
     ctx.Add("lmem[{}]={};", word_offset, value);
 }
 

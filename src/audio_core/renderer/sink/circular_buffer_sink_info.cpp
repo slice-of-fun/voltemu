@@ -1,13 +1,15 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include "audio_core/renderer/memory/pool_mapper.h"
 #include "audio_core/renderer/sink/circular_buffer_sink_info.h"
+
+#include "audio_core/renderer/memory/pool_mapper.h"
 #include "audio_core/renderer/upsampler/upsampler_manager.h"
 
 namespace AudioCore::Renderer {
 
-CircularBufferSinkInfo::CircularBufferSinkInfo() {
+CircularBufferSinkInfo::CircularBufferSinkInfo()
+{
     state.fill(0);
     parameter.fill(0);
     type = Type::CircularBufferSink;
@@ -16,7 +18,8 @@ CircularBufferSinkInfo::CircularBufferSinkInfo() {
     state_->address_info.Setup(0, 0);
 }
 
-void CircularBufferSinkInfo::CleanUp() {
+void CircularBufferSinkInfo::CleanUp()
+{
     auto state_{reinterpret_cast<DeviceState*>(state.data())};
 
     if (state_->upsampler_info) {
@@ -29,7 +32,8 @@ void CircularBufferSinkInfo::CleanUp() {
 }
 
 void CircularBufferSinkInfo::Update(BehaviorInfo::ErrorInfo& error_info, OutStatus& out_status,
-                                    const InParameter& in_params, const PoolMapper& pool_mapper) {
+                                    const InParameter& in_params, const PoolMapper& pool_mapper)
+{
     const auto buffer_params{
         reinterpret_cast<const CircularBufferInParameter*>(&in_params.circular_buffer)};
     auto current_params{reinterpret_cast<CircularBufferInParameter*>(parameter.data())};
@@ -56,7 +60,8 @@ void CircularBufferSinkInfo::Update(BehaviorInfo::ErrorInfo& error_info, OutStat
     out_status.writeOffset = current_state->last_pos2;
 }
 
-void CircularBufferSinkInfo::UpdateForCommandGeneration() {
+void CircularBufferSinkInfo::UpdateForCommandGeneration()
+{
     if (in_use) {
         auto params{reinterpret_cast<CircularBufferInParameter*>(parameter.data())};
         auto state_{reinterpret_cast<CircularBufferState*>(state.data())};

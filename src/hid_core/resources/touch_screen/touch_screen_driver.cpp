@@ -1,44 +1,53 @@
 // SPDX-FileCopyrightText: Copyright 2024 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+#include "hid_core/resources/touch_screen/touch_screen_driver.h"
+
 #include <algorithm>
+
 #include "common/settings.h"
 #include "core/frontend/emu_window.h"
 #include "hid_core/hid_core.h"
-#include "hid_core/resources/touch_screen/touch_screen_driver.h"
 
 namespace Service::HID {
 
-TouchDriver::TouchDriver(Core::HID::HIDCore& hid_core) {
+TouchDriver::TouchDriver(Core::HID::HIDCore& hid_core)
+{
     console = hid_core.GetEmulatedConsole();
 }
 
 TouchDriver::~TouchDriver() = default;
 
-Result TouchDriver::StartTouchSensor() {
+Result TouchDriver::StartTouchSensor()
+{
     is_running = true;
     return ResultSuccess;
 }
 
-Result TouchDriver::StopTouchSensor() {
+Result TouchDriver::StopTouchSensor()
+{
     is_running = false;
     return ResultSuccess;
 }
 
-bool TouchDriver::IsRunning() const {
+bool TouchDriver::IsRunning() const
+{
     return is_running;
 }
 
-void TouchDriver::ProcessTouchScreenAutoTune() const {
+void TouchDriver::ProcessTouchScreenAutoTune() const
+{
     // TODO
 }
 
-Result TouchDriver::WaitForDummyInput() {
+Result TouchDriver::WaitForDummyInput()
+{
     touch_status = {};
     return ResultSuccess;
 }
 
-Result TouchDriver::WaitForInput() {
+Result TouchDriver::WaitForInput()
+{
     touch_status = {};
     const auto touch_input = console->GetTouch();
     for (std::size_t id = 0; id < touch_status.states.size(); id++) {
@@ -99,15 +108,18 @@ Result TouchDriver::WaitForInput() {
     return ResultSuccess;
 }
 
-void TouchDriver::GetNextTouchState(TouchScreenState& out_state) const {
+void TouchDriver::GetNextTouchState(TouchScreenState& out_state) const
+{
     out_state = touch_status;
 }
 
-void TouchDriver::SetTouchMode(Core::HID::TouchScreenModeForNx mode) {
+void TouchDriver::SetTouchMode(Core::HID::TouchScreenModeForNx mode)
+{
     touch_mode = mode;
 }
 
-Core::HID::TouchScreenModeForNx TouchDriver::GetTouchMode() const {
+Core::HID::TouchScreenModeForNx TouchDriver::GetTouchMode() const
+{
     return touch_mode;
 }
 

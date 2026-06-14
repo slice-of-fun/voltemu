@@ -7,11 +7,11 @@
 #pragma once
 
 #include <array>
+#include <boost/container/small_vector.hpp>
 #include <condition_variable>
+#include <queue>
 #include <span>
 #include <vector>
-#include <boost/container/small_vector.hpp>
-#include <queue>
 
 #include "common/bit_field.h"
 #include "common/common_types.h"
@@ -98,7 +98,8 @@ union CommandHeader {
 static_assert(std::is_standard_layout_v<CommandHeader>, "CommandHeader is not standard layout");
 static_assert(sizeof(CommandHeader) == sizeof(u32), "CommandHeader has incorrect size!");
 
-inline CommandHeader BuildCommandHeader(BufferMethods method, u32 arg_count, SubmissionMode mode) {
+inline CommandHeader BuildCommandHeader(BufferMethods method, u32 arg_count, SubmissionMode mode)
+{
     CommandHeader result{};
     result.method.Assign(static_cast<u32>(method));
     result.arg_count.Assign(arg_count);
@@ -111,7 +112,9 @@ struct CommandList final {
     explicit CommandList(std::size_t size) : command_lists(size) {}
     explicit CommandList(
         boost::container::small_vector<CommandHeader, 512>&& prefetch_command_list_)
-        : prefetch_command_list{std::move(prefetch_command_list_)} {}
+        : prefetch_command_list{std::move(prefetch_command_list_)}
+    {
+    }
 
     boost::container::small_vector<CommandListHeader, 512> command_lists;
     boost::container::small_vector<CommandHeader, 512> prefetch_command_list;
@@ -130,14 +133,13 @@ public:
                        Control::ChannelState& channel_state_);
     ~DmaPusher();
 
-    void Push(CommandList&& entries) {
-        dma_pushbuffer.push(std::move(entries));
-    }
+    void Push(CommandList&& entries) { dma_pushbuffer.push(std::move(entries)); }
 
     void DispatchCalls();
 
     void BindSubchannel(Engines::EngineInterface* engine, u32 subchannel_id,
-                        Engines::EngineTypes engine_type) {
+                        Engines::EngineTypes engine_type)
+    {
         subchannels[subchannel_id] = engine;
         subchannel_type[subchannel_id] = engine_type;
     }

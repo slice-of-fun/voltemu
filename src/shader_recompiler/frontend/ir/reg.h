@@ -273,7 +273,8 @@ static_assert(static_cast<int>(Reg::RZ) == 255);
 constexpr size_t NUM_USER_REGS = 255;
 constexpr size_t NUM_REGS = 256;
 
-[[nodiscard]] constexpr Reg operator+(Reg reg, int num) {
+[[nodiscard]] constexpr Reg operator+(Reg reg, int num)
+{
     if (reg == Reg::RZ) {
         // Adding or subtracting registers from RZ yields RZ
         return Reg::RZ;
@@ -288,38 +289,41 @@ constexpr size_t NUM_REGS = 256;
     return static_cast<Reg>(result);
 }
 
-[[nodiscard]] constexpr Reg operator-(Reg reg, int num) {
+[[nodiscard]] constexpr Reg operator-(Reg reg, int num)
+{
     return reg + (-num);
 }
 
-constexpr Reg operator++(Reg& reg) {
+constexpr Reg operator++(Reg& reg)
+{
     reg = reg + 1;
     return reg;
 }
 
-constexpr Reg operator++(Reg& reg, int) {
+constexpr Reg operator++(Reg& reg, int)
+{
     const Reg copy{reg};
     reg = reg + 1;
     return copy;
 }
 
-[[nodiscard]] constexpr size_t RegIndex(Reg reg) noexcept {
+[[nodiscard]] constexpr size_t RegIndex(Reg reg) noexcept
+{
     return static_cast<size_t>(reg);
 }
 
-[[nodiscard]] constexpr bool IsAligned(Reg reg, size_t align) {
+[[nodiscard]] constexpr bool IsAligned(Reg reg, size_t align)
+{
     return RegIndex(reg) % align == 0 || reg == Reg::RZ;
 }
 
 } // namespace Shader::IR
 
-template <>
-struct fmt::formatter<Shader::IR::Reg> {
-    constexpr auto parse(format_parse_context& ctx) {
-        return ctx.begin();
-    }
-    template <typename FormatContext>
-    auto format(const Shader::IR::Reg& reg, FormatContext& ctx) const {
+template<> struct fmt::formatter<Shader::IR::Reg> {
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(const Shader::IR::Reg& reg, FormatContext& ctx) const
+    {
         if (reg == Shader::IR::Reg::RZ) {
             return fmt::format_to(ctx.out(), "RZ");
         } else if (static_cast<int>(reg) >= 0 && static_cast<int>(reg) < 255) {

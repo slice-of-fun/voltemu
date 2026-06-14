@@ -6,12 +6,11 @@
 
 #pragma once
 
+#include <QDialog>
+#include <QList>
 #include <memory>
 #include <string>
 #include <vector>
-
-#include <QDialog>
-#include <QList>
 
 #include "configuration/shared_widget.h"
 #include "core/file_sys/vfs/vfs_types.h"

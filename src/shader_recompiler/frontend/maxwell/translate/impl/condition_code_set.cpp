@@ -8,7 +8,8 @@
 
 namespace Shader::Maxwell {
 
-void TranslatorVisitor::CSET(u64 insn) {
+void TranslatorVisitor::CSET(u64 insn)
+{
     union {
         u64 raw;
         BitField<0, 8, IR::Reg> dest_reg;
@@ -42,7 +43,8 @@ void TranslatorVisitor::CSET(u64 insn) {
     }
 }
 
-void TranslatorVisitor::CSETP(u64 insn) {
+void TranslatorVisitor::CSETP(u64 insn)
+{
     union {
         u64 raw;
         BitField<0, 3, IR::Pred> dest_pred_b;

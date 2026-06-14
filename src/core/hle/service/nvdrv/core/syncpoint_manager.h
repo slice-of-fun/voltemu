@@ -58,7 +58,8 @@ public:
      */
     bool HasSyncpointExpired(u32 id, u32 threshold) const;
 
-    bool IsFenceSignalled(NvFence fence) const {
+    bool IsFenceSignalled(NvFence fence) const
+    {
         return HasSyncpointExpired(fence.id, fence.value);
     }
 

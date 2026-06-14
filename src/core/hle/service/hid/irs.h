@@ -49,19 +49,21 @@ private:
                               ClientAppletResourceUserId aruid,
                               const Core::IrSensor::PackedMomentProcessorConfig& processor_config);
 
-    Result RunClusteringProcessor(
-        Core::IrSensor::IrCameraHandle camera_handle, ClientAppletResourceUserId aruid,
-        const Core::IrSensor::PackedClusteringProcessorConfig& processor_config);
+    Result
+    RunClusteringProcessor(Core::IrSensor::IrCameraHandle camera_handle,
+                           ClientAppletResourceUserId aruid,
+                           const Core::IrSensor::PackedClusteringProcessorConfig& processor_config);
 
     Result RunImageTransferProcessor(
         Core::IrSensor::IrCameraHandle camera_handle, ClientAppletResourceUserId aruid,
         const Core::IrSensor::PackedImageTransferProcessorConfig& processor_config,
         u64 transfer_memory_size, InCopyHandle<Kernel::KTransferMemory> t_mem);
 
-    Result GetImageTransferProcessorState(
-        Out<Core::IrSensor::ImageTransferProcessorState> out_state,
-        Core::IrSensor::IrCameraHandle camera_handle, ClientAppletResourceUserId aruid,
-        OutBuffer<BufferAttr_HipcMapAlias> out_buffer_data);
+    Result
+    GetImageTransferProcessorState(Out<Core::IrSensor::ImageTransferProcessorState> out_state,
+                                   Core::IrSensor::IrCameraHandle camera_handle,
+                                   ClientAppletResourceUserId aruid,
+                                   OutBuffer<BufferAttr_HipcMapAlias> out_buffer_data);
 
     Result RunTeraPluginProcessor(Core::IrSensor::IrCameraHandle camera_handle,
                                   Core::IrSensor::PackedTeraPluginProcessorConfig processor_config,
@@ -70,10 +72,10 @@ private:
     Result GetNpadIrCameraHandle(Out<Core::IrSensor::IrCameraHandle> out_camera_handle,
                                  Core::HID::NpadIdType npad_id);
 
-    Result RunPointingProcessor(
-        Core::IrSensor::IrCameraHandle camera_handle,
-        const Core::IrSensor::PackedPointingProcessorConfig& processor_config,
-        ClientAppletResourceUserId aruid);
+    Result
+    RunPointingProcessor(Core::IrSensor::IrCameraHandle camera_handle,
+                         const Core::IrSensor::PackedPointingProcessorConfig& processor_config,
+                         ClientAppletResourceUserId aruid);
 
     Result SuspendImageProcessor(Core::IrSensor::IrCameraHandle camera_handle,
                                  ClientAppletResourceUserId aruid);
@@ -103,12 +105,13 @@ private:
 
     Result IsIrCameraHandleValid(const Core::IrSensor::IrCameraHandle& camera_handle) const;
 
-    Core::IrSensor::DeviceFormat& GetIrCameraSharedMemoryDeviceEntry(
-        const Core::IrSensor::IrCameraHandle& camera_handle);
+    Core::IrSensor::DeviceFormat&
+    GetIrCameraSharedMemoryDeviceEntry(const Core::IrSensor::IrCameraHandle& camera_handle);
 
-    template <typename T>
+    template<typename T>
     void MakeProcessor(const Core::IrSensor::IrCameraHandle& handle,
-                       Core::IrSensor::DeviceFormat& device_state) {
+                       Core::IrSensor::DeviceFormat& device_state)
+    {
         const auto index = static_cast<std::size_t>(handle.npad_id);
         if (index > sizeof(processors)) {
             LOG_CRITICAL(Service_IRS, "Invalid index {}", index);
@@ -117,9 +120,10 @@ private:
         processors[index] = std::make_unique<T>(device_state);
     }
 
-    template <typename T>
+    template<typename T>
     void MakeProcessorWithCoreContext(const Core::IrSensor::IrCameraHandle& handle,
-                                      Core::IrSensor::DeviceFormat& device_state) {
+                                      Core::IrSensor::DeviceFormat& device_state)
+    {
         const auto index = static_cast<std::size_t>(handle.npad_id);
         if (index > sizeof(processors)) {
             LOG_CRITICAL(Service_IRS, "Invalid index {}", index);
@@ -134,8 +138,8 @@ private:
         }
     }
 
-    template <typename T>
-    T& GetProcessor(const Core::IrSensor::IrCameraHandle& handle) {
+    template<typename T> T& GetProcessor(const Core::IrSensor::IrCameraHandle& handle)
+    {
         const auto index = static_cast<std::size_t>(handle.npad_id);
         if (index > sizeof(processors)) {
             LOG_CRITICAL(Service_IRS, "Invalid index {}", index);
@@ -144,8 +148,8 @@ private:
         return static_cast<T&>(*processors[index]);
     }
 
-    template <typename T>
-    const T& GetProcessor(const Core::IrSensor::IrCameraHandle& handle) const {
+    template<typename T> const T& GetProcessor(const Core::IrSensor::IrCameraHandle& handle) const
+    {
         const auto index = static_cast<std::size_t>(handle.npad_id);
         if (index > sizeof(processors)) {
             LOG_CRITICAL(Service_IRS, "Invalid index {}", index);

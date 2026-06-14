@@ -6,10 +6,11 @@
 
 #pragma once
 
+#include <SDL3/SDL_hidapi.h>
+
 #include <array>
 #include <span>
 #include <thread>
-#include <SDL3/SDL_hidapi.h>
 
 #include "input_common/input_engine.h"
 
@@ -33,8 +34,9 @@ public:
     ~Joycons();
 
     bool IsVibrationEnabled(const PadIdentifier& identifier) override;
-    Common::Input::DriverResult SetVibration(
-        const PadIdentifier& identifier, const Common::Input::VibrationStatus& vibration) override;
+    Common::Input::DriverResult
+    SetVibration(const PadIdentifier& identifier,
+                 const Common::Input::VibrationStatus& vibration) override;
 
     Common::Input::DriverResult SetLeds(const PadIdentifier& identifier,
                                         const Common::Input::LedStatus& led_status) override;
@@ -55,8 +57,9 @@ public:
     Common::Input::NfcState WriteMifareData(const PadIdentifier& identifier,
                                             const Common::Input::MifareRequest& request) override;
 
-    Common::Input::DriverResult SetPollingMode(
-        const PadIdentifier& identifier, const Common::Input::PollingMode polling_mode) override;
+    Common::Input::DriverResult
+    SetPollingMode(const PadIdentifier& identifier,
+                   const Common::Input::PollingMode polling_mode) override;
 
     /// Used for automapping features
     std::vector<Common::ParamPackage> GetInputDevices() const override;

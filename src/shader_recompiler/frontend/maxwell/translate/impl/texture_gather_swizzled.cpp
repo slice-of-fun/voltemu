@@ -34,19 +34,22 @@ union Encoding {
     BitField<36, 13, u64> cbuf_offset;
 };
 
-void CheckAlignment(IR::Reg reg, size_t alignment) {
+void CheckAlignment(IR::Reg reg, size_t alignment)
+{
     if (!IR::IsAligned(reg, alignment)) {
         throw NotImplementedException("Unaligned source register {}", reg);
     }
 }
 
-IR::Value MakeOffset(TranslatorVisitor& v, IR::Reg reg) {
+IR::Value MakeOffset(TranslatorVisitor& v, IR::Reg reg)
+{
     const IR::U32 value{v.X(reg)};
     return v.ir.CompositeConstruct(v.ir.BitFieldExtract(value, v.ir.Imm32(0), v.ir.Imm32(6), true),
                                    v.ir.BitFieldExtract(value, v.ir.Imm32(8), v.ir.Imm32(6), true));
 }
 
-IR::Value Sample(TranslatorVisitor& v, u64 insn) {
+IR::Value Sample(TranslatorVisitor& v, u64 insn)
+{
     const Encoding tld4s{insn};
     const IR::U32 handle{v.ir.Imm32(static_cast<u32>(tld4s.cbuf_offset * 4))};
     const IR::Reg reg_a{tld4s.src_reg_a};
@@ -80,7 +83,8 @@ IR::Value Sample(TranslatorVisitor& v, u64 insn) {
     return v.ir.ImageGather(handle, coords, {}, {}, info);
 }
 
-IR::Reg RegStoreComponent32(u64 insn, size_t index) {
+IR::Reg RegStoreComponent32(u64 insn, size_t index)
+{
     const Encoding tlds4{insn};
     switch (index) {
     case 0:
@@ -97,18 +101,21 @@ IR::Reg RegStoreComponent32(u64 insn, size_t index) {
     throw LogicError("Invalid store index {}", index);
 }
 
-void Store32(TranslatorVisitor& v, u64 insn, const IR::Value& sample) {
+void Store32(TranslatorVisitor& v, u64 insn, const IR::Value& sample)
+{
     for (size_t component = 0; component < 4; ++component) {
         const IR::Reg dest{RegStoreComponent32(insn, component)};
         v.F(dest, IR::F32{v.ir.CompositeExtract(sample, component)});
     }
 }
 
-IR::U32 Pack(TranslatorVisitor& v, const IR::F32& lhs, const IR::F32& rhs) {
+IR::U32 Pack(TranslatorVisitor& v, const IR::F32& lhs, const IR::F32& rhs)
+{
     return v.ir.PackHalf2x16(v.ir.CompositeConstruct(lhs, rhs));
 }
 
-void Store16(TranslatorVisitor& v, u64 insn, const IR::Value& sample) {
+void Store16(TranslatorVisitor& v, u64 insn, const IR::Value& sample)
+{
     std::array<IR::F32, 4> swizzled;
     for (size_t component = 0; component < 4; ++component) {
         swizzled[component] = IR::F32{v.ir.CompositeExtract(sample, component)};
@@ -119,7 +126,8 @@ void Store16(TranslatorVisitor& v, u64 insn, const IR::Value& sample) {
 }
 } // Anonymous namespace
 
-void TranslatorVisitor::TLD4S(u64 insn) {
+void TranslatorVisitor::TLD4S(u64 insn)
+{
     const IR::Value sample{Sample(*this, insn)};
     if (Encoding{insn}.precision == Precision::F32) {
         Store32(*this, insn, sample);

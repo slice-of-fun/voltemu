@@ -6,13 +6,14 @@
 
 #pragma once
 
+#include <ankerl/unordered_dense.h>
+
 #include <array>
 #include <functional>
 #include <mutex>
 #include <optional>
 #include <span>
 #include <string>
-#include <ankerl/unordered_dense.h>
 #include <vector>
 
 #include "common/common_types.h"

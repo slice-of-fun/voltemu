@@ -148,8 +148,8 @@ public:
     u8* GetPointer(Common::ProcessAddress vaddr);
     u8* GetPointerSilent(Common::ProcessAddress vaddr);
 
-    template <typename T>
-    T* GetPointer(Common::ProcessAddress vaddr) {
+    template<typename T> T* GetPointer(Common::ProcessAddress vaddr)
+    {
         return reinterpret_cast<T*>(GetPointer(vaddr));
     }
 
@@ -163,8 +163,8 @@ public:
      */
     [[nodiscard]] const u8* GetPointer(Common::ProcessAddress vaddr) const;
 
-    template <typename T>
-    const T* GetPointer(Common::ProcessAddress vaddr) const {
+    template<typename T> const T* GetPointer(Common::ProcessAddress vaddr) const
+    {
         return reinterpret_cast<T*>(GetPointer(vaddr));
     }
 
@@ -504,9 +504,9 @@ private:
     std::unique_ptr<Impl> impl;
 };
 
-template <typename T, GuestMemoryFlags FLAGS>
+template<typename T, GuestMemoryFlags FLAGS>
 using CpuGuestMemory = GuestMemory<Core::Memory::Memory, T, FLAGS>;
-template <typename T, GuestMemoryFlags FLAGS>
+template<typename T, GuestMemoryFlags FLAGS>
 using CpuGuestMemoryScoped = GuestMemoryScoped<Core::Memory::Memory, T, FLAGS>;
 
 } // namespace Core::Memory

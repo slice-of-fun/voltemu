@@ -4,13 +4,15 @@
 // SPDX-FileCopyrightText: 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+#include "jni/emu_window/emu_window.h"
+
 #include <android/native_window_jni.h>
+#include <dlfcn.h>
 
 #include <algorithm>
 #include <array>
 #include <cmath>
 #include <cstdint>
-#include <dlfcn.h>
 
 #include "common/android/id_cache.h"
 #include "common/logging.h"
@@ -20,10 +22,10 @@
 #include "input_common/drivers/virtual_amiibo.h"
 #include "input_common/drivers/virtual_gamepad.h"
 #include "input_common/main.h"
-#include "jni/emu_window/emu_window.h"
 #include "jni/native.h"
 
-void EmuWindow_Android::OnSurfaceChanged(ANativeWindow* surface) {
+void EmuWindow_Android::OnSurfaceChanged(ANativeWindow* surface)
+{
     if (!surface) {
         LOG_INFO(Frontend, "EmuWindow_Android::OnSurfaceChanged received null surface");
         m_window_width = 0;
@@ -48,23 +50,27 @@ void EmuWindow_Android::OnSurfaceChanged(ANativeWindow* surface) {
     UpdateFrameRateHint();
 }
 
-void EmuWindow_Android::OnTouchPressed(int id, float x, float y) {
+void EmuWindow_Android::OnTouchPressed(int id, float x, float y)
+{
     const auto [touch_x, touch_y] = MapToTouchScreen(x, y);
     EmulationSession::GetInstance().GetInputSubsystem().GetTouchScreen()->TouchPressed(touch_x,
                                                                                        touch_y, id);
 }
 
-void EmuWindow_Android::OnTouchMoved(int id, float x, float y) {
+void EmuWindow_Android::OnTouchMoved(int id, float x, float y)
+{
     const auto [touch_x, touch_y] = MapToTouchScreen(x, y);
     EmulationSession::GetInstance().GetInputSubsystem().GetTouchScreen()->TouchMoved(touch_x,
                                                                                      touch_y, id);
 }
 
-void EmuWindow_Android::OnTouchReleased(int id) {
+void EmuWindow_Android::OnTouchReleased(int id)
+{
     EmulationSession::GetInstance().GetInputSubsystem().GetTouchScreen()->TouchReleased(id);
 }
 
-void EmuWindow_Android::OnFrameDisplayed() {
+void EmuWindow_Android::OnFrameDisplayed()
+{
     UpdateObservedFrameRate();
     UpdateFrameRateHint();
 
@@ -75,7 +81,8 @@ void EmuWindow_Android::OnFrameDisplayed() {
     }
 }
 
-void EmuWindow_Android::UpdateObservedFrameRate() {
+void EmuWindow_Android::UpdateObservedFrameRate()
+{
     const auto now = Clock::now();
     if (m_last_frame_display_time.time_since_epoch().count() != 0) {
         const auto frame_time = std::chrono::duration<float>(now - m_last_frame_display_time);
@@ -97,7 +104,8 @@ void EmuWindow_Android::UpdateObservedFrameRate() {
     m_last_frame_display_time = now;
 }
 
-float EmuWindow_Android::QuantizeFrameRateHint(float frame_rate) {
+float EmuWindow_Android::QuantizeFrameRateHint(float frame_rate)
+{
     if (!std::isfinite(frame_rate) || frame_rate <= 0.0f) {
         return 0.0f;
     }
@@ -108,7 +116,8 @@ float EmuWindow_Android::QuantizeFrameRateHint(float frame_rate) {
     return std::round(frame_rate / Step) * Step;
 }
 
-float EmuWindow_Android::GetFrameTimeVerifiedHint() const {
+float EmuWindow_Android::GetFrameTimeVerifiedHint() const
+{
     if (!EmulationSession::GetInstance().IsRunning()) {
         return 0.0f;
     }
@@ -124,7 +133,8 @@ float EmuWindow_Android::GetFrameTimeVerifiedHint() const {
     return QuantizeFrameRateHint(verified_rate);
 }
 
-float EmuWindow_Android::GetFrameRateHint() const {
+float EmuWindow_Android::GetFrameRateHint() const
+{
     const float observed_rate = std::clamp(m_smoothed_present_rate, 0.0f, 240.0f);
     const float frame_time_verified_hint = GetFrameTimeVerifiedHint();
 
@@ -165,7 +175,8 @@ float EmuWindow_Android::GetFrameRateHint() const {
     return QuantizeFrameRateHint(speed_limited_rate);
 }
 
-void EmuWindow_Android::UpdateFrameRateHint() {
+void EmuWindow_Android::UpdateFrameRateHint()
+{
     auto* const surface = reinterpret_cast<ANativeWindow*>(window_info.render_surface);
     if (!surface) {
         return;
@@ -210,23 +221,21 @@ void EmuWindow_Android::UpdateFrameRateHint() {
         m_pending_frame_rate_since = now;
     }
 
-    using SetFrameRateWithChangeStrategyFn =
-        int32_t (*)(ANativeWindow*, float, int8_t, int8_t);
+    using SetFrameRateWithChangeStrategyFn = int32_t (*)(ANativeWindow*, float, int8_t, int8_t);
     using SetFrameRateFn = int32_t (*)(ANativeWindow*, float, int8_t);
     static const auto set_frame_rate_with_change_strategy =
         reinterpret_cast<SetFrameRateWithChangeStrategyFn>(
             dlsym(RTLD_DEFAULT, "ANativeWindow_setFrameRateWithChangeStrategy"));
-    static const auto set_frame_rate = reinterpret_cast<SetFrameRateFn>(
-        dlsym(RTLD_DEFAULT, "ANativeWindow_setFrameRate"));
+    static const auto set_frame_rate =
+        reinterpret_cast<SetFrameRateFn>(dlsym(RTLD_DEFAULT, "ANativeWindow_setFrameRate"));
 
     constexpr int8_t FrameRateCompatibilityDefault = 0;
     constexpr int8_t ChangeFrameRateOnlyIfSeamless = 0;
 
     int32_t result = -1;
     if (set_frame_rate_with_change_strategy) {
-        result = set_frame_rate_with_change_strategy(surface, frame_rate_hint,
-                                                     FrameRateCompatibilityDefault,
-                                                     ChangeFrameRateOnlyIfSeamless);
+        result = set_frame_rate_with_change_strategy(
+            surface, frame_rate_hint, FrameRateCompatibilityDefault, ChangeFrameRateOnlyIfSeamless);
     } else if (set_frame_rate) {
         result = set_frame_rate(surface, frame_rate_hint, FrameRateCompatibilityDefault);
     } else {
@@ -246,7 +255,8 @@ void EmuWindow_Android::UpdateFrameRateHint() {
 
 EmuWindow_Android::EmuWindow_Android(ANativeWindow* surface,
                                      std::shared_ptr<Common::DynamicLibrary> driver_library)
-    : m_driver_library{driver_library} {
+    : m_driver_library{driver_library}
+{
     LOG_INFO(Frontend, "initializing");
 
     if (!surface) {

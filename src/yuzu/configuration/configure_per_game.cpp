@@ -4,12 +4,7 @@
 // SPDX-FileCopyrightText: Copyright 2020 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include <algorithm>
-#include <filesystem>
-#include <memory>
-#include <string>
-#include <utility>
-#include <vector>
+#include "yuzu/configuration/configure_per_game.h"
 
 #include <fmt/ranges.h>
 
@@ -18,6 +13,12 @@
 #include <QPushButton>
 #include <QString>
 #include <QTimer>
+#include <algorithm>
+#include <filesystem>
+#include <memory>
+#include <string>
+#include <utility>
+#include <vector>
 
 #include "common/fs/fs_util.h"
 #include "common/settings_enums.h"
@@ -42,7 +43,6 @@
 #include "yuzu/configuration/configure_graphics_extensions.h"
 #include "yuzu/configuration/configure_input_per_game.h"
 #include "yuzu/configuration/configure_network.h"
-#include "yuzu/configuration/configure_per_game.h"
 #include "yuzu/configuration/configure_per_game_addons.h"
 #include "yuzu/configuration/configure_system.h"
 #include "yuzu/util/util.h"
@@ -50,10 +50,11 @@
 ConfigurePerGame::ConfigurePerGame(QWidget* parent, u64 title_id_, const std::string& file_name,
                                    std::vector<VkDeviceInfo::Record>& vk_device_records,
                                    Core::System& system_)
-    : QDialog(parent), ui(std::make_unique<Ui::ConfigurePerGame>()), title_id{title_id_},
-      system{system_},
+    : QDialog(parent),
+      ui(std::make_unique<Ui::ConfigurePerGame>()), title_id{title_id_}, system{system_},
       builder{std::make_unique<ConfigurationShared::Builder>(this, !system_.IsPoweredOn())},
-      tab_group{std::make_shared<std::vector<ConfigurationShared::Tab*>>()} {
+      tab_group{std::make_shared<std::vector<ConfigurationShared::Tab*>>()}
+{
     const auto file_path = std::filesystem::path(Common::FS::ToU8String(file_name));
     const auto config_file_name = title_id == 0 ? Common::FS::PathToUTF8String(file_path.filename())
                                                 : fmt::format("{:016X}", title_id);
@@ -105,7 +106,8 @@ ConfigurePerGame::ConfigurePerGame(QWidget* parent, u64 title_id_, const std::st
 
 ConfigurePerGame::~ConfigurePerGame() = default;
 
-void ConfigurePerGame::ApplyConfiguration() {
+void ConfigurePerGame::ApplyConfiguration()
+{
     for (const auto tab : *tab_group) {
         tab->ApplyConfiguration();
     }
@@ -126,7 +128,8 @@ void ConfigurePerGame::ApplyConfiguration() {
     game_config->SaveAllValues();
 }
 
-void ConfigurePerGame::changeEvent(QEvent* event) {
+void ConfigurePerGame::changeEvent(QEvent* event)
+{
     if (event->type() == QEvent::LanguageChange) {
         RetranslateUI();
     }
@@ -134,21 +137,25 @@ void ConfigurePerGame::changeEvent(QEvent* event) {
     QDialog::changeEvent(event);
 }
 
-void ConfigurePerGame::RetranslateUI() {
+void ConfigurePerGame::RetranslateUI()
+{
     ui->retranslateUi(this);
 }
 
-void ConfigurePerGame::HandleApplyButtonClicked() {
+void ConfigurePerGame::HandleApplyButtonClicked()
+{
     UISettings::values.configuration_applied = true;
     ApplyConfiguration();
 }
 
-void ConfigurePerGame::LoadFromFile(FileSys::VirtualFile file_) {
+void ConfigurePerGame::LoadFromFile(FileSys::VirtualFile file_)
+{
     file = std::move(file_);
     LoadConfiguration();
 }
 
-void ConfigurePerGame::LoadConfiguration() {
+void ConfigurePerGame::LoadConfiguration()
+{
     if (file == nullptr) {
         return;
     }

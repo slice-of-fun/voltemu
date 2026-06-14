@@ -608,7 +608,8 @@ struct Nickname {
     std::array<char16_t, MaxNameSize> data{};
 
     // Checks for null or dirty strings
-    bool IsValid() const {
+    bool IsValid() const
+    {
         if (data[0] == 0) {
             return false;
         }
@@ -684,9 +685,7 @@ struct DatabaseSessionMetadata {
     u32 magic;
     u64 update_counter;
 
-    bool IsInterfaceVersionSupported(u32 version) const {
-        return version <= interface_version;
-    }
+    bool IsInterfaceVersionSupported(u32 version) const { return version <= interface_version; }
 };
 
 } // namespace Service::Mii

@@ -66,11 +66,13 @@ public:
 
 private:
     using SharedMemoryInfoList = Common::IntrusiveListBaseTraits<KSharedMemoryInfo>::ListType;
-    using TLPTree = Common::IntrusiveRedBlackTreeBaseTraits<KThreadLocalPage>::TreeType<KThreadLocalPage>;
+    using TLPTree =
+        Common::IntrusiveRedBlackTreeBaseTraits<KThreadLocalPage>::TreeType<KThreadLocalPage>;
     using TLPIterator = TLPTree::iterator;
 
 private:
-    std::array<std::unique_ptr<Core::ArmInterface>, Core::Hardware::NUM_CPU_CORES> m_arm_interfaces{};
+    std::array<std::unique_ptr<Core::ArmInterface>, Core::Hardware::NUM_CPU_CORES>
+        m_arm_interfaces{};
     std::array<KThread*, Core::Hardware::NUM_CPU_CORES> m_running_threads{};
     std::array<u64, Core::Hardware::NUM_CPU_CORES> m_running_thread_idle_counts{};
     std::array<u64, Core::Hardware::NUM_CPU_CORES> m_running_thread_switch_counts{};
@@ -98,7 +100,7 @@ private:
     KConditionVariable m_cond_var;
     KAddressArbiter m_address_arbiter;
     std::array<u64, 4> m_entropy{};
-    u32 m_pointer_buffer_size = 0x8000;  // Default pointer buffer size (can be game-specific later)
+    u32 m_pointer_buffer_size = 0x8000; // Default pointer buffer size (can be game-specific later)
     std::array<char, 13> m_name{};
     Svc::CreateProcessFlag m_flags{};
     KMemoryManager::Pool m_memory_pool{};
@@ -141,14 +143,16 @@ private:
     Result StartTermination();
     void FinishTermination();
 
-    void PinThread(s32 core_id, KThread* thread) {
+    void PinThread(s32 core_id, KThread* thread)
+    {
         ASSERT(0 <= core_id && core_id < static_cast<s32>(Core::Hardware::NUM_CPU_CORES));
         ASSERT(thread != nullptr);
         ASSERT(m_pinned_threads[core_id] == nullptr);
         m_pinned_threads[core_id] = thread;
     }
 
-    void UnpinThread(s32 core_id, KThread* thread) {
+    void UnpinThread(s32 core_id, KThread* thread)
+    {
         ASSERT(0 <= core_id && core_id < static_cast<s32>(Core::Hardware::NUM_CPU_CORES));
         ASSERT(thread != nullptr);
         ASSERT(m_pinned_threads[core_id] == thread);
@@ -170,120 +174,150 @@ public:
                       KProcessAddress aslr_space_start);
     void Exit();
 
-    const char* GetName() const {
+    const char* GetName() const
+    {
         return m_name.data();
     }
 
-    u64 GetProgramId() const {
+    u64 GetProgramId() const
+    {
         return m_program_id;
     }
 
-    u64 GetProcessId() const {
+    u64 GetProcessId() const
+    {
         return m_process_id;
     }
 
-    State GetState() const {
+    State GetState() const
+    {
         return m_state;
     }
 
-    u64 GetCoreMask() const {
+    u64 GetCoreMask() const
+    {
         return m_capabilities.GetCoreMask();
     }
-    u64 GetPhysicalCoreMask() const {
+    u64 GetPhysicalCoreMask() const
+    {
         return m_capabilities.GetPhysicalCoreMask();
     }
-    u64 GetPriorityMask() const {
+    u64 GetPriorityMask() const
+    {
         return m_capabilities.GetPriorityMask();
     }
 
-    s32 GetIdealCoreId() const {
+    s32 GetIdealCoreId() const
+    {
         return m_ideal_core_id;
     }
-    void SetIdealCoreId(s32 core_id) {
+    void SetIdealCoreId(s32 core_id)
+    {
         m_ideal_core_id = core_id;
     }
 
-    bool CheckThreadPriority(s32 prio) const {
+    bool CheckThreadPriority(s32 prio) const
+    {
         return ((1ULL << prio) & this->GetPriorityMask()) != 0;
     }
 
-    u32 GetCreateProcessFlags() const {
+    u32 GetCreateProcessFlags() const
+    {
         return static_cast<u32>(m_flags);
     }
 
-    bool Is64Bit() const {
+    bool Is64Bit() const
+    {
         return True(m_flags & Svc::CreateProcessFlag::Is64Bit);
     }
 
-    KProcessAddress GetEntryPoint() const {
+    KProcessAddress GetEntryPoint() const
+    {
         return m_code_address;
     }
 
-    size_t GetMainStackSize() const {
+    size_t GetMainStackSize() const
+    {
         return m_main_thread_stack_size;
     }
 
-    KMemoryManager::Pool GetMemoryPool() const {
+    KMemoryManager::Pool GetMemoryPool() const
+    {
         return m_memory_pool;
     }
 
-    u64 GetRandomEntropy(size_t i) const {
+    u64 GetRandomEntropy(size_t i) const
+    {
         return m_entropy[i];
     }
 
-    bool IsApplication() const {
+    bool IsApplication() const
+    {
         return m_is_application;
     }
 
-    bool IsDefaultApplicationSystemResource() const {
+    bool IsDefaultApplicationSystemResource() const
+    {
         return m_is_default_application_system_resource;
     }
 
-    bool IsSuspended() const {
+    bool IsSuspended() const
+    {
         return m_is_suspended;
     }
-    void SetSuspended(bool suspended) {
+    void SetSuspended(bool suspended)
+    {
         m_is_suspended = suspended;
     }
 
-    u32 GetPointerBufferSize() const {
+    u32 GetPointerBufferSize() const
+    {
         return m_pointer_buffer_size;
     }
 
-    void SetPointerBufferSize(u32 size) {
+    void SetPointerBufferSize(u32 size)
+    {
         m_pointer_buffer_size = size;
     }
 
     Result Terminate();
 
-    bool IsTerminated() const {
+    bool IsTerminated() const
+    {
         return m_state == State::Terminated;
     }
 
-    bool IsPermittedSvc(u32 svc_id) const {
+    bool IsPermittedSvc(u32 svc_id) const
+    {
         return m_capabilities.IsPermittedSvc(svc_id);
     }
 
-    bool IsPermittedInterrupt(s32 interrupt_id) const {
+    bool IsPermittedInterrupt(s32 interrupt_id) const
+    {
         return m_capabilities.IsPermittedInterrupt(interrupt_id);
     }
 
-    bool IsPermittedDebug() const {
+    bool IsPermittedDebug() const
+    {
         return m_capabilities.IsPermittedDebug();
     }
 
-    bool CanForceDebug() const {
+    bool CanForceDebug() const
+    {
         return m_capabilities.CanForceDebug();
     }
 
-    u32 GetAllocateOption() const {
+    u32 GetAllocateOption() const
+    {
         return m_page_table.GetAllocateOption();
     }
 
-    ThreadList& GetThreadList() {
+    ThreadList& GetThreadList()
+    {
         return m_thread_list;
     }
-    const ThreadList& GetThreadList() const {
+    const ThreadList& GetThreadList() const
+    {
         return m_thread_list;
     }
 
@@ -291,16 +325,19 @@ public:
     bool LeaveUserException();
     bool ReleaseUserException(KThread* thread);
 
-    KThread* GetPinnedThread(s32 core_id) const {
+    KThread* GetPinnedThread(s32 core_id) const
+    {
         ASSERT(0 <= core_id && core_id < static_cast<s32>(Core::Hardware::NUM_CPU_CORES));
         return m_pinned_threads[core_id];
     }
 
-    const Svc::SvcAccessFlagSet& GetSvcPermissions() const {
+    const Svc::SvcAccessFlagSet& GetSvcPermissions() const
+    {
         return m_capabilities.GetSvcPermissions();
     }
 
-    KResourceLimit* GetResourceLimit() const {
+    KResourceLimit* GetResourceLimit() const
+    {
         return m_resource_limit;
     }
 
@@ -309,24 +346,30 @@ public:
     void ReleaseResource(Svc::LimitableResource which, s64 value);
     void ReleaseResource(Svc::LimitableResource which, s64 value, s64 hint);
 
-    KLightLock& GetStateLock() {
+    KLightLock& GetStateLock()
+    {
         return m_state_lock;
     }
-    KLightLock& GetListLock() {
+    KLightLock& GetListLock()
+    {
         return m_list_lock;
     }
 
-    KProcessPageTable& GetPageTable() {
+    KProcessPageTable& GetPageTable()
+    {
         return m_page_table;
     }
-    const KProcessPageTable& GetPageTable() const {
+    const KProcessPageTable& GetPageTable() const
+    {
         return m_page_table;
     }
 
-    KHandleTable& GetHandleTable() {
+    KHandleTable& GetHandleTable()
+    {
         return m_handle_table;
     }
-    const KHandleTable& GetHandleTable() const {
+    const KHandleTable& GetHandleTable() const
+    {
         return m_handle_table;
     }
 
@@ -341,32 +384,39 @@ public:
     Result CreateThreadLocalRegion(KProcessAddress* out);
     Result DeleteThreadLocalRegion(KProcessAddress addr);
 
-    KProcessAddress GetProcessLocalRegionAddress() const {
+    KProcessAddress GetProcessLocalRegionAddress() const
+    {
         return m_plr_address;
     }
 
-    KThread* GetExceptionThread() const {
+    KThread* GetExceptionThread() const
+    {
         return m_exception_thread;
     }
 
-    void AddCpuTime(s64 diff) {
+    void AddCpuTime(s64 diff)
+    {
         m_cpu_time += diff;
     }
-    s64 GetCpuTime() {
+    s64 GetCpuTime()
+    {
         return m_cpu_time.load();
     }
 
-    s64 GetScheduledCount() const {
+    s64 GetScheduledCount() const
+    {
         return m_schedule_count;
     }
-    void IncrementScheduledCount() {
+    void IncrementScheduledCount()
+    {
         ++m_schedule_count;
     }
 
     void IncrementRunningThreadCount();
     void DecrementRunningThreadCount();
 
-    size_t GetRequiredSecureMemorySizeNonDefault() const {
+    size_t GetRequiredSecureMemorySizeNonDefault() const
+    {
         if (!this->IsDefaultApplicationSystemResource() && m_system_resource->IsSecureResource()) {
             auto* secure_system_resource = static_cast<KSecureSystemResource*>(m_system_resource);
             return secure_system_resource->CalculateRequiredSecureMemorySize();
@@ -375,7 +425,8 @@ public:
         return 0;
     }
 
-    size_t GetRequiredSecureMemorySize() const {
+    size_t GetRequiredSecureMemorySize() const
+    {
         if (m_system_resource->IsSecureResource()) {
             auto* secure_system_resource = static_cast<KSecureSystemResource*>(m_system_resource);
             return secure_system_resource->CalculateRequiredSecureMemorySize();
@@ -384,7 +435,8 @@ public:
         return 0;
     }
 
-    size_t GetTotalSystemResourceSize() const {
+    size_t GetTotalSystemResourceSize() const
+    {
         if (!this->IsDefaultApplicationSystemResource() && m_system_resource->IsSecureResource()) {
             auto* secure_system_resource = static_cast<KSecureSystemResource*>(m_system_resource);
             return secure_system_resource->GetSize();
@@ -393,7 +445,8 @@ public:
         return 0;
     }
 
-    size_t GetUsedSystemResourceSize() const {
+    size_t GetUsedSystemResourceSize() const
+    {
         if (!this->IsDefaultApplicationSystemResource() && m_system_resource->IsSecureResource()) {
             auto* secure_system_resource = static_cast<KSecureSystemResource*>(m_system_resource);
             return secure_system_resource->GetUsedSize();
@@ -402,13 +455,15 @@ public:
         return 0;
     }
 
-    void SetRunningThread(s32 core, KThread* thread, u64 idle_count, u64 switch_count) {
+    void SetRunningThread(s32 core, KThread* thread, u64 idle_count, u64 switch_count)
+    {
         m_running_threads[core] = thread;
         m_running_thread_idle_counts[core] = idle_count;
         m_running_thread_switch_counts[core] = switch_count;
     }
 
-    void ClearRunningThread(KThread* thread) {
+    void ClearRunningThread(KThread* thread)
+    {
         for (size_t i = 0; i < m_running_threads.size(); ++i) {
             if (m_running_threads[i] == thread) {
                 m_running_threads[i] = nullptr;
@@ -416,27 +471,34 @@ public:
         }
     }
 
-    const KSystemResource& GetSystemResource() const {
+    const KSystemResource& GetSystemResource() const
+    {
         return *m_system_resource;
     }
 
-    const KMemoryBlockSlabManager& GetMemoryBlockSlabManager() const {
+    const KMemoryBlockSlabManager& GetMemoryBlockSlabManager() const
+    {
         return m_system_resource->GetMemoryBlockSlabManager();
     }
-    const KBlockInfoManager& GetBlockInfoManager() const {
+    const KBlockInfoManager& GetBlockInfoManager() const
+    {
         return m_system_resource->GetBlockInfoManager();
     }
-    const KPageTableManager& GetPageTableManager() const {
+    const KPageTableManager& GetPageTableManager() const
+    {
         return m_system_resource->GetPageTableManager();
     }
 
-    KThread* GetRunningThread(s32 core) const {
+    KThread* GetRunningThread(s32 core) const
+    {
         return m_running_threads[core];
     }
-    u64 GetRunningThreadIdleCount(s32 core) const {
+    u64 GetRunningThreadIdleCount(s32 core) const
+    {
         return m_running_thread_idle_counts[core];
     }
-    u64 GetRunningThreadSwitchCount(s32 core) const {
+    u64 GetRunningThreadSwitchCount(s32 core) const
+    {
         return m_running_thread_switch_counts[core];
     }
 
@@ -447,13 +509,15 @@ public:
 
     Result Reset();
 
-    void SetDebugBreak() {
+    void SetDebugBreak()
+    {
         if (m_state == State::RunningAttached) {
             this->ChangeState(State::DebugBreak);
         }
     }
 
-    void SetAttached() {
+    void SetAttached()
+    {
         if (m_state == State::DebugBreak) {
             this->ChangeState(State::RunningAttached);
         }
@@ -465,21 +529,25 @@ public:
     void UnpinCurrentThread();
     void UnpinThread(KThread* thread);
 
-    void SignalConditionVariable(uintptr_t cv_key, int32_t count) {
+    void SignalConditionVariable(uintptr_t cv_key, int32_t count)
+    {
         return m_cond_var.Signal(cv_key, count);
     }
 
-    Result WaitConditionVariable(KProcessAddress address, uintptr_t cv_key, u32 tag, s64 ns) {
+    Result WaitConditionVariable(KProcessAddress address, uintptr_t cv_key, u32 tag, s64 ns)
+    {
         R_RETURN(m_cond_var.Wait(address, cv_key, tag, ns));
     }
 
     Result SignalAddressArbiter(uintptr_t address, Svc::SignalType signal_type, s32 value,
-                                s32 count) {
+                                s32 count)
+    {
         R_RETURN(m_address_arbiter.SignalToAddress(address, signal_type, value, count));
     }
 
     Result WaitAddressArbiter(uintptr_t address, Svc::ArbitrationType arb_type, s32 value,
-                              s64 timeout) {
+                              s64 timeout)
+    {
         R_RETURN(m_address_arbiter.WaitForAddress(address, arb_type, value, timeout));
     }
 
@@ -488,12 +556,14 @@ public:
     static void Switch(KProcess* cur_process, KProcess* next_process);
 
 #ifdef HAS_NCE
-    ankerl::unordered_dense::map<u64, u64>& GetPostHandlers() noexcept {
+    ankerl::unordered_dense::map<u64, u64>& GetPostHandlers() noexcept
+    {
         return m_post_handlers;
     }
 #endif
 
-    Core::ArmInterface* GetArmInterface(size_t core_index) const {
+    Core::ArmInterface* GetArmInterface(size_t core_index) const
+    {
         return m_arm_interfaces[core_index].get();
     }
 
@@ -504,43 +574,53 @@ public:
     // Attempts to remove the watchpoint specified by the given parameters.
     bool RemoveWatchpoint(KProcessAddress addr, u64 size, DebugWatchpointType type);
 
-    const std::array<DebugWatchpoint, Core::Hardware::NUM_WATCHPOINTS>& GetWatchpoints() const {
+    const std::array<DebugWatchpoint, Core::Hardware::NUM_WATCHPOINTS>& GetWatchpoints() const
+    {
         return m_watchpoints;
     }
 
 public:
-    Result LoadFromMetadata(const FileSys::ProgramMetadata& metadata, std::size_t code_size, KProcessAddress aslr_space_start, size_t aslr_space_offset);
+    Result LoadFromMetadata(const FileSys::ProgramMetadata& metadata, std::size_t code_size,
+                            KProcessAddress aslr_space_start, size_t aslr_space_offset);
 
     void LoadModule(CodeSet code_set, KProcessAddress base_addr);
 
     void InitializeInterfaces();
 
-    Core::Memory::Memory& GetMemory() {
+    Core::Memory::Memory& GetMemory()
+    {
         return m_memory;
     }
 
-    Core::ExclusiveMonitor& GetExclusiveMonitor() const {
+    Core::ExclusiveMonitor& GetExclusiveMonitor() const
+    {
         return *m_exclusive_monitor;
     }
 
 public:
     // Overridden parent functions.
-    bool IsInitialized() const override {
+    bool IsInitialized() const override
+    {
         return m_is_initialized;
     }
 
-    static void PostDestroy(uintptr_t arg) {}
+    static void PostDestroy(uintptr_t arg)
+    {
+    }
 
     void Finalize() override;
 
-    u64 GetIdImpl() const {
+    u64 GetIdImpl() const
+    {
         return this->GetProcessId();
     }
-    u64 GetId() const override {
+    u64 GetId() const override
+    {
         return this->GetIdImpl();
     }
 
-    virtual bool IsSignaled() const override {
+    virtual bool IsSignaled() const override
+    {
         ASSERT(KScheduler::IsSchedulerLockedByCurrentThread(m_kernel));
         return m_is_signaled;
     }
@@ -548,7 +628,8 @@ public:
     void DoWorkerTaskImpl();
 
 private:
-    void ChangeState(State new_state) {
+    void ChangeState(State new_state)
+    {
         if (m_state != new_state) {
             m_state = new_state;
             m_is_signaled = true;
@@ -556,7 +637,8 @@ private:
         }
     }
 
-    Result InitializeHandleTable(s32 size) {
+    Result InitializeHandleTable(s32 size)
+    {
         // Try to initialize the handle table.
         R_TRY(m_handle_table.Initialize(size));
 
@@ -565,7 +647,8 @@ private:
         R_SUCCEED();
     }
 
-    void FinalizeHandleTable() {
+    void FinalizeHandleTable()
+    {
         // Finalize the table.
         m_handle_table.Finalize();
 

@@ -6,9 +6,10 @@
 
 #pragma once
 
+#include <QWidget>
 #include <memory>
 #include <vector>
-#include <QWidget>
+
 #include "qt_common/config/shared_translation.h"
 #include "yuzu/configuration/configuration_shared.h"
 

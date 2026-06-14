@@ -6,18 +6,20 @@
 
 #pragma once
 
+#include <ankerl/unordered_dense.h>
+
 #include <array>
+#include <boost/container/flat_map.hpp>
 #include <functional>
 #include <memory>
 #include <optional>
 #include <string>
 #include <vector>
-#include <ankerl/unordered_dense.h>
-#include <boost/container/flat_map.hpp>
+
 #include "common/common_types.h"
 #include "core/crypto/key_manager.h"
-#include "core/file_sys/vfs/vfs.h"
 #include "core/file_sys/nca_metadata.h"
+#include "core/file_sys/vfs/vfs.h"
 
 namespace FileSys {
 class ExternalContentProvider;
@@ -60,7 +62,8 @@ struct ExternalUpdateEntry {
     std::array<VirtualFile, size_t(ContentRecordType::Count)> files;
 };
 
-constexpr u64 GetUpdateTitleID(u64 base_title_id) {
+constexpr u64 GetUpdateTitleID(u64 base_title_id)
+{
     return base_title_id | 0x800;
 }
 
@@ -96,9 +99,10 @@ public:
     virtual std::vector<ContentProviderEntry> ListEntries() const;
 
     // If a parameter is not std::nullopt, it will be filtered for from all entries.
-    virtual std::vector<ContentProviderEntry> ListEntriesFilter(
-        std::optional<TitleType> title_type = {}, std::optional<ContentRecordType> record_type = {},
-        std::optional<u64> title_id = {}) const = 0;
+    virtual std::vector<ContentProviderEntry>
+    ListEntriesFilter(std::optional<TitleType> title_type = {},
+                      std::optional<ContentRecordType> record_type = {},
+                      std::optional<u64> title_id = {}) const = 0;
 
 protected:
     // A single instance of KeyManager to be used by GetEntry()
@@ -164,9 +168,10 @@ public:
     std::unique_ptr<NCA> GetEntry(u64 title_id, ContentRecordType type) const override;
 
     // If a parameter is not std::nullopt, it will be filtered for from all entries.
-    std::vector<ContentProviderEntry> ListEntriesFilter(
-        std::optional<TitleType> title_type = {}, std::optional<ContentRecordType> record_type = {},
-        std::optional<u64> title_id = {}) const override;
+    std::vector<ContentProviderEntry>
+    ListEntriesFilter(std::optional<TitleType> title_type = {},
+                      std::optional<ContentRecordType> record_type = {},
+                      std::optional<u64> title_id = {}) const override;
 
     // Raw copies all the ncas from the xci/nsp to the csache. Does some quick checks to make sure
     // there is a meta NCA and all of them are accessible.
@@ -190,7 +195,7 @@ public:
     bool RemoveExistingEntry(u64 title_id) const;
 
 private:
-    template <typename T>
+    template<typename T>
     void IterateAllMetadata(std::vector<T>& out,
                             std::function<T(const CNMT&, const ContentRecord&)> proc,
                             std::function<bool(const CNMT&, const ContentRecord&)> filter) const;
@@ -236,21 +241,26 @@ public:
     VirtualFile GetEntryUnparsed(u64 title_id, ContentRecordType type) const override;
     VirtualFile GetEntryRaw(u64 title_id, ContentRecordType type) const override;
     std::unique_ptr<NCA> GetEntry(u64 title_id, ContentRecordType type) const override;
-    std::vector<ContentProviderEntry> ListEntriesFilter(
-        std::optional<TitleType> title_type, std::optional<ContentRecordType> record_type,
-        std::optional<u64> title_id) const override;
+    std::vector<ContentProviderEntry>
+    ListEntriesFilter(std::optional<TitleType> title_type,
+                      std::optional<ContentRecordType> record_type,
+                      std::optional<u64> title_id) const override;
 
     const ExternalContentProvider* GetExternalProvider() const;
-    [[nodiscard]] inline const ContentProvider* GetSlotProvider(ContentProviderUnionSlot slot) const {
+    [[nodiscard]] inline const ContentProvider* GetSlotProvider(ContentProviderUnionSlot slot) const
+    {
         return providers[size_t(slot)];
     }
 
-    std::vector<std::pair<ContentProviderUnionSlot, ContentProviderEntry>> ListEntriesFilterOrigin(
-        std::optional<ContentProviderUnionSlot> origin = {},
-        std::optional<TitleType> title_type = {}, std::optional<ContentRecordType> record_type = {},
-        std::optional<u64> title_id = {}) const;
+    std::vector<std::pair<ContentProviderUnionSlot, ContentProviderEntry>>
+    ListEntriesFilterOrigin(std::optional<ContentProviderUnionSlot> origin = {},
+                            std::optional<TitleType> title_type = {},
+                            std::optional<ContentRecordType> record_type = {},
+                            std::optional<u64> title_id = {}) const;
 
-    std::optional<ContentProviderUnionSlot> GetSlotForEntry(u64 title_id, ContentRecordType type) const;
+    std::optional<ContentProviderUnionSlot> GetSlotForEntry(u64 title_id,
+                                                            ContentRecordType type) const;
+
 private:
     std::array<ContentProvider*, size_t(ContentProviderUnionSlot::Count)> providers;
 };
@@ -273,9 +283,10 @@ public:
     VirtualFile GetEntryUnparsed(u64 title_id, ContentRecordType type) const override;
     VirtualFile GetEntryRaw(u64 title_id, ContentRecordType type) const override;
     std::unique_ptr<NCA> GetEntry(u64 title_id, ContentRecordType type) const override;
-    std::vector<ContentProviderEntry> ListEntriesFilter(
-        std::optional<TitleType> title_type, std::optional<ContentRecordType> record_type,
-        std::optional<u64> title_id) const override;
+    std::vector<ContentProviderEntry>
+    ListEntriesFilter(std::optional<TitleType> title_type,
+                      std::optional<ContentRecordType> record_type,
+                      std::optional<u64> title_id) const override;
 
     std::vector<ExternalUpdateEntry> ListUpdateVersions(u64 title_id) const;
     VirtualFile GetEntryForVersion(u64 title_id, ContentRecordType type, u32 version) const;
@@ -299,9 +310,10 @@ public:
     VirtualFile GetEntryUnparsed(u64 title_id, ContentRecordType type) const override;
     VirtualFile GetEntryRaw(u64 title_id, ContentRecordType type) const override;
     std::unique_ptr<NCA> GetEntry(u64 title_id, ContentRecordType type) const override;
-    std::vector<ContentProviderEntry> ListEntriesFilter(
-        std::optional<TitleType> title_type, std::optional<ContentRecordType> record_type,
-        std::optional<u64> title_id) const override;
+    std::vector<ContentProviderEntry>
+    ListEntriesFilter(std::optional<TitleType> title_type,
+                      std::optional<ContentRecordType> record_type,
+                      std::optional<u64> title_id) const override;
 
     std::vector<ExternalUpdateEntry> ListUpdateVersions(u64 title_id) const;
     VirtualFile GetEntryForVersion(u64 title_id, ContentRecordType type, u32 version) const;
@@ -312,7 +324,8 @@ private:
     void ProcessXCI(const VirtualFile& file);
 
     std::vector<VirtualDir> load_dirs;
-    ankerl::unordered_dense::map<std::tuple<u64, ContentRecordType, TitleType>, VirtualFile> entries;
+    ankerl::unordered_dense::map<std::tuple<u64, ContentRecordType, TitleType>, VirtualFile>
+        entries;
     ankerl::unordered_dense::map<u64, u32> versions;
     std::vector<ExternalUpdateEntry> multi_version_entries;
 };

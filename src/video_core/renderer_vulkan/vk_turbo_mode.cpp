@@ -33,13 +33,15 @@ TurboMode::TurboMode(const vk::Instance& instance, const vk::InstanceDispatch& d
 
 TurboMode::~TurboMode() = default;
 
-void TurboMode::QueueSubmitted() {
+void TurboMode::QueueSubmitted()
+{
     std::scoped_lock lk{m_submission_lock};
     m_submission_time = std::chrono::steady_clock::now();
     m_submission_cv.notify_one();
 }
 
-void TurboMode::Run(std::stop_token stop_token) {
+void TurboMode::Run(std::stop_token stop_token)
+{
 #ifndef __ANDROID__
     auto& dld = m_device.GetLogical();
 

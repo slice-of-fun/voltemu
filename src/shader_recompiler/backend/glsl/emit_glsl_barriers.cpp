@@ -5,15 +5,18 @@
 #include "shader_recompiler/backend/glsl/glsl_emit_context.h"
 
 namespace Shader::Backend::GLSL {
-void EmitBarrier(EmitContext& ctx) {
+void EmitBarrier(EmitContext& ctx)
+{
     ctx.Add("barrier();");
 }
 
-void EmitWorkgroupMemoryBarrier(EmitContext& ctx) {
+void EmitWorkgroupMemoryBarrier(EmitContext& ctx)
+{
     ctx.Add("groupMemoryBarrier();");
 }
 
-void EmitDeviceMemoryBarrier(EmitContext& ctx) {
+void EmitDeviceMemoryBarrier(EmitContext& ctx)
+{
     ctx.Add("memoryBarrier();");
 }
 } // namespace Shader::Backend::GLSL

@@ -1,11 +1,12 @@
 // SPDX-FileCopyrightText: Copyright 2020 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/kernel/k_address_space_info.h"
+
 #include <array>
 
 #include "common/assert.h"
 #include "common/literals.h"
-#include "core/hle/kernel/k_address_space_info.h"
 
 namespace Kernel {
 
@@ -38,7 +39,8 @@ constexpr std::array<KAddressSpaceInfo, 13> AddressSpaceInfos{{
 }};
 // clang-format on
 
-const KAddressSpaceInfo& GetAddressSpaceInfo(size_t width, KAddressSpaceInfo::Type type) {
+const KAddressSpaceInfo& GetAddressSpaceInfo(size_t width, KAddressSpaceInfo::Type type)
+{
     for (auto& info : AddressSpaceInfos) {
         if (info.bit_width == width && info.type == type) {
             return info;
@@ -49,11 +51,13 @@ const KAddressSpaceInfo& GetAddressSpaceInfo(size_t width, KAddressSpaceInfo::Ty
 
 } // namespace
 
-std::size_t KAddressSpaceInfo::GetAddressSpaceStart(size_t width, KAddressSpaceInfo::Type type) {
+std::size_t KAddressSpaceInfo::GetAddressSpaceStart(size_t width, KAddressSpaceInfo::Type type)
+{
     return GetAddressSpaceInfo(width, type).address;
 }
 
-std::size_t KAddressSpaceInfo::GetAddressSpaceSize(size_t width, KAddressSpaceInfo::Type type) {
+std::size_t KAddressSpaceInfo::GetAddressSpaceSize(size_t width, KAddressSpaceInfo::Type type)
+{
     return GetAddressSpaceInfo(width, type).size;
 }
 

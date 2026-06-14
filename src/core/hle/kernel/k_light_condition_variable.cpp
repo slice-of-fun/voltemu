@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include "core/hle/kernel/k_light_condition_variable.h"
+
 #include "core/hle/kernel/k_scheduler.h"
 #include "core/hle/kernel/k_scoped_scheduler_lock_and_sleep.h"
 #include "core/hle/kernel/k_thread_queue.h"
@@ -15,9 +16,12 @@ class ThreadQueueImplForKLightConditionVariable final : public KThreadQueue {
 public:
     ThreadQueueImplForKLightConditionVariable(KernelCore& kernel, KThread::WaiterList* wl,
                                               bool term)
-        : KThreadQueue(kernel), m_wait_list(wl), m_allow_terminating_thread(term) {}
+        : KThreadQueue(kernel), m_wait_list(wl), m_allow_terminating_thread(term)
+    {
+    }
 
-    void CancelWait(KThread* waiting_thread, Result wait_result, bool cancel_timer_task) override {
+    void CancelWait(KThread* waiting_thread, Result wait_result, bool cancel_timer_task) override
+    {
         // Only process waits if we're allowed to.
         if (ResultTerminationRequested == wait_result && m_allow_terminating_thread) {
             return;
@@ -37,7 +41,8 @@ private:
 
 } // namespace
 
-void KLightConditionVariable::Wait(KLightLock* lock, s64 timeout, bool allow_terminating_thread) {
+void KLightConditionVariable::Wait(KLightLock* lock, s64 timeout, bool allow_terminating_thread)
+{
     // Create thread queue.
     KThread* owner = GetCurrentThreadPointer(m_kernel);
     KHardwareTimer* timer{};
@@ -68,7 +73,8 @@ void KLightConditionVariable::Wait(KLightLock* lock, s64 timeout, bool allow_ter
     lock->Lock();
 }
 
-void KLightConditionVariable::Broadcast() {
+void KLightConditionVariable::Broadcast()
+{
     KScopedSchedulerLock lk(m_kernel);
 
     // Signal all threads.

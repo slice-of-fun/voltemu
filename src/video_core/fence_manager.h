@@ -12,8 +12,8 @@
 #include <deque>
 #include <functional>
 #include <mutex>
-#include <thread>
 #include <queue>
+#include <thread>
 
 #include "common/common_types.h"
 #include "common/settings.h"
@@ -30,16 +30,13 @@ class FenceBase {
 public:
     explicit FenceBase(bool is_stubbed_) : is_stubbed{is_stubbed_} {}
 
-    bool IsStubbed() const {
-        return is_stubbed;
-    }
+    bool IsStubbed() const { return is_stubbed; }
 
 protected:
     bool is_stubbed;
 };
 
-template <typename Traits>
-class FenceManager {
+template<typename Traits> class FenceManager {
     using TFence = typename Traits::FenceType;
     using TTextureCache = typename Traits::TextureCacheType;
     using TBufferCache = typename Traits::BufferCacheType;
@@ -48,13 +45,15 @@ class FenceManager {
 
 public:
     /// Notify the fence manager about a new frame
-    void TickFrame() {
+    void TickFrame()
+    {
         std::unique_lock lock(ring_guard);
         delayed_destruction_ring.Tick();
     }
 
     // Unlike other fences, this one doesn't
-    void SignalOrdering() {
+    void SignalOrdering()
+    {
         if constexpr (!can_async_check) {
             TryReleasePendingFences<false>();
         }
@@ -62,16 +61,19 @@ public:
         buffer_cache.AccumulateFlushes();
     }
 
-    void SignalReference() {
+    void SignalReference()
+    {
         std::function<void()> do_nothing([] {});
         SignalFence(std::move(do_nothing));
     }
 
-    void SyncOperation(std::function<void()>&& func) {
+    void SyncOperation(std::function<void()>&& func)
+    {
         uncommitted_operations.emplace_back(std::move(func));
     }
 
-    void SignalFence(std::function<void()>&& func) {
+    void SignalFence(std::function<void()>&& func)
+    {
         if constexpr (!can_async_check) {
             TryReleasePendingFences<false>();
         }
@@ -104,13 +106,15 @@ public:
         rasterizer.InvalidateGPUCache();
     }
 
-    void SignalSyncPoint(u32 value) {
+    void SignalSyncPoint(u32 value)
+    {
         syncpoint_manager.IncrementGuest(value);
         std::function<void()> func([this, value] { syncpoint_manager.IncrementHost(value); });
         SignalFence(std::move(func));
     }
 
-    void WaitPendingFences([[maybe_unused]] bool force) {
+    void WaitPendingFences([[maybe_unused]] bool force)
+    {
         if constexpr (!can_async_check) {
             TryReleasePendingFences<true>();
         } else {
@@ -137,14 +141,16 @@ protected:
                           TTextureCache& texture_cache_, TBufferCache& buffer_cache_,
                           TQueryCache& query_cache_)
         : rasterizer{rasterizer_}, gpu{gpu_}, syncpoint_manager{gpu.Host1x().GetSyncpointManager()},
-          texture_cache{texture_cache_}, buffer_cache{buffer_cache_}, query_cache{query_cache_} {
+          texture_cache{texture_cache_}, buffer_cache{buffer_cache_}, query_cache{query_cache_}
+    {
         if constexpr (can_async_check) {
             fence_thread =
                 std::jthread([this](std::stop_token token) { ReleaseThreadFunc(token); });
         }
     }
 
-    virtual ~FenceManager() {
+    virtual ~FenceManager()
+    {
         if constexpr (can_async_check) {
             fence_thread.request_stop();
             cv.notify_all();
@@ -170,8 +176,8 @@ protected:
     TQueryCache& query_cache;
 
 private:
-    template <bool force_wait>
-    void TryReleasePendingFences() {
+    template<bool force_wait> void TryReleasePendingFences()
+    {
         while (!fences.empty()) {
             TFence& current_fence = fences.front();
             if (ShouldWait() && !IsFenceSignaled(current_fence)) {
@@ -195,7 +201,8 @@ private:
         }
     }
 
-    void ReleaseThreadFunc(std::stop_token stop_token) {
+    void ReleaseThreadFunc(std::stop_token stop_token)
+    {
         Common::SetCurrentThreadName("GPUFencingThread");
         Common::SetCurrentThreadPriority(Common::ThreadPriority::High);
 
@@ -227,19 +234,22 @@ private:
         }
     }
 
-    bool ShouldWait() const {
+    bool ShouldWait() const
+    {
         std::scoped_lock lock{buffer_cache.mutex, texture_cache.mutex};
         return texture_cache.ShouldWaitAsyncFlushes() || buffer_cache.ShouldWaitAsyncFlushes() ||
                query_cache.ShouldWaitAsyncFlushes();
     }
 
-    bool ShouldFlush() const {
+    bool ShouldFlush() const
+    {
         std::scoped_lock lock{buffer_cache.mutex, texture_cache.mutex};
         return texture_cache.HasUncommittedFlushes() || buffer_cache.HasUncommittedFlushes() ||
                query_cache.HasUncommittedFlushes();
     }
 
-    void PopAsyncFlushes() {
+    void PopAsyncFlushes()
+    {
         {
             std::scoped_lock lock{buffer_cache.mutex, texture_cache.mutex};
             texture_cache.PopAsyncFlushes();
@@ -248,7 +258,8 @@ private:
         query_cache.PopAsyncFlushes();
     }
 
-    void CommitAsyncFlushes() {
+    void CommitAsyncFlushes()
+    {
         {
             std::scoped_lock lock{buffer_cache.mutex, texture_cache.mutex};
             texture_cache.CommitAsyncFlushes();

@@ -51,45 +51,38 @@ public:
     void RequestScheduleOnInterrupt();
     void PreemptSingleCore();
 
-    u64 GetIdleCount() {
-        return m_state.idle_count;
-    }
+    u64 GetIdleCount() { return m_state.idle_count; }
 
-    KThread* GetIdleThread() const {
-        return m_idle_thread;
-    }
+    KThread* GetIdleThread() const { return m_idle_thread; }
 
-    bool IsIdle() const {
-        return m_current_thread.load() == m_idle_thread;
-    }
+    bool IsIdle() const { return m_current_thread.load() == m_idle_thread; }
 
-    KThread* GetPreviousThread() const {
-        return m_state.prev_thread;
-    }
+    KThread* GetPreviousThread() const { return m_state.prev_thread; }
 
-    KThread* GetSchedulerCurrentThread() const {
-        return m_current_thread.load();
-    }
+    KThread* GetSchedulerCurrentThread() const { return m_current_thread.load(); }
 
-    s64 GetLastContextSwitchTime() const {
-        return m_last_context_switch_time;
-    }
+    s64 GetLastContextSwitchTime() const { return m_last_context_switch_time; }
 
     // Static public API.
-    static bool CanSchedule(KernelCore& kernel) {
+    static bool CanSchedule(KernelCore& kernel)
+    {
         return GetCurrentThread(kernel).GetDisableDispatchCount() == 0;
     }
-    static bool IsSchedulerLockedByCurrentThread(KernelCore& kernel) {
+    static bool IsSchedulerLockedByCurrentThread(KernelCore& kernel)
+    {
         return kernel.GlobalSchedulerContext().m_scheduler_lock.IsLockedByCurrentThread();
     }
 
-    static bool IsSchedulerUpdateNeeded(KernelCore& kernel) {
+    static bool IsSchedulerUpdateNeeded(KernelCore& kernel)
+    {
         return kernel.GlobalSchedulerContext().m_scheduler_update_needed;
     }
-    static void SetSchedulerUpdateNeeded(KernelCore& kernel) {
+    static void SetSchedulerUpdateNeeded(KernelCore& kernel)
+    {
         kernel.GlobalSchedulerContext().m_scheduler_update_needed = true;
     }
-    static void ClearSchedulerUpdateNeeded(KernelCore& kernel) {
+    static void ClearSchedulerUpdateNeeded(KernelCore& kernel)
+    {
         kernel.GlobalSchedulerContext().m_scheduler_update_needed = false;
     }
 
@@ -114,7 +107,8 @@ public:
 
 private:
     // Static private API.
-    static KSchedulerPriorityQueue& GetPriorityQueue(KernelCore& kernel) {
+    static KSchedulerPriorityQueue& GetPriorityQueue(KernelCore& kernel)
+    {
         return kernel.GlobalSchedulerContext().m_priority_queue;
     }
     static u64 UpdateHighestPriorityThreadsImpl(KernelCore& kernel);
@@ -166,7 +160,9 @@ private:
 class KScopedSchedulerLock : public KScopedLock<KScheduler::LockType> {
 public:
     explicit KScopedSchedulerLock(KernelCore& kernel)
-        : KScopedLock(kernel.GlobalSchedulerContext().m_scheduler_lock) {}
+        : KScopedLock(kernel.GlobalSchedulerContext().m_scheduler_lock)
+    {
+    }
     ~KScopedSchedulerLock() = default;
 };
 

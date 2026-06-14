@@ -1,9 +1,10 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/hid/hid.h"
+
 #include "core/hle/kernel/k_process.h"
 #include "core/hle/kernel/kernel.h"
-#include "core/hle/service/hid/hid.h"
 #include "core/hle/service/hid/hid_debug_server.h"
 #include "core/hle/service/hid/hid_server.h"
 #include "core/hle/service/hid/hid_system_server.h"
@@ -16,7 +17,8 @@
 
 namespace Service::HID {
 
-void LoopProcess(Core::System& system) {
+void LoopProcess(Core::System& system)
+{
     auto server_manager = std::make_unique<ServerManager>(system);
     std::shared_ptr<HidFirmwareSettings> firmware_settings =
         std::make_shared<HidFirmwareSettings>(system);

@@ -1,12 +1,13 @@
 // SPDX-FileCopyrightText: Copyright 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/glue/time/worker.h"
+
 #include "common/scope_exit.h"
 #include "core/core.h"
 #include "core/core_timing.h"
 #include "core/hle/service/glue/time/file_timestamp_worker.h"
 #include "core/hle/service/glue/time/standard_steady_clock_resource.h"
-#include "core/hle/service/glue/time/worker.h"
 #include "core/hle/service/os/multi_wait_utils.h"
 #include "core/hle/service/psc/time/common.h"
 #include "core/hle/service/psc/time/service_manager.h"
@@ -25,7 +26,8 @@ TimeWorker::TimeWorker(Core::System& system, StandardSteadyClockResource& steady
       m_file_timestamp_worker{file_timestamp_worker}, m_timer_steady_clock{m_ctx.CreateEvent(
                                                           "Glue:TimeWorker:SteadyClockTimerEvent")},
       m_timer_file_system{m_ctx.CreateEvent("Glue:TimeWorker:FileTimeTimerEvent")},
-      m_alarm_worker{m_system, m_steady_clock_resource}, m_pm_state_change_handler{m_alarm_worker} {
+      m_alarm_worker{m_system, m_steady_clock_resource}, m_pm_state_change_handler{m_alarm_worker}
+{
     m_timer_steady_clock_timing_event = Core::Timing::CreateEvent(
         "Time::SteadyClockEvent",
         [this](s64 time,
@@ -43,7 +45,8 @@ TimeWorker::TimeWorker(Core::System& system, StandardSteadyClockResource& steady
         });
 }
 
-TimeWorker::~TimeWorker() {
+TimeWorker::~TimeWorker()
+{
     m_local_clock_event->Signal();
     m_network_clock_event->Signal();
     m_ephemeral_clock_event->Signal();
@@ -60,8 +63,9 @@ TimeWorker::~TimeWorker() {
     m_ctx.CloseEvent(m_timer_file_system);
 }
 
-template <typename T>
-T TimeWorker::GetSettingsItemValue(const std::string& category, const std::string& name) {
+template<typename T>
+T TimeWorker::GetSettingsItemValue(const std::string& category, const std::string& name)
+{
     T v{};
     auto res = m_set_sys->GetSettingsItemValueImpl(v, category, name);
     ASSERT(res == ResultSuccess);
@@ -69,7 +73,8 @@ T TimeWorker::GetSettingsItemValue(const std::string& category, const std::strin
 }
 
 void TimeWorker::Initialize(std::shared_ptr<Service::PSC::Time::StaticService> time_sm,
-                            std::shared_ptr<Service::Set::ISystemSettingsServer> set_sys) {
+                            std::shared_ptr<Service::Set::ISystemSettingsServer> set_sys)
+{
     m_set_sys = std::move(set_sys);
     m_time_m =
         m_system.ServiceManager().GetService<Service::PSC::Time::ServiceManager>("time:m", true);
@@ -118,11 +123,13 @@ void TimeWorker::Initialize(std::shared_ptr<Service::PSC::Time::StaticService> t
     ASSERT(res == ResultSuccess);
 }
 
-void TimeWorker::StartThread() {
+void TimeWorker::StartThread()
+{
     m_thread = std::jthread(std::bind_front(&TimeWorker::ThreadFunc, this));
 }
 
-void TimeWorker::ThreadFunc(std::stop_token stop_token) {
+void TimeWorker::ThreadFunc(std::stop_token stop_token)
+{
     Common::SetCurrentThreadName("TimeWorker");
     Common::SetCurrentThreadPriority(Common::ThreadPriority::Low);
 

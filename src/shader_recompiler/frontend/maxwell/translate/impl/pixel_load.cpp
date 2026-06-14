@@ -17,7 +17,8 @@ enum class Mode : u64 {
 };
 } // Anonymous namespace
 
-void TranslatorVisitor::PIXLD(u64 insn) {
+void TranslatorVisitor::PIXLD(u64 insn)
+{
     union {
         u64 raw;
         BitField<31, 3, Mode> mode;

@@ -6,10 +6,10 @@
 
 #pragma once
 
+#include <glad/glad.h>
+
 #include <memory>
 #include <span>
-
-#include <glad/glad.h>
 
 #include "shader_recompiler/shader_info.h"
 #include "video_core/renderer_opengl/gl_device.h"
@@ -81,24 +81,18 @@ public:
 
     void FreeDeferredStagingBuffer(StagingBufferMap& buffer);
 
-    u64 GetDeviceLocalMemory() const {
-        return device_access_memory;
-    }
+    u64 GetDeviceLocalMemory() const { return device_access_memory; }
 
     u64 GetDeviceMemoryUsage() const;
 
-    bool CanReportMemoryUsage() const {
-        return device.CanReportMemoryUsage();
-    }
+    bool CanReportMemoryUsage() const { return device.CanReportMemoryUsage(); }
 
-    bool ShouldReinterpret([[maybe_unused]] Image& dst,
-                           [[maybe_unused]] Image& src) const noexcept {
+    bool ShouldReinterpret([[maybe_unused]] Image& dst, [[maybe_unused]] Image& src) const noexcept
+    {
         return true;
     }
 
-    bool CanUploadMSAA() const noexcept {
-        return true;
-    }
+    bool CanUploadMSAA() const noexcept { return true; }
 
     void CopyImage(Image& dst, Image& src, std::span<const VideoCommon::ImageCopy> copies);
 
@@ -106,7 +100,8 @@ public:
 
     void ReinterpretImage(Image& dst, Image& src, std::span<const VideoCommon::ImageCopy> copies);
 
-    void ConvertImage(Framebuffer* dst, ImageView& dst_view, ImageView& src_view) {
+    void ConvertImage(Framebuffer* dst, ImageView& dst_view, ImageView& src_view)
+    {
         UNIMPLEMENTED();
     }
 
@@ -128,24 +123,22 @@ public:
 
     FormatProperties FormatInfo(VideoCommon::ImageType type, GLenum internal_format) const;
 
-    bool HasNativeBgr() const noexcept {
+    bool HasNativeBgr() const noexcept
+    {
         // OpenGL does not have native support for the BGR internal format
         return false;
     }
 
-    bool HasBrokenTextureViewFormats() const noexcept {
-        return has_broken_texture_view_formats;
-    }
+    bool HasBrokenTextureViewFormats() const noexcept { return has_broken_texture_view_formats; }
 
     bool HasNativeASTC() const noexcept;
 
     void TickFrame() {}
 
-    StateTracker& GetStateTracker() {
-        return state_tracker;
-    }
+    StateTracker& GetStateTracker() { return state_tracker; }
 
-    void BarrierFeedbackLoop() const noexcept {
+    void BarrierFeedbackLoop() const noexcept
+    {
         // OpenGL does not require a barrier for attachment feedback loops.
     }
 
@@ -209,17 +202,11 @@ public:
 
     GLuint StorageHandle() noexcept;
 
-    GLuint Handle() const noexcept {
-        return current_texture;
-    }
+    GLuint Handle() const noexcept { return current_texture; }
 
-    GLuint GlFormat() const noexcept {
-        return gl_format;
-    }
+    GLuint GlFormat() const noexcept { return gl_format; }
 
-    GLuint GlType() const noexcept {
-        return gl_type;
-    }
+    GLuint GlType() const noexcept { return gl_type; }
 
     bool IsRescaled() const;
 
@@ -270,25 +257,18 @@ public:
     [[nodiscard]] GLuint StorageView(Shader::TextureType texture_type,
                                      Shader::ImageFormat image_format);
 
-    [[nodiscard]] GLuint Handle(Shader::TextureType handle_type) const noexcept {
+    [[nodiscard]] GLuint Handle(Shader::TextureType handle_type) const noexcept
+    {
         return views[static_cast<size_t>(handle_type)];
     }
 
-    [[nodiscard]] GLuint DefaultHandle() const noexcept {
-        return default_handle;
-    }
+    [[nodiscard]] GLuint DefaultHandle() const noexcept { return default_handle; }
 
-    [[nodiscard]] GLenum Format() const noexcept {
-        return internal_format;
-    }
+    [[nodiscard]] GLenum Format() const noexcept { return internal_format; }
 
-    [[nodiscard]] GPUVAddr GpuAddr() const noexcept {
-        return gpu_addr;
-    }
+    [[nodiscard]] GPUVAddr GpuAddr() const noexcept { return gpu_addr; }
 
-    [[nodiscard]] u32 BufferSize() const noexcept {
-        return buffer_size;
-    }
+    [[nodiscard]] u32 BufferSize() const noexcept { return buffer_size; }
 
 private:
     struct StorageViews {
@@ -321,15 +301,15 @@ class Sampler {
 public:
     explicit Sampler(TextureCacheRuntime&, const Tegra::Texture::TSCEntry&);
 
-    [[nodiscard]] GLuint Handle() const noexcept {
-        return sampler.handle;
-    }
+    [[nodiscard]] GLuint Handle() const noexcept { return sampler.handle; }
 
-    [[nodiscard]] GLuint HandleWithDefaultAnisotropy() const noexcept {
+    [[nodiscard]] GLuint HandleWithDefaultAnisotropy() const noexcept
+    {
         return sampler_default_anisotropy.handle;
     }
 
-    [[nodiscard]] bool HasAddedAnisotropy() const noexcept {
+    [[nodiscard]] bool HasAddedAnisotropy() const noexcept
+    {
         return static_cast<bool>(sampler_default_anisotropy.handle);
     }
 
@@ -351,13 +331,9 @@ public:
     Framebuffer(Framebuffer&&) = default;
     Framebuffer& operator=(Framebuffer&&) = default;
 
-    [[nodiscard]] GLuint Handle() const noexcept {
-        return framebuffer.handle;
-    }
+    [[nodiscard]] GLuint Handle() const noexcept { return framebuffer.handle; }
 
-    [[nodiscard]] GLbitfield BufferBits() const noexcept {
-        return buffer_bits;
-    }
+    [[nodiscard]] GLbitfield BufferBits() const noexcept { return buffer_bits; }
 
 private:
     OGLFramebuffer framebuffer;

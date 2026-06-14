@@ -17,7 +17,9 @@ namespace AudioCore {
 class WorkbufferAllocator {
 public:
     explicit WorkbufferAllocator(std::span<u8> buffer_, u64 size_)
-        : buffer{reinterpret_cast<u64>(buffer_.data())}, size{size_} {}
+        : buffer{reinterpret_cast<u64>(buffer_.data())}, size{size_}
+    {
+    }
 
     /**
      * Allocate the given count of T elements, aligned to alignment.
@@ -26,8 +28,8 @@ public:
      * @param alignment - The required starting alignment.
      * @return Non-owning container of allocated elements.
      */
-    template <typename T>
-    std::span<T> Allocate(u64 count, u64 alignment) {
+    template<typename T> std::span<T> Allocate(u64 count, u64 alignment)
+    {
         u64 out{0};
         u64 byte_size{count * sizeof(T)};
 
@@ -55,7 +57,8 @@ public:
      *
      * @param alignment - The required starting alignment.
      */
-    void Align(u64 alignment) {
+    void Align(u64 alignment)
+    {
         auto current{buffer + offset};
         auto aligned_buffer{Common::AlignUp(current, alignment)};
         offset = 0 - buffer + aligned_buffer;
@@ -66,27 +69,21 @@ public:
      *
      * @return The current allocating offset.
      */
-    u64 GetCurrentOffset() const {
-        return offset;
-    }
+    u64 GetCurrentOffset() const { return offset; }
 
     /**
      * Get the current buffer size.
      *
      * @return The size of the current buffer.
      */
-    u64 GetSize() const {
-        return size;
-    }
+    u64 GetSize() const { return size; }
 
     /**
      * Get the remaining size that can be allocated.
      *
      * @return The remaining size left in the buffer.
      */
-    u64 GetRemainingSize() const {
-        return size - offset;
-    }
+    u64 GetRemainingSize() const { return size - offset; }
 
 private:
     /// The buffer into which we are allocating.

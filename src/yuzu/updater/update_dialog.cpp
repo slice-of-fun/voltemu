@@ -1,17 +1,19 @@
 // SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+#include "update_dialog.h"
+
+#include <qdesktopservices.h>
+
 #include <QRadioButton>
 #include <QSaveFile>
 #include <QStandardPaths>
-#include <qdesktopservices.h>
+
+#include "common/httplib.h"
 #include "common/logging.h"
 #include "qt_common/abstract/frontend.h"
 #include "qt_common/abstract/progress.h"
 #include "ui_update_dialog.h"
-#include "update_dialog.h"
-
-#include "common/httplib.h"
 
 #ifdef YUZU_BUNDLED_OPENSSL
 #include <openssl/cert.h>
@@ -22,7 +24,8 @@
 #undef GetSaveFileName
 
 UpdateDialog::UpdateDialog(const Common::Net::Release& release, QWidget* parent)
-    : QDialog(parent), ui(new Ui::UpdateDialog) {
+    : QDialog(parent), ui(new Ui::UpdateDialog)
+{
     ui->setupUi(this);
 
     ui->version->setText(
@@ -70,11 +73,13 @@ UpdateDialog::UpdateDialog(const Common::Net::Release& release, QWidget* parent)
     }
 }
 
-UpdateDialog::~UpdateDialog() {
+UpdateDialog::~UpdateDialog()
+{
     delete ui;
 }
 
-void UpdateDialog::Download() {
+void UpdateDialog::Download()
+{
     const auto filename = QtCommon::Frontend::GetSaveFileName(
         tr("New Version Location"),
         qApp->applicationDirPath() % QStringLiteral("/") % QString::fromStdString(m_asset.filename),

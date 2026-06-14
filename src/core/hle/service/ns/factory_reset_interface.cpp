@@ -6,7 +6,8 @@
 namespace Service::NS {
 
 IFactoryResetInterface::IFactoryResetInterface(Core::System& system_)
-    : ServiceFramework{system_, "IFactoryResetInterface"} {
+    : ServiceFramework{system_, "IFactoryResetInterface"}
+{
     // clang-format off
         static const FunctionInfo functions[] = {
             {100, nullptr, "ResetToFactorySettings"},

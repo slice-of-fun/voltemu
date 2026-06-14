@@ -4,18 +4,22 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/crypto/ctr_encryption_layer.h"
+
 #include <algorithm>
 #include <array>
 #include <cstring>
-#include "core/crypto/ctr_encryption_layer.h"
 
 namespace Core::Crypto {
 
 CTREncryptionLayer::CTREncryptionLayer(FileSys::VirtualFile base_, Key128 key_,
                                        std::size_t base_offset_)
-    : EncryptionLayer(std::move(base_)), base_offset(base_offset_), cipher(key_, Mode::CTR) {}
+    : EncryptionLayer(std::move(base_)), base_offset(base_offset_), cipher(key_, Mode::CTR)
+{
+}
 
-std::size_t CTREncryptionLayer::Read(u8* data, std::size_t length, std::size_t offset) const {
+std::size_t CTREncryptionLayer::Read(u8* data, std::size_t length, std::size_t offset) const
+{
     if (length == 0)
         return 0;
 
@@ -100,11 +104,13 @@ std::size_t CTREncryptionLayer::Read(u8* data, std::size_t length, std::size_t o
     return total_read;
 }
 
-void CTREncryptionLayer::SetIV(const IVData& iv_) {
+void CTREncryptionLayer::SetIV(const IVData& iv_)
+{
     iv = iv_;
 }
 
-void CTREncryptionLayer::UpdateIV(std::size_t offset) const {
+void CTREncryptionLayer::UpdateIV(std::size_t offset) const
+{
     offset >>= 4;
     for (std::size_t i = 0; i < 8; ++i) {
         iv[16 - i - 1] = offset & 0xFF;

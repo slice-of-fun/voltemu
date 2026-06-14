@@ -8,6 +8,7 @@
 #pragma once
 
 #include <optional>
+
 #include "common/net/net.h"
 
 namespace UpdateChecker {

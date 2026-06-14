@@ -4,6 +4,7 @@
 #pragma once
 
 #include <array>
+
 #include "common/assert.h"
 #include "common/bit_field.h"
 #include "common/common_types.h"
@@ -153,7 +154,8 @@ union TextureHandle {
 };
 static_assert(sizeof(TextureHandle) == 4, "TextureHandle has wrong size");
 
-[[nodiscard]] inline std::pair<u32, u32> TexturePair(u32 raw, bool via_header_index) {
+[[nodiscard]] inline std::pair<u32, u32> TexturePair(u32 raw, bool via_header_index)
+{
     if (via_header_index) {
         return {raw, raw};
     } else {
@@ -230,57 +232,53 @@ struct TICEntry {
         std::array<u64, 4> raw;
     };
 
-    constexpr bool operator==(const TICEntry& rhs) const noexcept {
-        return raw == rhs.raw;
-    }
+    constexpr bool operator==(const TICEntry& rhs) const noexcept { return raw == rhs.raw; }
 
-    constexpr bool operator!=(const TICEntry& rhs) const noexcept {
-        return raw != rhs.raw;
-    }
+    constexpr bool operator!=(const TICEntry& rhs) const noexcept { return raw != rhs.raw; }
 
-    constexpr GPUVAddr Address() const {
+    constexpr GPUVAddr Address() const
+    {
         return static_cast<GPUVAddr>((static_cast<GPUVAddr>(address_high) << 32) | address_low);
     }
 
-    constexpr u32 Pitch() const {
+    constexpr u32 Pitch() const
+    {
         ASSERT(header_version == TICHeaderVersion::Pitch ||
                header_version == TICHeaderVersion::PitchColorKey);
         // The pitch value is 21 bits, and is 32B aligned.
         return pitch_high << 5;
     }
 
-    constexpr u32 Width() const {
+    constexpr u32 Width() const
+    {
         if (header_version != TICHeaderVersion::OneDBuffer) {
             return width_minus_one + 1;
         }
         return (buffer_high_width_minus_one << 16 | buffer_low_width_minus_one) + 1;
     }
 
-    constexpr u32 Height() const {
-        return height_minus_1 + 1;
-    }
+    constexpr u32 Height() const { return height_minus_1 + 1; }
 
-    constexpr u32 Depth() const {
-        return depth_minus_1 + 1;
-    }
+    constexpr u32 Depth() const { return depth_minus_1 + 1; }
 
-    constexpr u32 BaseLayer() const {
+    constexpr u32 BaseLayer() const
+    {
         return layer_base_0_2 | layer_base_3_7 << 3 | layer_base_8_10 << 8;
     }
 
-    constexpr bool IsBlockLinear() const {
+    constexpr bool IsBlockLinear() const
+    {
         return header_version == TICHeaderVersion::BlockLinear ||
                header_version == TICHeaderVersion::BlockLinearColorKey;
     }
 
-    constexpr bool IsPitchLinear() const {
+    constexpr bool IsPitchLinear() const
+    {
         return header_version == TICHeaderVersion::Pitch ||
                header_version == TICHeaderVersion::PitchColorKey;
     }
 
-    constexpr bool IsBuffer() const {
-        return header_version == TICHeaderVersion::OneDBuffer;
-    }
+    constexpr bool IsBuffer() const { return header_version == TICHeaderVersion::OneDBuffer; }
 };
 static_assert(sizeof(TICEntry) == 0x20, "TICEntry has wrong size");
 
@@ -368,27 +366,20 @@ struct TSCEntry {
         std::array<u64, 4> raw;
     };
 
-    constexpr bool operator==(const TSCEntry& rhs) const noexcept {
-        return raw == rhs.raw;
-    }
+    constexpr bool operator==(const TSCEntry& rhs) const noexcept { return raw == rhs.raw; }
 
-    constexpr bool operator!=(const TSCEntry& rhs) const noexcept {
-        return raw != rhs.raw;
-    }
+    constexpr bool operator!=(const TSCEntry& rhs) const noexcept { return raw != rhs.raw; }
 
     std::array<float, 4> BorderColor() const noexcept;
 
     float MaxAnisotropy() const noexcept;
 
-    float MinLod() const {
-        return static_cast<float>(min_lod_clamp) / 256.0f;
-    }
+    float MinLod() const { return static_cast<float>(min_lod_clamp) / 256.0f; }
 
-    float MaxLod() const {
-        return static_cast<float>(max_lod_clamp) / 256.0f;
-    }
+    float MaxLod() const { return static_cast<float>(max_lod_clamp) / 256.0f; }
 
-    float LodBias() const {
+    float LodBias() const
+    {
         // Sign extend the 13-bit value.
         static constexpr u32 mask = 1U << (13 - 1);
         return static_cast<float>(static_cast<s32>((mip_lod_bias ^ mask) - mask)) / 256.0f;
@@ -398,12 +389,10 @@ static_assert(sizeof(TSCEntry) == 0x20, "TSCEntry has wrong size");
 
 } // namespace Tegra::Texture
 
-template <>
-struct std::hash<Tegra::Texture::TICEntry> {
+template<> struct std::hash<Tegra::Texture::TICEntry> {
     size_t operator()(const Tegra::Texture::TICEntry& tic) const noexcept;
 };
 
-template <>
-struct std::hash<Tegra::Texture::TSCEntry> {
+template<> struct std::hash<Tegra::Texture::TSCEntry> {
     size_t operator()(const Tegra::Texture::TSCEntry& tsc) const noexcept;
 };

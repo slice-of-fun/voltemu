@@ -4,16 +4,16 @@
 // SPDX-FileCopyrightText: Copyright 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include <chrono>
+#include "core/hle/service/glue/time/manager.h"
 
-#include "core/core.h"
-#include "core/core_timing.h"
+#include <chrono>
 
 #include "common/settings.h"
 #include "common/time_zone.h"
+#include "core/core.h"
+#include "core/core_timing.h"
 #include "core/file_sys/vfs/vfs.h"
 #include "core/hle/kernel/svc.h"
-#include "core/hle/service/glue/time/manager.h"
 #include "core/hle/service/psc/time/service_manager.h"
 #include "core/hle/service/psc/time/static.h"
 #include "core/hle/service/psc/time/system_clock.h"
@@ -23,7 +23,8 @@
 
 namespace Service::Glue::Time {
 
-static s64 CalendarTimeToEpoch(Service::PSC::Time::CalendarTime calendar) {
+static s64 CalendarTimeToEpoch(Service::PSC::Time::CalendarTime calendar)
+{
     constexpr auto is_leap = [](s32 year) -> bool {
         return (((year) % 4) == 0 && (((year) % 100) != 0 || ((year) % 400) == 0));
     };
@@ -52,8 +53,9 @@ static s64 CalendarTimeToEpoch(Service::PSC::Time::CalendarTime calendar) {
     return epoch_s - 62135683200ll;
 }
 
-static s64 GetEpochTimeFromInitialYear(
-    std::shared_ptr<Service::Set::ISystemSettingsServer>& set_sys) {
+static s64
+GetEpochTimeFromInitialYear(std::shared_ptr<Service::Set::ISystemSettingsServer>& set_sys)
+{
     s32 year{2000};
     set_sys->GetSettingsItemValueImpl(year, "time", "standard_user_clock_initial_year");
 
@@ -68,8 +70,9 @@ static s64 GetEpochTimeFromInitialYear(
     return CalendarTimeToEpoch(calendar);
 }
 
-static Service::PSC::Time::LocationName GetTimeZoneString(
-    TimeZoneBinary& time_zone_binary, Service::PSC::Time::LocationName& in_name) {
+static Service::PSC::Time::LocationName GetTimeZoneString(TimeZoneBinary& time_zone_binary,
+                                                          Service::PSC::Time::LocationName& in_name)
+{
     auto configured_zone = Settings::GetTimeZoneString(Settings::values.time_zone_index.GetValue());
 
     Service::PSC::Time::LocationName configured_name{};
@@ -90,10 +93,10 @@ static Service::PSC::Time::LocationName GetTimeZoneString(
 }
 
 TimeManager::TimeManager(Core::System& system)
-    : m_steady_clock_resource{system}, m_time_zone_binary{system}, m_worker{
-                                                                       system,
-                                                                       m_steady_clock_resource,
-                                                                       m_file_timestamp_worker} {
+    : m_steady_clock_resource{system}, m_time_zone_binary{system}, m_worker{system,
+                                                                            m_steady_clock_resource,
+                                                                            m_file_timestamp_worker}
+{
     m_time_m =
         system.ServiceManager().GetService<Service::PSC::Time::ServiceManager>("time:m", true);
 
@@ -191,7 +194,8 @@ TimeManager::TimeManager(Core::System& system)
     }
 }
 
-Result TimeManager::SetupStandardSteadyClockCore() {
+Result TimeManager::SetupStandardSteadyClockCore()
+{
     Common::UUID external_clock_source_id{};
     auto res = m_set_sys->GetExternalSteadyClockSourceId(&external_clock_source_id);
     ASSERT(res == ResultSuccess);
@@ -231,7 +235,8 @@ Result TimeManager::SetupStandardSteadyClockCore() {
     R_SUCCEED();
 }
 
-Result TimeManager::SetupTimeZoneServiceCore() {
+Result TimeManager::SetupTimeZoneServiceCore()
+{
     Service::PSC::Time::LocationName name{};
     auto res = m_set_sys->GetDeviceTimeZoneLocationName(&name);
     ASSERT(res == ResultSuccess);

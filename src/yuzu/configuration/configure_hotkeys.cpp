@@ -4,18 +4,18 @@
 // SPDX-FileCopyrightText: 2017 Citra Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "yuzu/configuration/configure_hotkeys.h"
+
 #include <QMenu>
 #include <QMessageBox>
 #include <QStandardItemModel>
 #include <QTimer>
 
+#include "frontend_common/config.h"
 #include "hid_core/frontend/emulated_controller.h"
 #include "hid_core/hid_core.h"
-
-#include "frontend_common/config.h"
 #include "qt_common/config/uisettings.h"
 #include "ui_configure_hotkeys.h"
-#include "yuzu/configuration/configure_hotkeys.h"
 #include "yuzu/hotkeys.h"
 #include "yuzu/util/sequence_dialog/sequence_dialog.h"
 
@@ -25,7 +25,8 @@ constexpr int controller_column = 2;
 
 ConfigureHotkeys::ConfigureHotkeys(Core::HID::HIDCore& hid_core, QWidget* parent)
     : QWidget(parent), ui(std::make_unique<Ui::ConfigureHotkeys>()),
-      timeout_timer(std::make_unique<QTimer>()), poll_timer(std::make_unique<QTimer>()) {
+      timeout_timer(std::make_unique<QTimer>()), poll_timer(std::make_unique<QTimer>())
+{
     ui->setupUi(this);
     setFocusPolicy(Qt::ClickFocus);
 
@@ -72,7 +73,8 @@ ConfigureHotkeys::ConfigureHotkeys(Core::HID::HIDCore& hid_core, QWidget* parent
 
 ConfigureHotkeys::~ConfigureHotkeys() = default;
 
-void ConfigureHotkeys::Populate(const HotkeyRegistry& registry) {
+void ConfigureHotkeys::Populate(const HotkeyRegistry& registry)
+{
     for (const auto& group : registry.hotkey_groups) {
         QString parent_item_data = QString::fromStdString(group.first);
         auto* parent_item =
@@ -101,7 +103,8 @@ void ConfigureHotkeys::Populate(const HotkeyRegistry& registry) {
     ui->hotkey_list->resizeColumnToContents(controller_column);
 }
 
-void ConfigureHotkeys::changeEvent(QEvent* event) {
+void ConfigureHotkeys::changeEvent(QEvent* event)
+{
     if (event->type() == QEvent::LanguageChange) {
         RetranslateUI();
     }
@@ -109,7 +112,8 @@ void ConfigureHotkeys::changeEvent(QEvent* event) {
     QWidget::changeEvent(event);
 }
 
-void ConfigureHotkeys::RetranslateUI() {
+void ConfigureHotkeys::RetranslateUI()
+{
     ui->retranslateUi(this);
 
     model->setHorizontalHeaderLabels({tr("Action"), tr("Hotkey"), tr("Controller Hotkey")});
@@ -125,7 +129,8 @@ void ConfigureHotkeys::RetranslateUI() {
     }
 }
 
-void ConfigureHotkeys::Configure(QModelIndex index) {
+void ConfigureHotkeys::Configure(QModelIndex index)
+{
     if (!index.parent().isValid()) {
         return;
     }
@@ -158,7 +163,8 @@ void ConfigureHotkeys::Configure(QModelIndex index) {
         model->setData(index, key_sequence.toString(QKeySequence::NativeText));
     }
 }
-void ConfigureHotkeys::ConfigureController(QModelIndex index) {
+void ConfigureHotkeys::ConfigureController(QModelIndex index)
+{
     if (timeout_timer->isActive()) {
         return;
     }
@@ -198,7 +204,8 @@ void ConfigureHotkeys::ConfigureController(QModelIndex index) {
     controller->DisableConfiguration();
 }
 
-void ConfigureHotkeys::SetPollingResult(const bool cancel) {
+void ConfigureHotkeys::SetPollingResult(const bool cancel)
+{
     timeout_timer->stop();
     poll_timer->stop();
     (*input_setter)(cancel);
@@ -210,7 +217,8 @@ void ConfigureHotkeys::SetPollingResult(const bool cancel) {
 
 QString ConfigureHotkeys::GetButtonCombinationName(Core::HID::NpadButton button,
                                                    const bool home = false,
-                                                   const bool capture = false) const {
+                                                   const bool capture = false) const
+{
     Core::HID::NpadButtonState state{button};
     QString button_combination;
     if (home) {
@@ -275,7 +283,8 @@ QString ConfigureHotkeys::GetButtonCombinationName(Core::HID::NpadButton button,
     }
 }
 
-std::pair<bool, QString> ConfigureHotkeys::IsUsedKey(QKeySequence key_sequence) const {
+std::pair<bool, QString> ConfigureHotkeys::IsUsedKey(QKeySequence key_sequence) const
+{
     for (int r = 0; r < model->rowCount(); ++r) {
         const QStandardItem* const parent = model->item(r, 0);
 
@@ -293,7 +302,8 @@ std::pair<bool, QString> ConfigureHotkeys::IsUsedKey(QKeySequence key_sequence) 
     return std::make_pair(false, QString());
 }
 
-std::pair<bool, QString> ConfigureHotkeys::IsUsedControllerKey(const QString& key_sequence) const {
+std::pair<bool, QString> ConfigureHotkeys::IsUsedControllerKey(const QString& key_sequence) const
+{
     for (int r = 0; r < model->rowCount(); ++r) {
         const QStandardItem* const parent = model->item(r, 0);
 
@@ -310,7 +320,8 @@ std::pair<bool, QString> ConfigureHotkeys::IsUsedControllerKey(const QString& ke
     return std::make_pair(false, QString());
 }
 
-void ConfigureHotkeys::ApplyConfiguration(HotkeyRegistry& registry) {
+void ConfigureHotkeys::ApplyConfiguration(HotkeyRegistry& registry)
+{
     for (int key_id = 0; key_id < model->rowCount(); key_id++) {
         const QStandardItem* parent = model->item(key_id, 0);
         for (int key_column_id = 0; key_column_id < parent->rowCount(); key_column_id++) {
@@ -334,7 +345,8 @@ void ConfigureHotkeys::ApplyConfiguration(HotkeyRegistry& registry) {
     registry.SaveHotkeys();
 }
 
-void ConfigureHotkeys::RestoreDefaults() {
+void ConfigureHotkeys::RestoreDefaults()
+{
     for (int r = 0; r < model->rowCount(); ++r) {
         const QStandardItem* parent = model->item(r, 0);
         const int hotkey_size = static_cast<int>(UISettings::default_hotkeys.size());
@@ -357,7 +369,8 @@ void ConfigureHotkeys::RestoreDefaults() {
     }
 }
 
-void ConfigureHotkeys::ClearAll() {
+void ConfigureHotkeys::ClearAll()
+{
     for (int r = 0; r < model->rowCount(); ++r) {
         const QStandardItem* parent = model->item(r, 0);
 
@@ -368,7 +381,8 @@ void ConfigureHotkeys::ClearAll() {
     }
 }
 
-void ConfigureHotkeys::PopupContextMenu(const QPoint& menu_location) {
+void ConfigureHotkeys::PopupContextMenu(const QPoint& menu_location)
+{
     QModelIndex index = ui->hotkey_list->indexAt(menu_location);
     if (!index.parent().isValid()) {
         return;
@@ -396,7 +410,8 @@ void ConfigureHotkeys::PopupContextMenu(const QPoint& menu_location) {
     context_menu.exec(ui->hotkey_list->viewport()->mapToGlobal(menu_location));
 }
 
-void ConfigureHotkeys::RestoreControllerHotkey(QModelIndex index) {
+void ConfigureHotkeys::RestoreControllerHotkey(QModelIndex index)
+{
     const QString& default_key_sequence =
         QString::fromStdString(UISettings::default_hotkeys[index.row()].shortcut.controller_keyseq);
     const auto [key_sequence_used, used_action] = IsUsedControllerKey(default_key_sequence);
@@ -410,7 +425,8 @@ void ConfigureHotkeys::RestoreControllerHotkey(QModelIndex index) {
     }
 }
 
-void ConfigureHotkeys::RestoreHotkey(QModelIndex index) {
+void ConfigureHotkeys::RestoreHotkey(QModelIndex index)
+{
     const QKeySequence& default_key_sequence = QKeySequence::fromString(
         QString::fromStdString(UISettings::default_hotkeys[index.row()].shortcut.keyseq),
         QKeySequence::NativeText);

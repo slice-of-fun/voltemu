@@ -10,9 +10,9 @@
 #include <cstddef>
 #include <functional>
 #include <memory>
+#include <queue>
 #include <thread>
 #include <utility>
-#include <queue>
 
 #include "common/alignment.h"
 #include "common/common_types.h"
@@ -22,8 +22,7 @@
 #include "video_core/vulkan_common/vulkan_wrapper.h"
 
 namespace VideoCommon {
-template <typename Trait>
-class QueryCacheBase;
+template<typename Trait> class QueryCacheBase;
 }
 
 namespace Vulkan {
@@ -64,9 +63,7 @@ public:
     void RequestOutsideRenderPassOperationContext();
 
     /// Returns true when a render pass is currently active in the scheduler state.
-    bool IsRenderPassActive() const {
-        return state.renderpass != VK_NULL_HANDLE;
-    }
+    bool IsRenderPassActive() const { return state.renderpass != VK_NULL_HANDLE; }
 
     /// Update the pipeline to the current execution context.
     bool UpdateGraphicsPipeline(GraphicsPipeline* pipeline);
@@ -78,19 +75,19 @@ public:
     void InvalidateState();
 
     /// Assigns the query cache.
-    void SetQueryCache(VideoCommon::QueryCacheBase<QueryCacheParams>& query_cache_) {
+    void SetQueryCache(VideoCommon::QueryCacheBase<QueryCacheParams>& query_cache_)
+    {
         query_cache = &query_cache_;
     }
 
     // Registers a callback to perform on queue submission.
-    void RegisterOnSubmit(std::function<void()>&& func) {
-        on_submit = std::move(func);
-    }
+    void RegisterOnSubmit(std::function<void()>&& func) { on_submit = std::move(func); }
 
     /// Send work to a separate thread.
-    template <typename T>
-        requires std::is_invocable_v<T, vk::CommandBuffer, vk::CommandBuffer>
-    void RecordWithUploadBuffer(T&& command) {
+    template<typename T>
+    requires std::is_invocable_v<T, vk::CommandBuffer, vk::CommandBuffer>
+    void RecordWithUploadBuffer(T&& command)
+    {
         if (chunk->Record(command)) {
             return;
         }
@@ -98,9 +95,10 @@ public:
         (void)chunk->Record(command);
     }
 
-    template <typename T>
-        requires std::is_invocable_v<T, vk::CommandBuffer>
-    void Record(T&& c) {
+    template<typename T>
+    requires std::is_invocable_v<T, vk::CommandBuffer>
+    void Record(T&& c)
+    {
         this->RecordWithUploadBuffer(
             [command = std::move(c)](vk::CommandBuffer cmdbuf, vk::CommandBuffer) {
                 command(cmdbuf);
@@ -108,17 +106,14 @@ public:
     }
 
     /// Returns the current command buffer tick.
-    [[nodiscard]] u64 CurrentTick() const noexcept {
-        return master_semaphore->CurrentTick();
-    }
+    [[nodiscard]] u64 CurrentTick() const noexcept { return master_semaphore->CurrentTick(); }
 
     /// Returns true when a tick has been triggered by the GPU.
-    [[nodiscard]] bool IsFree(u64 tick) const noexcept {
-        return master_semaphore->IsFree(tick);
-    }
+    [[nodiscard]] bool IsFree(u64 tick) const noexcept { return master_semaphore->IsFree(tick); }
 
     /// Waits for the given GPU tick, optionally pacing frames.
-    void Wait(u64 tick, double target_fps = 0.0) {
+    void Wait(u64 tick, double target_fps = 0.0)
+    {
         if (tick > 0) {
             if (tick >= master_semaphore->CurrentTick()) {
                 Flush();
@@ -128,7 +123,8 @@ public:
         if (Settings::values.use_speed_limit.GetValue() && target_fps > 0.0) {
             auto now = std::chrono::steady_clock::now();
             if (last_target_fps != target_fps) {
-                frame_interval = std::chrono::duration_cast<std::chrono::steady_clock::duration>(std::chrono::duration<double>(1.0 / target_fps));
+                frame_interval = std::chrono::duration_cast<std::chrono::steady_clock::duration>(
+                    std::chrono::duration<double>(1.0 / target_fps));
                 max_frame_count = static_cast<int>(0.1 * target_fps);
                 last_target_fps = target_fps;
                 frame_counter = 0;
@@ -152,9 +148,7 @@ public:
     }
 
     /// Returns the master timeline semaphore.
-    [[nodiscard]] MasterSemaphore& GetMasterSemaphore() const noexcept {
-        return *master_semaphore;
-    }
+    [[nodiscard]] MasterSemaphore& GetMasterSemaphore() const noexcept { return *master_semaphore; }
 
     std::mutex submit_mutex;
 
@@ -165,20 +159,15 @@ private:
 
         virtual void Execute(vk::CommandBuffer cmdbuf, vk::CommandBuffer upload_cmdbuf) const = 0;
 
-        Command* GetNext() const {
-            return next;
-        }
+        Command* GetNext() const { return next; }
 
-        void SetNext(Command* next_) {
-            next = next_;
-        }
+        void SetNext(Command* next_) { next = next_; }
 
     private:
         Command* next = nullptr;
     };
 
-    template <typename T>
-    class TypedCommand final : public Command {
+    template<typename T> class TypedCommand final : public Command {
     public:
         explicit TypedCommand(T&& command_) : command{std::move(command_)} {}
         ~TypedCommand() override = default;
@@ -186,7 +175,8 @@ private:
         TypedCommand(TypedCommand&&) = delete;
         TypedCommand& operator=(TypedCommand&&) = delete;
 
-        void Execute(vk::CommandBuffer cmdbuf, vk::CommandBuffer upload_cmdbuf) const override {
+        void Execute(vk::CommandBuffer cmdbuf, vk::CommandBuffer upload_cmdbuf) const override
+        {
 
             command(cmdbuf, upload_cmdbuf);
         }
@@ -199,8 +189,8 @@ private:
     public:
         void ExecuteAll(vk::CommandBuffer cmdbuf, vk::CommandBuffer upload_cmdbuf);
 
-        template <typename T>
-        bool Record(T& command) {
+        template<typename T> bool Record(T& command)
+        {
             using FuncType = TypedCommand<T>;
             static_assert(sizeof(FuncType) < sizeof(data), "Lambda is too large");
 
@@ -220,17 +210,11 @@ private:
             return true;
         }
 
-        void MarkSubmit() {
-            submit = true;
-        }
+        void MarkSubmit() { submit = true; }
 
-        bool Empty() const {
-            return command_offset == 0;
-        }
+        bool Empty() const { return command_offset == 0; }
 
-        bool HasSubmit() const {
-            return submit;
-        }
+        bool HasSubmit() const { return submit; }
 
     private:
         Command* first = nullptr;

@@ -15,9 +15,10 @@ namespace Kernel::Svc {
 
 /// Gets system/memory information for the current process
 Result GetInfo(Core::System& system, u64* result, InfoType info_id_type, Handle handle,
-               u64 info_sub_id) {
-    LOG_TRACE(Kernel_SVC, "called info_id={:#X}, info_sub_id=0x{:X}, handle=0x{:08X}",
-              info_id_type, info_sub_id, handle);
+               u64 info_sub_id)
+{
+    LOG_TRACE(Kernel_SVC, "called info_id={:#X}, info_sub_id=0x{:X}, handle=0x{:08X}", info_id_type,
+              info_sub_id, handle);
 
     u32 info_id = static_cast<u32>(info_id_type);
 
@@ -271,7 +272,8 @@ Result GetInfo(Core::System& system, u64* result, InfoType info_id_type, Handle 
 }
 
 Result GetSystemInfo(Core::System& system, uint64_t* out, SystemInfoType info_type, Handle handle,
-                     uint64_t info_subtype) {
+                     uint64_t info_subtype)
+{
     const u32 info_id = static_cast<u32>(info_type);
 
     R_UNLESS(info_id <= 2, ResultInvalidEnumValue);
@@ -316,22 +318,26 @@ Result GetSystemInfo(Core::System& system, uint64_t* out, SystemInfoType info_ty
 }
 
 Result GetInfo64(Core::System& system, uint64_t* out, InfoType info_type, Handle handle,
-                 uint64_t info_subtype) {
+                 uint64_t info_subtype)
+{
     R_RETURN(GetInfo(system, out, info_type, handle, info_subtype));
 }
 
 Result GetSystemInfo64(Core::System& system, uint64_t* out, SystemInfoType info_type, Handle handle,
-                       uint64_t info_subtype) {
+                       uint64_t info_subtype)
+{
     R_RETURN(GetSystemInfo(system, out, info_type, handle, info_subtype));
 }
 
 Result GetInfo64From32(Core::System& system, uint64_t* out, InfoType info_type, Handle handle,
-                       uint64_t info_subtype) {
+                       uint64_t info_subtype)
+{
     R_RETURN(GetInfo(system, out, info_type, handle, info_subtype));
 }
 
 Result GetSystemInfo64From32(Core::System& system, uint64_t* out, SystemInfoType info_type,
-                             Handle handle, uint64_t info_subtype) {
+                             Handle handle, uint64_t info_subtype)
+{
     R_RETURN(GetSystemInfo(system, out, info_type, handle, info_subtype));
 }
 

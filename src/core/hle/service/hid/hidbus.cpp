@@ -4,6 +4,8 @@
 // SPDX-FileCopyrightText: Copyright 2021 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/hid/hidbus.h"
+
 #include "common/logging.h"
 #include "common/settings.h"
 #include "core/core.h"
@@ -13,7 +15,6 @@
 #include "core/hle/kernel/k_shared_memory.h"
 #include "core/hle/kernel/k_transfer_memory.h"
 #include "core/hle/service/cmif_serialization.h"
-#include "core/hle/service/hid/hidbus.h"
 #include "core/hle/service/ipc_helpers.h"
 #include "core/hle/service/service.h"
 #include "core/memory.h"
@@ -27,7 +28,8 @@ namespace Service::HID {
 constexpr auto hidbus_update_ns = std::chrono::nanoseconds{15 * 1000 * 1000};
 
 Hidbus::Hidbus(Core::System& system_)
-    : ServiceFramework{system_, "hidbus"}, service_context{system_, service_name} {
+    : ServiceFramework{system_, "hidbus"}, service_context{system_, service_name}
+{
 
     // clang-format off
     static const FunctionInfo functions[] = {
@@ -64,11 +66,13 @@ Hidbus::Hidbus(Core::System& system_)
                                               hidbus_update_event);
 }
 
-Hidbus::~Hidbus() {
+Hidbus::~Hidbus()
+{
     system.CoreTiming().UnscheduleEvent(hidbus_update_event);
 }
 
-void Hidbus::UpdateHidbus(std::chrono::nanoseconds ns_late) {
+void Hidbus::UpdateHidbus(std::chrono::nanoseconds ns_late)
+{
     if (is_hidbus_enabled) {
         for (std::size_t i = 0; i < devices.size(); ++i) {
             if (!devices[i].is_device_initialized) {
@@ -88,7 +92,8 @@ void Hidbus::UpdateHidbus(std::chrono::nanoseconds ns_late) {
     }
 }
 
-std::optional<std::size_t> Hidbus::GetDeviceIndexFromHandle(BusHandle handle) const {
+std::optional<std::size_t> Hidbus::GetDeviceIndexFromHandle(BusHandle handle) const
+{
     for (std::size_t i = 0; i < devices.size(); ++i) {
         const auto& device_handle = devices[i].handle;
         if (handle.abstracted_pad_id == device_handle.abstracted_pad_id &&
@@ -104,7 +109,8 @@ std::optional<std::size_t> Hidbus::GetDeviceIndexFromHandle(BusHandle handle) co
 
 Result Hidbus::GetBusHandle(Out<bool> out_is_valid, Out<BusHandle> out_bus_handle,
                             Core::HID::NpadIdType npad_id, BusType bus_type,
-                            AppletResourceUserId aruid) {
+                            AppletResourceUserId aruid)
+{
     LOG_INFO(Service_HID, "called, npad_id={}, bus_type={}, applet_resource_user_id={}", npad_id,
              bus_type, aruid.pid);
 
@@ -146,7 +152,8 @@ Result Hidbus::GetBusHandle(Out<bool> out_is_valid, Out<BusHandle> out_bus_handl
     R_SUCCEED();
 }
 
-Result Hidbus::IsExternalDeviceConnected(Out<bool> out_is_connected, BusHandle bus_handle) {
+Result Hidbus::IsExternalDeviceConnected(Out<bool> out_is_connected, BusHandle bus_handle)
+{
     LOG_INFO(Service_HID,
              "Called, abstracted_pad_id={}, bus_type={}, internal_index={}, "
              "player_number={}, is_valid={}",
@@ -161,7 +168,8 @@ Result Hidbus::IsExternalDeviceConnected(Out<bool> out_is_connected, BusHandle b
     R_SUCCEED();
 }
 
-Result Hidbus::Initialize(BusHandle bus_handle, AppletResourceUserId aruid) {
+Result Hidbus::Initialize(BusHandle bus_handle, AppletResourceUserId aruid)
+{
     LOG_INFO(Service_HID,
              "called, abstracted_pad_id={} bus_type={} internal_index={} "
              "player_number={} is_valid={}, applet_resource_user_id={}",
@@ -201,7 +209,8 @@ Result Hidbus::Initialize(BusHandle bus_handle, AppletResourceUserId aruid) {
     R_SUCCEED();
 }
 
-Result Hidbus::Finalize(BusHandle bus_handle, AppletResourceUserId aruid) {
+Result Hidbus::Finalize(BusHandle bus_handle, AppletResourceUserId aruid)
+{
     LOG_INFO(Service_HID,
              "called, abstracted_pad_id={}, bus_type={}, internal_index={}, "
              "player_number={}, is_valid={}, applet_resource_user_id={}",
@@ -229,7 +238,8 @@ Result Hidbus::Finalize(BusHandle bus_handle, AppletResourceUserId aruid) {
 }
 
 Result Hidbus::EnableExternalDevice(bool is_enabled, BusHandle bus_handle, u64 inval,
-                                    AppletResourceUserId aruid) {
+                                    AppletResourceUserId aruid)
+{
     LOG_DEBUG(Service_HID,
               "called, enable={}, abstracted_pad_id={}, bus_type={}, internal_index={}, "
               "player_number={}, is_valid={}, inval={}, applet_resource_user_id{}",
@@ -244,7 +254,8 @@ Result Hidbus::EnableExternalDevice(bool is_enabled, BusHandle bus_handle, u64 i
     R_SUCCEED();
 }
 
-Result Hidbus::GetExternalDeviceId(Out<u32> out_device_id, BusHandle bus_handle) {
+Result Hidbus::GetExternalDeviceId(Out<u32> out_device_id, BusHandle bus_handle)
+{
     LOG_DEBUG(Service_HID,
               "called, abstracted_pad_id={}, bus_type={}, internal_index={}, player_number={}, "
               "is_valid={}",
@@ -260,7 +271,8 @@ Result Hidbus::GetExternalDeviceId(Out<u32> out_device_id, BusHandle bus_handle)
 }
 
 Result Hidbus::SendCommandAsync(BusHandle bus_handle,
-                                InBuffer<BufferAttr_HipcAutoSelect> buffer_data) {
+                                InBuffer<BufferAttr_HipcAutoSelect> buffer_data)
+{
     LOG_DEBUG(Service_HID,
               "called, data_size={}, abstracted_pad_id={}, bus_type={}, internal_index={}, "
               "player_number={}, is_valid={}",
@@ -276,7 +288,8 @@ Result Hidbus::SendCommandAsync(BusHandle bus_handle,
 };
 
 Result Hidbus::GetSendCommandAsynceResult(Out<u64> out_data_size, BusHandle bus_handle,
-                                          OutBuffer<BufferAttr_HipcAutoSelect> out_buffer_data) {
+                                          OutBuffer<BufferAttr_HipcAutoSelect> out_buffer_data)
+{
     LOG_DEBUG(Service_HID,
               "called, abstracted_pad_id={}, bus_type={}, internal_index={}, player_number={}, "
               "is_valid={}",
@@ -292,7 +305,8 @@ Result Hidbus::GetSendCommandAsynceResult(Out<u64> out_data_size, BusHandle bus_
 };
 
 Result Hidbus::SetEventForSendCommandAsycResult(OutCopyHandle<Kernel::KReadableEvent> out_event,
-                                                BusHandle bus_handle) {
+                                                BusHandle bus_handle)
+{
     LOG_INFO(Service_HID,
              "called, abstracted_pad_id={}, bus_type={}, internal_index={}, player_number={}, "
              "is_valid={}",
@@ -307,7 +321,8 @@ Result Hidbus::SetEventForSendCommandAsycResult(OutCopyHandle<Kernel::KReadableE
     R_SUCCEED();
 };
 
-Result Hidbus::GetSharedMemoryHandle(OutCopyHandle<Kernel::KSharedMemory> out_shared_memory) {
+Result Hidbus::GetSharedMemoryHandle(OutCopyHandle<Kernel::KSharedMemory> out_shared_memory)
+{
     LOG_DEBUG(Service_HID, "called");
 
     *out_shared_memory = &system.Kernel().GetHidBusSharedMem();
@@ -316,7 +331,8 @@ Result Hidbus::GetSharedMemoryHandle(OutCopyHandle<Kernel::KSharedMemory> out_sh
 
 Result Hidbus::EnableJoyPollingReceiveMode(u32 t_mem_size, JoyPollingMode polling_mode,
                                            BusHandle bus_handle,
-                                           InCopyHandle<Kernel::KTransferMemory> t_mem) {
+                                           InCopyHandle<Kernel::KTransferMemory> t_mem)
+{
     ASSERT_MSG(t_mem_size == 0x1000, "t_mem_size is not 0x1000 bytes");
     ASSERT_MSG(t_mem->GetSize() == t_mem_size, "t_mem has incorrect size");
 
@@ -336,7 +352,8 @@ Result Hidbus::EnableJoyPollingReceiveMode(u32 t_mem_size, JoyPollingMode pollin
     R_SUCCEED();
 }
 
-Result Hidbus::DisableJoyPollingReceiveMode(BusHandle bus_handle) {
+Result Hidbus::DisableJoyPollingReceiveMode(BusHandle bus_handle)
+{
     LOG_INFO(Service_HID,
              "called, abstracted_pad_id={}, bus_type={}, internal_index={}, player_number={}, "
              "is_valid={}",
@@ -352,7 +369,8 @@ Result Hidbus::DisableJoyPollingReceiveMode(BusHandle bus_handle) {
     R_SUCCEED();
 }
 
-Result Hidbus::SetStatusManagerType(StatusManagerType manager_type) {
+Result Hidbus::SetStatusManagerType(StatusManagerType manager_type)
+{
     LOG_WARNING(Service_HID, "(STUBBED) called, manager_type={}", manager_type);
     R_SUCCEED();
 };

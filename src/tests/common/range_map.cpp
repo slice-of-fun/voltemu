@@ -1,11 +1,10 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#include <stdexcept>
+#include "common/range_map.h"
 
 #include <catch2/catch_test_macros.hpp>
-
-#include "common/range_map.h"
+#include <stdexcept>
 
 enum class MappedEnum : u32 {
     Invalid = 0,
@@ -14,7 +13,8 @@ enum class MappedEnum : u32 {
     Valid_3 = 3,
 };
 
-TEST_CASE("Range Map: Setup", "[video_core]") {
+TEST_CASE("Range Map: Setup", "[video_core]")
+{
     Common::RangeMap<u64, MappedEnum> my_map(MappedEnum::Invalid);
     my_map.Map(3000, 3500, MappedEnum::Valid_1);
     my_map.Unmap(3200, 3600);

@@ -6,9 +6,10 @@
 
 #pragma once
 
+#include <ankerl/unordered_dense.h>
+
 #include <functional>
 #include <mutex>
-#include <ankerl/unordered_dense.h>
 
 #include "common/common_types.h"
 #include "common/input.h"
@@ -56,9 +57,9 @@ struct VibrationRequest {
 
 namespace std {
 // Hash used to create lists from PadIdentifier data
-template <>
-struct hash<PadIdentifier> {
-    size_t operator()(const PadIdentifier& pad_id) const noexcept {
+template<> struct hash<PadIdentifier> {
+    size_t operator()(const PadIdentifier& pad_id) const noexcept
+    {
         u64 hash_value = pad_id.guid.Hash();
         hash_value ^= (static_cast<u64>(pad_id.port) << 32);
         hash_value ^= static_cast<u64>(pad_id.pad);
@@ -113,81 +114,93 @@ public:
     void EndConfiguration();
 
     // Sets a led pattern for a controller
-    virtual Common::Input::DriverResult SetLeds(
-        [[maybe_unused]] const PadIdentifier& identifier,
-        [[maybe_unused]] const Common::Input::LedStatus& led_status) {
+    virtual Common::Input::DriverResult
+    SetLeds([[maybe_unused]] const PadIdentifier& identifier,
+            [[maybe_unused]] const Common::Input::LedStatus& led_status)
+    {
         return Common::Input::DriverResult::NotSupported;
     }
 
     // Sets rumble to a controller
-    virtual Common::Input::DriverResult SetVibration(
-        [[maybe_unused]] const PadIdentifier& identifier,
-        [[maybe_unused]] const Common::Input::VibrationStatus& vibration) {
+    virtual Common::Input::DriverResult
+    SetVibration([[maybe_unused]] const PadIdentifier& identifier,
+                 [[maybe_unused]] const Common::Input::VibrationStatus& vibration)
+    {
         return Common::Input::DriverResult::NotSupported;
     }
 
     // Returns true if device supports vibrations
-    virtual bool IsVibrationEnabled([[maybe_unused]] const PadIdentifier& identifier) {
+    virtual bool IsVibrationEnabled([[maybe_unused]] const PadIdentifier& identifier)
+    {
         return false;
     }
 
     // Sets polling mode to a controller
-    virtual Common::Input::DriverResult SetPollingMode(
-        [[maybe_unused]] const PadIdentifier& identifier,
-        [[maybe_unused]] const Common::Input::PollingMode polling_mode) {
+    virtual Common::Input::DriverResult
+    SetPollingMode([[maybe_unused]] const PadIdentifier& identifier,
+                   [[maybe_unused]] const Common::Input::PollingMode polling_mode)
+    {
         return Common::Input::DriverResult::NotSupported;
     }
 
     // Sets camera format to a controller
-    virtual Common::Input::DriverResult SetCameraFormat(
-        [[maybe_unused]] const PadIdentifier& identifier,
-        [[maybe_unused]] Common::Input::CameraFormat camera_format) {
+    virtual Common::Input::DriverResult
+    SetCameraFormat([[maybe_unused]] const PadIdentifier& identifier,
+                    [[maybe_unused]] Common::Input::CameraFormat camera_format)
+    {
         return Common::Input::DriverResult::NotSupported;
     }
 
     // Returns success if nfc is supported
-    virtual Common::Input::NfcState SupportsNfc(
-        [[maybe_unused]] const PadIdentifier& identifier) const {
+    virtual Common::Input::NfcState
+    SupportsNfc([[maybe_unused]] const PadIdentifier& identifier) const
+    {
         return Common::Input::NfcState::NotSupported;
     }
 
     // Start scanning for nfc tags
-    virtual Common::Input::NfcState StartNfcPolling(
-        [[maybe_unused]] const PadIdentifier& identifier_) {
+    virtual Common::Input::NfcState
+    StartNfcPolling([[maybe_unused]] const PadIdentifier& identifier_)
+    {
         return Common::Input::NfcState::NotSupported;
     }
 
     // Start scanning for nfc tags
-    virtual Common::Input::NfcState StopNfcPolling(
-        [[maybe_unused]] const PadIdentifier& identifier_) {
+    virtual Common::Input::NfcState
+    StopNfcPolling([[maybe_unused]] const PadIdentifier& identifier_)
+    {
         return Common::Input::NfcState::NotSupported;
     }
 
     // Reads data from amiibo tag
-    virtual Common::Input::NfcState ReadAmiiboData(
-        [[maybe_unused]] const PadIdentifier& identifier_,
-        [[maybe_unused]] std::vector<u8>& out_data) {
+    virtual Common::Input::NfcState
+    ReadAmiiboData([[maybe_unused]] const PadIdentifier& identifier_,
+                   [[maybe_unused]] std::vector<u8>& out_data)
+    {
         return Common::Input::NfcState::NotSupported;
     }
 
     // Writes data to an nfc tag
     virtual Common::Input::NfcState WriteNfcData([[maybe_unused]] const PadIdentifier& identifier,
-                                                 [[maybe_unused]] const std::vector<u8>& data) {
+                                                 [[maybe_unused]] const std::vector<u8>& data)
+    {
         return Common::Input::NfcState::NotSupported;
     }
 
     // Reads data from mifare tag
-    virtual Common::Input::NfcState ReadMifareData(
-        [[maybe_unused]] const PadIdentifier& identifier_,
-        [[maybe_unused]] const Common::Input::MifareRequest& request,
-        [[maybe_unused]] Common::Input::MifareRequest& out_data) {
+    virtual Common::Input::NfcState
+    ReadMifareData([[maybe_unused]] const PadIdentifier& identifier_,
+                   [[maybe_unused]] const Common::Input::MifareRequest& request,
+                   [[maybe_unused]] Common::Input::MifareRequest& out_data)
+    {
         return Common::Input::NfcState::NotSupported;
     }
 
     // Write data to mifare tag
-    virtual Common::Input::NfcState WriteMifareData(
-        [[maybe_unused]] const PadIdentifier& identifier_,
-        [[maybe_unused]] const Common::Input::MifareRequest& request) {
+    virtual Common::Input::NfcState
+    WriteMifareData([[maybe_unused]] const PadIdentifier& identifier_,
+                    [[maybe_unused]] const Common::Input::MifareRequest& request)
+    {
         return Common::Input::NfcState::NotSupported;
     }
 
@@ -195,41 +208,45 @@ public:
     [[nodiscard]] const std::string& GetEngineName() const;
 
     /// Used for automapping features
-    virtual std::vector<Common::ParamPackage> GetInputDevices() const {
-        return {};
-    }
+    virtual std::vector<Common::ParamPackage> GetInputDevices() const { return {}; }
 
     /// Retrieves the button mappings for the given device
-    virtual ButtonMapping GetButtonMappingForDevice(
-        [[maybe_unused]] const Common::ParamPackage& params) {
+    virtual ButtonMapping
+    GetButtonMappingForDevice([[maybe_unused]] const Common::ParamPackage& params)
+    {
         return {};
     }
 
     /// Retrieves the analog mappings for the given device
-    virtual AnalogMapping GetAnalogMappingForDevice(
-        [[maybe_unused]] const Common::ParamPackage& params) {
+    virtual AnalogMapping
+    GetAnalogMappingForDevice([[maybe_unused]] const Common::ParamPackage& params)
+    {
         return {};
     }
 
     /// Retrieves the motion mappings for the given device
-    virtual MotionMapping GetMotionMappingForDevice(
-        [[maybe_unused]] const Common::ParamPackage& params) {
+    virtual MotionMapping
+    GetMotionMappingForDevice([[maybe_unused]] const Common::ParamPackage& params)
+    {
         return {};
     }
 
     /// Retrieves the name of the given input.
-    virtual Common::Input::ButtonNames GetUIName(
-        [[maybe_unused]] const Common::ParamPackage& params) const {
+    virtual Common::Input::ButtonNames
+    GetUIName([[maybe_unused]] const Common::ParamPackage& params) const
+    {
         return Common::Input::ButtonNames::Engine;
     }
 
     /// Retrieves the index number of the given hat button direction
-    virtual u8 GetHatButtonId([[maybe_unused]] const std::string& direction_name) const {
+    virtual u8 GetHatButtonId([[maybe_unused]] const std::string& direction_name) const
+    {
         return 0;
     }
 
     /// Returns true if axis of a stick aren't mapped in the correct direction
-    virtual bool IsStickInverted([[maybe_unused]] const Common::ParamPackage& params) {
+    virtual bool IsStickInverted([[maybe_unused]] const Common::ParamPackage& params)
+    {
         return false;
     }
 
@@ -264,7 +281,8 @@ protected:
     void SetCamera(const PadIdentifier& identifier, const Common::Input::CameraStatus& value);
     void SetNfc(const PadIdentifier& identifier, const Common::Input::NfcStatus& value);
 
-    virtual std::string GetHatButtonName([[maybe_unused]] u8 direction_value) const {
+    virtual std::string GetHatButtonName([[maybe_unused]] u8 direction_value) const
+    {
         return "Unknown";
     }
 

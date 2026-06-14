@@ -5,7 +5,8 @@
 
 namespace Service::HID {
 
-XCD_SYS::XCD_SYS(Core::System& system_) : ServiceFramework{system_, "xcd:sys"} {
+XCD_SYS::XCD_SYS(Core::System& system_) : ServiceFramework{system_, "xcd:sys"}
+{
     // clang-format off
     static const FunctionInfo functions[] = {
         {0, nullptr, "GetDataFormat"},

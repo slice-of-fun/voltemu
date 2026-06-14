@@ -4,11 +4,14 @@
 // SPDX-FileCopyrightText: Copyright 2019 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include <QDateTime>
 #include "yuzu/applets/qt_error.h"
+
+#include <QDateTime>
+
 #include "yuzu/main_window.h"
 
-QtErrorDisplay::QtErrorDisplay(MainWindow& parent) {
+QtErrorDisplay::QtErrorDisplay(MainWindow& parent)
+{
     connect(this, &QtErrorDisplay::MainWindowDisplayError, &parent,
             &MainWindow::ErrorDisplayDisplayError, Qt::QueuedConnection);
     connect(this, &QtErrorDisplay::MainWindowRequestExit, &parent,
@@ -19,12 +22,14 @@ QtErrorDisplay::QtErrorDisplay(MainWindow& parent) {
 
 QtErrorDisplay::~QtErrorDisplay() = default;
 
-void QtErrorDisplay::Close() const {
+void QtErrorDisplay::Close() const
+{
     callback = {};
     emit MainWindowRequestExit();
 }
 
-void QtErrorDisplay::ShowError(Result error, FinishedCallback finished) const {
+void QtErrorDisplay::ShowError(Result error, FinishedCallback finished) const
+{
     callback = std::move(finished);
     emit MainWindowDisplayError(
         tr("Error Code: %1-%2 (0x%3)")
@@ -35,7 +40,8 @@ void QtErrorDisplay::ShowError(Result error, FinishedCallback finished) const {
 }
 
 void QtErrorDisplay::ShowErrorWithTimestamp(Result error, std::chrono::seconds time,
-                                            FinishedCallback finished) const {
+                                            FinishedCallback finished) const
+{
     callback = std::move(finished);
 
     const QDateTime date_time = QDateTime::fromSecsSinceEpoch(time.count());
@@ -52,7 +58,8 @@ void QtErrorDisplay::ShowErrorWithTimestamp(Result error, std::chrono::seconds t
 
 void QtErrorDisplay::ShowCustomErrorText(Result error, std::string dialog_text,
                                          std::string fullscreen_text,
-                                         FinishedCallback finished) const {
+                                         FinishedCallback finished) const
+{
     callback = std::move(finished);
     emit MainWindowDisplayError(
         tr("Error Code: %1-%2 (0x%3)")
@@ -64,7 +71,8 @@ void QtErrorDisplay::ShowCustomErrorText(Result error, std::string dialog_text,
             .arg(QString::fromStdString(fullscreen_text)));
 }
 
-void QtErrorDisplay::MainWindowFinishedError() {
+void QtErrorDisplay::MainWindowFinishedError()
+{
     if (callback) {
         callback();
     }

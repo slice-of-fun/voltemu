@@ -7,9 +7,9 @@
 #pragma once
 
 #include <algorithm>
+#include <numeric>
 #include <span>
 
-#include <numeric>
 #include "video_core/texture_cache/types.h"
 
 namespace VideoCommon {
@@ -18,7 +18,8 @@ namespace VideoCommon {
 struct RenderTargets {
     constexpr bool operator==(const RenderTargets&) const noexcept = default;
 
-    constexpr bool Contains(std::span<const ImageViewId> elements) const noexcept {
+    constexpr bool Contains(std::span<const ImageViewId> elements) const noexcept
+    {
         const auto contains = [elements](ImageViewId item) {
             return std::ranges::find(elements, item) != elements.end();
         };
@@ -36,9 +37,9 @@ struct RenderTargets {
 
 namespace std {
 
-template <>
-struct hash<VideoCommon::RenderTargets> {
-    size_t operator()(const VideoCommon::RenderTargets& rt) const noexcept {
+template<> struct hash<VideoCommon::RenderTargets> {
+    size_t operator()(const VideoCommon::RenderTargets& rt) const noexcept
+    {
         using VideoCommon::ImageViewId;
         size_t value = std::hash<ImageViewId>{}(rt.depth_buffer_id);
         for (const ImageViewId color_buffer_id : rt.color_buffer_ids) {

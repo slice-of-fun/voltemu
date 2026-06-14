@@ -1,13 +1,14 @@
 // SPDX-FileCopyrightText: Copyright 2019 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/file_sys/system_archive/shared_font.h"
+
 #include "core/file_sys/system_archive/data/font_chinese_simplified.h"
 #include "core/file_sys/system_archive/data/font_chinese_traditional.h"
 #include "core/file_sys/system_archive/data/font_extended_chinese_simplified.h"
 #include "core/file_sys/system_archive/data/font_korean.h"
 #include "core/file_sys/system_archive/data/font_nintendo_extended.h"
 #include "core/file_sys/system_archive/data/font_standard.h"
-#include "core/file_sys/system_archive/shared_font.h"
 #include "core/file_sys/vfs/vfs_vector.h"
 #include "core/hle/service/ns/platform_service_manager.h"
 
@@ -15,8 +16,9 @@ namespace FileSys::SystemArchive {
 
 namespace {
 
-template <std::size_t Size>
-VirtualFile PackBFTTF(const std::array<u8, Size>& data, const std::string& name) {
+template<std::size_t Size>
+VirtualFile PackBFTTF(const std::array<u8, Size>& data, const std::string& name)
+{
     std::vector<u32> vec(Size / sizeof(u32));
     std::memcpy(vec.data(), data.data(), vec.size() * sizeof(u32));
 
@@ -29,7 +31,8 @@ VirtualFile PackBFTTF(const std::array<u8, Size>& data, const std::string& name)
 
 } // Anonymous namespace
 
-VirtualDir FontNintendoExtension() {
+VirtualDir FontNintendoExtension()
+{
     return std::make_shared<VectorVfsDirectory>(
         std::vector<VirtualFile>{
             PackBFTTF(SharedFontData::FONT_NINTENDO_EXTENDED, "nintendo_ext_003.bfttf"),
@@ -38,7 +41,8 @@ VirtualDir FontNintendoExtension() {
         std::vector<VirtualDir>{});
 }
 
-VirtualDir FontStandard() {
+VirtualDir FontStandard()
+{
     return std::make_shared<VectorVfsDirectory>(
         std::vector<VirtualFile>{
             PackBFTTF(SharedFontData::FONT_STANDARD, "nintendo_udsg-r_std_003.bfttf"),
@@ -46,7 +50,8 @@ VirtualDir FontStandard() {
         std::vector<VirtualDir>{});
 }
 
-VirtualDir FontKorean() {
+VirtualDir FontKorean()
+{
     return std::make_shared<VectorVfsDirectory>(
         std::vector<VirtualFile>{
             PackBFTTF(SharedFontData::FONT_KOREAN, "nintendo_udsg-r_ko_003.bfttf"),
@@ -54,7 +59,8 @@ VirtualDir FontKorean() {
         std::vector<VirtualDir>{});
 }
 
-VirtualDir FontChineseTraditional() {
+VirtualDir FontChineseTraditional()
+{
     return std::make_shared<VectorVfsDirectory>(
         std::vector<VirtualFile>{
             PackBFTTF(SharedFontData::FONT_CHINESE_TRADITIONAL,
@@ -63,7 +69,8 @@ VirtualDir FontChineseTraditional() {
         std::vector<VirtualDir>{});
 }
 
-VirtualDir FontChineseSimple() {
+VirtualDir FontChineseSimple()
+{
     return std::make_shared<VectorVfsDirectory>(
         std::vector<VirtualFile>{
             PackBFTTF(SharedFontData::FONT_CHINESE_SIMPLIFIED,

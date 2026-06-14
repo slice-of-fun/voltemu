@@ -4,15 +4,17 @@
 // SPDX-FileCopyrightText: Copyright 2019 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/am/frontend/applet_error.h"
+
 #include <array>
 #include <cstring>
+
 #include "common/assert.h"
 #include "common/logging.h"
 #include "common/string_util.h"
 #include "core/core.h"
 #include "core/frontend/applets/error.h"
 #include "core/hle/service/am/am.h"
-#include "core/hle/service/am/frontend/applet_error.h"
 #include "core/hle/service/am/service/storage.h"
 #include "core/reporter.h"
 
@@ -22,21 +24,24 @@ struct ErrorCode {
     u32 error_category{};
     u32 error_number{};
 
-    static constexpr ErrorCode FromU64(u64 error_code) {
+    static constexpr ErrorCode FromU64(u64 error_code)
+    {
         return {
             .error_category{static_cast<u32>(error_code >> 32)},
             .error_number{static_cast<u32>(error_code & 0xFFFFFFFF)},
         };
     }
 
-    static constexpr ErrorCode FromResult(Result result) {
+    static constexpr ErrorCode FromResult(Result result)
+    {
         return {
             .error_category{2000 + static_cast<u32>(result.GetModule())},
             .error_number{result.GetDescription()},
         };
     }
 
-    constexpr Result ToResult() const {
+    constexpr Result ToResult() const
+    {
         return Result{static_cast<ErrorModule>(error_category - 2000), error_number};
     }
 };
@@ -95,13 +100,14 @@ union Error::ErrorArguments {
 };
 
 namespace {
-template <typename T>
-void CopyArgumentData(std::span<const u8> data, T& variable) {
+template<typename T> void CopyArgumentData(std::span<const u8> data, T& variable)
+{
     ASSERT(data.size() >= sizeof(T));
     std::memcpy(&variable, data.data(), sizeof(T));
 }
 
-Result Decode64BitError(u64 error) {
+Result Decode64BitError(u64 error)
+{
     return ErrorCode::FromU64(error).ToResult();
 }
 
@@ -109,11 +115,14 @@ Result Decode64BitError(u64 error) {
 
 Error::Error(Core::System& system_, std::shared_ptr<Applet> applet_, LibraryAppletMode applet_mode_,
              const Core::Frontend::ErrorApplet& frontend_)
-    : FrontendApplet{system_, applet_, applet_mode_}, frontend{frontend_} {}
+    : FrontendApplet{system_, applet_, applet_mode_}, frontend{frontend_}
+{
+}
 
 Error::~Error() = default;
 
-void Error::Initialize() {
+void Error::Initialize()
+{
     FrontendApplet::Initialize();
     args = std::make_unique<ErrorArguments>();
     complete = false;
@@ -156,15 +165,18 @@ void Error::Initialize() {
     }
 }
 
-Result Error::GetStatus() const {
+Result Error::GetStatus() const
+{
     return ResultSuccess;
 }
 
-void Error::ExecuteInteractive() {
+void Error::ExecuteInteractive()
+{
     ASSERT_MSG(false, "Unexpected interactive applet data!");
 }
 
-void Error::Execute() {
+void Error::Execute()
+{
     if (complete) {
         return;
     }
@@ -208,13 +220,15 @@ void Error::Execute() {
     }
 }
 
-void Error::DisplayCompleted() {
+void Error::DisplayCompleted()
+{
     complete = true;
     PushOutData(std::make_shared<IStorage>(system, std::vector<u8>(0x1000)));
     Exit();
 }
 
-Result Error::RequestExit() {
+Result Error::RequestExit()
+{
     frontend.Close();
     R_SUCCEED();
 }

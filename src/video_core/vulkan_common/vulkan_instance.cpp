@@ -4,25 +4,30 @@
 // SPDX-FileCopyrightText: Copyright 2020 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "video_core/vulkan_common/vulkan_instance.h"
+
+#include <vulkan/vulkan_core.h>
+
 #include <cstddef>
 #include <future>
 #include <optional>
+#include <ranges>
 #include <span>
 #include <vector>
 
 #include "common/common_types.h"
 #include "common/dynamic_library.h"
 #include "common/logging.h"
-#include <ranges>
-#include <vulkan/vulkan_core.h>
 #include "core/frontend/emu_window.h"
-#include "video_core/vulkan_common/vulkan_instance.h"
 #include "video_core/vulkan_common/vulkan_wrapper.h"
 
 namespace Vulkan {
 namespace {
 
-[[nodiscard]] bool AreExtensionsSupported(const vk::InstanceDispatch& dld, std::vector<VkExtensionProperties> const& properties, std::span<const char* const> extensions) {
+[[nodiscard]] bool AreExtensionsSupported(const vk::InstanceDispatch& dld,
+                                          std::vector<VkExtensionProperties> const& properties,
+                                          std::span<const char* const> extensions)
+{
     for (const char* extension : extensions) {
         const auto it = std::ranges::find_if(properties, [extension](const auto& prop) {
             return std::strcmp(extension, prop.extensionName) == 0;
@@ -35,9 +40,10 @@ namespace {
     return true;
 }
 
-[[nodiscard]] std::vector<const char*> RequiredExtensions(
-    const vk::InstanceDispatch& dld, Core::Frontend::WindowSystemType window_type,
-    bool enable_validation) {
+[[nodiscard]] std::vector<const char*>
+RequiredExtensions(const vk::InstanceDispatch& dld, Core::Frontend::WindowSystemType window_type,
+                   bool enable_validation)
+{
     std::vector<const char*> extensions;
     extensions.reserve(6);
     switch (window_type) {
@@ -76,16 +82,19 @@ namespace {
     }
     if (auto const properties = vk::EnumerateInstanceExtensionProperties(dld); properties) {
 #ifdef __APPLE__
-        if (AreExtensionsSupported(dld, *properties, std::array{VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME}))
+        if (AreExtensionsSupported(dld, *properties,
+                                   std::array{VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME}))
             extensions.push_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
 #endif
-        if (enable_validation && AreExtensionsSupported(dld, *properties, std::array{VK_EXT_DEBUG_UTILS_EXTENSION_NAME}))
+        if (enable_validation &&
+            AreExtensionsSupported(dld, *properties, std::array{VK_EXT_DEBUG_UTILS_EXTENSION_NAME}))
             extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
     }
     return extensions;
 }
 
-[[nodiscard]] std::vector<const char*> Layers(bool enable_validation) {
+[[nodiscard]] std::vector<const char*> Layers(bool enable_validation)
+{
     std::vector<const char*> layers;
     if (enable_validation) {
         layers.push_back("VK_LAYER_KHRONOS_validation");
@@ -93,7 +102,8 @@ namespace {
     return layers;
 }
 
-void RemoveUnavailableLayers(const vk::InstanceDispatch& dld, std::vector<const char*>& layers) {
+void RemoveUnavailableLayers(const vk::InstanceDispatch& dld, std::vector<const char*>& layers)
+{
     const std::optional layer_properties = vk::EnumerateInstanceLayerProperties(dld);
     if (!layer_properties) {
         LOG_ERROR(Render_Vulkan, "Failed to query layer properties, disabling layers");
@@ -115,7 +125,8 @@ void RemoveUnavailableLayers(const vk::InstanceDispatch& dld, std::vector<const 
 
 vk::Instance CreateInstance(const Common::DynamicLibrary& library, vk::InstanceDispatch& dld,
                             u32 required_version, Core::Frontend::WindowSystemType window_type,
-                            bool enable_validation) {
+                            bool enable_validation)
+{
     if (!library.IsOpen()) {
         LOG_ERROR(Render_Vulkan, "Vulkan library not available");
         throw vk::Exception(VK_ERROR_INITIALIZATION_FAILED);
@@ -128,7 +139,8 @@ vk::Instance CreateInstance(const Common::DynamicLibrary& library, vk::InstanceD
         LOG_ERROR(Render_Vulkan, "Failed to load Vulkan function pointers");
         throw vk::Exception(VK_ERROR_INITIALIZATION_FAILED);
     }
-    std::vector<const char*> const extensions = RequiredExtensions(dld, window_type, enable_validation);
+    std::vector<const char*> const extensions =
+        RequiredExtensions(dld, window_type, enable_validation);
     auto const properties = vk::EnumerateInstanceExtensionProperties(dld);
     if (!properties || !AreExtensionsSupported(dld, *properties, extensions))
         throw vk::Exception(VK_ERROR_EXTENSION_NOT_PRESENT);

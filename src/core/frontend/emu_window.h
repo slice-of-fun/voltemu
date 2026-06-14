@@ -89,13 +89,9 @@ public:
      * @note Accesses to the returned object need not be consistent because it may be modified in
      * another thread
      */
-    const WindowConfig& GetActiveConfig() const {
-        return active_config;
-    }
+    const WindowConfig& GetActiveConfig() const { return active_config; }
 
-    bool StrictContextRequired() const {
-        return strict_context_required;
-    }
+    bool StrictContextRequired() const { return strict_context_required; }
 
     /**
      * Requests the internal configuration to be replaced by the specified argument at some point in
@@ -103,24 +99,18 @@ public:
      * @note This method is thread-safe, because it delays configuration changes to the GUI event
      * loop. Hence there is no guarantee on when the requested configuration will be active.
      */
-    void SetConfig(const WindowConfig& val) {
-        config = val;
-    }
+    void SetConfig(const WindowConfig& val) { config = val; }
 
     /**
      * Returns system information about the drawing area.
      */
-    const WindowSystemInfo& GetWindowInfo() const {
-        return window_info;
-    }
+    const WindowSystemInfo& GetWindowInfo() const { return window_info; }
 
     /**
      * Gets the framebuffer layout (width, height, and screen regions)
      * @note This method is thread-safe
      */
-    const Layout::FramebufferLayout& GetFramebufferLayout() const {
-        return framebuffer_layout;
-    }
+    const Layout::FramebufferLayout& GetFramebufferLayout() const { return framebuffer_layout; }
 
     /**
      * Convenience method to update the current frame layout
@@ -139,7 +129,8 @@ protected:
      * @note Implementations will usually want to call this from the GUI thread.
      * @todo Actually call this in existing implementations.
      */
-    void ProcessConfigurationChanges() {
+    void ProcessConfigurationChanges()
+    {
         // TODO: For proper thread safety, we should eventually implement a proper
         // multiple-writer/single-reader queue...
 
@@ -153,7 +144,8 @@ protected:
      * Update framebuffer layout with the given parameter.
      * @note EmuWindow implementations will usually use this in window resize event handlers.
      */
-    void NotifyFramebufferLayoutChanged(const Layout::FramebufferLayout& layout) {
+    void NotifyFramebufferLayoutChanged(const Layout::FramebufferLayout& layout)
+    {
         framebuffer_layout = layout;
     }
 
@@ -161,7 +153,8 @@ protected:
      * Update internal client area size with the given parameter.
      * @note EmuWindow implementations will usually use this in window resize event handlers.
      */
-    void NotifyClientAreaSizeChanged(std::pair<u32, u32> size) {
+    void NotifyClientAreaSizeChanged(std::pair<u32, u32> size)
+    {
         client_area_width = size.first;
         client_area_height = size.second;
     }
@@ -186,7 +179,8 @@ private:
      * For the request to be honored, EmuWindow implementations will usually reimplement this
      * function.
      */
-    virtual void OnMinimalClientAreaChangeRequest(std::pair<u32, u32>) {
+    virtual void OnMinimalClientAreaChangeRequest(std::pair<u32, u32>)
+    {
         // By default, ignore this request and do nothing.
     }
 

@@ -4,14 +4,14 @@
 // SPDX-FileCopyrightText: Copyright 2024 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#include <optional>
+#include "core/hle/service/nvnflinger/hardware_composer.h"
 
 #include <boost/container/small_vector.hpp>
+#include <optional>
 
 #include "core/hle/service/nvdrv/devices/nvdisp_disp0.h"
 #include "core/hle/service/nvnflinger/buffer_item.h"
 #include "core/hle/service/nvnflinger/buffer_item_consumer.h"
-#include "core/hle/service/nvnflinger/hardware_composer.h"
 #include "core/hle/service/nvnflinger/hwc_layer.h"
 #include "core/hle/service/nvnflinger/ui/graphic_buffer.h"
 
@@ -19,7 +19,8 @@ namespace Service::Nvnflinger {
 
 namespace {
 
-s32 NormalizeSwapInterval(f32* out_speed_scale, s32 swap_interval) {
+s32 NormalizeSwapInterval(f32* out_speed_scale, s32 swap_interval)
+{
     if (swap_interval <= 0) {
         // As an extension, treat nonpositive swap interval as speed multiplier.
         if (out_speed_scale) {
@@ -47,10 +48,11 @@ HardwareComposer::HardwareComposer() = default;
 HardwareComposer::~HardwareComposer() = default;
 
 u32 HardwareComposer::ComposeLocked(f32* out_speed_scale, Display& display,
-                                    Nvidia::Devices::nvdisp_disp0& nvdisp) {
+                                    Nvidia::Devices::nvdisp_disp0& nvdisp)
+{
 #if BOOST_VERSION >= 108100 || __GNUC__ > 12
     boost::container::small_vector<HwcLayer, 2> composition_stack;
-#else //TODO: debian stable
+#else // TODO: debian stable
     std::vector<HwcLayer> composition_stack;
 #endif
 
@@ -82,8 +84,10 @@ u32 HardwareComposer::ComposeLocked(f32* out_speed_scale, Display& display,
         if (!layer->is_overlay) {
             auto fb_it = m_framebuffers.find(consumer_id);
             if (fb_it != m_framebuffers.end() && fb_it->second.is_acquired) {
-                const u64 frames_since_last_acquire = m_frame_number - fb_it->second.last_acquire_frame;
-                const s32 expected_interval = NormalizeSwapInterval(nullptr, fb_it->second.item.swap_interval);
+                const u64 frames_since_last_acquire =
+                    m_frame_number - fb_it->second.last_acquire_frame;
+                const s32 expected_interval =
+                    NormalizeSwapInterval(nullptr, fb_it->second.item.swap_interval);
 
                 if (frames_since_last_acquire < static_cast<u64>(expected_interval)) {
                     should_try_acquire = false;
@@ -93,10 +97,11 @@ u32 HardwareComposer::ComposeLocked(f32* out_speed_scale, Display& display,
 
         // Try to fetch the framebuffer (either new or stale).
         const auto result = should_try_acquire
-            ? this->CacheFramebufferLocked(*layer, consumer_id)
-            : (m_framebuffers.find(consumer_id) != m_framebuffers.end() && m_framebuffers[consumer_id].is_acquired
-                ? CacheStatus::CachedBufferReused
-                : CacheStatus::NoBufferAvailable);
+                                ? this->CacheFramebufferLocked(*layer, consumer_id)
+                                : (m_framebuffers.find(consumer_id) != m_framebuffers.end() &&
+                                           m_framebuffers[consumer_id].is_acquired
+                                       ? CacheStatus::CachedBufferReused
+                                       : CacheStatus::NoBufferAvailable);
 
         // If we failed, skip this layer.
         if (result == CacheStatus::NoBufferAvailable) {
@@ -151,8 +156,9 @@ u32 HardwareComposer::ComposeLocked(f32* out_speed_scale, Display& display,
     // If any new buffers were acquired, we can present.
     if (has_acquired_buffer && !composition_stack.empty()) {
         // Sort back-to-front: lower z first, higher z last so top-most draws last (on top).
-        std::stable_sort(composition_stack.begin(), composition_stack.end(),
-                         [&](const HwcLayer& l, const HwcLayer& r) { return l.z_index < r.z_index; });
+        std::stable_sort(
+            composition_stack.begin(), composition_stack.end(),
+            [&](const HwcLayer& l, const HwcLayer& r) { return l.z_index < r.z_index; });
 
         // Composite.
         nvdisp.Composite(composition_stack);
@@ -182,7 +188,8 @@ u32 HardwareComposer::ComposeLocked(f32* out_speed_scale, Display& display,
     // Advance by 1 frame (60 FPS compositing)
     m_frame_number += 1;
 
-    // Release any necessary framebuffers (non-overlay layers only, as overlays are already released above).
+    // Release any necessary framebuffers (non-overlay layers only, as overlays are already released
+    // above).
     for (auto& [layer_id, framebuffer] : m_framebuffers) {
         if (!framebuffer.is_acquired) {
             // Already released.
@@ -209,7 +216,8 @@ u32 HardwareComposer::ComposeLocked(f32* out_speed_scale, Display& display,
     return 1;
 }
 
-void HardwareComposer::RemoveLayerLocked(Display& display, ConsumerId consumer_id) {
+void HardwareComposer::RemoveLayerLocked(Display& display, ConsumerId consumer_id)
+{
     // Check if we are tracking a slot with this consumer_id.
     const auto it = m_framebuffers.find(consumer_id);
     if (it == m_framebuffers.end()) {
@@ -226,7 +234,8 @@ void HardwareComposer::RemoveLayerLocked(Display& display, ConsumerId consumer_i
     m_framebuffers.erase(it);
 }
 
-bool HardwareComposer::TryAcquireFramebufferLocked(Layer& layer, Framebuffer& framebuffer) {
+bool HardwareComposer::TryAcquireFramebufferLocked(Layer& layer, Framebuffer& framebuffer)
+{
     // Attempt the update.
     const auto status = layer.buffer_item_consumer->AcquireBuffer(&framebuffer.item, {}, false);
     if (status != android::Status::NoError) {
@@ -234,7 +243,8 @@ bool HardwareComposer::TryAcquireFramebufferLocked(Layer& layer, Framebuffer& fr
     }
 
     // We succeeded, so set the new release frame info.
-    const s32 swap_interval = layer.is_overlay ? 1 : NormalizeSwapInterval(nullptr, framebuffer.item.swap_interval);
+    const s32 swap_interval =
+        layer.is_overlay ? 1 : NormalizeSwapInterval(nullptr, framebuffer.item.swap_interval);
     framebuffer.release_frame_number = m_frame_number + swap_interval;
     framebuffer.last_acquire_frame = m_frame_number;
     framebuffer.is_acquired = true;
@@ -243,7 +253,8 @@ bool HardwareComposer::TryAcquireFramebufferLocked(Layer& layer, Framebuffer& fr
 }
 
 HardwareComposer::CacheStatus HardwareComposer::CacheFramebufferLocked(Layer& layer,
-                                                                       ConsumerId consumer_id) {
+                                                                       ConsumerId consumer_id)
+{
     // Check if this framebuffer is already present.
     const auto it = m_framebuffers.find(consumer_id);
     if (it != m_framebuffers.end()) {

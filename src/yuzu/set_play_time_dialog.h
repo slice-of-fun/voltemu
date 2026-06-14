@@ -3,8 +3,9 @@
 
 #pragma once
 
-#include <memory>
 #include <QDialog>
+#include <memory>
+
 #include "common/common_types.h"
 
 namespace Ui {

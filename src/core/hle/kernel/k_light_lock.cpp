@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include "core/hle/kernel/k_light_lock.h"
+
 #include "core/hle/kernel/k_scheduler.h"
 #include "core/hle/kernel/k_thread.h"
 #include "core/hle/kernel/k_thread_queue.h"
@@ -15,7 +16,8 @@ class ThreadQueueImplForKLightLock final : public KThreadQueue {
 public:
     explicit ThreadQueueImplForKLightLock(KernelCore& kernel) : KThreadQueue(kernel) {}
 
-    void CancelWait(KThread* waiting_thread, Result wait_result, bool cancel_timer_task) override {
+    void CancelWait(KThread* waiting_thread, Result wait_result, bool cancel_timer_task) override
+    {
         // Remove the thread as a waiter from its owner.
         if (KThread* owner = waiting_thread->GetLockOwner(); owner != nullptr) {
             owner->RemoveWaiter(waiting_thread);
@@ -28,7 +30,8 @@ public:
 
 } // namespace
 
-void KLightLock::Lock() {
+void KLightLock::Lock()
+{
     const uintptr_t cur_thread = reinterpret_cast<uintptr_t>(GetCurrentThreadPointer(m_kernel));
 
     while (true) {
@@ -44,7 +47,8 @@ void KLightLock::Lock() {
     }
 }
 
-void KLightLock::Unlock() {
+void KLightLock::Unlock()
+{
     const uintptr_t cur_thread = reinterpret_cast<uintptr_t>(GetCurrentThreadPointer(m_kernel));
 
     uintptr_t expected = cur_thread;
@@ -53,7 +57,8 @@ void KLightLock::Unlock() {
     }
 }
 
-bool KLightLock::LockSlowPath(uintptr_t _owner, uintptr_t _cur_thread) {
+bool KLightLock::LockSlowPath(uintptr_t _owner, uintptr_t _cur_thread)
+{
     KThread* cur_thread = reinterpret_cast<KThread*>(_cur_thread);
     ThreadQueueImplForKLightLock wait_queue(m_kernel);
 
@@ -82,7 +87,8 @@ bool KLightLock::LockSlowPath(uintptr_t _owner, uintptr_t _cur_thread) {
     return true;
 }
 
-void KLightLock::UnlockSlowPath(uintptr_t _cur_thread) {
+void KLightLock::UnlockSlowPath(uintptr_t _cur_thread)
+{
     KThread* owner_thread = reinterpret_cast<KThread*>(_cur_thread);
 
     // Unlock.
@@ -118,7 +124,8 @@ void KLightLock::UnlockSlowPath(uintptr_t _cur_thread) {
     }
 }
 
-bool KLightLock::IsLockedByCurrentThread() const {
+bool KLightLock::IsLockedByCurrentThread() const
+{
     return (m_tag.load() | 1ULL) ==
            (reinterpret_cast<uintptr_t>(GetCurrentThreadPointer(m_kernel)) | 1ULL);
 }

@@ -6,11 +6,13 @@
 
 namespace Shader::Backend::GLASM {
 
-void EmitJoin(EmitContext&) {
+void EmitJoin(EmitContext&)
+{
     throw NotImplementedException("Join shouldn't be emitted");
 }
 
-void EmitDemoteToHelperInvocation(EmitContext& ctx) {
+void EmitDemoteToHelperInvocation(EmitContext& ctx)
+{
     ctx.Add("KIL TR.x;");
 }
 

@@ -1,11 +1,12 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+#include "hid_core/irsensor/moment_processor.h"
+
 #include "core/core.h"
 #include "core/core_timing.h"
 #include "hid_core/frontend/emulated_controller.h"
 #include "hid_core/hid_core.h"
-#include "hid_core/irsensor/moment_processor.h"
 
 namespace Service::IRS {
 static constexpr auto format = Core::IrSensor::ImageTransferProcessorFormat::Size40x30;
@@ -14,7 +15,8 @@ static constexpr std::size_t ImageHeight = 30;
 
 MomentProcessor::MomentProcessor(Core::System& system_, Core::IrSensor::DeviceFormat& device_format,
                                  std::size_t npad_index)
-    : device(device_format), system{system_} {
+    : device(device_format), system{system_}
+{
     npad_device = system.HIDCore().GetEmulatedControllerByIndex(npad_index);
 
     device.mode = Core::IrSensor::IrSensorMode::MomentProcessor;
@@ -31,20 +33,27 @@ MomentProcessor::MomentProcessor(Core::System& system_, Core::IrSensor::DeviceFo
     callback_key = npad_device->SetCallback(engine_callback);
 }
 
-MomentProcessor::~MomentProcessor() {
+MomentProcessor::~MomentProcessor()
+{
     npad_device->DeleteCallback(callback_key);
 };
 
-void MomentProcessor::StartProcessor() {
+void MomentProcessor::StartProcessor()
+{
     device.camera_status = Core::IrSensor::IrCameraStatus::Available;
     device.camera_internal_status = Core::IrSensor::IrCameraInternalStatus::Ready;
 }
 
-void MomentProcessor::SuspendProcessor() {}
+void MomentProcessor::SuspendProcessor()
+{
+}
 
-void MomentProcessor::StopProcessor() {}
+void MomentProcessor::StopProcessor()
+{
+}
 
-void MomentProcessor::OnControllerUpdate(Core::HID::ControllerTriggerType type) {
+void MomentProcessor::OnControllerUpdate(Core::HID::ControllerTriggerType type)
+{
     if (type != Core::HID::ControllerTriggerType::IrSensor) {
         return;
     }
@@ -79,18 +88,18 @@ void MomentProcessor::OnControllerUpdate(Core::HID::ControllerTriggerType type) 
     }
 }
 
-u8 MomentProcessor::GetPixel(const std::vector<u8>& data, std::size_t x, std::size_t y) const {
+u8 MomentProcessor::GetPixel(const std::vector<u8>& data, std::size_t x, std::size_t y) const
+{
     if ((y * ImageWidth) + x >= data.size()) {
         return 0;
     }
     return data[(y * ImageWidth) + x];
 }
 
-MomentProcessor::MomentStatistic MomentProcessor::GetStatistic(const std::vector<u8>& data,
-                                                               std::size_t start_x,
-                                                               std::size_t start_y,
-                                                               std::size_t width,
-                                                               std::size_t height) const {
+MomentProcessor::MomentStatistic
+MomentProcessor::GetStatistic(const std::vector<u8>& data, std::size_t start_x, std::size_t start_y,
+                              std::size_t width, std::size_t height) const
+{
     // The actual implementation is always 320x240
     static constexpr std::size_t RealWidth = 320;
     static constexpr std::size_t RealHeight = 240;
@@ -132,7 +141,8 @@ MomentProcessor::MomentStatistic MomentProcessor::GetStatistic(const std::vector
     return statistic;
 }
 
-void MomentProcessor::SetConfig(Core::IrSensor::PackedMomentProcessorConfig config) {
+void MomentProcessor::SetConfig(Core::IrSensor::PackedMomentProcessorConfig config)
+{
     current_config.camera_config.exposure_time = config.camera_config.exposure_time;
     current_config.camera_config.gain = config.camera_config.gain;
     current_config.camera_config.is_negative_used = config.camera_config.is_negative_used;

@@ -4,17 +4,19 @@
 // SPDX-FileCopyrightText: Copyright 2020 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "common/time_zone.h"
+
+#include <fmt/chrono.h>
+#include <fmt/core.h>
+
 #include <chrono>
 #include <exception>
 #include <iomanip>
 #include <map>
 #include <sstream>
 #include <stdexcept>
-#include <fmt/chrono.h>
-#include <fmt/core.h>
 
 #include "common/logging.h"
-#include "common/time_zone.h"
 
 namespace Common::TimeZone {
 
@@ -28,16 +30,19 @@ constexpr std::array timezones{
     "UCT",       "Universal", "UTC", "W-SU",    "WET",     "Zulu",
 };
 
-const std::array<const char*, 46>& GetTimeZoneStrings() {
+const std::array<const char*, 46>& GetTimeZoneStrings()
+{
     return timezones;
 }
 
-std::string GetDefaultTimeZone() {
+std::string GetDefaultTimeZone()
+{
     return "GMT";
 }
 
 // Results are not comparable to seconds since Epoch
-static std::time_t TmSpecToSeconds(const struct std::tm& spec) {
+static std::time_t TmSpecToSeconds(const struct std::tm& spec)
+{
     const int year = spec.tm_year - 1; // Years up to now
     const int leap_years = year / 4 - year / 100;
     std::time_t cumulative = spec.tm_year;
@@ -48,7 +53,8 @@ static std::time_t TmSpecToSeconds(const struct std::tm& spec) {
     return cumulative;
 }
 
-std::chrono::seconds GetCurrentOffsetSeconds() {
+std::chrono::seconds GetCurrentOffsetSeconds()
+{
     const std::time_t t{std::time(nullptr)};
     const std::tm local{*std::localtime(&t)};
     const std::tm gmt{*std::gmtime(&t)};
@@ -70,7 +76,8 @@ const static std::map<s64, const char*> off_timezones = {
     {43000, "Asia/Tehran"},          {545, "Asia/Kathmandu"},       {-930, "Asia/Marquesas"},
 };
 
-std::string FindSystemTimeZone() {
+std::string FindSystemTimeZone()
+{
     const s64 seconds = static_cast<s64>(GetCurrentOffsetSeconds().count());
 
     const s64 minutes = seconds / 60;

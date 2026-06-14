@@ -28,21 +28,25 @@ public:
         std::array<u8, sizeof(s64)> phys_offset;
         s32 storage_index;
 
-        void SetVirtualOffset(const s64& ofs) {
+        void SetVirtualOffset(const s64& ofs)
+        {
             std::memcpy(this->virt_offset.data(), std::addressof(ofs), sizeof(s64));
         }
 
-        s64 GetVirtualOffset() const {
+        s64 GetVirtualOffset() const
+        {
             s64 offset;
             std::memcpy(std::addressof(offset), this->virt_offset.data(), sizeof(s64));
             return offset;
         }
 
-        void SetPhysicalOffset(const s64& ofs) {
+        void SetPhysicalOffset(const s64& ofs)
+        {
             std::memcpy(this->phys_offset.data(), std::addressof(ofs), sizeof(s64));
         }
 
-        s64 GetPhysicalOffset() const {
+        s64 GetPhysicalOffset() const
+        {
             s64 offset;
             std::memcpy(std::addressof(offset), this->phys_offset.data(), sizeof(s64));
             return offset;
@@ -56,7 +60,8 @@ public:
         s64 phys_offset;
         s32 storage_index;
 
-        void Set(const Entry& entry) {
+        void Set(const Entry& entry)
+        {
             this->virt_offset = entry.GetVirtualOffset();
             this->phys_offset = entry.GetPhysicalOffset();
             this->storage_index = entry.storage_index;
@@ -66,29 +71,27 @@ public:
 
 public:
     IndirectStorage() : m_table(), m_data_storage() {}
-    virtual ~IndirectStorage() {
-        this->Finalize();
-    }
+    virtual ~IndirectStorage() { this->Finalize(); }
 
     Result Initialize(VirtualFile table_storage);
     void Finalize();
 
-    bool IsInitialized() const {
-        return m_table.IsInitialized();
-    }
+    bool IsInitialized() const { return m_table.IsInitialized(); }
 
-    Result Initialize(VirtualFile node_storage, VirtualFile entry_storage, s32 entry_count) {
+    Result Initialize(VirtualFile node_storage, VirtualFile entry_storage, s32 entry_count)
+    {
         R_RETURN(
             m_table.Initialize(node_storage, entry_storage, NodeSize, sizeof(Entry), entry_count));
     }
 
-    void SetStorage(s32 idx, VirtualFile storage) {
+    void SetStorage(s32 idx, VirtualFile storage)
+    {
         ASSERT(0 <= idx && idx < StorageCount);
         m_data_storage[idx] = storage;
     }
 
-    template <typename T>
-    void SetStorage(s32 idx, T storage, s64 offset, s64 size) {
+    template<typename T> void SetStorage(s32 idx, T storage, s64 offset, s64 size)
+    {
         ASSERT(0 <= idx && idx < StorageCount);
         m_data_storage[idx] = std::make_shared<OffsetVfsFile>(storage, size, offset);
     }
@@ -96,7 +99,8 @@ public:
     Result GetEntryList(Entry* out_entries, s32* out_entry_count, s32 entry_count, s64 offset,
                         s64 size);
 
-    virtual size_t GetSize() const override {
+    virtual size_t GetSize() const override
+    {
         BucketTree::Offsets offsets{};
         m_table.GetOffsets(std::addressof(offsets));
 
@@ -106,29 +110,28 @@ public:
     virtual size_t Read(u8* buffer, size_t size, size_t offset) const override;
 
 public:
-    static constexpr s64 QueryHeaderStorageSize() {
-        return BucketTree::QueryHeaderStorageSize();
-    }
+    static constexpr s64 QueryHeaderStorageSize() { return BucketTree::QueryHeaderStorageSize(); }
 
-    static constexpr s64 QueryNodeStorageSize(s32 entry_count) {
+    static constexpr s64 QueryNodeStorageSize(s32 entry_count)
+    {
         return BucketTree::QueryNodeStorageSize(NodeSize, sizeof(Entry), entry_count);
     }
 
-    static constexpr s64 QueryEntryStorageSize(s32 entry_count) {
+    static constexpr s64 QueryEntryStorageSize(s32 entry_count)
+    {
         return BucketTree::QueryEntryStorageSize(NodeSize, sizeof(Entry), entry_count);
     }
 
 protected:
-    BucketTree& GetEntryTable() {
-        return m_table;
-    }
+    BucketTree& GetEntryTable() { return m_table; }
 
-    VirtualFile& GetDataStorage(s32 index) {
+    VirtualFile& GetDataStorage(s32 index)
+    {
         ASSERT(0 <= index && index < StorageCount);
         return m_data_storage[index];
     }
 
-    template <bool ContinuousCheck, bool RangeCheck, typename F>
+    template<bool ContinuousCheck, bool RangeCheck, typename F>
     Result OperatePerEntry(s64 offset, s64 size, F func);
 
 private:
@@ -137,17 +140,11 @@ private:
 
         IndirectStorage::Entry entry;
 
-        s64 GetVirtualOffset() const {
-            return this->entry.GetVirtualOffset();
-        }
+        s64 GetVirtualOffset() const { return this->entry.GetVirtualOffset(); }
 
-        s64 GetPhysicalOffset() const {
-            return this->entry.GetPhysicalOffset();
-        }
+        s64 GetPhysicalOffset() const { return this->entry.GetPhysicalOffset(); }
 
-        bool IsFragment() const {
-            return this->entry.storage_index != 0;
-        }
+        bool IsFragment() const { return this->entry.storage_index != 0; }
     };
     static_assert(std::is_trivial_v<ContinuousReadingEntry>);
 
@@ -156,8 +153,9 @@ private:
     std::array<VirtualFile, StorageCount> m_data_storage;
 };
 
-template <bool ContinuousCheck, bool RangeCheck, typename F>
-Result IndirectStorage::OperatePerEntry(s64 offset, s64 size, F func) {
+template<bool ContinuousCheck, bool RangeCheck, typename F>
+Result IndirectStorage::OperatePerEntry(s64 offset, s64 size, F func)
+{
     // Validate preconditions.
     ASSERT(offset >= 0);
     ASSERT(size >= 0);

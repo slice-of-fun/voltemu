@@ -4,12 +4,13 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/file_sys/program_metadata.h"
+
 #include <cstddef>
 #include <vector>
 
 #include "common/logging.h"
 #include "common/scope_exit.h"
-#include "core/file_sys/program_metadata.h"
 #include "core/file_sys/vfs/vfs.h"
 #include "core/loader/loader.h"
 
@@ -19,7 +20,8 @@ ProgramMetadata::ProgramMetadata() = default;
 
 ProgramMetadata::~ProgramMetadata() = default;
 
-Loader::ResultStatus ProgramMetadata::Load(VirtualFile file) {
+Loader::ResultStatus ProgramMetadata::Load(VirtualFile file)
+{
     const std::size_t total_size = file->GetSize();
     if (total_size < sizeof(Header)) {
         return Loader::ResultStatus::ErrorBadNPDMHeader;
@@ -99,16 +101,19 @@ Loader::ResultStatus ProgramMetadata::Load(VirtualFile file) {
     return Loader::ResultStatus::Success;
 }
 
-Loader::ResultStatus ProgramMetadata::Reload(VirtualFile file) {
+Loader::ResultStatus ProgramMetadata::Reload(VirtualFile file)
+{
     const u64 original_program_id = aci_header.title_id;
-    SCOPE_EXIT {
+    SCOPE_EXIT
+    {
         aci_header.title_id = original_program_id;
     };
 
     return this->Load(file);
 }
 
-/*static*/ ProgramMetadata ProgramMetadata::GetDefault() {
+/*static*/ ProgramMetadata ProgramMetadata::GetDefault()
+{
     // Allow use of cores 0~3 and thread priorities 16~63.
     constexpr u32 default_thread_info_capability = 0x30043F7;
 
@@ -127,7 +132,8 @@ void ProgramMetadata::LoadManual(bool is_64_bit, ProgramAddressSpaceType address
                                  s32 main_thread_prio, u32 main_thread_core,
                                  u32 main_thread_stack_size, u64 title_id,
                                  u64 filesystem_permissions, u32 system_resource_size,
-                                 KernelCapabilityDescriptors capabilities) {
+                                 KernelCapabilityDescriptors capabilities)
+{
     npdm_header.has_64_bit_instructions.Assign(is_64_bit);
     npdm_header.address_space_type.Assign(address_space);
     npdm_header.main_thread_priority = static_cast<u8>(main_thread_prio);
@@ -139,47 +145,58 @@ void ProgramMetadata::LoadManual(bool is_64_bit, ProgramAddressSpaceType address
     aci_kernel_capabilities = std::move(capabilities);
 }
 
-bool ProgramMetadata::Is64BitProgram() const {
+bool ProgramMetadata::Is64BitProgram() const
+{
     return npdm_header.has_64_bit_instructions.As<bool>();
 }
 
-ProgramAddressSpaceType ProgramMetadata::GetAddressSpaceType() const {
+ProgramAddressSpaceType ProgramMetadata::GetAddressSpaceType() const
+{
     return npdm_header.address_space_type;
 }
 
-u8 ProgramMetadata::GetMainThreadPriority() const {
+u8 ProgramMetadata::GetMainThreadPriority() const
+{
     return npdm_header.main_thread_priority;
 }
 
-u8 ProgramMetadata::GetMainThreadCore() const {
+u8 ProgramMetadata::GetMainThreadCore() const
+{
     return npdm_header.main_thread_cpu;
 }
 
-u32 ProgramMetadata::GetMainThreadStackSize() const {
+u32 ProgramMetadata::GetMainThreadStackSize() const
+{
     return npdm_header.main_stack_size;
 }
 
-u64 ProgramMetadata::GetTitleID() const {
+u64 ProgramMetadata::GetTitleID() const
+{
     return aci_header.title_id;
 }
 
-u64 ProgramMetadata::GetFilesystemPermissions() const {
+u64 ProgramMetadata::GetFilesystemPermissions() const
+{
     return aci_file_access.permissions;
 }
 
-u32 ProgramMetadata::GetSystemResourceSize() const {
+u32 ProgramMetadata::GetSystemResourceSize() const
+{
     return npdm_header.system_resource_size;
 }
 
-PoolPartition ProgramMetadata::GetPoolPartition() const {
+PoolPartition ProgramMetadata::GetPoolPartition() const
+{
     return acid_header.pool_partition;
 }
 
-const ProgramMetadata::KernelCapabilityDescriptors& ProgramMetadata::GetKernelCapabilities() const {
+const ProgramMetadata::KernelCapabilityDescriptors& ProgramMetadata::GetKernelCapabilities() const
+{
     return aci_kernel_capabilities;
 }
 
-void ProgramMetadata::Print() const {
+void ProgramMetadata::Print() const
+{
     LOG_DEBUG(Service_FS, "Magic:                  {:.4}", npdm_header.magic.data());
     LOG_DEBUG(Service_FS, "Main thread priority:   0x{:02X}", npdm_header.main_thread_priority);
     LOG_DEBUG(Service_FS, "Main thread core:       {}", npdm_header.main_thread_cpu);

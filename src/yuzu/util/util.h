@@ -8,6 +8,7 @@
 
 #include <QFont>
 #include <QString>
+
 #include "common/uuid.h"
 
 /// Returns a QFont object appropriate to use as a monospace font for debugging widgets, etc.

@@ -10,9 +10,9 @@
 
 #define SDL_MAIN_HANDLED
 #include <SDL3/SDL.h>
-
 #include <fmt/ranges.h>
 #include <glad/glad.h>
+
 #include "common/logging.h"
 #include "common/scm_rev.h"
 #include "common/settings.h"
@@ -23,34 +23,37 @@
 #include "yuzu_cmd/emu_window/emu_window_sdl3_gl.h"
 
 namespace {
-void* SDLGLGetProcAddress(const char* proc_name) {
+void* SDLGLGetProcAddress(const char* proc_name)
+{
     return reinterpret_cast<void*>(SDL_GL_GetProcAddress(proc_name));
 }
 } // Anonymous namespace
 
 class SDLGLContext : public Core::Frontend::GraphicsContext {
 public:
-    explicit SDLGLContext(SDL_Window* window_) : window{window_} {
+    explicit SDLGLContext(SDL_Window* window_) : window{window_}
+    {
         context = SDL_GL_CreateContext(window);
     }
 
-    ~SDLGLContext() {
+    ~SDLGLContext()
+    {
         DoneCurrent();
         SDL_GL_DestroyContext(context);
     }
 
-    void SwapBuffers() override {
-        SDL_GL_SwapWindow(window);
-    }
+    void SwapBuffers() override { SDL_GL_SwapWindow(window); }
 
-    void MakeCurrent() override {
+    void MakeCurrent() override
+    {
         if (is_current) {
             return;
         }
         is_current = SDL_GL_MakeCurrent(window, context) == 0;
     }
 
-    void DoneCurrent() override {
+    void DoneCurrent() override
+    {
         if (!is_current) {
             return;
         }
@@ -64,7 +67,8 @@ private:
     bool is_current = false;
 };
 
-bool EmuWindow_SDL3_GL::SupportsRequiredGLExtensions() {
+bool EmuWindow_SDL3_GL::SupportsRequiredGLExtensions()
+{
     std::vector<std::string_view> unsupported_ext{};
 #ifdef HAS_OPENGL
     // Extensions required to support some texture formats.
@@ -80,7 +84,8 @@ bool EmuWindow_SDL3_GL::SupportsRequiredGLExtensions() {
 
 EmuWindow_SDL3_GL::EmuWindow_SDL3_GL(InputCommon::InputSubsystem* input_subsystem_,
                                      Core::System& system_, bool fullscreen)
-    : EmuWindow_SDL3{input_subsystem_, system_} {
+    : EmuWindow_SDL3{input_subsystem_, system_}
+{
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 6);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_COMPATIBILITY);
@@ -97,11 +102,9 @@ EmuWindow_SDL3_GL::EmuWindow_SDL3_GL(InputCommon::InputSubsystem* input_subsyste
 
     std::string window_title = fmt::format("{} | {}-{}", Common::g_build_fullname,
                                            Common::g_scm_branch, Common::g_scm_desc);
-    render_window =
-        SDL_CreateWindow(window_title.c_str(), Layout::ScreenUndocked::Width,
-                         Layout::ScreenUndocked::Height,
-                         SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE |
-                             SDL_WINDOW_HIGH_PIXEL_DENSITY);
+    render_window = SDL_CreateWindow(
+        window_title.c_str(), Layout::ScreenUndocked::Width, Layout::ScreenUndocked::Height,
+        SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIGH_PIXEL_DENSITY);
 
     if (render_window == nullptr) {
         LOG_CRITICAL(Frontend, "Failed to create SDL3 window! {}", SDL_GetError());
@@ -147,11 +150,13 @@ EmuWindow_SDL3_GL::EmuWindow_SDL3_GL(InputCommon::InputSubsystem* input_subsyste
     Settings::LogSettings();
 }
 
-EmuWindow_SDL3_GL::~EmuWindow_SDL3_GL() {
+EmuWindow_SDL3_GL::~EmuWindow_SDL3_GL()
+{
     core_context.reset();
     SDL_GL_DestroyContext(window_context);
 }
 
-std::unique_ptr<Core::Frontend::GraphicsContext> EmuWindow_SDL3_GL::CreateSharedContext() const {
+std::unique_ptr<Core::Frontend::GraphicsContext> EmuWindow_SDL3_GL::CreateSharedContext() const
+{
     return std::make_unique<SDLGLContext>(render_window);
 }

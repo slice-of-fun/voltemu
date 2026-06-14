@@ -4,11 +4,13 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "video_core/engines/kepler_compute.h"
+
 #include <bitset>
+
 #include "common/assert.h"
 #include "common/logging.h"
 #include "core/core.h"
-#include "video_core/engines/kepler_compute.h"
 #include "video_core/engines/maxwell_3d.h"
 #include "video_core/memory_manager.h"
 #include "video_core/rasterizer_interface.h"
@@ -17,7 +19,8 @@
 namespace Tegra::Engines {
 
 KeplerCompute::KeplerCompute(Core::System& system_, MemoryManager& memory_manager_)
-    : system{system_}, memory_manager{memory_manager_}, upload_state{memory_manager, regs.upload} {
+    : system{system_}, memory_manager{memory_manager_}, upload_state{memory_manager, regs.upload}
+{
     execution_mask.reset();
     execution_mask[KEPLER_COMPUTE_REG_INDEX(exec_upload)] = true;
     execution_mask[KEPLER_COMPUTE_REG_INDEX(data_upload)] = true;
@@ -26,19 +29,22 @@ KeplerCompute::KeplerCompute(Core::System& system_, MemoryManager& memory_manage
 
 KeplerCompute::~KeplerCompute() = default;
 
-void KeplerCompute::BindRasterizer(VideoCore::RasterizerInterface* rasterizer_) {
+void KeplerCompute::BindRasterizer(VideoCore::RasterizerInterface* rasterizer_)
+{
     rasterizer = rasterizer_;
     upload_state.BindRasterizer(rasterizer);
 }
 
-void KeplerCompute::ConsumeSinkImpl() {
+void KeplerCompute::ConsumeSinkImpl()
+{
     for (auto [method, value] : method_sink) {
         regs.reg_array[method] = value;
     }
     method_sink.clear();
 }
 
-void KeplerCompute::CallMethod(u32 method, u32 method_argument, bool is_last_call) {
+void KeplerCompute::CallMethod(u32 method, u32 method_argument, bool is_last_call)
+{
     ASSERT_MSG(method < Regs::NUM_REGS,
                "Invalid KeplerCompute register, increase the size of the Regs structure");
 
@@ -79,7 +85,8 @@ void KeplerCompute::CallMethod(u32 method, u32 method_argument, bool is_last_cal
 }
 
 void KeplerCompute::CallMultiMethod(u32 method, const u32* base_start, u32 amount,
-                                    u32 methods_pending) {
+                                    u32 methods_pending)
+{
     switch (method) {
     case KEPLER_COMPUTE_REG_INDEX(data_upload):
         upload_address = current_dma_segment;
@@ -93,14 +100,16 @@ void KeplerCompute::CallMultiMethod(u32 method, const u32* base_start, u32 amoun
     }
 }
 
-void KeplerCompute::ProcessLaunch() {
+void KeplerCompute::ProcessLaunch()
+{
     const GPUVAddr launch_desc_loc = regs.launch_desc_loc.Address();
     memory_manager.ReadBlockUnsafe(launch_desc_loc, &launch_description,
                                    LaunchParams::NUM_LAUNCH_PARAMETERS * sizeof(u32));
     rasterizer->DispatchCompute();
 }
 
-Texture::TICEntry KeplerCompute::GetTICEntry(u32 tic_index) const {
+Texture::TICEntry KeplerCompute::GetTICEntry(u32 tic_index) const
+{
     const GPUVAddr tic_address_gpu{regs.tic.Address() + tic_index * sizeof(Texture::TICEntry)};
 
     Texture::TICEntry tic_entry;
@@ -108,7 +117,8 @@ Texture::TICEntry KeplerCompute::GetTICEntry(u32 tic_index) const {
     return tic_entry;
 }
 
-Texture::TSCEntry KeplerCompute::GetTSCEntry(u32 tsc_index) const {
+Texture::TSCEntry KeplerCompute::GetTSCEntry(u32 tsc_index) const
+{
     const GPUVAddr tsc_address_gpu{regs.tsc.Address() + tsc_index * sizeof(Texture::TSCEntry)};
 
     Texture::TSCEntry tsc_entry;

@@ -4,13 +4,16 @@
 // SPDX-FileCopyrightText: Copyright 2024 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include <algorithm>
-#include <vector>
-#include <optional>
+#include "core/hle/service/ns/read_only_application_control_data_interface.h"
+
 #include <stb_image.h>
 #include <stb_image_resize.h>
 #include <stb_image_write.h>
+
+#include <algorithm>
+#include <optional>
 #include <string>
+#include <vector>
 
 #include "common/settings.h"
 #include "core/file_sys/control_metadata.h"
@@ -18,24 +21,25 @@
 #include "core/file_sys/vfs/vfs.h"
 #include "core/hle/kernel/k_transfer_memory.h"
 #include "core/hle/service/cmif_serialization.h"
-#include "core/hle/service/ns/language.h"
-#include "core/hle/service/ns/ns_types.h"
-#include "core/hle/service/ns/ns_results.h"
-#include "core/hle/service/ns/read_only_application_control_data_interface.h"
-#include "core/hle/service/set/settings_server.h"
 #include "core/hle/service/kernel_helpers.h"
+#include "core/hle/service/ns/language.h"
+#include "core/hle/service/ns/ns_results.h"
+#include "core/hle/service/ns/ns_types.h"
+#include "core/hle/service/set/settings_server.h"
 
 namespace Service::NS {
 
 namespace {
 
-void JPGToMemory(void* context, void* data, int size) {
+void JPGToMemory(void* context, void* data, int size)
+{
     auto* buffer = static_cast<std::vector<u8>*>(context);
     const auto* char_data = static_cast<const u8*>(data);
     buffer->insert(buffer->end(), char_data, char_data + size);
 }
 
-void SanitizeJPEGImageSize(std::vector<u8>& image) {
+void SanitizeJPEGImageSize(std::vector<u8>& image)
+{
     constexpr std::size_t max_jpeg_image_size = 0x20000;
     constexpr int profile_dimensions = 174; // for grid view thingy
     int original_width, original_height, color_channels;
@@ -70,14 +74,15 @@ void SanitizeJPEGImageSize(std::vector<u8>& image) {
 
 } // namespace
 
-
 // IAsyncValue implementation for ListApplicationTitle
 // https://switchbrew.org/wiki/NS_services#ListApplicationTitle
-class IAsyncValueForListApplicationTitle final : public ServiceFramework<IAsyncValueForListApplicationTitle> {
+class IAsyncValueForListApplicationTitle final
+    : public ServiceFramework<IAsyncValueForListApplicationTitle> {
 public:
     explicit IAsyncValueForListApplicationTitle(Core::System& system_, s32 offset, s32 size)
         : ServiceFramework{system_, "IAsyncValue"}, service_context{system_, "IAsyncValue"},
-          data_offset{offset}, data_size{size} {
+          data_offset{offset}, data_size{size}
+    {
         static const FunctionInfo functions[] = {
             {0, &IAsyncValueForListApplicationTitle::GetSize, "GetSize"},
             {1, &IAsyncValueForListApplicationTitle::Get, "Get"},
@@ -90,23 +95,21 @@ public:
         completion_event->GetReadableEvent().Signal();
     }
 
-    ~IAsyncValueForListApplicationTitle() override {
-        service_context.CloseEvent(completion_event);
-    }
+    ~IAsyncValueForListApplicationTitle() override { service_context.CloseEvent(completion_event); }
 
-    Kernel::KReadableEvent& ReadableEvent() const {
-        return completion_event->GetReadableEvent();
-    }
+    Kernel::KReadableEvent& ReadableEvent() const { return completion_event->GetReadableEvent(); }
 
 private:
-    void GetSize(HLERequestContext& ctx) {
+    void GetSize(HLERequestContext& ctx)
+    {
         LOG_DEBUG(Service_NS, "called");
         IPC::ResponseBuilder rb{ctx, 4};
         rb.Push(ResultSuccess);
         rb.Push<s64>(data_size);
     }
 
-    void Get(HLERequestContext& ctx) {
+    void Get(HLERequestContext& ctx)
+    {
         LOG_DEBUG(Service_NS, "called");
         std::vector<u8> buffer(sizeof(s32));
         std::memcpy(buffer.data(), &data_offset, sizeof(s32));
@@ -116,13 +119,15 @@ private:
         rb.Push(ResultSuccess);
     }
 
-    void Cancel(HLERequestContext& ctx) {
+    void Cancel(HLERequestContext& ctx)
+    {
         LOG_DEBUG(Service_NS, "called");
         IPC::ResponseBuilder rb{ctx, 2};
         rb.Push(ResultSuccess);
     }
 
-    void GetErrorContext(HLERequestContext& ctx) {
+    void GetErrorContext(HLERequestContext& ctx)
+    {
         LOG_DEBUG(Service_NS, "called");
         IPC::ResponseBuilder rb{ctx, 2};
         rb.Push(ResultSuccess);
@@ -136,7 +141,8 @@ private:
 
 IReadOnlyApplicationControlDataInterface::IReadOnlyApplicationControlDataInterface(
     Core::System& system_)
-    : ServiceFramework{system_, "IReadOnlyApplicationControlDataInterface"} {
+    : ServiceFramework{system_, "IReadOnlyApplicationControlDataInterface"}
+{
     // clang-format off
     static const FunctionInfo functions[] = {
         {0, D<&IReadOnlyApplicationControlDataInterface::GetApplicationControlData>, "GetApplicationControlData"},
@@ -157,7 +163,8 @@ IReadOnlyApplicationControlDataInterface::~IReadOnlyApplicationControlDataInterf
 
 Result IReadOnlyApplicationControlDataInterface::GetApplicationControlData(
     OutBuffer<BufferAttr_HipcMapAlias> out_buffer, Out<u32> out_actual_size,
-    ApplicationControlSource application_control_source, u64 application_id) {
+    ApplicationControlSource application_control_source, u64 application_id)
+{
     LOG_INFO(Service_NS, "called with control_source={}, application_id={:016X}",
              application_control_source, application_id);
 
@@ -195,7 +202,8 @@ Result IReadOnlyApplicationControlDataInterface::GetApplicationControlData(
 }
 
 Result IReadOnlyApplicationControlDataInterface::GetApplicationDesiredLanguage(
-    Out<ApplicationLanguage> out_desired_language, u32 supported_languages) {
+    Out<ApplicationLanguage> out_desired_language, u32 supported_languages)
+{
     LOG_INFO(Service_NS, "called with supported_languages={:08X}", supported_languages);
 
     // Get language code from settings
@@ -232,7 +240,8 @@ Result IReadOnlyApplicationControlDataInterface::GetApplicationDesiredLanguage(
 }
 
 Result IReadOnlyApplicationControlDataInterface::ConvertApplicationLanguageToLanguageCode(
-    Out<u64> out_language_code, ApplicationLanguage application_language) {
+    Out<u64> out_language_code, ApplicationLanguage application_language)
+{
     const auto language_code = ConvertToLanguageCode(application_language);
     if (language_code == std::nullopt) {
         LOG_ERROR(Service_NS, "Language not found! application_language={}", application_language);
@@ -245,8 +254,10 @@ Result IReadOnlyApplicationControlDataInterface::ConvertApplicationLanguageToLan
 
 Result IReadOnlyApplicationControlDataInterface::GetApplicationControlData2(
     OutBuffer<BufferAttr_HipcMapAlias> out_buffer, Out<u64> out_total_size,
-    ApplicationControlSource application_control_source, u8 flag1, u8 flag2, u64 application_id) {
-    LOG_INFO(Service_NS, "called with control_source={}, flags=({:02X},{:02X}), application_id={:016X}",
+    ApplicationControlSource application_control_source, u8 flag1, u8 flag2, u64 application_id)
+{
+    LOG_INFO(Service_NS,
+             "called with control_source={}, flags=({:02X},{:02X}), application_id={:016X}",
              application_control_source, flag1, flag2, application_id);
 
     const FileSys::PatchManager pm{application_id, system.GetFileSystemController(),
@@ -264,7 +275,8 @@ Result IReadOnlyApplicationControlDataInterface::GetApplicationControlData2(
 
     if (control.first != nullptr) {
         const auto bytes = control.first->GetRawBytes();
-        const auto copy_len = (std::min)(static_cast<size_t>(bytes.size()), static_cast<size_t>(nacp_size));
+        const auto copy_len =
+            (std::min)(static_cast<size_t>(bytes.size()), static_cast<size_t>(nacp_size));
         std::memcpy(out_buffer.data(), bytes.data(), copy_len);
         if (copy_len < nacp_size) {
             std::memset(out_buffer.data() + copy_len, 0, nacp_size - copy_len);
@@ -309,8 +321,8 @@ Result IReadOnlyApplicationControlDataInterface::GetApplicationControlData2(
     R_SUCCEED();
 }
 
-
-void IReadOnlyApplicationControlDataInterface::ListApplicationTitle(HLERequestContext& ctx) {
+void IReadOnlyApplicationControlDataInterface::ListApplicationTitle(HLERequestContext& ctx)
+{
     /*
     IPC::RequestParser rp{ctx};
     auto control_source = rp.PopRaw<u8>();
@@ -364,9 +376,12 @@ void IReadOnlyApplicationControlDataInterface::ListApplicationTitle(HLERequestCo
 }
 
 Result IReadOnlyApplicationControlDataInterface::GetApplicationControlData3(
-   OutBuffer<BufferAttr_HipcMapAlias> out_buffer, Out<u32> out_flags_a, Out<u32> out_flags_b,
-   Out<u32> out_actual_size, ApplicationControlSource application_control_source, u8 flag1, u8 flag2, u64 application_id) {
-    LOG_INFO(Service_NS, "called with control_source={}, flags=({:02X},{:02X}), application_id={:016X}",
+    OutBuffer<BufferAttr_HipcMapAlias> out_buffer, Out<u32> out_flags_a, Out<u32> out_flags_b,
+    Out<u32> out_actual_size, ApplicationControlSource application_control_source, u8 flag1,
+    u8 flag2, u64 application_id)
+{
+    LOG_INFO(Service_NS,
+             "called with control_source={}, flags=({:02X},{:02X}), application_id={:016X}",
              application_control_source, flag1, flag2, application_id);
 
     const FileSys::PatchManager pm{application_id, system.GetFileSystemController(),
@@ -384,7 +399,8 @@ Result IReadOnlyApplicationControlDataInterface::GetApplicationControlData3(
 
     if (control.first != nullptr) {
         const auto bytes = control.first->GetRawBytes();
-        const auto copy_len = (std::min)(static_cast<size_t>(bytes.size()), static_cast<size_t>(nacp_size));
+        const auto copy_len =
+            (std::min)(static_cast<size_t>(bytes.size()), static_cast<size_t>(nacp_size));
         std::memcpy(out_buffer.data(), bytes.data(), copy_len);
         if (copy_len < nacp_size) {
             std::memset(out_buffer.data() + copy_len, 0, nacp_size - copy_len);

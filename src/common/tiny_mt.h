@@ -37,20 +37,17 @@ private:
     static constexpr int MinimumInitIterations = 8;
     static constexpr int NumDiscardedInitOutputs = 8;
 
-    static constexpr u32 XorByShifted27(u32 value) {
-        return value ^ (value >> 27);
-    }
+    static constexpr u32 XorByShifted27(u32 value) { return value ^ (value >> 27); }
 
-    static constexpr u32 XorByShifted30(u32 value) {
-        return value ^ (value >> 30);
-    }
+    static constexpr u32 XorByShifted30(u32 value) { return value ^ (value >> 30); }
 
 private:
     State state{};
 
 private:
     // Internal API.
-    void FinalizeInitialization() {
+    void FinalizeInitialization()
+    {
         const u32 state0 = this->state.data[0] & TopBitmask;
         const u32 state1 = this->state.data[1];
         const u32 state2 = this->state.data[2];
@@ -68,11 +65,10 @@ private:
         }
     }
 
-    u32 GenerateRandomU24() {
-        return (this->GenerateRandomU32() >> 8);
-    }
+    u32 GenerateRandomU24() { return (this->GenerateRandomU32() >> 8); }
 
-    static void GenerateInitialValuePlus(TinyMT::State* state, int index, u32 value) {
+    static void GenerateInitialValuePlus(TinyMT::State* state, int index, u32 value)
+    {
         u32& state0 = state->data[(index + 0) % NumStateWords];
         u32& state1 = state->data[(index + 1) % NumStateWords];
         u32& state2 = state->data[(index + 2) % NumStateWords];
@@ -86,7 +82,8 @@ private:
         state2 += y;
     }
 
-    static void GenerateInitialValueXor(TinyMT::State* state, int index) {
+    static void GenerateInitialValueXor(TinyMT::State* state, int index)
+    {
         u32& state0 = state->data[(index + 0) % NumStateWords];
         u32& state1 = state->data[(index + 1) % NumStateWords];
         u32& state2 = state->data[(index + 2) % NumStateWords];
@@ -106,7 +103,8 @@ public:
     // Public API.
 
     // Initialization.
-    void Initialize(u32 seed) {
+    void Initialize(u32 seed)
+    {
         this->state.data[0] = seed;
         this->state.data[1] = ParamMat1;
         this->state.data[2] = ParamMat2;
@@ -120,7 +118,8 @@ public:
         this->FinalizeInitialization();
     }
 
-    void Initialize(const u32* seed, int seed_count) {
+    void Initialize(const u32* seed, int seed_count)
+    {
         this->state.data[0] = 0;
         this->state.data[1] = ParamMat1;
         this->state.data[2] = ParamMat2;
@@ -146,16 +145,13 @@ public:
     }
 
     // State management.
-    void GetState(TinyMT::State& out) const {
-        out.data = this->state.data;
-    }
+    void GetState(TinyMT::State& out) const { out.data = this->state.data; }
 
-    void SetState(const TinyMT::State& state_) {
-        this->state.data = state_.data;
-    }
+    void SetState(const TinyMT::State& state_) { this->state.data = state_.data; }
 
     // Random generation.
-    void GenerateRandomBytes(void* dst, std::size_t size) {
+    void GenerateRandomBytes(void* dst, std::size_t size)
+    {
         const uintptr_t start = reinterpret_cast<uintptr_t>(dst);
         const uintptr_t end = start + size;
         const uintptr_t aligned_start = Common::AlignUp(start, 4);
@@ -184,7 +180,8 @@ public:
         }
     }
 
-    u32 GenerateRandomU32() {
+    u32 GenerateRandomU32()
+    {
         // Advance state.
         const u32 x0 =
             (this->state.data[0] & TopBitmask) ^ this->state.data[1] ^ this->state.data[2];
@@ -218,13 +215,15 @@ public:
         return t0;
     }
 
-    float GenerateRandomF32() {
+    float GenerateRandomF32()
+    {
         // Floats have 24 bits of mantissa.
         constexpr u32 MantissaBits = 24;
         return static_cast<float>(GenerateRandomU24()) * (1.0f / (1U << MantissaBits));
     }
 
-    double GenerateRandomF64() {
+    double GenerateRandomF64()
+    {
         // Doubles have 53 bits of mantissa.
         // The smart way to generate 53 bits of random would be to use 32 bits
         // from the first rnd32() call, and then 21 from the second.

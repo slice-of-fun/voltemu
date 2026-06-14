@@ -6,11 +6,11 @@
 
 #pragma once
 
-#include <chrono>
-#include <memory>
 #include <QString>
 #include <QWidget>
 #include <QtGlobal>
+#include <chrono>
+#include <memory>
 
 #if !QT_CONFIG(movie)
 #define YUZU_QT_MOVIE_MISSING 1

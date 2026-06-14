@@ -1,10 +1,12 @@
 // SPDX-FileCopyrightText: Copyright 2021 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include <algorithm>
+#include "hid_core/frontend/emulated_devices.h"
+
 #include <fmt/ranges.h>
 
-#include "hid_core/frontend/emulated_devices.h"
+#include <algorithm>
+
 #include "hid_core/frontend/input_converter.h"
 
 namespace Core::HID {
@@ -13,11 +15,13 @@ EmulatedDevices::EmulatedDevices() = default;
 
 EmulatedDevices::~EmulatedDevices() = default;
 
-void EmulatedDevices::ReloadFromSettings() {
+void EmulatedDevices::ReloadFromSettings()
+{
     ReloadInput();
 }
 
-void EmulatedDevices::ReloadInput() {
+void EmulatedDevices::ReloadInput()
+{
     // If you load any device here add the equivalent to the UnloadInput() function
 
     // Native Mouse is mapped on port 1, pad 0
@@ -127,7 +131,8 @@ void EmulatedDevices::ReloadInput() {
     }
 }
 
-void EmulatedDevices::UnloadInput() {
+void EmulatedDevices::UnloadInput()
+{
     for (auto& button : mouse_button_devices) {
         button.reset();
     }
@@ -143,26 +148,31 @@ void EmulatedDevices::UnloadInput() {
     }
 }
 
-void EmulatedDevices::EnableConfiguration() {
+void EmulatedDevices::EnableConfiguration()
+{
     is_configuring = true;
     SaveCurrentConfig();
 }
 
-void EmulatedDevices::DisableConfiguration() {
+void EmulatedDevices::DisableConfiguration()
+{
     is_configuring = false;
 }
 
-bool EmulatedDevices::IsConfiguring() const {
+bool EmulatedDevices::IsConfiguring() const
+{
     return is_configuring;
 }
 
-void EmulatedDevices::SaveCurrentConfig() {
+void EmulatedDevices::SaveCurrentConfig()
+{
     if (!is_configuring) {
         return;
     }
 }
 
-void EmulatedDevices::RestoreConfig() {
+void EmulatedDevices::RestoreConfig()
+{
     if (!is_configuring) {
         return;
     }
@@ -170,7 +180,8 @@ void EmulatedDevices::RestoreConfig() {
 }
 
 void EmulatedDevices::SetKeyboardButton(const Common::Input::CallbackStatus& callback,
-                                        std::size_t index) {
+                                        std::size_t index)
+{
     if (index >= device_status.keyboard_values.size()) {
         return;
     }
@@ -218,7 +229,8 @@ void EmulatedDevices::SetKeyboardButton(const Common::Input::CallbackStatus& cal
     TriggerOnChange(DeviceTriggerType::Keyboard);
 }
 
-void EmulatedDevices::UpdateKey(std::size_t key_index, bool status) {
+void EmulatedDevices::UpdateKey(std::size_t key_index, bool status)
+{
     constexpr std::size_t KEYS_PER_BYTE = 8;
     auto& entry = device_status.keyboard_state.key[key_index / KEYS_PER_BYTE];
     const u8 mask = static_cast<u8>(1 << (key_index % KEYS_PER_BYTE));
@@ -230,7 +242,8 @@ void EmulatedDevices::UpdateKey(std::size_t key_index, bool status) {
 }
 
 void EmulatedDevices::SetKeyboardModifier(const Common::Input::CallbackStatus& callback,
-                                          std::size_t index) {
+                                          std::size_t index)
+{
     if (index >= device_status.keyboard_moddifier_values.size()) {
         return;
     }
@@ -302,7 +315,8 @@ void EmulatedDevices::SetKeyboardModifier(const Common::Input::CallbackStatus& c
 }
 
 void EmulatedDevices::SetMouseButton(const Common::Input::CallbackStatus& callback,
-                                     std::size_t index) {
+                                     std::size_t index)
+{
     if (index >= device_status.mouse_button_values.size()) {
         return;
     }
@@ -366,7 +380,8 @@ void EmulatedDevices::SetMouseButton(const Common::Input::CallbackStatus& callba
 }
 
 void EmulatedDevices::SetMouseWheel(const Common::Input::CallbackStatus& callback,
-                                    std::size_t index) {
+                                    std::size_t index)
+{
     if (index >= device_status.mouse_wheel_values.size()) {
         return;
     }
@@ -395,7 +410,8 @@ void EmulatedDevices::SetMouseWheel(const Common::Input::CallbackStatus& callbac
     TriggerOnChange(DeviceTriggerType::Mouse);
 }
 
-void EmulatedDevices::SetMousePosition(const Common::Input::CallbackStatus& callback) {
+void EmulatedDevices::SetMousePosition(const Common::Input::CallbackStatus& callback)
+{
     std::unique_lock lock{mutex};
     const auto touch_value = TransformToTouch(callback);
 
@@ -415,47 +431,56 @@ void EmulatedDevices::SetMousePosition(const Common::Input::CallbackStatus& call
     TriggerOnChange(DeviceTriggerType::Mouse);
 }
 
-KeyboardValues EmulatedDevices::GetKeyboardValues() const {
+KeyboardValues EmulatedDevices::GetKeyboardValues() const
+{
     std::scoped_lock lock{mutex};
     return device_status.keyboard_values;
 }
 
-KeyboardModifierValues EmulatedDevices::GetKeyboardModdifierValues() const {
+KeyboardModifierValues EmulatedDevices::GetKeyboardModdifierValues() const
+{
     std::scoped_lock lock{mutex};
     return device_status.keyboard_moddifier_values;
 }
 
-MouseButtonValues EmulatedDevices::GetMouseButtonsValues() const {
+MouseButtonValues EmulatedDevices::GetMouseButtonsValues() const
+{
     std::scoped_lock lock{mutex};
     return device_status.mouse_button_values;
 }
 
-KeyboardKey EmulatedDevices::GetKeyboard() const {
+KeyboardKey EmulatedDevices::GetKeyboard() const
+{
     std::scoped_lock lock{mutex};
     return device_status.keyboard_state;
 }
 
-KeyboardModifier EmulatedDevices::GetKeyboardModifier() const {
+KeyboardModifier EmulatedDevices::GetKeyboardModifier() const
+{
     std::scoped_lock lock{mutex};
     return device_status.keyboard_moddifier_state;
 }
 
-MouseButton EmulatedDevices::GetMouseButtons() const {
+MouseButton EmulatedDevices::GetMouseButtons() const
+{
     std::scoped_lock lock{mutex};
     return device_status.mouse_button_state;
 }
 
-MousePosition EmulatedDevices::GetMousePosition() const {
+MousePosition EmulatedDevices::GetMousePosition() const
+{
     std::scoped_lock lock{mutex};
     return device_status.mouse_position_state;
 }
 
-AnalogStickState EmulatedDevices::GetMouseWheel() const {
+AnalogStickState EmulatedDevices::GetMouseWheel() const
+{
     std::scoped_lock lock{mutex};
     return device_status.mouse_wheel_state;
 }
 
-void EmulatedDevices::TriggerOnChange(DeviceTriggerType type) {
+void EmulatedDevices::TriggerOnChange(DeviceTriggerType type)
+{
     std::scoped_lock lock{callback_mutex};
     for (const auto& poller_pair : callback_list) {
         const InterfaceUpdateCallback& poller = poller_pair.second;
@@ -465,13 +490,15 @@ void EmulatedDevices::TriggerOnChange(DeviceTriggerType type) {
     }
 }
 
-int EmulatedDevices::SetCallback(InterfaceUpdateCallback update_callback) {
+int EmulatedDevices::SetCallback(InterfaceUpdateCallback update_callback)
+{
     std::scoped_lock lock{callback_mutex};
     callback_list.insert_or_assign(last_callback_key, std::move(update_callback));
     return last_callback_key++;
 }
 
-void EmulatedDevices::DeleteCallback(int key) {
+void EmulatedDevices::DeleteCallback(int key)
+{
     std::scoped_lock lock{callback_mutex};
     const auto& iterator = callback_list.find(key);
     if (iterator == callback_list.end()) {

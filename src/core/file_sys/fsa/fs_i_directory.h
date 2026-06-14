@@ -19,8 +19,8 @@ namespace FileSys::Fsa {
 
 class IDirectory {
 public:
-    explicit IDirectory(VirtualDir backend_, OpenDirectoryMode mode)
-        : backend(std::move(backend_)) {
+    explicit IDirectory(VirtualDir backend_, OpenDirectoryMode mode) : backend(std::move(backend_))
+    {
         // TODO(DarkLordZach): Verify that this is the correct behavior.
         // Build entry index now to save time later.
         if (True(mode & OpenDirectoryMode::Directory)) {
@@ -32,7 +32,8 @@ public:
     }
     virtual ~IDirectory() {}
 
-    Result Read(s64* out_count, DirectoryEntry* out_entries, s64 max_entries) {
+    Result Read(s64* out_count, DirectoryEntry* out_entries, s64 max_entries)
+    {
         R_UNLESS(out_count != nullptr, ResultNullptrArgument);
         if (max_entries == 0) {
             *out_count = 0;
@@ -43,13 +44,15 @@ public:
         R_RETURN(this->DoRead(out_count, out_entries, max_entries));
     }
 
-    Result GetEntryCount(s64* out) {
+    Result GetEntryCount(s64* out)
+    {
         R_UNLESS(out != nullptr, ResultNullptrArgument);
         R_RETURN(this->DoGetEntryCount(out));
     }
 
 private:
-    Result DoRead(s64* out_count, DirectoryEntry* out_entries, s64 max_entries) {
+    Result DoRead(s64* out_count, DirectoryEntry* out_entries, s64 max_entries)
+    {
         const u64 actual_entries =
             (std::min)(static_cast<u64>(max_entries), entries.size() - next_entry_index);
         const auto* begin = reinterpret_cast<u8*>(entries.data() + next_entry_index);
@@ -64,14 +67,16 @@ private:
         R_SUCCEED();
     }
 
-    Result DoGetEntryCount(s64* out) {
+    Result DoGetEntryCount(s64* out)
+    {
         *out = entries.size() - next_entry_index;
         R_SUCCEED();
     }
 
     // TODO: Remove this when VFS is gone
-    template <typename T>
-    void BuildEntryIndex(const std::vector<T>& new_data, DirectoryEntryType type) {
+    template<typename T>
+    void BuildEntryIndex(const std::vector<T>& new_data, DirectoryEntryType type)
+    {
         entries.reserve(entries.size() + new_data.size());
 
         for (const auto& new_entry : new_data) {

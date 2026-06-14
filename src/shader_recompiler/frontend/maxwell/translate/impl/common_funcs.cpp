@@ -5,7 +5,8 @@
 
 namespace Shader::Maxwell {
 IR::U1 IntegerCompare(IR::IREmitter& ir, const IR::U32& operand_1, const IR::U32& operand_2,
-                      CompareOp compare_op, bool is_signed) {
+                      CompareOp compare_op, bool is_signed)
+{
     switch (compare_op) {
     case CompareOp::False:
         return ir.Imm1(false);
@@ -29,7 +30,8 @@ IR::U1 IntegerCompare(IR::IREmitter& ir, const IR::U32& operand_1, const IR::U32
 }
 
 IR::U1 ExtendedIntegerCompare(IR::IREmitter& ir, const IR::U32& operand_1, const IR::U32& operand_2,
-                              CompareOp compare_op, bool is_signed) {
+                              CompareOp compare_op, bool is_signed)
+{
     const IR::U32 zero{ir.Imm32(0)};
     const IR::U32 carry{ir.Select(ir.GetCFlag(), ir.Imm32(1), zero)};
     const IR::U1 z_flag{ir.GetZFlag()};
@@ -72,7 +74,8 @@ IR::U1 ExtendedIntegerCompare(IR::IREmitter& ir, const IR::U32& operand_1, const
 }
 
 IR::U1 PredicateCombine(IR::IREmitter& ir, const IR::U1& predicate_1, const IR::U1& predicate_2,
-                        BooleanOp bop) {
+                        BooleanOp bop)
+{
     switch (bop) {
     case BooleanOp::AND:
         return ir.LogicalAnd(predicate_1, predicate_2);
@@ -85,7 +88,8 @@ IR::U1 PredicateCombine(IR::IREmitter& ir, const IR::U1& predicate_1, const IR::
     }
 }
 
-IR::U1 PredicateOperation(IR::IREmitter& ir, const IR::U32& result, PredicateOp op) {
+IR::U1 PredicateOperation(IR::IREmitter& ir, const IR::U32& result, PredicateOp op)
+{
     switch (op) {
     case PredicateOp::False:
         return ir.Imm1(false);
@@ -100,7 +104,8 @@ IR::U1 PredicateOperation(IR::IREmitter& ir, const IR::U32& result, PredicateOp 
     }
 }
 
-bool IsCompareOpOrdered(FPCompareOp op) {
+bool IsCompareOpOrdered(FPCompareOp op)
+{
     switch (op) {
     case FPCompareOp::LTU:
     case FPCompareOp::EQU:
@@ -116,7 +121,8 @@ bool IsCompareOpOrdered(FPCompareOp op) {
 
 IR::U1 FloatingPointCompare(IR::IREmitter& ir, const IR::F16F32F64& operand_1,
                             const IR::F16F32F64& operand_2, FPCompareOp compare_op,
-                            IR::FpControl control) {
+                            IR::FpControl control)
+{
     const bool ordered{IsCompareOpOrdered(compare_op)};
     switch (compare_op) {
     case FPCompareOp::F:

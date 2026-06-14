@@ -13,7 +13,8 @@ class KHardwareTimerBase {
 public:
     explicit KHardwareTimerBase(KernelCore& kernel) : m_kernel{kernel} {}
 
-    void CancelTask(KTimerTask* task) {
+    void CancelTask(KTimerTask* task)
+    {
         KScopedDisableDispatch dd{m_kernel};
         KScopedSpinLock lk{m_lock};
 
@@ -23,11 +24,10 @@ public:
     }
 
 protected:
-    KSpinLock& GetLock() {
-        return m_lock;
-    }
+    KSpinLock& GetLock() { return m_lock; }
 
-    s64 DoInterruptTaskImpl(s64 cur_time) {
+    s64 DoInterruptTaskImpl(s64 cur_time)
+    {
         // We want to handle all tasks, returning the next time that a task is scheduled.
         while (true) {
             // Get the next task. If there isn't one, return 0.
@@ -49,7 +49,8 @@ protected:
         }
     }
 
-    bool RegisterAbsoluteTaskImpl(KTimerTask* task, s64 task_time) {
+    bool RegisterAbsoluteTaskImpl(KTimerTask* task, s64 task_time)
+    {
         ASSERT(task_time > 0);
 
         // Set the task's time, and insert it into our tree.
@@ -65,7 +66,8 @@ protected:
     }
 
 private:
-    void RemoveTaskFromTree(KTimerTask* task) {
+    void RemoveTaskFromTree(KTimerTask* task)
+    {
         // Erase from the tree.
         auto it = m_task_tree.erase(m_task_tree.iterator_to(*task));
 

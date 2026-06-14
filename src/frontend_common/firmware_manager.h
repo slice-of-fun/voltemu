@@ -3,18 +3,19 @@
 
 #pragma once
 
-#include "common/common_types.h"
-#include "core/core.h"
-#include "core/file_sys/nca_metadata.h"
-#include "core/file_sys/content_archive.h"
-#include "core/file_sys/registered_cache.h"
-#include "core/hle/service/filesystem/filesystem.h"
+#include <core/hle/service/am/frontend/applet_mii_edit.h>
+
 #include <algorithm>
 #include <array>
-#include <core/hle/service/am/frontend/applet_mii_edit.h>
 #include <string>
 
+#include "common/common_types.h"
+#include "core/core.h"
+#include "core/file_sys/content_archive.h"
+#include "core/file_sys/nca_metadata.h"
+#include "core/file_sys/registered_cache.h"
 #include "core/hle/result.h"
+#include "core/hle/service/filesystem/filesystem.h"
 #include "core/hle/service/set/settings_types.h"
 #include "core/hle/service/set/system_settings_server.h"
 
@@ -48,8 +49,8 @@ KeyInstallResult InstallKeys(std::string location, std::string expected_extensio
  */
 inline constexpr bool GameRequiresFirmware(u64 program_id)
 {
-    return std::find(FIRMWARE_REQUIRED_GAMES.begin(), FIRMWARE_REQUIRED_GAMES.end(), program_id)
-           != FIRMWARE_REQUIRED_GAMES.end();
+    return std::find(FIRMWARE_REQUIRED_GAMES.begin(), FIRMWARE_REQUIRED_GAMES.end(), program_id) !=
+           FIRMWARE_REQUIRED_GAMES.end();
 }
 
 enum FirmwareCheckResult {
@@ -63,7 +64,7 @@ enum FirmwareCheckResult {
  * \param system The system to check for firmware.
  * \return Whether or not the system has installed firmware.
  */
-inline bool CheckFirmwarePresence(Core::System &system)
+inline bool CheckFirmwarePresence(Core::System& system)
 {
     constexpr u64 MiiEditId = static_cast<u64>(Service::AM::AppletProgramId::MiiEdit);
 
@@ -86,23 +87,22 @@ inline bool CheckFirmwarePresence(Core::System &system)
  * \param system The system to check firmware on.
  * \return A result code defining the status of the system's firmware.
  */
-FirmwareCheckResult VerifyFirmware(Core::System &system);
+FirmwareCheckResult VerifyFirmware(Core::System& system);
 
 /**
  * @brief Get the currently installed firmware version.
  * @param system The system to check firmware on.
  * @return A pair of the firmware version format and result code.
  */
-inline std::pair<Service::Set::FirmwareVersionFormat, Result> GetFirmwareVersion(Core::System &system)
+inline std::pair<Service::Set::FirmwareVersionFormat, Result>
+GetFirmwareVersion(Core::System& system)
 {
     Service::Set::FirmwareVersionFormat firmware_data{};
-    const auto result
-        = Service::Set::GetFirmwareVersionImpl(firmware_data,
-                                               system,
-                                               Service::Set::GetFirmwareVersionType::Version2);
+    const auto result = Service::Set::GetFirmwareVersionImpl(
+        firmware_data, system, Service::Set::GetFirmwareVersionType::Version2);
 
     return {firmware_data, result};
 }
 
 // TODO(crueter): GET AS STRING
-}
+} // namespace FirmwareManager

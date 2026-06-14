@@ -77,8 +77,10 @@ public:
      *
      * @return Required workbuffer size.
      */
-    static u64 GetRequiredBufferSizeForPerformanceMetricsPerFrame(
-        const BehaviorInfo& behavior, const AudioRendererParameterInternal& params) {
+    static u64
+    GetRequiredBufferSizeForPerformanceMetricsPerFrame(const BehaviorInfo& behavior,
+                                                       const AudioRendererParameterInternal& params)
+    {
         u64 entry_count{params.voices + params.effects + params.sub_mixes + params.sinks + 1};
         switch (behavior.GetPerformanceMetricsDataFormat()) {
         case 1:
@@ -208,8 +210,8 @@ private:
         impl;
 };
 
-template <PerformanceVersion Version, typename FrameHeaderVersion, typename EntryVersion,
-          typename DetailVersion>
+template<PerformanceVersion Version, typename FrameHeaderVersion, typename EntryVersion,
+         typename DetailVersion>
 class PerformanceManagerImpl : public PerformanceManager {
 public:
     void Initialize(std::span<u8> workbuffer, u64 workbuffer_size,

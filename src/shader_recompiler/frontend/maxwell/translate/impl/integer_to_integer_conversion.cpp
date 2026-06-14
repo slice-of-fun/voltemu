@@ -13,7 +13,8 @@ enum class IntegerWidth : u64 {
     Word,
 };
 
-[[nodiscard]] IR::U32 WidthSize(IR::IREmitter& ir, IntegerWidth width) {
+[[nodiscard]] IR::U32 WidthSize(IR::IREmitter& ir, IntegerWidth width)
+{
     switch (width) {
     case IntegerWidth::Byte:
         return ir.Imm32(8);
@@ -26,15 +27,16 @@ enum class IntegerWidth : u64 {
     }
 }
 
-[[nodiscard]] IR::U32 ConvertInteger(IR::IREmitter& ir, const IR::U32& src,
-                                     IntegerWidth dst_width) {
+[[nodiscard]] IR::U32 ConvertInteger(IR::IREmitter& ir, const IR::U32& src, IntegerWidth dst_width)
+{
     const IR::U32 zero{ir.Imm32(0)};
     const IR::U32 count{WidthSize(ir, dst_width)};
     return ir.BitFieldExtract(src, zero, count, false);
 }
 
 [[nodiscard]] IR::U32 SaturateInteger(IR::IREmitter& ir, const IR::U32& src, IntegerWidth dst_width,
-                                      bool dst_signed, bool src_signed) {
+                                      bool dst_signed, bool src_signed)
+{
     IR::U32 min{};
     IR::U32 max{};
     const IR::U32 zero{ir.Imm32(0)};
@@ -58,7 +60,8 @@ enum class IntegerWidth : u64 {
     return dst_signed && src_signed ? ir.SClamp(value, min, max) : ir.UClamp(value, min, max);
 }
 
-void I2I(TranslatorVisitor& v, u64 insn, const IR::U32& src_a) {
+void I2I(TranslatorVisitor& v, u64 insn, const IR::U32& src_a)
+{
     union {
         u64 insn;
         BitField<0, 8, IR::Reg> dest_reg;
@@ -110,15 +113,18 @@ void I2I(TranslatorVisitor& v, u64 insn, const IR::U32& src_a) {
 }
 } // Anonymous namespace
 
-void TranslatorVisitor::I2I_reg(u64 insn) {
+void TranslatorVisitor::I2I_reg(u64 insn)
+{
     I2I(*this, insn, GetReg20(insn));
 }
 
-void TranslatorVisitor::I2I_cbuf(u64 insn) {
+void TranslatorVisitor::I2I_cbuf(u64 insn)
+{
     I2I(*this, insn, GetCbuf(insn));
 }
 
-void TranslatorVisitor::I2I_imm(u64 insn) {
+void TranslatorVisitor::I2I_imm(u64 insn)
+{
     I2I(*this, insn, GetImm20(insn));
 }
 

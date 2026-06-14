@@ -7,6 +7,7 @@
 #pragma once
 
 #include <optional>
+
 #include "common/common_types.h"
 #include "core/hle/service/set/system_settings_server.h"
 
@@ -36,7 +37,8 @@ enum class ApplicationLanguage : u8 {
 using ApplicationLanguagePriorityList =
     const std::array<ApplicationLanguage, static_cast<std::size_t>(ApplicationLanguage::Count)>;
 
-constexpr u32 GetSupportedLanguageFlag(const ApplicationLanguage lang) {
+constexpr u32 GetSupportedLanguageFlag(const ApplicationLanguage lang)
+{
     return 1U << static_cast<u32>(lang);
 }
 

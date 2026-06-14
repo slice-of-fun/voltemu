@@ -4,13 +4,14 @@
 // SPDX-FileCopyrightText: Copyright 2024 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "video_core/renderer_opengl/present/layer.h"
+
 #include "video_core/framebuffer_config.h"
 #include "video_core/present.h"
 #include "video_core/renderer_opengl/gl_blit_screen.h"
 #include "video_core/renderer_opengl/gl_rasterizer.h"
 #include "video_core/renderer_opengl/present/fsr.h"
 #include "video_core/renderer_opengl/present/fxaa.h"
-#include "video_core/renderer_opengl/present/layer.h"
 #include "video_core/renderer_opengl/present/present_uniforms.h"
 #include "video_core/renderer_opengl/present/smaa.h"
 #include "video_core/surface.h"
@@ -20,7 +21,8 @@ namespace OpenGL {
 
 Layer::Layer(RasterizerOpenGL& rasterizer_, Tegra::MaxwellDeviceMemoryManager& device_memory_,
              const PresentFilters& filters_)
-    : rasterizer(rasterizer_), device_memory(device_memory_), filters(filters_) {
+    : rasterizer(rasterizer_), device_memory(device_memory_), filters(filters_)
+{
     // Allocate textures for the screen
     framebuffer_texture.resource.Create(GL_TEXTURE_2D);
 
@@ -39,7 +41,8 @@ GLuint Layer::ConfigureDraw(std::array<GLfloat, 3 * 2>& out_matrix,
                             std::array<ScreenRectVertex, 4>& out_vertices,
                             ProgramManager& program_manager,
                             const Tegra::FramebufferConfig& framebuffer,
-                            const Layout::FramebufferLayout& layout, bool invert_y) {
+                            const Layout::FramebufferLayout& layout, bool invert_y)
+{
     FramebufferTextureInfo info = PrepareRenderTarget(framebuffer);
     auto crop = Tegra::NormalizeCrop(framebuffer, info.width, info.height);
     GLuint texture = info.display_texture;
@@ -101,7 +104,8 @@ GLuint Layer::ConfigureDraw(std::array<GLfloat, 3 * 2>& out_matrix,
     return texture;
 }
 
-FramebufferTextureInfo Layer::PrepareRenderTarget(const Tegra::FramebufferConfig& framebuffer) {
+FramebufferTextureInfo Layer::PrepareRenderTarget(const Tegra::FramebufferConfig& framebuffer)
+{
     // If framebuffer is provided, reload it from memory to a texture
     if (framebuffer_texture.width != static_cast<GLsizei>(framebuffer.width) ||
         framebuffer_texture.height != static_cast<GLsizei>(framebuffer.height) ||
@@ -117,7 +121,8 @@ FramebufferTextureInfo Layer::PrepareRenderTarget(const Tegra::FramebufferConfig
     return LoadFBToScreenInfo(framebuffer);
 }
 
-FramebufferTextureInfo Layer::LoadFBToScreenInfo(const Tegra::FramebufferConfig& framebuffer) {
+FramebufferTextureInfo Layer::LoadFBToScreenInfo(const Tegra::FramebufferConfig& framebuffer)
+{
     const VAddr framebuffer_addr{framebuffer.address + framebuffer.offset};
     const auto accelerated_info =
         rasterizer.AccelerateDisplay(framebuffer, framebuffer_addr, framebuffer.stride);
@@ -165,7 +170,8 @@ FramebufferTextureInfo Layer::LoadFBToScreenInfo(const Tegra::FramebufferConfig&
     return info;
 }
 
-void Layer::ConfigureFramebufferTexture(const Tegra::FramebufferConfig& framebuffer) {
+void Layer::ConfigureFramebufferTexture(const Tegra::FramebufferConfig& framebuffer)
+{
     framebuffer_texture.width = framebuffer.width;
     framebuffer_texture.height = framebuffer.height;
     framebuffer_texture.pixel_format = framebuffer.pixel_format;
@@ -205,7 +211,8 @@ void Layer::ConfigureFramebufferTexture(const Tegra::FramebufferConfig& framebuf
     anti_alias.emplace<std::monostate>();
 }
 
-void Layer::CreateFXAA() {
+void Layer::CreateFXAA()
+{
     if (!std::holds_alternative<FXAA>(anti_alias)) {
         anti_alias.emplace<FXAA>(
             Settings::values.resolution_info.ScaleUp(framebuffer_texture.width),
@@ -213,7 +220,8 @@ void Layer::CreateFXAA() {
     }
 }
 
-void Layer::CreateSMAA() {
+void Layer::CreateSMAA()
+{
     if (!std::holds_alternative<SMAA>(anti_alias)) {
         anti_alias.emplace<SMAA>(
             Settings::values.resolution_info.ScaleUp(framebuffer_texture.width),

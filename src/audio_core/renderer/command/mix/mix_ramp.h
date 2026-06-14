@@ -67,7 +67,7 @@ struct MixRampCommand : ICommand {
  * @param sample_count - Number of samples to process.
  * @return The final gained input sample, used for depopping.
  */
-template <size_t Q>
+template<size_t Q>
 s32 ApplyMixRamp(std::span<s32> output, std::span<const s32> input, f32 volume_, f32 ramp_,
                  u32 sample_count);
 

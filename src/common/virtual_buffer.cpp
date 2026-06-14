@@ -15,7 +15,8 @@
 
 namespace Common {
 
-void* AllocateMemoryPages(std::size_t size) noexcept {
+void* AllocateMemoryPages(std::size_t size) noexcept
+{
 #ifdef _WIN32
     void* base = VirtualAlloc(nullptr, size, MEM_COMMIT, PAGE_READWRITE);
 #else
@@ -27,7 +28,8 @@ void* AllocateMemoryPages(std::size_t size) noexcept {
     return base;
 }
 
-void FreeMemoryPages(void* base, [[maybe_unused]] std::size_t size) noexcept {
+void FreeMemoryPages(void* base, [[maybe_unused]] std::size_t size) noexcept
+{
     if (!base)
         return;
 #ifdef _WIN32

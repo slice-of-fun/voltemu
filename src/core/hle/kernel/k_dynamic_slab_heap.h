@@ -11,7 +11,7 @@
 
 namespace Kernel {
 
-template <typename T, bool ClearNode = false>
+template<typename T, bool ClearNode = false>
 class KDynamicSlabHeap : protected impl::KSlabHeapImpl {
     YUZU_NON_COPYABLE(KDynamicSlabHeap);
     YUZU_NON_MOVEABLE(KDynamicSlabHeap);
@@ -19,27 +19,19 @@ class KDynamicSlabHeap : protected impl::KSlabHeapImpl {
 public:
     constexpr KDynamicSlabHeap() = default;
 
-    constexpr KVirtualAddress GetAddress() const {
-        return m_address;
-    }
-    constexpr size_t GetSize() const {
-        return m_size;
-    }
-    constexpr size_t GetUsed() const {
-        return m_used.load();
-    }
-    constexpr size_t GetPeak() const {
-        return m_peak.load();
-    }
-    constexpr size_t GetCount() const {
-        return m_count.load();
-    }
+    constexpr KVirtualAddress GetAddress() const { return m_address; }
+    constexpr size_t GetSize() const { return m_size; }
+    constexpr size_t GetUsed() const { return m_used.load(); }
+    constexpr size_t GetPeak() const { return m_peak.load(); }
+    constexpr size_t GetCount() const { return m_count.load(); }
 
-    constexpr bool IsInRange(KVirtualAddress addr) const {
+    constexpr bool IsInRange(KVirtualAddress addr) const
+    {
         return this->GetAddress() <= addr && addr <= this->GetAddress() + this->GetSize() - 1;
     }
 
-    void Initialize(KDynamicPageManager* page_allocator, size_t num_objects) {
+    void Initialize(KDynamicPageManager* page_allocator, size_t num_objects)
+    {
         ASSERT(page_allocator != nullptr);
 
         // Initialize members.
@@ -62,7 +54,8 @@ public:
         }
     }
 
-    T* Allocate(KDynamicPageManager* page_allocator) {
+    T* Allocate(KDynamicPageManager* page_allocator)
+    {
         T* allocated = static_cast<T*>(KSlabHeapImpl::Allocate());
 
         // If we successfully allocated and we should clear the node, do so.
@@ -103,7 +96,8 @@ public:
         return allocated;
     }
 
-    void Free(T* t) {
+    void Free(T* t)
+    {
         KSlabHeapImpl::Free(t);
         --m_used;
     }

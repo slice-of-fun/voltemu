@@ -7,7 +7,8 @@
 
 namespace Shader::Maxwell {
 namespace {
-void POPC(TranslatorVisitor& v, u64 insn, const IR::U32& src) {
+void POPC(TranslatorVisitor& v, u64 insn, const IR::U32& src)
+{
     union {
         u64 raw;
         BitField<0, 8, IR::Reg> dest_reg;
@@ -20,15 +21,18 @@ void POPC(TranslatorVisitor& v, u64 insn, const IR::U32& src) {
 }
 } // Anonymous namespace
 
-void TranslatorVisitor::POPC_reg(u64 insn) {
+void TranslatorVisitor::POPC_reg(u64 insn)
+{
     POPC(*this, insn, GetReg20(insn));
 }
 
-void TranslatorVisitor::POPC_cbuf(u64 insn) {
+void TranslatorVisitor::POPC_cbuf(u64 insn)
+{
     POPC(*this, insn, GetCbuf(insn));
 }
 
-void TranslatorVisitor::POPC_imm(u64 insn) {
+void TranslatorVisitor::POPC_imm(u64 insn)
+{
     POPC(*this, insn, GetImm20(insn));
 }
 

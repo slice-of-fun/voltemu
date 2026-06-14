@@ -7,7 +7,9 @@
 #include <cstdint>
 #include <string>
 
-namespace VideoCore { class RendererBase; }
+namespace VideoCore {
+class RendererBase;
+}
 
 namespace Core::GameSettings {
 
@@ -43,9 +45,7 @@ enum class GPUVendor {
     Unknown,
 };
 
-enum class TitleID : std::uint64_t {
-    NinjaGaidenRagebound = 0x0100781020710000ULL
-};
+enum class TitleID : std::uint64_t { NinjaGaidenRagebound = 0x0100781020710000ULL };
 
 struct EnvironmentInfo {
     OS os{OS::Unknown};

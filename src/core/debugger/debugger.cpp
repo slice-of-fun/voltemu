@@ -4,12 +4,13 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include <mutex>
-#include <utility>
 #include <boost/asio.hpp>
 #include <boost/version.hpp>
+#include <mutex>
+#include <utility>
 
-#if BOOST_VERSION > 108400 && (!defined(_WINDOWS) && !defined(__ANDROID__)) || defined(YUZU_BOOST_v1)
+#if BOOST_VERSION > 108400 && (!defined(_WINDOWS) && !defined(__ANDROID__)) ||                     \
+    defined(YUZU_BOOST_v1)
 #define USE_BOOST_v1
 #endif
 
@@ -30,8 +31,9 @@
 #include "core/hle/kernel/k_process.h"
 #include "core/hle/kernel/k_scheduler.h"
 
-template <typename Readable, typename Buffer, typename Callback>
-static void AsyncReceiveInto(Readable& r, Buffer& buffer, Callback&& c) {
+template<typename Readable, typename Buffer, typename Callback>
+static void AsyncReceiveInto(Readable& r, Buffer& buffer, Callback&& c)
+{
     static_assert(std::is_trivial_v<Buffer>);
     auto boost_buffer{boost::asio::buffer(&buffer, sizeof(Buffer))};
     r.async_read_some(
@@ -45,8 +47,9 @@ static void AsyncReceiveInto(Readable& r, Buffer& buffer, Callback&& c) {
         });
 }
 
-template <typename Callback>
-static void AsyncAccept(boost::asio::ip::tcp::acceptor& acceptor, Callback&& c) {
+template<typename Callback>
+static void AsyncAccept(boost::asio::ip::tcp::acceptor& acceptor, Callback&& c)
+{
     acceptor.async_accept([&, c](const boost::system::error_code& error, auto&& peer_socket) {
         if (!error.failed()) {
             c(peer_socket);
@@ -55,8 +58,9 @@ static void AsyncAccept(boost::asio::ip::tcp::acceptor& acceptor, Callback&& c) 
     });
 }
 
-template <typename Readable, typename Buffer>
-static std::span<const u8> ReceiveInto(Readable& r, Buffer& buffer) {
+template<typename Readable, typename Buffer>
+static std::span<const u8> ReceiveInto(Readable& r, Buffer& buffer)
+{
     static_assert(std::is_trivial_v<Buffer>);
     auto boost_buffer{boost::asio::buffer(&buffer, sizeof(Buffer))};
     size_t bytes_read = r.read_some(boost_buffer);
@@ -81,15 +85,15 @@ namespace Core {
 
 class DebuggerImpl : public DebuggerBackend {
 public:
-    explicit DebuggerImpl(Core::System& system_, u16 port) : system{system_} {
+    explicit DebuggerImpl(Core::System& system_, u16 port) : system{system_}
+    {
         InitializeServer(port);
     }
 
-    ~DebuggerImpl() override {
-        ShutdownServer();
-    }
+    ~DebuggerImpl() override { ShutdownServer(); }
 
-    bool SignalDebugger(SignalInfo signal_info) {
+    bool SignalDebugger(SignalInfo signal_info)
+    {
         std::scoped_lock lk{connection_lock};
 
         if (stopped || !state) {
@@ -111,25 +115,24 @@ public:
     // These functions are callbacks from the frontend, and the lock will be held.
     // There is no need to relock it.
 
-    std::span<const u8> ReadFromClient() override {
+    std::span<const u8> ReadFromClient() override
+    {
         return ReceiveInto(state->client_socket, state->client_data);
     }
 
-    void WriteToClient(std::span<const u8> data) override {
+    void WriteToClient(std::span<const u8> data) override
+    {
         boost::asio::write(state->client_socket,
                            boost::asio::buffer(data.data(), data.size_bytes()));
     }
 
-    void SetActiveThread(Kernel::KThread* thread) override {
-        state->active_thread = thread;
-    }
+    void SetActiveThread(Kernel::KThread* thread) override { state->active_thread = thread; }
 
-    Kernel::KThread* GetActiveThread() override {
-        return state->active_thread.GetPointerUnsafe();
-    }
+    Kernel::KThread* GetActiveThread() override { return state->active_thread.GetPointerUnsafe(); }
 
 private:
-    void InitializeServer(u16 port) {
+    void InitializeServer(u16 port)
+    {
         using boost::asio::ip::tcp;
 
         LOG_INFO(Debug_GDBStub, "Starting server on port {}...", port);
@@ -153,7 +156,8 @@ private:
         });
     }
 
-    void AcceptConnection(boost::asio::ip::tcp::socket&& peer) {
+    void AcceptConnection(boost::asio::ip::tcp::socket&& peer)
+    {
         LOG_INFO(Debug_GDBStub, "Accepting new peer connection");
 
         std::scoped_lock lk{connection_lock};
@@ -188,13 +192,15 @@ private:
         frontend->Connected();
     }
 
-    void ShutdownServer() {
+    void ShutdownServer()
+    {
         connection_thread.request_stop();
         io_context.stop();
         connection_thread.join();
     }
 
-    void PipeData(std::span<const u8> data) {
+    void PipeData(std::span<const u8> data)
+    {
         std::scoped_lock lk{connection_lock};
 
         switch (state->info.type) {
@@ -231,7 +237,8 @@ private:
         }
     }
 
-    void ClientData(std::span<const u8> data) {
+    void ClientData(std::span<const u8> data)
+    {
         std::scoped_lock lk{connection_lock};
 
         const auto actions{frontend->ClientData(data)};
@@ -249,9 +256,8 @@ private:
                 break;
             case DebuggerAction::ContinueThreads: {
                 auto* gdb = static_cast<GDBStub*>(frontend.get());
-                MarkResumed([this, threads = std::move(gdb->resume_threads)] {
-                    ResumeThreads(threads);
-                });
+                MarkResumed(
+                    [this, threads = std::move(gdb->resume_threads)] { ResumeThreads(threads); });
                 break;
             }
             case DebuggerAction::StepThread: {
@@ -275,7 +281,8 @@ private:
         }
     }
 
-    void PauseEmulation() {
+    void PauseEmulation()
+    {
         Kernel::KScopedLightLock ll{debug_process->GetListLock()};
         Kernel::KScopedSchedulerLock sl{system.Kernel()};
 
@@ -285,7 +292,8 @@ private:
         }
     }
 
-    void ResumeEmulation(Kernel::KThread* except = nullptr) {
+    void ResumeEmulation(Kernel::KThread* except = nullptr)
+    {
         Kernel::KScopedLightLock ll{debug_process->GetListLock()};
         Kernel::KScopedSchedulerLock sl{system.Kernel()};
 
@@ -301,7 +309,8 @@ private:
     }
 
     void ResumeThreads(const std::vector<Kernel::KThread*>& threads,
-                       Kernel::KThread* except = nullptr) {
+                       Kernel::KThread* except = nullptr)
+    {
         Kernel::KScopedLightLock ll{debug_process->GetListLock()};
         Kernel::KScopedSchedulerLock sl{system.Kernel()};
 
@@ -316,13 +325,14 @@ private:
         }
     }
 
-    template <typename Callback>
-    void MarkResumed(Callback&& cb) {
+    template<typename Callback> void MarkResumed(Callback&& cb)
+    {
         stopped = false;
         cb();
     }
 
-    void UpdateActiveThread() {
+    void UpdateActiveThread()
+    {
         Kernel::KScopedLightLock ll{debug_process->GetListLock()};
 
         auto& threads{ThreadList()};
@@ -336,13 +346,9 @@ private:
     }
 
 private:
-    void SetDebugProcess() {
-        debug_process = std::move(system.Kernel().GetProcessList().back());
-    }
+    void SetDebugProcess() { debug_process = std::move(system.Kernel().GetProcessList().back()); }
 
-    Kernel::KProcess::ThreadList& ThreadList() {
-        return debug_process->GetThreadList();
-    }
+    Kernel::KProcess::ThreadList& ThreadList() { return debug_process->GetThreadList(); }
 
 private:
     System& system;
@@ -371,7 +377,8 @@ private:
     bool stopped{};
 };
 
-Debugger::Debugger(Core::System& system, u16 port) {
+Debugger::Debugger(Core::System& system, u16 port)
+{
     try {
         impl = std::make_unique<DebuggerImpl>(system, port);
     } catch (const std::exception& ex) {
@@ -381,16 +388,18 @@ Debugger::Debugger(Core::System& system, u16 port) {
 
 Debugger::~Debugger() = default;
 
-bool Debugger::NotifyThreadStopped(Kernel::KThread* thread) {
+bool Debugger::NotifyThreadStopped(Kernel::KThread* thread)
+{
     return impl && impl->SignalDebugger(SignalInfo{SignalType::Stopped, thread, nullptr});
 }
 
-bool Debugger::NotifyThreadWatchpoint(Kernel::KThread* thread,
-                                      const Kernel::DebugWatchpoint& watch) {
+bool Debugger::NotifyThreadWatchpoint(Kernel::KThread* thread, const Kernel::DebugWatchpoint& watch)
+{
     return impl && impl->SignalDebugger(SignalInfo{SignalType::Watchpoint, thread, &watch});
 }
 
-void Debugger::NotifyShutdown() {
+void Debugger::NotifyShutdown()
+{
     if (impl) {
         impl->SignalDebugger(SignalInfo{SignalType::ShuttingDown, nullptr, nullptr});
     }

@@ -33,14 +33,17 @@ protected:
 
     // Parameterized constructor
     QueryBase(DAddr address, QueryFlagBits flags_, u64 value_)
-        : guest_address(address), flags(flags_), value{value_} {}
+        : guest_address(address), flags(flags_), value{value_}
+    {
+    }
 };
 
 class GuestQuery : public QueryBase {
 public:
     // Parameterized constructor
     GuestQuery(bool isLong, VAddr address, u64 queryValue)
-        : QueryBase(address, QueryFlagBits::IsFinalValueSynced, queryValue) {
+        : QueryBase(address, QueryFlagBits::IsFinalValueSynced, queryValue)
+    {
         if (isLong) {
             flags |= QueryFlagBits::HasTimestamp;
         }
@@ -55,7 +58,8 @@ public:
     // Parameterized constructor
     HostQueryBase(bool has_timestamp, VAddr address)
         : QueryBase(address, QueryFlagBits::IsHostManaged, 0), start_bank_id{}, size_banks{},
-          start_slot{}, size_slots{} {
+          start_slot{}, size_slots{}
+    {
         if (has_timestamp) {
             flags |= QueryFlagBits::HasTimestamp;
         }

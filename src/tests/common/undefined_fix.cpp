@@ -5,9 +5,14 @@
 
 namespace PlayTime {
 
-PlayTimeManager::PlayTimeManager() {}
-PlayTimeManager::~PlayTimeManager() {}
-u64 PlayTimeManager::GetPlayTime(u64 program_id) const {
+PlayTimeManager::PlayTimeManager()
+{
+}
+PlayTimeManager::~PlayTimeManager()
+{
+}
+u64 PlayTimeManager::GetPlayTime(u64 program_id) const
+{
     return 0;
 }
 

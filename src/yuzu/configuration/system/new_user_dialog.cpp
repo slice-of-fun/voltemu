@@ -1,7 +1,18 @@
 // SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+#include "new_user_dialog.h"
+
+#include <fmt/format.h>
+#include <qnamespace.h>
+#include <qregularexpression.h>
+#include <qvalidator.h>
+
+#include <QFileDialog>
+#include <QMessageBox>
+#include <QStyle>
 #include <algorithm>
+
 #include "common/common_types.h"
 #include "common/fs/path_util.h"
 #include "common/uuid.h"
@@ -11,19 +22,11 @@
 #include "core/file_sys/nca_metadata.h"
 #include "core/file_sys/romfs.h"
 #include "core/hle/service/filesystem/filesystem.h"
-#include "new_user_dialog.h"
 #include "qt_common/qt_common.h"
 #include "ui_new_user_dialog.h"
 
-#include <QFileDialog>
-#include <QMessageBox>
-#include <QStyle>
-#include <fmt/format.h>
-#include <qnamespace.h>
-#include <qregularexpression.h>
-#include <qvalidator.h>
-
-QPixmap NewUserDialog::DefaultAvatar() {
+QPixmap NewUserDialog::DefaultAvatar()
+{
     QPixmap icon;
 
     icon.fill(Qt::black);
@@ -33,14 +36,16 @@ QPixmap NewUserDialog::DefaultAvatar() {
     return icon.scaled(64, 64, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
 }
 
-QString NewUserDialog::GetImagePath(const Common::UUID& uuid) {
+QString NewUserDialog::GetImagePath(const Common::UUID& uuid)
+{
     const auto path =
         Common::FS::GetVoltPath(Common::FS::VoltPath::NANDDir) /
         fmt::format("system/save/8000000000000010/su/avators/{}.jpg", uuid.FormattedString());
     return QString::fromStdString(Common::FS::PathToUTF8String(path));
 }
 
-QPixmap NewUserDialog::GetIcon(const Common::UUID& uuid) {
+QPixmap NewUserDialog::GetIcon(const Common::UUID& uuid)
+{
     QPixmap icon{GetImagePath(uuid)};
 
     if (!icon) {
@@ -52,16 +57,19 @@ QPixmap NewUserDialog::GetIcon(const Common::UUID& uuid) {
 
 NewUserDialog::NewUserDialog(Common::UUID uuid, const std::string& username, const QString& title,
                              QWidget* parent)
-    : QDialog(parent) {
+    : QDialog(parent)
+{
     m_editing = true;
     setup(uuid, username, title);
 }
 
-NewUserDialog::NewUserDialog(QWidget* parent) : QDialog(parent) {
+NewUserDialog::NewUserDialog(QWidget* parent) : QDialog(parent)
+{
     setup(Common::UUID::MakeRandom(), "Eden", tr("New User"));
 }
 
-void NewUserDialog::setup(Common::UUID uuid, const std::string& username, const QString& title) {
+void NewUserDialog::setup(Common::UUID uuid, const std::string& username, const QString& title)
+{
     ui = new Ui::NewUserDialog;
     ui->setupUi(this);
 
@@ -119,22 +127,26 @@ void NewUserDialog::setup(Common::UUID uuid, const std::string& username, const 
     avatar_dialog = new ProfileAvatarDialog(this);
 }
 
-NewUserDialog::~NewUserDialog() {
+NewUserDialog::~NewUserDialog()
+{
     delete ui;
 }
 
-bool NewUserDialog::isDefaultAvatar() const {
+bool NewUserDialog::isDefaultAvatar() const
+{
     return m_isDefaultAvatar;
 }
 
-void NewUserDialog::setIsDefaultAvatar(bool newIsDefaultAvatar) {
+void NewUserDialog::setIsDefaultAvatar(bool newIsDefaultAvatar)
+{
     if (m_isDefaultAvatar == newIsDefaultAvatar)
         return;
     m_isDefaultAvatar = newIsDefaultAvatar;
     emit isDefaultAvatarChanged(m_isDefaultAvatar);
 }
 
-void NewUserDialog::selectImage() {
+void NewUserDialog::selectImage()
+{
     const auto file = QFileDialog::getOpenFileName(this, tr("Select User Image"), QString(),
                                                    tr("Image Formats (*.jpg *.jpeg *.png *.bmp)"));
     if (file.isEmpty()) {
@@ -151,7 +163,8 @@ void NewUserDialog::selectImage() {
     setIsDefaultAvatar(false);
 }
 
-void NewUserDialog::setAvatar() {
+void NewUserDialog::setAvatar()
+{
     if (!avatar_dialog->AreImagesLoaded()) {
         if (!LoadAvatarData()) {
             return;
@@ -162,7 +175,8 @@ void NewUserDialog::setAvatar() {
     }
 }
 
-bool NewUserDialog::LoadAvatarData() {
+bool NewUserDialog::LoadAvatarData()
+{
     constexpr u64 AvatarImageDataId = 0x010000000000080AULL;
 
     // Attempt to load avatar data archive from installed firmware
@@ -225,7 +239,8 @@ bool NewUserDialog::LoadAvatarData() {
     return true;
 }
 
-std::vector<uint8_t> NewUserDialog::DecompressYaz0(const FileSys::VirtualFile& file) {
+std::vector<uint8_t> NewUserDialog::DecompressYaz0(const FileSys::VirtualFile& file)
+{
     if (!file) {
         throw std::invalid_argument("Null file pointer passed to DecompressYaz0");
     }
@@ -297,18 +312,21 @@ std::vector<uint8_t> NewUserDialog::DecompressYaz0(const FileSys::VirtualFile& f
     return output;
 }
 
-void NewUserDialog::setImage(const QPixmap& pixmap) {
+void NewUserDialog::setImage(const QPixmap& pixmap)
+{
     m_pixmap = pixmap;
     m_scene->clear();
     m_scene->addPixmap(m_pixmap);
 }
 
-void NewUserDialog::revertImage() {
+void NewUserDialog::revertImage()
+{
     setImage(DefaultAvatar());
     setIsDefaultAvatar(true);
 }
 
-void NewUserDialog::updateRevertButton() {
+void NewUserDialog::updateRevertButton()
+{
     if (isDefaultAvatar()) {
         ui->revert->setIcon(QIcon{});
     } else {
@@ -318,12 +336,14 @@ void NewUserDialog::updateRevertButton() {
     }
 }
 
-void NewUserDialog::generateUUID() {
+void NewUserDialog::generateUUID()
+{
     Common::UUID uuid = Common::UUID::MakeRandom();
     ui->uuid->setText(QString::fromStdString(uuid.RawString()).toUpper());
 }
 
-void NewUserDialog::verifyUser() {
+void NewUserDialog::verifyUser()
+{
     const QPixmap checked = QIcon::fromTheme(QStringLiteral("checked")).pixmap(16);
     const QPixmap failed = QIcon::fromTheme(QStringLiteral("failed")).pixmap(16);
 
@@ -351,7 +371,8 @@ void NewUserDialog::verifyUser() {
 }
 
 // TODO: Move UUID
-void NewUserDialog::dispatchUser() {
+void NewUserDialog::dispatchUser()
+{
     QByteArray bytes = QByteArray::fromHex(ui->uuid->text().toLatin1());
 
     // convert to 16 u8's

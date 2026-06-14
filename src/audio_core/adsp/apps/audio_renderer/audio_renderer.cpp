@@ -4,10 +4,11 @@
 // SPDX-FileCopyrightText: Copyright 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "audio_core/adsp/apps/audio_renderer/audio_renderer.h"
+
 #include <array>
 #include <chrono>
 
-#include "audio_core/adsp/apps/audio_renderer/audio_renderer.h"
 #include "audio_core/audio_core.h"
 #include "audio_core/common/common.h"
 #include "audio_core/sink/sink.h"
@@ -19,13 +20,17 @@
 namespace AudioCore::ADSP::AudioRenderer {
 
 AudioRenderer::AudioRenderer(Core::System& system_, Sink::Sink& sink_)
-    : system{system_}, sink{sink_} {}
+    : system{system_}, sink{sink_}
+{
+}
 
-AudioRenderer::~AudioRenderer() {
+AudioRenderer::~AudioRenderer()
+{
     Stop();
 }
 
-void AudioRenderer::Start() {
+void AudioRenderer::Start()
+{
     CreateSinkStreams();
 
     mailbox.Initialize(AppMailboxId::AudioRenderer);
@@ -38,7 +43,8 @@ void AudioRenderer::Start() {
         // TODO: Create gMix devices, initialize them here
 
         if (mailbox.Receive(Direction::DSP) != Message::InitializeOK) {
-            LOG_ERROR(Service_Audio, "ADSP Audio Renderer -- Failed to receive initialize message from host!");
+            LOG_ERROR(Service_Audio,
+                      "ADSP Audio Renderer -- Failed to receive initialize message from host!");
             return;
         }
 
@@ -73,8 +79,8 @@ void AudioRenderer::Start() {
                         // this is a new command list, initialize it.
                         if (command_buffer.remaining_command_count == 0) {
                             command_list_processor.Initialize(system, *command_buffer.process,
-                                command_buffer.buffer,
-                                command_buffer.size, streams[index]);
+                                                              command_buffer.buffer,
+                                                              command_buffer.size, streams[index]);
                         }
 
                         if (command_buffer.reset_buffer && !buffers_reset[index]) {
@@ -84,7 +90,7 @@ void AudioRenderer::Start() {
 
                         u64 max_time{max_process_time};
                         if (index == 1 && command_buffer.applet_resource_user_id ==
-                                            command_buffers[0].applet_resource_user_id) {
+                                              command_buffers[0].applet_resource_user_id) {
                             max_time = max_process_time - render_times_taken[0];
                             if (render_times_taken[0] > max_process_time) {
                                 max_time = 0;
@@ -114,7 +120,8 @@ void AudioRenderer::Start() {
                 mailbox.Send(Direction::Host, Message::RenderResponse);
             } break;
             default:
-                LOG_WARNING(Service_Audio, "ADSP AudioRenderer received an invalid message, msg={:02X}!", msg);
+                LOG_WARNING(Service_Audio,
+                            "ADSP AudioRenderer received an invalid message, msg={:02X}!", msg);
                 break;
             }
         }
@@ -129,7 +136,8 @@ void AudioRenderer::Start() {
     running = true;
 }
 
-void AudioRenderer::Stop() {
+void AudioRenderer::Stop()
+{
     if (!running) {
         return;
     }
@@ -152,12 +160,14 @@ void AudioRenderer::Stop() {
     running = false;
 }
 
-void AudioRenderer::Signal() {
+void AudioRenderer::Signal()
+{
     signalled_tick = system.CoreTiming().GetGlobalTimeNs().count();
     Send(Direction::DSP, Message::Render);
 }
 
-void AudioRenderer::Wait() {
+void AudioRenderer::Wait()
+{
     auto msg = Receive(Direction::Host);
     if (msg != Message::RenderResponse) {
         LOG_ERROR(Service_Audio,
@@ -168,17 +178,20 @@ void AudioRenderer::Wait() {
     PostDSPClearCommandBuffer();
 }
 
-void AudioRenderer::Send(Direction dir, u32 message) {
+void AudioRenderer::Send(Direction dir, u32 message)
+{
     mailbox.Send(dir, std::move(message));
 }
 
-u32 AudioRenderer::Receive(Direction dir) {
+u32 AudioRenderer::Receive(Direction dir)
+{
     return mailbox.Receive(dir);
 }
 
 void AudioRenderer::SetCommandBuffer(s32 session_id, CpuAddr buffer, u64 size, u64 time_limit,
                                      u64 applet_resource_user_id, Kernel::KProcess* process,
-                                     bool reset) noexcept {
+                                     bool reset) noexcept
+{
     command_buffers[session_id].buffer = buffer;
     command_buffers[session_id].size = size;
     command_buffers[session_id].time_limit = time_limit;
@@ -187,7 +200,8 @@ void AudioRenderer::SetCommandBuffer(s32 session_id, CpuAddr buffer, u64 size, u
     command_buffers[session_id].reset_buffer = reset;
 }
 
-void AudioRenderer::PostDSPClearCommandBuffer() noexcept {
+void AudioRenderer::PostDSPClearCommandBuffer() noexcept
+{
     for (auto& buffer : command_buffers) {
         buffer.buffer = 0;
         buffer.size = 0;
@@ -195,19 +209,23 @@ void AudioRenderer::PostDSPClearCommandBuffer() noexcept {
     }
 }
 
-u32 AudioRenderer::GetRemainCommandCount(s32 session_id) const noexcept {
+u32 AudioRenderer::GetRemainCommandCount(s32 session_id) const noexcept
+{
     return command_buffers[session_id].remaining_command_count;
 }
 
-void AudioRenderer::ClearRemainCommandCount(s32 session_id) noexcept {
+void AudioRenderer::ClearRemainCommandCount(s32 session_id) noexcept
+{
     command_buffers[session_id].remaining_command_count = 0;
 }
 
-u64 AudioRenderer::GetRenderingStartTick(s32 session_id) const noexcept {
+u64 AudioRenderer::GetRenderingStartTick(s32 session_id) const noexcept
+{
     return (1000 * command_buffers[session_id].render_time_taken_us) + signalled_tick;
 }
 
-void AudioRenderer::CreateSinkStreams() {
+void AudioRenderer::CreateSinkStreams()
+{
     u32 channels{sink.GetDeviceChannels()};
     for (u32 i = 0; i < MaxRendererSessions; i++) {
         std::string name{fmt::format("ADSP_RenderStream-{}", i)};

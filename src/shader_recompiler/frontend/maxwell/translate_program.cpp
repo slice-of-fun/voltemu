@@ -4,10 +4,12 @@
 // SPDX-FileCopyrightText: Copyright 2021 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "shader_recompiler/frontend/maxwell/translate_program.h"
+
 #include <algorithm>
 #include <memory>
-#include <vector>
 #include <queue>
+#include <vector>
 
 #include "common/settings.h"
 #include "shader_recompiler/exception.h"
@@ -16,13 +18,13 @@
 #include "shader_recompiler/frontend/ir/post_order.h"
 #include "shader_recompiler/frontend/maxwell/structured_control_flow.h"
 #include "shader_recompiler/frontend/maxwell/translate/translate.h"
-#include "shader_recompiler/frontend/maxwell/translate_program.h"
 #include "shader_recompiler/host_translate_info.h"
 #include "shader_recompiler/ir_opt/passes.h"
 
 namespace Shader::Maxwell {
 namespace {
-IR::BlockList GenerateBlocks(const IR::AbstractSyntaxList& syntax_list) {
+IR::BlockList GenerateBlocks(const IR::AbstractSyntaxList& syntax_list)
+{
     size_t num_syntax_blocks{};
     for (const auto& node : syntax_list) {
         if (node.type == IR::AbstractSyntaxNode::Type::Block) {
@@ -41,7 +43,8 @@ IR::BlockList GenerateBlocks(const IR::AbstractSyntaxList& syntax_list) {
     return blocks;
 }
 
-void RemoveUnreachableBlocks(IR::Program& program) {
+void RemoveUnreachableBlocks(IR::Program& program)
+{
     // Some blocks might be unreachable if a function call exists unconditionally
     // If this happens the number of blocks and post order blocks will mismatch
     if (program.blocks.size() == program.post_order_blocks.size()) {
@@ -53,7 +56,8 @@ void RemoveUnreachableBlocks(IR::Program& program) {
     program.blocks.erase(std::remove_if(begin, end, pred), end);
 }
 
-void CollectInterpolationInfo(Environment& env, IR::Program& program) {
+void CollectInterpolationInfo(Environment& env, IR::Program& program)
+{
     if (program.stage != Stage::Fragment) {
         return;
     }
@@ -87,7 +91,8 @@ void CollectInterpolationInfo(Environment& env, IR::Program& program) {
     }
 }
 
-void AddNVNStorageBuffers(IR::Program& program) {
+void AddNVNStorageBuffers(IR::Program& program)
+{
     if (!program.info.uses_global_memory) {
         return;
     }
@@ -132,7 +137,8 @@ void AddNVNStorageBuffers(IR::Program& program) {
     }
 }
 
-bool IsLegacyAttribute(IR::Attribute attribute) {
+bool IsLegacyAttribute(IR::Attribute attribute)
+{
     return (attribute >= IR::Attribute::ColorFrontDiffuseR &&
             attribute <= IR::Attribute::ColorBackSpecularA) ||
            attribute == IR::Attribute::FogCoordinate ||
@@ -142,7 +148,8 @@ bool IsLegacyAttribute(IR::Attribute attribute) {
 
 std::map<IR::Attribute, IR::Attribute> GenerateLegacyToGenericMappings(
     const VaryingState& state, std::queue<IR::Attribute> unused_generics,
-    const std::map<IR::Attribute, IR::Attribute>& previous_stage_mapping) {
+    const std::map<IR::Attribute, IR::Attribute>& previous_stage_mapping)
+{
     std::map<IR::Attribute, IR::Attribute> mapping;
     auto update_mapping = [&mapping, &unused_generics, previous_stage_mapping](IR::Attribute attr,
                                                                                size_t count) {
@@ -178,7 +185,8 @@ std::map<IR::Attribute, IR::Attribute> GenerateLegacyToGenericMappings(
 void EmitGeometryPassthrough(IR::IREmitter& ir, const IR::Program& program,
                              const Shader::VaryingState& passthrough_mask,
                              bool passthrough_position,
-                             std::optional<IR::Attribute> passthrough_layer_attr) {
+                             std::optional<IR::Attribute> passthrough_layer_attr)
+{
     for (u32 i = 0; i < program.output_vertices; i++) {
         // Assign generics from input
         for (u32 j = 0; j < 32; j++) {
@@ -214,7 +222,8 @@ void EmitGeometryPassthrough(IR::IREmitter& ir, const IR::Program& program,
     ir.EndPrimitive(ir.Imm32(0));
 }
 
-u32 GetOutputTopologyVertices(OutputTopology output_topology) {
+u32 GetOutputTopologyVertices(OutputTopology output_topology)
+{
     switch (output_topology) {
     case OutputTopology::PointList:
         return 1;
@@ -225,7 +234,8 @@ u32 GetOutputTopologyVertices(OutputTopology output_topology) {
     }
 }
 
-void LowerGeometryPassthrough(const IR::Program& program, const HostTranslateInfo& host_info) {
+void LowerGeometryPassthrough(const IR::Program& program, const HostTranslateInfo& host_info)
+{
     for (IR::Block* const block : program.blocks) {
         for (IR::Inst& inst : block->Instructions()) {
             if (inst.GetOpcode() == IR::Opcode::Epilogue) {
@@ -241,7 +251,8 @@ void LowerGeometryPassthrough(const IR::Program& program, const HostTranslateInf
 } // Anonymous namespace
 
 IR::Program TranslateProgram(ObjectPool<IR::Inst>& inst_pool, ObjectPool<IR::Block>& block_pool,
-                             Environment& env, Flow::CFG& cfg, const HostTranslateInfo& host_info) {
+                             Environment& env, Flow::CFG& cfg, const HostTranslateInfo& host_info)
+{
     IR::Program program;
     program.syntax_list = BuildASL(inst_pool, block_pool, env, cfg, host_info);
     program.blocks = GenerateBlocks(program.syntax_list);
@@ -321,7 +332,8 @@ IR::Program TranslateProgram(ObjectPool<IR::Inst>& inst_pool, ObjectPool<IR::Blo
 }
 
 IR::Program MergeDualVertexPrograms(IR::Program& vertex_a, IR::Program& vertex_b,
-                                    Environment& env_vertex_b) {
+                                    Environment& env_vertex_b)
+{
     IR::Program result{};
     Optimization::VertexATransformPass(vertex_a);
     Optimization::VertexBTransformPass(vertex_b);
@@ -353,7 +365,8 @@ IR::Program MergeDualVertexPrograms(IR::Program& vertex_a, IR::Program& vertex_b
     return result;
 }
 
-void ConvertLegacyToGeneric(IR::Program& program, const Shader::RuntimeInfo& runtime_info) {
+void ConvertLegacyToGeneric(IR::Program& program, const Shader::RuntimeInfo& runtime_info)
+{
     auto& stores = program.info.stores;
     if (stores.Legacy()) {
         std::queue<IR::Attribute> unused_output_generics{};
@@ -417,7 +430,8 @@ IR::Program GenerateGeometryPassthrough(ObjectPool<IR::Inst>& inst_pool,
                                         ObjectPool<IR::Block>& block_pool,
                                         const HostTranslateInfo& host_info,
                                         IR::Program& source_program,
-                                        Shader::OutputTopology output_topology) {
+                                        Shader::OutputTopology output_topology)
+{
     IR::Program program;
     program.stage = Stage::Geometry;
     program.output_topology = output_topology;

@@ -22,10 +22,10 @@
 #include "video_core/engines/const_buffer_info.h"
 #include "video_core/engines/engine_interface.h"
 #include "video_core/engines/engine_upload.h"
+#include "video_core/engines/maxwell_3d.h"
 #include "video_core/gpu.h"
 #include "video_core/macro.h"
 #include "video_core/textures/texture.h"
-#include "video_core/engines/maxwell_3d.h"
 
 namespace Core {
 class System;
@@ -99,7 +99,8 @@ public:
             u32 address_low;
             u32 type;
 
-            GPUVAddr Address() const {
+            GPUVAddr Address() const
+            {
                 return (GPUVAddr{address_high} << 32) | GPUVAddr{address_low};
             }
         };
@@ -108,7 +109,8 @@ public:
             u32 address_high;
             u32 address_low;
 
-            GPUVAddr Address() const {
+            GPUVAddr Address() const
+            {
                 return (GPUVAddr{address_high} << 32) | GPUVAddr{address_low};
             }
         };
@@ -125,7 +127,8 @@ public:
             u32 offset_low;
             Mode mode;
 
-            GPUVAddr Address() const {
+            GPUVAddr Address() const
+            {
                 return (GPUVAddr{offset_high} << 32) | GPUVAddr{offset_low};
             }
         };
@@ -179,7 +182,8 @@ public:
         struct OpportunisticEarlyZ {
             BitField<0, 5, u32> threshold;
 
-            u32 Threshold() const {
+            u32 Threshold() const
+            {
                 switch (threshold) {
                 case 0x0:
                     return 0;
@@ -469,7 +473,8 @@ public:
                 s32 start_offset;
                 INSERT_PADDING_BYTES_NOINIT(0xC);
 
-                GPUVAddr Address() const {
+                GPUVAddr Address() const
+                {
                     return (GPUVAddr{address_high} << 32) | GPUVAddr{address_low};
                 }
             };
@@ -511,13 +516,12 @@ public:
             u32 size_low;
             u32 default_size_per_warp;
 
-            GPUVAddr Address() const {
+            GPUVAddr Address() const
+            {
                 return (GPUVAddr{address_high} << 32) | GPUVAddr{address_low};
             }
 
-            u64 Size() const {
-                return (u64{size_high} << 32) | u64{size_low};
-            }
+            u64 Size() const { return (u64{size_high} << 32) | u64{size_low}; }
         };
 
         struct ZCullRegion {
@@ -537,12 +541,14 @@ public:
             u32 storage_limit_address_high;
             u32 storage_limit_address_low;
 
-            GPUVAddr StorageAddress() const {
+            GPUVAddr StorageAddress() const
+            {
                 return (GPUVAddr{storage_address_high} << 32) | GPUVAddr{storage_address_low};
             }
-            GPUVAddr StorageLimitAddress() const {
+            GPUVAddr StorageLimitAddress() const
+            {
                 return (GPUVAddr{storage_limit_address_high} << 32) |
-                        GPUVAddr{storage_limit_address_low};
+                       GPUVAddr{storage_limit_address_low};
             }
         };
 
@@ -596,7 +602,8 @@ public:
                 u32 hex;
             };
 
-            u32 ComponentCount() const {
+            u32 ComponentCount() const
+            {
                 switch (size) {
                 case Size::Size_R32_G32_B32_A32:
                     return 4;
@@ -635,7 +642,8 @@ public:
                 }
             }
 
-            u32 SizeInBytes() const {
+            u32 SizeInBytes() const
+            {
                 switch (size) {
                 case Size::Size_R32_G32_B32_A32:
                     return 16;
@@ -674,7 +682,8 @@ public:
                 }
             }
 
-            std::string SizeString() const {
+            std::string SizeString() const
+            {
                 switch (size) {
                 case Size::Size_R32_G32_B32_A32:
                     return "32_32_32_32";
@@ -712,7 +721,8 @@ public:
                 }
             }
 
-            std::string TypeString() const {
+            std::string TypeString() const
+            {
                 switch (type) {
                 case Type::UnusedEnumDoNotUseBecauseItWillGoAway:
                     return "Unused";
@@ -735,17 +745,11 @@ public:
                 return {};
             }
 
-            bool IsNormalized() const {
-                return (type == Type::SNorm) || (type == Type::UNorm);
-            }
+            bool IsNormalized() const { return (type == Type::SNorm) || (type == Type::UNorm); }
 
-            bool IsValid() const {
-                return size != Size::Invalid;
-            }
+            bool IsValid() const { return size != Size::Invalid; }
 
-            bool operator<(const VertexAttribute& other) const {
-                return hex < other.hex;
-            }
+            bool operator<(const VertexAttribute& other) const { return hex < other.hex; }
         };
         static_assert(sizeof(VertexAttribute) == 0x4);
 
@@ -761,7 +765,8 @@ public:
                 BitField<28, 4, u32> y3;
             };
 
-            constexpr std::pair<u32, u32> Location(int index) const {
+            constexpr std::pair<u32, u32> Location(int index) const
+            {
                 switch (index) {
                 case 0:
                     return {x0, y0};
@@ -816,9 +821,10 @@ public:
                 BitField<25, 3, u32> target7;
             };
 
-            u32 Map(std::size_t index) const {
+            u32 Map(std::size_t index) const
+            {
                 const std::array<u32, NumRenderTargets> maps{target0, target1, target2, target3,
-                                                                target4, target5, target6, target7};
+                                                             target4, target5, target6, target7};
                 ASSERT(index < maps.size());
                 return maps[index];
             }
@@ -827,7 +833,8 @@ public:
         struct CompressionThresholdSamples {
             u32 samples;
 
-            u32 Samples() const {
+            u32 Samples() const
+            {
                 if (samples == 0) {
                     return 0;
                 }
@@ -1135,7 +1142,8 @@ public:
             u32 mark_ieee_clean;
             INSERT_PADDING_BYTES_NOINIT(0x18);
 
-            GPUVAddr Address() const {
+            GPUVAddr Address() const
+            {
                 return (GPUVAddr{address_high} << 32) | GPUVAddr{address_low};
             }
         };
@@ -1172,7 +1180,8 @@ public:
                 BitField<8, 5, u32> y;
             } snap_grid_precision;
 
-            Common::Rectangle<f32> GetRect() const {
+            Common::Rectangle<f32> GetRect() const
+            {
                 return {
                     GetX(),               // left
                     GetY() + GetHeight(), // top
@@ -1181,21 +1190,13 @@ public:
                 };
             }
 
-            f32 GetX() const {
-                return (std::max)(0.0f, translate_x - std::fabs(scale_x));
-            }
+            f32 GetX() const { return (std::max)(0.0f, translate_x - std::fabs(scale_x)); }
 
-            f32 GetY() const {
-                return (std::max)(0.0f, translate_y - std::fabs(scale_y));
-            }
+            f32 GetY() const { return (std::max)(0.0f, translate_y - std::fabs(scale_y)); }
 
-            f32 GetWidth() const {
-                return translate_x + std::fabs(scale_x) - GetX();
-            }
+            f32 GetWidth() const { return translate_x + std::fabs(scale_x) - GetX(); }
 
-            f32 GetHeight() const {
-                return translate_y + std::fabs(scale_y) - GetY();
-            }
+            f32 GetHeight() const { return translate_y + std::fabs(scale_y) - GetY(); }
         };
         static_assert(sizeof(ViewportTransform) == 0x20);
 
@@ -1480,7 +1481,8 @@ public:
             u32 address_high;
             u32 address_low;
 
-            GPUVAddr Address() const {
+            GPUVAddr Address() const
+            {
                 return (GPUVAddr{address_high} << 32) | GPUVAddr{address_low};
             }
         };
@@ -1530,7 +1532,8 @@ public:
             u32 address_high;
             u32 address_low;
 
-            GPUVAddr Address() const {
+            GPUVAddr Address() const
+            {
                 return (GPUVAddr{address_high} << 32) | GPUVAddr{address_low};
             }
         };
@@ -1557,7 +1560,8 @@ public:
             TileMode tile_mode;
             u32 array_pitch;
 
-            GPUVAddr Address() const {
+            GPUVAddr Address() const
+            {
                 return (GPUVAddr{address_high} << 32) | GPUVAddr{address_low};
             }
         };
@@ -1828,9 +1832,10 @@ public:
                 BitField<29, 1, Depth> output7_range;
             };
 
-            bool AnyEnabled() const {
+            bool AnyEnabled() const
+            {
                 return output0_enable || output1_enable || output2_enable || output3_enable ||
-                        output4_enable || output5_enable || output6_enable || output7_enable;
+                       output4_enable || output5_enable || output6_enable || output7_enable;
             }
         };
 
@@ -1867,9 +1872,10 @@ public:
                     BitField<7, 1, u32> plane7;
                 };
 
-                bool AnyEnabled() const {
+                bool AnyEnabled() const
+                {
                     return plane0 || plane1 || plane2 || plane3 || plane4 || plane5 || plane6 ||
-                            plane7;
+                           plane7;
                 }
             };
 
@@ -1919,7 +1925,8 @@ public:
             u32 address_low;
             Mode mode;
 
-            GPUVAddr Address() const {
+            GPUVAddr Address() const
+            {
                 return (GPUVAddr{address_high} << 32) | GPUVAddr{address_low};
             }
         };
@@ -1929,7 +1936,8 @@ public:
             u32 address_low;
             u32 limit;
 
-            GPUVAddr Address() const {
+            GPUVAddr Address() const
+            {
                 return (GPUVAddr{address_high} << 32) | GPUVAddr{address_low};
             }
         };
@@ -1939,7 +1947,8 @@ public:
             u32 address_low;
             u32 limit;
 
-            GPUVAddr Address() const {
+            GPUVAddr Address() const
+            {
                 return (GPUVAddr{address_high} << 32) | GPUVAddr{address_low};
             }
         };
@@ -1987,7 +1996,8 @@ public:
             u32 address_high;
             u32 address_low;
 
-            GPUVAddr Address() const {
+            GPUVAddr Address() const
+            {
                 return (GPUVAddr{address_high} << 32) | GPUVAddr{address_low};
             }
         };
@@ -2032,7 +2042,8 @@ public:
             u32 address_high;
             u32 address_low;
 
-            GPUVAddr Address() const {
+            GPUVAddr Address() const
+            {
                 return (GPUVAddr{address_high} << 32) | GPUVAddr{address_low};
             }
         };
@@ -2215,7 +2226,8 @@ public:
             u32 first;
             u32 count;
 
-            size_t FormatSizeInBytes() const {
+            size_t FormatSizeInBytes() const
+            {
                 switch (format) {
                 case IndexFormat::UnsignedByte:
                     return 1;
@@ -2228,16 +2240,19 @@ public:
                 return 1;
             }
 
-            GPUVAddr StartAddress() const {
+            GPUVAddr StartAddress() const
+            {
                 return (GPUVAddr{start_addr_high} << 32) | GPUVAddr{start_addr_low};
             }
 
-            GPUVAddr EndAddress() const {
+            GPUVAddr EndAddress() const
+            {
                 return (GPUVAddr{limit_addr_high} << 32) | GPUVAddr{limit_addr_low};
             }
 
             /// Adjust the index buffer offset so it points to the first desired index.
-            GPUVAddr IndexStart() const {
+            GPUVAddr IndexStart() const
+            {
                 return StartAddress() + size_t{first} * size_t{FormatSizeInBytes()};
             }
         };
@@ -2256,8 +2271,9 @@ public:
 
             /// Returns whether the vertex array specified by index is supposed to be
             /// accessed per instance or not.
-            bool IsInstancingEnabled(std::size_t index) const {
-                return bool(is_instanced[index]); //FUCK YOU MSVC
+            bool IsInstancingEnabled(std::size_t index) const
+            {
+                return bool(is_instanced[index]); // FUCK YOU MSVC
             }
         };
 
@@ -2466,7 +2482,8 @@ public:
                 BitField<17, 2, u32> format_signed;
             } query;
 
-            GPUVAddr Address() const {
+            GPUVAddr Address() const
+            {
                 return (GPUVAddr{address_high} << 32) | GPUVAddr{address_low};
             }
         };
@@ -2480,13 +2497,12 @@ public:
             u32 address_low;
             u32 frequency;
 
-            GPUVAddr Address() const {
+            GPUVAddr Address() const
+            {
                 return (GPUVAddr{address_high} << 32) | GPUVAddr{address_low};
             }
 
-            bool IsEnabled() const {
-                return enable != 0 && Address() != 0;
-            }
+            bool IsEnabled() const { return enable != 0 && Address() != 0; }
         };
         static_assert(sizeof(VertexStream) == 0x10);
 
@@ -2494,7 +2510,8 @@ public:
             u32 address_high;
             u32 address_low;
 
-            GPUVAddr Address() const {
+            GPUVAddr Address() const
+            {
                 return (GPUVAddr{address_high} << 32) | GPUVAddr{address_low};
             }
         };
@@ -2523,7 +2540,8 @@ public:
         };
         static_assert(sizeof(Pipeline) == 0x40);
 
-        bool IsShaderConfigEnabled(std::size_t index) const {
+        bool IsShaderConfigEnabled(std::size_t index) const
+        {
             // The VertexB is always enabled.
             if (index == static_cast<std::size_t>(ShaderType::VertexB)) {
                 return true;
@@ -2531,7 +2549,8 @@ public:
             return pipelines[index].enable != 0;
         }
 
-        bool IsShaderConfigEnabled(ShaderType type) const {
+        bool IsShaderConfigEnabled(ShaderType type) const
+        {
             return IsShaderConfigEnabled(static_cast<std::size_t>(type));
         }
 
@@ -2542,7 +2561,8 @@ public:
             u32 offset;
             std::array<u32, NumCBData> buffer;
 
-            GPUVAddr Address() const {
+            GPUVAddr Address() const
+            {
                 return (GPUVAddr{address_high} << 32) | GPUVAddr{address_low};
             }
         };
@@ -3071,11 +3091,16 @@ public:
         void ProcessMethodCall(Maxwell3D& maxwell3d, u32 method, u32 argument);
         void Clear(Maxwell3D& maxwell3d, u32 layer_count);
         void DrawDeferred(Maxwell3D& maxwell3d);
-        void DrawArray(Maxwell3D& maxwell3d, Maxwell3D::Regs::PrimitiveTopology topology, u32 vertex_first, u32 vertex_count, u32 base_instance, u32 num_instances);
-        void DrawArrayInstanced(Maxwell3D& maxwell3d, Maxwell3D::Regs::PrimitiveTopology topology, u32 vertex_first, u32 vertex_count, bool subsequent);
-        void DrawIndex(Maxwell3D& maxwell3d, Maxwell3D::Regs::PrimitiveTopology topology, u32 index_first, u32 index_count, u32 base_index, u32 base_instance, u32 num_instances);
+        void DrawArray(Maxwell3D& maxwell3d, Maxwell3D::Regs::PrimitiveTopology topology,
+                       u32 vertex_first, u32 vertex_count, u32 base_instance, u32 num_instances);
+        void DrawArrayInstanced(Maxwell3D& maxwell3d, Maxwell3D::Regs::PrimitiveTopology topology,
+                                u32 vertex_first, u32 vertex_count, bool subsequent);
+        void DrawIndex(Maxwell3D& maxwell3d, Maxwell3D::Regs::PrimitiveTopology topology,
+                       u32 index_first, u32 index_count, u32 base_index, u32 base_instance,
+                       u32 num_instances);
         void DrawArrayIndirect(Maxwell3D& maxwell3d, Maxwell3D::Regs::PrimitiveTopology topology);
-        void DrawIndexedIndirect(Maxwell3D& maxwell3d, Maxwell3D::Regs::PrimitiveTopology topology, u32 index_first, u32 index_count);
+        void DrawIndexedIndirect(Maxwell3D& maxwell3d, Maxwell3D::Regs::PrimitiveTopology topology,
+                                 u32 index_first, u32 index_count);
         void SetInlineIndexBuffer(Maxwell3D& maxwell3d, u32 index);
         void DrawBegin(Maxwell3D& maxwell3d);
         void DrawEnd(Maxwell3D& maxwell3d, u32 instance_count = 1, bool force_draw = false);
@@ -3135,17 +3160,11 @@ public:
     void CallMultiMethod(u32 method, const u32* base_start, u32 amount,
                          u32 methods_pending) override;
 
-    bool ShouldExecute() const {
-        return execute_on;
-    }
+    bool ShouldExecute() const { return execute_on; }
 
-    VideoCore::RasterizerInterface& Rasterizer() {
-        return *rasterizer;
-    }
+    VideoCore::RasterizerInterface& Rasterizer() { return *rasterizer; }
 
-    const VideoCore::RasterizerInterface& Rasterizer() const {
-        return *rasterizer;
-    }
+    const VideoCore::RasterizerInterface& Rasterizer() const { return *rasterizer; }
 
     struct DirtyState {
         using Flags = std::bitset<(std::numeric_limits<u8>::max)() + 1>;
@@ -3158,20 +3177,17 @@ public:
 
     DrawManager draw_manager;
 
-    GPUVAddr GetMacroAddress(size_t index) const {
-        return macro_addresses[index];
-    }
+    GPUVAddr GetMacroAddress(size_t index) const { return macro_addresses[index]; }
 
-    void RefreshParameters() {
+    void RefreshParameters()
+    {
         if (!current_macro_dirty) {
             return;
         }
         RefreshParametersImpl();
     }
 
-    bool AnyParametersDirty() const {
-        return current_macro_dirty;
-    }
+    bool AnyParametersDirty() const { return current_macro_dirty; }
 
     u32 GetMaxCurrentVertices();
 

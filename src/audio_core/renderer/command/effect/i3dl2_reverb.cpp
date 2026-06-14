@@ -4,11 +4,12 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "audio_core/renderer/command/effect/i3dl2_reverb.h"
+
 #include <numbers>
+#include <ranges>
 
 #include "audio_core/adsp/apps/audio_renderer/command_list_processor.h"
-#include "audio_core/renderer/command/effect/i3dl2_reverb.h"
-#include <ranges>
 
 namespace AudioCore::Renderer {
 
@@ -64,7 +65,8 @@ constexpr std::array<f32, I3dl2ReverbInfo::MaxDelayTaps> EarlyGains{
  * @param reset  - If enabled, the state buffers will be reset. Only set this on initialize.
  */
 static void UpdateI3dl2ReverbEffectParameter(const I3dl2ReverbInfo::ParameterVersion1& params,
-                                             I3dl2ReverbInfo::State& state, const bool reset) {
+                                             I3dl2ReverbInfo::State& state, const bool reset)
+{
     const auto pow_10 = [](f32 val) -> f32 {
         return (val >= 0.0f) ? 1.0f : (val <= -5.3f) ? 0.0f : std::pow(10.0f, val);
     };
@@ -81,8 +83,8 @@ static void UpdateI3dl2ReverbEffectParameter(const I3dl2ReverbInfo::ParameterVer
     Common::FixedPoint<50, 14> early_gain{
         (std::min)(params.room_gain + params.reflection_gain, 5000.0f) / 2000.0f};
     state.early_gain = pow_10(early_gain.to_float());
-    Common::FixedPoint<50, 14> late_gain{(std::min)(params.room_gain + params.reverb_gain, 5000.0f) /
-                                         2000.0f};
+    Common::FixedPoint<50, 14> late_gain{
+        (std::min)(params.room_gain + params.reverb_gain, 5000.0f) / 2000.0f};
     state.late_gain = pow_10(late_gain.to_float());
 
     Common::FixedPoint<50, 14> hf_gain{pow_10(params.room_HF_gain / 2000.0f)};
@@ -164,7 +166,8 @@ static void UpdateI3dl2ReverbEffectParameter(const I3dl2ReverbInfo::ParameterVer
  * @param workbuffer - Game-supplied memory for the state. (Unused)
  */
 static void InitializeI3dl2ReverbEffect(const I3dl2ReverbInfo::ParameterVersion1& params,
-                                        I3dl2ReverbInfo::State& state, const CpuAddr workbuffer) {
+                                        I3dl2ReverbInfo::State& state, const CpuAddr workbuffer)
+{
     state = {};
     Common::FixedPoint<50, 14> delay{static_cast<f32>(params.sample_rate) / 1000};
 
@@ -198,7 +201,8 @@ static void InitializeI3dl2ReverbEffect(const I3dl2ReverbInfo::ParameterVersion1
  */
 static void ApplyI3dl2ReverbEffectBypass(std::span<std::span<const s32>> inputs,
                                          std::span<std::span<s32>> outputs, const u32 channel_count,
-                                         [[maybe_unused]] const u32 sample_count) {
+                                         [[maybe_unused]] const u32 sample_count)
+{
     for (u32 i = 0; i < channel_count; i++) {
         if (inputs[i].data() != outputs[i].data()) {
             std::memcpy(outputs[i].data(), inputs[i].data(), outputs[i].size_bytes());
@@ -219,7 +223,8 @@ static void ApplyI3dl2ReverbEffectBypass(std::span<std::span<const s32>> inputs,
 static Common::FixedPoint<50, 14> Axfx2AllPassTick(I3dl2ReverbInfo::I3dl2DelayLine& decay0,
                                                    I3dl2ReverbInfo::I3dl2DelayLine& decay1,
                                                    I3dl2ReverbInfo::I3dl2DelayLine& fdn,
-                                                   const Common::FixedPoint<50, 14> mix) {
+                                                   const Common::FixedPoint<50, 14> mix)
+{
     auto val{decay0.Read()};
     auto mixed{mix - (val * decay0.wet_gain)};
     auto out{decay0.Tick(mixed) + (mixed * decay0.wet_gain)};
@@ -243,10 +248,11 @@ static Common::FixedPoint<50, 14> Axfx2AllPassTick(I3dl2ReverbInfo::I3dl2DelayLi
  * @param outputs      - Output mix buffers to receive the reverbed samples.
  * @param sample_count - Number of samples to process.
  */
-template <size_t NumChannels>
+template<size_t NumChannels>
 static void ApplyI3dl2ReverbEffect(I3dl2ReverbInfo::State& state,
                                    std::span<std::span<const s32>> inputs,
-                                   std::span<std::span<s32>> outputs, const u32 sample_count) {
+                                   std::span<std::span<s32>> outputs, const u32 sample_count)
+{
     static constexpr std::array<u8, I3dl2ReverbInfo::MaxDelayTaps> OutTapIndexes1Ch{
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     };
@@ -371,7 +377,8 @@ static void ApplyI3dl2ReverbEffect(I3dl2ReverbInfo::State& state,
 static void ApplyI3dl2ReverbEffect(const I3dl2ReverbInfo::ParameterVersion1& params,
                                    I3dl2ReverbInfo::State& state, const bool enabled,
                                    std::span<std::span<const s32>> inputs,
-                                   std::span<std::span<s32>> outputs, const u32 sample_count) {
+                                   std::span<std::span<s32>> outputs, const u32 sample_count)
+{
     if (enabled) {
         switch (params.channel_count) {
         case 0:
@@ -398,7 +405,8 @@ static void ApplyI3dl2ReverbEffect(const I3dl2ReverbInfo::ParameterVersion1& par
 }
 
 void I3dl2ReverbCommand::Dump([[maybe_unused]] const AudioRenderer::CommandListProcessor& processor,
-                              std::string& string) {
+                              std::string& string)
+{
     string += fmt::format("I3dl2ReverbCommand\n\tenabled {} \n\tinputs: ", effect_enabled);
     for (u32 i = 0; i < parameter.channel_count; i++) {
         string += fmt::format("{:02X}, ", inputs[i]);
@@ -410,7 +418,8 @@ void I3dl2ReverbCommand::Dump([[maybe_unused]] const AudioRenderer::CommandListP
     string += "\n";
 }
 
-void I3dl2ReverbCommand::Process(const AudioRenderer::CommandListProcessor& processor) {
+void I3dl2ReverbCommand::Process(const AudioRenderer::CommandListProcessor& processor)
+{
     std::array<std::span<const s32>, MaxChannels> input_buffers{};
     std::array<std::span<s32>, MaxChannels> output_buffers{};
 
@@ -434,7 +443,8 @@ void I3dl2ReverbCommand::Process(const AudioRenderer::CommandListProcessor& proc
                            processor.sample_count);
 }
 
-bool I3dl2ReverbCommand::Verify(const AudioRenderer::CommandListProcessor& processor) {
+bool I3dl2ReverbCommand::Verify(const AudioRenderer::CommandListProcessor& processor)
+{
     return true;
 }
 

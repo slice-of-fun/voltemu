@@ -43,11 +43,10 @@ public:
 
     void Acquire();
 
-    const DescriptorUpdateEntry* UpdateData() const noexcept {
-        return upload_start;
-    }
+    const DescriptorUpdateEntry* UpdateData() const noexcept { return upload_start; }
 
-    void AddSampledImage(VkImageView image_view, VkSampler sampler) {
+    void AddSampledImage(VkImageView image_view, VkSampler sampler)
+    {
         *(payload_cursor++) = VkDescriptorImageInfo{
             .sampler = sampler,
             .imageView = image_view,
@@ -55,7 +54,8 @@ public:
         };
     }
 
-    void AddImage(VkImageView image_view) {
+    void AddImage(VkImageView image_view)
+    {
         *(payload_cursor++) = VkDescriptorImageInfo{
             .sampler = VK_NULL_HANDLE,
             .imageView = image_view,
@@ -63,7 +63,8 @@ public:
         };
     }
 
-    void AddBuffer(VkBuffer buffer, VkDeviceSize offset, VkDeviceSize size) {
+    void AddBuffer(VkBuffer buffer, VkDeviceSize offset, VkDeviceSize size)
+    {
         *(payload_cursor++) = VkDescriptorBufferInfo{
             .buffer = buffer,
             .offset = offset,
@@ -71,9 +72,7 @@ public:
         };
     }
 
-    void AddTexelBuffer(VkBufferView texel_buffer) {
-        *(payload_cursor++) = texel_buffer;
-    }
+    void AddTexelBuffer(VkBufferView texel_buffer) { *(payload_cursor++) = texel_buffer; }
 
 private:
     const Device& device;

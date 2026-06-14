@@ -18,16 +18,14 @@ public:
     explicit IStorage(Core::System& system_, std::vector<u8>&& buffer);
     ~IStorage() override;
 
-    std::shared_ptr<LibraryAppletStorage> GetImpl() const {
-        return m_impl;
-    }
+    std::shared_ptr<LibraryAppletStorage> GetImpl() const { return m_impl; }
 
     std::vector<u8> GetData() const;
 
 private:
     Result Open(Out<SharedPointer<IStorageAccessor>> out_storage_accessor);
-    Result OpenTransferStorage(
-        Out<SharedPointer<ITransferStorageAccessor>> out_transfer_storage_accessor);
+    Result
+    OpenTransferStorage(Out<SharedPointer<ITransferStorageAccessor>> out_transfer_storage_accessor);
 
     const std::shared_ptr<LibraryAppletStorage> m_impl;
 };

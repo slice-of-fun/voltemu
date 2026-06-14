@@ -1,12 +1,14 @@
 // SPDX-FileCopyrightText: Copyright 2019 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/glue/glue.h"
+
 #include <memory>
+
 #include "core/core.h"
 #include "core/hle/service/glue/arp.h"
 #include "core/hle/service/glue/bgtc.h"
 #include "core/hle/service/glue/ectx.h"
-#include "core/hle/service/glue/glue.h"
 #include "core/hle/service/glue/notif.h"
 #include "core/hle/service/glue/time/manager.h"
 #include "core/hle/service/glue/time/static.h"
@@ -15,7 +17,8 @@
 
 namespace Service::Glue {
 
-void LoopProcess(Core::System& system) {
+void LoopProcess(Core::System& system)
+{
     auto server_manager = std::make_unique<ServerManager>(system);
 
     // ARP

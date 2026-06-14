@@ -7,31 +7,32 @@
 // Please send all BUG REPORTS to <pavel@cs.unc.edu>.
 // <http://gamma.cs.unc.edu/FasTC/>
 
+#include "video_core/textures/astc.h"
+
 #include <algorithm>
 #include <bit>
+#include <boost/container/static_vector.hpp>
 #include <cassert>
 #include <cstring>
+#include <ranges>
 #include <span>
 #include <vector>
 
-#include <boost/container/static_vector.hpp>
-
 #include "common/alignment.h"
 #include "common/common_types.h"
-#include <ranges>
-#include "video_core/textures/astc.h"
 #include "video_core/textures/workers.h"
 
 class InputBitStream {
 public:
     constexpr explicit InputBitStream(std::span<const u8> data, size_t start_offset = 0)
-        : cur_byte{data.data()}, total_bits{data.size()}, next_bit{start_offset % 8} {}
-
-    constexpr size_t GetBitsRead() const {
-        return bits_read;
+        : cur_byte{data.data()}, total_bits{data.size()}, next_bit{start_offset % 8}
+    {
     }
 
-    constexpr bool ReadBit() {
+    constexpr size_t GetBitsRead() const { return bits_read; }
+
+    constexpr bool ReadBit()
+    {
         if (bits_read >= total_bits * 8) {
             return 0;
         }
@@ -45,7 +46,8 @@ public:
         return bit;
     }
 
-    constexpr u32 ReadBits(std::size_t nBits) {
+    constexpr u32 ReadBits(std::size_t nBits)
+    {
         u32 ret = 0;
         for (std::size_t i = 0; i < nBits; ++i) {
             ret |= (ReadBit() & 1) << i;
@@ -53,8 +55,8 @@ public:
         return ret;
     }
 
-    template <std::size_t nBits>
-    constexpr u32 ReadBits() {
+    template<std::size_t nBits> constexpr u32 ReadBits()
+    {
         u32 ret = 0;
         for (std::size_t i = 0; i < nBits; ++i) {
             ret |= (ReadBit() & 1) << i;
@@ -72,26 +74,29 @@ private:
 class OutputBitStream {
 public:
     constexpr explicit OutputBitStream(u8* ptr, std::size_t bits = 0, std::size_t start_offset = 0)
-        : cur_byte{ptr}, num_bits{bits}, next_bit{start_offset % 8} {}
-
-    constexpr std::size_t GetBitsWritten() const {
-        return bits_written;
+        : cur_byte{ptr}, num_bits{bits}, next_bit{start_offset % 8}
+    {
     }
 
-    constexpr void WriteBitsR(u32 val, u32 nBits) {
+    constexpr std::size_t GetBitsWritten() const { return bits_written; }
+
+    constexpr void WriteBitsR(u32 val, u32 nBits)
+    {
         for (u32 i = 0; i < nBits; i++) {
             WriteBit((val >> (nBits - i - 1)) & 1);
         }
     }
 
-    constexpr void WriteBits(u32 val, u32 nBits) {
+    constexpr void WriteBits(u32 val, u32 nBits)
+    {
         for (u32 i = 0; i < nBits; i++) {
             WriteBit((val >> i) & 1);
         }
     }
 
 private:
-    constexpr void WriteBit(bool b) {
+    constexpr void WriteBit(bool b)
+    {
         if (bits_written >= num_bits) {
             return;
         }
@@ -118,19 +123,17 @@ private:
     std::size_t next_bit = 0;
 };
 
-template <typename IntType>
-class Bits {
+template<typename IntType> class Bits {
 public:
     explicit Bits(const IntType& v) : m_Bits(v) {}
 
     Bits(const Bits&) = delete;
     Bits& operator=(const Bits&) = delete;
 
-    u8 operator[](u32 bitPos) const {
-        return static_cast<u8>((m_Bits >> bitPos) & 1);
-    }
+    u8 operator[](u32 bitPos) const { return static_cast<u8>((m_Bits >> bitPos) & 1); }
 
-    IntType operator()(u32 start, u32 end) const {
+    IntType operator()(u32 start, u32 end) const
+    {
         if (start == end) {
             return (*this)[start];
         } else if (start > end) {
@@ -153,14 +156,18 @@ struct IntegerEncodedValue {
     constexpr IntegerEncodedValue() = default;
 
     constexpr IntegerEncodedValue(IntegerEncoding encoding_, u32 num_bits_)
-        : encoding{encoding_}, num_bits{num_bits_} {}
+        : encoding{encoding_}, num_bits{num_bits_}
+    {
+    }
 
-    constexpr bool MatchesEncoding(const IntegerEncodedValue& other) const {
+    constexpr bool MatchesEncoding(const IntegerEncodedValue& other) const
+    {
         return encoding == other.encoding && num_bits == other.num_bits;
     }
 
     // Returns the number of bits required to encode num_vals values.
-    u32 GetBitLength(u32 num_vals) const {
+    u32 GetBitLength(u32 num_vals) const
+    {
         u32 total_bits = num_bits * num_vals;
         if (encoding == IntegerEncoding::Trit) {
             total_bits += (num_vals * 8 + 4) / 5;
@@ -181,7 +188,8 @@ struct IntegerEncodedValue {
 
 // Returns a new instance of this struct that corresponds to the
 // can take no more than mav_value values
-static constexpr IntegerEncodedValue CreateEncoding(u32 mav_value) {
+static constexpr IntegerEncodedValue CreateEncoding(u32 mav_value)
+{
     while (mav_value > 0) {
         u32 check = mav_value + 1;
 
@@ -207,7 +215,8 @@ static constexpr IntegerEncodedValue CreateEncoding(u32 mav_value) {
     return IntegerEncodedValue(IntegerEncoding::JustBits, 0);
 }
 
-static constexpr std::array<IntegerEncodedValue, 256> MakeEncodedValues() {
+static constexpr std::array<IntegerEncodedValue, 256> MakeEncodedValues()
+{
     std::array<IntegerEncodedValue, 256> encodings{};
     for (std::size_t i = 0; i < encodings.size(); ++i) {
         encodings[i] = CreateEncoding(static_cast<u32>(i));
@@ -224,7 +233,8 @@ using IntegerEncodedVector = boost::container::static_vector<
         boost::container::inplace_alignment<alignof(IntegerEncodedValue)>,
         boost::container::throw_on_overflow<false>>::type>;
 
-static void DecodeTritBlock(InputBitStream& bits, IntegerEncodedVector& result, u32 nBitsPerValue) {
+static void DecodeTritBlock(InputBitStream& bits, IntegerEncodedVector& result, u32 nBitsPerValue)
+{
     // Implement the algorithm in section C.2.12
     std::array<u32, 5> m;
     std::array<u32, 5> t;
@@ -282,8 +292,8 @@ static void DecodeTritBlock(InputBitStream& bits, IntegerEncodedVector& result, 
     }
 }
 
-static void DecodeQuintBlock(InputBitStream& bits, IntegerEncodedVector& result,
-                             u32 nBitsPerValue) {
+static void DecodeQuintBlock(InputBitStream& bits, IntegerEncodedVector& result, u32 nBitsPerValue)
+{
     // Implement the algorithm in section C.2.12
     u32 m[3];
     u32 q[3];
@@ -333,7 +343,8 @@ static void DecodeQuintBlock(InputBitStream& bits, IntegerEncodedVector& result,
 // bitstream. We must know beforehand what the maximum possible
 // value is, and how many values we're decoding.
 static void DecodeIntegerSequence(IntegerEncodedVector& result, InputBitStream& bits, u32 maxRange,
-                                  u32 nValues) {
+                                  u32 nValues)
+{
     // Determine encoding parameters
     IntegerEncodedValue val = ASTC_ENCODINGS_VALUES[maxRange];
 
@@ -369,7 +380,8 @@ struct TexelWeightParams {
     bool m_bVoidExtentLDR = false;
     bool m_bVoidExtentHDR = false;
 
-    u32 GetPackedBitSize() const {
+    u32 GetPackedBitSize() const
+    {
         // How many indices do we have?
         u32 nIdxs = m_Height * m_Width;
         if (m_bDualPlane) {
@@ -379,7 +391,8 @@ struct TexelWeightParams {
         return ASTC_ENCODINGS_VALUES[m_MaxWeight].GetBitLength(nIdxs);
     }
 
-    u32 GetNumWeightValues() const {
+    u32 GetNumWeightValues() const
+    {
         u32 ret = m_Width * m_Height;
         if (m_bDualPlane) {
             ret *= 2;
@@ -388,7 +401,8 @@ struct TexelWeightParams {
     }
 };
 
-static TexelWeightParams DecodeBlockInfo(InputBitStream& strm) {
+static TexelWeightParams DecodeBlockInfo(InputBitStream& strm)
+{
     TexelWeightParams params;
 
     // Read the entire block mode all at once
@@ -589,8 +603,8 @@ static TexelWeightParams DecodeBlockInfo(InputBitStream& strm) {
 
 // Replicates low num_bits such that [(to_bit - 1):(to_bit - 1 - from_bit)]
 // is the same as [(num_bits - 1):0] and repeats all the way down.
-template <typename IntType>
-static constexpr IntType Replicate(IntType val, u32 num_bits, u32 to_bit) {
+template<typename IntType> static constexpr IntType Replicate(IntType val, u32 num_bits, u32 to_bit)
+{
     if (num_bits == 0 || to_bit == 0) {
         return 0;
     }
@@ -611,12 +625,13 @@ static constexpr IntType Replicate(IntType val, u32 num_bits, u32 to_bit) {
     return res;
 }
 
-static constexpr std::size_t NumReplicateEntries(u32 num_bits) {
+static constexpr std::size_t NumReplicateEntries(u32 num_bits)
+{
     return std::size_t(1) << num_bits;
 }
 
-template <typename IntType, u32 num_bits, u32 to_bit>
-static constexpr auto MakeReplicateTable() {
+template<typename IntType, u32 num_bits, u32 to_bit> static constexpr auto MakeReplicateTable()
+{
     std::array<IntType, NumReplicateEntries(num_bits)> table{};
     for (IntType value = 0; value < static_cast<IntType>(std::size(table)); ++value) {
         table[value] = Replicate(value, num_bits, to_bit);
@@ -625,17 +640,20 @@ static constexpr auto MakeReplicateTable() {
 }
 
 static constexpr auto REPLICATE_BYTE_TO_16_TABLE = MakeReplicateTable<u32, 8, 16>();
-static constexpr u32 ReplicateByteTo16(std::size_t value) {
+static constexpr u32 ReplicateByteTo16(std::size_t value)
+{
     return REPLICATE_BYTE_TO_16_TABLE[value];
 }
 
 static constexpr auto REPLICATE_BIT_TO_7_TABLE = MakeReplicateTable<u32, 1, 7>();
-static constexpr u32 ReplicateBitTo7(std::size_t value) {
+static constexpr u32 ReplicateBitTo7(std::size_t value)
+{
     return REPLICATE_BIT_TO_7_TABLE[value];
 }
 
 static constexpr auto REPLICATE_BIT_TO_9_TABLE = MakeReplicateTable<u32, 1, 9>();
-static constexpr u32 ReplicateBitTo9(std::size_t value) {
+static constexpr u32 ReplicateBitTo9(std::size_t value)
+{
     return REPLICATE_BIT_TO_9_TABLE[value];
 }
 
@@ -649,7 +667,8 @@ static constexpr auto REPLICATE_7_BIT_TO_8_TABLE = MakeReplicateTable<u32, 7, 8>
 static constexpr auto REPLICATE_8_BIT_TO_8_TABLE = MakeReplicateTable<u32, 8, 8>();
 /// Use a precompiled table with the most common usages, if it's not in the expected range, fallback
 /// to the runtime implementation
-static constexpr u32 FastReplicateTo8(u32 value, u32 num_bits) {
+static constexpr u32 FastReplicateTo8(u32 value, u32 num_bits)
+{
     switch (num_bits) {
     case 1:
         return REPLICATE_1_BIT_TO_8_TABLE[value];
@@ -677,7 +696,8 @@ static constexpr auto REPLICATE_2_BIT_TO_6_TABLE = MakeReplicateTable<u32, 2, 6>
 static constexpr auto REPLICATE_3_BIT_TO_6_TABLE = MakeReplicateTable<u32, 3, 6>();
 static constexpr auto REPLICATE_4_BIT_TO_6_TABLE = MakeReplicateTable<u32, 4, 6>();
 static constexpr auto REPLICATE_5_BIT_TO_6_TABLE = MakeReplicateTable<u32, 5, 6>();
-static constexpr u32 FastReplicateTo6(u32 value, u32 num_bits) {
+static constexpr u32 FastReplicateTo6(u32 value, u32 num_bits)
+{
     switch (num_bits) {
     case 1:
         return REPLICATE_1_BIT_TO_6_TABLE[value];
@@ -705,29 +725,33 @@ public:
     Pixel(u32 a, u32 r, u32 g, u32 b, u32 bitDepth = 8)
         : m_BitDepth{u8(bitDepth), u8(bitDepth), u8(bitDepth), u8(bitDepth)},
           color{static_cast<ChannelType>(a), static_cast<ChannelType>(r),
-                static_cast<ChannelType>(g), static_cast<ChannelType>(b)} {}
+                static_cast<ChannelType>(g), static_cast<ChannelType>(b)}
+    {
+    }
 
     // Changes the depth of each pixel. This scales the values to
     // the appropriate bit depth by either truncating the least
     // significant bits when going from larger to smaller bit depth
     // or by repeating the most significant bits when going from
     // smaller to larger bit depths.
-    void ChangeBitDepth() {
+    void ChangeBitDepth()
+    {
         for (u32 i = 0; i < 4; i++) {
             Component(i) = ChangeBitDepth(Component(i), m_BitDepth[i]);
             m_BitDepth[i] = 8;
         }
     }
 
-    template <typename IntType>
-    static float ConvertChannelToFloat(IntType channel, u8 bitDepth) {
+    template<typename IntType> static float ConvertChannelToFloat(IntType channel, u8 bitDepth)
+    {
         float denominator = static_cast<float>((1 << bitDepth) - 1);
         return static_cast<float>(channel) / denominator;
     }
 
     // Changes the bit depth of a single component. See the comment
     // above for how we do this.
-    static ChannelType ChangeBitDepth(Pixel::ChannelType val, u8 oldDepth) {
+    static ChannelType ChangeBitDepth(Pixel::ChannelType val, u8 oldDepth)
+    {
         assert(oldDepth <= 8);
 
         if (oldDepth == 8) {
@@ -750,38 +774,19 @@ public:
         return 0;
     }
 
-    const ChannelType& A() const {
-        return color[0];
-    }
-    ChannelType& A() {
-        return color[0];
-    }
-    const ChannelType& R() const {
-        return color[1];
-    }
-    ChannelType& R() {
-        return color[1];
-    }
-    const ChannelType& G() const {
-        return color[2];
-    }
-    ChannelType& G() {
-        return color[2];
-    }
-    const ChannelType& B() const {
-        return color[3];
-    }
-    ChannelType& B() {
-        return color[3];
-    }
-    const ChannelType& Component(u32 idx) const {
-        return color[idx];
-    }
-    ChannelType& Component(u32 idx) {
-        return color[idx];
-    }
+    const ChannelType& A() const { return color[0]; }
+    ChannelType& A() { return color[0]; }
+    const ChannelType& R() const { return color[1]; }
+    ChannelType& R() { return color[1]; }
+    const ChannelType& G() const { return color[2]; }
+    ChannelType& G() { return color[2]; }
+    const ChannelType& B() const { return color[3]; }
+    ChannelType& B() { return color[3]; }
+    const ChannelType& Component(u32 idx) const { return color[idx]; }
+    ChannelType& Component(u32 idx) { return color[idx]; }
 
-    void GetBitDepth(u8 (&outDepth)[4]) const {
+    void GetBitDepth(u8 (&outDepth)[4]) const
+    {
         for (s32 i = 0; i < 4; i++) {
             outDepth[i] = m_BitDepth[i];
         }
@@ -791,7 +796,8 @@ public:
     // and then pack each channel into an R8G8B8A8 32-bit integer. We assume
     // that the architecture is little-endian, so the alpha channel will end
     // up in the most-significant byte.
-    u32 Pack() const {
+    u32 Pack() const
+    {
         Pixel eightBit(*this);
         eightBit.ChangeBitDepth();
 
@@ -807,19 +813,19 @@ public:
     }
 
     // Clamps the pixel to the range [0,255]
-    void ClampByte() {
+    void ClampByte()
+    {
         for (u32 i = 0; i < 4; i++) {
             color[i] = (color[i] < 0) ? 0 : ((color[i] > 255) ? 255 : color[i]);
         }
     }
 
-    void MakeOpaque() {
-        A() = 255;
-    }
+    void MakeOpaque() { A() = 255; }
 };
 
 static void DecodeColorValues(u32* out, std::span<u8> data, const u32* modes, const u32 nPartitions,
-                              const u32 nBitsForColorData) {
+                              const u32 nBitsForColorData)
+{
     // First figure out how many color values we have
     u32 nValues = 0;
     for (u32 i = 0; i < nPartitions; i++) {
@@ -989,7 +995,8 @@ static void DecodeColorValues(u32* out, std::span<u8> data, const u32* modes, co
     }
 }
 
-static u32 UnquantizeTexelWeight(const IntegerEncodedValue& val) {
+static u32 UnquantizeTexelWeight(const IntegerEncodedValue& val)
+{
     u32 bitval = val.bit_value;
     u32 bitlen = val.num_bits;
 
@@ -1080,7 +1087,8 @@ static u32 UnquantizeTexelWeight(const IntegerEncodedValue& val) {
 
 static void UnquantizeTexelWeights(u32 out[2][144], const IntegerEncodedVector& weights,
                                    const TexelWeightParams& params, const u32 blockWidth,
-                                   const u32 blockHeight) {
+                                   const u32 blockHeight)
+{
     u32 weightIdx = 0;
     u32 unquantized[2][144];
 
@@ -1147,7 +1155,8 @@ static void UnquantizeTexelWeights(u32 out[2][144], const IntegerEncodedVector& 
 }
 
 // Transfers a bit as described in C.2.14
-static inline void BitTransferSigned(int& a, int& b) {
+static inline void BitTransferSigned(int& a, int& b)
+{
     b >>= 1;
     b |= a & 0x80;
     a >>= 1;
@@ -1158,14 +1167,16 @@ static inline void BitTransferSigned(int& a, int& b) {
 
 // Adds more precision to the blue channel as described
 // in C.2.14
-static inline Pixel BlueContract(s32 a, s32 r, s32 g, s32 b) {
+static inline Pixel BlueContract(s32 a, s32 r, s32 g, s32 b)
+{
     return Pixel(static_cast<s16>(a), static_cast<s16>((r + b) >> 1),
                  static_cast<s16>((g + b) >> 1), static_cast<s16>(b));
 }
 
 // Partition selection functions as specified in
 // C.2.21
-static inline u32 hash52(u32 p) {
+static inline u32 hash52(u32 p)
+{
     p ^= p >> 15;
     p -= p << 17;
     p += p << 7;
@@ -1179,7 +1190,8 @@ static inline u32 hash52(u32 p) {
     return p;
 }
 
-static u32 SelectPartition(s32 seed, s32 x, s32 y, s32 z, s32 partitionCount, s32 smallBlock) {
+static u32 SelectPartition(s32 seed, s32 x, s32 y, s32 z, s32 partitionCount, s32 smallBlock)
+{
     if (1 == partitionCount)
         return 0;
 
@@ -1265,13 +1277,14 @@ static u32 SelectPartition(s32 seed, s32 x, s32 y, s32 z, s32 partitionCount, s3
     return 3;
 }
 
-static inline u32 Select2DPartition(s32 seed, s32 x, s32 y, s32 partitionCount, s32 smallBlock) {
+static inline u32 Select2DPartition(s32 seed, s32 x, s32 y, s32 partitionCount, s32 smallBlock)
+{
     return SelectPartition(seed, x, y, 0, partitionCount, smallBlock);
 }
 
 // Section C.2.14
-static void ComputeEndpoints(Pixel& ep1, Pixel& ep2, const u32*& colorValues,
-                             u32 colorEndpointMode) {
+static void ComputeEndpoints(Pixel& ep1, Pixel& ep2, const u32*& colorValues, u32 colorEndpointMode)
+{
 #define READ_UINT_VALUES(N)                                                                        \
     u32 v[N];                                                                                      \
     for (u32 i = 0; i < N; i++) {                                                                  \
@@ -1392,7 +1405,8 @@ static void ComputeEndpoints(Pixel& ep1, Pixel& ep2, const u32*& colorValues,
 }
 
 static void FillVoidExtentLDR(InputBitStream& strm, std::span<u32> outBuf, u32 blockWidth,
-                              u32 blockHeight) {
+                              u32 blockHeight)
+{
     // Don't actually care about the void extent, just read the bits...
     for (s32 i = 0; i < 4; ++i) {
         strm.ReadBits<13>();
@@ -1414,7 +1428,8 @@ static void FillVoidExtentLDR(InputBitStream& strm, std::span<u32> outBuf, u32 b
     }
 }
 
-static void FillError(std::span<u32> outBuf, u32 blockWidth, u32 blockHeight) {
+static void FillError(std::span<u32> outBuf, u32 blockWidth, u32 blockHeight)
+{
     for (u32 j = 0; j < blockHeight; j++) {
         for (u32 i = 0; i < blockWidth; i++) {
             outBuf[j * blockWidth + i] = 0x00000000;
@@ -1423,7 +1438,8 @@ static void FillError(std::span<u32> outBuf, u32 blockWidth, u32 blockHeight) {
 }
 
 static void DecompressBlock(std::span<const u8, 16> inBuf, const u32 blockWidth,
-                            const u32 blockHeight, std::span<u32, 12 * 12> outBuf) {
+                            const u32 blockHeight, std::span<u32, 12 * 12> outBuf)
+{
     InputBitStream strm(inBuf);
     TexelWeightParams weightParams = DecodeBlockInfo(strm);
 
@@ -1655,7 +1671,8 @@ static void DecompressBlock(std::span<const u8, 16> inBuf, const u32 blockWidth,
 }
 
 void Decompress(std::span<const uint8_t> data, uint32_t width, uint32_t height, uint32_t depth,
-                uint32_t block_width, uint32_t block_height, std::span<uint8_t> output) {
+                uint32_t block_width, uint32_t block_height, std::span<uint8_t> output)
+{
     const u32 rows = Common::DivideUp(height, block_height);
     const u32 cols = Common::DivideUp(width, block_width);
 

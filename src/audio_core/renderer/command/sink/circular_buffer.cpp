@@ -4,16 +4,18 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "audio_core/renderer/command/sink/circular_buffer.h"
+
 #include <vector>
 
 #include "audio_core/adsp/apps/audio_renderer/command_list_processor.h"
-#include "audio_core/renderer/command/sink/circular_buffer.h"
 #include "core/memory.h"
 
 namespace AudioCore::Renderer {
 
 void CircularBufferSinkCommand::Dump(
-    [[maybe_unused]] const AudioRenderer::CommandListProcessor& processor, std::string& string) {
+    [[maybe_unused]] const AudioRenderer::CommandListProcessor& processor, std::string& string)
+{
     string += fmt::format(
         "CircularBufferSinkCommand\n\tinput_count {} ring size {:04X} ring pos {:04X}\n\tinputs: ",
         input_count, size, pos);
@@ -23,7 +25,8 @@ void CircularBufferSinkCommand::Dump(
     string += "\n";
 }
 
-void CircularBufferSinkCommand::Process(const AudioRenderer::CommandListProcessor& processor) {
+void CircularBufferSinkCommand::Process(const AudioRenderer::CommandListProcessor& processor)
+{
     constexpr s32 min{(std::numeric_limits<s16>::min)()};
     constexpr s32 max{(std::numeric_limits<s16>::max)()};
 
@@ -44,7 +47,8 @@ void CircularBufferSinkCommand::Process(const AudioRenderer::CommandListProcesso
     }
 }
 
-bool CircularBufferSinkCommand::Verify(const AudioRenderer::CommandListProcessor& processor) {
+bool CircularBufferSinkCommand::Verify(const AudioRenderer::CommandListProcessor& processor)
+{
     return true;
 }
 

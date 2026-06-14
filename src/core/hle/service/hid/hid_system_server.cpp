@@ -5,6 +5,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "core/hle/service/hid/hid_system_server.h"
+
 #include "core/hle/service/ipc_helpers.h"
 #include "core/hle/service/set/settings_types.h"
 #include "hid_core/hid_result.h"
@@ -21,7 +22,8 @@ namespace Service::HID {
 IHidSystemServer::IHidSystemServer(Core::System& system_, std::shared_ptr<ResourceManager> resource,
                                    std::shared_ptr<HidFirmwareSettings> settings)
     : ServiceFramework{system_, "hid:sys"}, service_context{system_, service_name},
-      resource_manager{resource}, firmware_settings{settings} {
+      resource_manager{resource}, firmware_settings{settings}
+{
     // clang-format off
     static const FunctionInfo functions[] = {
         {31, nullptr, "SendKeyboardLockKeyEvent"},
@@ -258,14 +260,16 @@ IHidSystemServer::IHidSystemServer(Core::System& system_, std::shared_ptr<Resour
         service_context.CreateEvent("IHidSystemServer::AcquireUniquePadConnectionEventHandle");
 }
 
-IHidSystemServer::~IHidSystemServer() {
+IHidSystemServer::~IHidSystemServer()
+{
     service_context.CloseEvent(joy_detach_event);
     service_context.CloseEvent(acquire_device_registered_event);
     service_context.CloseEvent(acquire_connection_trigger_timeout_event);
     service_context.CloseEvent(unique_pad_connection_event);
 };
 
-void IHidSystemServer::GetPlatformConfig(HLERequestContext& ctx) {
+void IHidSystemServer::GetPlatformConfig(HLERequestContext& ctx)
+{
     const auto platform_config = firmware_settings->GetPlatformConfig();
 
     LOG_INFO(Service_HID, "called, platform_config={}", platform_config.raw);
@@ -275,7 +279,8 @@ void IHidSystemServer::GetPlatformConfig(HLERequestContext& ctx) {
     rb.PushRaw(platform_config);
 }
 
-void IHidSystemServer::ApplyNpadSystemCommonPolicy(HLERequestContext& ctx) {
+void IHidSystemServer::ApplyNpadSystemCommonPolicy(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     const auto applet_resource_user_id{rp.Pop<u64>()};
 
@@ -287,7 +292,8 @@ void IHidSystemServer::ApplyNpadSystemCommonPolicy(HLERequestContext& ctx) {
     rb.Push(ResultSuccess);
 }
 
-void IHidSystemServer::EnableAssigningSingleOnSlSrPress(HLERequestContext& ctx) {
+void IHidSystemServer::EnableAssigningSingleOnSlSrPress(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     const auto applet_resource_user_id{rp.Pop<u64>()};
 
@@ -299,7 +305,8 @@ void IHidSystemServer::EnableAssigningSingleOnSlSrPress(HLERequestContext& ctx) 
     rb.Push(ResultSuccess);
 }
 
-void IHidSystemServer::DisableAssigningSingleOnSlSrPress(HLERequestContext& ctx) {
+void IHidSystemServer::DisableAssigningSingleOnSlSrPress(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     const auto applet_resource_user_id{rp.Pop<u64>()};
 
@@ -311,7 +318,8 @@ void IHidSystemServer::DisableAssigningSingleOnSlSrPress(HLERequestContext& ctx)
     rb.Push(ResultSuccess);
 }
 
-void IHidSystemServer::GetLastActiveNpad(HLERequestContext& ctx) {
+void IHidSystemServer::GetLastActiveNpad(HLERequestContext& ctx)
+{
     Core::HID::NpadIdType npad_id{};
     const Result result = GetResourceManager()->GetNpad()->GetLastActiveNpad(npad_id);
 
@@ -322,7 +330,8 @@ void IHidSystemServer::GetLastActiveNpad(HLERequestContext& ctx) {
     rb.PushEnum(npad_id);
 }
 
-void IHidSystemServer::ApplyNpadSystemCommonPolicyFull(HLERequestContext& ctx) {
+void IHidSystemServer::ApplyNpadSystemCommonPolicyFull(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     const auto applet_resource_user_id{rp.Pop<u64>()};
 
@@ -334,7 +343,8 @@ void IHidSystemServer::ApplyNpadSystemCommonPolicyFull(HLERequestContext& ctx) {
     rb.Push(ResultSuccess);
 }
 
-void IHidSystemServer::GetNpadFullKeyGripColor(HLERequestContext& ctx) {
+void IHidSystemServer::GetNpadFullKeyGripColor(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     const auto npad_id_type{rp.PopEnum<Core::HID::NpadIdType>()};
 
@@ -351,7 +361,8 @@ void IHidSystemServer::GetNpadFullKeyGripColor(HLERequestContext& ctx) {
     rb.PushRaw(right_color);
 }
 
-void IHidSystemServer::GetMaskedSupportedNpadStyleSet(HLERequestContext& ctx) {
+void IHidSystemServer::GetMaskedSupportedNpadStyleSet(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     const auto applet_resource_user_id{rp.Pop<u64>()};
 
@@ -367,7 +378,8 @@ void IHidSystemServer::GetMaskedSupportedNpadStyleSet(HLERequestContext& ctx) {
     rb.PushEnum(supported_styleset);
 }
 
-void IHidSystemServer::SetSupportedNpadStyleSetAll(HLERequestContext& ctx) {
+void IHidSystemServer::SetSupportedNpadStyleSetAll(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     const auto applet_resource_user_id{rp.Pop<u64>()};
 
@@ -381,7 +393,8 @@ void IHidSystemServer::SetSupportedNpadStyleSetAll(HLERequestContext& ctx) {
     rb.Push(result);
 }
 
-void IHidSystemServer::GetNpadCaptureButtonAssignment(HLERequestContext& ctx) {
+void IHidSystemServer::GetNpadCaptureButtonAssignment(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     const auto applet_resource_user_id{rp.Pop<u64>()};
     const auto capture_button_list_size{ctx.GetWriteBufferNumElements<Core::HID::NpadButton>()};
@@ -402,7 +415,8 @@ void IHidSystemServer::GetNpadCaptureButtonAssignment(HLERequestContext& ctx) {
     rb.Push(list_size);
 }
 
-void IHidSystemServer::GetAppletDetailedUiType(HLERequestContext& ctx) {
+void IHidSystemServer::GetAppletDetailedUiType(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     const auto npad_id_type{rp.PopEnum<Core::HID::NpadIdType>()};
 
@@ -417,7 +431,8 @@ void IHidSystemServer::GetAppletDetailedUiType(HLERequestContext& ctx) {
     rb.PushRaw(detailed_ui_type);
 }
 
-void IHidSystemServer::GetNpadInterfaceType(HLERequestContext& ctx) {
+void IHidSystemServer::GetNpadInterfaceType(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     const auto npad_id_type{rp.PopEnum<Core::HID::NpadIdType>()};
 
@@ -429,7 +444,8 @@ void IHidSystemServer::GetNpadInterfaceType(HLERequestContext& ctx) {
     rb.PushEnum(Core::HID::NpadInterfaceType::Bluetooth);
 }
 
-void IHidSystemServer::GetNpadLeftRightInterfaceType(HLERequestContext& ctx) {
+void IHidSystemServer::GetNpadLeftRightInterfaceType(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     const auto npad_id_type{rp.PopEnum<Core::HID::NpadIdType>()};
 
@@ -442,7 +458,8 @@ void IHidSystemServer::GetNpadLeftRightInterfaceType(HLERequestContext& ctx) {
     rb.PushEnum(Core::HID::NpadInterfaceType::Bluetooth);
 }
 
-void IHidSystemServer::HasBattery(HLERequestContext& ctx) {
+void IHidSystemServer::HasBattery(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     const auto npad_id_type{rp.PopEnum<Core::HID::NpadIdType>()};
 
@@ -454,7 +471,8 @@ void IHidSystemServer::HasBattery(HLERequestContext& ctx) {
     rb.Push(false);
 }
 
-void IHidSystemServer::HasLeftRightBattery(HLERequestContext& ctx) {
+void IHidSystemServer::HasLeftRightBattery(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     const auto npad_id_type{rp.PopEnum<Core::HID::NpadIdType>()};
 
@@ -476,7 +494,8 @@ void IHidSystemServer::HasLeftRightBattery(HLERequestContext& ctx) {
     rb.PushRaw(left_right_battery);
 }
 
-void IHidSystemServer::GetUniquePadsFromNpad(HLERequestContext& ctx) {
+void IHidSystemServer::GetUniquePadsFromNpad(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     const auto npad_id_type{rp.PopEnum<Core::HID::NpadIdType>()};
 
@@ -494,7 +513,8 @@ void IHidSystemServer::GetUniquePadsFromNpad(HLERequestContext& ctx) {
     rb.Push(static_cast<u32>(unique_pads.size()));
 }
 
-void IHidSystemServer::SetNpadSystemExtStateEnabled(HLERequestContext& ctx) {
+void IHidSystemServer::SetNpadSystemExtStateEnabled(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     struct Parameters {
         bool is_enabled;
@@ -514,7 +534,8 @@ void IHidSystemServer::SetNpadSystemExtStateEnabled(HLERequestContext& ctx) {
     IPC::ResponseBuilder rb{ctx, 2};
     rb.Push(result);
 }
-void IHidSystemServer::RegisterAppletResourceUserId(HLERequestContext& ctx) {
+void IHidSystemServer::RegisterAppletResourceUserId(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     struct Parameters {
         bool enable_input;
@@ -535,7 +556,8 @@ void IHidSystemServer::RegisterAppletResourceUserId(HLERequestContext& ctx) {
     rb.Push(result);
 }
 
-void IHidSystemServer::UnregisterAppletResourceUserId(HLERequestContext& ctx) {
+void IHidSystemServer::UnregisterAppletResourceUserId(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     u64 applet_resource_user_id{rp.Pop<u64>()};
 
@@ -547,7 +569,8 @@ void IHidSystemServer::UnregisterAppletResourceUserId(HLERequestContext& ctx) {
     rb.Push(ResultSuccess);
 }
 
-void IHidSystemServer::EnableAppletToGetInput(HLERequestContext& ctx) {
+void IHidSystemServer::EnableAppletToGetInput(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     struct Parameters {
         bool is_enabled;
@@ -568,7 +591,8 @@ void IHidSystemServer::EnableAppletToGetInput(HLERequestContext& ctx) {
     rb.Push(ResultSuccess);
 }
 
-void IHidSystemServer::SetAruidValidForVibration(HLERequestContext& ctx) {
+void IHidSystemServer::SetAruidValidForVibration(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     struct Parameters {
         bool is_enabled;
@@ -589,7 +613,8 @@ void IHidSystemServer::SetAruidValidForVibration(HLERequestContext& ctx) {
     rb.Push(ResultSuccess);
 }
 
-void IHidSystemServer::EnableAppletToGetSixAxisSensor(HLERequestContext& ctx) {
+void IHidSystemServer::EnableAppletToGetSixAxisSensor(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     struct Parameters {
         bool is_enabled;
@@ -610,7 +635,8 @@ void IHidSystemServer::EnableAppletToGetSixAxisSensor(HLERequestContext& ctx) {
     rb.Push(ResultSuccess);
 }
 
-void IHidSystemServer::EnableAppletToGetPadInput(HLERequestContext& ctx) {
+void IHidSystemServer::EnableAppletToGetPadInput(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     struct Parameters {
         bool is_enabled;
@@ -631,7 +657,8 @@ void IHidSystemServer::EnableAppletToGetPadInput(HLERequestContext& ctx) {
     rb.Push(ResultSuccess);
 }
 
-void IHidSystemServer::EnableAppletToGetTouchScreen(HLERequestContext& ctx) {
+void IHidSystemServer::EnableAppletToGetTouchScreen(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     struct Parameters {
         bool is_enabled;
@@ -652,7 +679,8 @@ void IHidSystemServer::EnableAppletToGetTouchScreen(HLERequestContext& ctx) {
     rb.Push(ResultSuccess);
 }
 
-void IHidSystemServer::SetVibrationMasterVolume(HLERequestContext& ctx) {
+void IHidSystemServer::SetVibrationMasterVolume(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     const auto master_volume{rp.Pop<f32>()};
 
@@ -666,7 +694,8 @@ void IHidSystemServer::SetVibrationMasterVolume(HLERequestContext& ctx) {
     rb.Push(result);
 }
 
-void IHidSystemServer::GetVibrationMasterVolume(HLERequestContext& ctx) {
+void IHidSystemServer::GetVibrationMasterVolume(HLERequestContext& ctx)
+{
     f32 master_volume{};
     const auto result =
         GetResourceManager()->GetNpad()->GetVibrationHandler()->GetVibrationMasterVolume(
@@ -679,7 +708,8 @@ void IHidSystemServer::GetVibrationMasterVolume(HLERequestContext& ctx) {
     rb.Push(master_volume);
 }
 
-void IHidSystemServer::BeginPermitVibrationSession(HLERequestContext& ctx) {
+void IHidSystemServer::BeginPermitVibrationSession(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     const auto applet_resource_user_id{rp.Pop<u64>()};
 
@@ -693,7 +723,8 @@ void IHidSystemServer::BeginPermitVibrationSession(HLERequestContext& ctx) {
     rb.Push(result);
 }
 
-void IHidSystemServer::EndPermitVibrationSession(HLERequestContext& ctx) {
+void IHidSystemServer::EndPermitVibrationSession(HLERequestContext& ctx)
+{
     LOG_INFO(Service_HID, "called");
 
     const auto result =
@@ -703,7 +734,8 @@ void IHidSystemServer::EndPermitVibrationSession(HLERequestContext& ctx) {
     rb.Push(result);
 }
 
-void IHidSystemServer::IsJoyConRailEnabled(HLERequestContext& ctx) {
+void IHidSystemServer::IsJoyConRailEnabled(HLERequestContext& ctx)
+{
     const bool is_attached = true;
 
     LOG_WARNING(Service_HID, "(STUBBED) called, is_attached={}", is_attached);
@@ -713,7 +745,8 @@ void IHidSystemServer::IsJoyConRailEnabled(HLERequestContext& ctx) {
     rb.Push(is_attached);
 }
 
-void IHidSystemServer::IsJoyConAttachedOnAllRail(HLERequestContext& ctx) {
+void IHidSystemServer::IsJoyConAttachedOnAllRail(HLERequestContext& ctx)
+{
     const bool is_attached = true;
 
     LOG_DEBUG(Service_HID, "(STUBBED) called, is_attached={}", is_attached);
@@ -723,7 +756,8 @@ void IHidSystemServer::IsJoyConAttachedOnAllRail(HLERequestContext& ctx) {
     rb.Push(is_attached);
 }
 
-void IHidSystemServer::AcquireConnectionTriggerTimeoutEvent(HLERequestContext& ctx) {
+void IHidSystemServer::AcquireConnectionTriggerTimeoutEvent(HLERequestContext& ctx)
+{
     LOG_INFO(Service_AM, "(STUBBED) called");
 
     IPC::ResponseBuilder rb{ctx, 2, 1};
@@ -731,7 +765,8 @@ void IHidSystemServer::AcquireConnectionTriggerTimeoutEvent(HLERequestContext& c
     rb.PushCopyObjects(acquire_device_registered_event->GetReadableEvent());
 }
 
-void IHidSystemServer::AcquireDeviceRegisteredEventForControllerSupport(HLERequestContext& ctx) {
+void IHidSystemServer::AcquireDeviceRegisteredEventForControllerSupport(HLERequestContext& ctx)
+{
     LOG_INFO(Service_HID, "(STUBBED) called");
 
     IPC::ResponseBuilder rb{ctx, 2, 1};
@@ -739,7 +774,8 @@ void IHidSystemServer::AcquireDeviceRegisteredEventForControllerSupport(HLEReque
     rb.PushCopyObjects(acquire_device_registered_event->GetReadableEvent());
 }
 
-void IHidSystemServer::GetRegisteredDevices(HLERequestContext& ctx) {
+void IHidSystemServer::GetRegisteredDevices(HLERequestContext& ctx)
+{
     LOG_WARNING(Service_HID, "(STUBBED) called");
 
     struct RegisterData {
@@ -757,7 +793,8 @@ void IHidSystemServer::GetRegisteredDevices(HLERequestContext& ctx) {
     rb.Push<u64>(registered_devices.size());
 }
 
-void IHidSystemServer::AcquireUniquePadConnectionEventHandle(HLERequestContext& ctx) {
+void IHidSystemServer::AcquireUniquePadConnectionEventHandle(HLERequestContext& ctx)
+{
     LOG_WARNING(Service_HID, "(STUBBED) called");
 
     IPC::ResponseBuilder rb{ctx, 2, 1};
@@ -765,7 +802,8 @@ void IHidSystemServer::AcquireUniquePadConnectionEventHandle(HLERequestContext& 
     rb.Push(ResultSuccess);
 }
 
-void IHidSystemServer::GetUniquePadIds(HLERequestContext& ctx) {
+void IHidSystemServer::GetUniquePadIds(HLERequestContext& ctx)
+{
     LOG_DEBUG(Service_HID, "(STUBBED) called");
 
     IPC::ResponseBuilder rb{ctx, 4};
@@ -773,7 +811,8 @@ void IHidSystemServer::GetUniquePadIds(HLERequestContext& ctx) {
     rb.Push<u64>(0);
 }
 
-void IHidSystemServer::AcquireJoyDetachOnBluetoothOffEventHandle(HLERequestContext& ctx) {
+void IHidSystemServer::AcquireJoyDetachOnBluetoothOffEventHandle(HLERequestContext& ctx)
+{
     LOG_INFO(Service_AM, "called");
 
     IPC::ResponseBuilder rb{ctx, 2, 1};
@@ -781,7 +820,8 @@ void IHidSystemServer::AcquireJoyDetachOnBluetoothOffEventHandle(HLERequestConte
     rb.PushCopyObjects(joy_detach_event->GetReadableEvent());
 }
 
-void IHidSystemServer::IsUsbFullKeyControllerEnabled(HLERequestContext& ctx) {
+void IHidSystemServer::IsUsbFullKeyControllerEnabled(HLERequestContext& ctx)
+{
     const bool is_enabled = false;
 
     LOG_WARNING(Service_HID, "(STUBBED) called, is_enabled={}", is_enabled);
@@ -791,7 +831,8 @@ void IHidSystemServer::IsUsbFullKeyControllerEnabled(HLERequestContext& ctx) {
     rb.Push(is_enabled);
 }
 
-void IHidSystemServer::EnableUsbFullKeyController(HLERequestContext& ctx) {
+void IHidSystemServer::EnableUsbFullKeyController(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     const auto is_enabled{rp.Pop<bool>()};
 
@@ -801,7 +842,8 @@ void IHidSystemServer::EnableUsbFullKeyController(HLERequestContext& ctx) {
     rb.Push(ResultSuccess);
 }
 
-void IHidSystemServer::IsHandheldButtonPressedOnConsoleMode(HLERequestContext& ctx) {
+void IHidSystemServer::IsHandheldButtonPressedOnConsoleMode(HLERequestContext& ctx)
+{
     const bool button_pressed = false;
 
     LOG_DEBUG(Service_HID, "(STUBBED) called, is_enabled={}",
@@ -812,56 +854,64 @@ void IHidSystemServer::IsHandheldButtonPressedOnConsoleMode(HLERequestContext& c
     rb.Push(button_pressed);
 }
 
-void IHidSystemServer::InitializeFirmwareUpdate(HLERequestContext& ctx) {
+void IHidSystemServer::InitializeFirmwareUpdate(HLERequestContext& ctx)
+{
     LOG_WARNING(Service_HID, "(STUBBED) called");
 
     IPC::ResponseBuilder rb{ctx, 2};
     rb.Push(ResultSuccess);
 }
 
-void IHidSystemServer::CheckFirmwareUpdateRequired(HLERequestContext& ctx) {
+void IHidSystemServer::CheckFirmwareUpdateRequired(HLERequestContext& ctx)
+{
     LOG_WARNING(Service_HID, "(STUBBED) called");
 
     IPC::ResponseBuilder rb{ctx, 2};
     rb.Push(ResultSuccess);
 }
 
-void IHidSystemServer::SetFirmwareHotfixUpdateSkipEnabled(HLERequestContext& ctx) {
+void IHidSystemServer::SetFirmwareHotfixUpdateSkipEnabled(HLERequestContext& ctx)
+{
     LOG_WARNING(Service_HID, "(STUBBED) called");
 
     IPC::ResponseBuilder rb{ctx, 2};
     rb.Push(ResultSuccess);
 }
 
-void IHidSystemServer::InitializeUsbFirmwareUpdate(HLERequestContext& ctx) {
+void IHidSystemServer::InitializeUsbFirmwareUpdate(HLERequestContext& ctx)
+{
     LOG_WARNING(Service_HID, "(STUBBED) called");
 
     IPC::ResponseBuilder rb{ctx, 2};
     rb.Push(ResultSuccess);
 }
 
-void IHidSystemServer::FinalizeUsbFirmwareUpdate(HLERequestContext& ctx) {
+void IHidSystemServer::FinalizeUsbFirmwareUpdate(HLERequestContext& ctx)
+{
     LOG_WARNING(Service_HID, "(STUBBED) called");
 
     IPC::ResponseBuilder rb{ctx, 2};
     rb.Push(ResultSuccess);
 }
 
-void IHidSystemServer::CheckUsbFirmwareUpdateRequired(HLERequestContext& ctx) {
+void IHidSystemServer::CheckUsbFirmwareUpdateRequired(HLERequestContext& ctx)
+{
     LOG_WARNING(Service_HID, "(STUBBED) called");
 
     IPC::ResponseBuilder rb{ctx, 2};
     rb.Push(ResultSuccess);
 }
 
-void IHidSystemServer::InitializeUsbFirmwareUpdateWithoutMemory(HLERequestContext& ctx) {
+void IHidSystemServer::InitializeUsbFirmwareUpdateWithoutMemory(HLERequestContext& ctx)
+{
     LOG_WARNING(Service_HID, "(STUBBED) called");
 
     IPC::ResponseBuilder rb{ctx, 2};
     rb.Push(ResultSuccess);
 }
 
-void IHidSystemServer::SetTouchScreenMagnification(HLERequestContext& ctx) {
+void IHidSystemServer::SetTouchScreenMagnification(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     const auto point1x{rp.Pop<f32>()};
     const auto point1y{rp.Pop<f32>()};
@@ -878,7 +928,8 @@ void IHidSystemServer::SetTouchScreenMagnification(HLERequestContext& ctx) {
     rb.Push(result);
 }
 
-void IHidSystemServer::GetTouchScreenFirmwareVersion(HLERequestContext& ctx) {
+void IHidSystemServer::GetTouchScreenFirmwareVersion(HLERequestContext& ctx)
+{
     LOG_INFO(Service_HID, "called");
 
     Core::HID::FirmwareVersion firmware{};
@@ -889,7 +940,8 @@ void IHidSystemServer::GetTouchScreenFirmwareVersion(HLERequestContext& ctx) {
     rb.PushRaw(firmware);
 }
 
-void IHidSystemServer::SetTouchScreenDefaultConfiguration(HLERequestContext& ctx) {
+void IHidSystemServer::SetTouchScreenDefaultConfiguration(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     auto touchscreen_config{rp.PopRaw<Core::HID::TouchScreenConfigurationForNx>()};
 
@@ -908,7 +960,8 @@ void IHidSystemServer::SetTouchScreenDefaultConfiguration(HLERequestContext& ctx
     rb.Push(result);
 }
 
-void IHidSystemServer::GetTouchScreenDefaultConfiguration(HLERequestContext& ctx) {
+void IHidSystemServer::GetTouchScreenDefaultConfiguration(HLERequestContext& ctx)
+{
     LOG_INFO(Service_HID, "called");
 
     Core::HID::TouchScreenConfigurationForNx touchscreen_config{};
@@ -926,7 +979,8 @@ void IHidSystemServer::GetTouchScreenDefaultConfiguration(HLERequestContext& ctx
     rb.PushRaw(touchscreen_config);
 }
 
-void IHidSystemServer::SetForceHandheldStyleVibration(HLERequestContext& ctx) {
+void IHidSystemServer::SetForceHandheldStyleVibration(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     const auto is_forced{rp.Pop<bool>()};
 
@@ -939,7 +993,8 @@ void IHidSystemServer::SetForceHandheldStyleVibration(HLERequestContext& ctx) {
     rb.Push(ResultSuccess);
 }
 
-void IHidSystemServer::IsUsingCustomButtonConfig(HLERequestContext& ctx) {
+void IHidSystemServer::IsUsingCustomButtonConfig(HLERequestContext& ctx)
+{
     const bool is_enabled = false;
 
     LOG_DEBUG(Service_HID, "(STUBBED) called, is_enabled={}", is_enabled);
@@ -949,7 +1004,8 @@ void IHidSystemServer::IsUsingCustomButtonConfig(HLERequestContext& ctx) {
     rb.Push(is_enabled);
 }
 
-void IHidSystemServer::IsAnyCustomButtonConfigEnabled(HLERequestContext& ctx) {
+void IHidSystemServer::IsAnyCustomButtonConfigEnabled(HLERequestContext& ctx)
+{
     const bool is_enabled = false;
 
     LOG_DEBUG(Service_HID, "(STUBBED) called, is_enabled={}", is_enabled);
@@ -959,7 +1015,8 @@ void IHidSystemServer::IsAnyCustomButtonConfigEnabled(HLERequestContext& ctx) {
     rb.Push(is_enabled);
 }
 
-std::shared_ptr<ResourceManager> IHidSystemServer::GetResourceManager() {
+std::shared_ptr<ResourceManager> IHidSystemServer::GetResourceManager()
+{
     resource_manager->Initialize();
     return resource_manager;
 }

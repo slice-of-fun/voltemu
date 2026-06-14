@@ -7,9 +7,12 @@ namespace AudioCore::Renderer {
 
 UpsamplerManager::UpsamplerManager(const u32 count_, std::span<UpsamplerInfo> infos_,
                                    std::span<s32> workbuffer_)
-    : count{count_}, upsampler_infos{infos_}, workbuffer{workbuffer_} {}
+    : count{count_}, upsampler_infos{infos_}, workbuffer{workbuffer_}
+{
+}
 
-UpsamplerInfo* UpsamplerManager::Allocate() {
+UpsamplerInfo* UpsamplerManager::Allocate()
+{
     std::scoped_lock l{lock};
 
     if (count == 0) {
@@ -36,7 +39,8 @@ UpsamplerInfo* UpsamplerManager::Allocate() {
     return &upsampler;
 }
 
-void UpsamplerManager::Free(UpsamplerInfo* info) {
+void UpsamplerManager::Free(UpsamplerInfo* info)
+{
     std::scoped_lock l{lock};
     info->enabled = false;
 }

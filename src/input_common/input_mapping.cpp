@@ -1,15 +1,17 @@
 // SPDX-FileCopyrightText: Copyright 2021 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "input_common/input_mapping.h"
+
 #include "common/settings.h"
 #include "input_common/input_engine.h"
-#include "input_common/input_mapping.h"
 
 namespace InputCommon {
 
 MappingFactory::MappingFactory() = default;
 
-void MappingFactory::BeginMapping(Polling::InputType type) {
+void MappingFactory::BeginMapping(Polling::InputType type)
+{
     is_enabled = true;
     input_type = type;
     input_queue.Clear();
@@ -17,13 +19,15 @@ void MappingFactory::BeginMapping(Polling::InputType type) {
     second_axis = -1;
 }
 
-Common::ParamPackage MappingFactory::GetNextInput() {
+Common::ParamPackage MappingFactory::GetNextInput()
+{
     Common::ParamPackage input;
     input_queue.Pop(input);
     return input;
 }
 
-void MappingFactory::RegisterInput(const MappingData& data) {
+void MappingFactory::RegisterInput(const MappingData& data)
+{
     if (!is_enabled) {
         return;
     }
@@ -46,13 +50,15 @@ void MappingFactory::RegisterInput(const MappingData& data) {
     }
 }
 
-void MappingFactory::StopMapping() {
+void MappingFactory::StopMapping()
+{
     is_enabled = false;
     input_type = Polling::InputType::None;
     input_queue.Clear();
 }
 
-void MappingFactory::RegisterButton(const MappingData& data) {
+void MappingFactory::RegisterButton(const MappingData& data)
+{
     Common::ParamPackage new_input;
     new_input.Set("engine", data.engine);
     if (data.pad.guid.IsValid()) {
@@ -91,7 +97,8 @@ void MappingFactory::RegisterButton(const MappingData& data) {
     input_queue.Push(new_input);
 }
 
-void MappingFactory::RegisterStick(const MappingData& data) {
+void MappingFactory::RegisterStick(const MappingData& data)
+{
     Common::ParamPackage new_input;
     new_input.Set("engine", data.engine);
     if (data.pad.guid.IsValid()) {
@@ -136,7 +143,8 @@ void MappingFactory::RegisterStick(const MappingData& data) {
     input_queue.Push(new_input);
 }
 
-void MappingFactory::RegisterMotion(const MappingData& data) {
+void MappingFactory::RegisterMotion(const MappingData& data)
+{
     Common::ParamPackage new_input;
     new_input.Set("engine", data.engine);
     if (data.pad.guid.IsValid()) {
@@ -189,7 +197,8 @@ void MappingFactory::RegisterMotion(const MappingData& data) {
     input_queue.Push(new_input);
 }
 
-bool MappingFactory::IsDriverValid(const MappingData& data) const {
+bool MappingFactory::IsDriverValid(const MappingData& data) const
+{
     // Only port 0 can be mapped on the keyboard
     if (data.engine == "keyboard" && data.pad.port != 0) {
         return false;

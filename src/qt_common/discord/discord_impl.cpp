@@ -4,22 +4,21 @@
 // SPDX-FileCopyrightText: 2018 Citra Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include <chrono>
-#include <string>
-
-#include <QEventLoop>
-#include <boost/algorithm/string/replace.hpp>
-#include "common/httplib.h"
+#include "discord_impl.h"
 
 #include <discord_rpc.h>
 #include <fmt/format.h>
 
+#include <QEventLoop>
+#include <boost/algorithm/string/replace.hpp>
+#include <chrono>
+#include <string>
+
 #include "common/common_types.h"
+#include "common/httplib.h"
 #include "common/string_util.h"
 #include "core/core.h"
 #include "core/loader/loader.h"
-
-#include "discord_impl.h"
 
 #ifdef YUZU_BUNDLED_OPENSSL
 #include <openssl/cert.h>
@@ -27,23 +26,27 @@
 
 namespace DiscordRPC {
 
-DiscordImpl::DiscordImpl(Core::System& system_) : system{system_} {
+DiscordImpl::DiscordImpl(Core::System& system_) : system{system_}
+{
     DiscordEventHandlers handlers{};
     // The number is the client ID for Eden, it's used for images and the
     // application name
     Discord_Initialize("1397286652128264252", &handlers, 1, nullptr);
 }
 
-DiscordImpl::~DiscordImpl() {
+DiscordImpl::~DiscordImpl()
+{
     Discord_ClearPresence();
     Discord_Shutdown();
 }
 
-void DiscordImpl::Pause() {
+void DiscordImpl::Pause()
+{
     Discord_ClearPresence();
 }
 
-std::string DiscordImpl::GetGameString(const std::string& title) {
+std::string DiscordImpl::GetGameString(const std::string& title)
+{
     // Convert to lowercase
     std::string icon_name = Common::ToLower(title);
 
@@ -74,7 +77,8 @@ static constexpr char DEFAULT_DISCORD_IMAGE[] =
     "https://git.eden-emu.dev/eden-emu/eden/raw/branch/master/dist/qt_themes/default/icons/256x256/"
     "eden.png";
 
-void DiscordImpl::UpdateGameStatus(bool use_default) {
+void DiscordImpl::UpdateGameStatus(bool use_default)
+{
     const std::string url = use_default ? std::string{DEFAULT_DISCORD_IMAGE} : game_url;
     s64 start_time = std::chrono::duration_cast<std::chrono::seconds>(
                          std::chrono::system_clock::now().time_since_epoch())
@@ -92,7 +96,8 @@ void DiscordImpl::UpdateGameStatus(bool use_default) {
     Discord_UpdatePresence(&presence);
 }
 
-void DiscordImpl::Update() {
+void DiscordImpl::Update()
+{
     if (system.IsPoweredOn()) {
         system.GetAppLoader().ReadTitle(game_title);
 

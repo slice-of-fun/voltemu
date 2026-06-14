@@ -47,9 +47,7 @@ public:
                                                           int minor = -1);
 
     /// Returns true if a module is loaded, otherwise false.
-    [[nodiscard]] bool IsOpen() const {
-        return handle != nullptr;
-    }
+    [[nodiscard]] bool IsOpen() const { return handle != nullptr; }
 
     /// Loads (or replaces) the handle with the specified library file name.
     /// Returns true if the library was loaded and can be used.
@@ -64,8 +62,8 @@ public:
 
     /// Obtains the address of the specified symbol, automatically casting to the correct type.
     /// Returns true if the symbol was found and assigned, otherwise false.
-    template <typename T>
-    [[nodiscard]] bool GetSymbol(const char* name, T* ptr) const {
+    template<typename T> [[nodiscard]] bool GetSymbol(const char* name, T* ptr) const
+    {
         *ptr = reinterpret_cast<T>(GetSymbolAddress(name));
         return *ptr != nullptr;
     }

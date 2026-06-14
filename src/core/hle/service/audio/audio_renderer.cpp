@@ -5,6 +5,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include "core/hle/service/audio/audio_renderer.h"
+
 #include "core/hle/service/cmif_serialization.h"
 
 namespace Service::Audio {
@@ -18,7 +19,8 @@ IAudioRenderer::IAudioRenderer(Core::System& system_, Manager& manager_,
     : ServiceFramework{system_, "IAudioRenderer"}, service_context{system_, "IAudioRenderer"},
       rendered_event{service_context.CreateEvent("IAudioRendererEvent")}, manager{manager_},
       impl{std::make_unique<Renderer>(system_, manager, rendered_event)}, process_handle{
-                                                                              process_handle_} {
+                                                                              process_handle_}
+{
     // clang-format off
     static const FunctionInfo functions[] = {
         {0, D<&IAudioRenderer::GetSampleRate>, "GetSampleRate"},
@@ -44,31 +46,36 @@ IAudioRenderer::IAudioRenderer(Core::System& system_, Manager& manager_,
                      applet_resource_user_id, session_id);
 }
 
-IAudioRenderer::~IAudioRenderer() {
+IAudioRenderer::~IAudioRenderer()
+{
     impl->Finalize();
     service_context.CloseEvent(rendered_event);
     process_handle->Close();
 }
 
-Result IAudioRenderer::GetSampleRate(Out<u32> out_sample_rate) {
+Result IAudioRenderer::GetSampleRate(Out<u32> out_sample_rate)
+{
     *out_sample_rate = impl->GetSystem().GetSampleRate();
     LOG_DEBUG(Service_Audio, "called. Sample rate {}", *out_sample_rate);
     R_SUCCEED();
 }
 
-Result IAudioRenderer::GetSampleCount(Out<u32> out_sample_count) {
+Result IAudioRenderer::GetSampleCount(Out<u32> out_sample_count)
+{
     *out_sample_count = impl->GetSystem().GetSampleCount();
     LOG_DEBUG(Service_Audio, "called. Sample count {}", *out_sample_count);
     R_SUCCEED();
 }
 
-Result IAudioRenderer::GetState(Out<u32> out_state) {
+Result IAudioRenderer::GetState(Out<u32> out_state)
+{
     *out_state = !impl->GetSystem().IsActive();
     LOG_DEBUG(Service_Audio, "called, state {}", *out_state);
     R_SUCCEED();
 }
 
-Result IAudioRenderer::GetMixBufferCount(Out<u32> out_mix_buffer_count) {
+Result IAudioRenderer::GetMixBufferCount(Out<u32> out_mix_buffer_count)
+{
     LOG_DEBUG(Service_Audio, "called");
     *out_mix_buffer_count = impl->GetSystem().GetMixBufferCount();
     R_SUCCEED();
@@ -76,14 +83,16 @@ Result IAudioRenderer::GetMixBufferCount(Out<u32> out_mix_buffer_count) {
 
 Result IAudioRenderer::RequestUpdate(OutBuffer<BufferAttr_HipcMapAlias> out_buffer,
                                      OutBuffer<BufferAttr_HipcMapAlias> out_performance_buffer,
-                                     InBuffer<BufferAttr_HipcMapAlias> input) {
+                                     InBuffer<BufferAttr_HipcMapAlias> input)
+{
     R_RETURN(this->RequestUpdateAuto(out_buffer, out_performance_buffer, input));
 }
 
-Result IAudioRenderer::RequestUpdateAuto(
-    OutBuffer<BufferAttr_HipcAutoSelect> out_buffer,
-    OutBuffer<BufferAttr_HipcAutoSelect> out_performance_buffer,
-    InBuffer<BufferAttr_HipcAutoSelect> input) {
+Result
+IAudioRenderer::RequestUpdateAuto(OutBuffer<BufferAttr_HipcAutoSelect> out_buffer,
+                                  OutBuffer<BufferAttr_HipcAutoSelect> out_performance_buffer,
+                                  InBuffer<BufferAttr_HipcAutoSelect> input)
+{
     LOG_TRACE(Service_Audio, "called");
 
     const auto result = impl->RequestUpdate(input, out_performance_buffer, out_buffer);
@@ -94,19 +103,22 @@ Result IAudioRenderer::RequestUpdateAuto(
     R_RETURN(result);
 }
 
-Result IAudioRenderer::Start() {
+Result IAudioRenderer::Start()
+{
     LOG_DEBUG(Service_Audio, "called");
     impl->Start();
     R_SUCCEED();
 }
 
-Result IAudioRenderer::Stop() {
+Result IAudioRenderer::Stop()
+{
     LOG_DEBUG(Service_Audio, "called");
     impl->Stop();
     R_SUCCEED();
 }
 
-Result IAudioRenderer::QuerySystemEvent(OutCopyHandle<Kernel::KReadableEvent> out_event) {
+Result IAudioRenderer::QuerySystemEvent(OutCopyHandle<Kernel::KReadableEvent> out_event)
+{
     LOG_DEBUG(Service_Audio, "called");
     R_UNLESS(impl->GetSystem().GetExecutionMode() != AudioCore::ExecutionMode::Manual,
              Audio::ResultNotSupported);
@@ -114,26 +126,30 @@ Result IAudioRenderer::QuerySystemEvent(OutCopyHandle<Kernel::KReadableEvent> ou
     R_SUCCEED();
 }
 
-Result IAudioRenderer::SetRenderingTimeLimit(u32 rendering_time_limit) {
+Result IAudioRenderer::SetRenderingTimeLimit(u32 rendering_time_limit)
+{
     LOG_DEBUG(Service_Audio, "called");
     impl->GetSystem().SetRenderingTimeLimit(rendering_time_limit);
     ;
     R_SUCCEED();
 }
 
-Result IAudioRenderer::GetRenderingTimeLimit(Out<u32> out_rendering_time_limit) {
+Result IAudioRenderer::GetRenderingTimeLimit(Out<u32> out_rendering_time_limit)
+{
     LOG_DEBUG(Service_Audio, "called");
     *out_rendering_time_limit = impl->GetSystem().GetRenderingTimeLimit();
     R_SUCCEED();
 }
 
-Result IAudioRenderer::SetVoiceDropParameter(f32 voice_drop_parameter) {
+Result IAudioRenderer::SetVoiceDropParameter(f32 voice_drop_parameter)
+{
     LOG_DEBUG(Service_Audio, "called");
     impl->GetSystem().SetVoiceDropParameter(voice_drop_parameter);
     R_SUCCEED();
 }
 
-Result IAudioRenderer::GetVoiceDropParameter(Out<f32> out_voice_drop_parameter) {
+Result IAudioRenderer::GetVoiceDropParameter(Out<f32> out_voice_drop_parameter)
+{
     LOG_DEBUG(Service_Audio, "called");
     *out_voice_drop_parameter = impl->GetSystem().GetVoiceDropParameter();
     R_SUCCEED();

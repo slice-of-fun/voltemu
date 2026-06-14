@@ -34,7 +34,9 @@ public:
           m_local_system_clock_context_writer{m_system, m_shared_memory},
           m_network_system_clock_context_writer{m_system, m_shared_memory,
                                                 m_standard_user_system_clock},
-          m_ephemeral_network_clock_context_writer{m_system} {}
+          m_ephemeral_network_clock_context_writer{m_system}
+    {
+    }
 
     Core::System& m_system;
 

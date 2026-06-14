@@ -1,20 +1,23 @@
 // SPDX-FileCopyrightText: Copyright 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/mii/types/core_data.h"
+
 #include "common/assert.h"
 #include "core/hle/service/mii/mii_util.h"
 #include "core/hle/service/mii/types/char_info.h"
-#include "core/hle/service/mii/types/core_data.h"
 #include "core/hle/service/mii/types/raw_data.h"
 
 namespace Service::Mii {
 
-void CoreData::SetDefault() {
+void CoreData::SetDefault()
+{
     data = {};
     name = GetDefaultNickname();
 }
 
-void CoreData::BuildRandom(Age age, Gender gender, Race race) {
+void CoreData::BuildRandom(Age age, Gender gender, Race race)
+{
     if (gender == Gender::All) {
         gender = MiiUtil::GetRandomValue(Gender::Max);
     }
@@ -188,7 +191,8 @@ void CoreData::BuildRandom(Age age, Gender gender, Race race) {
     SetMoleY(20);
 }
 
-void CoreData::BuildFromCharInfo(const CharInfo& char_info) {
+void CoreData::BuildFromCharInfo(const CharInfo& char_info)
+{
     name = char_info.GetNickname();
     SetFontRegion(char_info.GetFontRegion());
     SetFavoriteColor(char_info.GetFavoriteColor());
@@ -241,7 +245,8 @@ void CoreData::BuildFromCharInfo(const CharInfo& char_info) {
     SetMoleY(char_info.GetMoleY());
 }
 
-ValidationResult CoreData::IsValid() const {
+ValidationResult CoreData::IsValid() const
+{
     if (!name.IsValid()) {
         return ValidationResult::InvalidName;
     }
@@ -395,411 +400,513 @@ ValidationResult CoreData::IsValid() const {
     return ValidationResult::NoErrors;
 }
 
-void CoreData::SetFontRegion(FontRegion value) {
+void CoreData::SetFontRegion(FontRegion value)
+{
     data.font_region.Assign(static_cast<u32>(value));
 }
 
-void CoreData::SetFavoriteColor(FavoriteColor value) {
+void CoreData::SetFavoriteColor(FavoriteColor value)
+{
     data.favorite_color.Assign(static_cast<u32>(value));
 }
 
-void CoreData::SetGender(Gender value) {
+void CoreData::SetGender(Gender value)
+{
     data.gender.Assign(static_cast<u32>(value));
 }
 
-void CoreData::SetHeight(u8 value) {
+void CoreData::SetHeight(u8 value)
+{
     data.height.Assign(value);
 }
 
-void CoreData::SetBuild(u8 value) {
+void CoreData::SetBuild(u8 value)
+{
     data.build.Assign(value);
 }
 
-void CoreData::SetType(u8 value) {
+void CoreData::SetType(u8 value)
+{
     data.type.Assign(value);
 }
 
-void CoreData::SetRegionMove(u8 value) {
+void CoreData::SetRegionMove(u8 value)
+{
     data.region_move.Assign(value);
 }
 
-void CoreData::SetFacelineType(FacelineType value) {
+void CoreData::SetFacelineType(FacelineType value)
+{
     data.faceline_type.Assign(static_cast<u32>(value));
 }
 
-void CoreData::SetFacelineColor(FacelineColor value) {
+void CoreData::SetFacelineColor(FacelineColor value)
+{
     data.faceline_color.Assign(static_cast<u32>(value));
 }
 
-void CoreData::SetFacelineWrinkle(FacelineWrinkle value) {
+void CoreData::SetFacelineWrinkle(FacelineWrinkle value)
+{
     data.faceline_wrinkle.Assign(static_cast<u32>(value));
 }
 
-void CoreData::SetFacelineMake(FacelineMake value) {
+void CoreData::SetFacelineMake(FacelineMake value)
+{
     data.faceline_makeup.Assign(static_cast<u32>(value));
 }
 
-void CoreData::SetHairType(HairType value) {
+void CoreData::SetHairType(HairType value)
+{
     data.hair_type.Assign(static_cast<u32>(value));
 }
 
-void CoreData::SetHairColor(CommonColor value) {
+void CoreData::SetHairColor(CommonColor value)
+{
     data.hair_color.Assign(static_cast<u32>(value));
 }
 
-void CoreData::SetHairFlip(HairFlip value) {
+void CoreData::SetHairFlip(HairFlip value)
+{
     data.hair_flip.Assign(static_cast<u32>(value));
 }
 
-void CoreData::SetEyeType(EyeType value) {
+void CoreData::SetEyeType(EyeType value)
+{
     data.eye_type.Assign(static_cast<u32>(value));
 }
 
-void CoreData::SetEyeColor(CommonColor value) {
+void CoreData::SetEyeColor(CommonColor value)
+{
     data.eye_color.Assign(static_cast<u32>(value));
 }
 
-void CoreData::SetEyeScale(u8 value) {
+void CoreData::SetEyeScale(u8 value)
+{
     data.eye_scale.Assign(value);
 }
 
-void CoreData::SetEyeAspect(u8 value) {
+void CoreData::SetEyeAspect(u8 value)
+{
     data.eye_aspect.Assign(value);
 }
 
-void CoreData::SetEyeRotate(u8 value) {
+void CoreData::SetEyeRotate(u8 value)
+{
     data.eye_rotate.Assign(value);
 }
 
-void CoreData::SetEyeX(u8 value) {
+void CoreData::SetEyeX(u8 value)
+{
     data.eye_x.Assign(value);
 }
 
-void CoreData::SetEyeY(u8 value) {
+void CoreData::SetEyeY(u8 value)
+{
     data.eye_y.Assign(value);
 }
 
-void CoreData::SetEyebrowType(EyebrowType value) {
+void CoreData::SetEyebrowType(EyebrowType value)
+{
     data.eyebrow_type.Assign(static_cast<u32>(value));
 }
 
-void CoreData::SetEyebrowColor(CommonColor value) {
+void CoreData::SetEyebrowColor(CommonColor value)
+{
     data.eyebrow_color.Assign(static_cast<u32>(value));
 }
 
-void CoreData::SetEyebrowScale(u8 value) {
+void CoreData::SetEyebrowScale(u8 value)
+{
     data.eyebrow_scale.Assign(value);
 }
 
-void CoreData::SetEyebrowAspect(u8 value) {
+void CoreData::SetEyebrowAspect(u8 value)
+{
     data.eyebrow_aspect.Assign(value);
 }
 
-void CoreData::SetEyebrowRotate(u8 value) {
+void CoreData::SetEyebrowRotate(u8 value)
+{
     data.eyebrow_rotate.Assign(value);
 }
 
-void CoreData::SetEyebrowX(u8 value) {
+void CoreData::SetEyebrowX(u8 value)
+{
     data.eyebrow_x.Assign(value);
 }
 
-void CoreData::SetEyebrowY(u8 value) {
+void CoreData::SetEyebrowY(u8 value)
+{
     data.eyebrow_y.Assign(value);
 }
 
-void CoreData::SetNoseType(NoseType value) {
+void CoreData::SetNoseType(NoseType value)
+{
     data.nose_type.Assign(static_cast<u32>(value));
 }
 
-void CoreData::SetNoseScale(u8 value) {
+void CoreData::SetNoseScale(u8 value)
+{
     data.nose_scale.Assign(value);
 }
 
-void CoreData::SetNoseY(u8 value) {
+void CoreData::SetNoseY(u8 value)
+{
     data.nose_y.Assign(value);
 }
 
-void CoreData::SetMouthType(MouthType value) {
+void CoreData::SetMouthType(MouthType value)
+{
     data.mouth_type.Assign(static_cast<u32>(value));
 }
 
-void CoreData::SetMouthColor(CommonColor value) {
+void CoreData::SetMouthColor(CommonColor value)
+{
     data.mouth_color.Assign(static_cast<u32>(value));
 }
 
-void CoreData::SetMouthScale(u8 value) {
+void CoreData::SetMouthScale(u8 value)
+{
     data.mouth_scale.Assign(value);
 }
 
-void CoreData::SetMouthAspect(u8 value) {
+void CoreData::SetMouthAspect(u8 value)
+{
     data.mouth_aspect.Assign(value);
 }
 
-void CoreData::SetMouthY(u8 value) {
+void CoreData::SetMouthY(u8 value)
+{
     data.mouth_y.Assign(value);
 }
 
-void CoreData::SetBeardColor(CommonColor value) {
+void CoreData::SetBeardColor(CommonColor value)
+{
     data.beard_color.Assign(static_cast<u32>(value));
 }
 
-void CoreData::SetBeardType(BeardType value) {
+void CoreData::SetBeardType(BeardType value)
+{
     data.beard_type.Assign(static_cast<u32>(value));
 }
 
-void CoreData::SetMustacheType(MustacheType value) {
+void CoreData::SetMustacheType(MustacheType value)
+{
     data.mustache_type.Assign(static_cast<u32>(value));
 }
 
-void CoreData::SetMustacheScale(u8 value) {
+void CoreData::SetMustacheScale(u8 value)
+{
     data.mustache_scale.Assign(value);
 }
 
-void CoreData::SetMustacheY(u8 value) {
+void CoreData::SetMustacheY(u8 value)
+{
     data.mustache_y.Assign(value);
 }
 
-void CoreData::SetGlassType(GlassType value) {
+void CoreData::SetGlassType(GlassType value)
+{
     data.glasses_type.Assign(static_cast<u32>(value));
 }
 
-void CoreData::SetGlassColor(CommonColor value) {
+void CoreData::SetGlassColor(CommonColor value)
+{
     data.glasses_color.Assign(static_cast<u32>(value));
 }
 
-void CoreData::SetGlassScale(u8 value) {
+void CoreData::SetGlassScale(u8 value)
+{
     data.glasses_scale.Assign(value);
 }
 
-void CoreData::SetGlassY(u8 value) {
+void CoreData::SetGlassY(u8 value)
+{
     data.glasses_y.Assign(value);
 }
 
-void CoreData::SetMoleType(MoleType value) {
+void CoreData::SetMoleType(MoleType value)
+{
     data.mole_type.Assign(static_cast<u32>(value));
 }
 
-void CoreData::SetMoleScale(u8 value) {
+void CoreData::SetMoleScale(u8 value)
+{
     data.mole_scale.Assign(value);
 }
 
-void CoreData::SetMoleX(u8 value) {
+void CoreData::SetMoleX(u8 value)
+{
     data.mole_x.Assign(value);
 }
 
-void CoreData::SetMoleY(u8 value) {
+void CoreData::SetMoleY(u8 value)
+{
     data.mole_y.Assign(value);
 }
 
-void CoreData::SetNickname(Nickname nickname) {
+void CoreData::SetNickname(Nickname nickname)
+{
     name = nickname;
 }
 
-FontRegion CoreData::GetFontRegion() const {
+FontRegion CoreData::GetFontRegion() const
+{
     return static_cast<FontRegion>(data.font_region.Value());
 }
 
-FavoriteColor CoreData::GetFavoriteColor() const {
+FavoriteColor CoreData::GetFavoriteColor() const
+{
     return static_cast<FavoriteColor>(data.favorite_color.Value());
 }
 
-Gender CoreData::GetGender() const {
+Gender CoreData::GetGender() const
+{
     return static_cast<Gender>(data.gender.Value());
 }
 
-u8 CoreData::GetHeight() const {
+u8 CoreData::GetHeight() const
+{
     return static_cast<u8>(data.height.Value());
 }
 
-u8 CoreData::GetBuild() const {
+u8 CoreData::GetBuild() const
+{
     return static_cast<u8>(data.build.Value());
 }
 
-u8 CoreData::GetType() const {
+u8 CoreData::GetType() const
+{
     return static_cast<u8>(data.type.Value());
 }
 
-u8 CoreData::GetRegionMove() const {
+u8 CoreData::GetRegionMove() const
+{
     return static_cast<u8>(data.region_move.Value());
 }
 
-FacelineType CoreData::GetFacelineType() const {
+FacelineType CoreData::GetFacelineType() const
+{
     return static_cast<FacelineType>(data.faceline_type.Value());
 }
 
-FacelineColor CoreData::GetFacelineColor() const {
+FacelineColor CoreData::GetFacelineColor() const
+{
     return static_cast<FacelineColor>(data.faceline_color.Value());
 }
 
-FacelineWrinkle CoreData::GetFacelineWrinkle() const {
+FacelineWrinkle CoreData::GetFacelineWrinkle() const
+{
     return static_cast<FacelineWrinkle>(data.faceline_wrinkle.Value());
 }
 
-FacelineMake CoreData::GetFacelineMake() const {
+FacelineMake CoreData::GetFacelineMake() const
+{
     return static_cast<FacelineMake>(data.faceline_makeup.Value());
 }
 
-HairType CoreData::GetHairType() const {
+HairType CoreData::GetHairType() const
+{
     return static_cast<HairType>(data.hair_type.Value());
 }
 
-CommonColor CoreData::GetHairColor() const {
+CommonColor CoreData::GetHairColor() const
+{
     return static_cast<CommonColor>(data.hair_color.Value());
 }
 
-HairFlip CoreData::GetHairFlip() const {
+HairFlip CoreData::GetHairFlip() const
+{
     return static_cast<HairFlip>(data.hair_flip.Value());
 }
 
-EyeType CoreData::GetEyeType() const {
+EyeType CoreData::GetEyeType() const
+{
     return static_cast<EyeType>(data.eye_type.Value());
 }
 
-CommonColor CoreData::GetEyeColor() const {
+CommonColor CoreData::GetEyeColor() const
+{
     return static_cast<CommonColor>(data.eye_color.Value());
 }
 
-u8 CoreData::GetEyeScale() const {
+u8 CoreData::GetEyeScale() const
+{
     return static_cast<u8>(data.eye_scale.Value());
 }
 
-u8 CoreData::GetEyeAspect() const {
+u8 CoreData::GetEyeAspect() const
+{
     return static_cast<u8>(data.eye_aspect.Value());
 }
 
-u8 CoreData::GetEyeRotate() const {
+u8 CoreData::GetEyeRotate() const
+{
     return static_cast<u8>(data.eye_rotate.Value());
 }
 
-u8 CoreData::GetEyeX() const {
+u8 CoreData::GetEyeX() const
+{
     return static_cast<u8>(data.eye_x.Value());
 }
 
-u8 CoreData::GetEyeY() const {
+u8 CoreData::GetEyeY() const
+{
     return static_cast<u8>(data.eye_y.Value());
 }
 
-EyebrowType CoreData::GetEyebrowType() const {
+EyebrowType CoreData::GetEyebrowType() const
+{
     return static_cast<EyebrowType>(data.eyebrow_type.Value());
 }
 
-CommonColor CoreData::GetEyebrowColor() const {
+CommonColor CoreData::GetEyebrowColor() const
+{
     return static_cast<CommonColor>(data.eyebrow_color.Value());
 }
 
-u8 CoreData::GetEyebrowScale() const {
+u8 CoreData::GetEyebrowScale() const
+{
     return static_cast<u8>(data.eyebrow_scale.Value());
 }
 
-u8 CoreData::GetEyebrowAspect() const {
+u8 CoreData::GetEyebrowAspect() const
+{
     return static_cast<u8>(data.eyebrow_aspect.Value());
 }
 
-u8 CoreData::GetEyebrowRotate() const {
+u8 CoreData::GetEyebrowRotate() const
+{
     return static_cast<u8>(data.eyebrow_rotate.Value());
 }
 
-u8 CoreData::GetEyebrowX() const {
+u8 CoreData::GetEyebrowX() const
+{
     return static_cast<u8>(data.eyebrow_x.Value());
 }
 
-u8 CoreData::GetEyebrowY() const {
+u8 CoreData::GetEyebrowY() const
+{
     return static_cast<u8>(data.eyebrow_y.Value());
 }
 
-NoseType CoreData::GetNoseType() const {
+NoseType CoreData::GetNoseType() const
+{
     return static_cast<NoseType>(data.nose_type.Value());
 }
 
-u8 CoreData::GetNoseScale() const {
+u8 CoreData::GetNoseScale() const
+{
     return static_cast<u8>(data.nose_scale.Value());
 }
 
-u8 CoreData::GetNoseY() const {
+u8 CoreData::GetNoseY() const
+{
     return static_cast<u8>(data.nose_y.Value());
 }
 
-MouthType CoreData::GetMouthType() const {
+MouthType CoreData::GetMouthType() const
+{
     return static_cast<MouthType>(data.mouth_type.Value());
 }
 
-CommonColor CoreData::GetMouthColor() const {
+CommonColor CoreData::GetMouthColor() const
+{
     return static_cast<CommonColor>(data.mouth_color.Value());
 }
 
-u8 CoreData::GetMouthScale() const {
+u8 CoreData::GetMouthScale() const
+{
     return static_cast<u8>(data.mouth_scale.Value());
 }
 
-u8 CoreData::GetMouthAspect() const {
+u8 CoreData::GetMouthAspect() const
+{
     return static_cast<u8>(data.mouth_aspect.Value());
 }
 
-u8 CoreData::GetMouthY() const {
+u8 CoreData::GetMouthY() const
+{
     return static_cast<u8>(data.mouth_y.Value());
 }
 
-CommonColor CoreData::GetBeardColor() const {
+CommonColor CoreData::GetBeardColor() const
+{
     return static_cast<CommonColor>(data.beard_color.Value());
 }
 
-BeardType CoreData::GetBeardType() const {
+BeardType CoreData::GetBeardType() const
+{
     return static_cast<BeardType>(data.beard_type.Value());
 }
 
-MustacheType CoreData::GetMustacheType() const {
+MustacheType CoreData::GetMustacheType() const
+{
     return static_cast<MustacheType>(data.mustache_type.Value());
 }
 
-u8 CoreData::GetMustacheScale() const {
+u8 CoreData::GetMustacheScale() const
+{
     return static_cast<u8>(data.mustache_scale.Value());
 }
 
-u8 CoreData::GetMustacheY() const {
+u8 CoreData::GetMustacheY() const
+{
     return static_cast<u8>(data.mustache_y.Value());
 }
 
-GlassType CoreData::GetGlassType() const {
+GlassType CoreData::GetGlassType() const
+{
     return static_cast<GlassType>(data.glasses_type.Value());
 }
 
-CommonColor CoreData::GetGlassColor() const {
+CommonColor CoreData::GetGlassColor() const
+{
     return static_cast<CommonColor>(data.glasses_color.Value());
 }
 
-u8 CoreData::GetGlassScale() const {
+u8 CoreData::GetGlassScale() const
+{
     return static_cast<u8>(data.glasses_scale.Value());
 }
 
-u8 CoreData::GetGlassY() const {
+u8 CoreData::GetGlassY() const
+{
     return static_cast<u8>(data.glasses_y.Value());
 }
 
-MoleType CoreData::GetMoleType() const {
+MoleType CoreData::GetMoleType() const
+{
     return static_cast<MoleType>(data.mole_type.Value());
 }
 
-u8 CoreData::GetMoleScale() const {
+u8 CoreData::GetMoleScale() const
+{
     return static_cast<u8>(data.mole_scale.Value());
 }
 
-u8 CoreData::GetMoleX() const {
+u8 CoreData::GetMoleX() const
+{
     return static_cast<u8>(data.mole_x.Value());
 }
 
-u8 CoreData::GetMoleY() const {
+u8 CoreData::GetMoleY() const
+{
     return static_cast<u8>(data.mole_y.Value());
 }
 
-Nickname CoreData::GetNickname() const {
+Nickname CoreData::GetNickname() const
+{
     return name;
 }
 
-Nickname CoreData::GetDefaultNickname() const {
+Nickname CoreData::GetDefaultNickname() const
+{
     return {u'n', u'o', u' ', u'n', u'a', u'm', u'e'};
 }
 
-Nickname CoreData::GetInvalidNickname() const {
+Nickname CoreData::GetInvalidNickname() const
+{
     return {u'?', u'?', u'?'};
 }
 

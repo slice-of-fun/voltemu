@@ -1,11 +1,12 @@
 // SPDX-FileCopyrightText: 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+#include "core/hle/service/nvdrv/core/heap_mapper.h"
+
 #include <mutex>
 
 #include "common/range_sets.h"
 #include "common/range_sets.inc"
-#include "core/hle/service/nvdrv/core/heap_mapper.h"
 #include "video_core/host1x/host1x.h"
 
 namespace Service::Nvidia::NvCore {
@@ -22,11 +23,13 @@ struct HeapMapper::HeapMapperInternal {
 
 HeapMapper::HeapMapper(VAddr start_vaddress, DAddr start_daddress, size_t size, Core::Asid asid,
                        Tegra::Host1x::Host1x& host1x)
-    : m_vaddress{start_vaddress}, m_daddress{start_daddress}, m_size{size}, m_asid{asid} {
+    : m_vaddress{start_vaddress}, m_daddress{start_daddress}, m_size{size}, m_asid{asid}
+{
     m_internal = std::make_unique<HeapMapperInternal>(host1x);
 }
 
-HeapMapper::~HeapMapper() {
+HeapMapper::~HeapMapper()
+{
     // Unmap whatever has been mapped.
     m_internal->m_mapped_ranges.ForEach([this](VAddr start_addr, VAddr end_addr, s32 count) {
         const size_t sub_size = end_addr - start_addr;
@@ -35,7 +38,8 @@ HeapMapper::~HeapMapper() {
     });
 }
 
-DAddr HeapMapper::Map(VAddr start, size_t size) {
+DAddr HeapMapper::Map(VAddr start, size_t size)
+{
     std::scoped_lock lk(m_internal->m_guard);
     // Add the mapping range to a temporary range set.
     m_internal->m_temporary_set.Clear();
@@ -60,7 +64,8 @@ DAddr HeapMapper::Map(VAddr start, size_t size) {
     return m_daddress + static_cast<DAddr>(start - m_vaddress);
 }
 
-void HeapMapper::Unmap(VAddr start, size_t size) {
+void HeapMapper::Unmap(VAddr start, size_t size)
+{
     std::scoped_lock lk(m_internal->m_guard);
 
     // Just subtract the range and whatever is deleted, unmap it.

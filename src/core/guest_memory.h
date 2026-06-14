@@ -31,8 +31,7 @@ enum GuestMemoryFlags : u32 {
     UnsafeReadCachedWrite = UnsafeReadWrite | Cached,
 };
 
-template <typename M, typename T, GuestMemoryFlags FLAGS>
-class GuestMemory {
+template<typename M, typename T, GuestMemoryFlags FLAGS> class GuestMemory {
     using iterator = T*;
     using const_iterator = const T*;
     using value_type = T;
@@ -43,7 +42,8 @@ public:
     GuestMemory() = delete;
     explicit GuestMemory(M& memory, u64 addr, std::size_t size,
                          Common::ScratchBuffer<T>* backup = nullptr)
-        : m_memory{&memory}, m_addr{addr}, m_size{size} {
+        : m_memory{&memory}, m_addr{addr}, m_size{size}
+    {
         static_assert(FLAGS & GuestMemoryFlags::Read || FLAGS & GuestMemoryFlags::Write);
         if constexpr (!(FLAGS & GuestMemoryFlags::Read)) {
             if (!this->TrySetSpan()) {
@@ -69,54 +69,36 @@ public:
     GuestMemory(GuestMemory&& rhs) = default;
     GuestMemory& operator=(GuestMemory&& rhs) = default;
 
-    T* data() noexcept {
-        return m_data_span.data();
-    }
+    T* data() noexcept { return m_data_span.data(); }
 
-    const T* data() const noexcept {
-        return m_data_span.data();
-    }
+    const T* data() const noexcept { return m_data_span.data(); }
 
-    size_t size() const noexcept {
-        return m_size;
-    }
+    size_t size() const noexcept { return m_size; }
 
-    size_t size_bytes() const noexcept {
-        return this->size() * sizeof(T);
-    }
+    size_t size_bytes() const noexcept { return this->size() * sizeof(T); }
 
-    [[nodiscard]] T* begin() noexcept {
-        return this->data();
-    }
+    [[nodiscard]] T* begin() noexcept { return this->data(); }
 
-    [[nodiscard]] const T* begin() const noexcept {
-        return this->data();
-    }
+    [[nodiscard]] const T* begin() const noexcept { return this->data(); }
 
-    [[nodiscard]] T* end() noexcept {
-        return this->data() + this->size();
-    }
+    [[nodiscard]] T* end() noexcept { return this->data() + this->size(); }
 
-    [[nodiscard]] const T* end() const noexcept {
-        return this->data() + this->size();
-    }
+    [[nodiscard]] const T* end() const noexcept { return this->data() + this->size(); }
 
-    T& operator[](size_t index) noexcept {
-        return m_data_span[index];
-    }
+    T& operator[](size_t index) noexcept { return m_data_span[index]; }
 
-    const T& operator[](size_t index) const noexcept {
-        return m_data_span[index];
-    }
+    const T& operator[](size_t index) const noexcept { return m_data_span[index]; }
 
-    void SetAddressAndSize(u64 addr, std::size_t size) noexcept {
+    void SetAddressAndSize(u64 addr, std::size_t size) noexcept
+    {
         m_addr = addr;
         m_size = size;
         m_addr_changed = true;
     }
 
     std::span<T> Read(u64 addr, std::size_t size,
-                      Common::ScratchBuffer<T>* backup = nullptr) noexcept {
+                      Common::ScratchBuffer<T>* backup = nullptr) noexcept
+    {
         m_addr = addr;
         m_size = size;
         if (m_size == 0) {
@@ -147,7 +129,8 @@ public:
         return m_data_span;
     }
 
-    void Write(std::span<T> write_data) noexcept {
+    void Write(std::span<T> write_data) noexcept
+    {
         if constexpr (FLAGS & GuestMemoryFlags::Cached) {
             m_memory->WriteBlockCached(m_addr, write_data.data(), this->size_bytes());
         } else if constexpr (FLAGS & GuestMemoryFlags::Safe) {
@@ -157,7 +140,8 @@ public:
         }
     }
 
-    bool TrySetSpan() noexcept {
+    bool TrySetSpan() noexcept
+    {
         if (u8* ptr = m_memory->GetSpan(m_addr, this->size_bytes()); ptr) {
             m_data_span = {reinterpret_cast<T*>(ptr), this->size()};
             m_span_valid = true;
@@ -168,13 +152,9 @@ public:
     }
 
 protected:
-    bool IsDataCopy() const noexcept {
-        return m_is_data_copy;
-    }
+    bool IsDataCopy() const noexcept { return m_is_data_copy; }
 
-    bool AddressChanged() const noexcept {
-        return m_addr_changed;
-    }
+    bool AddressChanged() const noexcept { return m_addr_changed; }
 
     M* m_memory;
     u64 m_addr{};
@@ -186,15 +166,18 @@ protected:
     bool m_addr_changed{false};
 };
 
-template <typename M, typename T, GuestMemoryFlags FLAGS>
+template<typename M, typename T, GuestMemoryFlags FLAGS>
 class GuestMemoryScoped : public GuestMemory<M, T, FLAGS> {
 public:
     GuestMemoryScoped() = delete;
     explicit GuestMemoryScoped(M& memory, u64 addr, std::size_t size,
                                Common::ScratchBuffer<T>* backup = nullptr)
-        : GuestMemory<M, T, FLAGS>(memory, addr, size, backup) {}
+        : GuestMemory<M, T, FLAGS>(memory, addr, size, backup)
+    {
+    }
 
-    ~GuestMemoryScoped() {
+    ~GuestMemoryScoped()
+    {
         if constexpr (FLAGS & GuestMemoryFlags::Write) {
             if (this->size() == 0) [[unlikely]] {
                 return;

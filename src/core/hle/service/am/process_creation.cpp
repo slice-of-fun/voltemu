@@ -1,13 +1,14 @@
 // SPDX-FileCopyrightText: Copyright 2024 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/am/process_creation.h"
+
 #include "core/core.h"
 #include "core/file_sys/content_archive.h"
 #include "core/file_sys/nca_metadata.h"
 #include "core/file_sys/patch_manager.h"
 #include "core/file_sys/registered_cache.h"
 #include "core/file_sys/romfs_factory.h"
-#include "core/hle/service/am/process_creation.h"
 #include "core/hle/service/glue/glue_manager.h"
 #include "core/hle/service/os/process.h"
 #include "core/loader/loader.h"
@@ -16,8 +17,9 @@ namespace Service::AM {
 
 namespace {
 
-FileSys::StorageId GetStorageIdForFrontendSlot(
-    std::optional<FileSys::ContentProviderUnionSlot> slot) {
+FileSys::StorageId
+GetStorageIdForFrontendSlot(std::optional<FileSys::ContentProviderUnionSlot> slot)
+{
     if (!slot.has_value()) {
         return FileSys::StorageId::None;
     }
@@ -39,7 +41,8 @@ FileSys::StorageId GetStorageIdForFrontendSlot(
 std::unique_ptr<Process> CreateProcessImpl(std::unique_ptr<Loader::AppLoader>& out_loader,
                                            Loader::ResultStatus& out_load_result,
                                            Core::System& system, FileSys::VirtualFile file,
-                                           u64 program_id, u64 program_index) {
+                                           u64 program_id, u64 program_index)
+{
     // Get the appropriate loader to parse this NCA.
     out_loader = Loader::GetLoader(system, file, program_id, program_index);
 
@@ -60,7 +63,8 @@ std::unique_ptr<Process> CreateProcessImpl(std::unique_ptr<Loader::AppLoader>& o
 } // Anonymous namespace
 
 std::unique_ptr<Process> CreateProcess(Core::System& system, u64 program_id,
-                                       u8 minimum_key_generation, u8 maximum_key_generation) {
+                                       u8 minimum_key_generation, u8 maximum_key_generation)
+{
     // Attempt to load program NCA.
     FileSys::VirtualFile nca_raw{};
 
@@ -94,7 +98,8 @@ std::unique_ptr<Process> CreateApplicationProcess(std::vector<u8>& out_control,
                                                   std::unique_ptr<Loader::AppLoader>& out_loader,
                                                   Loader::ResultStatus& out_load_result,
                                                   Core::System& system, FileSys::VirtualFile file,
-                                                  u64 program_id, u64 program_index) {
+                                                  u64 program_id, u64 program_index)
+{
     auto process =
         CreateProcessImpl(out_loader, out_load_result, system, file, program_id, program_index);
     if (!process) {
@@ -106,7 +111,7 @@ std::unique_ptr<Process> CreateApplicationProcess(std::vector<u8>& out_control,
         out_control = nacp.GetRawBytes();
     } else {
         out_control.resize(sizeof(FileSys::RawNACP));
-        std::fill(out_control.begin(), out_control.end(), (u8) 0);
+        std::fill(out_control.begin(), out_control.end(), (u8)0);
     }
 
     auto& storage = system.GetContentProviderUnion();

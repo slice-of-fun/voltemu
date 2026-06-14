@@ -20,13 +20,13 @@ struct ANativeWindow;
 class GraphicsContext_Android final : public Core::Frontend::GraphicsContext {
 public:
     explicit GraphicsContext_Android(std::shared_ptr<Common::DynamicLibrary> driver_library)
-        : m_driver_library{driver_library} {}
+        : m_driver_library{driver_library}
+    {
+    }
 
     ~GraphicsContext_Android() = default;
 
-    std::shared_ptr<Common::DynamicLibrary> GetDriverLibrary() override {
-        return m_driver_library;
-    }
+    std::shared_ptr<Common::DynamicLibrary> GetDriverLibrary() override { return m_driver_library; }
 
 private:
     std::shared_ptr<Common::DynamicLibrary> m_driver_library;
@@ -47,12 +47,11 @@ public:
     void OnTouchMoved(int id, float x, float y);
     void OnTouchReleased(int id);
 
-    std::unique_ptr<Core::Frontend::GraphicsContext> CreateSharedContext() const override {
+    std::unique_ptr<Core::Frontend::GraphicsContext> CreateSharedContext() const override
+    {
         return {std::make_unique<GraphicsContext_Android>(m_driver_library)};
     }
-    bool IsShown() const override {
-        return true;
-    };
+    bool IsShown() const override { return true; };
 
 private:
     using Clock = std::chrono::steady_clock;

@@ -1,9 +1,10 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "audio_core/audio_out_manager.h"
+
 #include "audio_core/audio_core.h"
 #include "audio_core/audio_manager.h"
-#include "audio_core/audio_out_manager.h"
 #include "audio_core/out/audio_out.h"
 #include "core/core.h"
 #include "core/hle/kernel/k_event.h"
@@ -11,12 +12,14 @@
 
 namespace AudioCore::AudioOut {
 
-Manager::Manager(Core::System& system_) : system{system_} {
+Manager::Manager(Core::System& system_) : system{system_}
+{
     std::iota(session_ids.begin(), session_ids.end(), 0);
     num_free_sessions = MaxOutSessions;
 }
 
-Result Manager::AcquireSessionId(size_t& session_id) {
+Result Manager::AcquireSessionId(size_t& session_id)
+{
     if (num_free_sessions == 0) {
         LOG_ERROR(Service_Audio, "All 12 Audio Out sessions are in use, cannot create any more");
         return Service::Audio::ResultOutOfSessions;
@@ -27,7 +30,8 @@ Result Manager::AcquireSessionId(size_t& session_id) {
     return ResultSuccess;
 }
 
-void Manager::ReleaseSessionId(const size_t session_id) {
+void Manager::ReleaseSessionId(const size_t session_id)
+{
     std::scoped_lock l{mutex};
     LOG_DEBUG(Service_Audio, "Freeing AudioOut session {}", session_id);
     session_ids[free_session_id] = session_id;
@@ -37,7 +41,8 @@ void Manager::ReleaseSessionId(const size_t session_id) {
     applet_resource_user_ids[session_id] = 0;
 }
 
-Result Manager::LinkToManager() {
+Result Manager::LinkToManager()
+{
     std::scoped_lock l{mutex};
     if (!linked_to_manager) {
         AudioManager& manager{system.AudioCore().GetAudioManager()};
@@ -48,7 +53,8 @@ Result Manager::LinkToManager() {
     return ResultSuccess;
 }
 
-void Manager::Start() {
+void Manager::Start()
+{
     if (sessions_started) {
         return;
     }
@@ -63,7 +69,8 @@ void Manager::Start() {
     sessions_started = true;
 }
 
-void Manager::BufferReleaseAndRegister() {
+void Manager::BufferReleaseAndRegister()
+{
     std::scoped_lock l{mutex};
     for (auto& session : sessions) {
         if (session != nullptr) {
@@ -73,7 +80,8 @@ void Manager::BufferReleaseAndRegister() {
 }
 
 u32 Manager::GetAudioOutDeviceNames(
-    std::vector<Renderer::AudioDevice::AudioDeviceName>& names) const {
+    std::vector<Renderer::AudioDevice::AudioDeviceName>& names) const
+{
     names.emplace_back("DeviceOut");
     return 1;
 }

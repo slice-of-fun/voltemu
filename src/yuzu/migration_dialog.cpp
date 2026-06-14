@@ -9,7 +9,8 @@
 #include <QPushButton>
 #include <QStyle>
 
-MigrationDialog::MigrationDialog(QWidget* parent) : QDialog(parent) {
+MigrationDialog::MigrationDialog(QWidget* parent) : QDialog(parent)
+{
     QVBoxLayout* layout = new QVBoxLayout(this);
 
     m_text = new QLabel(this);
@@ -21,20 +22,24 @@ MigrationDialog::MigrationDialog(QWidget* parent) : QDialog(parent) {
     layout->addLayout(m_buttons, 1);
 }
 
-MigrationDialog::~MigrationDialog() {
+MigrationDialog::~MigrationDialog()
+{
     m_boxes->deleteLater();
     m_buttons->deleteLater();
 }
 
-void MigrationDialog::setText(const QString& text) {
+void MigrationDialog::setText(const QString& text)
+{
     m_text->setText(text);
 }
 
-void MigrationDialog::addBox(QWidget* box) {
+void MigrationDialog::addBox(QWidget* box)
+{
     m_boxes->addWidget(box);
 }
 
-QAbstractButton* MigrationDialog::addButton(const QString& text, const bool reject) {
+QAbstractButton* MigrationDialog::addButton(const QString& text, const bool reject)
+{
     QAbstractButton* button = new QPushButton(this);
     button->setText(text);
     m_buttons->addWidget(button, 1);
@@ -51,6 +56,7 @@ QAbstractButton* MigrationDialog::addButton(const QString& text, const bool reje
     return button;
 }
 
-QAbstractButton* MigrationDialog::clickedButton() const {
+QAbstractButton* MigrationDialog::clickedButton() const
+{
     return m_clickedButton;
 }

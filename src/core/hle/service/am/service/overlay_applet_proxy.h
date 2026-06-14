@@ -3,9 +3,9 @@
 
 #pragma once
 
+#include "core/hle/service/am/service/overlay_functions.h"
 #include "core/hle/service/cmif_types.h"
 #include "core/hle/service/service.h"
-#include "core/hle/service/am/service/overlay_functions.h"
 
 namespace Service::AM {
 
@@ -38,8 +38,8 @@ private:
     Result GetDisplayController(Out<SharedPointer<IDisplayController>> out_display_controller);
     Result GetProcessWindingController(
         Out<SharedPointer<IProcessWindingController>> out_process_winding_controller);
-    Result GetLibraryAppletCreator(
-        Out<SharedPointer<ILibraryAppletCreator>> out_library_applet_creator);
+    Result
+    GetLibraryAppletCreator(Out<SharedPointer<ILibraryAppletCreator>> out_library_applet_creator);
     Result GetOverlayFunctions(Out<SharedPointer<IOverlayFunctions>> out_overlay_functions);
     Result GetAppletCommonFunctions(
         Out<SharedPointer<IAppletCommonFunctions>> out_applet_common_functions);

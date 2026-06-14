@@ -4,12 +4,13 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/mii/mii.h"
+
 #include <memory>
 
 #include "common/logging.h"
 #include "core/hle/service/cmif_serialization.h"
 #include "core/hle/service/ipc_helpers.h"
-#include "core/hle/service/mii/mii.h"
 #include "core/hle/service/mii/mii_manager.h"
 #include "core/hle/service/mii/mii_result.h"
 #include "core/hle/service/mii/types/char_info.h"
@@ -26,8 +27,8 @@ class IDatabaseService final : public ServiceFramework<IDatabaseService> {
 public:
     explicit IDatabaseService(Core::System& system_, std::shared_ptr<MiiManager> mii_manager,
                               bool is_system_)
-        : ServiceFramework{system_, "IDatabaseService"}, manager{mii_manager}, is_system{
-                                                                                   is_system_} {
+        : ServiceFramework{system_, "IDatabaseService"}, manager{mii_manager}, is_system{is_system_}
+    {
         // clang-format off
         static const FunctionInfo functions[] = {
             {0, D<&IDatabaseService::IsUpdated>, "IsUpdated"},
@@ -68,7 +69,8 @@ public:
     }
 
 private:
-    Result IsUpdated(Out<bool> out_is_updated, SourceFlag source_flag) {
+    Result IsUpdated(Out<bool> out_is_updated, SourceFlag source_flag)
+    {
         LOG_DEBUG(Service_Mii, "called with source_flag={}", source_flag);
 
         *out_is_updated = manager->IsUpdated(metadata, source_flag);
@@ -76,7 +78,8 @@ private:
         R_SUCCEED();
     }
 
-    Result IsFullDatabase(Out<bool> out_is_full_database) {
+    Result IsFullDatabase(Out<bool> out_is_full_database)
+    {
         LOG_DEBUG(Service_Mii, "called");
 
         *out_is_full_database = manager->IsFullDatabase();
@@ -84,7 +87,8 @@ private:
         R_SUCCEED();
     }
 
-    Result GetCount(Out<u32> out_mii_count, SourceFlag source_flag) {
+    Result GetCount(Out<u32> out_mii_count, SourceFlag source_flag)
+    {
         *out_mii_count = manager->GetCount(metadata, source_flag);
 
         LOG_DEBUG(Service_Mii, "called with source_flag={}, mii_count={}", source_flag,
@@ -94,7 +98,8 @@ private:
     }
 
     Result Get(Out<u32> out_mii_count, SourceFlag source_flag,
-               OutArray<CharInfoElement, BufferAttr_HipcMapAlias> char_info_element_buffer) {
+               OutArray<CharInfoElement, BufferAttr_HipcMapAlias> char_info_element_buffer)
+    {
         const auto result =
             manager->Get(metadata, char_info_element_buffer, *out_mii_count, source_flag);
 
@@ -105,7 +110,8 @@ private:
     }
 
     Result Get1(Out<u32> out_mii_count, SourceFlag source_flag,
-                OutArray<CharInfo, BufferAttr_HipcMapAlias> char_info_buffer) {
+                OutArray<CharInfo, BufferAttr_HipcMapAlias> char_info_buffer)
+    {
         const auto result = manager->Get(metadata, char_info_buffer, *out_mii_count, source_flag);
 
         LOG_INFO(Service_Mii, "called with source_flag={}, mii_count={}", source_flag,
@@ -115,13 +121,15 @@ private:
     }
 
     Result UpdateLatest(Out<CharInfo> out_char_info, const CharInfo& char_info,
-                        SourceFlag source_flag) {
+                        SourceFlag source_flag)
+    {
         LOG_INFO(Service_Mii, "called with source_flag={}", source_flag);
 
         R_RETURN(manager->UpdateLatest(metadata, *out_char_info, char_info, source_flag));
     }
 
-    Result BuildRandom(Out<CharInfo> out_char_info, Age age, Gender gender, Race race) {
+    Result BuildRandom(Out<CharInfo> out_char_info, Age age, Gender gender, Race race)
+    {
         LOG_DEBUG(Service_Mii, "called with age={}, gender={}, race={}", age, gender, race);
 
         R_UNLESS(age <= Age::All, ResultInvalidArgument);
@@ -133,7 +141,8 @@ private:
         R_SUCCEED();
     }
 
-    Result BuildDefault(Out<CharInfo> out_char_info, s32 index) {
+    Result BuildDefault(Out<CharInfo> out_char_info, s32 index)
+    {
         LOG_DEBUG(Service_Mii, "called with index={}", index);
         R_UNLESS(index < static_cast<s32>(RawData::DefaultMii.size()), ResultInvalidArgument);
 
@@ -143,7 +152,8 @@ private:
     }
 
     Result Get2(Out<u32> out_mii_count, SourceFlag source_flag,
-                OutArray<StoreDataElement, BufferAttr_HipcMapAlias> store_data_element_buffer) {
+                OutArray<StoreDataElement, BufferAttr_HipcMapAlias> store_data_element_buffer)
+    {
         const auto result =
             manager->Get(metadata, store_data_element_buffer, *out_mii_count, source_flag);
 
@@ -154,7 +164,8 @@ private:
     }
 
     Result Get3(Out<u32> out_mii_count, SourceFlag source_flag,
-                OutArray<StoreData, BufferAttr_HipcMapAlias> store_data_buffer) {
+                OutArray<StoreData, BufferAttr_HipcMapAlias> store_data_buffer)
+    {
         const auto result = manager->Get(metadata, store_data_buffer, *out_mii_count, source_flag);
 
         LOG_INFO(Service_Mii, "called with source_flag={}, mii_count={}", source_flag,
@@ -164,14 +175,16 @@ private:
     }
 
     Result UpdateLatest1(Out<StoreData> out_store_data, const StoreData& store_data,
-                         SourceFlag source_flag) {
+                         SourceFlag source_flag)
+    {
         LOG_INFO(Service_Mii, "called with source_flag={}", source_flag);
         R_UNLESS(is_system, ResultPermissionDenied);
 
         R_RETURN(manager->UpdateLatest(metadata, *out_store_data, store_data, source_flag));
     }
 
-    Result FindIndex(Out<s32> out_index, Common::UUID create_id, bool is_special) {
+    Result FindIndex(Out<s32> out_index, Common::UUID create_id, bool is_special)
+    {
         LOG_INFO(Service_Mii, "called with create_id={}, is_special={}",
                  create_id.FormattedString(), is_special);
 
@@ -180,7 +193,8 @@ private:
         R_SUCCEED();
     }
 
-    Result Move(Common::UUID create_id, s32 new_index) {
+    Result Move(Common::UUID create_id, s32 new_index)
+    {
         LOG_INFO(Service_Mii, "called with create_id={}, new_index={}", create_id.FormattedString(),
                  new_index);
         R_UNLESS(is_system, ResultPermissionDenied);
@@ -192,7 +206,8 @@ private:
         R_RETURN(manager->Move(metadata, new_index, create_id));
     }
 
-    Result AddOrReplace(const StoreData& store_data) {
+    Result AddOrReplace(const StoreData& store_data)
+    {
         LOG_INFO(Service_Mii, "called");
         R_UNLESS(is_system, ResultPermissionDenied);
 
@@ -201,14 +216,16 @@ private:
         R_RETURN(result);
     }
 
-    Result Delete(Common::UUID create_id) {
+    Result Delete(Common::UUID create_id)
+    {
         LOG_INFO(Service_Mii, "called, create_id={}", create_id.FormattedString());
         R_UNLESS(is_system, ResultPermissionDenied);
 
         R_RETURN(manager->Delete(metadata, create_id));
     }
 
-    Result DestroyFile() {
+    Result DestroyFile()
+    {
         bool is_db_test_mode_enabled{};
         m_set_sys->GetSettingsItemValueImpl(is_db_test_mode_enabled, "mii",
                                             "is_db_test_mode_enabled");
@@ -219,7 +236,8 @@ private:
         R_RETURN(manager->DestroyFile(metadata));
     }
 
-    Result DeleteFile() {
+    Result DeleteFile()
+    {
         bool is_db_test_mode_enabled{};
         m_set_sys->GetSettingsItemValueImpl(is_db_test_mode_enabled, "mii",
                                             "is_db_test_mode_enabled");
@@ -230,7 +248,8 @@ private:
         R_RETURN(manager->DeleteFile());
     }
 
-    Result Format() {
+    Result Format()
+    {
         bool is_db_test_mode_enabled{};
         m_set_sys->GetSettingsItemValueImpl(is_db_test_mode_enabled, "mii",
                                             "is_db_test_mode_enabled");
@@ -241,7 +260,8 @@ private:
         R_RETURN(manager->Format(metadata));
     }
 
-    Result IsBrokenDatabaseWithClearFlag(Out<bool> out_is_broken_with_clear_flag) {
+    Result IsBrokenDatabaseWithClearFlag(Out<bool> out_is_broken_with_clear_flag)
+    {
         LOG_DEBUG(Service_Mii, "called");
         R_UNLESS(is_system, ResultPermissionDenied);
 
@@ -250,13 +270,15 @@ private:
         R_SUCCEED();
     }
 
-    Result GetIndex(Out<s32> out_index, const CharInfo& char_info) {
+    Result GetIndex(Out<s32> out_index, const CharInfo& char_info)
+    {
         LOG_DEBUG(Service_Mii, "called");
 
         R_RETURN(manager->GetIndex(metadata, char_info, *out_index));
     }
 
-    Result SetInterfaceVersion(u32 interface_version) {
+    Result SetInterfaceVersion(u32 interface_version)
+    {
         LOG_INFO(Service_Mii, "called, interface_version={:08X}", interface_version);
 
         manager->SetInterfaceVersion(metadata, interface_version);
@@ -264,25 +286,29 @@ private:
         R_SUCCEED();
     }
 
-    Result Convert(Out<CharInfo> out_char_info, const Ver3StoreData& mii_v3) {
+    Result Convert(Out<CharInfo> out_char_info, const Ver3StoreData& mii_v3)
+    {
         LOG_INFO(Service_Mii, "called");
 
         R_RETURN(manager->ConvertV3ToCharInfo(*out_char_info, mii_v3));
     }
 
-    Result ConvertCoreDataToCharInfo(Out<CharInfo> out_char_info, const CoreData& core_data) {
+    Result ConvertCoreDataToCharInfo(Out<CharInfo> out_char_info, const CoreData& core_data)
+    {
         LOG_INFO(Service_Mii, "called");
 
         R_RETURN(manager->ConvertCoreDataToCharInfo(*out_char_info, core_data));
     }
 
-    Result ConvertCharInfoToCoreData(Out<CoreData> out_core_data, const CharInfo& char_info) {
+    Result ConvertCharInfoToCoreData(Out<CoreData> out_core_data, const CharInfo& char_info)
+    {
         LOG_INFO(Service_Mii, "called");
 
         R_RETURN(manager->ConvertCharInfoToCoreData(*out_core_data, char_info));
     }
 
-    Result Append(const CharInfo& char_info) {
+    Result Append(const CharInfo& char_info)
+    {
         LOG_INFO(Service_Mii, "called");
 
         R_RETURN(manager->Append(metadata, char_info));
@@ -297,7 +323,8 @@ private:
 
 IStaticService::IStaticService(Core::System& system_, const char* name_,
                                std::shared_ptr<MiiManager> mii_manager, bool is_system_)
-    : ServiceFramework{system_, name_}, manager{mii_manager}, is_system{is_system_} {
+    : ServiceFramework{system_, name_}, manager{mii_manager}, is_system{is_system_}
+{
     // clang-format off
     static const FunctionInfo functions[] = {
         {0, D<&IStaticService::GetDatabaseService>, "GetDatabaseService"},
@@ -309,8 +336,8 @@ IStaticService::IStaticService(Core::System& system_, const char* name_,
 
 IStaticService::~IStaticService() = default;
 
-Result IStaticService::GetDatabaseService(
-    Out<SharedPointer<IDatabaseService>> out_database_service) {
+Result IStaticService::GetDatabaseService(Out<SharedPointer<IDatabaseService>> out_database_service)
+{
     LOG_DEBUG(Service_Mii, "called");
 
     *out_database_service = std::make_shared<IDatabaseService>(system, manager, is_system);
@@ -318,13 +345,15 @@ Result IStaticService::GetDatabaseService(
     R_SUCCEED();
 }
 
-std::shared_ptr<MiiManager> IStaticService::GetMiiManager() {
+std::shared_ptr<MiiManager> IStaticService::GetMiiManager()
+{
     return manager;
 }
 
 class IImageDatabaseService final : public ServiceFramework<IImageDatabaseService> {
 public:
-    explicit IImageDatabaseService(Core::System& system_) : ServiceFramework{system_, "miiimg"} {
+    explicit IImageDatabaseService(Core::System& system_) : ServiceFramework{system_, "miiimg"}
+    {
         // clang-format off
         static const FunctionInfo functions[] = {
             {0, D<&IImageDatabaseService::Initialize>, "Initialize"},
@@ -348,13 +377,15 @@ public:
     }
 
 private:
-    Result Initialize() {
+    Result Initialize()
+    {
         LOG_INFO(Service_Mii, "called");
 
         R_SUCCEED();
     }
 
-    Result GetCount(Out<u32> out_count) {
+    Result GetCount(Out<u32> out_count)
+    {
         LOG_DEBUG(Service_Mii, "called");
 
         *out_count = 0;
@@ -363,7 +394,8 @@ private:
     }
 };
 
-void LoopProcess(Core::System& system) {
+void LoopProcess(Core::System& system)
+{
     auto server_manager = std::make_unique<ServerManager>(system);
     std::shared_ptr<MiiManager> manager = std::make_shared<MiiManager>();
 

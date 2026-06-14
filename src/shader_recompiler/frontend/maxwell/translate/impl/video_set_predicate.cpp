@@ -20,7 +20,8 @@ enum class VsetpCompareOp : u64 {
     True,
 };
 
-CompareOp VsetpToShaderCompareOp(VsetpCompareOp op) {
+CompareOp VsetpToShaderCompareOp(VsetpCompareOp op)
+{
     switch (op) {
     case VsetpCompareOp::False:
         return CompareOp::False;
@@ -44,7 +45,8 @@ CompareOp VsetpToShaderCompareOp(VsetpCompareOp op) {
 }
 } // Anonymous namespace
 
-void TranslatorVisitor::VSETP(u64 insn) {
+void TranslatorVisitor::VSETP(u64 insn)
+{
     union {
         u64 raw;
         BitField<0, 3, IR::Pred> dest_pred_b;

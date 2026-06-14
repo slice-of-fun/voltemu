@@ -25,10 +25,10 @@ public:
 public:
     IntegrityVerificationStorage()
         : m_verification_block_size(0), m_verification_block_order(0),
-          m_upper_layer_verification_block_size(0), m_upper_layer_verification_block_order(0) {}
-    virtual ~IntegrityVerificationStorage() override {
-        this->Finalize();
+          m_upper_layer_verification_block_size(0), m_upper_layer_verification_block_order(0)
+    {
     }
+    virtual ~IntegrityVerificationStorage() override { this->Finalize(); }
 
     void Initialize(VirtualFile hs, VirtualFile ds, s64 verif_block_size,
                     s64 upper_layer_verif_block_size, bool is_real_data);
@@ -37,17 +37,17 @@ public:
     virtual size_t Read(u8* buffer, size_t size, size_t offset) const override;
     virtual size_t GetSize() const override;
 
-    s64 GetBlockSize() const {
-        return m_verification_block_size;
-    }
+    s64 GetBlockSize() const { return m_verification_block_size; }
 
 private:
-    static void SetValidationBit(BlockHash* hash) {
+    static void SetValidationBit(BlockHash* hash)
+    {
         ASSERT(hash != nullptr);
         hash->hash[HashSize - 1] |= 0x80;
     }
 
-    static bool IsValidationBit(const BlockHash* hash) {
+    static bool IsValidationBit(const BlockHash* hash)
+    {
         ASSERT(hash != nullptr);
         return (hash->hash[HashSize - 1] & 0x80) != 0;
     }

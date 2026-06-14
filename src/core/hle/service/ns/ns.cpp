@@ -1,8 +1,9 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include "core/hle/service/ns/develop_interface.h"
 #include "core/hle/service/ns/ns.h"
+
+#include "core/hle/service/ns/develop_interface.h"
 #include "core/hle/service/ns/platform_service_manager.h"
 #include "core/hle/service/ns/query_service.h"
 #include "core/hle/service/ns/service_getter_interface.h"
@@ -12,7 +13,8 @@
 
 namespace Service::NS {
 
-void LoopProcess(Core::System& system) {
+void LoopProcess(Core::System& system)
+{
     auto server_manager = std::make_unique<ServerManager>(system);
 
     server_manager->RegisterNamedService(

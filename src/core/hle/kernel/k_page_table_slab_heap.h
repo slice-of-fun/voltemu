@@ -36,21 +36,25 @@ public:
 public:
     KPageTableSlabHeap() = default;
 
-    static constexpr size_t CalculateReferenceCountSize(size_t size) {
+    static constexpr size_t CalculateReferenceCountSize(size_t size)
+    {
         return (size / PageSize) * sizeof(RefCount);
     }
 
-    void Initialize(KDynamicPageManager* page_allocator, size_t object_count, RefCount* rc) {
+    void Initialize(KDynamicPageManager* page_allocator, size_t object_count, RefCount* rc)
+    {
         BaseHeap::Initialize(page_allocator, object_count);
         this->Initialize(rc);
     }
 
-    RefCount GetRefCount(KVirtualAddress addr) {
+    RefCount GetRefCount(KVirtualAddress addr)
+    {
         ASSERT(this->IsInRange(addr));
         return *this->GetRefCountPointer(addr);
     }
 
-    void Open(KVirtualAddress addr, int count) {
+    void Open(KVirtualAddress addr, int count)
+    {
         ASSERT(this->IsInRange(addr));
 
         *this->GetRefCountPointer(addr) += static_cast<RefCount>(count);
@@ -58,7 +62,8 @@ public:
         ASSERT(this->GetRefCount(addr) > 0);
     }
 
-    bool Close(KVirtualAddress addr, int count) {
+    bool Close(KVirtualAddress addr, int count)
+    {
         ASSERT(this->IsInRange(addr));
         ASSERT(this->GetRefCount(addr) >= count);
 
@@ -66,12 +71,11 @@ public:
         return this->GetRefCount(addr) == 0;
     }
 
-    bool IsInPageTableHeap(KVirtualAddress addr) const {
-        return this->IsInRange(addr);
-    }
+    bool IsInPageTableHeap(KVirtualAddress addr) const { return this->IsInRange(addr); }
 
 private:
-    void Initialize([[maybe_unused]] RefCount* rc) {
+    void Initialize([[maybe_unused]] RefCount* rc)
+    {
         // TODO(bunnei): Use rc once we support kernel virtual memory allocations.
         const auto count = this->GetSize() / PageSize;
         m_ref_counts.resize(count);
@@ -81,7 +85,8 @@ private:
         }
     }
 
-    RefCount* GetRefCountPointer(KVirtualAddress addr) {
+    RefCount* GetRefCountPointer(KVirtualAddress addr)
+    {
         return m_ref_counts.data() + ((addr - this->GetAddress()) / PageSize);
     }
 

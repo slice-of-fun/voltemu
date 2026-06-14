@@ -4,6 +4,7 @@
 #pragma once
 
 #include <vector>
+
 #include "common/common_types.h"
 #include "core/hle/service/cmif_types.h"
 #include "core/hle/service/service.h"

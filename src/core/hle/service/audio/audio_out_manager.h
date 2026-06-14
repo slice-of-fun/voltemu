@@ -35,13 +35,14 @@ private:
                         ClientAppletResourceUserId aruid);
     Result ListAudioOutsAuto(OutArray<AudioDeviceName, BufferAttr_HipcAutoSelect> out_audio_outs,
                              Out<u32> out_count);
-    Result OpenAudioOutAuto(
-        Out<AudioCore::AudioOut::AudioOutParameterInternal> out_parameter_internal,
-        Out<SharedPointer<IAudioOut>> out_audio_out,
-        OutArray<AudioDeviceName, BufferAttr_HipcAutoSelect> out_name,
-        InArray<AudioDeviceName, BufferAttr_HipcAutoSelect> name,
-        AudioCore::AudioOut::AudioOutParameter parameter,
-        InCopyHandle<Kernel::KProcess> process_handle, ClientAppletResourceUserId aruid);
+    Result
+    OpenAudioOutAuto(Out<AudioCore::AudioOut::AudioOutParameterInternal> out_parameter_internal,
+                     Out<SharedPointer<IAudioOut>> out_audio_out,
+                     OutArray<AudioDeviceName, BufferAttr_HipcAutoSelect> out_name,
+                     InArray<AudioDeviceName, BufferAttr_HipcAutoSelect> name,
+                     AudioCore::AudioOut::AudioOutParameter parameter,
+                     InCopyHandle<Kernel::KProcess> process_handle,
+                     ClientAppletResourceUserId aruid);
 
     std::unique_ptr<AudioCore::AudioOut::Manager> impl;
 };

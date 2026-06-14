@@ -71,11 +71,10 @@ struct CommandHeader {
         BitField<31, 1, u32> enable_handle_descriptor;
     };
 
-    bool IsTipc() const {
-        return type.Value() >= CommandType::TIPC_CommandRegion;
-    }
+    bool IsTipc() const { return type.Value() >= CommandType::TIPC_CommandRegion; }
 
-    bool IsCloseCommand() const {
+    bool IsCloseCommand() const
+    {
         switch (type.Value()) {
         case CommandType::Close:
         case CommandType::TIPC_Close:
@@ -106,22 +105,22 @@ struct BufferDescriptorX {
 
     u32_le address_bits_0_31;
 
-    u32_le Counter() const {
+    u32_le Counter() const
+    {
         u32_le counter{counter_bits_0_5};
         counter |= counter_bits_9_11 << 9;
         return counter;
     }
 
-    VAddr Address() const {
+    VAddr Address() const
+    {
         VAddr address{address_bits_0_31};
         address |= static_cast<VAddr>(address_bits_32_35) << 32;
         address |= static_cast<VAddr>(address_bits_36_38) << 36;
         return address;
     }
 
-    u64 Size() const {
-        return static_cast<u64>(size);
-    }
+    u64 Size() const { return static_cast<u64>(size); }
 };
 static_assert(sizeof(BufferDescriptorX) == 8, "BufferDescriptorX size is incorrect");
 
@@ -136,14 +135,16 @@ struct BufferDescriptorABW {
         BitField<28, 4, u32> address_bits_32_35;
     };
 
-    VAddr Address() const {
+    VAddr Address() const
+    {
         VAddr address{address_bits_0_31};
         address |= static_cast<VAddr>(address_bits_32_35) << 32;
         address |= static_cast<VAddr>(address_bits_36_38) << 36;
         return address;
     }
 
-    u64 Size() const {
+    u64 Size() const
+    {
         u64 size{size_bits_0_31};
         size |= static_cast<u64>(size_bits_32_35) << 32;
         return size;
@@ -159,15 +160,14 @@ struct BufferDescriptorC {
         BitField<16, 16, u32> size;
     };
 
-    VAddr Address() const {
+    VAddr Address() const
+    {
         VAddr address{address_bits_0_31};
         address |= static_cast<VAddr>(address_bits_32_47) << 32;
         return address;
     }
 
-    u64 Size() const {
-        return static_cast<u64>(size);
-    }
+    u64 Size() const { return static_cast<u64>(size); }
 };
 static_assert(sizeof(BufferDescriptorC) == 8, "BufferDescriptorC size is incorrect");
 

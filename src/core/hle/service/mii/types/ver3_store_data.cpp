@@ -1,14 +1,16 @@
 // SPDX-FileCopyrightText: Copyright 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/mii/types/ver3_store_data.h"
+
 #include "core/hle/service/mii/mii_util.h"
 #include "core/hle/service/mii/types/raw_data.h"
 #include "core/hle/service/mii/types/store_data.h"
-#include "core/hle/service/mii/types/ver3_store_data.h"
 
 namespace Service::Mii {
 
-void NfpStoreDataExtension::SetFromStoreData(const StoreData& store_data) {
+void NfpStoreDataExtension::SetFromStoreData(const StoreData& store_data)
+{
     faceline_color = static_cast<u8>(store_data.GetFacelineColor()) & 0xf;
     hair_color = static_cast<u8>(store_data.GetHairColor()) & 0x7f;
     eye_color = static_cast<u8>(store_data.GetEyeColor()) & 0x7f;
@@ -19,7 +21,8 @@ void NfpStoreDataExtension::SetFromStoreData(const StoreData& store_data) {
     glass_type = static_cast<u8>(store_data.GetGlassType()) & 0x1f;
 }
 
-void Ver3StoreData::BuildToStoreData(StoreData& out_store_data) const {
+void Ver3StoreData::BuildToStoreData(StoreData& out_store_data) const
+{
     out_store_data.BuildBase(Gender::Male);
 
     out_store_data.SetGender(static_cast<Gender>(mii_information.gender.Value()));
@@ -97,7 +100,8 @@ void Ver3StoreData::BuildToStoreData(StoreData& out_store_data) const {
     out_store_data.SetChecksum();
 }
 
-void Ver3StoreData::BuildFromStoreData(const StoreData& store_data) {
+void Ver3StoreData::BuildFromStoreData(const StoreData& store_data)
+{
     version = 3;
     mii_information.gender.Assign(static_cast<u8>(store_data.GetGender()));
     mii_information.favorite_color.Assign(static_cast<u8>(store_data.GetFavoriteColor()));
@@ -172,7 +176,8 @@ void Ver3StoreData::BuildFromStoreData(const StoreData& store_data) {
     crc = MiiUtil::CalculateCrc16(&version, sizeof(Ver3StoreData) - sizeof(u16));
 }
 
-u32 Ver3StoreData::IsValid() const {
+u32 Ver3StoreData::IsValid() const
+{
     bool is_valid = version == 0 || version == 3;
 
     is_valid = is_valid && (mii_name.data[0] != '\0');

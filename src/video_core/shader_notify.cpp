@@ -1,10 +1,10 @@
 // SPDX-FileCopyrightText: Copyright 2020 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "video_core/shader_notify.h"
+
 #include <atomic>
 #include <chrono>
-
-#include "video_core/shader_notify.h"
 
 using namespace std::chrono_literals;
 
@@ -12,7 +12,8 @@ namespace VideoCore {
 
 const auto TIME_TO_STOP_REPORTING = 2s;
 
-int ShaderNotify::ShadersBuilding() noexcept {
+int ShaderNotify::ShadersBuilding() noexcept
+{
     const int now_complete = num_complete.load(std::memory_order::relaxed);
     const int now_building = num_building.load(std::memory_order::relaxed);
     if (now_complete == now_building) {

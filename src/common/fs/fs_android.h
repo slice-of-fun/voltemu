@@ -3,9 +3,10 @@
 
 #pragma once
 
+#include <jni.h>
+
 #include <string>
 #include <vector>
-#include <jni.h>
 
 namespace Common::FS::Android {
 

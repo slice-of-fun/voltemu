@@ -4,8 +4,11 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "video_core/engines/maxwell_3d.h"
+
 #include <cstring>
 #include <optional>
+
 #include "common/assert.h"
 #include "common/bit_util.h"
 #include "common/scope_exit.h"
@@ -13,7 +16,6 @@
 #include "core/core.h"
 #include "core/core_timing.h"
 #include "video_core/dirty_flags.h"
-#include "video_core/engines/maxwell_3d.h"
 #include "video_core/engines/maxwell_3d.h"
 #include "video_core/gpu.h"
 #include "video_core/memory_manager.h"
@@ -26,15 +28,16 @@ namespace Tegra::Engines {
 constexpr u32 MacroRegistersStart = 0xE00;
 
 Maxwell3D::Maxwell3D(Core::System& system_, MemoryManager& memory_manager_)
-    : draw_manager()
-    , system{system_}
-    , memory_manager{memory_manager_}
+    : draw_manager(), system{system_}, memory_manager{memory_manager_}
 #ifdef ARCHITECTURE_x86_64
-    , macro_engine(bool(Settings::values.disable_macro_jit))
+      ,
+      macro_engine(bool(Settings::values.disable_macro_jit))
 #else
-    , macro_engine(true)
+      ,
+      macro_engine(true)
 #endif
-    , upload_state{memory_manager, regs.upload}
+      ,
+      upload_state{memory_manager, regs.upload}
 {
     dirty.flags.flip();
     InitializeRegisterDefaults();
@@ -45,12 +48,14 @@ Maxwell3D::Maxwell3D(Core::System& system_, MemoryManager& memory_manager_)
 
 Maxwell3D::~Maxwell3D() = default;
 
-void Maxwell3D::BindRasterizer(VideoCore::RasterizerInterface* rasterizer_) {
+void Maxwell3D::BindRasterizer(VideoCore::RasterizerInterface* rasterizer_)
+{
     rasterizer = rasterizer_;
     upload_state.BindRasterizer(rasterizer_);
 }
 
-void Maxwell3D::InitializeRegisterDefaults() {
+void Maxwell3D::InitializeRegisterDefaults()
+{
     // Initializes registers to their default values - what games expect them to be at boot. This is
     // for certain registers that may not be explicitly set by games.
 
@@ -134,7 +139,8 @@ void Maxwell3D::InitializeRegisterDefaults() {
     shadow_state = regs;
 }
 
-bool Maxwell3D::IsMethodExecutable(u32 method) {
+bool Maxwell3D::IsMethodExecutable(u32 method)
+{
     if (method >= MacroRegistersStart) {
         return true;
     }
@@ -201,7 +207,8 @@ bool Maxwell3D::IsMethodExecutable(u32 method) {
     }
 }
 
-void Maxwell3D::ProcessMacro(u32 method, const u32* base_start, u32 amount, bool is_last_call) {
+void Maxwell3D::ProcessMacro(u32 method, const u32* base_start, u32 amount, bool is_last_call)
+{
     if (executing_macro == 0) {
         // A macro call must begin by writing the macro method's register, not its argument.
         ASSERT_MSG((method % 2) == 0,
@@ -228,7 +235,8 @@ void Maxwell3D::ProcessMacro(u32 method, const u32* base_start, u32 amount, bool
     }
 }
 
-void Maxwell3D::RefreshParametersImpl() {
+void Maxwell3D::RefreshParametersImpl()
+{
     if (!Settings::IsGPULevelHigh()) {
         return;
     }
@@ -244,7 +252,8 @@ void Maxwell3D::RefreshParametersImpl() {
     }
 }
 
-u32 Maxwell3D::GetMaxCurrentVertices() {
+u32 Maxwell3D::GetMaxCurrentVertices()
+{
     u32 num_vertices = 0;
     for (size_t index = 0; index < Regs::NumVertexArrays; ++index) {
         const auto& array = regs.vertex_streams[index];
@@ -267,17 +276,21 @@ u32 Maxwell3D::GetMaxCurrentVertices() {
     return num_vertices;
 }
 
-size_t Maxwell3D::EstimateIndexBufferSize() {
+size_t Maxwell3D::EstimateIndexBufferSize()
+{
     GPUVAddr start_address = regs.index_buffer.StartAddress();
     GPUVAddr end_address = regs.index_buffer.EndAddress();
     auto const byte_size = regs.index_buffer.FormatSizeInBytes();
     auto const max_size = 1ull << (byte_size * CHAR_BIT);
     auto const upper_cap = GetMaxCurrentVertices() * 4 * byte_size;
     auto const lower_cap = std::min<size_t>(size_t(end_address - start_address), upper_cap);
-    return std::min<size_t>(memory_manager.GetMemoryLayoutSize(start_address, byte_size * max_size) / byte_size, lower_cap);
+    return std::min<size_t>(
+        memory_manager.GetMemoryLayoutSize(start_address, byte_size * max_size) / byte_size,
+        lower_cap);
 }
 
-u32 Maxwell3D::ProcessShadowRam(u32 method, u32 argument) {
+u32 Maxwell3D::ProcessShadowRam(u32 method, u32 argument)
+{
     // Keep track of the register value in shadow_state when requested.
     auto const c = shadow_state.shadow_ram_control;
     if (c == Regs::ShadowRamControl::Track || c == Regs::ShadowRamControl::TrackWithFilter)
@@ -287,9 +300,11 @@ u32 Maxwell3D::ProcessShadowRam(u32 method, u32 argument) {
     return argument;
 }
 
-void Maxwell3D::ConsumeSinkImpl() {
+void Maxwell3D::ConsumeSinkImpl()
+{
     const auto control = shadow_state.shadow_ram_control;
-    if (control == Regs::ShadowRamControl::Track || control == Regs::ShadowRamControl::TrackWithFilter) {
+    if (control == Regs::ShadowRamControl::Track ||
+        control == Regs::ShadowRamControl::TrackWithFilter) {
         for (auto [method, value] : method_sink) {
             shadow_state.reg_array[method] = value;
             ProcessDirtyRegisters(method, value);
@@ -304,13 +319,16 @@ void Maxwell3D::ConsumeSinkImpl() {
     method_sink.clear();
 }
 
-void Maxwell3D::ProcessDirtyRegisters(u32 method, u32 argument) {
+void Maxwell3D::ProcessDirtyRegisters(u32 method, u32 argument)
+{
     regs.reg_array[method] = argument;
     for (auto const& table : dirty.tables)
         dirty.flags[table[method]] = true;
 }
 
-void Maxwell3D::ProcessMethodCall(u32 method, u32 argument, u32 nonshadow_argument, bool is_last_call) {
+void Maxwell3D::ProcessMethodCall(u32 method, u32 argument, u32 nonshadow_argument,
+                                  bool is_last_call)
+{
     switch (method) {
     case MAXWELL3D_REG_INDEX(wait_for_idle):
         return rasterizer->WaitForIdle();
@@ -361,7 +379,8 @@ void Maxwell3D::ProcessMethodCall(u32 method, u32 argument, u32 nonshadow_argume
     case MAXWELL3D_REG_INDEX(sync_info):
         return ProcessSyncPoint();
     case MAXWELL3D_REG_INDEX(launch_dma):
-        return upload_state.ProcessExec(regs.launch_dma.memory_layout.Value() == Regs::LaunchDMA::Layout::Pitch);
+        return upload_state.ProcessExec(regs.launch_dma.memory_layout.Value() ==
+                                        Regs::LaunchDMA::Layout::Pitch);
     case MAXWELL3D_REG_INDEX(inline_data):
         upload_state.ProcessData(argument, is_last_call);
         return;
@@ -378,7 +397,8 @@ void Maxwell3D::ProcessMethodCall(u32 method, u32 argument, u32 nonshadow_argume
     }
 }
 
-void Maxwell3D::CallMacroMethod(u32 method, const std::vector<u32>& parameters) {
+void Maxwell3D::CallMacroMethod(u32 method, const std::vector<u32>& parameters)
+{
     // Reset the current macro.
     executing_macro = 0;
 
@@ -391,7 +411,8 @@ void Maxwell3D::CallMacroMethod(u32 method, const std::vector<u32>& parameters) 
     draw_manager.DrawDeferred(*this);
 }
 
-void Maxwell3D::CallMethod(u32 method, u32 method_argument, bool is_last_call) {
+void Maxwell3D::CallMethod(u32 method, u32 method_argument, bool is_last_call)
+{
     // It is an error to write to a register other than the current macro's ARG register before
     // it has finished execution.
     if (executing_macro != 0) {
@@ -405,14 +426,15 @@ void Maxwell3D::CallMethod(u32 method, u32 method_argument, bool is_last_call) {
         return;
     }
 
-    ASSERT(method < Regs::NUM_REGS && "Invalid Maxwell3D register, increase the size of the Regs structure");
+    ASSERT(method < Regs::NUM_REGS &&
+           "Invalid Maxwell3D register, increase the size of the Regs structure");
     const u32 argument = ProcessShadowRam(method, method_argument);
     ProcessDirtyRegisters(method, argument);
     ProcessMethodCall(method, argument, method_argument, is_last_call);
 }
 
-void Maxwell3D::CallMultiMethod(u32 method, const u32* base_start, u32 amount,
-                                u32 methods_pending) {
+void Maxwell3D::CallMultiMethod(u32 method, const u32* base_start, u32 amount, u32 methods_pending)
+{
     // Methods after 0xE00 are special, they're actually triggers for some microcode that was
     // uploaded to the GPU during initialization.
     if (method >= MacroRegistersStart) {
@@ -451,15 +473,18 @@ void Maxwell3D::CallMultiMethod(u32 method, const u32* base_start, u32 amount,
     }
 }
 
-void Maxwell3D::ProcessMacroUpload(u32 data) {
+void Maxwell3D::ProcessMacroUpload(u32 data)
+{
     macro_engine.AddCode(regs.load_mme.instruction_ptr++, data);
 }
 
-void Maxwell3D::ProcessMacroBind(u32 data) {
+void Maxwell3D::ProcessMacroBind(u32 data)
+{
     macro_positions[regs.load_mme.start_address_ptr++] = data;
 }
 
-void Maxwell3D::ProcessFirmwareCall4() {
+void Maxwell3D::ProcessFirmwareCall4()
+{
     LOG_DEBUG(HW_GPU, "(STUBBED) called");
 
     // Firmware call 4 is a blob that changes some registers depending on its parameters.
@@ -467,7 +492,8 @@ void Maxwell3D::ProcessFirmwareCall4() {
     regs.shadow_scratch[0] = 1;
 }
 
-void Maxwell3D::StampQueryResult(u64 payload, bool long_query) {
+void Maxwell3D::StampQueryResult(u64 payload, bool long_query)
+{
     const GPUVAddr sequence_address{regs.report_semaphore.Address()};
     if (long_query) {
         memory_manager.Write<u64>(sequence_address + sizeof(u64), system.GPU().GetTicks());
@@ -477,7 +503,8 @@ void Maxwell3D::StampQueryResult(u64 payload, bool long_query) {
     }
 }
 
-void Maxwell3D::ProcessQueryGet() {
+void Maxwell3D::ProcessQueryGet()
+{
     VideoCommon::QueryPropertiesFlags flags{};
     if (regs.report_semaphore.query.short_query == 0) {
         flags |= VideoCommon::QueryPropertiesFlags::HasTimeout;
@@ -511,7 +538,8 @@ void Maxwell3D::ProcessQueryGet() {
     }
 }
 
-void Maxwell3D::ProcessQueryCondition() {
+void Maxwell3D::ProcessQueryCondition()
+{
     if (rasterizer->AccelerateConditionalRendering()) {
         execute_on = true;
         return;
@@ -565,7 +593,8 @@ void Maxwell3D::ProcessQueryCondition() {
     }
 }
 
-void Maxwell3D::ProcessCounterReset() {
+void Maxwell3D::ProcessCounterReset()
+{
     const auto query_type = [clear_report = regs.clear_report_value]() {
         switch (clear_report) {
         case Tegra::Engines::Maxwell3D::Regs::ClearReport::ZPassPixelCount:
@@ -584,13 +613,15 @@ void Maxwell3D::ProcessCounterReset() {
     rasterizer->ResetCounter(query_type);
 }
 
-void Maxwell3D::ProcessSyncPoint() {
+void Maxwell3D::ProcessSyncPoint()
+{
     const u32 sync_point = regs.sync_info.sync_point.Value();
     [[maybe_unused]] const u32 cache_flush = regs.sync_info.clean_l2.Value();
     rasterizer->SignalSyncPoint(sync_point);
 }
 
-void Maxwell3D::ProcessCBBind(size_t stage_index) {
+void Maxwell3D::ProcessCBBind(size_t stage_index)
+{
     // Bind the buffer currently in CB_ADDRESS to the specified index in the desired shader
     // stage.
     const auto& bind_data = regs.bind_groups[stage_index];
@@ -609,7 +640,8 @@ void Maxwell3D::ProcessCBBind(size_t stage_index) {
     rasterizer->BindGraphicsUniformBuffer(stage_index, bind_data.shader_slot, gpu_addr, size);
 }
 
-void Maxwell3D::ProcessCBMultiData(const u32* start_base, u32 amount) {
+void Maxwell3D::ProcessCBMultiData(const u32* start_base, u32 amount)
+{
     // Write the input value to the current const buffer at the current position.
     const GPUVAddr buffer_address = regs.const_buffer.Address();
     ASSERT(buffer_address != 0);
@@ -625,11 +657,13 @@ void Maxwell3D::ProcessCBMultiData(const u32* start_base, u32 amount) {
     regs.const_buffer.offset += static_cast<u32>(copy_size);
 }
 
-void Maxwell3D::ProcessCBData(u32 value) {
+void Maxwell3D::ProcessCBData(u32 value)
+{
     ProcessCBMultiData(&value, 1);
 }
 
-Texture::TICEntry Maxwell3D::GetTICEntry(u32 tic_index) const {
+Texture::TICEntry Maxwell3D::GetTICEntry(u32 tic_index) const
+{
     const GPUVAddr tic_address_gpu{regs.tex_header.Address() +
                                    tic_index * sizeof(Texture::TICEntry)};
     Texture::TICEntry tic_entry;
@@ -637,7 +671,8 @@ Texture::TICEntry Maxwell3D::GetTICEntry(u32 tic_index) const {
     return tic_entry;
 }
 
-Texture::TSCEntry Maxwell3D::GetTSCEntry(u32 tsc_index) const {
+Texture::TSCEntry Maxwell3D::GetTSCEntry(u32 tsc_index) const
+{
     const GPUVAddr tsc_address_gpu{regs.tex_sampler.Address() +
                                    tsc_index * sizeof(Texture::TSCEntry)};
     Texture::TSCEntry tsc_entry;
@@ -645,13 +680,15 @@ Texture::TSCEntry Maxwell3D::GetTSCEntry(u32 tsc_index) const {
     return tsc_entry;
 }
 
-u32 Maxwell3D::GetRegisterValue(u32 method) const {
+u32 Maxwell3D::GetRegisterValue(u32 method) const
+{
     ASSERT(method < Regs::NUM_REGS && "Invalid Maxwell3D register");
     return regs.reg_array[method];
 }
 
 void Maxwell3D::SetHLEReplacementAttributeType(u32 bank, u32 offset,
-                                               HLEReplacementAttributeType name) {
+                                               HLEReplacementAttributeType name)
+{
     const u64 key = (static_cast<u64>(bank) << 32) | offset;
     replace_table.emplace(key, name);
 }

@@ -5,7 +5,8 @@
 
 namespace Service::Set {
 
-ApplnSettings DefaultApplnSettings() {
+ApplnSettings DefaultApplnSettings()
+{
     ApplnSettings settings{};
 
     settings.mii_author_id = Common::UUID::MakeDefault();

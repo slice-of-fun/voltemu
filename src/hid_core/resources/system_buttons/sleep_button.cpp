@@ -1,22 +1,30 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "hid_core/resources/system_buttons/sleep_button.h"
+
 #include "core/core_timing.h"
 #include "hid_core/resources/applet_resource.h"
 #include "hid_core/resources/shared_memory_format.h"
-#include "hid_core/resources/system_buttons/sleep_button.h"
 
 namespace Service::HID {
 
-SleepButton::SleepButton(Core::HID::HIDCore& hid_core_) : ControllerBase{hid_core_} {}
+SleepButton::SleepButton(Core::HID::HIDCore& hid_core_) : ControllerBase{hid_core_}
+{
+}
 
 SleepButton::~SleepButton() = default;
 
-void SleepButton::OnInit() {}
+void SleepButton::OnInit()
+{
+}
 
-void SleepButton::OnRelease() {}
+void SleepButton::OnRelease()
+{
+}
 
-void SleepButton::OnUpdate(const Core::Timing::CoreTiming& core_timing) {
+void SleepButton::OnUpdate(const Core::Timing::CoreTiming& core_timing)
+{
     std::scoped_lock shared_lock{*shared_mutex};
     const u64 aruid = applet_resource->GetActiveAruid();
     auto* data = applet_resource->GetAruidData(aruid);

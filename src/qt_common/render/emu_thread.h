@@ -4,6 +4,7 @@
 #pragma once
 
 #include <QThread>
+
 #include "common/logging.h"
 #include "common/thread.h"
 
@@ -32,7 +33,8 @@ public:
      * Sets whether the emulation thread should run or not
      * @param should_run Boolean value, set the emulation thread to running if true
      */
-    void SetRunning(bool should_run) {
+    void SetRunning(bool should_run)
+    {
         // TODO: Prevent other threads from modifying the state until we finish.
         {
             // Notify the running thread to change state.
@@ -51,14 +53,13 @@ public:
      * Check if the emulation thread is running or not
      * @return True if the emulation thread is running, otherwise false
      */
-    bool IsRunning() const {
-        return m_should_run;
-    }
+    bool IsRunning() const { return m_should_run; }
 
     /**
      * Requests for the emulation thread to immediately stop running
      */
-    void ForceStop() {
+    void ForceStop()
+    {
         LOG_WARNING(Frontend, "Force stopping EmuThread");
         m_stop_source.request_stop();
     }

@@ -1,15 +1,17 @@
 // SPDX-FileCopyrightText: Copyright 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "common/fs/fs_android.h"
+
 #include "common/android/android_common.h"
 #include "common/android/id_cache.h"
 #include "common/assert.h"
-#include "common/fs/fs_android.h"
 #include "common/string_util.h"
 
 namespace Common::FS::Android {
 
-void RegisterCallbacks(JNIEnv* env, jclass clazz) {
+void RegisterCallbacks(JNIEnv* env, jclass clazz)
+{
     env->GetJavaVM(&g_jvm);
     native_library = clazz;
 
@@ -24,7 +26,8 @@ void RegisterCallbacks(JNIEnv* env, jclass clazz) {
                                                 "(Ljava/lang/String;Ljava/lang/String;)I");
 }
 
-void UnRegisterCallbacks() {
+void UnRegisterCallbacks()
+{
     s_get_parent_directory = nullptr;
     s_get_filename = nullptr;
 
@@ -35,7 +38,8 @@ void UnRegisterCallbacks() {
     s_open_content_uri = nullptr;
 }
 
-bool IsContentUri(const std::string& path) {
+bool IsContentUri(const std::string& path)
+{
     constexpr std::string_view prefix = "content://";
     if (path.size() < prefix.size()) [[unlikely]] {
         return false;
@@ -44,7 +48,8 @@ bool IsContentUri(const std::string& path) {
     return path.find(prefix) == 0;
 }
 
-s32 OpenContentUri(const std::string& filepath, OpenMode openmode) {
+s32 OpenContentUri(const std::string& filepath, OpenMode openmode)
+{
     if (s_open_content_uri == nullptr)
         return -1;
 
@@ -63,7 +68,8 @@ s32 OpenContentUri(const std::string& filepath, OpenMode openmode) {
     return env->CallStaticIntMethod(native_library, s_open_content_uri, j_filepath, j_mode);
 }
 
-u64 GetSize(const std::string& filepath) {
+u64 GetSize(const std::string& filepath)
+{
     if (s_get_size == nullptr) {
         return 0;
     }
@@ -73,7 +79,8 @@ u64 GetSize(const std::string& filepath) {
         Common::Android::ToJString(Common::Android::GetEnvForThread(), filepath)));
 }
 
-bool IsDirectory(const std::string& filepath) {
+bool IsDirectory(const std::string& filepath)
+{
     if (s_is_directory == nullptr) {
         return 0;
     }
@@ -83,7 +90,8 @@ bool IsDirectory(const std::string& filepath) {
         Common::Android::ToJString(Common::Android::GetEnvForThread(), filepath));
 }
 
-bool Exists(const std::string& filepath) {
+bool Exists(const std::string& filepath)
+{
     if (s_file_exists == nullptr) {
         return 0;
     }
@@ -93,7 +101,8 @@ bool Exists(const std::string& filepath) {
         Common::Android::ToJString(Common::Android::GetEnvForThread(), filepath));
 }
 
-std::string GetParentDirectory(const std::string& filepath) {
+std::string GetParentDirectory(const std::string& filepath)
+{
     if (s_get_parent_directory == nullptr) {
         return 0;
     }
@@ -106,7 +115,8 @@ std::string GetParentDirectory(const std::string& filepath) {
     return Common::Android::GetJString(env, j_return);
 }
 
-std::string GetFilename(const std::string& filepath) {
+std::string GetFilename(const std::string& filepath)
+{
     if (s_get_filename == nullptr) {
         return 0;
     }

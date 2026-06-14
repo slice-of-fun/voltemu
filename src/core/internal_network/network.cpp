@@ -51,31 +51,37 @@ using socklen_t = int;
 
 SOCKET interrupt_socket = static_cast<SOCKET>(-1);
 
-void InterruptSocketOperations() {
+void InterruptSocketOperations()
+{
     closesocket(interrupt_socket);
 }
 
-void AcknowledgeInterrupt() {
+void AcknowledgeInterrupt()
+{
     interrupt_socket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
 }
 
-void Initialize() {
+void Initialize()
+{
     WSADATA wsa_data;
     (void)WSAStartup(MAKEWORD(2, 2), &wsa_data);
 
     AcknowledgeInterrupt();
 }
 
-void Finalize() {
+void Finalize()
+{
     InterruptSocketOperations();
     WSACleanup();
 }
 
-SOCKET GetInterruptSocket() {
+SOCKET GetInterruptSocket()
+{
     return interrupt_socket;
 }
 
-sockaddr TranslateFromSockAddrIn(SockAddrIn input) {
+sockaddr TranslateFromSockAddrIn(SockAddrIn input)
+{
     sockaddr_in result;
 
 #ifdef __unix__
@@ -105,7 +111,8 @@ sockaddr TranslateFromSockAddrIn(SockAddrIn input) {
     return addr;
 }
 
-LINGER MakeLinger(bool enable, u32 linger_value) {
+LINGER MakeLinger(bool enable, u32 linger_value)
+{
     ASSERT(linger_value <= (std::numeric_limits<u_short>::max)());
 
     LINGER value;
@@ -114,12 +121,14 @@ LINGER MakeLinger(bool enable, u32 linger_value) {
     return value;
 }
 
-bool EnableNonBlock(SOCKET fd, bool enable) {
+bool EnableNonBlock(SOCKET fd, bool enable)
+{
     u_long value = enable ? 1 : 0;
     return ioctlsocket(fd, FIONBIO, &value) != SOCKET_ERROR;
 }
 
-Errno TranslateNativeError(int e, CallType call_type = CallType::Other) {
+Errno TranslateNativeError(int e, CallType call_type = CallType::Other)
+{
     switch (e) {
     case 0:
         return Errno::SUCCESS;
@@ -179,7 +188,8 @@ constexpr int SD_BOTH = SHUT_RDWR;
 
 int interrupt_pipe_fd[2] = {-1, -1};
 
-void Initialize() {
+void Initialize()
+{
     if (pipe(interrupt_pipe_fd) != 0) {
         LOG_ERROR(Network, "Failed to create interrupt pipe!");
     }
@@ -188,7 +198,8 @@ void Initialize() {
                "Failed to set nonblocking state for interrupt pipe");
 }
 
-void Finalize() {
+void Finalize()
+{
     if (interrupt_pipe_fd[0] >= 0) {
         close(interrupt_pipe_fd[0]);
     }
@@ -197,12 +208,14 @@ void Finalize() {
     }
 }
 
-void InterruptSocketOperations() {
+void InterruptSocketOperations()
+{
     u8 value = 0;
     ASSERT(write(interrupt_pipe_fd[1], &value, sizeof(value)) == 1);
 }
 
-void AcknowledgeInterrupt() {
+void AcknowledgeInterrupt()
+{
     u8 value = 0;
     ssize_t ret = read(interrupt_pipe_fd[0], &value, sizeof(value));
     if (ret != 1 && errno != EAGAIN && errno != EWOULDBLOCK) {
@@ -210,11 +223,13 @@ void AcknowledgeInterrupt() {
     }
 }
 
-SOCKET GetInterruptSocket() {
+SOCKET GetInterruptSocket()
+{
     return interrupt_pipe_fd[0];
 }
 
-sockaddr TranslateFromSockAddrIn(SockAddrIn input) {
+sockaddr TranslateFromSockAddrIn(SockAddrIn input)
+{
     sockaddr_in result;
 
     switch (static_cast<Domain>(input.family)) {
@@ -236,22 +251,26 @@ sockaddr TranslateFromSockAddrIn(SockAddrIn input) {
     return addr;
 }
 
-int WSAPoll(WSAPOLLFD* fds, ULONG nfds, int timeout) {
+int WSAPoll(WSAPOLLFD* fds, ULONG nfds, int timeout)
+{
     return poll(fds, static_cast<nfds_t>(nfds), timeout);
 }
 
-int closesocket(SOCKET fd) {
+int closesocket(SOCKET fd)
+{
     return close(fd);
 }
 
-linger MakeLinger(bool enable, u32 linger_value) {
+linger MakeLinger(bool enable, u32 linger_value)
+{
     linger value;
     value.l_onoff = enable ? 1 : 0;
     value.l_linger = linger_value;
     return value;
 }
 
-bool EnableNonBlock(int fd, bool enable) {
+bool EnableNonBlock(int fd, bool enable)
+{
     int flags = fcntl(fd, F_GETFL);
     if (flags == -1) {
         return false;
@@ -264,7 +283,8 @@ bool EnableNonBlock(int fd, bool enable) {
     return fcntl(fd, F_SETFL, flags) == 0;
 }
 
-Errno TranslateNativeError(int e, CallType call_type = CallType::Other) {
+Errno TranslateNativeError(int e, CallType call_type = CallType::Other)
+{
     switch (e) {
     case 0:
         return Errno::SUCCESS;
@@ -308,7 +328,8 @@ Errno TranslateNativeError(int e, CallType call_type = CallType::Other) {
 
 #endif
 
-Errno GetAndLogLastError(CallType call_type = CallType::Other) {
+Errno GetAndLogLastError(CallType call_type = CallType::Other)
+{
 #ifdef _WIN32
     int e = WSAGetLastError();
 #else
@@ -324,32 +345,47 @@ Errno GetAndLogLastError(CallType call_type = CallType::Other) {
     return err;
 }
 
-GetAddrInfoError TranslateGetAddrInfoErrorFromNative(int gai_err) {
+GetAddrInfoError TranslateGetAddrInfoErrorFromNative(int gai_err)
+{
     switch (gai_err) {
-    case 0: return GetAddrInfoError::SUCCESS;
-    case EAI_AGAIN: return GetAddrInfoError::AGAIN;
-    case EAI_BADFLAGS: return GetAddrInfoError::BADFLAGS;
-    case EAI_FAIL: return GetAddrInfoError::FAIL;
-    case EAI_FAMILY: return GetAddrInfoError::FAMILY;
-    case EAI_MEMORY: return GetAddrInfoError::MEMORY;
-    case EAI_NONAME: return GetAddrInfoError::NONAME;
-    case EAI_SERVICE: return GetAddrInfoError::SERVICE;
-    case EAI_SOCKTYPE: return GetAddrInfoError::SOCKTYPE;
-    // These codes may not be defined on all systems:
+    case 0:
+        return GetAddrInfoError::SUCCESS;
+    case EAI_AGAIN:
+        return GetAddrInfoError::AGAIN;
+    case EAI_BADFLAGS:
+        return GetAddrInfoError::BADFLAGS;
+    case EAI_FAIL:
+        return GetAddrInfoError::FAIL;
+    case EAI_FAMILY:
+        return GetAddrInfoError::FAMILY;
+    case EAI_MEMORY:
+        return GetAddrInfoError::MEMORY;
+    case EAI_NONAME:
+        return GetAddrInfoError::NONAME;
+    case EAI_SERVICE:
+        return GetAddrInfoError::SERVICE;
+    case EAI_SOCKTYPE:
+        return GetAddrInfoError::SOCKTYPE;
+        // These codes may not be defined on all systems:
 #ifdef EAI_ADDRFAMILY
-    case EAI_ADDRFAMILY: return GetAddrInfoError::ADDRFAMILY;
+    case EAI_ADDRFAMILY:
+        return GetAddrInfoError::ADDRFAMILY;
 #endif
 #ifdef EAI_SYSTEM
-    case EAI_SYSTEM: return GetAddrInfoError::SYSTEM;
+    case EAI_SYSTEM:
+        return GetAddrInfoError::SYSTEM;
 #endif
 #ifdef EAI_BADHINTS
-    case EAI_BADHINTS: return GetAddrInfoError::BADHINTS;
+    case EAI_BADHINTS:
+        return GetAddrInfoError::BADHINTS;
 #endif
 #ifdef EAI_PROTOCOL
-    case EAI_PROTOCOL: return GetAddrInfoError::PROTOCOL;
+    case EAI_PROTOCOL:
+        return GetAddrInfoError::PROTOCOL;
 #endif
 #ifdef EAI_OVERFLOW
-    case EAI_OVERFLOW: return GetAddrInfoError::OVERFLOW_;
+    case EAI_OVERFLOW:
+        return GetAddrInfoError::OVERFLOW_;
 #endif
     default:
 #ifdef EAI_NODATA
@@ -362,7 +398,8 @@ GetAddrInfoError TranslateGetAddrInfoErrorFromNative(int gai_err) {
     }
 }
 
-Domain TranslateDomainFromNative(int domain) {
+Domain TranslateDomainFromNative(int domain)
+{
     switch (domain) {
     case 0:
         return Domain::Unspecified;
@@ -374,7 +411,8 @@ Domain TranslateDomainFromNative(int domain) {
     }
 }
 
-int TranslateDomainToNative(Domain domain) {
+int TranslateDomainToNative(Domain domain)
+{
     switch (domain) {
     case Domain::Unspecified:
         return 0;
@@ -386,28 +424,38 @@ int TranslateDomainToNative(Domain domain) {
     }
 }
 
-Type TranslateTypeFromNative(int type) {
+Type TranslateTypeFromNative(int type)
+{
     switch (type) {
     case 0:
         return Type::Unspecified;
-    case SOCK_STREAM: return Type::STREAM;
-    case SOCK_DGRAM: return Type::DGRAM;
-    case SOCK_RAW: return Type::RAW;
-    case SOCK_SEQPACKET: return Type::SEQPACKET;
+    case SOCK_STREAM:
+        return Type::STREAM;
+    case SOCK_DGRAM:
+        return Type::DGRAM;
+    case SOCK_RAW:
+        return Type::RAW;
+    case SOCK_SEQPACKET:
+        return Type::SEQPACKET;
     default:
         UNIMPLEMENTED_MSG("Unimplemented type={}", type);
         return Type::STREAM;
     }
 }
 
-int TranslateTypeToNative(Type type) {
+int TranslateTypeToNative(Type type)
+{
     switch (type) {
     case Type::Unspecified:
         return 0;
-    case Type::STREAM: return SOCK_STREAM;
-    case Type::DGRAM: return SOCK_DGRAM;
-    case Type::RAW: return SOCK_RAW;
-    case Type::SEQPACKET: return SOCK_SEQPACKET;
+    case Type::STREAM:
+        return SOCK_STREAM;
+    case Type::DGRAM:
+        return SOCK_DGRAM;
+    case Type::RAW:
+        return SOCK_RAW;
+    case Type::SEQPACKET:
+        return SOCK_SEQPACKET;
     default:
         UNIMPLEMENTED_MSG("Unimplemented type={}", type);
         return 0;
@@ -418,200 +466,206 @@ int TranslateTypeToNative(Type type) {
 // It doesn't really matter, except that some homebrew may not work correctly
 // Official software uses TCP & UDP mainly, SCTP is used by some homebrew as well
 #ifdef __FreeBSD__
-#define NETWORK_PROTOCOL_TRANSLATE_LIST \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(IP) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(ICMP) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(TCP) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(UDP) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(IPV6) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(RAW) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(IGMP) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(GGP) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(IPV4) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(ST) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(EGP) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(PIGP) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(RCCMON) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(NVPII) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(PUP) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(ARGUS) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(EMCON) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(XNET) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(CHAOS) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(MUX) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(MEAS) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(HMP) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(PRM) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(IDP) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(TRUNK1) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(TRUNK2) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(LEAF1) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(LEAF2) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(RDP) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(IRTP) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(TP) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(BLT) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(NSP) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(INP) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(DCCP) \
-    /*NETWORK_PROTOCOL_TRANSLATE_ELEM(3PC)*/ \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(IDPR) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(XTP) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(DDP) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(CMTP) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(TPXX) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(IL) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(SDRP) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(ROUTING) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(FRAGMENT) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(IDRP) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(RSVP) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(GRE) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(MHRP) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(BHA) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(ESP) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(AH) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(INLSP) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(SWIPE) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(NHRP) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(MOBILE) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(TLSP) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(SKIP) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(ICMPV6) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(NONE) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(DSTOPTS) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(AHIP) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(CFTP) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(HELLO) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(SATEXPAK) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(KRYPTOLAN) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(RVD) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(IPPC) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(ADFS) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(SATMON) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(VISA) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(IPCV) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(CPNX) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(CPHB) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(WSN) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(PVP) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(BRSATMON) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(ND) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(WBMON) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(WBEXPAK) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(EON) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(VMTP) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(SVMTP) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(VINES) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(TTP) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(IGP) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(DGP) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(TCF) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(IGRP) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(OSPFIGP) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(SRPC) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(LARP) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(MTP) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(AX25) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(IPEIP) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(MICP) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(SCCSP) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(ETHERIP) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(ENCAP) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(APES) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(GMTP) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(IPCOMP) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(SCTP) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(MH) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(UDPLITE) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(HIP) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(SHIM6) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(PIM) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(CARP) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(PGM) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(MPLS) \
+#define NETWORK_PROTOCOL_TRANSLATE_LIST                                                            \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(IP)                                                            \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(ICMP)                                                          \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(TCP)                                                           \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(UDP)                                                           \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(IPV6)                                                          \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(RAW)                                                           \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(IGMP)                                                          \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(GGP)                                                           \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(IPV4)                                                          \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(ST)                                                            \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(EGP)                                                           \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(PIGP)                                                          \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(RCCMON)                                                        \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(NVPII)                                                         \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(PUP)                                                           \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(ARGUS)                                                         \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(EMCON)                                                         \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(XNET)                                                          \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(CHAOS)                                                         \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(MUX)                                                           \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(MEAS)                                                          \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(HMP)                                                           \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(PRM)                                                           \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(IDP)                                                           \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(TRUNK1)                                                        \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(TRUNK2)                                                        \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(LEAF1)                                                         \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(LEAF2)                                                         \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(RDP)                                                           \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(IRTP)                                                          \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(TP)                                                            \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(BLT)                                                           \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(NSP)                                                           \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(INP)                                                           \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(DCCP)                                                          \
+    /*NETWORK_PROTOCOL_TRANSLATE_ELEM(3PC)*/                                                       \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(IDPR)                                                          \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(XTP)                                                           \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(DDP)                                                           \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(CMTP)                                                          \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(TPXX)                                                          \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(IL)                                                            \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(SDRP)                                                          \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(ROUTING)                                                       \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(FRAGMENT)                                                      \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(IDRP)                                                          \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(RSVP)                                                          \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(GRE)                                                           \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(MHRP)                                                          \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(BHA)                                                           \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(ESP)                                                           \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(AH)                                                            \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(INLSP)                                                         \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(SWIPE)                                                         \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(NHRP)                                                          \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(MOBILE)                                                        \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(TLSP)                                                          \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(SKIP)                                                          \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(ICMPV6)                                                        \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(NONE)                                                          \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(DSTOPTS)                                                       \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(AHIP)                                                          \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(CFTP)                                                          \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(HELLO)                                                         \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(SATEXPAK)                                                      \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(KRYPTOLAN)                                                     \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(RVD)                                                           \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(IPPC)                                                          \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(ADFS)                                                          \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(SATMON)                                                        \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(VISA)                                                          \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(IPCV)                                                          \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(CPNX)                                                          \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(CPHB)                                                          \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(WSN)                                                           \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(PVP)                                                           \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(BRSATMON)                                                      \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(ND)                                                            \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(WBMON)                                                         \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(WBEXPAK)                                                       \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(EON)                                                           \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(VMTP)                                                          \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(SVMTP)                                                         \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(VINES)                                                         \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(TTP)                                                           \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(IGP)                                                           \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(DGP)                                                           \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(TCF)                                                           \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(IGRP)                                                          \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(OSPFIGP)                                                       \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(SRPC)                                                          \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(LARP)                                                          \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(MTP)                                                           \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(AX25)                                                          \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(IPEIP)                                                         \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(MICP)                                                          \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(SCCSP)                                                         \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(ETHERIP)                                                       \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(ENCAP)                                                         \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(APES)                                                          \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(GMTP)                                                          \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(IPCOMP)                                                        \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(SCTP)                                                          \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(MH)                                                            \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(UDPLITE)                                                       \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(HIP)                                                           \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(SHIM6)                                                         \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(PIM)                                                           \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(CARP)                                                          \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(PGM)                                                           \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(MPLS)                                                          \
     NETWORK_PROTOCOL_TRANSLATE_ELEM(PFSYNC)
 #elif defined(__linux__)
 // Other platforms get fucked
-#define NETWORK_PROTOCOL_TRANSLATE_LIST \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(IP) \
-    /*NETWORK_PROTOCOL_TRANSLATE_ELEM(HOPOPTS)*/ \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(ICMP) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(IGMP) \
-    /*NETWORK_PROTOCOL_TRANSLATE_ELEM(IPIP)*/ \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(TCP) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(EGP) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(PUP) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(UDP) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(IDP) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(TP) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(DCCP) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(IPV6) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(ROUTING) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(FRAGMENT) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(RSVP) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(GRE) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(ESP) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(AH) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(ICMPV6) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(NONE) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(DSTOPTS) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(MTP) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(ENCAP) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(PIM) \
-    /*NETWORK_PROTOCOL_TRANSLATE_ELEM(COMP)*/ \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(SCTP) \
+#define NETWORK_PROTOCOL_TRANSLATE_LIST                                                            \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(IP)                                                            \
+    /*NETWORK_PROTOCOL_TRANSLATE_ELEM(HOPOPTS)*/                                                   \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(ICMP)                                                          \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(IGMP)                                                          \
+    /*NETWORK_PROTOCOL_TRANSLATE_ELEM(IPIP)*/                                                      \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(TCP)                                                           \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(EGP)                                                           \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(PUP)                                                           \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(UDP)                                                           \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(IDP)                                                           \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(TP)                                                            \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(DCCP)                                                          \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(IPV6)                                                          \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(ROUTING)                                                       \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(FRAGMENT)                                                      \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(RSVP)                                                          \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(GRE)                                                           \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(ESP)                                                           \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(AH)                                                            \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(ICMPV6)                                                        \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(NONE)                                                          \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(DSTOPTS)                                                       \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(MTP)                                                           \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(ENCAP)                                                         \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(PIM)                                                           \
+    /*NETWORK_PROTOCOL_TRANSLATE_ELEM(COMP)*/                                                      \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(SCTP)                                                          \
     NETWORK_PROTOCOL_TRANSLATE_ELEM(UDPLITE)
 #elif defined(_WIN32)
-#define NETWORK_PROTOCOL_TRANSLATE_LIST \
-    /*NETWORK_PROTOCOL_TRANSLATE_ELEM(HOPOPTS)*/ \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(ICMP) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(IGMP) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(GGP) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(IPV4) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(ST) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(TCP) \
-    /*NETWORK_PROTOCOL_TRANSLATE_ELEM(CBT)*/ \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(EGP) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(IGP) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(PUP) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(UDP) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(IDP) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(RDP) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(IPV6) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(ROUTING) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(FRAGMENT) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(ESP) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(AH) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(ICMPV6) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(NONE) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(DSTOPTS) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(ND) \
-    /*NETWORK_PROTOCOL_TRANSLATE_ELEM(ICLFXBM)*/ \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(PIM) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(PGM) \
-    /*NETWORK_PROTOCOL_TRANSLATE_ELEM(L2TP)*/ \
+#define NETWORK_PROTOCOL_TRANSLATE_LIST                                                            \
+    /*NETWORK_PROTOCOL_TRANSLATE_ELEM(HOPOPTS)*/                                                   \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(ICMP)                                                          \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(IGMP)                                                          \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(GGP)                                                           \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(IPV4)                                                          \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(ST)                                                            \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(TCP)                                                           \
+    /*NETWORK_PROTOCOL_TRANSLATE_ELEM(CBT)*/                                                       \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(EGP)                                                           \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(IGP)                                                           \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(PUP)                                                           \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(UDP)                                                           \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(IDP)                                                           \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(RDP)                                                           \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(IPV6)                                                          \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(ROUTING)                                                       \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(FRAGMENT)                                                      \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(ESP)                                                           \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(AH)                                                            \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(ICMPV6)                                                        \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(NONE)                                                          \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(DSTOPTS)                                                       \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(ND)                                                            \
+    /*NETWORK_PROTOCOL_TRANSLATE_ELEM(ICLFXBM)*/                                                   \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(PIM)                                                           \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(PGM)                                                           \
+    /*NETWORK_PROTOCOL_TRANSLATE_ELEM(L2TP)*/                                                      \
     NETWORK_PROTOCOL_TRANSLATE_ELEM(SCTP)
 #else
-#define NETWORK_PROTOCOL_TRANSLATE_LIST \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(TCP) \
-    NETWORK_PROTOCOL_TRANSLATE_ELEM(UDP) \
+#define NETWORK_PROTOCOL_TRANSLATE_LIST                                                            \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(TCP)                                                           \
+    NETWORK_PROTOCOL_TRANSLATE_ELEM(UDP)                                                           \
     NETWORK_PROTOCOL_TRANSLATE_ELEM(SCTP)
 #endif
-[[nodiscard]] Protocol TranslateProtocolFromNative(u32 protocol) {
+[[nodiscard]] Protocol TranslateProtocolFromNative(u32 protocol)
+{
     switch (protocol) {
-#define NETWORK_PROTOCOL_TRANSLATE_ELEM(x) case IPPROTO_##x: return Protocol::x;
-    NETWORK_PROTOCOL_TRANSLATE_LIST
+#define NETWORK_PROTOCOL_TRANSLATE_ELEM(x)                                                         \
+    case IPPROTO_##x:                                                                              \
+        return Protocol::x;
+        NETWORK_PROTOCOL_TRANSLATE_LIST
 #undef NETWORK_PROTOCOL_TRANSLATE_ELEM
     default:
         UNIMPLEMENTED_MSG("Unimplemented protocol={}", protocol);
         return Protocol::IP;
     }
 }
-[[nodiscard]] u32 TranslateProtocolToNative(Protocol protocol) {
+[[nodiscard]] u32 TranslateProtocolToNative(Protocol protocol)
+{
     switch (protocol) {
-#define NETWORK_PROTOCOL_TRANSLATE_ELEM(x) case Protocol::x: return IPPROTO_##x;
-    NETWORK_PROTOCOL_TRANSLATE_LIST
+#define NETWORK_PROTOCOL_TRANSLATE_ELEM(x)                                                         \
+    case Protocol::x:                                                                              \
+        return IPPROTO_##x;
+        NETWORK_PROTOCOL_TRANSLATE_LIST
 #undef NETWORK_PROTOCOL_TRANSLATE_ELEM
     default:
         UNIMPLEMENTED_MSG("Unimplemented protocol={}", protocol);
@@ -620,7 +674,8 @@ int TranslateTypeToNative(Type type) {
 }
 #undef NETWORK_PROTOCOL_TRANSLATE_LIST
 
-SockAddrIn TranslateToSockAddrIn(sockaddr_in input, size_t input_len) {
+SockAddrIn TranslateToSockAddrIn(sockaddr_in input, size_t input_len)
+{
     SockAddrIn result{};
     result.family = TranslateDomainFromNative(input.sin_family);
     result.portno = ntohs(input.sin_port);
@@ -628,7 +683,8 @@ SockAddrIn TranslateToSockAddrIn(sockaddr_in input, size_t input_len) {
     return result;
 }
 
-short TranslatePollEvents(PollEvents events) {
+short TranslatePollEvents(PollEvents events)
+{
     short result = 0;
 
     const auto translate = [&result, &events](PollEvents guest, short host) {
@@ -664,7 +720,8 @@ short TranslatePollEvents(PollEvents events) {
     return result;
 }
 
-PollEvents TranslatePollRevents(short revents) {
+PollEvents TranslatePollRevents(short revents)
+{
     PollEvents result{};
     const auto translate = [&result, &revents](short host, PollEvents guest) {
         if ((revents & host) != 0) {
@@ -690,23 +747,28 @@ PollEvents TranslatePollRevents(short revents) {
 
 } // Anonymous namespace
 
-NetworkInstance::NetworkInstance() {
+NetworkInstance::NetworkInstance()
+{
     Initialize();
 }
 
-NetworkInstance::~NetworkInstance() {
+NetworkInstance::~NetworkInstance()
+{
     Finalize();
 }
 
-void CancelPendingSocketOperations() {
+void CancelPendingSocketOperations()
+{
     InterruptSocketOperations();
 }
 
-void RestartSocketOperations() {
+void RestartSocketOperations()
+{
     AcknowledgeInterrupt();
 }
 
-std::optional<IPv4Address> GetHostIPv4Address() {
+std::optional<IPv4Address> GetHostIPv4Address()
+{
     const auto network_interface = Network::GetSelectedNetworkInterface();
     if (!network_interface.has_value()) {
         // Only print the error once to avoid log spam
@@ -722,19 +784,22 @@ std::optional<IPv4Address> GetHostIPv4Address() {
     return TranslateIPv4(network_interface->ip_address);
 }
 
-std::string IPv4AddressToString(IPv4Address ip_addr) {
+std::string IPv4AddressToString(IPv4Address ip_addr)
+{
     std::array<char, INET_ADDRSTRLEN> buf = {};
     ASSERT(inet_ntop(AF_INET, &ip_addr, buf.data(), sizeof(buf)) == buf.data());
     return std::string(buf.data());
 }
 
-u32 IPv4AddressToInteger(IPv4Address ip_addr) {
+u32 IPv4AddressToInteger(IPv4Address ip_addr)
+{
     return static_cast<u32>(ip_addr[0]) << 24 | static_cast<u32>(ip_addr[1]) << 16 |
            static_cast<u32>(ip_addr[2]) << 8 | static_cast<u32>(ip_addr[3]);
 }
 
-Common::Expected<std::vector<AddrInfo>, GetAddrInfoError> GetAddressInfo(
-    const std::string& host, const std::optional<std::string>& service) {
+Common::Expected<std::vector<AddrInfo>, GetAddrInfoError>
+GetAddressInfo(const std::string& host, const std::optional<std::string>& service)
+{
     addrinfo hints{};
     hints.ai_family = AF_INET; // Switch only supports IPv4.
     addrinfo* addrinfo;
@@ -764,7 +829,8 @@ Common::Expected<std::vector<AddrInfo>, GetAddrInfoError> GetAddressInfo(
     return ret;
 }
 
-std::pair<s32, Errno> Poll(std::vector<PollFD>& pollfds, s32 timeout) {
+std::pair<s32, Errno> Poll(std::vector<PollFD>& pollfds, s32 timeout)
+{
     const size_t num = pollfds.size();
 
     std::vector<WSAPOLLFD> host_pollfds(pollfds.size());
@@ -803,7 +869,8 @@ std::pair<s32, Errno> Poll(std::vector<PollFD>& pollfds, s32 timeout) {
     return {-1, GetAndLogLastError()};
 }
 
-Socket::~Socket() {
+Socket::~Socket()
+{
     if (fd == INVALID_SOCKET) {
         return;
     }
@@ -811,12 +878,13 @@ Socket::~Socket() {
     fd = INVALID_SOCKET;
 }
 
-Socket::Socket(Socket&& rhs) noexcept {
+Socket::Socket(Socket&& rhs) noexcept
+{
     fd = std::exchange(rhs.fd, INVALID_SOCKET);
 }
 
-template <typename T>
-std::pair<T, Errno> Socket::GetSockOpt(SOCKET fd_so, int option) {
+template<typename T> std::pair<T, Errno> Socket::GetSockOpt(SOCKET fd_so, int option)
+{
     T value{};
     socklen_t len = sizeof(value);
     const int result = getsockopt(fd_so, SOL_SOCKET, option, reinterpret_cast<char*>(&value), &len);
@@ -827,8 +895,8 @@ std::pair<T, Errno> Socket::GetSockOpt(SOCKET fd_so, int option) {
     return {value, GetAndLogLastError()};
 }
 
-template <typename T>
-Errno Socket::SetSockOpt(SOCKET fd_so, int option, T value) {
+template<typename T> Errno Socket::SetSockOpt(SOCKET fd_so, int option, T value)
+{
     const int result =
         setsockopt(fd_so, SOL_SOCKET, option, reinterpret_cast<const char*>(&value), sizeof(value));
     if (result != SOCKET_ERROR) {
@@ -837,8 +905,10 @@ Errno Socket::SetSockOpt(SOCKET fd_so, int option, T value) {
     return GetAndLogLastError();
 }
 
-Errno Socket::Initialize(Domain domain, Type type, Protocol protocol) {
-    fd = socket(TranslateDomainToNative(domain), TranslateTypeToNative(type), TranslateProtocolToNative(protocol));
+Errno Socket::Initialize(Domain domain, Type type, Protocol protocol)
+{
+    fd = socket(TranslateDomainToNative(domain), TranslateTypeToNative(type),
+                TranslateProtocolToNative(protocol));
     if (fd != INVALID_SOCKET) {
         return Errno::SUCCESS;
     }
@@ -846,7 +916,8 @@ Errno Socket::Initialize(Domain domain, Type type, Protocol protocol) {
     return GetAndLogLastError();
 }
 
-std::pair<SocketBase::AcceptResult, Errno> Socket::Accept() {
+std::pair<SocketBase::AcceptResult, Errno> Socket::Accept()
+{
     sockaddr_in addr;
     socklen_t addrlen = sizeof(addr);
 
@@ -884,7 +955,8 @@ std::pair<SocketBase::AcceptResult, Errno> Socket::Accept() {
     return {std::move(result), Errno::SUCCESS};
 }
 
-Errno Socket::Connect(SockAddrIn addr_in) {
+Errno Socket::Connect(SockAddrIn addr_in)
+{
     const sockaddr host_addr_in = TranslateFromSockAddrIn(addr_in);
     if (connect(fd, &host_addr_in, sizeof(host_addr_in)) != SOCKET_ERROR) {
         return Errno::SUCCESS;
@@ -893,7 +965,8 @@ Errno Socket::Connect(SockAddrIn addr_in) {
     return GetAndLogLastError();
 }
 
-std::pair<SockAddrIn, Errno> Socket::GetPeerName() {
+std::pair<SockAddrIn, Errno> Socket::GetPeerName()
+{
     sockaddr_in addr;
     socklen_t addrlen = sizeof(addr);
     if (getpeername(fd, reinterpret_cast<sockaddr*>(&addr), &addrlen) == SOCKET_ERROR) {
@@ -903,7 +976,8 @@ std::pair<SockAddrIn, Errno> Socket::GetPeerName() {
     return {TranslateToSockAddrIn(addr, addrlen), Errno::SUCCESS};
 }
 
-std::pair<SockAddrIn, Errno> Socket::GetSockName() {
+std::pair<SockAddrIn, Errno> Socket::GetSockName()
+{
     sockaddr_in addr;
     socklen_t addrlen = sizeof(addr);
     if (getsockname(fd, reinterpret_cast<sockaddr*>(&addr), &addrlen) == SOCKET_ERROR) {
@@ -913,7 +987,8 @@ std::pair<SockAddrIn, Errno> Socket::GetSockName() {
     return {TranslateToSockAddrIn(addr, addrlen), Errno::SUCCESS};
 }
 
-Errno Socket::Bind(SockAddrIn addr) {
+Errno Socket::Bind(SockAddrIn addr)
+{
     const sockaddr addr_in = TranslateFromSockAddrIn(addr);
     if (bind(fd, &addr_in, sizeof(addr_in)) != SOCKET_ERROR) {
         return Errno::SUCCESS;
@@ -922,7 +997,8 @@ Errno Socket::Bind(SockAddrIn addr) {
     return GetAndLogLastError();
 }
 
-Errno Socket::Listen(s32 backlog) {
+Errno Socket::Listen(s32 backlog)
+{
     if (listen(fd, backlog) != SOCKET_ERROR) {
         return Errno::SUCCESS;
     }
@@ -930,7 +1006,8 @@ Errno Socket::Listen(s32 backlog) {
     return GetAndLogLastError();
 }
 
-Errno Socket::Shutdown(ShutdownHow how) {
+Errno Socket::Shutdown(ShutdownHow how)
+{
     int host_how = 0;
     switch (how) {
     case ShutdownHow::RD:
@@ -953,7 +1030,8 @@ Errno Socket::Shutdown(ShutdownHow how) {
     return GetAndLogLastError();
 }
 
-std::pair<s32, Errno> Socket::Recv(int flags, std::span<u8> message) {
+std::pair<s32, Errno> Socket::Recv(int flags, std::span<u8> message)
+{
     ASSERT(flags == 0);
     ASSERT(message.size() < static_cast<size_t>((std::numeric_limits<int>::max)()));
 
@@ -966,7 +1044,8 @@ std::pair<s32, Errno> Socket::Recv(int flags, std::span<u8> message) {
     return {-1, GetAndLogLastError()};
 }
 
-std::pair<s32, Errno> Socket::RecvFrom(int flags, std::span<u8> message, SockAddrIn* addr) {
+std::pair<s32, Errno> Socket::RecvFrom(int flags, std::span<u8> message, SockAddrIn* addr)
+{
     ASSERT(flags == 0);
     ASSERT(message.size() < static_cast<size_t>((std::numeric_limits<int>::max)()));
 
@@ -987,7 +1066,8 @@ std::pair<s32, Errno> Socket::RecvFrom(int flags, std::span<u8> message, SockAdd
     return {-1, GetAndLogLastError()};
 }
 
-std::pair<s32, Errno> Socket::Send(std::span<const u8> message, int flags) {
+std::pair<s32, Errno> Socket::Send(std::span<const u8> message, int flags)
+{
     ASSERT(message.size() < static_cast<size_t>((std::numeric_limits<int>::max)()));
     ASSERT(flags == 0);
 
@@ -1004,8 +1084,8 @@ std::pair<s32, Errno> Socket::Send(std::span<const u8> message, int flags) {
     return {-1, GetAndLogLastError(CallType::Send)};
 }
 
-std::pair<s32, Errno> Socket::SendTo(u32 flags, std::span<const u8> message,
-                                     const SockAddrIn* addr) {
+std::pair<s32, Errno> Socket::SendTo(u32 flags, std::span<const u8> message, const SockAddrIn* addr)
+{
     ASSERT(flags == 0);
 
     const sockaddr* to = nullptr;
@@ -1026,7 +1106,8 @@ std::pair<s32, Errno> Socket::SendTo(u32 flags, std::span<const u8> message,
     return {-1, GetAndLogLastError(CallType::Send)};
 }
 
-Errno Socket::Close() {
+Errno Socket::Close()
+{
     [[maybe_unused]] const int result = closesocket(fd);
     if (result != 0) {
         LOG_WARNING(Network, "closesocket failed, socket may already be closed");
@@ -1036,44 +1117,54 @@ Errno Socket::Close() {
     return Errno::SUCCESS;
 }
 
-std::pair<Errno, Errno> Socket::GetPendingError() {
+std::pair<Errno, Errno> Socket::GetPendingError()
+{
     auto [pending_err, getsockopt_err] = GetSockOpt<int>(fd, SO_ERROR);
     return {TranslateNativeError(pending_err), getsockopt_err};
 }
 
-Errno Socket::SetLinger(bool enable, u32 linger) {
+Errno Socket::SetLinger(bool enable, u32 linger)
+{
     return SetSockOpt(fd, SO_LINGER, MakeLinger(enable, linger));
 }
 
-Errno Socket::SetReuseAddr(bool enable) {
+Errno Socket::SetReuseAddr(bool enable)
+{
     return SetSockOpt<u32>(fd, SO_REUSEADDR, enable ? 1 : 0);
 }
 
-Errno Socket::SetKeepAlive(bool enable) {
+Errno Socket::SetKeepAlive(bool enable)
+{
     return SetSockOpt<u32>(fd, SO_KEEPALIVE, enable ? 1 : 0);
 }
 
-Errno Socket::SetBroadcast(bool enable) {
+Errno Socket::SetBroadcast(bool enable)
+{
     return SetSockOpt<u32>(fd, SO_BROADCAST, enable ? 1 : 0);
 }
 
-Errno Socket::SetSndBuf(u32 value) {
+Errno Socket::SetSndBuf(u32 value)
+{
     return SetSockOpt(fd, SO_SNDBUF, value);
 }
 
-Errno Socket::SetRcvBuf(u32 value) {
+Errno Socket::SetRcvBuf(u32 value)
+{
     return SetSockOpt(fd, SO_RCVBUF, value);
 }
 
-Errno Socket::SetSndTimeo(u32 value) {
+Errno Socket::SetSndTimeo(u32 value)
+{
     return SetSockOpt(fd, SO_SNDTIMEO, value);
 }
 
-Errno Socket::SetRcvTimeo(u32 value) {
+Errno Socket::SetRcvTimeo(u32 value)
+{
     return SetSockOpt(fd, SO_RCVTIMEO, value);
 }
 
-Errno Socket::SetNonBlock(bool enable) {
+Errno Socket::SetNonBlock(bool enable)
+{
     if (EnableNonBlock(fd, enable)) {
         is_non_blocking = enable;
         return Errno::SUCCESS;
@@ -1081,11 +1172,13 @@ Errno Socket::SetNonBlock(bool enable) {
     return GetAndLogLastError();
 }
 
-bool Socket::IsOpened() const {
+bool Socket::IsOpened() const
+{
     return fd != INVALID_SOCKET;
 }
 
-void Socket::HandleProxyPacket(const ProxyPacket& packet) {
+void Socket::HandleProxyPacket(const ProxyPacket& packet)
+{
     LOG_WARNING(Network, "ProxyPacket received, but not in Proxy mode!");
 }
 

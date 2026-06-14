@@ -1,10 +1,11 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "video_core/renderer_opengl/gl_shader_manager.h"
+
 #include <glad/glad.h>
 
 #include "video_core/host_shaders/opengl_lmem_warmup_comp.h"
-#include "video_core/renderer_opengl/gl_shader_manager.h"
 #include "video_core/renderer_opengl/gl_shader_util.h"
 
 namespace OpenGL {
@@ -14,7 +15,8 @@ static constexpr std::array ASSEMBLY_PROGRAM_ENUMS{
     GL_GEOMETRY_PROGRAM_NV, GL_FRAGMENT_PROGRAM_NV,
 };
 
-ProgramManager::ProgramManager(const Device& device) {
+ProgramManager::ProgramManager(const Device& device)
+{
     glCreateProgramPipelines(1, &pipeline.handle);
     if (device.UseAssemblyShaders()) {
         glEnable(GL_COMPUTE_PROGRAM_NV);
@@ -25,12 +27,14 @@ ProgramManager::ProgramManager(const Device& device) {
     }
 }
 
-void ProgramManager::BindComputeProgram(GLuint program) {
+void ProgramManager::BindComputeProgram(GLuint program)
+{
     glUseProgram(program);
     is_compute_bound = true;
 }
 
-void ProgramManager::BindComputeAssemblyProgram(GLuint program) {
+void ProgramManager::BindComputeAssemblyProgram(GLuint program)
+{
     if (current_assembly_compute_program != program) {
         current_assembly_compute_program = program;
         glBindProgramARB(GL_COMPUTE_PROGRAM_NV, program);
@@ -38,7 +42,8 @@ void ProgramManager::BindComputeAssemblyProgram(GLuint program) {
     UnbindPipeline();
 }
 
-void ProgramManager::BindSourcePrograms(std::span<const OGLProgram, NUM_STAGES> programs) {
+void ProgramManager::BindSourcePrograms(std::span<const OGLProgram, NUM_STAGES> programs)
+{
     static constexpr std::array<GLenum, 5> stage_enums{
         GL_VERTEX_SHADER_BIT,   GL_TESS_CONTROL_SHADER_BIT, GL_TESS_EVALUATION_SHADER_BIT,
         GL_GEOMETRY_SHADER_BIT, GL_FRAGMENT_SHADER_BIT,
@@ -52,7 +57,8 @@ void ProgramManager::BindSourcePrograms(std::span<const OGLProgram, NUM_STAGES> 
     BindPipeline();
 }
 
-void ProgramManager::BindPresentPrograms(GLuint vertex, GLuint fragment) {
+void ProgramManager::BindPresentPrograms(GLuint vertex, GLuint fragment)
+{
     if (current_programs[0] != vertex) {
         current_programs[0] = vertex;
         glUseProgramStages(pipeline.handle, GL_VERTEX_SHADER_BIT, vertex);
@@ -78,7 +84,8 @@ void ProgramManager::BindPresentPrograms(GLuint vertex, GLuint fragment) {
 }
 
 void ProgramManager::BindAssemblyPrograms(std::span<const OGLAssemblyProgram, NUM_STAGES> programs,
-                                          u32 stage_mask) {
+                                          u32 stage_mask)
+{
     const u32 changed_mask = current_stage_mask ^ stage_mask;
     current_stage_mask = stage_mask;
 
@@ -102,16 +109,20 @@ void ProgramManager::BindAssemblyPrograms(std::span<const OGLAssemblyProgram, NU
     UnbindPipeline();
 }
 
-void ProgramManager::RestoreGuestCompute() {}
+void ProgramManager::RestoreGuestCompute()
+{
+}
 
-void ProgramManager::LocalMemoryWarmup() {
+void ProgramManager::LocalMemoryWarmup()
+{
     if (lmem_warmup_program.handle != 0) {
         BindComputeProgram(lmem_warmup_program.handle);
         glDispatchCompute(1, 1, 1);
     }
 }
 
-void ProgramManager::BindPipeline() {
+void ProgramManager::BindPipeline()
+{
     if (!is_pipeline_bound) {
         is_pipeline_bound = true;
         glBindProgramPipeline(pipeline.handle);
@@ -119,7 +130,8 @@ void ProgramManager::BindPipeline() {
     UnbindCompute();
 }
 
-void ProgramManager::UnbindPipeline() {
+void ProgramManager::UnbindPipeline()
+{
     if (is_pipeline_bound) {
         is_pipeline_bound = false;
         glBindProgramPipeline(0);
@@ -127,7 +139,8 @@ void ProgramManager::UnbindPipeline() {
     UnbindCompute();
 }
 
-void ProgramManager::UnbindCompute() {
+void ProgramManager::UnbindCompute()
+{
     if (is_compute_bound) {
         is_compute_bound = false;
         glUseProgram(0);

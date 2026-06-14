@@ -2,13 +2,15 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include "core/hle/service/am/service/cradle_firmware_updater.h"
+
 #include "core/hle/service/cmif_serialization.h"
 
 namespace Service::AM {
 
 ICradleFirmwareUpdater::ICradleFirmwareUpdater(Core::System& system_)
     : ServiceFramework{system_, "ICradleFirmwareUpdater"},
-      m_context{system, "ICradleFirmwareUpdater"}, m_cradle_device_info_event{m_context} {
+      m_context{system, "ICradleFirmwareUpdater"}, m_cradle_device_info_event{m_context}
+{
     // clang-format off
     static const FunctionInfo functions[] = {
         {0, D<&ICradleFirmwareUpdater::StartUpdate>, "StartUpdate"},
@@ -26,24 +28,28 @@ ICradleFirmwareUpdater::ICradleFirmwareUpdater(Core::System& system_)
 
 ICradleFirmwareUpdater::~ICradleFirmwareUpdater() = default;
 
-Result ICradleFirmwareUpdater::StartUpdate() {
+Result ICradleFirmwareUpdater::StartUpdate()
+{
     LOG_WARNING(Service_AM, "(STUBBED) called");
     R_SUCCEED();
 }
 
-Result ICradleFirmwareUpdater::FinishUpdate() {
+Result ICradleFirmwareUpdater::FinishUpdate()
+{
     LOG_WARNING(Service_AM, "(STUBBED) called");
     R_SUCCEED();
 }
 
-Result ICradleFirmwareUpdater::GetCradleDeviceInfo(Out<CradleDeviceInfo> out_cradle_device_info) {
+Result ICradleFirmwareUpdater::GetCradleDeviceInfo(Out<CradleDeviceInfo> out_cradle_device_info)
+{
     LOG_WARNING(Service_AM, "(STUBBED) called");
     *out_cradle_device_info = {};
     R_SUCCEED();
 }
 
 Result ICradleFirmwareUpdater::GetCradleDeviceInfoChangeEvent(
-    OutCopyHandle<Kernel::KReadableEvent> out_event) {
+    OutCopyHandle<Kernel::KReadableEvent> out_event)
+{
     LOG_WARNING(Service_AM, "(STUBBED) called");
     *out_event = m_cradle_device_info_event.GetHandle();
     R_SUCCEED();

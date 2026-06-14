@@ -4,6 +4,8 @@
 // SPDX-FileCopyrightText: Copyright 2019 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "video_core/renderer_vulkan/maxwell_to_vk.h"
+
 #include <iterator>
 
 #include "common/assert.h"
@@ -11,7 +13,6 @@
 #include "common/logging.h"
 #include "common/settings.h"
 #include "video_core/engines/maxwell_3d.h"
-#include "video_core/renderer_vulkan/maxwell_to_vk.h"
 #include "video_core/surface.h"
 #include "video_core/vulkan_common/vulkan_device.h"
 #include "video_core/vulkan_common/vulkan_wrapper.h"
@@ -22,7 +23,8 @@ using Maxwell = Tegra::Engines::Maxwell3D::Regs;
 
 namespace Sampler {
 
-VkFilter Filter(Tegra::Texture::TextureFilter filter) {
+VkFilter Filter(Tegra::Texture::TextureFilter filter)
+{
     switch (filter) {
     case Tegra::Texture::TextureFilter::Nearest:
         return VK_FILTER_NEAREST;
@@ -33,7 +35,8 @@ VkFilter Filter(Tegra::Texture::TextureFilter filter) {
     return {};
 }
 
-VkSamplerMipmapMode MipmapMode(Tegra::Texture::TextureMipmapFilter mipmap_filter) {
+VkSamplerMipmapMode MipmapMode(Tegra::Texture::TextureMipmapFilter mipmap_filter)
+{
     switch (mipmap_filter) {
     case Tegra::Texture::TextureMipmapFilter::None:
         // There are no Vulkan filter modes that directly correspond to OpenGL minification filters
@@ -50,9 +53,9 @@ VkSamplerMipmapMode MipmapMode(Tegra::Texture::TextureMipmapFilter mipmap_filter
     return {};
 }
 
-VkSamplerAddressMode WrapMode(const Device& device,
-                              Tegra::Texture::WrapMode wrap_mode,
-                              Tegra::Texture::TextureFilter filter) {
+VkSamplerAddressMode WrapMode(const Device& device, Tegra::Texture::WrapMode wrap_mode,
+                              Tegra::Texture::TextureFilter filter)
+{
     switch (wrap_mode) {
     case Tegra::Texture::WrapMode::Wrap:
         return VK_SAMPLER_ADDRESS_MODE_REPEAT;
@@ -84,7 +87,8 @@ VkSamplerAddressMode WrapMode(const Device& device,
     }
 }
 
-VkCompareOp DepthCompareFunction(Tegra::Texture::DepthCompareFunc depth_compare_func) {
+VkCompareOp DepthCompareFunction(Tegra::Texture::DepthCompareFunc depth_compare_func)
+{
     switch (depth_compare_func) {
     case Tegra::Texture::DepthCompareFunc::Never:
         return VK_COMPARE_OP_NEVER;
@@ -110,132 +114,159 @@ VkCompareOp DepthCompareFunction(Tegra::Texture::DepthCompareFunc depth_compare_
 } // namespace Sampler
 struct FormatTuple {
     VkFormat format{}; ///< Vulkan format
-    s32 usage = 0; ///< Describes image format usage
+    s32 usage = 0;     ///< Describes image format usage
 };
-constexpr bool IsZetaFormat(PixelFormat pixel_format) {
-    return pixel_format >= PixelFormat::MaxColorFormat && pixel_format < PixelFormat::MaxDepthStencilFormat;
+constexpr bool IsZetaFormat(PixelFormat pixel_format)
+{
+    return pixel_format >= PixelFormat::MaxColorFormat &&
+           pixel_format < PixelFormat::MaxDepthStencilFormat;
 }
 
-FormatInfo SurfaceFormat(const Device& device, FormatType format_type, bool with_srgb, PixelFormat pixel_format) {
+FormatInfo SurfaceFormat(const Device& device, FormatType format_type, bool with_srgb,
+                         PixelFormat pixel_format)
+{
     u32 const usage_attachable = 1 << 0;
     u32 const usage_storage = 1 << 1;
     FormatTuple tuple;
     switch (pixel_format) {
-#define SURFACE_FORMAT_LIST \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_A8B8G8R8_UNORM_PACK32, usage_attachable | usage_storage, A8B8G8R8_UNORM) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_A8B8G8R8_SNORM_PACK32, usage_attachable | usage_storage, A8B8G8R8_SNORM) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_A8B8G8R8_SINT_PACK32, usage_attachable | usage_storage, A8B8G8R8_SINT) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_A8B8G8R8_UINT_PACK32, usage_attachable | usage_storage, A8B8G8R8_UINT) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_R5G6B5_UNORM_PACK16, usage_attachable, R5G6B5_UNORM) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_B5G6R5_UNORM_PACK16, 0, B5G6R5_UNORM) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_A1R5G5B5_UNORM_PACK16, usage_attachable, A1R5G5B5_UNORM) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_A2B10G10R10_UNORM_PACK32, usage_attachable | usage_storage, A2B10G10R10_UNORM) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_A2B10G10R10_UINT_PACK32, usage_attachable | usage_storage, A2B10G10R10_UINT) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_A2R10G10B10_UNORM_PACK32, usage_attachable, A2R10G10B10_UNORM) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_A1R5G5B5_UNORM_PACK16, usage_attachable, A1B5G5R5_UNORM) /*flipped with swizzle*/ \
+#define SURFACE_FORMAT_LIST                                                                        \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_A8B8G8R8_UNORM_PACK32, usage_attachable | usage_storage,         \
+                        A8B8G8R8_UNORM)                                                            \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_A8B8G8R8_SNORM_PACK32, usage_attachable | usage_storage,         \
+                        A8B8G8R8_SNORM)                                                            \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_A8B8G8R8_SINT_PACK32, usage_attachable | usage_storage,          \
+                        A8B8G8R8_SINT)                                                             \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_A8B8G8R8_UINT_PACK32, usage_attachable | usage_storage,          \
+                        A8B8G8R8_UINT)                                                             \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_R5G6B5_UNORM_PACK16, usage_attachable, R5G6B5_UNORM)             \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_B5G6R5_UNORM_PACK16, 0, B5G6R5_UNORM)                            \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_A1R5G5B5_UNORM_PACK16, usage_attachable, A1R5G5B5_UNORM)         \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_A2B10G10R10_UNORM_PACK32, usage_attachable | usage_storage,      \
+                        A2B10G10R10_UNORM)                                                         \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_A2B10G10R10_UINT_PACK32, usage_attachable | usage_storage,       \
+                        A2B10G10R10_UINT)                                                          \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_A2R10G10B10_UNORM_PACK32, usage_attachable, A2R10G10B10_UNORM)   \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_A1R5G5B5_UNORM_PACK16, usage_attachable,                         \
+                        A1B5G5R5_UNORM) /*flipped with swizzle*/                                   \
     SURFACE_FORMAT_ELEM(VK_FORMAT_R5G5B5A1_UNORM_PACK16, 0, A5B5G5R1_UNORM) /*specially swizzled*/ \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_R8_UNORM, usage_attachable | usage_storage, R8_UNORM) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_R8_SNORM, usage_attachable | usage_storage, R8_SNORM) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_R8_SINT, usage_attachable | usage_storage, R8_SINT) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_R8_UINT, usage_attachable | usage_storage, R8_UINT) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_R16G16B16A16_SFLOAT, usage_attachable | usage_storage, R16G16B16A16_FLOAT) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_R16G16B16A16_UNORM, usage_attachable | usage_storage, R16G16B16A16_UNORM) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_R16G16B16A16_SNORM, usage_attachable | usage_storage, R16G16B16A16_SNORM) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_R16G16B16A16_SINT, usage_attachable | usage_storage, R16G16B16A16_SINT) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_R16G16B16A16_UINT, usage_attachable | usage_storage, R16G16B16A16_UINT) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_B10G11R11_UFLOAT_PACK32, usage_attachable | usage_storage, B10G11R11_FLOAT) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_R32G32B32A32_UINT, usage_attachable | usage_storage, R32G32B32A32_UINT) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_BC1_RGBA_UNORM_BLOCK, 0, BC1_RGBA_UNORM) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_BC2_UNORM_BLOCK, 0, BC2_UNORM) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_BC3_UNORM_BLOCK, 0, BC3_UNORM) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_BC4_UNORM_BLOCK, 0, BC4_UNORM) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_BC4_SNORM_BLOCK, 0, BC4_SNORM) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_BC5_UNORM_BLOCK, 0, BC5_UNORM) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_BC5_SNORM_BLOCK, 0, BC5_SNORM) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_BC7_UNORM_BLOCK, 0, BC7_UNORM) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_BC6H_UFLOAT_BLOCK, 0, BC6H_UFLOAT) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_BC6H_SFLOAT_BLOCK, 0, BC6H_SFLOAT) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_ASTC_4x4_UNORM_BLOCK, 0, ASTC_2D_4X4_UNORM) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_B8G8R8A8_UNORM, usage_attachable | usage_storage, B8G8R8A8_UNORM) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_R32G32B32A32_SFLOAT, usage_attachable | usage_storage, R32G32B32A32_FLOAT) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_R32G32B32A32_SINT, usage_attachable | usage_storage, R32G32B32A32_SINT) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_R32G32_SFLOAT, usage_attachable | usage_storage, R32G32_FLOAT) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_R32G32_SINT, usage_attachable | usage_storage, R32G32_SINT) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_R32_SFLOAT, usage_attachable | usage_storage, R32_FLOAT) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_R16_SFLOAT, usage_attachable | usage_storage, R16_FLOAT) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_R16_UNORM, usage_attachable | usage_storage, R16_UNORM) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_R16_SNORM, usage_attachable | usage_storage, R16_SNORM) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_R16_UINT, usage_attachable | usage_storage, R16_UINT) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_R16_SINT, usage_attachable | usage_storage, R16_SINT) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_R16G16_UNORM, usage_attachable | usage_storage, R16G16_UNORM) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_R16G16_SFLOAT, usage_attachable | usage_storage, R16G16_FLOAT) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_R16G16_UINT, usage_attachable | usage_storage, R16G16_UINT) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_R16G16_SINT, usage_attachable | usage_storage, R16G16_SINT) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_R16G16_SNORM, usage_attachable | usage_storage, R16G16_SNORM) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_R32G32B32_SFLOAT, 0, R32G32B32_FLOAT) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_A8B8G8R8_SRGB_PACK32, usage_attachable, A8B8G8R8_SRGB) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_R8G8_UNORM, usage_attachable | usage_storage, R8G8_UNORM) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_R8G8_SNORM, usage_attachable | usage_storage, R8G8_SNORM) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_R8G8_SINT, usage_attachable | usage_storage, R8G8_SINT) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_R8G8_UINT, usage_attachable | usage_storage, R8G8_UINT) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_R32G32_UINT, usage_attachable | usage_storage, R32G32_UINT) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_R16G16B16A16_SFLOAT, usage_attachable | usage_storage, R16G16B16X16_FLOAT) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_R32_UINT, usage_attachable | usage_storage, R32_UINT) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_R32_SINT, usage_attachable | usage_storage, R32_SINT) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_ASTC_8x8_UNORM_BLOCK, 0, ASTC_2D_8X8_UNORM) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_ASTC_8x5_UNORM_BLOCK, 0, ASTC_2D_8X5_UNORM) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_ASTC_5x4_UNORM_BLOCK, 0, ASTC_2D_5X4_UNORM) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_B8G8R8A8_SRGB, usage_attachable, B8G8R8A8_SRGB) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_BC1_RGBA_SRGB_BLOCK, 0, BC1_RGBA_SRGB) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_BC2_SRGB_BLOCK, 0, BC2_SRGB) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_BC3_SRGB_BLOCK, 0, BC3_SRGB) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_BC7_SRGB_BLOCK, 0, BC7_SRGB) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_A4B4G4R4_UNORM_PACK16_EXT, 0, A4B4G4R4_UNORM) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_R4G4_UNORM_PACK8, 0, G4R4_UNORM) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_ASTC_4x4_SRGB_BLOCK, 0, ASTC_2D_4X4_SRGB) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_ASTC_8x8_SRGB_BLOCK, 0, ASTC_2D_8X8_SRGB) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_ASTC_8x5_SRGB_BLOCK, 0, ASTC_2D_8X5_SRGB) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_ASTC_5x4_SRGB_BLOCK, 0, ASTC_2D_5X4_SRGB) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_ASTC_5x5_UNORM_BLOCK, 0, ASTC_2D_5X5_UNORM) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_ASTC_5x5_SRGB_BLOCK, 0, ASTC_2D_5X5_SRGB) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_ASTC_10x8_UNORM_BLOCK, 0, ASTC_2D_10X8_UNORM) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_ASTC_10x8_SRGB_BLOCK, 0, ASTC_2D_10X8_SRGB) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_ASTC_6x6_UNORM_BLOCK, 0, ASTC_2D_6X6_UNORM) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_ASTC_6x6_SRGB_BLOCK, 0, ASTC_2D_6X6_SRGB) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_ASTC_10x6_UNORM_BLOCK, 0, ASTC_2D_10X6_UNORM) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_ASTC_10x6_SRGB_BLOCK, 0, ASTC_2D_10X6_SRGB) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_ASTC_10x5_UNORM_BLOCK, 0, ASTC_2D_10X5_UNORM) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_ASTC_10x5_SRGB_BLOCK, 0, ASTC_2D_10X5_SRGB) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_ASTC_10x10_UNORM_BLOCK, 0, ASTC_2D_10X10_UNORM) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_ASTC_10x10_SRGB_BLOCK, 0, ASTC_2D_10X10_SRGB) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_ASTC_12x10_UNORM_BLOCK, 0, ASTC_2D_12X10_UNORM) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_ASTC_12x10_SRGB_BLOCK, 0, ASTC_2D_12X10_SRGB) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_ASTC_12x12_UNORM_BLOCK, 0, ASTC_2D_12X12_UNORM) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_ASTC_12x12_SRGB_BLOCK, 0, ASTC_2D_12X12_SRGB) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_ASTC_8x6_UNORM_BLOCK, 0, ASTC_2D_8X6_UNORM) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_ASTC_8x6_SRGB_BLOCK, 0, ASTC_2D_8X6_SRGB) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_ASTC_6x5_UNORM_BLOCK, 0, ASTC_2D_6X5_UNORM) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_ASTC_6x5_SRGB_BLOCK, 0, ASTC_2D_6X5_SRGB) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_E5B9G9R9_UFLOAT_PACK32, 0, E5B9G9R9_FLOAT) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_ETC2_R8G8B8_UNORM_BLOCK, 0, ETC2_RGB_UNORM) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_ETC2_R8G8B8A8_UNORM_BLOCK, 0, ETC2_RGBA_UNORM) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_ETC2_R8G8B8A1_UNORM_BLOCK, 0, ETC2_RGB_PTA_UNORM) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_ETC2_R8G8B8_SRGB_BLOCK, 0, ETC2_RGB_SRGB) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_ETC2_R8G8B8A8_SRGB_BLOCK, 0, ETC2_RGBA_SRGB) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_ETC2_R8G8B8A1_SRGB_BLOCK, 0, ETC2_RGB_PTA_SRGB) \
-    /* Depth formats */ \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_D32_SFLOAT, usage_attachable, D32_FLOAT) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_D16_UNORM, usage_attachable, D16_UNORM) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_X8_D24_UNORM_PACK32, usage_attachable, X8_D24_UNORM) \
-    /* Stencil formats */ \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_S8_UINT, usage_attachable, S8_UINT) \
-    /* DepthStencil formats */ \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_D24_UNORM_S8_UINT, usage_attachable, D24_UNORM_S8_UINT) \
-    SURFACE_FORMAT_ELEM(VK_FORMAT_D24_UNORM_S8_UINT, usage_attachable, S8_UINT_D24_UNORM) /* emulated */ \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_R8_UNORM, usage_attachable | usage_storage, R8_UNORM)            \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_R8_SNORM, usage_attachable | usage_storage, R8_SNORM)            \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_R8_SINT, usage_attachable | usage_storage, R8_SINT)              \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_R8_UINT, usage_attachable | usage_storage, R8_UINT)              \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_R16G16B16A16_SFLOAT, usage_attachable | usage_storage,           \
+                        R16G16B16A16_FLOAT)                                                        \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_R16G16B16A16_UNORM, usage_attachable | usage_storage,            \
+                        R16G16B16A16_UNORM)                                                        \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_R16G16B16A16_SNORM, usage_attachable | usage_storage,            \
+                        R16G16B16A16_SNORM)                                                        \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_R16G16B16A16_SINT, usage_attachable | usage_storage,             \
+                        R16G16B16A16_SINT)                                                         \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_R16G16B16A16_UINT, usage_attachable | usage_storage,             \
+                        R16G16B16A16_UINT)                                                         \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_B10G11R11_UFLOAT_PACK32, usage_attachable | usage_storage,       \
+                        B10G11R11_FLOAT)                                                           \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_R32G32B32A32_UINT, usage_attachable | usage_storage,             \
+                        R32G32B32A32_UINT)                                                         \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_BC1_RGBA_UNORM_BLOCK, 0, BC1_RGBA_UNORM)                         \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_BC2_UNORM_BLOCK, 0, BC2_UNORM)                                   \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_BC3_UNORM_BLOCK, 0, BC3_UNORM)                                   \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_BC4_UNORM_BLOCK, 0, BC4_UNORM)                                   \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_BC4_SNORM_BLOCK, 0, BC4_SNORM)                                   \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_BC5_UNORM_BLOCK, 0, BC5_UNORM)                                   \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_BC5_SNORM_BLOCK, 0, BC5_SNORM)                                   \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_BC7_UNORM_BLOCK, 0, BC7_UNORM)                                   \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_BC6H_UFLOAT_BLOCK, 0, BC6H_UFLOAT)                               \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_BC6H_SFLOAT_BLOCK, 0, BC6H_SFLOAT)                               \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_ASTC_4x4_UNORM_BLOCK, 0, ASTC_2D_4X4_UNORM)                      \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_B8G8R8A8_UNORM, usage_attachable | usage_storage,                \
+                        B8G8R8A8_UNORM)                                                            \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_R32G32B32A32_SFLOAT, usage_attachable | usage_storage,           \
+                        R32G32B32A32_FLOAT)                                                        \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_R32G32B32A32_SINT, usage_attachable | usage_storage,             \
+                        R32G32B32A32_SINT)                                                         \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_R32G32_SFLOAT, usage_attachable | usage_storage, R32G32_FLOAT)   \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_R32G32_SINT, usage_attachable | usage_storage, R32G32_SINT)      \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_R32_SFLOAT, usage_attachable | usage_storage, R32_FLOAT)         \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_R16_SFLOAT, usage_attachable | usage_storage, R16_FLOAT)         \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_R16_UNORM, usage_attachable | usage_storage, R16_UNORM)          \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_R16_SNORM, usage_attachable | usage_storage, R16_SNORM)          \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_R16_UINT, usage_attachable | usage_storage, R16_UINT)            \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_R16_SINT, usage_attachable | usage_storage, R16_SINT)            \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_R16G16_UNORM, usage_attachable | usage_storage, R16G16_UNORM)    \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_R16G16_SFLOAT, usage_attachable | usage_storage, R16G16_FLOAT)   \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_R16G16_UINT, usage_attachable | usage_storage, R16G16_UINT)      \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_R16G16_SINT, usage_attachable | usage_storage, R16G16_SINT)      \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_R16G16_SNORM, usage_attachable | usage_storage, R16G16_SNORM)    \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_R32G32B32_SFLOAT, 0, R32G32B32_FLOAT)                            \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_A8B8G8R8_SRGB_PACK32, usage_attachable, A8B8G8R8_SRGB)           \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_R8G8_UNORM, usage_attachable | usage_storage, R8G8_UNORM)        \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_R8G8_SNORM, usage_attachable | usage_storage, R8G8_SNORM)        \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_R8G8_SINT, usage_attachable | usage_storage, R8G8_SINT)          \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_R8G8_UINT, usage_attachable | usage_storage, R8G8_UINT)          \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_R32G32_UINT, usage_attachable | usage_storage, R32G32_UINT)      \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_R16G16B16A16_SFLOAT, usage_attachable | usage_storage,           \
+                        R16G16B16X16_FLOAT)                                                        \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_R32_UINT, usage_attachable | usage_storage, R32_UINT)            \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_R32_SINT, usage_attachable | usage_storage, R32_SINT)            \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_ASTC_8x8_UNORM_BLOCK, 0, ASTC_2D_8X8_UNORM)                      \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_ASTC_8x5_UNORM_BLOCK, 0, ASTC_2D_8X5_UNORM)                      \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_ASTC_5x4_UNORM_BLOCK, 0, ASTC_2D_5X4_UNORM)                      \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_B8G8R8A8_SRGB, usage_attachable, B8G8R8A8_SRGB)                  \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_BC1_RGBA_SRGB_BLOCK, 0, BC1_RGBA_SRGB)                           \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_BC2_SRGB_BLOCK, 0, BC2_SRGB)                                     \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_BC3_SRGB_BLOCK, 0, BC3_SRGB)                                     \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_BC7_SRGB_BLOCK, 0, BC7_SRGB)                                     \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_A4B4G4R4_UNORM_PACK16_EXT, 0, A4B4G4R4_UNORM)                    \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_R4G4_UNORM_PACK8, 0, G4R4_UNORM)                                 \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_ASTC_4x4_SRGB_BLOCK, 0, ASTC_2D_4X4_SRGB)                        \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_ASTC_8x8_SRGB_BLOCK, 0, ASTC_2D_8X8_SRGB)                        \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_ASTC_8x5_SRGB_BLOCK, 0, ASTC_2D_8X5_SRGB)                        \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_ASTC_5x4_SRGB_BLOCK, 0, ASTC_2D_5X4_SRGB)                        \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_ASTC_5x5_UNORM_BLOCK, 0, ASTC_2D_5X5_UNORM)                      \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_ASTC_5x5_SRGB_BLOCK, 0, ASTC_2D_5X5_SRGB)                        \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_ASTC_10x8_UNORM_BLOCK, 0, ASTC_2D_10X8_UNORM)                    \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_ASTC_10x8_SRGB_BLOCK, 0, ASTC_2D_10X8_SRGB)                      \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_ASTC_6x6_UNORM_BLOCK, 0, ASTC_2D_6X6_UNORM)                      \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_ASTC_6x6_SRGB_BLOCK, 0, ASTC_2D_6X6_SRGB)                        \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_ASTC_10x6_UNORM_BLOCK, 0, ASTC_2D_10X6_UNORM)                    \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_ASTC_10x6_SRGB_BLOCK, 0, ASTC_2D_10X6_SRGB)                      \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_ASTC_10x5_UNORM_BLOCK, 0, ASTC_2D_10X5_UNORM)                    \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_ASTC_10x5_SRGB_BLOCK, 0, ASTC_2D_10X5_SRGB)                      \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_ASTC_10x10_UNORM_BLOCK, 0, ASTC_2D_10X10_UNORM)                  \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_ASTC_10x10_SRGB_BLOCK, 0, ASTC_2D_10X10_SRGB)                    \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_ASTC_12x10_UNORM_BLOCK, 0, ASTC_2D_12X10_UNORM)                  \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_ASTC_12x10_SRGB_BLOCK, 0, ASTC_2D_12X10_SRGB)                    \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_ASTC_12x12_UNORM_BLOCK, 0, ASTC_2D_12X12_UNORM)                  \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_ASTC_12x12_SRGB_BLOCK, 0, ASTC_2D_12X12_SRGB)                    \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_ASTC_8x6_UNORM_BLOCK, 0, ASTC_2D_8X6_UNORM)                      \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_ASTC_8x6_SRGB_BLOCK, 0, ASTC_2D_8X6_SRGB)                        \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_ASTC_6x5_UNORM_BLOCK, 0, ASTC_2D_6X5_UNORM)                      \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_ASTC_6x5_SRGB_BLOCK, 0, ASTC_2D_6X5_SRGB)                        \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_E5B9G9R9_UFLOAT_PACK32, 0, E5B9G9R9_FLOAT)                       \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_ETC2_R8G8B8_UNORM_BLOCK, 0, ETC2_RGB_UNORM)                      \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_ETC2_R8G8B8A8_UNORM_BLOCK, 0, ETC2_RGBA_UNORM)                   \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_ETC2_R8G8B8A1_UNORM_BLOCK, 0, ETC2_RGB_PTA_UNORM)                \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_ETC2_R8G8B8_SRGB_BLOCK, 0, ETC2_RGB_SRGB)                        \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_ETC2_R8G8B8A8_SRGB_BLOCK, 0, ETC2_RGBA_SRGB)                     \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_ETC2_R8G8B8A1_SRGB_BLOCK, 0, ETC2_RGB_PTA_SRGB)                  \
+    /* Depth formats */                                                                            \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_D32_SFLOAT, usage_attachable, D32_FLOAT)                         \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_D16_UNORM, usage_attachable, D16_UNORM)                          \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_X8_D24_UNORM_PACK32, usage_attachable, X8_D24_UNORM)             \
+    /* Stencil formats */                                                                          \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_S8_UINT, usage_attachable, S8_UINT)                              \
+    /* DepthStencil formats */                                                                     \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_D24_UNORM_S8_UINT, usage_attachable, D24_UNORM_S8_UINT)          \
+    SURFACE_FORMAT_ELEM(VK_FORMAT_D24_UNORM_S8_UINT, usage_attachable,                             \
+                        S8_UINT_D24_UNORM) /* emulated */                                          \
     SURFACE_FORMAT_ELEM(VK_FORMAT_D32_SFLOAT_S8_UINT, usage_attachable, D32_FLOAT_S8_UINT)
-#define SURFACE_FORMAT_ELEM(res, usage, pixel) case PixelFormat::pixel: tuple = {res, usage}; break;
-    SURFACE_FORMAT_LIST
-    default: UNREACHABLE_MSG("unknown format {}", pixel_format);
+#define SURFACE_FORMAT_ELEM(res, usage, pixel)                                                     \
+    case PixelFormat::pixel:                                                                       \
+        tuple = {res, usage};                                                                      \
+        break;
+        SURFACE_FORMAT_LIST
+    default:
+        UNREACHABLE_MSG("unknown format {}", pixel_format);
 #undef SURFACE_FORMAT_ELEM
 #undef SURFACE_FORMAT_LIST
     }
@@ -269,14 +300,16 @@ FormatInfo SurfaceFormat(const Device& device, FormatType format_type, bool with
             tuple.format = VK_FORMAT_R8G8_SNORM;
         } else if (pixel_format == PixelFormat::BC5_UNORM) {
             tuple.format = VK_FORMAT_R8G8_UNORM;
-        } else if (pixel_format == PixelFormat::BC6H_SFLOAT || pixel_format == PixelFormat::BC6H_UFLOAT) {
+        } else if (pixel_format == PixelFormat::BC6H_SFLOAT ||
+                   pixel_format == PixelFormat::BC6H_UFLOAT) {
             tuple.format = VK_FORMAT_R16G16B16A16_SFLOAT;
         } else if (is_srgb) {
             tuple.format = VK_FORMAT_A8B8G8R8_SRGB_PACK32;
         } else {
             tuple.format = VK_FORMAT_A8B8G8R8_UNORM_PACK32;
         }
-    } else if (!device.IsOptimalEtc2Supported() && VideoCore::Surface::IsPixelFormatETC2(pixel_format)) {
+    } else if (!device.IsOptimalEtc2Supported() &&
+               VideoCore::Surface::IsPixelFormatETC2(pixel_format)) {
         // Transcode on hardware that doesn't support ETC2 natively
         tuple.format = is_srgb ? VK_FORMAT_A8B8G8R8_SRGB_PACK32 : VK_FORMAT_A8B8G8R8_UNORM_PACK32;
     }
@@ -304,7 +337,8 @@ FormatInfo SurfaceFormat(const Device& device, FormatType format_type, bool with
     return {device.GetSupportedFormat(tuple.format, usage, format_type), attachable, storage};
 }
 
-VkShaderStageFlagBits ShaderStage(Shader::Stage stage) {
+VkShaderStageFlagBits ShaderStage(Shader::Stage stage)
+{
     switch (stage) {
     case Shader::Stage::VertexA:
     case Shader::Stage::VertexB:
@@ -325,7 +359,8 @@ VkShaderStageFlagBits ShaderStage(Shader::Stage stage) {
 }
 
 VkPrimitiveTopology PrimitiveTopology([[maybe_unused]] const Device& device,
-                                      Maxwell::PrimitiveTopology topology) {
+                                      Maxwell::PrimitiveTopology topology)
+{
     switch (topology) {
     case Maxwell::PrimitiveTopology::Points:
         return VK_PRIMITIVE_TOPOLOGY_POINT_LIST;
@@ -366,7 +401,8 @@ VkPrimitiveTopology PrimitiveTopology([[maybe_unused]] const Device& device,
 }
 
 VkFormat VertexFormat(const Device& device, Maxwell::VertexAttribute::Type type,
-                      Maxwell::VertexAttribute::Size size) {
+                      Maxwell::VertexAttribute::Size size)
+{
     if (device.MustEmulateScaledFormats()) {
         if (type == Maxwell::VertexAttribute::Type::SScaled) {
             type = Maxwell::VertexAttribute::Type::SInt;
@@ -594,7 +630,8 @@ VkFormat VertexFormat(const Device& device, Maxwell::VertexAttribute::Type type,
                                      FormatType::Buffer);
 }
 
-VkCompareOp ComparisonOp(Maxwell::ComparisonOp comparison) {
+VkCompareOp ComparisonOp(Maxwell::ComparisonOp comparison)
+{
     switch (comparison) {
     case Maxwell::ComparisonOp::Never_D3D:
     case Maxwell::ComparisonOp::Never_GL:
@@ -625,7 +662,8 @@ VkCompareOp ComparisonOp(Maxwell::ComparisonOp comparison) {
     return {};
 }
 
-VkIndexType IndexFormat(Maxwell::IndexFormat index_format) {
+VkIndexType IndexFormat(Maxwell::IndexFormat index_format)
+{
     switch (index_format) {
     case Maxwell::IndexFormat::UnsignedByte:
         return VK_INDEX_TYPE_UINT8_EXT;
@@ -638,7 +676,8 @@ VkIndexType IndexFormat(Maxwell::IndexFormat index_format) {
     return {};
 }
 
-VkStencilOp StencilOp(Maxwell::StencilOp::Op stencil_op) {
+VkStencilOp StencilOp(Maxwell::StencilOp::Op stencil_op)
+{
     switch (stencil_op) {
     case Maxwell::StencilOp::Op::Keep_D3D:
     case Maxwell::StencilOp::Op::Keep_GL:
@@ -669,7 +708,8 @@ VkStencilOp StencilOp(Maxwell::StencilOp::Op stencil_op) {
     return {};
 }
 
-VkBlendOp BlendEquation(Maxwell::Blend::Equation equation) {
+VkBlendOp BlendEquation(Maxwell::Blend::Equation equation)
+{
     switch (equation) {
     case Maxwell::Blend::Equation::Add_D3D:
     case Maxwell::Blend::Equation::Add_GL:
@@ -691,7 +731,8 @@ VkBlendOp BlendEquation(Maxwell::Blend::Equation equation) {
     return {};
 }
 
-VkBlendFactor BlendFactor(Maxwell::Blend::Factor factor) {
+VkBlendFactor BlendFactor(Maxwell::Blend::Factor factor)
+{
     switch (factor) {
     case Maxwell::Blend::Factor::Zero_D3D:
     case Maxwell::Blend::Factor::Zero_GL:
@@ -755,7 +796,8 @@ VkBlendFactor BlendFactor(Maxwell::Blend::Factor factor) {
     return {};
 }
 
-VkFrontFace FrontFace(Maxwell::FrontFace front_face) {
+VkFrontFace FrontFace(Maxwell::FrontFace front_face)
+{
     switch (front_face) {
     case Maxwell::FrontFace::ClockWise:
         return VK_FRONT_FACE_CLOCKWISE;
@@ -766,7 +808,8 @@ VkFrontFace FrontFace(Maxwell::FrontFace front_face) {
     return {};
 }
 
-VkCullModeFlagBits CullFace(Maxwell::CullFace cull_face) {
+VkCullModeFlagBits CullFace(Maxwell::CullFace cull_face)
+{
     switch (cull_face) {
     case Maxwell::CullFace::Front:
         return VK_CULL_MODE_FRONT_BIT;
@@ -779,7 +822,8 @@ VkCullModeFlagBits CullFace(Maxwell::CullFace cull_face) {
     return {};
 }
 
-VkPolygonMode PolygonMode(Maxwell::PolygonMode polygon_mode) {
+VkPolygonMode PolygonMode(Maxwell::PolygonMode polygon_mode)
+{
     switch (polygon_mode) {
     case Maxwell::PolygonMode::Point:
         return VK_POLYGON_MODE_POINT;
@@ -792,7 +836,8 @@ VkPolygonMode PolygonMode(Maxwell::PolygonMode polygon_mode) {
     return {};
 }
 
-VkComponentSwizzle SwizzleSource(Tegra::Texture::SwizzleSource swizzle) {
+VkComponentSwizzle SwizzleSource(Tegra::Texture::SwizzleSource swizzle)
+{
     switch (swizzle) {
     case Tegra::Texture::SwizzleSource::Zero:
         return VK_COMPONENT_SWIZZLE_ZERO;
@@ -812,7 +857,8 @@ VkComponentSwizzle SwizzleSource(Tegra::Texture::SwizzleSource swizzle) {
     return {};
 }
 
-VkViewportCoordinateSwizzleNV ViewportSwizzle(Maxwell::ViewportSwizzle swizzle) {
+VkViewportCoordinateSwizzleNV ViewportSwizzle(Maxwell::ViewportSwizzle swizzle)
+{
     switch (swizzle) {
     case Maxwell::ViewportSwizzle::PositiveX:
         return VK_VIEWPORT_COORDINATE_SWIZZLE_POSITIVE_X_NV;
@@ -835,7 +881,8 @@ VkViewportCoordinateSwizzleNV ViewportSwizzle(Maxwell::ViewportSwizzle swizzle) 
     return {};
 }
 
-VkSamplerReductionMode SamplerReduction(Tegra::Texture::SamplerReduction reduction) {
+VkSamplerReductionMode SamplerReduction(Tegra::Texture::SamplerReduction reduction)
+{
     switch (reduction) {
     case Tegra::Texture::SamplerReduction::WeightedAverage:
         return VK_SAMPLER_REDUCTION_MODE_WEIGHTED_AVERAGE_EXT;
@@ -848,7 +895,8 @@ VkSamplerReductionMode SamplerReduction(Tegra::Texture::SamplerReduction reducti
     return VK_SAMPLER_REDUCTION_MODE_WEIGHTED_AVERAGE_EXT;
 }
 
-VkSampleCountFlagBits MsaaMode(Tegra::Texture::MsaaMode msaa_mode) {
+VkSampleCountFlagBits MsaaMode(Tegra::Texture::MsaaMode msaa_mode)
+{
     switch (msaa_mode) {
     case Tegra::Texture::MsaaMode::Msaa1x1:
         return VK_SAMPLE_COUNT_1_BIT;

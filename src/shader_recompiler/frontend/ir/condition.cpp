@@ -1,15 +1,16 @@
 // SPDX-FileCopyrightText: Copyright 2021 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include <string>
+#include "shader_recompiler/frontend/ir/condition.h"
 
 #include <fmt/ranges.h>
 
-#include "shader_recompiler/frontend/ir/condition.h"
+#include <string>
 
 namespace Shader::IR {
 
-std::string NameOf(Condition condition) {
+std::string NameOf(Condition condition)
+{
     std::string ret;
     if (condition.GetFlowTest() != FlowTest::T) {
         ret = fmt::to_string(condition.GetFlowTest());

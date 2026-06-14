@@ -3,8 +3,6 @@
 
 #include "core/hle/service/bcat/news/news_storage.h"
 
-#include "common/fs/path_util.h"
-
 #include <algorithm>
 #include <chrono>
 #include <cstring>
@@ -12,24 +10,30 @@
 #include <fstream>
 #include <set>
 
+#include "common/fs/path_util.h"
+
 namespace Service::News {
 namespace {
 
-std::filesystem::path GetReadCachePath() {
+std::filesystem::path GetReadCachePath()
+{
     return Common::FS::GetVoltPath(Common::FS::VoltPath::CacheDir) / "news" / "news_read";
 }
 
-std::set<std::string> LoadReadIds() {
+std::set<std::string> LoadReadIds()
+{
     std::set<std::string> ids;
     std::ifstream f(GetReadCachePath());
     std::string line;
     while (std::getline(f, line)) {
-        if (!line.empty()) ids.insert(line);
+        if (!line.empty())
+            ids.insert(line);
     }
     return ids;
 }
 
-void SaveReadIds(const std::set<std::string>& ids) {
+void SaveReadIds(const std::set<std::string>& ids)
+{
     const auto path = GetReadCachePath();
     std::error_code ec;
     std::filesystem::create_directories(path.parent_path(), ec);
@@ -41,32 +45,38 @@ void SaveReadIds(const std::set<std::string>& ids) {
 
 } // namespace
 
-NewsStorage& NewsStorage::Instance() {
+NewsStorage& NewsStorage::Instance()
+{
     static NewsStorage s;
     return s;
 }
 
-void NewsStorage::Clear() {
+void NewsStorage::Clear()
+{
     std::scoped_lock lk{mtx};
     items.clear();
 }
 
-void NewsStorage::CopyZ(std::span<char> dst, std::string_view src) {
+void NewsStorage::CopyZ(std::span<char> dst, std::string_view src)
+{
     std::memset(dst.data(), 0, dst.size());
     std::memcpy(dst.data(), src.data(), (std::min)(dst.size() - 1, src.size()));
 }
 
-std::string NewsStorage::MakeKey(std::string_view news_id, std::string_view user_id) {
+std::string NewsStorage::MakeKey(std::string_view news_id, std::string_view user_id)
+{
     return std::string(news_id) + "|" + std::string(user_id);
 }
 
-s64 NewsStorage::Now() {
+s64 NewsStorage::Now()
+{
     using namespace std::chrono;
     return duration_cast<seconds>(system_clock::now().time_since_epoch()).count();
 }
 
 StoredNews& NewsStorage::Upsert(std::string_view news_id, std::string_view user_id,
-                                std::string_view topic_id, s64 time, std::vector<u8> payload) {
+                                std::string_view topic_id, s64 time, std::vector<u8> payload)
+{
     std::scoped_lock lk{mtx};
 
     const auto key = MakeKey(news_id, user_id);
@@ -96,11 +106,14 @@ StoredNews& NewsStorage::Upsert(std::string_view news_id, std::string_view user_
     return entry;
 }
 
-StoredNews& NewsStorage::UpsertRaw(const GithubNewsMeta& meta, std::vector<u8> payload) {
-    return Upsert(meta.news_id, "", meta.topic_id, static_cast<s64>(meta.published_at), std::move(payload));
+StoredNews& NewsStorage::UpsertRaw(const GithubNewsMeta& meta, std::vector<u8> payload)
+{
+    return Upsert(meta.news_id, "", meta.topic_id, static_cast<s64>(meta.published_at),
+                  std::move(payload));
 }
 
-std::vector<NewsRecord> NewsStorage::ListAll() const {
+std::vector<NewsRecord> NewsStorage::ListAll() const
+{
     std::scoped_lock lk{mtx};
 
     std::vector<NewsRecord> out;
@@ -109,14 +122,14 @@ std::vector<NewsRecord> NewsStorage::ListAll() const {
         out.push_back(v.record);
     }
 
-    std::sort(out.begin(), out.end(), [](const auto& a, const auto& b) {
-        return a.received_time > b.received_time;
-    });
+    std::sort(out.begin(), out.end(),
+              [](const auto& a, const auto& b) { return a.received_time > b.received_time; });
     return out;
 }
 
 std::optional<StoredNews> NewsStorage::FindByNewsId(std::string_view news_id,
-                                                    std::string_view user_id) const {
+                                                    std::string_view user_id) const
+{
     std::scoped_lock lk{mtx};
 
     if (auto it = items.find(MakeKey(news_id, user_id)); it != items.end()) {
@@ -131,7 +144,8 @@ std::optional<StoredNews> NewsStorage::FindByNewsId(std::string_view news_id,
 }
 
 bool NewsStorage::UpdateRecord(std::string_view news_id, std::string_view user_id,
-                               const std::function<void(NewsRecord&)>& updater) {
+                               const std::function<void(NewsRecord&)>& updater)
+{
     std::scoped_lock lk{mtx};
 
     if (auto it = items.find(MakeKey(news_id, user_id)); it != items.end()) {
@@ -141,7 +155,8 @@ bool NewsStorage::UpdateRecord(std::string_view news_id, std::string_view user_i
     return false;
 }
 
-void NewsStorage::MarkAsRead(std::string_view news_id) {
+void NewsStorage::MarkAsRead(std::string_view news_id)
+{
     std::scoped_lock lk{mtx};
     for (auto& [_, entry] : items) {
         if (std::string_view(entry.record.news_id.data()) == news_id) {
@@ -155,15 +170,16 @@ void NewsStorage::MarkAsRead(std::string_view news_id) {
     SaveReadIds(ids);
 }
 
-size_t NewsStorage::GetAndIncrementOpenCounter() {
+size_t NewsStorage::GetAndIncrementOpenCounter()
+{
     std::scoped_lock lk{mtx};
     return open_counter++;
 }
 
-void NewsStorage::ResetOpenCounter() {
+void NewsStorage::ResetOpenCounter()
+{
     std::scoped_lock lk{mtx};
     open_counter = 0;
 }
-
 
 } // namespace Service::News

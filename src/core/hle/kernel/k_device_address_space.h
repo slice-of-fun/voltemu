@@ -23,21 +23,21 @@ public:
     Result Initialize(u64 address, u64 size);
     void Finalize() override;
 
-    bool IsInitialized() const override {
-        return m_is_initialized;
-    }
+    bool IsInitialized() const override { return m_is_initialized; }
     static void PostDestroy(uintptr_t arg) {}
 
     Result Attach(Svc::DeviceName device_name);
     Result Detach(Svc::DeviceName device_name);
 
     Result MapByForce(KProcessPageTable* page_table, KProcessAddress process_address, size_t size,
-                      u64 device_address, u32 option) {
+                      u64 device_address, u32 option)
+    {
         R_RETURN(this->Map(page_table, process_address, size, device_address, option, false));
     }
 
     Result MapAligned(KProcessPageTable* page_table, KProcessAddress process_address, size_t size,
-                      u64 device_address, u32 option) {
+                      u64 device_address, u32 option)
+    {
         R_RETURN(this->Map(page_table, process_address, size, device_address, option, true));
     }
 

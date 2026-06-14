@@ -20,7 +20,9 @@ class IREmitter {
 public:
     explicit IREmitter(Block& block_) : block{&block_}, insertion_point{block->end()} {}
     explicit IREmitter(Block& block_, Block::iterator insertion_point_)
-        : block{&block_}, insertion_point{insertion_point_} {}
+        : block{&block_}, insertion_point{insertion_point_}
+    {
+    }
 
     Block* block;
 
@@ -159,8 +161,7 @@ public:
     void WorkgroupMemoryBarrier();
     void DeviceMemoryBarrier();
 
-    template <typename Dest, typename Source>
-    [[nodiscard]] Dest BitCast(const Source& value);
+    template<typename Dest, typename Source> [[nodiscard]] Dest BitCast(const Source& value);
 
     [[nodiscard]] U64 PackUint2x32(const Value& vector);
     [[nodiscard]] Value UnpackUint2x32(const U64& value);
@@ -408,23 +409,23 @@ public:
 private:
     IR::Block::iterator insertion_point;
 
-    template <typename T = Value, typename... Args>
-    T Inst(Opcode op, Args... args) {
+    template<typename T = Value, typename... Args> T Inst(Opcode op, Args... args)
+    {
         auto it{block->PrependNewInst(insertion_point, op, {Value{args}...})};
         return T{Value{&*it}};
     }
 
-    template <typename T>
-        requires(sizeof(T) <= sizeof(u32) && std::is_trivially_copyable_v<T>)
-    struct Flags {
+    template<typename T>
+    requires(sizeof(T) <= sizeof(u32) && std::is_trivially_copyable_v<T>) struct Flags {
         Flags() = default;
         Flags(T proxy_) : proxy{proxy_} {}
 
         T proxy;
     };
 
-    template <typename T = Value, typename FlagType, typename... Args>
-    T Inst(Opcode op, Flags<FlagType> flags, Args... args) {
+    template<typename T = Value, typename FlagType, typename... Args>
+    T Inst(Opcode op, Flags<FlagType> flags, Args... args)
+    {
         u32 raw_flags{};
         std::memcpy(&raw_flags, &flags.proxy, sizeof(flags.proxy));
         auto it{block->PrependNewInst(insertion_point, op, {Value{args}...}, raw_flags)};

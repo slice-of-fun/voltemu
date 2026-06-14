@@ -19,11 +19,11 @@ public:
     ~IScreenShotService() override;
 
 private:
-    Result SaveScreenShotEx0(
-        Out<ApplicationAlbumEntry> out_entry, const ScreenShotAttribute& attribute,
-        AlbumReportOption report_option, ClientAppletResourceUserId aruid,
-        InBuffer<BufferAttr_HipcMapTransferAllowsNonSecure | BufferAttr_HipcMapAlias>
-            image_data_buffer);
+    Result
+    SaveScreenShotEx0(Out<ApplicationAlbumEntry> out_entry, const ScreenShotAttribute& attribute,
+                      AlbumReportOption report_option, ClientAppletResourceUserId aruid,
+                      InBuffer<BufferAttr_HipcMapTransferAllowsNonSecure | BufferAttr_HipcMapAlias>
+                          image_data_buffer);
 
     Result SaveEditedScreenShotEx1(
         Out<ApplicationAlbumEntry> out_entry, const ScreenShotAttribute& attribute, u64 width,

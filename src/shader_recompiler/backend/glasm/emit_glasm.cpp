@@ -1,6 +1,8 @@
 // SPDX-FileCopyrightText: Copyright 2021 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "shader_recompiler/backend/glasm/emit_glasm.h"
+
 #include <algorithm>
 #include <string>
 #include <tuple>
@@ -8,7 +10,6 @@
 #include "common/div_ceil.h"
 #include "common/settings.h"
 #include "shader_recompiler/backend/bindings.h"
-#include "shader_recompiler/backend/glasm/emit_glasm.h"
 #include "shader_recompiler/backend/glasm/emit_glasm_instructions.h"
 #include "shader_recompiler/backend/glasm/glasm_emit_context.h"
 #include "shader_recompiler/frontend/ir/ir_emitter.h"
@@ -18,34 +19,29 @@
 
 namespace Shader::Backend::GLASM {
 namespace {
-template <class Func>
-struct FuncTraits {};
+template<class Func> struct FuncTraits {
+};
 
-template <class ReturnType_, class... Args>
-struct FuncTraits<ReturnType_ (*)(Args...)> {
+template<class ReturnType_, class... Args> struct FuncTraits<ReturnType_ (*)(Args...)> {
     using ReturnType = ReturnType_;
 
     static constexpr size_t NUM_ARGS = sizeof...(Args);
 
-    template <size_t I>
-    using ArgType = std::tuple_element_t<I, std::tuple<Args...>>;
+    template<size_t I> using ArgType = std::tuple_element_t<I, std::tuple<Args...>>;
 };
 
-template <typename T>
-struct Identity {
+template<typename T> struct Identity {
     Identity(T data_) : data{data_} {}
 
-    T Extract() {
-        return data;
-    }
+    T Extract() { return data; }
 
     T data;
 };
 
-template <bool scalar>
-class RegWrapper {
+template<bool scalar> class RegWrapper {
 public:
-    RegWrapper(EmitContext& ctx, const IR::Value& ir_value) : reg_alloc{ctx.reg_alloc} {
+    RegWrapper(EmitContext& ctx, const IR::Value& ir_value) : reg_alloc{ctx.reg_alloc}
+    {
         const Value value{reg_alloc.Peek(ir_value)};
         if (value.type == Type::Register) {
             inst = ir_value.InstRecursive();
@@ -66,7 +62,8 @@ public:
         }
     }
 
-    auto Extract() {
+    auto Extract()
+    {
         if (inst) {
             reg_alloc.Unref(*inst);
         } else {
@@ -81,13 +78,15 @@ private:
     Register reg{};
 };
 
-template <typename ArgType>
-class ValueWrapper {
+template<typename ArgType> class ValueWrapper {
 public:
     ValueWrapper(EmitContext& ctx, const IR::Value& ir_value_)
-        : reg_alloc{ctx.reg_alloc}, ir_value{ir_value_}, value{reg_alloc.Peek(ir_value)} {}
+        : reg_alloc{ctx.reg_alloc}, ir_value{ir_value_}, value{reg_alloc.Peek(ir_value)}
+    {
+    }
 
-    ArgType Extract() {
+    ArgType Extract()
+    {
         if (!ir_value.IsImmediate()) {
             reg_alloc.Unref(*ir_value.InstRecursive());
         }
@@ -100,8 +99,8 @@ private:
     ArgType value;
 };
 
-template <typename ArgType>
-auto Arg(EmitContext& ctx, const IR::Value& arg) {
+template<typename ArgType> auto Arg(EmitContext& ctx, const IR::Value& arg)
+{
     if constexpr (std::is_same_v<ArgType, Register>) {
         return RegWrapper<false>{ctx, arg};
     } else if constexpr (std::is_same_v<ArgType, ScalarRegister>) {
@@ -121,10 +120,9 @@ auto Arg(EmitContext& ctx, const IR::Value& arg) {
     }
 }
 
-template <auto func, bool is_first_arg_inst>
-struct InvokeCall {
-    template <typename... Args>
-    InvokeCall(EmitContext& ctx, IR::Inst* inst, Args&&... args) {
+template<auto func, bool is_first_arg_inst> struct InvokeCall {
+    template<typename... Args> InvokeCall(EmitContext& ctx, IR::Inst* inst, Args&&... args)
+    {
         if constexpr (is_first_arg_inst) {
             func(ctx, *inst, args.Extract()...);
         } else {
@@ -133,8 +131,9 @@ struct InvokeCall {
     }
 };
 
-template <auto func, bool is_first_arg_inst, size_t... I>
-void Invoke(EmitContext& ctx, IR::Inst* inst, std::index_sequence<I...>) {
+template<auto func, bool is_first_arg_inst, size_t... I>
+void Invoke(EmitContext& ctx, IR::Inst* inst, std::index_sequence<I...>)
+{
     using Traits = FuncTraits<decltype(func)>;
     if constexpr (is_first_arg_inst) {
         InvokeCall<func, is_first_arg_inst>{
@@ -145,8 +144,8 @@ void Invoke(EmitContext& ctx, IR::Inst* inst, std::index_sequence<I...>) {
     }
 }
 
-template <auto func>
-void Invoke(EmitContext& ctx, IR::Inst* inst) {
+template<auto func> void Invoke(EmitContext& ctx, IR::Inst* inst)
+{
     using Traits = FuncTraits<decltype(func)>;
     static_assert(Traits::NUM_ARGS >= 1, "Insufficient arguments");
     if constexpr (Traits::NUM_ARGS == 1) {
@@ -159,7 +158,8 @@ void Invoke(EmitContext& ctx, IR::Inst* inst) {
     }
 }
 
-void EmitInst(EmitContext& ctx, IR::Inst* inst) {
+void EmitInst(EmitContext& ctx, IR::Inst* inst)
+{
     switch (inst->GetOpcode()) {
 #define OPCODE(name, result_type, ...)                                                             \
     case IR::Opcode::name:                                                                         \
@@ -170,11 +170,13 @@ void EmitInst(EmitContext& ctx, IR::Inst* inst) {
     throw LogicError("Invalid opcode {}", inst->GetOpcode());
 }
 
-bool IsReference(IR::Inst& inst) {
+bool IsReference(IR::Inst& inst)
+{
     return inst.GetOpcode() == IR::Opcode::Reference;
 }
 
-void PrecolorInst(IR::Inst& phi) {
+void PrecolorInst(IR::Inst& phi)
+{
     // Insert phi moves before references to avoid overwriting other phis
     const size_t num_args{phi.NumArgs()};
     for (size_t i = 0; i < num_args; ++i) {
@@ -193,7 +195,8 @@ void PrecolorInst(IR::Inst& phi) {
     }
 }
 
-void Precolor(const IR::Program& program) {
+void Precolor(const IR::Program& program)
+{
     for (IR::Block* const block : program.blocks) {
         for (IR::Inst& phi : block->Instructions()) {
             if (!IR::IsPhi(phi)) {
@@ -204,7 +207,8 @@ void Precolor(const IR::Program& program) {
     }
 }
 
-void EmitCode(EmitContext& ctx, const IR::Program& program) {
+void EmitCode(EmitContext& ctx, const IR::Program& program)
+{
     const auto eval{
         [&](const IR::U1& cond) { return ScalarS32{ctx.reg_alloc.Consume(IR::Value{cond})}; }};
     for (const IR::AbstractSyntaxNode& node : program.syntax_list) {
@@ -271,7 +275,8 @@ void EmitCode(EmitContext& ctx, const IR::Program& program) {
 }
 
 void SetupOptions(const IR::Program& program, const Profile& profile,
-                  const RuntimeInfo& runtime_info, std::string& header) {
+                  const RuntimeInfo& runtime_info, std::string& header)
+{
     const Info& info{program.info};
     const Stage stage{program.stage};
 
@@ -326,7 +331,8 @@ void SetupOptions(const IR::Program& program, const Profile& profile,
     }
 }
 
-std::string_view StageHeader(Stage stage) {
+std::string_view StageHeader(Stage stage)
+{
     switch (stage) {
     case Stage::VertexA:
     case Stage::VertexB:
@@ -345,7 +351,8 @@ std::string_view StageHeader(Stage stage) {
     throw InvalidArgument("Invalid stage {}", stage);
 }
 
-std::string_view InputPrimitive(InputTopology topology) {
+std::string_view InputPrimitive(InputTopology topology)
+{
     switch (topology) {
     case InputTopology::Points:
         return "POINTS";
@@ -361,7 +368,8 @@ std::string_view InputPrimitive(InputTopology topology) {
     throw InvalidArgument("Invalid input topology {}", topology);
 }
 
-std::string_view OutputPrimitive(OutputTopology topology) {
+std::string_view OutputPrimitive(OutputTopology topology)
+{
     switch (topology) {
     case OutputTopology::PointList:
         return "POINTS";
@@ -373,7 +381,8 @@ std::string_view OutputPrimitive(OutputTopology topology) {
     throw InvalidArgument("Invalid output topology {}", topology);
 }
 
-std::string_view GetTessMode(TessPrimitive primitive) {
+std::string_view GetTessMode(TessPrimitive primitive)
+{
     switch (primitive) {
     case TessPrimitive::Triangles:
         return "TRIANGLES";
@@ -385,7 +394,8 @@ std::string_view GetTessMode(TessPrimitive primitive) {
     throw InvalidArgument("Invalid tessellation primitive {}", primitive);
 }
 
-std::string_view GetTessSpacing(TessSpacing spacing) {
+std::string_view GetTessSpacing(TessSpacing spacing)
+{
     switch (spacing) {
     case TessSpacing::Equal:
         return "EQUAL";
@@ -399,7 +409,8 @@ std::string_view GetTessSpacing(TessSpacing spacing) {
 } // Anonymous namespace
 
 std::string EmitGLASM(const Profile& profile, const RuntimeInfo& runtime_info, IR::Program& program,
-                      Bindings& bindings) {
+                      Bindings& bindings)
+{
     EmitContext ctx{program, bindings, profile, runtime_info};
     Precolor(program);
     EmitCode(ctx, program);

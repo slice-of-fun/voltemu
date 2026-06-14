@@ -4,6 +4,8 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/jit/jit.h"
+
 #include "common/logging.h"
 #include "core/arm/debug.h"
 #include "core/arm/symbols.h"
@@ -12,7 +14,6 @@
 #include "core/hle/result.h"
 #include "core/hle/service/cmif_serialization.h"
 #include "core/hle/service/ipc_helpers.h"
-#include "core/hle/service/jit/jit.h"
 #include "core/hle/service/jit/jit_code_memory.h"
 #include "core/hle/service/jit/jit_context.h"
 #include "core/hle/service/server_manager.h"
@@ -35,7 +36,8 @@ public:
                              CodeMemory&& user_rx_, CodeMemory&& user_ro_)
         : ServiceFramework{system_, "IJitEnvironment"}, process{std::move(process_)},
           user_rx{std::move(user_rx_)}, user_ro{std::move(user_ro_)},
-          context{system_.ApplicationMemory()} {
+          context{system_.ApplicationMemory()}
+    {
 
         // clang-format off
         static const FunctionInfo functions[] = {
@@ -61,7 +63,8 @@ public:
     Result GenerateCode(Out<s32> out_return_value, Out<CodeRange> out_range0,
                         Out<CodeRange> out_range1, OutBuffer<BufferAttr_HipcMapAlias> out_buffer,
                         u32 data_size, u64 command, CodeRange range0, CodeRange range1,
-                        Struct32 data, InBuffer<BufferAttr_HipcMapAlias> buffer) {
+                        Struct32 data, InBuffer<BufferAttr_HipcMapAlias> buffer)
+    {
         // Function call prototype:
         // void GenerateCode(s32* ret, CodeRange* c0_out, CodeRange* c1_out, JITConfiguration* cfg,
         //                   u64 cmd, u8* input_buf, size_t input_size, CodeRange* c0_in,
@@ -102,7 +105,8 @@ public:
     }
 
     Result Control(Out<s32> out_return_value, InBuffer<BufferAttr_HipcMapAlias> in_data,
-                   OutBuffer<BufferAttr_HipcMapAlias> out_data, u64 command) {
+                   OutBuffer<BufferAttr_HipcMapAlias> out_data, u64 command)
+    {
         // Function call prototype:
         // u64 Control(s32* ret, JITConfiguration* cfg, u64 cmd, u8* input_buf, size_t input_size,
         //             u8* output_buf, size_t output_size);
@@ -115,7 +119,9 @@ public:
         const VAddr input_ptr{context.AddHeap(in_data.data(), in_data.size())};
         const VAddr output_ptr{context.AddHeap(out_data.data(), out_data.size())};
 
-        const u64 wrapper_value = context.CallFunction(callbacks.Control, ret_ptr, configuration_ptr, command, input_ptr, in_data.size(), output_ptr, out_data.size());
+        const u64 wrapper_value =
+            context.CallFunction(callbacks.Control, ret_ptr, configuration_ptr, command, input_ptr,
+                                 in_data.size(), output_ptr, out_data.size());
         *out_return_value = context.GetHeap<s32>(ret_ptr);
         context.GetHeap(output_ptr, out_data.data(), out_data.size());
 
@@ -127,7 +133,9 @@ public:
         R_THROW(ResultUnknown);
     }
 
-    Result LoadPlugin(u64 tmem_size, InCopyHandle<Kernel::KTransferMemory> tmem, InBuffer<BufferAttr_HipcMapAlias> nrr, InBuffer<BufferAttr_HipcMapAlias> nro) {
+    Result LoadPlugin(u64 tmem_size, InCopyHandle<Kernel::KTransferMemory> tmem,
+                      InBuffer<BufferAttr_HipcMapAlias> nrr, InBuffer<BufferAttr_HipcMapAlias> nro)
+    {
         if (!tmem) {
             LOG_ERROR(Service_JIT, "Invalid transfer memory handle!");
             R_THROW(ResultUnknown);
@@ -139,9 +147,7 @@ public:
 
         // Gather up all the callbacks from the loaded plugin
         auto symbols = Core::Symbols::GetSymbols(nro, true);
-        const auto GetSymbol = [&](const std::string& name) {
-            return symbols[name].first;
-        };
+        const auto GetSymbol = [&](const std::string& name) { return symbols[name].first; };
         callbacks.rtld_fini = GetSymbol("_fini");
         callbacks.rtld_init = GetSymbol("_init");
         callbacks.Control = GetSymbol("nnjitpluginControl");
@@ -153,7 +159,8 @@ public:
         callbacks.OnPrepared = GetSymbol("nnjitpluginOnPrepared");
         callbacks.Keeper = GetSymbol("nnjitpluginKeeper");
 
-        if (callbacks.GetVersion == 0 || callbacks.Configure == 0 || callbacks.GenerateCode == 0 || callbacks.OnPrepared == 0 || callbacks.Control == 0) {
+        if (callbacks.GetVersion == 0 || callbacks.Configure == 0 || callbacks.GenerateCode == 0 ||
+            callbacks.OnPrepared == 0 || callbacks.Control == 0) {
             LOG_ERROR(Service_JIT, "plugin does not implement all necessary functionality");
             R_THROW(ResultUnknown);
         }
@@ -163,9 +170,12 @@ public:
             R_THROW(ResultUnknown);
         }
 
-        context.MapProcessMemory(configuration.sys_ro_memory.offset, configuration.sys_ro_memory.size);
-        context.MapProcessMemory(configuration.sys_rx_memory.offset, configuration.sys_rx_memory.size);
-        context.MapProcessMemory(configuration.transfer_memory.offset, configuration.transfer_memory.size);
+        context.MapProcessMemory(configuration.sys_ro_memory.offset,
+                                 configuration.sys_ro_memory.size);
+        context.MapProcessMemory(configuration.sys_rx_memory.offset,
+                                 configuration.sys_rx_memory.size);
+        context.MapProcessMemory(configuration.transfer_memory.offset,
+                                 configuration.transfer_memory.size);
 
         // Run ELF constructors, if needed
         if (callbacks.rtld_init != 0) {
@@ -206,7 +216,8 @@ public:
         R_SUCCEED();
     }
 
-    Result GetCodeAddress(Out<u64> rx_offset, Out<u64> ro_offset) {
+    Result GetCodeAddress(Out<u64> rx_offset, Out<u64> ro_offset)
+    {
         LOG_DEBUG(Service_JIT, "called");
 
         *rx_offset = configuration.user_rx_memory.offset;
@@ -237,7 +248,8 @@ private:
         CodeRange sys_ro_memory;
     };
 
-    static CodeRange ClearSize(CodeRange in) {
+    static CodeRange ClearSize(CodeRange in)
+    {
         in.size = 0;
         return in;
     }
@@ -252,7 +264,8 @@ private:
 
 class JITU final : public ServiceFramework<JITU> {
 public:
-    explicit JITU(Core::System& system_) : ServiceFramework{system_, "jit:u"} {
+    explicit JITU(Core::System& system_) : ServiceFramework{system_, "jit:u"}
+    {
         // clang-format off
         static const FunctionInfo functions[] = {
             {0, C<&JITU::CreateJitEnvironment>, "CreateJitEnvironment"},
@@ -266,7 +279,8 @@ private:
     Result CreateJitEnvironment(Out<SharedPointer<IJitEnvironment>> out_jit_environment,
                                 u64 rx_size, u64 ro_size, InCopyHandle<Kernel::KProcess> process,
                                 InCopyHandle<Kernel::KCodeMemory> rx_mem,
-                                InCopyHandle<Kernel::KCodeMemory> ro_mem) {
+                                InCopyHandle<Kernel::KCodeMemory> ro_mem)
+    {
         if (!process) {
             LOG_ERROR(Service_JIT, "process is null");
             R_THROW(ResultUnknown);
@@ -296,7 +310,8 @@ private:
     std::mt19937_64 generate_random{};
 };
 
-void LoopProcess(Core::System& system) {
+void LoopProcess(Core::System& system)
+{
     auto server_manager = std::make_unique<ServerManager>(system);
 
     server_manager->RegisterNamedService("jit:u", std::make_shared<JITU>(system));

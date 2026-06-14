@@ -7,20 +7,20 @@
 #pragma once
 
 #include <atomic>
+#include <boost/container/small_vector.hpp>
 #include <map>
 #include <mutex>
 #include <optional>
 #include <vector>
-#include <boost/container/small_vector.hpp>
 
 #include "common/common_types.h"
 #include "common/multi_level_page_table.h"
 #include "common/range_map.h"
 #include "common/scratch_buffer.h"
 #include "common/virtual_buffer.h"
-#include "video_core/invalidation_accumulator.h"
 #include "video_core/cache_types.h"
 #include "video_core/host1x/gpu_device_memory_manager.h"
+#include "video_core/invalidation_accumulator.h"
 #include "video_core/pte_kind.h"
 
 namespace VideoCore {
@@ -45,9 +45,7 @@ public:
 
     static constexpr bool HAS_FLUSH_INVALIDATION = true;
 
-    size_t GetID() const {
-        return unique_identifier;
-    }
+    size_t GetID() const { return unique_identifier; }
 
     /// Binds a renderer to the memory manager.
     void BindRasterizer(VideoCore::RasterizerInterface* rasterizer);
@@ -56,17 +54,15 @@ public:
 
     [[nodiscard]] std::optional<DAddr> GpuToCpuAddress(GPUVAddr addr, std::size_t size) const;
 
-    template <typename T>
-    [[nodiscard]] T Read(GPUVAddr addr) const;
+    template<typename T> [[nodiscard]] T Read(GPUVAddr addr) const;
 
-    template <typename T>
-    void Write(GPUVAddr addr, T data);
+    template<typename T> void Write(GPUVAddr addr, T data);
 
     [[nodiscard]] u8* GetPointer(GPUVAddr addr);
     [[nodiscard]] const u8* GetPointer(GPUVAddr addr) const;
 
-    template <typename T>
-    [[nodiscard]] T* GetPointer(GPUVAddr addr) {
+    template<typename T> [[nodiscard]] T* GetPointer(GPUVAddr addr)
+    {
         const auto address{GpuToCpuAddress(addr)};
         if (!address) {
             return {};
@@ -74,8 +70,8 @@ public:
         return memory.GetPointer<T>(*address);
     }
 
-    template <typename T>
-    [[nodiscard]] const T* GetPointer(GPUVAddr addr) const {
+    template<typename T> [[nodiscard]] const T* GetPointer(GPUVAddr addr) const
+    {
         return GetPointer<T*>(addr);
     }
 
@@ -126,8 +122,8 @@ public:
      * if the region is continuous, a single pair will be returned. If it's unmapped, an empty
      * vector will be returned;
      */
-    boost::container::small_vector<std::pair<GPUVAddr, std::size_t>, 32> GetSubmappedRange(
-        GPUVAddr gpu_addr, std::size_t size) const;
+    boost::container::small_vector<std::pair<GPUVAddr, std::size_t>, 32>
+    GetSubmappedRange(GPUVAddr gpu_addr, std::size_t size) const;
 
     GPUVAddr Map(GPUVAddr gpu_addr, DAddr dev_addr, std::size_t size,
                  PTEKind kind = PTEKind::INVALID, bool is_big_pages = true);
@@ -145,9 +141,7 @@ public:
 
     size_t MaxContinuousRange(GPUVAddr gpu_addr, size_t size) const;
 
-    bool IsWithinGPUAddressRange(GPUVAddr gpu_addr) const {
-        return gpu_addr < address_space_size;
-    }
+    bool IsWithinGPUAddressRange(GPUVAddr gpu_addr) const { return gpu_addr < address_space_size; }
 
     PTEKind GetPageKind(GPUVAddr gpu_addr) const;
 
@@ -160,20 +154,20 @@ public:
     u8* GetSpan(const GPUVAddr src_addr, const std::size_t size);
 
 private:
-    template <bool is_big_pages, typename FuncMapped, typename FuncReserved, typename FuncUnmapped>
+    template<bool is_big_pages, typename FuncMapped, typename FuncReserved, typename FuncUnmapped>
     inline void MemoryOperation(GPUVAddr gpu_src_addr, std::size_t size, FuncMapped&& func_mapped,
                                 FuncReserved&& func_reserved, FuncUnmapped&& func_unmapped) const;
 
-    template <bool is_safe>
+    template<bool is_safe>
     void ReadBlockImpl(GPUVAddr gpu_src_addr, void* dest_buffer, std::size_t size,
                        VideoCommon::CacheType which) const;
 
-    template <bool is_safe>
+    template<bool is_safe>
     void WriteBlockImpl(GPUVAddr gpu_dest_addr, const void* src_buffer, std::size_t size,
                         VideoCommon::CacheType which);
 
-    template <bool is_big_page>
-    [[nodiscard]] std::size_t PageEntryIndex(GPUVAddr gpu_addr) const {
+    template<bool is_big_page> [[nodiscard]] std::size_t PageEntryIndex(GPUVAddr gpu_addr) const
+    {
         if constexpr (is_big_page) {
             return (gpu_addr >> big_page_bits) & big_page_table_mask;
         } else {
@@ -184,7 +178,7 @@ private:
     inline bool IsBigPageContinuous(size_t big_page_index) const;
     inline void SetBigPageContinuous(size_t big_page_index, bool value);
 
-    template <bool is_gpu_address>
+    template<bool is_gpu_address>
     void GetSubmappedRangeImpl(
         GPUVAddr gpu_addr, std::size_t size,
         boost::container::small_vector<
@@ -219,19 +213,17 @@ private:
     std::vector<u64> entries;
     std::vector<u64> big_entries;
 
-    template <EntryType entry_type>
+    template<EntryType entry_type>
     GPUVAddr PageTableOp(GPUVAddr gpu_addr, [[maybe_unused]] DAddr dev_addr, size_t size,
                          PTEKind kind);
 
-    template <EntryType entry_type>
+    template<EntryType entry_type>
     GPUVAddr BigPageTableOp(GPUVAddr gpu_addr, [[maybe_unused]] DAddr dev_addr, size_t size,
                             PTEKind kind);
 
-    template <bool is_big_page>
-    inline EntryType GetEntry(size_t position) const;
+    template<bool is_big_page> inline EntryType GetEntry(size_t position) const;
 
-    template <bool is_big_page>
-    inline void SetEntry(size_t position, EntryType entry);
+    template<bool is_big_page> inline void SetEntry(size_t position, EntryType entry);
 
     Common::MultiLevelPageTable<u32> page_table;
     Common::RangeMap<GPUVAddr, PTEKind> kind_map;

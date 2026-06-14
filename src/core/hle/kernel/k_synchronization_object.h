@@ -33,7 +33,8 @@ public:
 
     std::vector<KThread*> GetWaitingThreadsForDebugging() const;
 
-    void LinkNode(ThreadListNode* node_) {
+    void LinkNode(ThreadListNode* node_)
+    {
         // Link the node to the list.
         if (m_thread_list_tail == nullptr) {
             m_thread_list_head = node_;
@@ -44,7 +45,8 @@ public:
         m_thread_list_tail = node_;
     }
 
-    void UnlinkNode(ThreadListNode* node_) {
+    void UnlinkNode(ThreadListNode* node_)
+    {
         // Unlink the node from the list.
         ThreadListNode* prev_ptr =
             reinterpret_cast<ThreadListNode*>(std::addressof(m_thread_list_head));
@@ -72,9 +74,7 @@ protected:
     virtual void OnFinalizeSynchronizationObject() {}
 
     void NotifyAvailable(Result result);
-    void NotifyAvailable() {
-        return this->NotifyAvailable(ResultSuccess);
-    }
+    void NotifyAvailable() { return this->NotifyAvailable(ResultSuccess); }
 
 private:
     ThreadListNode* m_thread_list_head{};

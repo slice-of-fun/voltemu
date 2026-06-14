@@ -4,10 +4,11 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/arm/symbols.h"
+
 #include "common/bit_field.h"
 #include "common/common_funcs.h"
 #include "common/elf.h"
-#include "core/arm/symbols.h"
 #include "core/core.h"
 #include "core/memory.h"
 
@@ -48,8 +49,8 @@ struct Mod64 {
     using Dyn = Elf64_Dyn;
 };
 
-template <typename M, typename F>
-static Symbols GetSymbols(F&& ReadBytes) {
+template<typename M, typename F> static Symbols GetSymbols(F&& ReadBytes)
+{
     const auto Read8 = [&](u64 index) {
         u8 ret;
         ReadBytes(&ret, index, sizeof(u8));
@@ -100,21 +101,24 @@ static Symbols GetSymbols(F&& ReadBytes) {
     return {};
 }
 
-Symbols GetSymbols(VAddr base, Core::Memory::Memory& memory, bool is_64) {
+Symbols GetSymbols(VAddr base, Core::Memory::Memory& memory, bool is_64)
+{
     const auto f = [base, &memory](void* ptr, size_t offset, size_t size) {
         memory.ReadBlock(base + offset, ptr, size);
     };
     return is_64 ? GetSymbols<Mod64>(f) : GetSymbols<Mod32>(f);
 }
 
-Symbols GetSymbols(std::span<const u8> data, bool is_64) {
+Symbols GetSymbols(std::span<const u8> data, bool is_64)
+{
     const auto f = [data](void* ptr, size_t offset, size_t size) {
         std::memcpy(ptr, data.data() + offset, size);
     };
     return is_64 ? GetSymbols<Mod64>(f) : GetSymbols<Mod32>(f);
 }
 
-std::optional<std::string> GetSymbolName(const Symbols& symbols, VAddr addr) {
+std::optional<std::string> GetSymbolName(const Symbols& symbols, VAddr addr)
+{
     const auto it = std::find_if(symbols.cbegin(), symbols.cend(), [addr](const auto& e) {
         auto const [start, size] = e.second;
         auto const end = start + size;

@@ -1,8 +1,9 @@
 // SPDX-FileCopyrightText: Copyright 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include "common/settings.h"
 #include "video_core/fsr.h"
+
+#include "common/settings.h"
 #include "video_core/host_shaders/ffx_a_h.h"
 #include "video_core/host_shaders/ffx_fsr1_h.h"
 #include "video_core/host_shaders/full_screen_triangle_vert.h"
@@ -19,7 +20,8 @@ using namespace FSR;
 
 using FsrConstants = std::array<u32, 4 * 4>;
 
-FSR::FSR(u32 output_width_, u32 output_height_) : width(output_width_), height(output_height_) {
+FSR::FSR(u32 output_width_, u32 output_height_) : width(output_width_), height(output_height_)
+{
     std::string fsr_source{HostShaders::OPENGL_FIDELITYFX_FSR_FRAG};
     ReplaceInclude(fsr_source, "ffx_a.h", HostShaders::FFX_A_H);
     ReplaceInclude(fsr_source, "ffx_fsr1.h", HostShaders::FFX_FSR1_H);
@@ -49,7 +51,8 @@ FSR::FSR(u32 output_width_, u32 output_height_) : width(output_width_), height(o
 FSR::~FSR() = default;
 
 GLuint FSR::Draw(ProgramManager& program_manager, GLuint texture, u32 input_image_width,
-                 u32 input_image_height, const Common::Rectangle<f32>& crop_rect) {
+                 u32 input_image_height, const Common::Rectangle<f32>& crop_rect)
+{
     const f32 input_width = static_cast<f32>(input_image_width);
     const f32 input_height = static_cast<f32>(input_image_height);
     const f32 output_width = static_cast<f32>(width);
@@ -91,7 +94,8 @@ GLuint FSR::Draw(ProgramManager& program_manager, GLuint texture, u32 input_imag
     return rcas_tex.handle;
 }
 
-bool FSR::NeedsRecreation(const Common::Rectangle<u32>& screen) {
+bool FSR::NeedsRecreation(const Common::Rectangle<u32>& screen)
+{
     return screen.GetWidth() != width || screen.GetHeight() != height;
 }
 

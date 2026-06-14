@@ -4,13 +4,15 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/friend/friend.h"
+
 #include <queue>
+
 #include "common/logging.h"
 #include "common/uuid.h"
 #include "core/core.h"
 #include "core/hle/kernel/k_event.h"
 #include "core/hle/service/acc/errors.h"
-#include "core/hle/service/friend/friend.h"
 #include "core/hle/service/friend/friend_interface.h"
 #include "core/hle/service/ipc_helpers.h"
 #include "core/hle/service/kernel_helpers.h"
@@ -21,7 +23,8 @@ namespace Service::Friend {
 class IFriendService final : public ServiceFramework<IFriendService> {
 public:
     explicit IFriendService(Core::System& system_)
-        : ServiceFramework{system_, "IFriendService"}, service_context{system, "IFriendService"} {
+        : ServiceFramework{system_, "IFriendService"}, service_context{system, "IFriendService"}
+    {
         // clang-format off
         static const FunctionInfo functions[] = {
             {0, &IFriendService::GetCompletionEvent, "GetCompletionEvent"},
@@ -144,9 +147,7 @@ public:
         completion_event = service_context.CreateEvent("IFriendService:CompletionEvent");
     }
 
-    ~IFriendService() override {
-        service_context.CloseEvent(completion_event);
-    }
+    ~IFriendService() override { service_context.CloseEvent(completion_event); }
 
 private:
     enum class PresenceFilter : u32 {
@@ -177,7 +178,8 @@ private:
     };
     static_assert(sizeof(FriendsUserSetting) == 0x800, "FriendsUserSetting is an invalid size");
 
-    void GetCompletionEvent(HLERequestContext& ctx) {
+    void GetCompletionEvent(HLERequestContext& ctx)
+    {
         LOG_DEBUG(Service_Friend, "called");
 
         auto& readable_event = completion_event->GetReadableEvent();
@@ -187,7 +189,8 @@ private:
         rb.PushCopyObjects(readable_event);
     }
 
-    void Cancel(HLERequestContext& ctx) {
+    void Cancel(HLERequestContext& ctx)
+    {
         LOG_DEBUG(Service_Friend, "(STUBBED) called.");
 
         // TODO (jarrodnorwell)
@@ -196,7 +199,8 @@ private:
         rb.Push(ResultSuccess);
     }
 
-    void GetFriendList(HLERequestContext& ctx) {
+    void GetFriendList(HLERequestContext& ctx)
+    {
         IPC::RequestParser rp{ctx};
         const auto friend_offset = rp.Pop<u32>();
         const auto uuid = rp.PopRaw<Common::UUID>();
@@ -212,7 +216,8 @@ private:
         // TODO(ogniK): Return a buffer of u64s which are the "NetworkServiceAccountId"
     }
 
-    void CheckFriendListAvailability(HLERequestContext& ctx) {
+    void CheckFriendListAvailability(HLERequestContext& ctx)
+    {
         IPC::RequestParser rp{ctx};
         const auto uuid{rp.PopRaw<Common::UUID>()};
 
@@ -223,7 +228,8 @@ private:
         rb.Push(true);
     }
 
-    void GetBlockedUserListIds(HLERequestContext& ctx) {
+    void GetBlockedUserListIds(HLERequestContext& ctx)
+    {
         // This is safe to stub, as there should be no adverse consequences from reporting no
         // blocked users.
         LOG_WARNING(Service_Friend, "(STUBBED) called");
@@ -232,7 +238,8 @@ private:
         rb.Push<u32>(0); // Indicates there are no blocked users
     }
 
-    void CheckBlockedUserListAvailability(HLERequestContext& ctx) {
+    void CheckBlockedUserListAvailability(HLERequestContext& ctx)
+    {
         IPC::RequestParser rp{ctx};
         const auto uuid{rp.PopRaw<Common::UUID>()};
 
@@ -243,21 +250,24 @@ private:
         rb.Push(true);
     }
 
-    void DeclareCloseOnlinePlaySession(HLERequestContext& ctx) {
+    void DeclareCloseOnlinePlaySession(HLERequestContext& ctx)
+    {
         // Stub used by Splatoon 2
         LOG_WARNING(Service_Friend, "(STUBBED) called");
         IPC::ResponseBuilder rb{ctx, 2};
         rb.Push(ResultSuccess);
     }
 
-    void UpdateUserPresence(HLERequestContext& ctx) {
+    void UpdateUserPresence(HLERequestContext& ctx)
+    {
         // Stub used by Retro City Rampage
         LOG_WARNING(Service_Friend, "(STUBBED) called");
         IPC::ResponseBuilder rb{ctx, 2};
         rb.Push(ResultSuccess);
     }
 
-    void GetPlayHistoryRegistrationKey(HLERequestContext& ctx) {
+    void GetPlayHistoryRegistrationKey(HLERequestContext& ctx)
+    {
         IPC::RequestParser rp{ctx};
         const auto local_play = rp.Pop<bool>();
         const auto uuid = rp.PopRaw<Common::UUID>();
@@ -269,7 +279,8 @@ private:
         rb.Push(ResultSuccess);
     }
 
-    void GetFriendCount(HLERequestContext& ctx) {
+    void GetFriendCount(HLERequestContext& ctx)
+    {
         LOG_DEBUG(Service_Friend, "(STUBBED) called");
 
         IPC::ResponseBuilder rb{ctx, 3};
@@ -277,7 +288,8 @@ private:
         rb.Push(0);
     }
 
-    void GetNewlyFriendCount(HLERequestContext& ctx) {
+    void GetNewlyFriendCount(HLERequestContext& ctx)
+    {
         LOG_DEBUG(Service_Friend, "(STUBBED) called");
 
         IPC::ResponseBuilder rb{ctx, 3};
@@ -285,7 +297,8 @@ private:
         rb.Push(0);
     }
 
-    void RequestSyncFriendList(HLERequestContext& ctx) {
+    void RequestSyncFriendList(HLERequestContext& ctx)
+    {
         LOG_DEBUG(Service_Friend, "(STUBBED) called.");
 
         // TODO (jarrodnorwell)
@@ -294,7 +307,8 @@ private:
         rb.Push(ResultSuccess);
     }
 
-    void GetFriendListForViewer(HLERequestContext& ctx) {
+    void GetFriendListForViewer(HLERequestContext& ctx)
+    {
         LOG_DEBUG(Service_Friend, "(STUBBED) called");
 
         IPC::ResponseBuilder rb{ctx, 3};
@@ -302,7 +316,8 @@ private:
         rb.Push<u32>(0);
     }
 
-    void GetReceivedFriendRequestCount(HLERequestContext& ctx) {
+    void GetReceivedFriendRequestCount(HLERequestContext& ctx)
+    {
         IPC::RequestParser rp{ctx};
         [[maybe_unused]] const auto uuid = rp.PopRaw<Common::UUID>();
 
@@ -314,7 +329,8 @@ private:
         rb.Push(0);
     }
 
-    void GetUserPresenceView(HLERequestContext& ctx) {
+    void GetUserPresenceView(HLERequestContext& ctx)
+    {
         IPC::RequestParser rp{ctx};
         const auto uuid = rp.PopRaw<Common::UUID>();
         LOG_DEBUG(Service_Friend, "(STUBBED) called, uuid={}.", uuid.RawString());
@@ -326,14 +342,16 @@ private:
         rb.Push(ResultSuccess);
     }
 
-    void GetPlayHistoryStatistics(HLERequestContext& ctx) {
+    void GetPlayHistoryStatistics(HLERequestContext& ctx)
+    {
         LOG_ERROR(Service_Friend, "(STUBBED) called, check in out");
 
         IPC::ResponseBuilder rb{ctx, 2};
         rb.Push(ResultSuccess);
     }
 
-    void LoadUserSetting(HLERequestContext& ctx) {
+    void LoadUserSetting(HLERequestContext& ctx)
+    {
         IPC::RequestParser rp{ctx};
         const auto uuid = rp.PopRaw<Common::UUID>();
 
@@ -352,14 +370,16 @@ private:
         rb.Push(ResultSuccess);
     }
 
-    void RequestListSummaryOverlayNotification(HLERequestContext& ctx) {
+    void RequestListSummaryOverlayNotification(HLERequestContext& ctx)
+    {
         LOG_INFO(Service_Friend, "(STUBBED) called");
 
         IPC::ResponseBuilder rb{ctx, 2};
         rb.Push(ResultSuccess);
     }
 
-    void GetReceivedFriendInvitationCountCache(HLERequestContext& ctx) {
+    void GetReceivedFriendInvitationCountCache(HLERequestContext& ctx)
+    {
         LOG_DEBUG(Service_Friend, "(STUBBED) called, check in out");
 
         IPC::ResponseBuilder rb{ctx, 3};
@@ -376,7 +396,8 @@ class INotificationService final : public ServiceFramework<INotificationService>
 public:
     explicit INotificationService(Core::System& system_, Common::UUID uuid_)
         : ServiceFramework{system_, "INotificationService"}, uuid{uuid_},
-          service_context{system_, "INotificationService"} {
+          service_context{system_, "INotificationService"}
+    {
         // clang-format off
         static const FunctionInfo functions[] = {
             {0, &INotificationService::GetEvent, "GetEvent"},
@@ -390,12 +411,11 @@ public:
         notification_event = service_context.CreateEvent("INotificationService:NotifyEvent");
     }
 
-    ~INotificationService() override {
-        service_context.CloseEvent(notification_event);
-    }
+    ~INotificationService() override { service_context.CloseEvent(notification_event); }
 
 private:
-    void GetEvent(HLERequestContext& ctx) {
+    void GetEvent(HLERequestContext& ctx)
+    {
         LOG_DEBUG(Service_Friend, "called");
 
         IPC::ResponseBuilder rb{ctx, 2, 1};
@@ -403,7 +423,8 @@ private:
         rb.PushCopyObjects(notification_event->GetReadableEvent());
     }
 
-    void Clear(HLERequestContext& ctx) {
+    void Clear(HLERequestContext& ctx)
+    {
         LOG_DEBUG(Service_Friend, "called");
         while (!notifications.empty()) {
             notifications.pop();
@@ -414,7 +435,8 @@ private:
         rb.Push(ResultSuccess);
     }
 
-    void Pop(HLERequestContext& ctx) {
+    void Pop(HLERequestContext& ctx)
+    {
         LOG_DEBUG(Service_Friend, "called");
 
         if (notifications.empty()) {
@@ -473,14 +495,16 @@ private:
     States states{};
 };
 
-void Module::Interface::CreateFriendService(HLERequestContext& ctx) {
+void Module::Interface::CreateFriendService(HLERequestContext& ctx)
+{
     IPC::ResponseBuilder rb{ctx, 2, 0, 1};
     rb.Push(ResultSuccess);
     rb.PushIpcInterface<IFriendService>(system);
     LOG_DEBUG(Service_Friend, "called");
 }
 
-void Module::Interface::CreateNotificationService(HLERequestContext& ctx) {
+void Module::Interface::CreateNotificationService(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     auto uuid = rp.PopRaw<Common::UUID>();
 
@@ -493,11 +517,14 @@ void Module::Interface::CreateNotificationService(HLERequestContext& ctx) {
 
 Module::Interface::Interface(std::shared_ptr<Module> module_, Core::System& system_,
                              const char* name)
-    : ServiceFramework{system_, name}, module{std::move(module_)} {}
+    : ServiceFramework{system_, name}, module{std::move(module_)}
+{
+}
 
 Module::Interface::~Interface() = default;
 
-void LoopProcess(Core::System& system) {
+void LoopProcess(Core::System& system)
+{
     auto server_manager = std::make_unique<ServerManager>(system);
     auto module = std::make_shared<Module>();
 

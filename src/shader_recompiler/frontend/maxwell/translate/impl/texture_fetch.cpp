@@ -32,7 +32,8 @@ enum class TextureType : u64 {
     ARRAY_CUBE,
 };
 
-Shader::TextureType GetType(TextureType type) {
+Shader::TextureType GetType(TextureType type)
+{
     switch (type) {
     case TextureType::_1D:
         return Shader::TextureType::Color1D;
@@ -54,7 +55,8 @@ Shader::TextureType GetType(TextureType type) {
     throw NotImplementedException("Invalid texture type {}", type);
 }
 
-IR::Value MakeCoords(TranslatorVisitor& v, IR::Reg reg, TextureType type) {
+IR::Value MakeCoords(TranslatorVisitor& v, IR::Reg reg, TextureType type)
+{
     const auto read_array{[&]() -> IR::F32 { return v.ir.ConvertUToF(32, 16, v.X(reg)); }};
     switch (type) {
     case TextureType::_1D:
@@ -77,7 +79,8 @@ IR::Value MakeCoords(TranslatorVisitor& v, IR::Reg reg, TextureType type) {
     throw NotImplementedException("Invalid texture type {}", type);
 }
 
-IR::F32 MakeLod(TranslatorVisitor& v, IR::Reg& reg, Blod blod) {
+IR::F32 MakeLod(TranslatorVisitor& v, IR::Reg& reg, Blod blod)
+{
     switch (blod) {
     case Blod::None:
         return v.ir.Imm32(0.0f);
@@ -95,7 +98,8 @@ IR::F32 MakeLod(TranslatorVisitor& v, IR::Reg& reg, Blod blod) {
     throw NotImplementedException("Invalid blod {}", blod);
 }
 
-IR::Value MakeOffset(TranslatorVisitor& v, IR::Reg& reg, TextureType type) {
+IR::Value MakeOffset(TranslatorVisitor& v, IR::Reg& reg, TextureType type)
+{
     const IR::U32 value{v.X(reg++)};
     switch (type) {
     case TextureType::_1D:
@@ -119,7 +123,8 @@ IR::Value MakeOffset(TranslatorVisitor& v, IR::Reg& reg, TextureType type) {
     throw NotImplementedException("Invalid texture type {}", type);
 }
 
-bool HasExplicitLod(Blod blod) {
+bool HasExplicitLod(Blod blod)
+{
     switch (blod) {
     case Blod::LL:
     case Blod::LLA:
@@ -131,7 +136,8 @@ bool HasExplicitLod(Blod blod) {
 }
 
 void Impl(TranslatorVisitor& v, u64 insn, bool aoffi, Blod blod, bool lc,
-          std::optional<u32> cbuf_offset) {
+          std::optional<u32> cbuf_offset)
+{
     union {
         u64 raw;
         BitField<35, 1, u64> ndv;
@@ -210,7 +216,8 @@ void Impl(TranslatorVisitor& v, u64 insn, bool aoffi, Blod blod, bool lc,
 }
 } // Anonymous namespace
 
-void TranslatorVisitor::TEX(u64 insn) {
+void TranslatorVisitor::TEX(u64 insn)
+{
     union {
         u64 raw;
         BitField<54, 1, u64> aoffi;
@@ -222,7 +229,8 @@ void TranslatorVisitor::TEX(u64 insn) {
     Impl(*this, insn, tex.aoffi != 0, tex.blod, tex.lc != 0, static_cast<u32>(tex.cbuf_offset * 4));
 }
 
-void TranslatorVisitor::TEX_b(u64 insn) {
+void TranslatorVisitor::TEX_b(u64 insn)
+{
     union {
         u64 raw;
         BitField<36, 1, u64> aoffi;

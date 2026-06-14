@@ -4,14 +4,16 @@
 // SPDX-FileCopyrightText: Copyright 2021 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "shader_recompiler/frontend/maxwell/translate/impl/impl.h"
+
 #include "common/bit_field.h"
 #include "shader_recompiler/frontend/ir/ir_emitter.h"
-#include "shader_recompiler/frontend/maxwell/translate/impl/impl.h"
 
 namespace Shader::Maxwell {
 namespace {
 [[nodiscard]] IR::U32 CbufLowerBits(IR::IREmitter& ir, bool unaligned, const IR::U32& binding,
-                                    u32 offset) {
+                                    u32 offset)
+{
     if (unaligned) {
         return ir.Imm32(0);
     }
@@ -19,33 +21,39 @@ namespace {
 }
 } // Anonymous namespace
 
-IR::U32 TranslatorVisitor::X(IR::Reg reg) {
+IR::U32 TranslatorVisitor::X(IR::Reg reg)
+{
     return ir.GetReg(reg);
 }
 
-IR::U64 TranslatorVisitor::L(IR::Reg reg) {
+IR::U64 TranslatorVisitor::L(IR::Reg reg)
+{
     if (!IR::IsAligned(reg, 2)) {
         throw NotImplementedException("Unaligned source register {}", reg);
     }
     return IR::U64{ir.PackUint2x32(ir.CompositeConstruct(X(reg), X(reg + 1)))};
 }
 
-IR::F32 TranslatorVisitor::F(IR::Reg reg) {
+IR::F32 TranslatorVisitor::F(IR::Reg reg)
+{
     return ir.BitCast<IR::F32>(X(reg));
 }
 
-IR::F64 TranslatorVisitor::D(IR::Reg reg) {
+IR::F64 TranslatorVisitor::D(IR::Reg reg)
+{
     if (!IR::IsAligned(reg, 2)) {
         throw NotImplementedException("Unaligned source register {}", reg);
     }
     return IR::F64{ir.PackDouble2x32(ir.CompositeConstruct(X(reg), X(reg + 1)))};
 }
 
-void TranslatorVisitor::X(IR::Reg dest_reg, const IR::U32& value) {
+void TranslatorVisitor::X(IR::Reg dest_reg, const IR::U32& value)
+{
     ir.SetReg(dest_reg, value);
 }
 
-void TranslatorVisitor::L(IR::Reg dest_reg, const IR::U64& value) {
+void TranslatorVisitor::L(IR::Reg dest_reg, const IR::U64& value)
+{
     if (!IR::IsAligned(dest_reg, 2)) {
         throw NotImplementedException("Unaligned destination register {}", dest_reg);
     }
@@ -55,11 +63,13 @@ void TranslatorVisitor::L(IR::Reg dest_reg, const IR::U64& value) {
     }
 }
 
-void TranslatorVisitor::F(IR::Reg dest_reg, const IR::F32& value) {
+void TranslatorVisitor::F(IR::Reg dest_reg, const IR::F32& value)
+{
     X(dest_reg, ir.BitCast<IR::U32>(value));
 }
 
-void TranslatorVisitor::D(IR::Reg dest_reg, const IR::F64& value) {
+void TranslatorVisitor::D(IR::Reg dest_reg, const IR::F64& value)
+{
     if (!IR::IsAligned(dest_reg, 2)) {
         throw NotImplementedException("Unaligned destination register {}", dest_reg);
     }
@@ -69,7 +79,8 @@ void TranslatorVisitor::D(IR::Reg dest_reg, const IR::F64& value) {
     }
 }
 
-IR::U32 TranslatorVisitor::GetReg8(u64 insn) {
+IR::U32 TranslatorVisitor::GetReg8(u64 insn)
+{
     union {
         u64 raw;
         BitField<8, 8, IR::Reg> index;
@@ -77,7 +88,8 @@ IR::U32 TranslatorVisitor::GetReg8(u64 insn) {
     return X(reg.index);
 }
 
-IR::U32 TranslatorVisitor::GetReg20(u64 insn) {
+IR::U32 TranslatorVisitor::GetReg20(u64 insn)
+{
     union {
         u64 raw;
         BitField<20, 8, IR::Reg> index;
@@ -85,7 +97,8 @@ IR::U32 TranslatorVisitor::GetReg20(u64 insn) {
     return X(reg.index);
 }
 
-IR::U32 TranslatorVisitor::GetReg39(u64 insn) {
+IR::U32 TranslatorVisitor::GetReg39(u64 insn)
+{
     union {
         u64 raw;
         BitField<39, 8, IR::Reg> index;
@@ -93,19 +106,23 @@ IR::U32 TranslatorVisitor::GetReg39(u64 insn) {
     return X(reg.index);
 }
 
-IR::F32 TranslatorVisitor::GetFloatReg8(u64 insn) {
+IR::F32 TranslatorVisitor::GetFloatReg8(u64 insn)
+{
     return ir.BitCast<IR::F32>(GetReg8(insn));
 }
 
-IR::F32 TranslatorVisitor::GetFloatReg20(u64 insn) {
+IR::F32 TranslatorVisitor::GetFloatReg20(u64 insn)
+{
     return ir.BitCast<IR::F32>(GetReg20(insn));
 }
 
-IR::F32 TranslatorVisitor::GetFloatReg39(u64 insn) {
+IR::F32 TranslatorVisitor::GetFloatReg39(u64 insn)
+{
     return ir.BitCast<IR::F32>(GetReg39(insn));
 }
 
-IR::F64 TranslatorVisitor::GetDoubleReg20(u64 insn) {
+IR::F64 TranslatorVisitor::GetDoubleReg20(u64 insn)
+{
     union {
         u64 raw;
         BitField<20, 8, IR::Reg> index;
@@ -113,7 +130,8 @@ IR::F64 TranslatorVisitor::GetDoubleReg20(u64 insn) {
     return D(reg.index);
 }
 
-IR::F64 TranslatorVisitor::GetDoubleReg39(u64 insn) {
+IR::F64 TranslatorVisitor::GetDoubleReg39(u64 insn)
+{
     union {
         u64 raw;
         BitField<39, 8, IR::Reg> index;
@@ -121,7 +139,8 @@ IR::F64 TranslatorVisitor::GetDoubleReg39(u64 insn) {
     return D(reg.index);
 }
 
-static std::pair<IR::U32, IR::U32> CbufAddr(u64 insn) {
+static std::pair<IR::U32, IR::U32> CbufAddr(u64 insn)
+{
     union {
         u64 raw;
         BitField<20, 14, u64> offset;
@@ -139,17 +158,20 @@ static std::pair<IR::U32, IR::U32> CbufAddr(u64 insn) {
     return {IR::U32{binding}, IR::U32{byte_offset}};
 }
 
-IR::U32 TranslatorVisitor::GetCbuf(u64 insn) {
+IR::U32 TranslatorVisitor::GetCbuf(u64 insn)
+{
     const auto [binding, byte_offset]{CbufAddr(insn)};
     return ir.GetCbuf(binding, byte_offset);
 }
 
-IR::F32 TranslatorVisitor::GetFloatCbuf(u64 insn) {
+IR::F32 TranslatorVisitor::GetFloatCbuf(u64 insn)
+{
     const auto [binding, byte_offset]{CbufAddr(insn)};
     return ir.GetFloatCbuf(binding, byte_offset);
 }
 
-IR::F64 TranslatorVisitor::GetDoubleCbuf(u64 insn) {
+IR::F64 TranslatorVisitor::GetDoubleCbuf(u64 insn)
+{
     union {
         u64 raw;
         BitField<20, 1, u64> unaligned;
@@ -165,7 +187,8 @@ IR::F64 TranslatorVisitor::GetDoubleCbuf(u64 insn) {
     return ir.PackDouble2x32(ir.CompositeConstruct(lower_bits, value));
 }
 
-IR::U64 TranslatorVisitor::GetPackedCbuf(u64 insn) {
+IR::U64 TranslatorVisitor::GetPackedCbuf(u64 insn)
+{
     union {
         u64 raw;
         BitField<20, 1, u64> unaligned;
@@ -181,7 +204,8 @@ IR::U64 TranslatorVisitor::GetPackedCbuf(u64 insn) {
     return ir.PackUint2x32(ir.CompositeConstruct(lower_value, upper_value));
 }
 
-IR::U32 TranslatorVisitor::GetImm20(u64 insn) {
+IR::U32 TranslatorVisitor::GetImm20(u64 insn)
+{
     union {
         u64 raw;
         BitField<20, 19, u64> value;
@@ -196,7 +220,8 @@ IR::U32 TranslatorVisitor::GetImm20(u64 insn) {
     }
 }
 
-IR::F32 TranslatorVisitor::GetFloatImm20(u64 insn) {
+IR::F32 TranslatorVisitor::GetFloatImm20(u64 insn)
+{
     union {
         u64 raw;
         BitField<20, 19, u64> value;
@@ -207,7 +232,8 @@ IR::F32 TranslatorVisitor::GetFloatImm20(u64 insn) {
     return ir.Imm32(std::bit_cast<f32>(value | sign_bit));
 }
 
-IR::F64 TranslatorVisitor::GetDoubleImm20(u64 insn) {
+IR::F64 TranslatorVisitor::GetDoubleImm20(u64 insn)
+{
     union {
         u64 raw;
         BitField<20, 19, u64> value;
@@ -218,12 +244,14 @@ IR::F64 TranslatorVisitor::GetDoubleImm20(u64 insn) {
     return ir.Imm64(std::bit_cast<f64>(value | sign_bit));
 }
 
-IR::U64 TranslatorVisitor::GetPackedImm20(u64 insn) {
+IR::U64 TranslatorVisitor::GetPackedImm20(u64 insn)
+{
     const s64 value{GetImm20(insn).U32()};
     return ir.Imm64(static_cast<u64>(static_cast<s64>(value) << 32));
 }
 
-IR::U32 TranslatorVisitor::GetImm32(u64 insn) {
+IR::U32 TranslatorVisitor::GetImm32(u64 insn)
+{
     union {
         u64 raw;
         BitField<20, 32, u64> value;
@@ -231,7 +259,8 @@ IR::U32 TranslatorVisitor::GetImm32(u64 insn) {
     return ir.Imm32(static_cast<u32>(imm.value));
 }
 
-IR::F32 TranslatorVisitor::GetFloatImm32(u64 insn) {
+IR::F32 TranslatorVisitor::GetFloatImm32(u64 insn)
+{
     union {
         u64 raw;
         BitField<20, 32, u64> value;
@@ -239,35 +268,43 @@ IR::F32 TranslatorVisitor::GetFloatImm32(u64 insn) {
     return ir.Imm32(std::bit_cast<f32>(static_cast<u32>(imm.value)));
 }
 
-void TranslatorVisitor::SetZFlag(const IR::U1& value) {
+void TranslatorVisitor::SetZFlag(const IR::U1& value)
+{
     ir.SetZFlag(value);
 }
 
-void TranslatorVisitor::SetSFlag(const IR::U1& value) {
+void TranslatorVisitor::SetSFlag(const IR::U1& value)
+{
     ir.SetSFlag(value);
 }
 
-void TranslatorVisitor::SetCFlag(const IR::U1& value) {
+void TranslatorVisitor::SetCFlag(const IR::U1& value)
+{
     ir.SetCFlag(value);
 }
 
-void TranslatorVisitor::SetOFlag(const IR::U1& value) {
+void TranslatorVisitor::SetOFlag(const IR::U1& value)
+{
     ir.SetOFlag(value);
 }
 
-void TranslatorVisitor::ResetZero() {
+void TranslatorVisitor::ResetZero()
+{
     SetZFlag(ir.Imm1(false));
 }
 
-void TranslatorVisitor::ResetSFlag() {
+void TranslatorVisitor::ResetSFlag()
+{
     SetSFlag(ir.Imm1(false));
 }
 
-void TranslatorVisitor::ResetCFlag() {
+void TranslatorVisitor::ResetCFlag()
+{
     SetCFlag(ir.Imm1(false));
 }
 
-void TranslatorVisitor::ResetOFlag() {
+void TranslatorVisitor::ResetOFlag()
+{
     SetOFlag(ir.Imm1(false));
 }
 

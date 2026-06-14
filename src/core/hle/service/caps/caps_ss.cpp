@@ -4,9 +4,10 @@
 // SPDX-FileCopyrightText: Copyright 2020 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/caps/caps_ss.h"
+
 #include "common/logging.h"
 #include "core/hle/service/caps/caps_manager.h"
-#include "core/hle/service/caps/caps_ss.h"
 #include "core/hle/service/cmif_serialization.h"
 #include "core/hle/service/ipc_helpers.h"
 
@@ -14,7 +15,8 @@ namespace Service::Capture {
 
 IScreenShotService::IScreenShotService(Core::System& system_,
                                        std::shared_ptr<AlbumManager> album_manager)
-    : ServiceFramework{system_, "caps:ss"}, manager{album_manager} {
+    : ServiceFramework{system_, "caps:ss"}, manager{album_manager}
+{
     // clang-format off
     static const FunctionInfo functions[] = {
         {201, nullptr, "SaveScreenShot"},
@@ -35,8 +37,8 @@ IScreenShotService::~IScreenShotService() = default;
 Result IScreenShotService::SaveScreenShotEx0(
     Out<ApplicationAlbumEntry> out_entry, const ScreenShotAttribute& attribute,
     AlbumReportOption report_option, ClientAppletResourceUserId aruid,
-    InBuffer<BufferAttr_HipcMapTransferAllowsNonSecure | BufferAttr_HipcMapAlias>
-        image_data_buffer) {
+    InBuffer<BufferAttr_HipcMapTransferAllowsNonSecure | BufferAttr_HipcMapAlias> image_data_buffer)
+{
     LOG_INFO(Service_Capture,
              "called, report_option={}, image_data_buffer_size={}, applet_resource_user_id={}",
              report_option, image_data_buffer.size(), aruid.pid);
@@ -53,7 +55,8 @@ Result IScreenShotService::SaveEditedScreenShotEx1(
     const InBuffer<BufferAttr_HipcMapTransferAllowsNonSecure | BufferAttr_HipcMapAlias>
         image_data_buffer,
     const InBuffer<BufferAttr_HipcMapTransferAllowsNonSecure | BufferAttr_HipcMapAlias>
-        thumbnail_image_data_buffer) {
+        thumbnail_image_data_buffer)
+{
     LOG_INFO(Service_Capture,
              "called, width={}, height={}, thumbnail_width={}, thumbnail_height={}, "
              "application_id={:016x},  storage={},  type={}, "

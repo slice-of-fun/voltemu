@@ -4,6 +4,7 @@
 #pragma once
 
 #include <string>
+
 #include "video_core/gpu_logging/gpu_logging.h"
 
 namespace GPU::Logging {

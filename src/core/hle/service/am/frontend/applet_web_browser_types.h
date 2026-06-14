@@ -6,8 +6,9 @@
 
 #pragma once
 
-#include <array>
 #include <ankerl/unordered_dense.h>
+
+#include <array>
 #include <vector>
 
 #include "common/common_funcs.h"

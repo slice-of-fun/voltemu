@@ -1,16 +1,18 @@
 // SPDX-FileCopyrightText: Copyright 2021 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "shader_recompiler/frontend/maxwell/translate/impl/load_constant.h"
+
 #include "common/bit_field.h"
 #include "common/common_types.h"
 #include "shader_recompiler/frontend/maxwell/translate/impl/impl.h"
-#include "shader_recompiler/frontend/maxwell/translate/impl/load_constant.h"
 
 namespace Shader::Maxwell {
 using namespace LDC;
 namespace {
 std::pair<IR::U32, IR::U32> Slot(IR::IREmitter& ir, Mode mode, const IR::U32& imm_index,
-                                 const IR::U32& reg, const IR::U32& imm_offset) {
+                                 const IR::U32& reg, const IR::U32& imm_offset)
+{
     switch (mode) {
     case Mode::Default:
         return {imm_index, ir.IAdd(reg, imm_offset)};
@@ -31,7 +33,8 @@ std::pair<IR::U32, IR::U32> Slot(IR::IREmitter& ir, Mode mode, const IR::U32& im
 }
 } // Anonymous namespace
 
-void TranslatorVisitor::LDC(u64 insn) {
+void TranslatorVisitor::LDC(u64 insn)
+{
     const Encoding ldc{insn};
     const IR::U32 imm_index{ir.Imm32(static_cast<u32>(ldc.index))};
     const IR::U32 reg{X(ldc.src_reg)};

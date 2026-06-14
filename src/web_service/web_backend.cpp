@@ -4,11 +4,12 @@
 // SPDX-FileCopyrightText: 2017 Citra Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include <fmt/ranges.h>
+
 #include <array>
 #include <mutex>
 #include <string>
 
-#include <fmt/ranges.h>
 #include "common/httplib.h"
 
 #ifdef YUZU_BUNDLED_OPENSSL
@@ -27,7 +28,8 @@ constexpr std::size_t TIMEOUT_SECONDS = 30;
 
 struct Client::Impl {
     Impl(std::string host_, std::string username_, std::string token_)
-        : host{std::move(host_)}, username{std::move(username_)}, token{std::move(token_)} {
+        : host{std::move(host_)}, username{std::move(username_)}, token{std::move(token_)}
+    {
         std::scoped_lock lock{jwt_cache.mutex};
         if (this->username == jwt_cache.username && this->token == jwt_cache.token) {
             jwt = jwt_cache.jwt;
@@ -42,7 +44,8 @@ struct Client::Impl {
     /// A generic function handles POST, GET and DELETE request together
     WebResult GenericRequest(const std::string& method, const std::string& path,
                              const std::string& data, bool allow_anonymous,
-                             const std::string& accept) {
+                             const std::string& accept)
+    {
         if (jwt.empty()) {
             UpdateJWT();
         }
@@ -71,7 +74,8 @@ struct Client::Impl {
     WebResult GenericRequest(const std::string& method, const std::string& path,
                              const std::string& data, const std::string& accept,
                              const std::string& jwt_ = "", const std::string& username_ = "",
-                             const std::string& token_ = "") {
+                             const std::string& token_ = "")
+    {
         if (cli == nullptr) {
             cli = std::make_unique<httplib::Client>(host.c_str());
             cli->set_connection_timeout(TIMEOUT_SECONDS);
@@ -141,7 +145,8 @@ struct Client::Impl {
     }
 
     // Retrieve a new JWT from given username and token
-    void UpdateJWT() {
+    void UpdateJWT()
+    {
         if (username.empty() || token.empty()) {
             return;
         }
@@ -173,32 +178,39 @@ struct Client::Impl {
 };
 
 Client::Client(std::string host, std::string username, std::string token)
-    : impl{std::make_unique<Impl>(std::move(host), std::move(username), std::move(token))} {}
+    : impl{std::make_unique<Impl>(std::move(host), std::move(username), std::move(token))}
+{
+}
 
 Client::~Client() = default;
 
-WebResult Client::PostJson(const std::string& path, const std::string& data, bool allow_anonymous) {
+WebResult Client::PostJson(const std::string& path, const std::string& data, bool allow_anonymous)
+{
     return impl->GenericRequest("POST", path, data, allow_anonymous, "application/json");
 }
 
-WebResult Client::GetJson(const std::string& path, bool allow_anonymous) {
+WebResult Client::GetJson(const std::string& path, bool allow_anonymous)
+{
     return impl->GenericRequest("GET", path, "", allow_anonymous, "application/json");
 }
 
-WebResult Client::DeleteJson(const std::string& path, const std::string& data,
-                             bool allow_anonymous) {
+WebResult Client::DeleteJson(const std::string& path, const std::string& data, bool allow_anonymous)
+{
     return impl->GenericRequest("DELETE", path, data, allow_anonymous, "application/json");
 }
 
-WebResult Client::GetPlain(const std::string& path, bool allow_anonymous) {
+WebResult Client::GetPlain(const std::string& path, bool allow_anonymous)
+{
     return impl->GenericRequest("GET", path, "", allow_anonymous, "text/plain");
 }
 
-WebResult Client::GetImage(const std::string& path, bool allow_anonymous) {
+WebResult Client::GetImage(const std::string& path, bool allow_anonymous)
+{
     return impl->GenericRequest("GET", path, "", allow_anonymous, "image/png");
 }
 
-WebResult Client::GetExternalJWT(const std::string& audience) {
+WebResult Client::GetExternalJWT(const std::string& audience)
+{
     return impl->GenericRequest("POST", fmt::format("/jwt/external/{}", audience), "", false,
                                 "text/html");
 }

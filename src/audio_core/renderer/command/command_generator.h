@@ -50,7 +50,8 @@ public:
      * @param params    - Input rendering parameters for numbers of voices/mixes/sinks etc.
      */
     static u64 CalculateCommandBufferSize(const BehaviorInfo& behavior,
-                                          const AudioRendererParameterInternal& params) {
+                                          const AudioRendererParameterInternal& params)
+    {
         u64 size{0};
 
         // Effects
@@ -60,12 +61,12 @@ public:
         u64 voice_size{0};
         if (behavior.IsWaveBufferVer2Supported()) {
             voice_size = (std::max)((std::max)(sizeof(AdpcmDataSourceVersion2Command),
-                                           sizeof(PcmInt16DataSourceVersion2Command)),
-                                  sizeof(PcmFloatDataSourceVersion2Command));
+                                               sizeof(PcmInt16DataSourceVersion2Command)),
+                                    sizeof(PcmFloatDataSourceVersion2Command));
         } else {
             voice_size = (std::max)((std::max)(sizeof(AdpcmDataSourceVersion1Command),
-                                           sizeof(PcmInt16DataSourceVersion1Command)),
-                                  sizeof(PcmFloatDataSourceVersion1Command));
+                                               sizeof(PcmInt16DataSourceVersion1Command)),
+                                    sizeof(PcmFloatDataSourceVersion1Command));
         }
         voice_size += sizeof(BiquadFilterCommand) * MaxBiquadFilters;
         voice_size += sizeof(VolumeRampCommand);
@@ -99,18 +100,14 @@ public:
      *
      * @return The command buffer.
      */
-    CommandBuffer& GetCommandBuffer() {
-        return command_buffer;
-    }
+    CommandBuffer& GetCommandBuffer() { return command_buffer; }
 
     /**
      * Get the current performance manager,
      *
      * @return The performance manager. May be nullptr.
      */
-    PerformanceManager* GetPerformanceManager() {
-        return performance_manager;
-    }
+    PerformanceManager* GetPerformanceManager() { return performance_manager; }
 
     /**
      * Generate a data source command.

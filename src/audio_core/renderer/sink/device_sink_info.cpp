@@ -2,17 +2,20 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include "audio_core/renderer/sink/device_sink_info.h"
+
 #include "audio_core/renderer/upsampler/upsampler_manager.h"
 
 namespace AudioCore::Renderer {
 
-DeviceSinkInfo::DeviceSinkInfo() {
+DeviceSinkInfo::DeviceSinkInfo()
+{
     state.fill(0);
     parameter.fill(0);
     type = Type::DeviceSink;
 }
 
-void DeviceSinkInfo::CleanUp() {
+void DeviceSinkInfo::CleanUp()
+{
     auto state_{reinterpret_cast<DeviceState*>(state.data())};
 
     if (state_->upsampler_info) {
@@ -26,7 +29,8 @@ void DeviceSinkInfo::CleanUp() {
 
 void DeviceSinkInfo::Update(BehaviorInfo::ErrorInfo& error_info, OutStatus& out_status,
                             const InParameter& in_params,
-                            [[maybe_unused]] const PoolMapper& pool_mapper) {
+                            [[maybe_unused]] const PoolMapper& pool_mapper)
+{
 
     const auto device_params{reinterpret_cast<const DeviceInParameter*>(&in_params.device)};
     auto current_params{reinterpret_cast<DeviceInParameter*>(parameter.data())};
@@ -52,6 +56,8 @@ void DeviceSinkInfo::Update(BehaviorInfo::ErrorInfo& error_info, OutStatus& out_
     error_info.address = CpuAddr(0);
 }
 
-void DeviceSinkInfo::UpdateForCommandGeneration() {}
+void DeviceSinkInfo::UpdateForCommandGeneration()
+{
+}
 
 } // namespace AudioCore::Renderer

@@ -35,25 +35,18 @@ public:
 
     [[nodiscard]] VkBufferView View(u32 offset, u32 size, VideoCore::Surface::PixelFormat format);
 
-    [[nodiscard]] VkBuffer Handle() const noexcept {
-        return *buffer;
-    }
+    [[nodiscard]] VkBuffer Handle() const noexcept { return *buffer; }
 
-    [[nodiscard]] bool IsRegionUsed(u64 offset, u64 size) const noexcept {
+    [[nodiscard]] bool IsRegionUsed(u64 offset, u64 size) const noexcept
+    {
         return tracker.IsUsed(offset, size);
     }
 
-    void MarkUsage(u64 offset, u64 size) noexcept {
-        tracker.Track(offset, size);
-    }
+    void MarkUsage(u64 offset, u64 size) noexcept { tracker.Track(offset, size); }
 
-    void ResetUsageTracking() noexcept {
-        tracker.Reset();
-    }
+    void ResetUsageTracking() noexcept { tracker.Reset(); }
 
-    operator VkBuffer() const noexcept {
-        return *buffer;
-    }
+    operator VkBuffer() const noexcept { return *buffer; }
 
 private:
     struct BufferView {
@@ -132,37 +125,36 @@ public:
     void BindTransformFeedbackBuffers(VideoCommon::HostBindings<Buffer>& bindings);
 
     std::span<u8> BindMappedUniformBuffer([[maybe_unused]] size_t stage,
-                                          [[maybe_unused]] u32 binding_index,
-                                          u32 size) {
+                                          [[maybe_unused]] u32 binding_index, u32 size)
+    {
         const StagingBufferRef ref = staging_pool.Request(size, MemoryUsage::Upload);
         BindBuffer(ref.buffer, static_cast<u32>(ref.offset), size);
         return ref.mapped_span;
     }
 
-    void BindUniformBuffer(VkBuffer buffer, u32 offset, u32 size) {
+    void BindUniformBuffer(VkBuffer buffer, u32 offset, u32 size)
+    {
         BindBuffer(buffer, offset, size);
     }
 
-    void BindStorageBuffer(VkBuffer buffer, u32 offset, u32 size,
-                           [[maybe_unused]] bool is_written) {
+    void BindStorageBuffer(VkBuffer buffer, u32 offset, u32 size, [[maybe_unused]] bool is_written)
+    {
         BindBuffer(buffer, offset, size);
     }
 
     void BindTextureBuffer(Buffer& buffer, u32 offset, u32 size,
-                           VideoCore::Surface::PixelFormat format) {
+                           VideoCore::Surface::PixelFormat format)
+    {
         guest_descriptor_queue.AddTexelBuffer(buffer.View(offset, size, format));
     }
 
-    bool ShouldLimitDynamicStorageBuffers() const {
-        return limit_dynamic_storage_buffers;
-    }
+    bool ShouldLimitDynamicStorageBuffers() const { return limit_dynamic_storage_buffers; }
 
-    u32 GetMaxDynamicStorageBuffers() const {
-        return max_dynamic_storage_buffers;
-    }
+    u32 GetMaxDynamicStorageBuffers() const { return max_dynamic_storage_buffers; }
 
 private:
-    void BindBuffer(VkBuffer buffer, u32 offset, u32 size) {
+    void BindBuffer(VkBuffer buffer, u32 offset, u32 size)
+    {
         guest_descriptor_queue.AddBuffer(buffer, offset, size);
     }
 

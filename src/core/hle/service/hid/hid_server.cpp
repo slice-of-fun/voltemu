@@ -4,6 +4,8 @@
 // SPDX-FileCopyrightText: Copyright 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+#include "core/hle/service/hid/hid_server.h"
+
 #include <array>
 
 #include "common/common_types.h"
@@ -15,16 +17,14 @@
 #include "core/hle/service/cmif_serialization.h"
 #include "core/hle/service/hid/active_vibration_device_list.h"
 #include "core/hle/service/hid/applet_resource.h"
-#include "core/hle/service/hid/hid_server.h"
 #include "core/hle/service/ipc_helpers.h"
 #include "core/memory.h"
 #include "hid_core/hid_result.h"
 #include "hid_core/hid_util.h"
 #include "hid_core/resource_manager.h"
-#include "hid_core/resources/hid_firmware_settings.h"
-
 #include "hid_core/resources/controller_base.h"
 #include "hid_core/resources/debug_pad/debug_pad.h"
+#include "hid_core/resources/hid_firmware_settings.h"
 #include "hid_core/resources/keyboard/keyboard.h"
 #include "hid_core/resources/mouse/mouse.h"
 #include "hid_core/resources/npad/npad.h"
@@ -44,7 +44,8 @@ namespace Service::HID {
 
 IHidServer::IHidServer(Core::System& system_, std::shared_ptr<ResourceManager> resource,
                        std::shared_ptr<HidFirmwareSettings> settings)
-    : ServiceFramework{system_, "hid"}, resource_manager{resource}, firmware_settings{settings} {
+    : ServiceFramework{system_, "hid"}, resource_manager{resource}, firmware_settings{settings}
+{
     // clang-format off
     static const FunctionInfo functions[] = {
         {0, C<&IHidServer::CreateAppletResource>, "CreateAppletResource"},
@@ -248,7 +249,8 @@ IHidServer::IHidServer(Core::System& system_, std::shared_ptr<ResourceManager> r
 IHidServer::~IHidServer() = default;
 
 Result IHidServer::CreateAppletResource(OutInterface<IAppletResource> out_applet_resource,
-                                        ClientAppletResourceUserId aruid) {
+                                        ClientAppletResourceUserId aruid)
+{
     const auto result = GetResourceManager()->CreateAppletResource(aruid.pid);
 
     LOG_DEBUG(Service_HID, "called, applet_resource_user_id={}, result={:#X}", aruid.pid,
@@ -258,7 +260,8 @@ Result IHidServer::CreateAppletResource(OutInterface<IAppletResource> out_applet
     R_SUCCEED();
 }
 
-Result IHidServer::ActivateDebugPad(ClientAppletResourceUserId aruid) {
+Result IHidServer::ActivateDebugPad(ClientAppletResourceUserId aruid)
+{
     LOG_DEBUG(Service_HID, "called, applet_resource_user_id={}", aruid.pid);
 
     if (!firmware_settings->IsDeviceManaged()) {
@@ -268,7 +271,8 @@ Result IHidServer::ActivateDebugPad(ClientAppletResourceUserId aruid) {
     R_RETURN(GetResourceManager()->GetDebugPad()->Activate(aruid.pid));
 }
 
-Result IHidServer::ActivateTouchScreen(ClientAppletResourceUserId aruid) {
+Result IHidServer::ActivateTouchScreen(ClientAppletResourceUserId aruid)
+{
     LOG_DEBUG(Service_HID, "called, applet_resource_user_id={}", aruid.pid);
 
     if (!firmware_settings->IsDeviceManaged()) {
@@ -278,7 +282,8 @@ Result IHidServer::ActivateTouchScreen(ClientAppletResourceUserId aruid) {
     R_RETURN(GetResourceManager()->GetTouchScreen()->Activate(aruid.pid));
 }
 
-Result IHidServer::ActivateMouse(ClientAppletResourceUserId aruid) {
+Result IHidServer::ActivateMouse(ClientAppletResourceUserId aruid)
+{
     LOG_DEBUG(Service_HID, "called, applet_resource_user_id={}", aruid.pid);
 
     if (!firmware_settings->IsDeviceManaged()) {
@@ -288,12 +293,14 @@ Result IHidServer::ActivateMouse(ClientAppletResourceUserId aruid) {
     R_RETURN(GetResourceManager()->GetMouse()->Activate(aruid.pid));
 }
 
-Result IHidServer::ActivateDebugMouse(ClientAppletResourceUserId aruid) {
+Result IHidServer::ActivateDebugMouse(ClientAppletResourceUserId aruid)
+{
     LOG_WARNING(Service_HID, "(STUBBED) called, applet_resource_user_id={}", aruid.pid);
     R_SUCCEED();
 }
 
-Result IHidServer::ActivateKeyboard(ClientAppletResourceUserId aruid) {
+Result IHidServer::ActivateKeyboard(ClientAppletResourceUserId aruid)
+{
     LOG_DEBUG(Service_HID, "called, applet_resource_user_id={}", aruid.pid);
 
     if (!firmware_settings->IsDeviceManaged()) {
@@ -303,13 +310,15 @@ Result IHidServer::ActivateKeyboard(ClientAppletResourceUserId aruid) {
     R_RETURN(GetResourceManager()->GetKeyboard()->Activate(aruid.pid));
 }
 
-Result IHidServer::SendKeyboardLockKeyEvent(u32 flags) {
+Result IHidServer::SendKeyboardLockKeyEvent(u32 flags)
+{
     LOG_WARNING(Service_HID, "(STUBBED) called. flags={}", flags);
     R_SUCCEED();
 }
 
 Result IHidServer::AcquireXpadIdEventHandle(OutCopyHandle<Kernel::KReadableEvent> out_event,
-                                            ClientAppletResourceUserId aruid) {
+                                            ClientAppletResourceUserId aruid)
+{
     LOG_DEBUG(Service_HID, "called, applet_resource_user_id={}", aruid.pid);
 
     // This function has been stubbed since 10.0.0+
@@ -317,14 +326,16 @@ Result IHidServer::AcquireXpadIdEventHandle(OutCopyHandle<Kernel::KReadableEvent
     R_SUCCEED();
 }
 
-Result IHidServer::ReleaseXpadIdEventHandle(ClientAppletResourceUserId aruid) {
+Result IHidServer::ReleaseXpadIdEventHandle(ClientAppletResourceUserId aruid)
+{
     LOG_DEBUG(Service_HID, "called, applet_resource_user_id={}", aruid.pid);
 
     // This function has been stubbed since 10.0.0+
     R_SUCCEED();
 }
 
-Result IHidServer::ActivateXpad(u32 basic_xpad_id, ClientAppletResourceUserId aruid) {
+Result IHidServer::ActivateXpad(u32 basic_xpad_id, ClientAppletResourceUserId aruid)
+{
     LOG_DEBUG(Service_HID, "called, basic_xpad_id={}, applet_resource_user_id={}", basic_xpad_id,
               aruid.pid);
 
@@ -333,7 +344,8 @@ Result IHidServer::ActivateXpad(u32 basic_xpad_id, ClientAppletResourceUserId ar
 }
 
 Result IHidServer::GetXpadIds(Out<u64> out_count,
-                              OutArray<u32, BufferAttr_HipcPointer> out_basic_pad_ids) {
+                              OutArray<u32, BufferAttr_HipcPointer> out_basic_pad_ids)
+{
     LOG_DEBUG(Service_HID, "called");
 
     // This function has been hardcoded since 10.0.0+
@@ -345,15 +357,18 @@ Result IHidServer::GetXpadIds(Out<u64> out_count,
     R_SUCCEED();
 }
 
-Result IHidServer::ActivateJoyXpad(u32 joy_xpad_id) {
+Result IHidServer::ActivateJoyXpad(u32 joy_xpad_id)
+{
     LOG_DEBUG(Service_HID, "called, joy_xpad_id={}", joy_xpad_id);
 
     // This function has been stubbed since 10.0.0+
     R_SUCCEED();
 }
 
-Result IHidServer::GetJoyXpadLifoHandle(
-    OutCopyHandle<Kernel::KSharedMemory> out_shared_memory_handle, u32 joy_xpad_id) {
+Result
+IHidServer::GetJoyXpadLifoHandle(OutCopyHandle<Kernel::KSharedMemory> out_shared_memory_handle,
+                                 u32 joy_xpad_id)
+{
     LOG_DEBUG(Service_HID, "called, joy_xpad_id={}", joy_xpad_id);
 
     // This function has been stubbed since 10.0.0+
@@ -361,7 +376,8 @@ Result IHidServer::GetJoyXpadLifoHandle(
     R_SUCCEED();
 }
 
-Result IHidServer::GetJoyXpadIds(Out<s64> out_basic_xpad_id_count) {
+Result IHidServer::GetJoyXpadIds(Out<s64> out_basic_xpad_id_count)
+{
     LOG_DEBUG(Service_HID, "called");
 
     // This function has been hardcoded since 10.0.0+
@@ -369,14 +385,16 @@ Result IHidServer::GetJoyXpadIds(Out<s64> out_basic_xpad_id_count) {
     R_SUCCEED();
 }
 
-Result IHidServer::ActivateSixAxisSensor(u32 joy_xpad_id) {
+Result IHidServer::ActivateSixAxisSensor(u32 joy_xpad_id)
+{
     LOG_DEBUG(Service_HID, "called, joy_xpad_id={}", joy_xpad_id);
 
     // This function has been stubbed since 10.0.0+
     R_SUCCEED();
 }
 
-Result IHidServer::DeactivateSixAxisSensor(u32 joy_xpad_id) {
+Result IHidServer::DeactivateSixAxisSensor(u32 joy_xpad_id)
+{
     LOG_DEBUG(Service_HID, "called, joy_xpad_id={}", joy_xpad_id);
 
     // This function has been stubbed since 10.0.0+
@@ -384,7 +402,8 @@ Result IHidServer::DeactivateSixAxisSensor(u32 joy_xpad_id) {
 }
 
 Result IHidServer::GetSixAxisSensorLifoHandle(
-    OutCopyHandle<Kernel::KSharedMemory> out_shared_memory_handle, u32 joy_xpad_id) {
+    OutCopyHandle<Kernel::KSharedMemory> out_shared_memory_handle, u32 joy_xpad_id)
+{
     LOG_DEBUG(Service_HID, "called, joy_xpad_id={}", joy_xpad_id);
 
     // This function has been stubbed since 10.0.0+
@@ -392,14 +411,16 @@ Result IHidServer::GetSixAxisSensorLifoHandle(
     R_SUCCEED();
 }
 
-Result IHidServer::ActivateJoySixAxisSensor(u32 joy_xpad_id) {
+Result IHidServer::ActivateJoySixAxisSensor(u32 joy_xpad_id)
+{
     LOG_DEBUG(Service_HID, "called, joy_xpad_id={}", joy_xpad_id);
 
     // This function has been stubbed since 10.0.0+
     R_SUCCEED();
 }
 
-Result IHidServer::DeactivateJoySixAxisSensor(u32 joy_xpad_id) {
+Result IHidServer::DeactivateJoySixAxisSensor(u32 joy_xpad_id)
+{
     LOG_DEBUG(Service_HID, "called, joy_xpad_id={}", joy_xpad_id);
 
     // This function has been stubbed since 10.0.0+
@@ -407,7 +428,8 @@ Result IHidServer::DeactivateJoySixAxisSensor(u32 joy_xpad_id) {
 }
 
 Result IHidServer::GetJoySixAxisSensorLifoHandle(
-    OutCopyHandle<Kernel::KSharedMemory> out_shared_memory_handle, u32 joy_xpad_id) {
+    OutCopyHandle<Kernel::KSharedMemory> out_shared_memory_handle, u32 joy_xpad_id)
+{
     LOG_DEBUG(Service_HID, "called, joy_xpad_id={}", joy_xpad_id);
 
     // This function has been stubbed since 10.0.0+
@@ -416,7 +438,8 @@ Result IHidServer::GetJoySixAxisSensorLifoHandle(
 }
 
 Result IHidServer::StartSixAxisSensor(Core::HID::SixAxisSensorHandle sixaxis_handle,
-                                      ClientAppletResourceUserId aruid) {
+                                      ClientAppletResourceUserId aruid)
+{
     LOG_DEBUG(Service_HID,
               "called, npad_type={}, npad_id={}, device_index={}, applet_resource_user_id={}",
               sixaxis_handle.npad_type, sixaxis_handle.npad_id, sixaxis_handle.device_index,
@@ -426,7 +449,8 @@ Result IHidServer::StartSixAxisSensor(Core::HID::SixAxisSensorHandle sixaxis_han
 }
 
 Result IHidServer::StopSixAxisSensor(Core::HID::SixAxisSensorHandle sixaxis_handle,
-                                     ClientAppletResourceUserId aruid) {
+                                     ClientAppletResourceUserId aruid)
+{
     LOG_DEBUG(Service_HID,
               "called, npad_type={}, npad_id={}, device_index={}, applet_resource_user_id={}",
               sixaxis_handle.npad_type, sixaxis_handle.npad_id, sixaxis_handle.device_index,
@@ -437,7 +461,8 @@ Result IHidServer::StopSixAxisSensor(Core::HID::SixAxisSensorHandle sixaxis_hand
 
 Result IHidServer::IsSixAxisSensorFusionEnabled(Out<bool> out_is_enabled,
                                                 Core::HID::SixAxisSensorHandle sixaxis_handle,
-                                                ClientAppletResourceUserId aruid) {
+                                                ClientAppletResourceUserId aruid)
+{
     LOG_DEBUG(Service_HID,
               "called, npad_type={}, npad_id={}, device_index={}, applet_resource_user_id={}",
               sixaxis_handle.npad_type, sixaxis_handle.npad_id, sixaxis_handle.device_index,
@@ -449,7 +474,8 @@ Result IHidServer::IsSixAxisSensorFusionEnabled(Out<bool> out_is_enabled,
 
 Result IHidServer::EnableSixAxisSensorFusion(bool is_enabled,
                                              Core::HID::SixAxisSensorHandle sixaxis_handle,
-                                             ClientAppletResourceUserId aruid) {
+                                             ClientAppletResourceUserId aruid)
+{
     LOG_DEBUG(Service_HID,
               "called, is_enabled={}, npad_type={}, npad_id={}, "
               "device_index={}, applet_resource_user_id={}",
@@ -462,7 +488,8 @@ Result IHidServer::EnableSixAxisSensorFusion(bool is_enabled,
 
 Result IHidServer::SetSixAxisSensorFusionParameters(
     Core::HID::SixAxisSensorHandle sixaxis_handle,
-    Core::HID::SixAxisSensorFusionParameters sixaxis_fusion, ClientAppletResourceUserId aruid) {
+    Core::HID::SixAxisSensorFusionParameters sixaxis_fusion, ClientAppletResourceUserId aruid)
+{
     LOG_DEBUG(Service_HID,
               "called, npad_type={}, npad_id={}, device_index={}, parameter1={}, "
               "parameter2={}, applet_resource_user_id={}",
@@ -475,7 +502,8 @@ Result IHidServer::SetSixAxisSensorFusionParameters(
 
 Result IHidServer::GetSixAxisSensorFusionParameters(
     Out<Core::HID::SixAxisSensorFusionParameters> out_fusion_parameters,
-    Core::HID::SixAxisSensorHandle sixaxis_handle, ClientAppletResourceUserId aruid) {
+    Core::HID::SixAxisSensorHandle sixaxis_handle, ClientAppletResourceUserId aruid)
+{
     LOG_DEBUG(Service_HID,
               "called, npad_type={}, npad_id={}, device_index={}, applet_resource_user_id={}",
               sixaxis_handle.npad_type, sixaxis_handle.npad_id, sixaxis_handle.device_index,
@@ -486,7 +514,8 @@ Result IHidServer::GetSixAxisSensorFusionParameters(
 }
 
 Result IHidServer::ResetSixAxisSensorFusionParameters(Core::HID::SixAxisSensorHandle sixaxis_handle,
-                                                      ClientAppletResourceUserId aruid) {
+                                                      ClientAppletResourceUserId aruid)
+{
     LOG_DEBUG(Service_HID,
               "called, npad_type={}, npad_id={}, device_index={}, applet_resource_user_id={}",
               sixaxis_handle.npad_type, sixaxis_handle.npad_id, sixaxis_handle.device_index,
@@ -505,7 +534,8 @@ Result IHidServer::ResetSixAxisSensorFusionParameters(Core::HID::SixAxisSensorHa
 
 Result IHidServer::SetGyroscopeZeroDriftMode(Core::HID::SixAxisSensorHandle sixaxis_handle,
                                              Core::HID::GyroscopeZeroDriftMode drift_mode,
-                                             ClientAppletResourceUserId aruid) {
+                                             ClientAppletResourceUserId aruid)
+{
     LOG_DEBUG(Service_HID,
               "called, npad_type={}, npad_id={}, device_index={}, drift_mode={}, "
               "applet_resource_user_id={}",
@@ -518,7 +548,8 @@ Result IHidServer::SetGyroscopeZeroDriftMode(Core::HID::SixAxisSensorHandle sixa
 
 Result IHidServer::GetGyroscopeZeroDriftMode(Out<Core::HID::GyroscopeZeroDriftMode> out_drift_mode,
                                              Core::HID::SixAxisSensorHandle sixaxis_handle,
-                                             ClientAppletResourceUserId aruid) {
+                                             ClientAppletResourceUserId aruid)
+{
     LOG_DEBUG(Service_HID,
               "called, npad_type={}, npad_id={}, device_index={}, applet_resource_user_id={}",
               sixaxis_handle.npad_type, sixaxis_handle.npad_id, sixaxis_handle.device_index,
@@ -529,7 +560,8 @@ Result IHidServer::GetGyroscopeZeroDriftMode(Out<Core::HID::GyroscopeZeroDriftMo
 }
 
 Result IHidServer::ResetGyroscopeZeroDriftMode(Core::HID::SixAxisSensorHandle sixaxis_handle,
-                                               ClientAppletResourceUserId aruid) {
+                                               ClientAppletResourceUserId aruid)
+{
     LOG_DEBUG(Service_HID,
               "called, npad_type={}, npad_id={}, device_index={}, applet_resource_user_id={}",
               sixaxis_handle.npad_type, sixaxis_handle.npad_id, sixaxis_handle.device_index,
@@ -542,7 +574,8 @@ Result IHidServer::ResetGyroscopeZeroDriftMode(Core::HID::SixAxisSensorHandle si
 
 Result IHidServer::IsSixAxisSensorAtRest(Out<bool> out_is_at_rest,
                                          Core::HID::SixAxisSensorHandle sixaxis_handle,
-                                         ClientAppletResourceUserId aruid) {
+                                         ClientAppletResourceUserId aruid)
+{
     LOG_DEBUG(Service_HID,
               "called, npad_type={}, npad_id={}, device_index={}, applet_resource_user_id={}",
               sixaxis_handle.npad_type, sixaxis_handle.npad_id, sixaxis_handle.device_index,
@@ -552,9 +585,11 @@ Result IHidServer::IsSixAxisSensorAtRest(Out<bool> out_is_at_rest,
         GetResourceManager()->GetSixAxis()->IsSixAxisSensorAtRest(sixaxis_handle, *out_is_at_rest));
 }
 
-Result IHidServer::IsFirmwareUpdateAvailableForSixAxisSensor(
-    Out<bool> out_is_firmware_available, Core::HID::SixAxisSensorHandle sixaxis_handle,
-    ClientAppletResourceUserId aruid) {
+Result
+IHidServer::IsFirmwareUpdateAvailableForSixAxisSensor(Out<bool> out_is_firmware_available,
+                                                      Core::HID::SixAxisSensorHandle sixaxis_handle,
+                                                      ClientAppletResourceUserId aruid)
+{
     LOG_WARNING(
         Service_HID,
         "(STUBBED) called, npad_type={}, npad_id={}, device_index={}, applet_resource_user_id={}",
@@ -564,9 +599,11 @@ Result IHidServer::IsFirmwareUpdateAvailableForSixAxisSensor(
         aruid.pid, sixaxis_handle, *out_is_firmware_available));
 }
 
-Result IHidServer::EnableSixAxisSensorUnalteredPassthrough(
-    bool is_enabled, Core::HID::SixAxisSensorHandle sixaxis_handle,
-    ClientAppletResourceUserId aruid) {
+Result
+IHidServer::EnableSixAxisSensorUnalteredPassthrough(bool is_enabled,
+                                                    Core::HID::SixAxisSensorHandle sixaxis_handle,
+                                                    ClientAppletResourceUserId aruid)
+{
     LOG_DEBUG(Service_HID,
               "(STUBBED) called, enabled={}, npad_type={}, npad_id={}, device_index={}, "
               "applet_resource_user_id={}",
@@ -579,7 +616,8 @@ Result IHidServer::EnableSixAxisSensorUnalteredPassthrough(
 
 Result IHidServer::IsSixAxisSensorUnalteredPassthroughEnabled(
     Out<bool> out_is_enabled, Core::HID::SixAxisSensorHandle sixaxis_handle,
-    ClientAppletResourceUserId aruid) {
+    ClientAppletResourceUserId aruid)
+{
     LOG_DEBUG(
         Service_HID,
         "(STUBBED) called, npad_type={}, npad_id={}, device_index={}, applet_resource_user_id={}",
@@ -592,7 +630,8 @@ Result IHidServer::IsSixAxisSensorUnalteredPassthroughEnabled(
 Result IHidServer::LoadSixAxisSensorCalibrationParameter(
     OutLargeData<Core::HID::SixAxisSensorCalibrationParameter, BufferAttr_HipcMapAlias>
         out_calibration,
-    Core::HID::SixAxisSensorHandle sixaxis_handle, ClientAppletResourceUserId aruid) {
+    Core::HID::SixAxisSensorHandle sixaxis_handle, ClientAppletResourceUserId aruid)
+{
     LOG_WARNING(
         Service_HID,
         "(STUBBED) called, npad_type={}, npad_id={}, device_index={}, applet_resource_user_id={}",
@@ -604,7 +643,8 @@ Result IHidServer::LoadSixAxisSensorCalibrationParameter(
 
 Result IHidServer::GetSixAxisSensorIcInformation(
     OutLargeData<Core::HID::SixAxisSensorIcInformation, BufferAttr_HipcPointer> out_ic_information,
-    Core::HID::SixAxisSensorHandle sixaxis_handle, ClientAppletResourceUserId aruid) {
+    Core::HID::SixAxisSensorHandle sixaxis_handle, ClientAppletResourceUserId aruid)
+{
     LOG_WARNING(
         Service_HID,
         "(STUBBED) called, npad_type={}, npad_id={}, device_index={}, applet_resource_user_id={}",
@@ -614,8 +654,10 @@ Result IHidServer::GetSixAxisSensorIcInformation(
         sixaxis_handle, *out_ic_information));
 }
 
-Result IHidServer::ResetIsSixAxisSensorDeviceNewlyAssigned(
-    Core::HID::SixAxisSensorHandle sixaxis_handle, ClientAppletResourceUserId aruid) {
+Result
+IHidServer::ResetIsSixAxisSensorDeviceNewlyAssigned(Core::HID::SixAxisSensorHandle sixaxis_handle,
+                                                    ClientAppletResourceUserId aruid)
+{
     LOG_WARNING(
         Service_HID,
         "(STUBBED) called, npad_type={}, npad_id={}, device_index={}, applet_resource_user_id={}",
@@ -625,7 +667,8 @@ Result IHidServer::ResetIsSixAxisSensorDeviceNewlyAssigned(
         aruid.pid, sixaxis_handle));
 }
 
-Result IHidServer::ActivateGesture(u32 basic_gesture_id, ClientAppletResourceUserId aruid) {
+Result IHidServer::ActivateGesture(u32 basic_gesture_id, ClientAppletResourceUserId aruid)
+{
     LOG_INFO(Service_HID, "called, basic_gesture_id={}, applet_resource_user_id={}",
              basic_gesture_id, aruid.pid);
 
@@ -636,17 +679,17 @@ Result IHidServer::ActivateGesture(u32 basic_gesture_id, ClientAppletResourceUse
     R_RETURN(GetResourceManager()->GetGesture()->Activate(aruid.pid, basic_gesture_id));
 }
 
-Result IHidServer::SetGestureOutputRanges(u32 param1, u32 param2, u32 param3, u32 param4) {
+Result IHidServer::SetGestureOutputRanges(u32 param1, u32 param2, u32 param3, u32 param4)
+{
     // https://switchbrew.org/wiki/HID_services , Undocumented. 92 [18.0.0+] SetGestureOutputRanges
-    LOG_WARNING(
-        Service_HID,
-        "(STUBBED) called, param1={}, param2={}, param3={}, param4={}",
-        param1, param2, param3, param4);
+    LOG_WARNING(Service_HID, "(STUBBED) called, param1={}, param2={}, param3={}, param4={}", param1,
+                param2, param3, param4);
     R_SUCCEED();
 }
 
 Result IHidServer::SetSupportedNpadStyleSet(Core::HID::NpadStyleSet supported_style_set,
-                                            ClientAppletResourceUserId aruid) {
+                                            ClientAppletResourceUserId aruid)
+{
     LOG_DEBUG(Service_HID, "called, supported_style_set={}, applet_resource_user_id={}",
               supported_style_set, aruid.pid);
 
@@ -664,7 +707,8 @@ Result IHidServer::SetSupportedNpadStyleSet(Core::HID::NpadStyleSet supported_st
 }
 
 Result IHidServer::GetSupportedNpadStyleSet(Out<Core::HID::NpadStyleSet> out_supported_style_set,
-                                            ClientAppletResourceUserId aruid) {
+                                            ClientAppletResourceUserId aruid)
+{
     LOG_DEBUG(Service_HID, "called, applet_resource_user_id={}", aruid.pid);
 
     R_RETURN(GetResourceManager()->GetNpad()->GetSupportedNpadStyleSet(aruid.pid,
@@ -673,14 +717,16 @@ Result IHidServer::GetSupportedNpadStyleSet(Out<Core::HID::NpadStyleSet> out_sup
 
 Result IHidServer::SetSupportedNpadIdType(
     ClientAppletResourceUserId aruid,
-    InArray<Core::HID::NpadIdType, BufferAttr_HipcPointer> supported_npad_list) {
+    InArray<Core::HID::NpadIdType, BufferAttr_HipcPointer> supported_npad_list)
+{
     LOG_DEBUG(Service_HID, "called, applet_resource_user_id={}", aruid.pid);
 
     R_RETURN(
         GetResourceManager()->GetNpad()->SetSupportedNpadIdType(aruid.pid, supported_npad_list));
 }
 
-Result IHidServer::ActivateNpad(ClientAppletResourceUserId aruid) {
+Result IHidServer::ActivateNpad(ClientAppletResourceUserId aruid)
+{
     LOG_DEBUG(Service_HID, "called, applet_resource_user_id={}", aruid.pid);
 
     auto npad = GetResourceManager()->GetNpad();
@@ -689,16 +735,19 @@ Result IHidServer::ActivateNpad(ClientAppletResourceUserId aruid) {
     R_RETURN(GetResourceManager()->GetNpad()->Activate(aruid.pid));
 }
 
-Result IHidServer::DeactivateNpad(ClientAppletResourceUserId aruid) {
+Result IHidServer::DeactivateNpad(ClientAppletResourceUserId aruid)
+{
     LOG_DEBUG(Service_HID, "called, applet_resource_user_id={}", aruid.pid);
 
     // This function does nothing since 10.0.0+
     R_SUCCEED();
 }
 
-Result IHidServer::AcquireNpadStyleSetUpdateEventHandle(
-    OutCopyHandle<Kernel::KReadableEvent> out_event, Core::HID::NpadIdType npad_id,
-    ClientAppletResourceUserId aruid, u64 unknown) {
+Result
+IHidServer::AcquireNpadStyleSetUpdateEventHandle(OutCopyHandle<Kernel::KReadableEvent> out_event,
+                                                 Core::HID::NpadIdType npad_id,
+                                                 ClientAppletResourceUserId aruid, u64 unknown)
+{
     LOG_DEBUG(Service_HID, "called, npad_id={}, applet_resource_user_id={}, unknown={}", npad_id,
               aruid.pid, unknown);
 
@@ -706,14 +755,16 @@ Result IHidServer::AcquireNpadStyleSetUpdateEventHandle(
         aruid.pid, out_event, npad_id));
 }
 
-Result IHidServer::DisconnectNpad(Core::HID::NpadIdType npad_id, ClientAppletResourceUserId aruid) {
+Result IHidServer::DisconnectNpad(Core::HID::NpadIdType npad_id, ClientAppletResourceUserId aruid)
+{
     LOG_DEBUG(Service_HID, "called, npad_id={}, applet_resource_user_id={}", npad_id, aruid.pid);
 
     R_RETURN(GetResourceManager()->GetNpad()->DisconnectNpad(aruid.pid, npad_id));
 }
 
 Result IHidServer::GetPlayerLedPattern(Out<Core::HID::LedPattern> out_led_pattern,
-                                       Core::HID::NpadIdType npad_id) {
+                                       Core::HID::NpadIdType npad_id)
+{
     LOG_DEBUG(Service_HID, "called, npad_id={}", npad_id);
 
     switch (npad_id) {
@@ -747,15 +798,16 @@ Result IHidServer::GetPlayerLedPattern(Out<Core::HID::LedPattern> out_led_patter
     }
 }
 
-Result IHidServer::ActivateNpadWithRevision(NpadRevision revision,
-                                            ClientAppletResourceUserId aruid) {
+Result IHidServer::ActivateNpadWithRevision(NpadRevision revision, ClientAppletResourceUserId aruid)
+{
     LOG_DEBUG(Service_HID, "called, revision={}, applet_resource_user_id={}", revision, aruid.pid);
 
     GetResourceManager()->GetNpad()->SetRevision(aruid.pid, revision);
     R_RETURN(GetResourceManager()->GetNpad()->Activate(aruid.pid));
 }
 
-Result IHidServer::SetNpadJoyHoldType(ClientAppletResourceUserId aruid, NpadJoyHoldType hold_type) {
+Result IHidServer::SetNpadJoyHoldType(ClientAppletResourceUserId aruid, NpadJoyHoldType hold_type)
+{
     LOG_DEBUG(Service_HID, "called, applet_resource_user_id={}, hold_type={}", aruid.pid,
               hold_type);
 
@@ -768,14 +820,16 @@ Result IHidServer::SetNpadJoyHoldType(ClientAppletResourceUserId aruid, NpadJoyH
 }
 
 Result IHidServer::GetNpadJoyHoldType(Out<NpadJoyHoldType> out_hold_type,
-                                      ClientAppletResourceUserId aruid) {
+                                      ClientAppletResourceUserId aruid)
+{
     LOG_DEBUG(Service_HID, "called, applet_resource_user_id={}", aruid.pid);
 
     R_RETURN(GetResourceManager()->GetNpad()->GetNpadJoyHoldType(aruid.pid, *out_hold_type));
 }
 
 Result IHidServer::SetNpadJoyAssignmentModeSingleByDefault(Core::HID::NpadIdType npad_id,
-                                                           ClientAppletResourceUserId aruid) {
+                                                           ClientAppletResourceUserId aruid)
+{
     LOG_INFO(Service_HID, "called, npad_id={}, applet_resource_user_id={}", npad_id, aruid.pid);
 
     Core::HID::NpadIdType new_npad_id{};
@@ -786,7 +840,8 @@ Result IHidServer::SetNpadJoyAssignmentModeSingleByDefault(Core::HID::NpadIdType
 
 Result IHidServer::SetNpadJoyAssignmentModeSingle(Core::HID::NpadIdType npad_id,
                                                   ClientAppletResourceUserId aruid,
-                                                  NpadJoyDeviceType npad_joy_device_type) {
+                                                  NpadJoyDeviceType npad_joy_device_type)
+{
     LOG_INFO(Service_HID, "called, npad_id={}, applet_resource_user_id={}, npad_joy_device_type={}",
              npad_id, aruid.pid, npad_joy_device_type);
 
@@ -797,7 +852,8 @@ Result IHidServer::SetNpadJoyAssignmentModeSingle(Core::HID::NpadIdType npad_id,
 }
 
 Result IHidServer::SetNpadJoyAssignmentModeDual(Core::HID::NpadIdType npad_id,
-                                                ClientAppletResourceUserId aruid) {
+                                                ClientAppletResourceUserId aruid)
+{
     LOG_DEBUG(Service_HID, "called, npad_id={}, applet_resource_user_id={}", npad_id, aruid.pid);
 
     Core::HID::NpadIdType new_npad_id{};
@@ -808,7 +864,8 @@ Result IHidServer::SetNpadJoyAssignmentModeDual(Core::HID::NpadIdType npad_id,
 
 Result IHidServer::MergeSingleJoyAsDualJoy(Core::HID::NpadIdType npad_id_1,
                                            Core::HID::NpadIdType npad_id_2,
-                                           ClientAppletResourceUserId aruid) {
+                                           ClientAppletResourceUserId aruid)
+{
     LOG_DEBUG(Service_HID, "called, npad_id_1={}, npad_id_2={}, applet_resource_user_id={}",
               npad_id_1, npad_id_2, aruid.pid);
 
@@ -816,14 +873,16 @@ Result IHidServer::MergeSingleJoyAsDualJoy(Core::HID::NpadIdType npad_id_1,
         GetResourceManager()->GetNpad()->MergeSingleJoyAsDualJoy(aruid.pid, npad_id_1, npad_id_2));
 }
 
-Result IHidServer::StartLrAssignmentMode(ClientAppletResourceUserId aruid) {
+Result IHidServer::StartLrAssignmentMode(ClientAppletResourceUserId aruid)
+{
     LOG_DEBUG(Service_HID, "called, applet_resource_user_id={}", aruid.pid);
 
     GetResourceManager()->GetNpad()->StartLrAssignmentMode(aruid.pid);
     R_SUCCEED();
 }
 
-Result IHidServer::StopLrAssignmentMode(ClientAppletResourceUserId aruid) {
+Result IHidServer::StopLrAssignmentMode(ClientAppletResourceUserId aruid)
+{
     LOG_DEBUG(Service_HID, "called, applet_resource_user_id={}", aruid.pid);
 
     GetResourceManager()->GetNpad()->StopLrAssignmentMode(aruid.pid);
@@ -831,7 +890,8 @@ Result IHidServer::StopLrAssignmentMode(ClientAppletResourceUserId aruid) {
 }
 
 Result IHidServer::SetNpadHandheldActivationMode(ClientAppletResourceUserId aruid,
-                                                 NpadHandheldActivationMode activation_mode) {
+                                                 NpadHandheldActivationMode activation_mode)
+{
     LOG_DEBUG(Service_HID, "called, applet_resource_user_id={}, activation_mode={}", aruid.pid,
               activation_mode);
 
@@ -845,8 +905,10 @@ Result IHidServer::SetNpadHandheldActivationMode(ClientAppletResourceUserId arui
         GetResourceManager()->GetNpad()->SetNpadHandheldActivationMode(aruid.pid, activation_mode));
 }
 
-Result IHidServer::GetNpadHandheldActivationMode(
-    Out<NpadHandheldActivationMode> out_activation_mode, ClientAppletResourceUserId aruid) {
+Result
+IHidServer::GetNpadHandheldActivationMode(Out<NpadHandheldActivationMode> out_activation_mode,
+                                          ClientAppletResourceUserId aruid)
+{
     LOG_DEBUG(Service_HID, "called, applet_resource_user_id={}", aruid.pid);
 
     R_RETURN(GetResourceManager()->GetNpad()->GetNpadHandheldActivationMode(aruid.pid,
@@ -855,7 +917,8 @@ Result IHidServer::GetNpadHandheldActivationMode(
 
 Result IHidServer::SwapNpadAssignment(Core::HID::NpadIdType npad_id_1,
                                       Core::HID::NpadIdType npad_id_2,
-                                      ClientAppletResourceUserId aruid) {
+                                      ClientAppletResourceUserId aruid)
+{
     LOG_DEBUG(Service_HID, "called, npad_id_1={}, npad_id_2={}, applet_resource_user_id={}",
               npad_id_1, npad_id_2, aruid.pid);
 
@@ -864,7 +927,8 @@ Result IHidServer::SwapNpadAssignment(Core::HID::NpadIdType npad_id_1,
 
 Result IHidServer::IsUnintendedHomeButtonInputProtectionEnabled(Out<bool> out_is_enabled,
                                                                 Core::HID::NpadIdType npad_id,
-                                                                ClientAppletResourceUserId aruid) {
+                                                                ClientAppletResourceUserId aruid)
+{
     LOG_INFO(Service_HID, "called, npad_id={}, applet_resource_user_id={}", npad_id, aruid.pid);
 
     R_UNLESS(IsNpadIdValid(npad_id), ResultInvalidNpadId);
@@ -874,7 +938,8 @@ Result IHidServer::IsUnintendedHomeButtonInputProtectionEnabled(Out<bool> out_is
 
 Result IHidServer::EnableUnintendedHomeButtonInputProtection(bool is_enabled,
                                                              Core::HID::NpadIdType npad_id,
-                                                             ClientAppletResourceUserId aruid) {
+                                                             ClientAppletResourceUserId aruid)
+{
     LOG_DEBUG(Service_HID, "called, is_enabled={}, npad_id={}, applet_resource_user_id={}",
               is_enabled, npad_id, aruid.pid);
 
@@ -886,7 +951,8 @@ Result IHidServer::EnableUnintendedHomeButtonInputProtection(bool is_enabled,
 Result IHidServer::SetNpadJoyAssignmentModeSingleWithDestination(
     Out<bool> out_is_reassigned, Out<Core::HID::NpadIdType> out_new_npad_id,
     Core::HID::NpadIdType npad_id, ClientAppletResourceUserId aruid,
-    NpadJoyDeviceType npad_joy_device_type) {
+    NpadJoyDeviceType npad_joy_device_type)
+{
     LOG_INFO(Service_HID, "called, npad_id={}, applet_resource_user_id={}, npad_joy_device_type={}",
              npad_id, aruid.pid, npad_joy_device_type);
 
@@ -897,7 +963,8 @@ Result IHidServer::SetNpadJoyAssignmentModeSingleWithDestination(
 }
 
 Result IHidServer::SetNpadAnalogStickUseCenterClamp(bool use_center_clamp,
-                                                    ClientAppletResourceUserId aruid) {
+                                                    ClientAppletResourceUserId aruid)
+{
     LOG_INFO(Service_HID, "called, use_center_clamp={}, applet_resource_user_id={}",
              use_center_clamp, aruid.pid);
 
@@ -907,7 +974,8 @@ Result IHidServer::SetNpadAnalogStickUseCenterClamp(bool use_center_clamp,
 
 Result IHidServer::SetNpadCaptureButtonAssignment(Core::HID::NpadStyleSet npad_styleset,
                                                   ClientAppletResourceUserId aruid,
-                                                  Core::HID::NpadButton button) {
+                                                  Core::HID::NpadButton button)
+{
     LOG_INFO(Service_HID, "called, npad_styleset={}, applet_resource_user_id={}, button={}",
              npad_styleset, aruid.pid, button);
 
@@ -915,15 +983,17 @@ Result IHidServer::SetNpadCaptureButtonAssignment(Core::HID::NpadStyleSet npad_s
         aruid.pid, npad_styleset, button));
 }
 
-Result IHidServer::ClearNpadCaptureButtonAssignment(ClientAppletResourceUserId aruid) {
+Result IHidServer::ClearNpadCaptureButtonAssignment(ClientAppletResourceUserId aruid)
+{
     LOG_INFO(Service_HID, "called, applet_resource_user_id={}", aruid.pid);
 
     R_RETURN(GetResourceManager()->GetNpad()->ClearNpadCaptureButtonAssignment(aruid.pid));
 }
 
-Result IHidServer::GetVibrationDeviceInfo(
-    Out<Core::HID::VibrationDeviceInfo> out_vibration_device_info,
-    Core::HID::VibrationDeviceHandle vibration_device_handle) {
+Result
+IHidServer::GetVibrationDeviceInfo(Out<Core::HID::VibrationDeviceInfo> out_vibration_device_info,
+                                   Core::HID::VibrationDeviceHandle vibration_device_handle)
+{
     LOG_DEBUG(Service_HID, "called, npad_type={}, npad_id={}, device_index={}",
               vibration_device_handle.npad_type, vibration_device_handle.npad_id,
               vibration_device_handle.device_index);
@@ -934,7 +1004,8 @@ Result IHidServer::GetVibrationDeviceInfo(
 
 Result IHidServer::SendVibrationValue(Core::HID::VibrationDeviceHandle vibration_device_handle,
                                       Core::HID::VibrationValue vibration_value,
-                                      ClientAppletResourceUserId aruid) {
+                                      ClientAppletResourceUserId aruid)
+{
     LOG_DEBUG(Service_HID,
               "called, npad_type={}, npad_id={}, device_index={}, applet_resource_user_id={}",
               vibration_device_handle.npad_type, vibration_device_handle.npad_id,
@@ -946,7 +1017,8 @@ Result IHidServer::SendVibrationValue(Core::HID::VibrationDeviceHandle vibration
 
 Result IHidServer::GetActualVibrationValue(Out<Core::HID::VibrationValue> out_vibration_value,
                                            Core::HID::VibrationDeviceHandle vibration_device_handle,
-                                           ClientAppletResourceUserId aruid) {
+                                           ClientAppletResourceUserId aruid)
+{
     LOG_DEBUG(Service_HID,
               "called, npad_type={}, npad_id={}, device_index={}, applet_resource_user_id={}",
               vibration_device_handle.npad_type, vibration_device_handle.npad_id,
@@ -971,22 +1043,25 @@ Result IHidServer::GetActualVibrationValue(Out<Core::HID::VibrationValue> out_vi
     R_SUCCEED();
 }
 
-Result IHidServer::CreateActiveVibrationDeviceList(
-    OutInterface<IActiveVibrationDeviceList> out_interface) {
+Result
+IHidServer::CreateActiveVibrationDeviceList(OutInterface<IActiveVibrationDeviceList> out_interface)
+{
     LOG_DEBUG(Service_HID, "called");
 
     *out_interface = std::make_shared<IActiveVibrationDeviceList>(system, GetResourceManager());
     R_SUCCEED();
 }
 
-Result IHidServer::PermitVibration(bool can_vibrate) {
+Result IHidServer::PermitVibration(bool can_vibrate)
+{
     LOG_DEBUG(Service_HID, "called, can_vibrate={}", can_vibrate);
 
     R_RETURN(GetResourceManager()->GetNpad()->GetVibrationHandler()->SetVibrationMasterVolume(
         can_vibrate ? 1.0f : 0.0f));
 }
 
-Result IHidServer::IsVibrationPermitted(Out<bool> out_is_permitted) {
+Result IHidServer::IsVibrationPermitted(Out<bool> out_is_permitted)
+{
     LOG_DEBUG(Service_HID, "called");
 
     f32 master_volume{};
@@ -1000,7 +1075,8 @@ Result IHidServer::IsVibrationPermitted(Out<bool> out_is_permitted) {
 Result IHidServer::SendVibrationValues(
     ClientAppletResourceUserId aruid,
     InArray<Core::HID::VibrationDeviceHandle, BufferAttr_HipcPointer> vibration_handles,
-    InArray<Core::HID::VibrationValue, BufferAttr_HipcPointer> vibration_values) {
+    InArray<Core::HID::VibrationValue, BufferAttr_HipcPointer> vibration_values)
+{
     LOG_DEBUG(Service_HID, "called, applet_resource_user_id={}", aruid.pid);
 
     R_UNLESS(vibration_handles.size() == vibration_values.size(), ResultVibrationArraySizeMismatch);
@@ -1013,9 +1089,11 @@ Result IHidServer::SendVibrationValues(
     R_SUCCEED();
 }
 
-Result IHidServer::SendVibrationGcErmCommand(
-    Core::HID::VibrationDeviceHandle vibration_device_handle, ClientAppletResourceUserId aruid,
-    Core::HID::VibrationGcErmCommand gc_erm_command) {
+Result
+IHidServer::SendVibrationGcErmCommand(Core::HID::VibrationDeviceHandle vibration_device_handle,
+                                      ClientAppletResourceUserId aruid,
+                                      Core::HID::VibrationGcErmCommand gc_erm_command)
+{
     LOG_DEBUG(Service_HID,
               "called, npad_type={}, npad_id={}, device_index={}, applet_resource_user_id={}, "
               "gc_erm_command={}",
@@ -1039,9 +1117,11 @@ Result IHidServer::SendVibrationGcErmCommand(
     R_SUCCEED();
 }
 
-Result IHidServer::GetActualVibrationGcErmCommand(
-    Out<Core::HID::VibrationGcErmCommand> out_gc_erm_command,
-    Core::HID::VibrationDeviceHandle vibration_device_handle, ClientAppletResourceUserId aruid) {
+Result
+IHidServer::GetActualVibrationGcErmCommand(Out<Core::HID::VibrationGcErmCommand> out_gc_erm_command,
+                                           Core::HID::VibrationDeviceHandle vibration_device_handle,
+                                           ClientAppletResourceUserId aruid)
+{
     LOG_DEBUG(Service_HID,
               "called, npad_type={}, npad_id={}, device_index={}, applet_resource_user_id={}",
               vibration_device_handle.npad_type, vibration_device_handle.npad_id,
@@ -1066,22 +1146,26 @@ Result IHidServer::GetActualVibrationGcErmCommand(
     R_SUCCEED();
 }
 
-Result IHidServer::BeginPermitVibrationSession(ClientAppletResourceUserId aruid) {
+Result IHidServer::BeginPermitVibrationSession(ClientAppletResourceUserId aruid)
+{
     LOG_DEBUG(Service_HID, "called, applet_resource_user_id={}", aruid.pid);
 
     R_RETURN(GetResourceManager()->GetNpad()->GetVibrationHandler()->BeginPermitVibrationSession(
         aruid.pid));
 }
 
-Result IHidServer::EndPermitVibrationSession(ClientAppletResourceUserId aruid) {
+Result IHidServer::EndPermitVibrationSession(ClientAppletResourceUserId aruid)
+{
     LOG_DEBUG(Service_HID, "called");
 
     R_RETURN(GetResourceManager()->GetNpad()->GetVibrationHandler()->EndPermitVibrationSession());
 }
 
-Result IHidServer::IsVibrationDeviceMounted(
-    Out<bool> out_is_mounted, Core::HID::VibrationDeviceHandle vibration_device_handle,
-    ClientAppletResourceUserId aruid) {
+Result
+IHidServer::IsVibrationDeviceMounted(Out<bool> out_is_mounted,
+                                     Core::HID::VibrationDeviceHandle vibration_device_handle,
+                                     ClientAppletResourceUserId aruid)
+{
     LOG_DEBUG(Service_HID,
               "called, npad_type={}, npad_id={}, device_index={}, applet_resource_user_id={}",
               vibration_device_handle.npad_type, vibration_device_handle.npad_id,
@@ -1098,9 +1182,11 @@ Result IHidServer::IsVibrationDeviceMounted(
     R_SUCCEED();
 }
 
-Result IHidServer::SendVibrationValueInBool(
-    bool is_vibrating, Core::HID::VibrationDeviceHandle vibration_device_handle,
-    ClientAppletResourceUserId aruid) {
+Result
+IHidServer::SendVibrationValueInBool(bool is_vibrating,
+                                     Core::HID::VibrationDeviceHandle vibration_device_handle,
+                                     ClientAppletResourceUserId aruid)
+{
     LOG_DEBUG(Service_HID,
               "called, npad_type={}, npad_id={}, device_index={}, applet_resource_user_id={}, "
               "is_vibrating={}",
@@ -1125,7 +1211,8 @@ Result IHidServer::SendVibrationValueInBool(
     R_SUCCEED();
 }
 
-Result IHidServer::ActivateConsoleSixAxisSensor(ClientAppletResourceUserId aruid) {
+Result IHidServer::ActivateConsoleSixAxisSensor(ClientAppletResourceUserId aruid)
+{
     LOG_INFO(Service_HID, "called, applet_resource_user_id={}", aruid.pid);
 
     if (!firmware_settings->IsDeviceManaged()) {
@@ -1135,25 +1222,28 @@ Result IHidServer::ActivateConsoleSixAxisSensor(ClientAppletResourceUserId aruid
     R_RETURN(GetResourceManager()->GetConsoleSixAxis()->Activate(aruid.pid));
 }
 
-Result IHidServer::StartConsoleSixAxisSensor(
-    Core::HID::ConsoleSixAxisSensorHandle console_sixaxis_handle,
-    ClientAppletResourceUserId aruid) {
+Result
+IHidServer::StartConsoleSixAxisSensor(Core::HID::ConsoleSixAxisSensorHandle console_sixaxis_handle,
+                                      ClientAppletResourceUserId aruid)
+{
     LOG_WARNING(Service_HID,
                 "(STUBBED) called, unknown_1={}, unknown_2={}, applet_resource_user_id={}",
                 console_sixaxis_handle.unknown_1, console_sixaxis_handle.unknown_2, aruid.pid);
     R_SUCCEED();
 }
 
-Result IHidServer::StopConsoleSixAxisSensor(
-    Core::HID::ConsoleSixAxisSensorHandle console_sixaxis_handle,
-    ClientAppletResourceUserId aruid) {
+Result
+IHidServer::StopConsoleSixAxisSensor(Core::HID::ConsoleSixAxisSensorHandle console_sixaxis_handle,
+                                     ClientAppletResourceUserId aruid)
+{
     LOG_WARNING(Service_HID,
                 "(STUBBED) called, unknown_1={}, unknown_2={}, applet_resource_user_id={}",
                 console_sixaxis_handle.unknown_1, console_sixaxis_handle.unknown_2, aruid.pid);
     R_SUCCEED();
 }
 
-Result IHidServer::ActivateSevenSixAxisSensor(ClientAppletResourceUserId aruid) {
+Result IHidServer::ActivateSevenSixAxisSensor(ClientAppletResourceUserId aruid)
+{
     LOG_INFO(Service_HID, "called, applet_resource_user_id={}", aruid.pid);
 
     if (!firmware_settings->IsDeviceManaged()) {
@@ -1164,12 +1254,14 @@ Result IHidServer::ActivateSevenSixAxisSensor(ClientAppletResourceUserId aruid) 
     R_SUCCEED();
 }
 
-Result IHidServer::StartSevenSixAxisSensor(ClientAppletResourceUserId aruid) {
+Result IHidServer::StartSevenSixAxisSensor(ClientAppletResourceUserId aruid)
+{
     LOG_WARNING(Service_HID, "(STUBBED) called, applet_resource_user_id={}", aruid.pid);
     R_SUCCEED();
 }
 
-Result IHidServer::StopSevenSixAxisSensor(ClientAppletResourceUserId aruid) {
+Result IHidServer::StopSevenSixAxisSensor(ClientAppletResourceUserId aruid)
+{
     LOG_WARNING(Service_HID, "(STUBBED) called, applet_resource_user_id={}", aruid.pid);
     R_SUCCEED();
 }
@@ -1177,7 +1269,8 @@ Result IHidServer::StopSevenSixAxisSensor(ClientAppletResourceUserId aruid) {
 Result IHidServer::InitializeSevenSixAxisSensor(ClientAppletResourceUserId aruid, u64 t_mem_1_size,
                                                 u64 t_mem_2_size,
                                                 InCopyHandle<Kernel::KTransferMemory> t_mem_1,
-                                                InCopyHandle<Kernel::KTransferMemory> t_mem_2) {
+                                                InCopyHandle<Kernel::KTransferMemory> t_mem_2)
+{
     LOG_WARNING(Service_HID,
                 "called, t_mem_1_size=0x{:08X}, t_mem_2_size=0x{:08X}, "
                 "applet_resource_user_id={}",
@@ -1198,13 +1291,15 @@ Result IHidServer::InitializeSevenSixAxisSensor(ClientAppletResourceUserId aruid
     R_SUCCEED();
 }
 
-Result IHidServer::FinalizeSevenSixAxisSensor(ClientAppletResourceUserId aruid) {
+Result IHidServer::FinalizeSevenSixAxisSensor(ClientAppletResourceUserId aruid)
+{
     LOG_WARNING(Service_HID, "(STUBBED) called, applet_resource_user_id={}", aruid.pid);
 
     R_SUCCEED();
 }
 
-Result IHidServer::ResetSevenSixAxisSensorTimestamp(ClientAppletResourceUserId aruid) {
+Result IHidServer::ResetSevenSixAxisSensorTimestamp(ClientAppletResourceUserId aruid)
+{
     LOG_WARNING(Service_HID, "called, applet_resource_user_id={}", aruid.pid);
 
     GetResourceManager()->GetSevenSixAxis()->ResetTimestamp();
@@ -1212,7 +1307,8 @@ Result IHidServer::ResetSevenSixAxisSensorTimestamp(ClientAppletResourceUserId a
 }
 
 Result IHidServer::IsUsbFullKeyControllerEnabled(Out<bool> out_is_enabled,
-                                                 ClientAppletResourceUserId aruid) {
+                                                 ClientAppletResourceUserId aruid)
+{
     LOG_WARNING(Service_HID, "(STUBBED) called");
 
     *out_is_enabled = false;
@@ -1221,22 +1317,25 @@ Result IHidServer::IsUsbFullKeyControllerEnabled(Out<bool> out_is_enabled,
 
 Result IHidServer::GetPalmaConnectionHandle(Out<Palma::PalmaConnectionHandle> out_handle,
                                             Core::HID::NpadIdType npad_id,
-                                            ClientAppletResourceUserId aruid) {
+                                            ClientAppletResourceUserId aruid)
+{
     LOG_WARNING(Service_HID, "(STUBBED) called, npad_id={}, applet_resource_user_id={}", npad_id,
                 aruid.pid);
 
     R_RETURN(GetResourceManager()->GetPalma()->GetPalmaConnectionHandle(npad_id, *out_handle));
 }
 
-Result IHidServer::InitializePalma(Palma::PalmaConnectionHandle connection_handle) {
+Result IHidServer::InitializePalma(Palma::PalmaConnectionHandle connection_handle)
+{
     LOG_WARNING(Service_HID, "(STUBBED) called, connection_handle={}", connection_handle.npad_id);
 
     R_RETURN(GetResourceManager()->GetPalma()->InitializePalma(connection_handle));
 }
 
-Result IHidServer::AcquirePalmaOperationCompleteEvent(
-    OutCopyHandle<Kernel::KReadableEvent> out_event,
-    Palma::PalmaConnectionHandle connection_handle) {
+Result
+IHidServer::AcquirePalmaOperationCompleteEvent(OutCopyHandle<Kernel::KReadableEvent> out_event,
+                                               Palma::PalmaConnectionHandle connection_handle)
+{
     LOG_WARNING(Service_HID, "(STUBBED) called, connection_handle={}", connection_handle.npad_id);
 
     *out_event =
@@ -1246,7 +1345,8 @@ Result IHidServer::AcquirePalmaOperationCompleteEvent(
 
 Result IHidServer::GetPalmaOperationInfo(Out<Palma::PalmaOperationType> out_operation_type,
                                          Palma::PalmaConnectionHandle connection_handle,
-                                         OutBuffer<BufferAttr_HipcMapAlias> out_data) {
+                                         OutBuffer<BufferAttr_HipcMapAlias> out_data)
+{
     LOG_WARNING(Service_HID, "(STUBBED) called, connection_handle={}", connection_handle.npad_id);
 
     R_RETURN(GetResourceManager()->GetPalma()->GetPalmaOperationInfo(
@@ -1254,7 +1354,8 @@ Result IHidServer::GetPalmaOperationInfo(Out<Palma::PalmaOperationType> out_oper
 }
 
 Result IHidServer::PlayPalmaActivity(Palma::PalmaConnectionHandle connection_handle,
-                                     u64 palma_activity) {
+                                     u64 palma_activity)
+{
     LOG_WARNING(Service_HID, "(STUBBED) called, connection_handle={}, palma_activity={}",
                 connection_handle.npad_id, palma_activity);
 
@@ -1263,35 +1364,39 @@ Result IHidServer::PlayPalmaActivity(Palma::PalmaConnectionHandle connection_han
 }
 
 Result IHidServer::SetPalmaFrModeType(Palma::PalmaConnectionHandle connection_handle,
-                                      Palma::PalmaFrModeType fr_mode) {
+                                      Palma::PalmaFrModeType fr_mode)
+{
     LOG_WARNING(Service_HID, "(STUBBED) called, connection_handle={}, fr_mode={}",
                 connection_handle.npad_id, fr_mode);
 
     R_RETURN(GetResourceManager()->GetPalma()->SetPalmaFrModeType(connection_handle, fr_mode));
 }
 
-Result IHidServer::ReadPalmaStep(Palma::PalmaConnectionHandle connection_handle) {
+Result IHidServer::ReadPalmaStep(Palma::PalmaConnectionHandle connection_handle)
+{
     LOG_WARNING(Service_HID, "(STUBBED) called, connection_handle={}", connection_handle.npad_id);
 
     R_RETURN(GetResourceManager()->GetPalma()->ReadPalmaStep(connection_handle));
 }
 
-Result IHidServer::EnablePalmaStep(bool is_enabled,
-                                   Palma::PalmaConnectionHandle connection_handle) {
+Result IHidServer::EnablePalmaStep(bool is_enabled, Palma::PalmaConnectionHandle connection_handle)
+{
     LOG_WARNING(Service_HID, "(STUBBED) called, connection_handle={}, is_enabled={}",
                 connection_handle.npad_id, is_enabled);
 
     R_RETURN(GetResourceManager()->GetPalma()->EnablePalmaStep(connection_handle, is_enabled));
 }
 
-Result IHidServer::ResetPalmaStep(Palma::PalmaConnectionHandle connection_handle) {
+Result IHidServer::ResetPalmaStep(Palma::PalmaConnectionHandle connection_handle)
+{
     LOG_WARNING(Service_HID, "(STUBBED) called, connection_handle={}", connection_handle.npad_id);
 
     R_RETURN(GetResourceManager()->GetPalma()->ResetPalmaStep(connection_handle));
 }
 
 Result IHidServer::ReadPalmaApplicationSection(Palma::PalmaConnectionHandle connection_handle,
-                                               u64 offset, u64 size) {
+                                               u64 offset, u64 size)
+{
     LOG_WARNING(Service_HID, "(STUBBED) called, connection_handle={}, offset={}, size={}",
                 connection_handle.npad_id, offset, size);
     R_SUCCEED();
@@ -1299,20 +1404,23 @@ Result IHidServer::ReadPalmaApplicationSection(Palma::PalmaConnectionHandle conn
 
 Result IHidServer::WritePalmaApplicationSection(
     Palma::PalmaConnectionHandle connection_handle, u64 offset, u64 size,
-    InLargeData<Palma::PalmaApplicationSection, BufferAttr_HipcPointer> data) {
+    InLargeData<Palma::PalmaApplicationSection, BufferAttr_HipcPointer> data)
+{
     LOG_WARNING(Service_HID, "(STUBBED) called, connection_handle={}, offset={}, size={}",
                 connection_handle.npad_id, offset, size);
     R_SUCCEED();
 }
 
-Result IHidServer::ReadPalmaUniqueCode(Palma::PalmaConnectionHandle connection_handle) {
+Result IHidServer::ReadPalmaUniqueCode(Palma::PalmaConnectionHandle connection_handle)
+{
     LOG_WARNING(Service_HID, "(STUBBED) called, connection_handle={}", connection_handle.npad_id);
 
     GetResourceManager()->GetPalma()->ReadPalmaUniqueCode(connection_handle);
     R_SUCCEED();
 }
 
-Result IHidServer::SetPalmaUniqueCodeInvalid(Palma::PalmaConnectionHandle connection_handle) {
+Result IHidServer::SetPalmaUniqueCodeInvalid(Palma::PalmaConnectionHandle connection_handle)
+{
     LOG_WARNING(Service_HID, "(STUBBED) called, connection_handle={}", connection_handle.npad_id);
 
     GetResourceManager()->GetPalma()->SetPalmaUniqueCodeInvalid(connection_handle);
@@ -1320,14 +1428,16 @@ Result IHidServer::SetPalmaUniqueCodeInvalid(Palma::PalmaConnectionHandle connec
 }
 
 Result IHidServer::WritePalmaActivityEntry(Palma::PalmaConnectionHandle connection_handle,
-                                           Palma::PalmaActivityEntry activity_entry) {
+                                           Palma::PalmaActivityEntry activity_entry)
+{
     LOG_WARNING(Service_HID, "(STUBBED) called, connection_handle={}", connection_handle.npad_id);
     R_SUCCEED();
 }
 
 Result IHidServer::WritePalmaRgbLedPatternEntry(Palma::PalmaConnectionHandle connection_handle,
                                                 u64 unknown,
-                                                InBuffer<BufferAttr_HipcMapAlias> led_pattern) {
+                                                InBuffer<BufferAttr_HipcMapAlias> led_pattern)
+{
     LOG_WARNING(Service_HID, "(STUBBED) called, connection_handle={}, unknown={}",
                 connection_handle.npad_id, unknown);
 
@@ -1337,7 +1447,8 @@ Result IHidServer::WritePalmaRgbLedPatternEntry(Palma::PalmaConnectionHandle con
 
 Result IHidServer::WritePalmaWaveEntry(Palma::PalmaConnectionHandle connection_handle,
                                        Palma::PalmaWaveSet wave_set, u64 unknown, u64 t_mem_size,
-                                       u64 size, InCopyHandle<Kernel::KTransferMemory> t_mem) {
+                                       u64 size, InCopyHandle<Kernel::KTransferMemory> t_mem)
+{
     ASSERT_MSG(t_mem->GetSize() == t_mem_size, "t_mem has incorrect size");
 
     LOG_WARNING(
@@ -1350,8 +1461,10 @@ Result IHidServer::WritePalmaWaveEntry(Palma::PalmaConnectionHandle connection_h
     R_SUCCEED();
 }
 
-Result IHidServer::SetPalmaDataBaseIdentificationVersion(
-    s32 database_id_version, Palma::PalmaConnectionHandle connection_handle) {
+Result
+IHidServer::SetPalmaDataBaseIdentificationVersion(s32 database_id_version,
+                                                  Palma::PalmaConnectionHandle connection_handle)
+{
     LOG_WARNING(Service_HID, "(STUBBED) called, connection_handle={}, database_id_version={}",
                 connection_handle.npad_id, database_id_version);
 
@@ -1360,8 +1473,9 @@ Result IHidServer::SetPalmaDataBaseIdentificationVersion(
     R_SUCCEED();
 }
 
-Result IHidServer::GetPalmaDataBaseIdentificationVersion(
-    Palma::PalmaConnectionHandle connection_handle) {
+Result
+IHidServer::GetPalmaDataBaseIdentificationVersion(Palma::PalmaConnectionHandle connection_handle)
+{
     LOG_WARNING(Service_HID, "(STUBBED) called, connection_handle={}", connection_handle.npad_id);
 
     R_RETURN(
@@ -1369,32 +1483,37 @@ Result IHidServer::GetPalmaDataBaseIdentificationVersion(
 }
 
 Result IHidServer::SuspendPalmaFeature(Palma::PalmaFeature feature,
-                                       Palma::PalmaConnectionHandle connection_handle) {
+                                       Palma::PalmaConnectionHandle connection_handle)
+{
     LOG_WARNING(Service_HID, "(STUBBED) called, feature={}, connection_handle={}", feature,
                 connection_handle.npad_id);
     R_SUCCEED();
 }
 
-Result IHidServer::GetPalmaOperationResult(Palma::PalmaConnectionHandle connection_handle) {
+Result IHidServer::GetPalmaOperationResult(Palma::PalmaConnectionHandle connection_handle)
+{
     LOG_WARNING(Service_HID, "(STUBBED) called, connection_handle={}", connection_handle.npad_id);
 
     R_RETURN(GetResourceManager()->GetPalma()->GetPalmaOperationResult(connection_handle));
 }
 
-Result IHidServer::ReadPalmaPlayLog(u16 unknown, Palma::PalmaConnectionHandle connection_handle) {
+Result IHidServer::ReadPalmaPlayLog(u16 unknown, Palma::PalmaConnectionHandle connection_handle)
+{
     LOG_WARNING(Service_HID, "(STUBBED) called, unknown={}, connection_handle={}", unknown,
                 connection_handle.npad_id);
     R_SUCCEED();
 }
 
-Result IHidServer::ResetPalmaPlayLog(u16 unknown, Palma::PalmaConnectionHandle connection_handle) {
+Result IHidServer::ResetPalmaPlayLog(u16 unknown, Palma::PalmaConnectionHandle connection_handle)
+{
     LOG_WARNING(Service_HID, "(STUBBED) called, unknown={}, connection_handle={}", unknown,
                 connection_handle.npad_id);
     R_SUCCEED();
 }
 
 Result IHidServer::SetIsPalmaAllConnectable(bool is_palma_all_connectable,
-                                            ClientAppletResourceUserId aruid) {
+                                            ClientAppletResourceUserId aruid)
+{
     LOG_WARNING(Service_HID,
                 "(STUBBED) called, is_palma_all_connectable={}, applet_resource_user_id={}",
                 is_palma_all_connectable, aruid.pid);
@@ -1404,53 +1523,61 @@ Result IHidServer::SetIsPalmaAllConnectable(bool is_palma_all_connectable,
 }
 
 Result IHidServer::SetIsPalmaPairedConnectable(bool is_palma_paired_connectable,
-                                               ClientAppletResourceUserId aruid) {
+                                               ClientAppletResourceUserId aruid)
+{
     LOG_WARNING(Service_HID,
                 "(STUBBED) called, is_palma_paired_connectable={}, applet_resource_user_id={}",
                 is_palma_paired_connectable, aruid.pid);
     R_SUCCEED();
 }
 
-Result IHidServer::PairPalma(Palma::PalmaConnectionHandle connection_handle) {
+Result IHidServer::PairPalma(Palma::PalmaConnectionHandle connection_handle)
+{
     LOG_WARNING(Service_HID, "(STUBBED) called, connection_handle={}", connection_handle.npad_id);
 
     GetResourceManager()->GetPalma()->PairPalma(connection_handle);
     R_SUCCEED();
 }
 
-Result IHidServer::SetPalmaBoostMode(bool is_enabled) {
+Result IHidServer::SetPalmaBoostMode(bool is_enabled)
+{
     LOG_WARNING(Service_HID, "(STUBBED) called, is_enabled={}", is_enabled);
 
     GetResourceManager()->GetPalma()->SetPalmaBoostMode(is_enabled);
     R_SUCCEED();
 }
 
-Result IHidServer::CancelWritePalmaWaveEntry(Palma::PalmaConnectionHandle connection_handle) {
+Result IHidServer::CancelWritePalmaWaveEntry(Palma::PalmaConnectionHandle connection_handle)
+{
     LOG_WARNING(Service_HID, "(STUBBED) called, connection_handle={}", connection_handle.npad_id);
     R_SUCCEED();
 }
 
-Result IHidServer::EnablePalmaBoostMode(bool is_enabled, ClientAppletResourceUserId aruid) {
+Result IHidServer::EnablePalmaBoostMode(bool is_enabled, ClientAppletResourceUserId aruid)
+{
     LOG_WARNING(Service_HID, "(STUBBED) called, is_enabled={}, applet_resource_user_id={}",
                 is_enabled, aruid.pid);
     R_SUCCEED();
 }
 
 Result IHidServer::GetPalmaBluetoothAddress(Out<Palma::Address> out_bt_address,
-                                            Palma::PalmaConnectionHandle connection_handle) {
+                                            Palma::PalmaConnectionHandle connection_handle)
+{
     LOG_WARNING(Service_HID, "(STUBBED) called, connection_handle={}", connection_handle.npad_id);
     R_SUCCEED();
 }
 
 Result IHidServer::SetDisallowedPalmaConnection(
     ClientAppletResourceUserId aruid,
-    InArray<Palma::Address, BufferAttr_HipcPointer> disallowed_address) {
+    InArray<Palma::Address, BufferAttr_HipcPointer> disallowed_address)
+{
     LOG_DEBUG(Service_HID, "(STUBBED) called, applet_resource_user_id={}", aruid.pid);
     R_SUCCEED();
 }
 
 Result IHidServer::SetNpadCommunicationMode(ClientAppletResourceUserId aruid,
-                                            NpadCommunicationMode communication_mode) {
+                                            NpadCommunicationMode communication_mode)
+{
     LOG_DEBUG(Service_HID, "called, applet_resource_user_id={}, communication_mode={}", aruid.pid,
               communication_mode);
 
@@ -1459,7 +1586,8 @@ Result IHidServer::SetNpadCommunicationMode(ClientAppletResourceUserId aruid,
 }
 
 Result IHidServer::GetNpadCommunicationMode(Out<NpadCommunicationMode> out_communication_mode,
-                                            ClientAppletResourceUserId aruid) {
+                                            ClientAppletResourceUserId aruid)
+{
     LOG_DEBUG(Service_HID, "called, applet_resource_user_id={}", aruid.pid);
 
     // This function has been stubbed since 2.0.0+
@@ -1467,8 +1595,10 @@ Result IHidServer::GetNpadCommunicationMode(Out<NpadCommunicationMode> out_commu
     R_SUCCEED();
 }
 
-Result IHidServer::SetTouchScreenConfiguration(
-    Core::HID::TouchScreenConfigurationForNx touchscreen_config, ClientAppletResourceUserId aruid) {
+Result
+IHidServer::SetTouchScreenConfiguration(Core::HID::TouchScreenConfigurationForNx touchscreen_config,
+                                        ClientAppletResourceUserId aruid)
+{
     LOG_INFO(Service_HID, "called, touchscreen_config={}, applet_resource_user_id={}",
              touchscreen_config.mode, aruid.pid);
 
@@ -1483,7 +1613,8 @@ Result IHidServer::SetTouchScreenConfiguration(
 
 Result IHidServer::IsFirmwareUpdateNeededForNotification(Out<bool> out_is_firmware_update_needed,
                                                          s32 unknown,
-                                                         ClientAppletResourceUserId aruid) {
+                                                         ClientAppletResourceUserId aruid)
+{
     LOG_WARNING(Service_HID, "(STUBBED) called, unknown={}, applet_resource_user_id={}", unknown,
                 aruid.pid);
 
@@ -1491,8 +1622,8 @@ Result IHidServer::IsFirmwareUpdateNeededForNotification(Out<bool> out_is_firmwa
     R_SUCCEED();
 }
 
-Result IHidServer::SetTouchScreenResolution(u32 width, u32 height,
-                                            ClientAppletResourceUserId aruid) {
+Result IHidServer::SetTouchScreenResolution(u32 width, u32 height, ClientAppletResourceUserId aruid)
+{
     LOG_INFO(Service_HID, "called, width={}, height={}, applet_resource_user_id={}", width, height,
              aruid.pid);
 
@@ -1500,7 +1631,8 @@ Result IHidServer::SetTouchScreenResolution(u32 width, u32 height,
     R_SUCCEED();
 }
 
-std::shared_ptr<ResourceManager> IHidServer::GetResourceManager() {
+std::shared_ptr<ResourceManager> IHidServer::GetResourceManager()
+{
     resource_manager->Initialize();
     return resource_manager;
 }

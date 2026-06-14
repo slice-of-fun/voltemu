@@ -5,7 +5,8 @@
 
 namespace Service::NS {
 
-IDevelopInterface::IDevelopInterface(Core::System& system_) : ServiceFramework{system_, "ns:dev"} {
+IDevelopInterface::IDevelopInterface(Core::System& system_) : ServiceFramework{system_, "ns:dev"}
+{
     // clang-format off
     static const FunctionInfo functions[] = {
         {0, nullptr, "LaunchProgram"},

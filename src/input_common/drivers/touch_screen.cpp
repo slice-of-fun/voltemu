@@ -1,8 +1,9 @@
 // SPDX-FileCopyrightText: Copyright 2021 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include "common/param_package.h"
 #include "input_common/drivers/touch_screen.h"
+
+#include "common/param_package.h"
 
 namespace InputCommon {
 
@@ -12,12 +13,14 @@ constexpr PadIdentifier identifier = {
     .pad = 0,
 };
 
-TouchScreen::TouchScreen(std::string input_engine_) : InputEngine(std::move(input_engine_)) {
+TouchScreen::TouchScreen(std::string input_engine_) : InputEngine(std::move(input_engine_))
+{
     PreSetController(identifier);
     ReleaseAllTouch();
 }
 
-void TouchScreen::TouchMoved(float x, float y, std::size_t finger_id) {
+void TouchScreen::TouchMoved(float x, float y, std::size_t finger_id)
+{
     const auto index = GetIndexFromFingerId(finger_id);
     if (!index) {
         // Touch doesn't exist handle it as a new one
@@ -31,7 +34,8 @@ void TouchScreen::TouchMoved(float x, float y, std::size_t finger_id) {
     SetAxis(identifier, static_cast<int>(i * 2 + 1), y);
 }
 
-void TouchScreen::TouchPressed(float x, float y, std::size_t finger_id) {
+void TouchScreen::TouchPressed(float x, float y, std::size_t finger_id)
+{
     if (GetIndexFromFingerId(finger_id)) {
         // Touch already exist. Just update the data
         TouchMoved(x, y, finger_id);
@@ -48,7 +52,8 @@ void TouchScreen::TouchPressed(float x, float y, std::size_t finger_id) {
     TouchMoved(x, y, finger_id);
 }
 
-void TouchScreen::TouchReleased(std::size_t finger_id) {
+void TouchScreen::TouchReleased(std::size_t finger_id)
+{
     const auto index = GetIndexFromFingerId(finger_id);
     if (!index) {
         return;
@@ -60,7 +65,8 @@ void TouchScreen::TouchReleased(std::size_t finger_id) {
     SetAxis(identifier, static_cast<int>(i * 2 + 1), 0.0f);
 }
 
-std::optional<std::size_t> TouchScreen::GetIndexFromFingerId(std::size_t finger_id) const {
+std::optional<std::size_t> TouchScreen::GetIndexFromFingerId(std::size_t finger_id) const
+{
     for (std::size_t index = 0; index < MAX_FINGER_COUNT; ++index) {
         const auto& finger = fingers[index];
         if (!finger.is_enabled) {
@@ -73,7 +79,8 @@ std::optional<std::size_t> TouchScreen::GetIndexFromFingerId(std::size_t finger_
     return std::nullopt;
 }
 
-std::optional<std::size_t> TouchScreen::GetNextFreeIndex() const {
+std::optional<std::size_t> TouchScreen::GetNextFreeIndex() const
+{
     for (std::size_t index = 0; index < MAX_FINGER_COUNT; ++index) {
         if (!fingers[index].is_enabled) {
             return index;
@@ -82,13 +89,15 @@ std::optional<std::size_t> TouchScreen::GetNextFreeIndex() const {
     return std::nullopt;
 }
 
-void TouchScreen::ClearActiveFlag() {
+void TouchScreen::ClearActiveFlag()
+{
     for (auto& finger : fingers) {
         finger.is_active = false;
     }
 }
 
-void TouchScreen::ReleaseInactiveTouch() {
+void TouchScreen::ReleaseInactiveTouch()
+{
     for (const auto& finger : fingers) {
         if (!finger.is_active) {
             TouchReleased(finger.finger_id);
@@ -96,7 +105,8 @@ void TouchScreen::ReleaseInactiveTouch() {
     }
 }
 
-void TouchScreen::ReleaseAllTouch() {
+void TouchScreen::ReleaseAllTouch()
+{
     for (const auto& finger : fingers) {
         if (finger.is_enabled) {
             TouchReleased(finger.finger_id);

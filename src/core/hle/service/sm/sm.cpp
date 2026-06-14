@@ -1,7 +1,10 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/sm/sm.h"
+
 #include <tuple>
+
 #include "common/assert.h"
 #include "common/scope_exit.h"
 #include "core/core.h"
@@ -13,7 +16,6 @@
 #include "core/hle/result.h"
 #include "core/hle/service/ipc_helpers.h"
 #include "core/hle/service/server_manager.h"
-#include "core/hle/service/sm/sm.h"
 #include "core/hle/service/sm/sm_controller.h"
 
 namespace Service::SM {
@@ -23,11 +25,13 @@ constexpr Result ResultAlreadyRegistered(ErrorModule::SM, 4);
 constexpr Result ResultInvalidServiceName(ErrorModule::SM, 6);
 constexpr Result ResultNotRegistered(ErrorModule::SM, 7);
 
-ServiceManager::ServiceManager(Kernel::KernelCore& kernel_) : kernel{kernel_} {
+ServiceManager::ServiceManager(Kernel::KernelCore& kernel_) : kernel{kernel_}
+{
     controller_interface = std::make_unique<Controller>(kernel.System());
 }
 
-ServiceManager::~ServiceManager() {
+ServiceManager::~ServiceManager()
+{
     for (auto& [name, port] : service_ports) {
         port->Close();
     }
@@ -37,11 +41,13 @@ ServiceManager::~ServiceManager() {
     }
 }
 
-void ServiceManager::InvokeControlRequest(HLERequestContext& context) {
+void ServiceManager::InvokeControlRequest(HLERequestContext& context)
+{
     controller_interface->InvokeRequest(context);
 }
 
-static Result ValidateServiceName(const std::string& name) {
+static Result ValidateServiceName(const std::string& name)
+{
     if (name.empty() || name.size() > 8) {
         LOG_ERROR(Service_SM, "Invalid service name! service={}", name);
         return Service::SM::ResultInvalidServiceName;
@@ -50,7 +56,8 @@ static Result ValidateServiceName(const std::string& name) {
 }
 
 Result ServiceManager::RegisterService(Kernel::KServerPort** out_server_port, std::string name,
-                                       u32 max_sessions, SessionRequestHandlerFactory handler) {
+                                       u32 max_sessions, SessionRequestHandlerFactory handler)
+{
     R_TRY(ValidateServiceName(name));
 
     std::scoped_lock lk{lock};
@@ -78,7 +85,8 @@ Result ServiceManager::RegisterService(Kernel::KServerPort** out_server_port, st
     R_SUCCEED();
 }
 
-Result ServiceManager::UnregisterService(const std::string& name) {
+Result ServiceManager::UnregisterService(const std::string& name)
+{
     R_TRY(ValidateServiceName(name));
 
     std::scoped_lock lk{lock};
@@ -95,7 +103,8 @@ Result ServiceManager::UnregisterService(const std::string& name) {
 }
 
 Result ServiceManager::GetServicePort(Kernel::KClientPort** out_client_port,
-                                      const std::string& name) {
+                                      const std::string& name)
+{
     R_TRY(ValidateServiceName(name));
 
     std::scoped_lock lk{lock};
@@ -116,7 +125,8 @@ Result ServiceManager::GetServicePort(Kernel::KClientPort** out_client_port,
  *  Outputs:
  *      0: Result
  */
-void SM::Initialize(HLERequestContext& ctx) {
+void SM::Initialize(HLERequestContext& ctx)
+{
     LOG_DEBUG(Service_SM, "called");
 
     ctx.GetManager()->SetIsInitializedForSm();
@@ -125,7 +135,8 @@ void SM::Initialize(HLERequestContext& ctx) {
     rb.Push(ResultSuccess);
 }
 
-void SM::GetServiceCmif(HLERequestContext& ctx) {
+void SM::GetServiceCmif(HLERequestContext& ctx)
+{
     Kernel::KClientSession* client_session{};
     auto result = GetServiceImpl(&client_session, ctx);
     if (ctx.GetIsDeferred()) {
@@ -143,7 +154,8 @@ void SM::GetServiceCmif(HLERequestContext& ctx) {
     }
 }
 
-void SM::GetServiceTipc(HLERequestContext& ctx) {
+void SM::GetServiceTipc(HLERequestContext& ctx)
+{
     Kernel::KClientSession* client_session{};
     auto result = GetServiceImpl(&client_session, ctx);
     if (ctx.GetIsDeferred()) {
@@ -156,7 +168,8 @@ void SM::GetServiceTipc(HLERequestContext& ctx) {
     rb.PushMoveObjects(result == ResultSuccess ? client_session : nullptr);
 }
 
-static std::string PopServiceName(IPC::RequestParser& rp) {
+static std::string PopServiceName(IPC::RequestParser& rp)
+{
     auto name_buf = rp.PopRaw<std::array<char, 8>>();
     std::string result;
     for (const auto& c : name_buf) {
@@ -167,7 +180,8 @@ static std::string PopServiceName(IPC::RequestParser& rp) {
     return result;
 }
 
-Result SM::GetServiceImpl(Kernel::KClientSession** out_client_session, HLERequestContext& ctx) {
+Result SM::GetServiceImpl(Kernel::KClientSession** out_client_session, HLERequestContext& ctx)
+{
     if (!ctx.GetManager()->GetIsInitializedForSm()) {
         return Service::SM::ResultInvalidClient;
     }
@@ -200,7 +214,8 @@ Result SM::GetServiceImpl(Kernel::KClientSession** out_client_session, HLEReques
     return ResultSuccess;
 }
 
-void SM::RegisterServiceCmif(HLERequestContext& ctx) {
+void SM::RegisterServiceCmif(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     std::string name(PopServiceName(rp));
 
@@ -210,7 +225,8 @@ void SM::RegisterServiceCmif(HLERequestContext& ctx) {
     this->RegisterServiceImpl(ctx, name, max_session_count, is_light);
 }
 
-void SM::RegisterServiceTipc(HLERequestContext& ctx) {
+void SM::RegisterServiceTipc(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     std::string name(PopServiceName(rp));
 
@@ -221,7 +237,8 @@ void SM::RegisterServiceTipc(HLERequestContext& ctx) {
 }
 
 void SM::RegisterServiceImpl(HLERequestContext& ctx, std::string name, u32 max_session_count,
-                             bool is_light) {
+                             bool is_light)
+{
     LOG_DEBUG(Service_SM, "called with name={}, max_session_count={}, is_light={}", name,
               max_session_count, is_light);
 
@@ -240,7 +257,8 @@ void SM::RegisterServiceImpl(HLERequestContext& ctx, std::string name, u32 max_s
     rb.PushMoveObjects(server_port);
 }
 
-void SM::UnregisterService(HLERequestContext& ctx) {
+void SM::UnregisterService(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     std::string name(PopServiceName(rp));
 
@@ -251,8 +269,9 @@ void SM::UnregisterService(HLERequestContext& ctx) {
 }
 
 SM::SM(ServiceManager& service_manager_, Core::System& system_)
-    : ServiceFramework{system_, "sm:", 4},
-      service_manager{service_manager_}, kernel{system_.Kernel()} {
+    : ServiceFramework{system_, "sm:", 4}, service_manager{service_manager_}, kernel{
+                                                                                  system_.Kernel()}
+{
     RegisterHandlers({
         {0, &SM::Initialize, "Initialize"},
         {1, &SM::GetServiceCmif, "GetService"},
@@ -271,7 +290,8 @@ SM::SM(ServiceManager& service_manager_, Core::System& system_)
 
 SM::~SM() = default;
 
-void LoopProcess(Core::System& system) {
+void LoopProcess(Core::System& system)
+{
     auto& service_manager = system.ServiceManager();
     auto server_manager = std::make_unique<ServerManager>(system);
 

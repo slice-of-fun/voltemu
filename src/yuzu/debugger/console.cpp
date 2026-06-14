@@ -5,9 +5,8 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #ifdef _WIN32
-#include <windows.h>
-
 #include <wincon.h>
+#include <windows.h>
 #endif
 
 #include "common/logging.h"
@@ -15,7 +14,8 @@
 #include "yuzu/debugger/console.h"
 
 namespace Debugger {
-void ToggleConsole() {
+void ToggleConsole()
+{
     static bool console_shown = false;
     if (console_shown == UISettings::values.show_console.GetValue()) {
         return;

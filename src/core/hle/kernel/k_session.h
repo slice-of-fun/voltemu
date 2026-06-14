@@ -24,11 +24,10 @@ public:
     void Initialize(KClientPort* port, uintptr_t name);
     void Finalize() override;
 
-    bool IsInitialized() const override {
-        return m_initialized;
-    }
+    bool IsInitialized() const override { return m_initialized; }
 
-    uintptr_t GetPostDestroyArgument() const override {
+    uintptr_t GetPostDestroyArgument() const override
+    {
         return reinterpret_cast<uintptr_t>(m_process);
     }
 
@@ -38,37 +37,21 @@ public:
 
     void OnClientClosed();
 
-    bool IsServerClosed() const {
-        return this->GetState() != State::Normal;
-    }
+    bool IsServerClosed() const { return this->GetState() != State::Normal; }
 
-    bool IsClientClosed() const {
-        return this->GetState() != State::Normal;
-    }
+    bool IsClientClosed() const { return this->GetState() != State::Normal; }
 
-    Result OnRequest(KSessionRequest* request) {
-        R_RETURN(m_server.OnRequest(request));
-    }
+    Result OnRequest(KSessionRequest* request) { R_RETURN(m_server.OnRequest(request)); }
 
-    KClientSession& GetClientSession() {
-        return m_client;
-    }
+    KClientSession& GetClientSession() { return m_client; }
 
-    KServerSession& GetServerSession() {
-        return m_server;
-    }
+    KServerSession& GetServerSession() { return m_server; }
 
-    const KClientSession& GetClientSession() const {
-        return m_client;
-    }
+    const KClientSession& GetClientSession() const { return m_client; }
 
-    const KServerSession& GetServerSession() const {
-        return m_server;
-    }
+    const KServerSession& GetServerSession() const { return m_server; }
 
-    const KClientPort* GetParent() const {
-        return m_port;
-    }
+    const KClientPort* GetParent() const { return m_port; }
 
 private:
     enum class State : u8 {
@@ -78,13 +61,9 @@ private:
         ServerClosed = 3,
     };
 
-    void SetState(State state) {
-        m_atomic_state = static_cast<u8>(state);
-    }
+    void SetState(State state) { m_atomic_state = static_cast<u8>(state); }
 
-    State GetState() const {
-        return static_cast<State>(m_atomic_state.load());
-    }
+    State GetState() const { return static_cast<State>(m_atomic_state.load()); }
 
     KServerSession m_server;
     KClientSession m_client;

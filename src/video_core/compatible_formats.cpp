@@ -1,11 +1,12 @@
 // SPDX-FileCopyrightText: Copyright 2020 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "video_core/compatible_formats.h"
+
 #include <array>
 #include <cstddef>
 
 #include "common/common_types.h"
-#include "video_core/compatible_formats.h"
 #include "video_core/surface.h"
 
 namespace VideoCore::Surface {
@@ -183,17 +184,19 @@ constexpr std::array COPY_CLASS_64_BITS{
 // COMPRESSED_RGBA_S3TC_DXT1_EXT
 // COMPRESSED_SIGNED_RED_RGTC1
 
-constexpr void Enable(Table& table, size_t format_a, size_t format_b) {
+constexpr void Enable(Table& table, size_t format_a, size_t format_b)
+{
     table[format_a][format_b / 64] |= u64(1) << (format_b % 64);
     table[format_b][format_a / 64] |= u64(1) << (format_a % 64);
 }
 
-constexpr void Enable(Table& table, PixelFormat format_a, PixelFormat format_b) {
+constexpr void Enable(Table& table, PixelFormat format_a, PixelFormat format_b)
+{
     Enable(table, static_cast<size_t>(format_a), static_cast<size_t>(format_b));
 }
 
-template <typename Range>
-constexpr void EnableRange(Table& table, const Range& range) {
+template<typename Range> constexpr void EnableRange(Table& table, const Range& range)
+{
     for (auto it_a = range.begin(); it_a != range.end(); ++it_a) {
         for (auto it_b = it_a; it_b != range.end(); ++it_b) {
             Enable(table, *it_a, *it_b);
@@ -201,13 +204,15 @@ constexpr void EnableRange(Table& table, const Range& range) {
     }
 }
 
-constexpr bool IsSupported(const Table& table, PixelFormat format_a, PixelFormat format_b) {
+constexpr bool IsSupported(const Table& table, PixelFormat format_a, PixelFormat format_b)
+{
     const size_t a = static_cast<size_t>(format_a);
     const size_t b = static_cast<size_t>(format_b);
     return ((table[a][b / 64] >> (b % 64)) & 1) != 0;
 }
 
-constexpr Table MakeViewTable() {
+constexpr Table MakeViewTable()
+{
     Table view{};
     for (size_t i = 0; i < MaxPixelFormat; ++i) {
         // Identity is allowed
@@ -238,32 +243,37 @@ constexpr Table MakeViewTable() {
     return view;
 }
 
-constexpr Table MakeCopyTable() {
+constexpr Table MakeCopyTable()
+{
     Table copy = MakeViewTable();
     EnableRange(copy, COPY_CLASS_128_BITS);
     EnableRange(copy, COPY_CLASS_64_BITS);
     return copy;
 }
 
-constexpr Table MakeNativeBgrViewTable() {
+constexpr Table MakeNativeBgrViewTable()
+{
     Table copy = MakeViewTable();
     EnableRange(copy, VIEW_CLASS_32_BITS);
     return copy;
 }
 
-constexpr Table MakeNonNativeBgrViewTable() {
+constexpr Table MakeNonNativeBgrViewTable()
+{
     Table copy = MakeViewTable();
     EnableRange(copy, VIEW_CLASS_32_BITS_NO_BGR);
     return copy;
 }
 
-constexpr Table MakeNativeBgrCopyTable() {
+constexpr Table MakeNativeBgrCopyTable()
+{
     Table copy = MakeCopyTable();
     EnableRange(copy, VIEW_CLASS_32_BITS);
     return copy;
 }
 
-constexpr Table MakeNonNativeBgrCopyTable() {
+constexpr Table MakeNonNativeBgrCopyTable()
+{
     Table copy = MakeCopyTable();
     EnableRange(copy, VIEW_CLASS_32_BITS);
     return copy;
@@ -271,7 +281,8 @@ constexpr Table MakeNonNativeBgrCopyTable() {
 } // Anonymous namespace
 
 bool IsViewCompatible(PixelFormat format_a, PixelFormat format_b, bool broken_views,
-                      bool native_bgr) {
+                      bool native_bgr)
+{
     if (format_a == format_b) {
         return true;
     }
@@ -284,7 +295,8 @@ bool IsViewCompatible(PixelFormat format_a, PixelFormat format_b, bool broken_vi
     return IsSupported(native_bgr ? BGR_TABLE : NO_BGR_TABLE, format_a, format_b);
 }
 
-bool IsCopyCompatible(PixelFormat format_a, PixelFormat format_b, bool native_bgr) {
+bool IsCopyCompatible(PixelFormat format_a, PixelFormat format_b, bool native_bgr)
+{
     if (format_a == format_b) {
         return true;
     }

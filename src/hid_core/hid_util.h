@@ -8,7 +8,8 @@
 
 namespace Service::HID {
 
-constexpr bool IsNpadIdValid(const Core::HID::NpadIdType npad_id) {
+constexpr bool IsNpadIdValid(const Core::HID::NpadIdType npad_id)
+{
     switch (npad_id) {
     case Core::HID::NpadIdType::Player1:
     case Core::HID::NpadIdType::Player2:
@@ -26,7 +27,8 @@ constexpr bool IsNpadIdValid(const Core::HID::NpadIdType npad_id) {
     }
 }
 
-constexpr Result IsSixaxisHandleValid(const Core::HID::SixAxisSensorHandle& handle) {
+constexpr Result IsSixaxisHandleValid(const Core::HID::SixAxisSensorHandle& handle)
+{
     const auto npad_id = IsNpadIdValid(static_cast<Core::HID::NpadIdType>(handle.npad_id));
     const bool device_index = handle.device_index < Core::HID::DeviceIndex::MaxDeviceIndex;
 
@@ -40,7 +42,8 @@ constexpr Result IsSixaxisHandleValid(const Core::HID::SixAxisSensorHandle& hand
     return ResultSuccess;
 }
 
-constexpr Result IsVibrationHandleValid(const Core::HID::VibrationDeviceHandle& handle) {
+constexpr Result IsVibrationHandleValid(const Core::HID::VibrationDeviceHandle& handle)
+{
     switch (handle.npad_type) {
     case Core::HID::NpadStyleIndex::Fullkey:
     case Core::HID::NpadStyleIndex::Handheld:
@@ -69,7 +72,8 @@ constexpr Result IsVibrationHandleValid(const Core::HID::VibrationDeviceHandle& 
 }
 
 /// Converts a Core::HID::NpadIdType to an array index.
-constexpr size_t NpadIdTypeToIndex(Core::HID::NpadIdType npad_id_type) {
+constexpr size_t NpadIdTypeToIndex(Core::HID::NpadIdType npad_id_type)
+{
     switch (npad_id_type) {
     case Core::HID::NpadIdType::Player1:
         return 0;
@@ -97,7 +101,8 @@ constexpr size_t NpadIdTypeToIndex(Core::HID::NpadIdType npad_id_type) {
 }
 
 /// Converts an array index to a Core::HID::NpadIdType
-constexpr Core::HID::NpadIdType IndexToNpadIdType(size_t index) {
+constexpr Core::HID::NpadIdType IndexToNpadIdType(size_t index)
+{
     switch (index) {
     case 0:
         return Core::HID::NpadIdType::Player1;
@@ -124,7 +129,8 @@ constexpr Core::HID::NpadIdType IndexToNpadIdType(size_t index) {
     }
 }
 
-constexpr Core::HID::NpadStyleSet GetStylesetByIndex(std::size_t index) {
+constexpr Core::HID::NpadStyleSet GetStylesetByIndex(std::size_t index)
+{
     switch (index) {
     case 0:
         return Core::HID::NpadStyleSet::Fullkey;

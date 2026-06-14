@@ -9,8 +9,7 @@
 
 namespace Common {
 
-template <class T, unsigned int N>
-struct ThreadQueueList {
+template<class T, unsigned int N> struct ThreadQueueList {
     // TODO(yuriks): If performance proves to be a problem, the std::deques can be replaced with
     //               (dynamically resizable) circular buffers to remove their overhead when
     //               inserting and popping.
@@ -20,12 +19,11 @@ struct ThreadQueueList {
     // Number of priority levels. (Valid levels are [0..NUM_QUEUES).)
     static constexpr Priority NUM_QUEUES = N;
 
-    ThreadQueueList() {
-        first = nullptr;
-    }
+    ThreadQueueList() { first = nullptr; }
 
     // Only for debugging, returns priority level.
-    [[nodiscard]] Priority contains(const T& uid) const {
+    [[nodiscard]] Priority contains(const T& uid) const
+    {
         for (Priority i = 0; i < NUM_QUEUES; ++i) {
             const Queue& cur = queues[i];
             if (std::find(cur.data.cbegin(), cur.data.cend(), uid) != cur.data.cend()) {
@@ -36,7 +34,8 @@ struct ThreadQueueList {
         return -1;
     }
 
-    [[nodiscard]] T get_first() const {
+    [[nodiscard]] T get_first() const
+    {
         const Queue* cur = first;
         while (cur != nullptr) {
             if (!cur->data.empty()) {
@@ -48,8 +47,8 @@ struct ThreadQueueList {
         return T();
     }
 
-    template <typename UnaryPredicate>
-    [[nodiscard]] T get_first_filter(UnaryPredicate filter) const {
+    template<typename UnaryPredicate> [[nodiscard]] T get_first_filter(UnaryPredicate filter) const
+    {
         const Queue* cur = first;
         while (cur != nullptr) {
             if (!cur->data.empty()) {
@@ -64,7 +63,8 @@ struct ThreadQueueList {
         return T();
     }
 
-    T pop_first() {
+    T pop_first()
+    {
         Queue* cur = first;
         while (cur != nullptr) {
             if (!cur->data.empty()) {
@@ -78,7 +78,8 @@ struct ThreadQueueList {
         return T();
     }
 
-    T pop_first_better(Priority priority) {
+    T pop_first_better(Priority priority)
+    {
         Queue* cur = first;
         Queue* stop = &queues[priority];
         while (cur < stop) {
@@ -93,29 +94,34 @@ struct ThreadQueueList {
         return T();
     }
 
-    void push_front(Priority priority, const T& thread_id) {
+    void push_front(Priority priority, const T& thread_id)
+    {
         Queue* cur = &queues[priority];
         cur->data.push_front(thread_id);
     }
 
-    void push_back(Priority priority, const T& thread_id) {
+    void push_back(Priority priority, const T& thread_id)
+    {
         Queue* cur = &queues[priority];
         cur->data.push_back(thread_id);
     }
 
-    void move(const T& thread_id, Priority old_priority, Priority new_priority) {
+    void move(const T& thread_id, Priority old_priority, Priority new_priority)
+    {
         remove(old_priority, thread_id);
         prepare(new_priority);
         push_back(new_priority, thread_id);
     }
 
-    void remove(Priority priority, const T& thread_id) {
+    void remove(Priority priority, const T& thread_id)
+    {
         Queue* const cur = &queues[priority];
         const auto iter = std::remove(cur->data.begin(), cur->data.end(), thread_id);
         cur->data.erase(iter, cur->data.end());
     }
 
-    void rotate(Priority priority) {
+    void rotate(Priority priority)
+    {
         Queue* cur = &queues[priority];
 
         if (cur->data.size() > 1) {
@@ -124,17 +130,20 @@ struct ThreadQueueList {
         }
     }
 
-    void clear() {
+    void clear()
+    {
         queues.fill(Queue());
         first = nullptr;
     }
 
-    [[nodiscard]] bool empty(Priority priority) const {
+    [[nodiscard]] bool empty(Priority priority) const
+    {
         const Queue* cur = &queues[priority];
         return cur->data.empty();
     }
 
-    void prepare(Priority priority) {
+    void prepare(Priority priority)
+    {
         Queue* cur = &queues[priority];
         if (cur->next_nonempty == UnlinkedTag())
             link(priority);
@@ -149,11 +158,10 @@ private:
     };
 
     /// Special tag used to mark priority levels that have never been used.
-    static Queue* UnlinkedTag() {
-        return reinterpret_cast<Queue*>(1);
-    }
+    static Queue* UnlinkedTag() { return reinterpret_cast<Queue*>(1); }
 
-    void link(Priority priority) {
+    void link(Priority priority)
+    {
         Queue* cur = &queues[priority];
 
         for (int i = priority - 1; i >= 0; --i) {

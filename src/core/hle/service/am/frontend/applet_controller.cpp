@@ -4,6 +4,8 @@
 // SPDX-FileCopyrightText: Copyright 2020 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/am/frontend/applet_controller.h"
+
 #include <algorithm>
 #include <cstring>
 
@@ -14,7 +16,6 @@
 #include "core/frontend/applets/controller.h"
 #include "core/hle/result.h"
 #include "core/hle/service/am/am.h"
-#include "core/hle/service/am/frontend/applet_controller.h"
 #include "core/hle/service/am/service/storage.h"
 #include "hid_core/frontend/emulated_controller.h"
 #include "hid_core/hid_core.h"
@@ -29,7 +30,8 @@ namespace Service::AM::Frontend {
 
 static Core::Frontend::ControllerParameters ConvertToFrontendParameters(
     ControllerSupportArgPrivate private_arg, ControllerSupportArgHeader header, bool enable_text,
-    std::vector<IdentificationColor> identification_colors, std::vector<ExplainText> text) {
+    std::vector<IdentificationColor> identification_colors, std::vector<ExplainText> text)
+{
     Core::HID::NpadStyleTag npad_style_set;
     npad_style_set.raw = private_arg.style_set;
 
@@ -53,11 +55,14 @@ static Core::Frontend::ControllerParameters ConvertToFrontendParameters(
 Controller::Controller(Core::System& system_, std::shared_ptr<Applet> applet_,
                        LibraryAppletMode applet_mode_,
                        const Core::Frontend::ControllerApplet& frontend_)
-    : FrontendApplet{system_, applet_, applet_mode_}, frontend{frontend_} {}
+    : FrontendApplet{system_, applet_, applet_mode_}, frontend{frontend_}
+{
+}
 
 Controller::~Controller() = default;
 
-void Controller::Initialize() {
+void Controller::Initialize()
+{
     FrontendApplet::Initialize();
 
     LOG_INFO(Service_HID, "Initializing Controller Applet.");
@@ -174,15 +179,18 @@ void Controller::Initialize() {
     }
 }
 
-Result Controller::GetStatus() const {
+Result Controller::GetStatus() const
+{
     return status;
 }
 
-void Controller::ExecuteInteractive() {
+void Controller::ExecuteInteractive()
+{
     ASSERT_MSG(false, "Attempted to call interactive execution on non-interactive applet.");
 }
 
-void Controller::Execute() {
+void Controller::Execute()
+{
     switch (controller_private_arg.mode) {
     case ControllerSupportMode::ShowControllerSupport: {
         const auto parameters = [this] {
@@ -244,7 +252,8 @@ void Controller::Execute() {
     }
 }
 
-void Controller::ConfigurationComplete(bool is_success) {
+void Controller::ConfigurationComplete(bool is_success)
+{
     ControllerSupportResultInfo result_info{};
 
     // If enable_single_mode is enabled, player_count is 1 regardless of any other parameters.
@@ -267,7 +276,8 @@ void Controller::ConfigurationComplete(bool is_success) {
     Exit();
 }
 
-Result Controller::RequestExit() {
+Result Controller::RequestExit()
+{
     frontend.Close();
     R_SUCCEED();
 }

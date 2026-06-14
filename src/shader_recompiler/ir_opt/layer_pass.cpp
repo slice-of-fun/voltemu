@@ -3,9 +3,8 @@
 
 #include <algorithm>
 #include <bit>
-#include <optional>
-
 #include <boost/container/small_vector.hpp>
+#include <optional>
 
 #include "shader_recompiler/environment.h"
 #include "shader_recompiler/frontend/ir/basic_block.h"
@@ -17,7 +16,8 @@
 
 namespace Shader::Optimization {
 
-static IR::Attribute EmulatedLayerAttribute(VaryingState& stores) {
+static IR::Attribute EmulatedLayerAttribute(VaryingState& stores)
+{
     for (u32 i = 0; i < 32; i++) {
         if (!stores.Generic(i)) {
             return IR::Attribute::Generic0X + (i * 4);
@@ -26,7 +26,8 @@ static IR::Attribute EmulatedLayerAttribute(VaryingState& stores) {
     return IR::Attribute::Layer;
 }
 
-static bool PermittedProgramStage(Stage stage) {
+static bool PermittedProgramStage(Stage stage)
+{
     switch (stage) {
     case Stage::VertexA:
     case Stage::VertexB:
@@ -38,7 +39,8 @@ static bool PermittedProgramStage(Stage stage) {
     }
 }
 
-void LayerPass(IR::Program& program, const HostTranslateInfo& host_info) {
+void LayerPass(IR::Program& program, const HostTranslateInfo& host_info)
+{
     if (host_info.support_viewport_index_layer || !PermittedProgramStage(program.stage)) {
         return;
     }

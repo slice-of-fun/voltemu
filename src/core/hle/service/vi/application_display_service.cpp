@@ -4,11 +4,12 @@
 // SPDX-FileCopyrightText: Copyright 2024 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/vi/application_display_service.h"
+
 #include "core/hle/service/cmif_serialization.h"
 #include "core/hle/service/nvnflinger/hos_binder_driver.h"
 #include "core/hle/service/nvnflinger/parcel.h"
 #include "core/hle/service/os/event.h"
-#include "core/hle/service/vi/application_display_service.h"
 #include "core/hle/service/vi/container.h"
 #include "core/hle/service/vi/manager_display_service.h"
 #include "core/hle/service/vi/system_display_service.h"
@@ -19,7 +20,8 @@ namespace Service::VI {
 IApplicationDisplayService::IApplicationDisplayService(Core::System& system_,
                                                        std::shared_ptr<Container> container)
     : ServiceFramework{system_, "IApplicationDisplayService"},
-      m_container{std::move(container)}, m_context{system, "IApplicationDisplayService"} {
+      m_container{std::move(container)}, m_context{system, "IApplicationDisplayService"}
+{
     // clang-format off
     static const FunctionInfo functions[] = {
         {100, C<&IApplicationDisplayService::GetRelayService>, "GetRelayService"},
@@ -49,7 +51,8 @@ IApplicationDisplayService::IApplicationDisplayService(Core::System& system_,
     RegisterHandlers(functions);
 }
 
-IApplicationDisplayService::~IApplicationDisplayService() {
+IApplicationDisplayService::~IApplicationDisplayService()
+{
     for (auto& [display_id, event] : m_display_vsync_events) {
         m_container->UnlinkVsyncEvent(display_id, &event);
     }
@@ -62,41 +65,45 @@ IApplicationDisplayService::~IApplicationDisplayService() {
 }
 
 Result IApplicationDisplayService::GetRelayService(
-    Out<SharedPointer<Nvnflinger::IHOSBinderDriver>> out_relay_service) {
+    Out<SharedPointer<Nvnflinger::IHOSBinderDriver>> out_relay_service)
+{
     LOG_WARNING(Service_VI, "(STUBBED) called");
     R_RETURN(m_container->GetBinderDriver(out_relay_service));
 }
 
 Result IApplicationDisplayService::GetSystemDisplayService(
-    Out<SharedPointer<ISystemDisplayService>> out_system_display_service) {
+    Out<SharedPointer<ISystemDisplayService>> out_system_display_service)
+{
     LOG_WARNING(Service_VI, "(STUBBED) called");
     *out_system_display_service = std::make_shared<ISystemDisplayService>(system, m_container);
     R_SUCCEED();
 }
 
 Result IApplicationDisplayService::GetManagerDisplayService(
-    Out<SharedPointer<IManagerDisplayService>> out_manager_display_service) {
+    Out<SharedPointer<IManagerDisplayService>> out_manager_display_service)
+{
     LOG_WARNING(Service_VI, "(STUBBED) called");
     *out_manager_display_service = std::make_shared<IManagerDisplayService>(system, m_container);
     R_SUCCEED();
 }
 
 Result IApplicationDisplayService::GetIndirectDisplayTransactionService(
-    Out<SharedPointer<Nvnflinger::IHOSBinderDriver>> out_indirect_display_transaction_service) {
+    Out<SharedPointer<Nvnflinger::IHOSBinderDriver>> out_indirect_display_transaction_service)
+{
     LOG_WARNING(Service_VI, "(STUBBED) called");
     R_RETURN(m_container->GetBinderDriver(out_indirect_display_transaction_service));
 }
 
-Result IApplicationDisplayService::OpenDisplay(Out<u64> out_display_id, DisplayName display_name) {
+Result IApplicationDisplayService::OpenDisplay(Out<u64> out_display_id, DisplayName display_name)
+{
     LOG_DEBUG(Service_VI, "called with display_name={}", display_name.data());
 
     // Ensure the display name is null-terminated
     display_name[display_name.size() - 1] = '\0';
 
     // According to switchbrew, only "Default", "External", "Edid", "Internal" and "Null" are valid
-    const std::array<std::string_view, 5> valid_names = {
-        "Default", "External", "Edid", "Internal", "Null"
-    };
+    const std::array<std::string_view, 5> valid_names = {"Default", "External", "Edid", "Internal",
+                                                         "Null"};
 
     bool valid_name = false;
     for (const auto& name : valid_names) {
@@ -111,17 +118,20 @@ Result IApplicationDisplayService::OpenDisplay(Out<u64> out_display_id, DisplayN
     R_RETURN(m_container->OpenDisplay(out_display_id, display_name));
 }
 
-Result IApplicationDisplayService::OpenDefaultDisplay(Out<u64> out_display_id) {
+Result IApplicationDisplayService::OpenDefaultDisplay(Out<u64> out_display_id)
+{
     LOG_DEBUG(Service_VI, "called");
     R_RETURN(this->OpenDisplay(out_display_id, DisplayName{"Default"}));
 }
 
-Result IApplicationDisplayService::CloseDisplay(u64 display_id) {
+Result IApplicationDisplayService::CloseDisplay(u64 display_id)
+{
     LOG_DEBUG(Service_VI, "called");
     R_RETURN(m_container->CloseDisplay(display_id));
 }
 
-Result IApplicationDisplayService::SetDisplayEnabled(u32 state, u64 display_id) {
+Result IApplicationDisplayService::SetDisplayEnabled(u32 state, u64 display_id)
+{
     LOG_DEBUG(Service_VI, "called");
 
     // This literally does nothing internally in the actual service itself,
@@ -130,7 +140,8 @@ Result IApplicationDisplayService::SetDisplayEnabled(u32 state, u64 display_id) 
 }
 
 Result IApplicationDisplayService::GetDisplayResolution(Out<s64> out_width, Out<s64> out_height,
-                                                        u64 display_id) {
+                                                        u64 display_id)
+{
     LOG_DEBUG(Service_VI, "called. display_id={}", display_id);
 
     // This only returns the fixed values of 1280x720 and makes no distinguishing
@@ -140,7 +151,8 @@ Result IApplicationDisplayService::GetDisplayResolution(Out<s64> out_width, Out<
     R_SUCCEED();
 }
 
-Result IApplicationDisplayService::SetLayerScalingMode(NintendoScaleMode scale_mode, u64 layer_id) {
+Result IApplicationDisplayService::SetLayerScalingMode(NintendoScaleMode scale_mode, u64 layer_id)
+{
     LOG_DEBUG(Service_VI, "called. scale_mode={}, unknown=0x{:016X}", scale_mode, layer_id);
 
     if (scale_mode > NintendoScaleMode::PreserveAspectRatio) {
@@ -158,7 +170,8 @@ Result IApplicationDisplayService::SetLayerScalingMode(NintendoScaleMode scale_m
 }
 
 Result IApplicationDisplayService::ListDisplays(
-    Out<u64> out_count, OutArray<DisplayInfo, BufferAttr_HipcMapAlias> out_displays) {
+    Out<u64> out_count, OutArray<DisplayInfo, BufferAttr_HipcMapAlias> out_displays)
+{
     LOG_WARNING(Service_VI, "(STUBBED) called");
 
     if (out_displays.size() > 0) {
@@ -174,7 +187,8 @@ Result IApplicationDisplayService::ListDisplays(
 Result IApplicationDisplayService::OpenLayer(Out<u64> out_size,
                                              OutBuffer<BufferAttr_HipcMapAlias> out_native_window,
                                              DisplayName display_name, u64 layer_id,
-                                             ClientAppletResourceUserId aruid) {
+                                             ClientAppletResourceUserId aruid)
+{
     display_name[display_name.size() - 1] = '\0';
 
     LOG_DEBUG(Service_VI, "called. layer_id={}, aruid={:#x}", layer_id, aruid.pid);
@@ -201,7 +215,8 @@ Result IApplicationDisplayService::OpenLayer(Out<u64> out_size,
     R_SUCCEED();
 }
 
-Result IApplicationDisplayService::CloseLayer(u64 layer_id) {
+Result IApplicationDisplayService::CloseLayer(u64 layer_id)
+{
     LOG_DEBUG(Service_VI, "called. layer_id={}", layer_id);
 
     {
@@ -213,9 +228,11 @@ Result IApplicationDisplayService::CloseLayer(u64 layer_id) {
     R_RETURN(m_container->CloseLayer(layer_id));
 }
 
-Result IApplicationDisplayService::CreateStrayLayer(
-    Out<u64> out_layer_id, Out<u64> out_size, OutBuffer<BufferAttr_HipcMapAlias> out_native_window,
-    u32 flags, u64 display_id) {
+Result
+IApplicationDisplayService::CreateStrayLayer(Out<u64> out_layer_id, Out<u64> out_size,
+                                             OutBuffer<BufferAttr_HipcMapAlias> out_native_window,
+                                             u32 flags, u64 display_id)
+{
     LOG_DEBUG(Service_VI, "called. flags={}, display_id={}", flags, display_id);
 
     s32 producer_binder_id;
@@ -236,7 +253,8 @@ Result IApplicationDisplayService::CreateStrayLayer(
     R_SUCCEED();
 }
 
-Result IApplicationDisplayService::DestroyStrayLayer(u64 layer_id) {
+Result IApplicationDisplayService::DestroyStrayLayer(u64 layer_id)
+{
     LOG_WARNING(Service_VI, "(STUBBED) called. layer_id={}", layer_id);
 
     {
@@ -249,7 +267,8 @@ Result IApplicationDisplayService::DestroyStrayLayer(u64 layer_id) {
 }
 
 Result IApplicationDisplayService::GetDisplayVsyncEvent(
-    OutCopyHandle<Kernel::KReadableEvent> out_vsync_event, u64 display_id) {
+    OutCopyHandle<Kernel::KReadableEvent> out_vsync_event, u64 display_id)
+{
     LOG_DEBUG(Service_VI, "called. display_id={}", display_id);
 
     std::scoped_lock lk{m_lock};
@@ -264,7 +283,8 @@ Result IApplicationDisplayService::GetDisplayVsyncEvent(
 }
 
 Result IApplicationDisplayService::ConvertScalingMode(Out<ConvertedScaleMode> out_scaling_mode,
-                                                      NintendoScaleMode mode) {
+                                                      NintendoScaleMode mode)
+{
     LOG_DEBUG(Service_VI, "called mode={}", mode);
 
     switch (mode) {
@@ -292,7 +312,8 @@ Result IApplicationDisplayService::ConvertScalingMode(Out<ConvertedScaleMode> ou
 Result IApplicationDisplayService::GetIndirectLayerImageMap(
     Out<u64> out_size, Out<u64> out_stride,
     OutBuffer<BufferAttr_HipcMapTransferAllowsNonSecure | BufferAttr_HipcMapAlias> out_buffer,
-    s64 width, s64 height, u64 indirect_layer_consumer_handle, ClientAppletResourceUserId aruid) {
+    s64 width, s64 height, u64 indirect_layer_consumer_handle, ClientAppletResourceUserId aruid)
+{
     LOG_WARNING(
         Service_VI,
         "(STUBBED) called, width={}, height={}, indirect_layer_consumer_handle={}, aruid={:#x}",
@@ -304,7 +325,8 @@ Result IApplicationDisplayService::GetIndirectLayerImageMap(
 
 Result IApplicationDisplayService::GetIndirectLayerImageRequiredMemoryInfo(Out<s64> out_size,
                                                                            Out<s64> out_alignment,
-                                                                           s64 width, s64 height) {
+                                                                           s64 width, s64 height)
+{
     LOG_DEBUG(Service_VI, "called width={}, height={}", width, height);
 
     constexpr u64 base_size = 0x20000;

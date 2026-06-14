@@ -7,29 +7,34 @@
 namespace Kernel::Svc {
 
 Result GetDebugFutureThreadInfo(Core::System& system, lp64::LastThreadContext* out_context,
-                                uint64_t* out_thread_id, Handle debug_handle, int64_t ns) {
+                                uint64_t* out_thread_id, Handle debug_handle, int64_t ns)
+{
     UNIMPLEMENTED();
     R_THROW(ResultNotImplemented);
 }
 
 Result GetLastThreadInfo(Core::System& system, lp64::LastThreadContext* out_context,
-                         uint64_t* out_tls_address, uint32_t* out_flags) {
+                         uint64_t* out_tls_address, uint32_t* out_flags)
+{
     UNIMPLEMENTED();
     R_THROW(ResultNotImplemented);
 }
 
 Result GetDebugFutureThreadInfo64(Core::System& system, lp64::LastThreadContext* out_context,
-                                  uint64_t* out_thread_id, Handle debug_handle, int64_t ns) {
+                                  uint64_t* out_thread_id, Handle debug_handle, int64_t ns)
+{
     R_RETURN(GetDebugFutureThreadInfo(system, out_context, out_thread_id, debug_handle, ns));
 }
 
 Result GetLastThreadInfo64(Core::System& system, lp64::LastThreadContext* out_context,
-                           uint64_t* out_tls_address, uint32_t* out_flags) {
+                           uint64_t* out_tls_address, uint32_t* out_flags)
+{
     R_RETURN(GetLastThreadInfo(system, out_context, out_tls_address, out_flags));
 }
 
 Result GetDebugFutureThreadInfo64From32(Core::System& system, ilp32::LastThreadContext* out_context,
-                                        uint64_t* out_thread_id, Handle debug_handle, int64_t ns) {
+                                        uint64_t* out_thread_id, Handle debug_handle, int64_t ns)
+{
     lp64::LastThreadContext context{};
     R_TRY(
         GetDebugFutureThreadInfo(system, std::addressof(context), out_thread_id, debug_handle, ns));
@@ -44,7 +49,8 @@ Result GetDebugFutureThreadInfo64From32(Core::System& system, ilp32::LastThreadC
 }
 
 Result GetLastThreadInfo64From32(Core::System& system, ilp32::LastThreadContext* out_context,
-                                 uint64_t* out_tls_address, uint32_t* out_flags) {
+                                 uint64_t* out_tls_address, uint32_t* out_flags)
+{
     lp64::LastThreadContext context{};
     R_TRY(GetLastThreadInfo(system, std::addressof(context), out_tls_address, out_flags));
 

@@ -1,14 +1,16 @@
 // SPDX-FileCopyrightText: Copyright 2024 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+#include "core/hle/service/ldn/sf_service_monitor.h"
+
 #include "core/hle/service/cmif_serialization.h"
 #include "core/hle/service/ldn/ldn_types.h"
-#include "core/hle/service/ldn/sf_service_monitor.h"
 
 namespace Service::LDN {
 
 ISfServiceMonitor::ISfServiceMonitor(Core::System& system_)
-    : ServiceFramework{system_, "ISfServiceMonitor"} {
+    : ServiceFramework{system_, "ISfServiceMonitor"}
+{
     // clang-format off
         static const FunctionInfo functions[] = {
             {0, C<&ISfServiceMonitor::Initialize>, "Initialize"},
@@ -32,15 +34,18 @@ ISfServiceMonitor::ISfServiceMonitor(Core::System& system_)
 
 ISfServiceMonitor::~ISfServiceMonitor() = default;
 
-Result ISfServiceMonitor::Initialize(Out<u32> out_value) {
+Result ISfServiceMonitor::Initialize(Out<u32> out_value)
+{
     LOG_WARNING(Service_LDN, "(STUBBED) called");
 
     *out_value = 0;
     R_SUCCEED();
 }
 
-Result ISfServiceMonitor::GetGroupInfo(
-    OutLargeData<GroupInfo, BufferAttr_HipcAutoSelect> out_group_info, GroupInfo in_group_info) {
+Result
+ISfServiceMonitor::GetGroupInfo(OutLargeData<GroupInfo, BufferAttr_HipcAutoSelect> out_group_info,
+                                GroupInfo in_group_info)
+{
     LOG_WARNING(Service_LDN, "(STUBBED) called");
 
     *out_group_info = in_group_info;

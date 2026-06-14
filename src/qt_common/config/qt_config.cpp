@@ -4,9 +4,10 @@
 // SPDX-FileCopyrightText: 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "qt_config.h"
+
 #include "common/logging.h"
 #include "input_common/main.h"
-#include "qt_config.h"
 #include "uisettings.h"
 
 const std::array<int, Settings::NativeButton::NumButtons> QtConfig::default_buttons = {
@@ -48,7 +49,8 @@ const std::array<int, 2> QtConfig::default_ringcon_analogs{{
 }};
 
 QtConfig::QtConfig(const std::string& config_name, const ConfigType config_type)
-    : Config(config_type) {
+    : Config(config_type)
+{
 
     Initialize(config_name);
     if (config_type != ConfigType::InputProfile) {
@@ -57,31 +59,36 @@ QtConfig::QtConfig(const std::string& config_name, const ConfigType config_type)
     }
 }
 
-QtConfig::~QtConfig() {
+QtConfig::~QtConfig()
+{
     if (global) {
         QtConfig::SaveAllValues();
     }
 }
 
-void QtConfig::ReloadAllValues() {
+void QtConfig::ReloadAllValues()
+{
     Reload();
     ReadQtValues();
     SaveQtValues();
 }
 
-void QtConfig::SaveAllValues() {
+void QtConfig::SaveAllValues()
+{
     SaveValues();
     SaveQtValues();
 }
 
-void QtConfig::ReadQtValues() {
+void QtConfig::ReadQtValues()
+{
     if (global) {
         ReadUIValues();
     }
     ReadQtControlValues();
 }
 
-void QtConfig::ReadQtPlayerValues(const std::size_t player_index) {
+void QtConfig::ReadQtPlayerValues(const std::size_t player_index)
+{
     std::string player_prefix;
     if (type != ConfigType::InputProfile) {
         player_prefix.append("player_").append(ToString(player_index)).append("_");
@@ -135,7 +142,8 @@ void QtConfig::ReadQtPlayerValues(const std::size_t player_index) {
     }
 }
 
-void QtConfig::ReadHidbusValues() {
+void QtConfig::ReadHidbusValues()
+{
     const std::string default_param = InputCommon::GenerateAnalogParamFromKeys(
         0, 0, default_ringcon_analogs[0], default_ringcon_analogs[1], 0, 0.05f);
     auto& ringcon_analogs = Settings::values.ringcon_analogs;
@@ -146,7 +154,8 @@ void QtConfig::ReadHidbusValues() {
     }
 }
 
-void QtConfig::ReadDebugControlValues() {
+void QtConfig::ReadDebugControlValues()
+{
     for (int i = 0; i < Settings::NativeButton::NumButtons; ++i) {
         const std::string default_param = InputCommon::GenerateKeyboardParam(default_buttons[i]);
         auto& debug_pad_buttons = Settings::values.debug_pad_buttons[i];
@@ -172,7 +181,8 @@ void QtConfig::ReadDebugControlValues() {
     }
 }
 
-void QtConfig::ReadQtControlValues() {
+void QtConfig::ReadQtControlValues()
+{
     BeginGroup(Settings::TranslateCategory(Settings::Category::Controls));
 
     Settings::values.players.SetGlobal(!IsCustomConfig());
@@ -189,7 +199,8 @@ void QtConfig::ReadQtControlValues() {
     EndGroup();
 }
 
-void QtConfig::ReadPathValues() {
+void QtConfig::ReadPathValues()
+{
     BeginGroup(Settings::TranslateCategory(Settings::Category::Paths));
 
     UISettings::values.roms_path = ReadStringSetting(std::string("romsPath"));
@@ -246,7 +257,8 @@ void QtConfig::ReadPathValues() {
     EndGroup();
 }
 
-void QtConfig::ReadShortcutValues() {
+void QtConfig::ReadShortcutValues()
+{
     BeginGroup(Settings::TranslateCategory(Settings::Category::Shortcuts));
 
     for (const auto& [name, group, shortcut] : UISettings::default_hotkeys) {
@@ -271,7 +283,8 @@ void QtConfig::ReadShortcutValues() {
     EndGroup();
 }
 
-void QtConfig::ReadUIValues() {
+void QtConfig::ReadUIValues()
+{
     BeginGroup(Settings::TranslateCategory(Settings::Category::Ui));
 
     UISettings::values.theme = ReadStringSetting(
@@ -291,7 +304,8 @@ void QtConfig::ReadUIValues() {
     EndGroup();
 }
 
-void QtConfig::ReadUIGamelistValues() {
+void QtConfig::ReadUIGamelistValues()
+{
     BeginGroup(Settings::TranslateCategory(Settings::Category::UiGameList));
 
     ReadCategory(Settings::Category::UiGameList);
@@ -318,7 +332,8 @@ void QtConfig::ReadUIGamelistValues() {
     EndGroup();
 }
 
-void QtConfig::ReadUILayoutValues() {
+void QtConfig::ReadUILayoutValues()
+{
     BeginGroup(Settings::TranslateCategory(Settings::Category::UiLayout));
 
     ReadCategory(Settings::Category::UiLayout);
@@ -326,7 +341,8 @@ void QtConfig::ReadUILayoutValues() {
     EndGroup();
 }
 
-void QtConfig::ReadMultiplayerValues() {
+void QtConfig::ReadMultiplayerValues()
+{
     BeginGroup(Settings::TranslateCategory(Settings::Category::Multiplayer));
 
     ReadCategory(Settings::Category::Multiplayer);
@@ -352,7 +368,8 @@ void QtConfig::ReadMultiplayerValues() {
     EndGroup();
 }
 
-void QtConfig::SaveQtValues() {
+void QtConfig::SaveQtValues()
+{
     if (global) {
         LOG_DEBUG(Config, "Saving global Qt configuration values");
         SaveUIValues();
@@ -364,7 +381,8 @@ void QtConfig::SaveQtValues() {
     WriteToIni();
 }
 
-void QtConfig::SaveQtPlayerValues(const std::size_t player_index) {
+void QtConfig::SaveQtPlayerValues(const std::size_t player_index)
+{
     std::string player_prefix;
     if (type != ConfigType::InputProfile) {
         player_prefix = std::string("player_").append(ToString(player_index)).append("_");
@@ -395,7 +413,8 @@ void QtConfig::SaveQtPlayerValues(const std::size_t player_index) {
     }
 }
 
-void QtConfig::SaveDebugControlValues() {
+void QtConfig::SaveDebugControlValues()
+{
     for (int i = 0; i < Settings::NativeButton::NumButtons; ++i) {
         const std::string default_param = InputCommon::GenerateKeyboardParam(default_buttons[i]);
         WriteStringSetting(std::string("debug_pad_").append(Settings::NativeButton::mapping[i]),
@@ -412,14 +431,16 @@ void QtConfig::SaveDebugControlValues() {
     }
 }
 
-void QtConfig::SaveHidbusValues() {
+void QtConfig::SaveHidbusValues()
+{
     const std::string default_param = InputCommon::GenerateAnalogParamFromKeys(
         0, 0, default_ringcon_analogs[0], default_ringcon_analogs[1], 0, 0.05f);
     WriteStringSetting(std::string("ring_controller"), Settings::values.ringcon_analogs,
                        std::make_optional(default_param));
 }
 
-void QtConfig::SaveQtControlValues() {
+void QtConfig::SaveQtControlValues()
+{
     BeginGroup(Settings::TranslateCategory(Settings::Category::Controls));
 
     Settings::values.players.SetGlobal(!IsCustomConfig());
@@ -436,7 +457,8 @@ void QtConfig::SaveQtControlValues() {
     EndGroup();
 }
 
-void QtConfig::SavePathValues() {
+void QtConfig::SavePathValues()
+{
     BeginGroup(Settings::TranslateCategory(Settings::Category::Paths));
 
     WriteCategory(Settings::Category::Paths);
@@ -466,7 +488,8 @@ void QtConfig::SavePathValues() {
     EndGroup();
 }
 
-void QtConfig::SaveShortcutValues() {
+void QtConfig::SaveShortcutValues()
+{
     BeginGroup(Settings::TranslateCategory(Settings::Category::Shortcuts));
 
     // Lengths of UISettings::values.shortcuts & default_hotkeys are same.
@@ -494,7 +517,8 @@ void QtConfig::SaveShortcutValues() {
     EndGroup();
 }
 
-void QtConfig::SaveUIValues() {
+void QtConfig::SaveUIValues()
+{
     BeginGroup(Settings::TranslateCategory(Settings::Category::Ui));
 
     WriteCategory(Settings::Category::Ui);
@@ -515,7 +539,8 @@ void QtConfig::SaveUIValues() {
     EndGroup();
 }
 
-void QtConfig::SaveUIGamelistValues() {
+void QtConfig::SaveUIGamelistValues()
+{
     BeginGroup(Settings::TranslateCategory(Settings::Category::UiGameList));
 
     WriteCategory(Settings::Category::UiGameList);
@@ -545,7 +570,8 @@ void QtConfig::SaveUIGamelistValues() {
     EndGroup();
 }
 
-void QtConfig::SaveUILayoutValues() {
+void QtConfig::SaveUILayoutValues()
+{
     BeginGroup(Settings::TranslateCategory(Settings::Category::UiLayout));
 
     WriteCategory(Settings::Category::UiLayout);
@@ -553,7 +579,8 @@ void QtConfig::SaveUILayoutValues() {
     EndGroup();
 }
 
-void QtConfig::SaveMultiplayerValues() {
+void QtConfig::SaveMultiplayerValues()
+{
     BeginGroup(std::string("Multiplayer"));
 
     WriteCategory(Settings::Category::Multiplayer);
@@ -577,7 +604,8 @@ void QtConfig::SaveMultiplayerValues() {
     EndGroup();
 }
 
-std::vector<Settings::BasicSetting*>& QtConfig::FindRelevantList(Settings::Category category) {
+std::vector<Settings::BasicSetting*>& QtConfig::FindRelevantList(Settings::Category category)
+{
     auto& list = Settings::values.linkage.by_category[category];
     if (!list.empty())
         return list;
@@ -585,7 +613,8 @@ std::vector<Settings::BasicSetting*>& QtConfig::FindRelevantList(Settings::Categ
     return UISettings::values.linkage.by_category[category];
 }
 
-void QtConfig::ReadQtControlPlayerValues(std::size_t player_index) {
+void QtConfig::ReadQtControlPlayerValues(std::size_t player_index)
+{
     BeginGroup(Settings::TranslateCategory(Settings::Category::Controls));
 
     ReadPlayerValues(player_index);
@@ -594,7 +623,8 @@ void QtConfig::ReadQtControlPlayerValues(std::size_t player_index) {
     EndGroup();
 }
 
-void QtConfig::SaveQtControlPlayerValues(std::size_t player_index) {
+void QtConfig::SaveQtControlPlayerValues(std::size_t player_index)
+{
     BeginGroup(Settings::TranslateCategory(Settings::Category::Controls));
 
     LOG_DEBUG(Config, "Saving players control configuration values");

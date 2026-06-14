@@ -1,19 +1,22 @@
 // SPDX-FileCopyrightText: Copyright 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "video_core/textures/bcn.h"
+
 #include <stb_dxt.h>
 #include <string.h>
+
 #include "common/alignment.h"
-#include "video_core/textures/bcn.h"
 #include "video_core/textures/workers.h"
 
 namespace Tegra::Texture::BCN {
 
 using BCNCompressor = void(u8* block_output, const u8* block_input, bool any_alpha);
 
-template <u32 BytesPerBlock, bool ThresholdAlpha = false>
+template<u32 BytesPerBlock, bool ThresholdAlpha = false>
 void CompressBCN(std::span<const uint8_t> data, uint32_t width, uint32_t height, uint32_t depth,
-                 std::span<uint8_t> output, BCNCompressor f) {
+                 std::span<uint8_t> output, BCNCompressor f)
+{
     constexpr u8 alpha_threshold = 128;
     constexpr u32 bytes_per_px = 4;
     const u32 plane_dim = width * height;
@@ -67,7 +70,8 @@ void CompressBCN(std::span<const uint8_t> data, uint32_t width, uint32_t height,
 }
 
 void CompressBC1(std::span<const uint8_t> data, uint32_t width, uint32_t height, uint32_t depth,
-                 std::span<uint8_t> output) {
+                 std::span<uint8_t> output)
+{
     CompressBCN<8, true>(data, width, height, depth, output,
                          [](u8* block_output, const u8* block_input, bool any_alpha) {
                              stb_compress_bc1_block(block_output, block_input, any_alpha,
@@ -76,7 +80,8 @@ void CompressBC1(std::span<const uint8_t> data, uint32_t width, uint32_t height,
 }
 
 void CompressBC3(std::span<const uint8_t> data, uint32_t width, uint32_t height, uint32_t depth,
-                 std::span<uint8_t> output) {
+                 std::span<uint8_t> output)
+{
     CompressBCN<16, false>(data, width, height, depth, output,
                            [](u8* block_output, const u8* block_input, bool any_alpha) {
                                stb_compress_bc3_block(block_output, block_input, STB_DXT_NORMAL);

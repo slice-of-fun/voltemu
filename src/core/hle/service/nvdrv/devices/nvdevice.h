@@ -71,9 +71,7 @@ public:
      */
     virtual void OnClose(DeviceFD fd) = 0;
 
-    virtual Kernel::KEvent* QueryEvent(u32 event_id) {
-        return nullptr;
-    }
+    virtual Kernel::KEvent* QueryEvent(u32 event_id) { return nullptr; }
 
 protected:
     Core::System& system;

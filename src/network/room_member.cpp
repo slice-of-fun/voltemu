@@ -3,17 +3,19 @@
 // SPDX-FileCopyrightText: Copyright 2017 Citra Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "network/room_member.h"
+
 #include <atomic>
 #include <list>
 #include <mutex>
 #include <set>
 #include <thread>
+
 #include "common/assert.h"
 #include "common/polyfill_thread.h"
 #include "common/socket_types.h"
 #include "enet/enet.h"
 #include "network/packet.h"
-#include "network/room_member.h"
 
 namespace Network {
 
@@ -21,18 +23,18 @@ constexpr u32 ConnectionTimeoutMs = 5000;
 
 class RoomMember::RoomMemberImpl {
 public:
-    void SetState(const State new_state) noexcept {
+    void SetState(const State new_state) noexcept
+    {
         if (state != new_state) {
             state = new_state;
             Invoke<State>(state);
         }
     }
 
-    void SetError(const Error new_error) noexcept {
-        Invoke<Error>(new_error);
-    }
+    void SetError(const Error new_error) noexcept { Invoke<Error>(new_error); }
 
-    [[nodiscard]] bool IsConnected() const noexcept {
+    [[nodiscard]] bool IsConnected() const noexcept
+    {
         return state == State::Joining || state == State::Joined || state == State::Moderator;
     }
 
@@ -59,17 +61,15 @@ public:
     std::mutex network_mutex; ///< Mutex that controls access to the `client` variable.
     /// Thread that receives and dispatches network packets
     std::optional<std::jthread> loop_thread;
-    std::mutex send_list_mutex;  ///< Mutex that controls access to the `send_list` variable.
+    std::mutex send_list_mutex;    ///< Mutex that controls access to the `send_list` variable.
     std::vector<Packet> send_list; ///< A list that stores all packets to send the async
 
-    template <typename T>
-    using CallbackSet = std::set<CallbackHandle<T>>;
+    template<typename T> using CallbackSet = std::set<CallbackHandle<T>>;
     std::mutex callback_mutex; ///< The mutex used for handling callbacks
 
     class Callbacks {
     public:
-        template <typename T>
-        CallbackSet<T>& Get();
+        template<typename T> CallbackSet<T>& Get();
 
     private:
         CallbackSet<ProxyPacket> callback_set_proxy_packet;
@@ -151,15 +151,14 @@ public:
      */
     void Disconnect();
 
-    template <typename T>
-    void Invoke(const T& data);
+    template<typename T> void Invoke(const T& data);
 
-    template <typename T>
-    CallbackHandle<T> Bind(std::function<void(const T&)> callback);
+    template<typename T> CallbackHandle<T> Bind(std::function<void(const T&)> callback);
 };
 
 // RoomMemberImpl
-void RoomMember::RoomMemberImpl::StartLoop() {
+void RoomMember::RoomMemberImpl::StartLoop()
+{
     loop_thread.emplace([&](std::stop_token stoken) {
         // Receive packets while the connection is open
         while (IsConnected()) {
@@ -187,9 +186,10 @@ void RoomMember::RoomMemberImpl::StartLoop() {
                     case IdJoinSuccess:
                     case IdJoinSuccessAsMod:
                         // The join request was successful, we are now in the room.
-                        // If we joined successfully, there must be at least one client in the room: us.
+                        // If we joined successfully, there must be at least one client in the room:
+                        // us.
                         ASSERT_MSG(member_information.size() > 0,
-                                "We have not yet received member information.");
+                                   "We have not yet received member information.");
                         HandleJoinPacket(&event); // Get the MAC Address for the client
                         if (event.packet->data[0] == IdJoinSuccessAsMod) {
                             SetState(State::Moderator);
@@ -272,7 +272,8 @@ void RoomMember::RoomMemberImpl::StartLoop() {
     });
 }
 
-void RoomMember::RoomMemberImpl::Send(Packet&& packet) {
+void RoomMember::RoomMemberImpl::Send(Packet&& packet)
+{
     std::lock_guard lock(send_list_mutex);
     send_list.push_back(std::move(packet));
 }
@@ -280,7 +281,8 @@ void RoomMember::RoomMemberImpl::Send(Packet&& packet) {
 void RoomMember::RoomMemberImpl::SendJoinRequest(const std::string& nickname_,
                                                  const IPv4Address& preferred_fake_ip,
                                                  const std::string& password,
-                                                 const std::string& token) {
+                                                 const std::string& token)
+{
     Packet packet;
     packet.Write(static_cast<u8>(IdJoinRequest));
     packet.Write(nickname_);
@@ -291,7 +293,8 @@ void RoomMember::RoomMemberImpl::SendJoinRequest(const std::string& nickname_,
     Send(std::move(packet));
 }
 
-void RoomMember::RoomMemberImpl::HandleRoomInformationPacket(const ENetEvent* event) {
+void RoomMember::RoomMemberImpl::HandleRoomInformationPacket(const ENetEvent* event)
+{
     Packet packet;
     packet.Append(event->packet->data, event->packet->dataLength);
 
@@ -336,7 +339,8 @@ void RoomMember::RoomMemberImpl::HandleRoomInformationPacket(const ENetEvent* ev
     Invoke(room_information);
 }
 
-void RoomMember::RoomMemberImpl::HandleJoinPacket(const ENetEvent* event) {
+void RoomMember::RoomMemberImpl::HandleJoinPacket(const ENetEvent* event)
+{
     Packet packet;
     packet.Append(event->packet->data, event->packet->dataLength);
 
@@ -347,7 +351,8 @@ void RoomMember::RoomMemberImpl::HandleJoinPacket(const ENetEvent* event) {
     packet.Read(fake_ip);
 }
 
-void RoomMember::RoomMemberImpl::HandleProxyPackets(const ENetEvent* event) {
+void RoomMember::RoomMemberImpl::HandleProxyPackets(const ENetEvent* event)
+{
     ProxyPacket proxy_packet{};
     Packet packet;
     packet.Append(event->packet->data, event->packet->dataLength);
@@ -378,7 +383,8 @@ void RoomMember::RoomMemberImpl::HandleProxyPackets(const ENetEvent* event) {
     Invoke<ProxyPacket>(proxy_packet);
 }
 
-void RoomMember::RoomMemberImpl::HandleLdnPackets(const ENetEvent* event) {
+void RoomMember::RoomMemberImpl::HandleLdnPackets(const ENetEvent* event)
+{
     LDNPacket ldn_packet{};
     Packet packet;
     packet.Append(event->packet->data, event->packet->dataLength);
@@ -399,7 +405,8 @@ void RoomMember::RoomMemberImpl::HandleLdnPackets(const ENetEvent* event) {
     Invoke<LDNPacket>(ldn_packet);
 }
 
-void RoomMember::RoomMemberImpl::HandleChatPacket(const ENetEvent* event) {
+void RoomMember::RoomMemberImpl::HandleChatPacket(const ENetEvent* event)
+{
     Packet packet;
     packet.Append(event->packet->data, event->packet->dataLength);
 
@@ -413,7 +420,8 @@ void RoomMember::RoomMemberImpl::HandleChatPacket(const ENetEvent* event) {
     Invoke<ChatEntry>(chat_entry);
 }
 
-void RoomMember::RoomMemberImpl::HandleStatusMessagePacket(const ENetEvent* event) {
+void RoomMember::RoomMemberImpl::HandleStatusMessagePacket(const ENetEvent* event)
+{
     Packet packet;
     packet.Append(event->packet->data, event->packet->dataLength);
 
@@ -429,7 +437,8 @@ void RoomMember::RoomMemberImpl::HandleStatusMessagePacket(const ENetEvent* even
     Invoke<StatusMessageEntry>(status_message_entry);
 }
 
-void RoomMember::RoomMemberImpl::HandleModBanListResponsePacket(const ENetEvent* event) {
+void RoomMember::RoomMemberImpl::HandleModBanListResponsePacket(const ENetEvent* event)
+{
     Packet packet;
     packet.Append(event->packet->data, event->packet->dataLength);
 
@@ -442,7 +451,8 @@ void RoomMember::RoomMemberImpl::HandleModBanListResponsePacket(const ENetEvent*
     Invoke<Room::BanList>(ban_list);
 }
 
-void RoomMember::RoomMemberImpl::Disconnect() {
+void RoomMember::RoomMemberImpl::Disconnect()
+{
     member_information.clear();
     room_information.member_slots = 0;
     room_information.name.clear();
@@ -471,53 +481,60 @@ void RoomMember::RoomMemberImpl::Disconnect() {
     server = nullptr;
 }
 
-template <>
-RoomMember::RoomMemberImpl::CallbackSet<ProxyPacket>& RoomMember::RoomMemberImpl::Callbacks::Get() {
+template<>
+RoomMember::RoomMemberImpl::CallbackSet<ProxyPacket>& RoomMember::RoomMemberImpl::Callbacks::Get()
+{
     return callback_set_proxy_packet;
 }
 
-template <>
-RoomMember::RoomMemberImpl::CallbackSet<LDNPacket>& RoomMember::RoomMemberImpl::Callbacks::Get() {
+template<>
+RoomMember::RoomMemberImpl::CallbackSet<LDNPacket>& RoomMember::RoomMemberImpl::Callbacks::Get()
+{
     return callback_set_ldn_packet;
 }
 
-template <>
+template<>
 RoomMember::RoomMemberImpl::CallbackSet<RoomMember::State>&
-RoomMember::RoomMemberImpl::Callbacks::Get() {
+RoomMember::RoomMemberImpl::Callbacks::Get()
+{
     return callback_set_state;
 }
 
-template <>
+template<>
 RoomMember::RoomMemberImpl::CallbackSet<RoomMember::Error>&
-RoomMember::RoomMemberImpl::Callbacks::Get() {
+RoomMember::RoomMemberImpl::Callbacks::Get()
+{
     return callback_set_error;
 }
 
-template <>
+template<>
 RoomMember::RoomMemberImpl::CallbackSet<RoomInformation>&
-RoomMember::RoomMemberImpl::Callbacks::Get() {
+RoomMember::RoomMemberImpl::Callbacks::Get()
+{
     return callback_set_room_information;
 }
 
-template <>
-RoomMember::RoomMemberImpl::CallbackSet<ChatEntry>& RoomMember::RoomMemberImpl::Callbacks::Get() {
+template<>
+RoomMember::RoomMemberImpl::CallbackSet<ChatEntry>& RoomMember::RoomMemberImpl::Callbacks::Get()
+{
     return callback_set_chat_messages;
 }
 
-template <>
+template<>
 RoomMember::RoomMemberImpl::CallbackSet<StatusMessageEntry>&
-RoomMember::RoomMemberImpl::Callbacks::Get() {
+RoomMember::RoomMemberImpl::Callbacks::Get()
+{
     return callback_set_status_messages;
 }
 
-template <>
-RoomMember::RoomMemberImpl::CallbackSet<Room::BanList>&
-RoomMember::RoomMemberImpl::Callbacks::Get() {
+template<>
+RoomMember::RoomMemberImpl::CallbackSet<Room::BanList>& RoomMember::RoomMemberImpl::Callbacks::Get()
+{
     return callback_set_ban_list;
 }
 
-template <typename T>
-void RoomMember::RoomMemberImpl::Invoke(const T& data) {
+template<typename T> void RoomMember::RoomMemberImpl::Invoke(const T& data)
+{
     std::lock_guard lock(callback_mutex);
     CallbackSet<T> callback_set = callbacks.Get<T>();
     for (auto const& callback : callback_set) {
@@ -525,9 +542,10 @@ void RoomMember::RoomMemberImpl::Invoke(const T& data) {
     }
 }
 
-template <typename T>
-RoomMember::CallbackHandle<T> RoomMember::RoomMemberImpl::Bind(
-    std::function<void(const T&)> callback) {
+template<typename T>
+RoomMember::CallbackHandle<T>
+RoomMember::RoomMemberImpl::Bind(std::function<void(const T&)> callback)
+{
     std::lock_guard lock(callback_mutex);
     CallbackHandle<T> handle;
     handle = std::make_shared<std::function<void(const T&)>>(callback);
@@ -536,44 +554,54 @@ RoomMember::CallbackHandle<T> RoomMember::RoomMemberImpl::Bind(
 }
 
 // RoomMember
-RoomMember::RoomMember() : room_member_impl{std::make_unique<RoomMemberImpl>()} {}
+RoomMember::RoomMember() : room_member_impl{std::make_unique<RoomMemberImpl>()}
+{
+}
 
-RoomMember::~RoomMember() {
+RoomMember::~RoomMember()
+{
     ASSERT_MSG(!IsConnected(), "RoomMember is being destroyed while connected");
     if (room_member_impl->loop_thread) {
         Leave();
     }
 }
 
-RoomMember::State RoomMember::GetState() const {
+RoomMember::State RoomMember::GetState() const
+{
     return room_member_impl->state;
 }
 
-const RoomMember::MemberList& RoomMember::GetMemberInformation() const {
+const RoomMember::MemberList& RoomMember::GetMemberInformation() const
+{
     return room_member_impl->member_information;
 }
 
-const std::string& RoomMember::GetNickname() const {
+const std::string& RoomMember::GetNickname() const
+{
     return room_member_impl->nickname;
 }
 
-const std::string& RoomMember::GetUsername() const {
+const std::string& RoomMember::GetUsername() const
+{
     std::lock_guard lock(room_member_impl->username_mutex);
     return room_member_impl->username;
 }
 
-const IPv4Address& RoomMember::GetFakeIpAddress() const {
+const IPv4Address& RoomMember::GetFakeIpAddress() const
+{
     ASSERT_MSG(IsConnected(), "Tried to get fake ip address while not connected");
     return room_member_impl->fake_ip;
 }
 
-RoomInformation RoomMember::GetRoomInformation() const {
+RoomInformation RoomMember::GetRoomInformation() const
+{
     return room_member_impl->room_information;
 }
 
 void RoomMember::Join(const std::string& nick, const char* server_addr, u16 server_port,
                       u16 client_port, const IPv4Address& preferred_fake_ip,
-                      const std::string& password, const std::string& token) {
+                      const std::string& password, const std::string& token)
+{
     // If the member is connected, kill the connection first
     if (room_member_impl->loop_thread && room_member_impl->loop_thread->joinable()) {
         Leave();
@@ -616,11 +644,13 @@ void RoomMember::Join(const std::string& nick, const char* server_addr, u16 serv
     }
 }
 
-bool RoomMember::IsConnected() const {
+bool RoomMember::IsConnected() const
+{
     return room_member_impl->IsConnected();
 }
 
-void RoomMember::SendProxyPacket(const ProxyPacket& proxy_packet) {
+void RoomMember::SendProxyPacket(const ProxyPacket& proxy_packet)
+{
     Packet packet;
     packet.Write(static_cast<u8>(IdProxyPacket));
 
@@ -639,7 +669,8 @@ void RoomMember::SendProxyPacket(const ProxyPacket& proxy_packet) {
     room_member_impl->Send(std::move(packet));
 }
 
-void RoomMember::SendLdnPacket(const LDNPacket& ldn_packet) {
+void RoomMember::SendLdnPacket(const LDNPacket& ldn_packet)
+{
     Packet packet;
     packet.Write(static_cast<u8>(IdLdnPacket));
 
@@ -654,14 +685,16 @@ void RoomMember::SendLdnPacket(const LDNPacket& ldn_packet) {
     room_member_impl->Send(std::move(packet));
 }
 
-void RoomMember::SendChatMessage(const std::string& message) {
+void RoomMember::SendChatMessage(const std::string& message)
+{
     Packet packet;
     packet.Write(static_cast<u8>(IdChatMessage));
     packet.Write(message);
     room_member_impl->Send(std::move(packet));
 }
 
-void RoomMember::SendGameInfo(const GameInfo& game_info) {
+void RoomMember::SendGameInfo(const GameInfo& game_info)
+{
     room_member_impl->current_game_info = game_info;
     if (!IsConnected())
         return;
@@ -674,7 +707,8 @@ void RoomMember::SendGameInfo(const GameInfo& game_info) {
     room_member_impl->Send(std::move(packet));
 }
 
-void RoomMember::SendModerationRequest(RoomMessageTypes type, const std::string& nickname) {
+void RoomMember::SendModerationRequest(RoomMessageTypes type, const std::string& nickname)
+{
     ASSERT_MSG(type == IdModKick || type == IdModBan || type == IdModUnban,
                "type is not a moderation request");
     if (!IsConnected())
@@ -686,7 +720,8 @@ void RoomMember::SendModerationRequest(RoomMessageTypes type, const std::string&
     room_member_impl->Send(std::move(packet));
 }
 
-void RoomMember::RequestBanList() {
+void RoomMember::RequestBanList()
+{
     if (!IsConnected())
         return;
 
@@ -695,53 +730,62 @@ void RoomMember::RequestBanList() {
     room_member_impl->Send(std::move(packet));
 }
 
-RoomMember::CallbackHandle<RoomMember::State> RoomMember::BindOnStateChanged(
-    std::function<void(const RoomMember::State&)> callback) {
+RoomMember::CallbackHandle<RoomMember::State>
+RoomMember::BindOnStateChanged(std::function<void(const RoomMember::State&)> callback)
+{
     return room_member_impl->Bind(callback);
 }
 
-RoomMember::CallbackHandle<RoomMember::Error> RoomMember::BindOnError(
-    std::function<void(const RoomMember::Error&)> callback) {
+RoomMember::CallbackHandle<RoomMember::Error>
+RoomMember::BindOnError(std::function<void(const RoomMember::Error&)> callback)
+{
     return room_member_impl->Bind(callback);
 }
 
-RoomMember::CallbackHandle<ProxyPacket> RoomMember::BindOnProxyPacketReceived(
-    std::function<void(const ProxyPacket&)> callback) {
+RoomMember::CallbackHandle<ProxyPacket>
+RoomMember::BindOnProxyPacketReceived(std::function<void(const ProxyPacket&)> callback)
+{
     return room_member_impl->Bind(callback);
 }
 
-RoomMember::CallbackHandle<LDNPacket> RoomMember::BindOnLdnPacketReceived(
-    std::function<void(const LDNPacket&)> callback) {
+RoomMember::CallbackHandle<LDNPacket>
+RoomMember::BindOnLdnPacketReceived(std::function<void(const LDNPacket&)> callback)
+{
     return room_member_impl->Bind(std::move(callback));
 }
 
-RoomMember::CallbackHandle<RoomInformation> RoomMember::BindOnRoomInformationChanged(
-    std::function<void(const RoomInformation&)> callback) {
+RoomMember::CallbackHandle<RoomInformation>
+RoomMember::BindOnRoomInformationChanged(std::function<void(const RoomInformation&)> callback)
+{
     return room_member_impl->Bind(callback);
 }
 
-RoomMember::CallbackHandle<ChatEntry> RoomMember::BindOnChatMessageReceived(
-    std::function<void(const ChatEntry&)> callback) {
+RoomMember::CallbackHandle<ChatEntry>
+RoomMember::BindOnChatMessageReceived(std::function<void(const ChatEntry&)> callback)
+{
     return room_member_impl->Bind(callback);
 }
 
-RoomMember::CallbackHandle<StatusMessageEntry> RoomMember::BindOnStatusMessageReceived(
-    std::function<void(const StatusMessageEntry&)> callback) {
+RoomMember::CallbackHandle<StatusMessageEntry>
+RoomMember::BindOnStatusMessageReceived(std::function<void(const StatusMessageEntry&)> callback)
+{
     return room_member_impl->Bind(callback);
 }
 
-RoomMember::CallbackHandle<Room::BanList> RoomMember::BindOnBanListReceived(
-    std::function<void(const Room::BanList&)> callback) {
+RoomMember::CallbackHandle<Room::BanList>
+RoomMember::BindOnBanListReceived(std::function<void(const Room::BanList&)> callback)
+{
     return room_member_impl->Bind(callback);
 }
 
-template <typename T>
-void RoomMember::Unbind(CallbackHandle<T> handle) {
+template<typename T> void RoomMember::Unbind(CallbackHandle<T> handle)
+{
     std::lock_guard lock(room_member_impl->callback_mutex);
     room_member_impl->callbacks.Get<T>().erase(handle);
 }
 
-void RoomMember::Leave() {
+void RoomMember::Leave()
+{
     room_member_impl->SetState(State::Idle);
     room_member_impl->loop_thread.reset();
     enet_host_destroy(room_member_impl->client);

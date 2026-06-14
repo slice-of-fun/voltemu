@@ -4,11 +4,11 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "audio_core/renderer/mix/mix_context.h"
+
 #include <ranges>
 
-#include "audio_core/renderer/mix/mix_context.h"
 #include "audio_core/renderer/splitter/splitter_context.h"
-#include <ranges>
 
 namespace AudioCore::Renderer {
 
@@ -16,7 +16,8 @@ void MixContext::Initialize(std::span<MixInfo*> sorted_mix_infos_, std::span<Mix
                             const u32 count_, std::span<s32> effect_process_order_buffer_,
                             const u32 effect_count_, std::span<u8> node_states_workbuffer,
                             const u64 node_buffer_size, std::span<u8> edge_matrix_workbuffer,
-                            const u64 edge_matrix_size) {
+                            const u64 edge_matrix_size)
+{
     count = count_;
     sorted_mix_infos = sorted_mix_infos_;
     mix_infos = mix_infos_;
@@ -33,27 +34,33 @@ void MixContext::Initialize(std::span<MixInfo*> sorted_mix_infos_, std::span<Mix
     }
 }
 
-MixInfo* MixContext::GetSortedInfo(const s32 index) {
+MixInfo* MixContext::GetSortedInfo(const s32 index)
+{
     return sorted_mix_infos[index];
 }
 
-void MixContext::SetSortedInfo(const s32 index, MixInfo& mix_info) {
+void MixContext::SetSortedInfo(const s32 index, MixInfo& mix_info)
+{
     sorted_mix_infos[index] = &mix_info;
 }
 
-MixInfo* MixContext::GetInfo(const s32 index) {
+MixInfo* MixContext::GetInfo(const s32 index)
+{
     return &mix_infos[index];
 }
 
-MixInfo* MixContext::GetFinalMixInfo() {
+MixInfo* MixContext::GetFinalMixInfo()
+{
     return &mix_infos[0];
 }
 
-s32 MixContext::GetCount() const {
+s32 MixContext::GetCount() const
+{
     return count;
 }
 
-void MixContext::UpdateDistancesFromFinalMix() {
+void MixContext::UpdateDistancesFromFinalMix()
+{
     for (s32 i = 0; i < count; i++) {
         mix_infos[i].distance_from_final_mix = InvalidDistanceFromFinalMix;
     }
@@ -96,7 +103,8 @@ void MixContext::UpdateDistancesFromFinalMix() {
     }
 }
 
-void MixContext::SortInfo() {
+void MixContext::SortInfo()
+{
     UpdateDistancesFromFinalMix();
 
     std::ranges::sort(sorted_mix_infos, [](const MixInfo* lhs, const MixInfo* rhs) {
@@ -106,7 +114,8 @@ void MixContext::SortInfo() {
     CalcMixBufferOffset();
 }
 
-void MixContext::CalcMixBufferOffset() {
+void MixContext::CalcMixBufferOffset()
+{
     s16 offset{0};
     for (s32 i = 0; i < count; i++) {
         auto mix_info{sorted_mix_infos[i]};
@@ -118,7 +127,8 @@ void MixContext::CalcMixBufferOffset() {
     }
 }
 
-bool MixContext::TSortInfo(const SplitterContext& splitter_context) {
+bool MixContext::TSortInfo(const SplitterContext& splitter_context)
+{
     if (!splitter_context.UsingSplitter()) {
         CalcMixBufferOffset();
         return true;
@@ -138,7 +148,8 @@ bool MixContext::TSortInfo(const SplitterContext& splitter_context) {
     return true;
 }
 
-EdgeMatrix& MixContext::GetEdgeMatrix() {
+EdgeMatrix& MixContext::GetEdgeMatrix()
+{
     return edge_matrix;
 }
 

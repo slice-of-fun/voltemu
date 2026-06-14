@@ -23,7 +23,8 @@ struct QueueBufferInput final {
 
     void Deflate(s64* timestamp_, bool* is_auto_timestamp_, Common::Rectangle<s32>* crop_,
                  NativeWindowScalingMode* scaling_mode_, NativeWindowTransform* transform_,
-                 u32* sticky_transform_, bool* async_, s32* swap_interval_, Fence* fence_) const {
+                 u32* sticky_transform_, bool* async_, s32* swap_interval_, Fence* fence_) const
+    {
         *timestamp_ = timestamp;
         *is_auto_timestamp_ = static_cast<bool>(is_auto_timestamp);
         *crop_ = crop;
@@ -51,14 +52,16 @@ static_assert(sizeof(QueueBufferInput) == 84, "QueueBufferInput has wrong size")
 struct QueueBufferOutput final {
     QueueBufferOutput();
 
-    void Deflate(u32* width_, u32* height_, u32* transform_hint_, u32* num_pending_buffers_) const {
+    void Deflate(u32* width_, u32* height_, u32* transform_hint_, u32* num_pending_buffers_) const
+    {
         *width_ = width;
         *height_ = height;
         *transform_hint_ = transform_hint;
         *num_pending_buffers_ = num_pending_buffers;
     }
 
-    void Inflate(u32 width_, u32 height_, u32 transform_hint_, u32 num_pending_buffers_) {
+    void Inflate(u32 width_, u32 height_, u32 transform_hint_, u32 num_pending_buffers_)
+    {
         width = width_;
         height = height_;
         transform_hint = transform_hint_;

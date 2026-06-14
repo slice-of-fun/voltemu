@@ -38,9 +38,7 @@ struct ComputePipelineKey {
 
     bool operator==(const ComputePipelineKey&) const noexcept;
 
-    bool operator!=(const ComputePipelineKey& rhs) const noexcept {
-        return !operator==(rhs);
-    }
+    bool operator!=(const ComputePipelineKey& rhs) const noexcept { return !operator==(rhs); }
 };
 static_assert(std::has_unique_object_representations_v<ComputePipelineKey>);
 static_assert(std::is_trivially_copyable_v<ComputePipelineKey>);
@@ -55,16 +53,13 @@ public:
 
     void Configure();
 
-    [[nodiscard]] bool WritesGlobalMemory() const noexcept {
-        return writes_global_memory;
-    }
+    [[nodiscard]] bool WritesGlobalMemory() const noexcept { return writes_global_memory; }
 
-    [[nodiscard]] bool UsesLocalMemory() const noexcept {
-        return uses_local_memory;
-    }
+    [[nodiscard]] bool UsesLocalMemory() const noexcept { return uses_local_memory; }
 
     void SetEngine(Tegra::Engines::KeplerCompute* kepler_compute_,
-                   Tegra::MemoryManager* gpu_memory_) {
+                   Tegra::MemoryManager* gpu_memory_)
+    {
         kepler_compute = kepler_compute_;
         gpu_memory = gpu_memory_;
     }
@@ -99,10 +94,7 @@ private:
 } // namespace OpenGL
 
 namespace std {
-template <>
-struct hash<OpenGL::ComputePipelineKey> {
-    size_t operator()(const OpenGL::ComputePipelineKey& k) const noexcept {
-        return k.Hash();
-    }
+template<> struct hash<OpenGL::ComputePipelineKey> {
+    size_t operator()(const OpenGL::ComputePipelineKey& k) const noexcept { return k.Hash(); }
 };
 } // namespace std

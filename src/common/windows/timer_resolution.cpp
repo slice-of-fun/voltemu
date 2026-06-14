@@ -4,9 +4,9 @@
 // SPDX-FileCopyrightText: Copyright 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include <windows.h>
-
 #include "common/windows/timer_resolution.h"
+
+#include <windows.h>
 
 extern "C" {
 // http://undocumented.ntinternals.net/index.html?page=UserMode%2FUndocumented%20Functions%2FTime%2FNtQueryTimerResolution.html
@@ -36,11 +36,13 @@ namespace {
 
 using namespace std::chrono;
 
-constexpr nanoseconds ToNS(ULONG hundred_ns) {
+constexpr nanoseconds ToNS(ULONG hundred_ns)
+{
     return nanoseconds{hundred_ns * 100};
 }
 
-constexpr ULONG ToHundredNS(nanoseconds ns) {
+constexpr ULONG ToHundredNS(nanoseconds ns)
+{
     return static_cast<ULONG>(ns.count()) / 100;
 }
 
@@ -50,7 +52,8 @@ struct TimerResolution {
     std::chrono::nanoseconds current;
 };
 
-TimerResolution GetTimerResolution() {
+TimerResolution GetTimerResolution()
+{
     ULONG MinimumTimerResolution;
     ULONG MaximumTimerResolution;
     ULONG CurrentTimerResolution;
@@ -63,34 +66,42 @@ TimerResolution GetTimerResolution() {
     };
 }
 
-void SetHighQoS() {
+void SetHighQoS()
+{
     // https://learn.microsoft.com/en-us/windows/win32/procthread/quality-of-service
-    static auto pf = (decltype(&SetProcessInformation))(void*)GetProcAddress(GetModuleHandle(TEXT("Kernel32.dll")), "SetProcessInformation");
+    static auto pf = (decltype(&SetProcessInformation))(void*)GetProcAddress(
+        GetModuleHandle(TEXT("Kernel32.dll")), "SetProcessInformation");
     if (pf) {
         PROCESS_POWER_THROTTLING_STATE PowerThrottling{
             .Version = PROCESS_POWER_THROTTLING_CURRENT_VERSION,
-            .ControlMask = PROCESS_POWER_THROTTLING_EXECUTION_SPEED | PROCESS_POWER_THROTTLING_IGNORE_TIMER_RESOLUTION,
+            .ControlMask = PROCESS_POWER_THROTTLING_EXECUTION_SPEED |
+                           PROCESS_POWER_THROTTLING_IGNORE_TIMER_RESOLUTION,
             .StateMask = 0,
         };
-        pf(GetCurrentProcess(), ProcessPowerThrottling, &PowerThrottling, sizeof(PROCESS_POWER_THROTTLING_STATE)); // Windows 7+
+        pf(GetCurrentProcess(), ProcessPowerThrottling, &PowerThrottling,
+           sizeof(PROCESS_POWER_THROTTLING_STATE)); // Windows 7+
     }
 }
 
 } // Anonymous namespace
 
-nanoseconds GetMinimumTimerResolution() {
+nanoseconds GetMinimumTimerResolution()
+{
     return GetTimerResolution().minimum;
 }
 
-nanoseconds GetMaximumTimerResolution() {
+nanoseconds GetMaximumTimerResolution()
+{
     return GetTimerResolution().maximum;
 }
 
-nanoseconds GetCurrentTimerResolution() {
+nanoseconds GetCurrentTimerResolution()
+{
     return GetTimerResolution().current;
 }
 
-nanoseconds SetCurrentTimerResolution(nanoseconds timer_resolution) {
+nanoseconds SetCurrentTimerResolution(nanoseconds timer_resolution)
+{
     // Set the timer resolution, and return the current timer resolution.
     const auto DesiredTimerResolution = ToHundredNS(timer_resolution);
     ULONG CurrentTimerResolution;
@@ -98,12 +109,14 @@ nanoseconds SetCurrentTimerResolution(nanoseconds timer_resolution) {
     return ToNS(CurrentTimerResolution);
 }
 
-nanoseconds SetCurrentTimerResolutionToMaximum() {
+nanoseconds SetCurrentTimerResolutionToMaximum()
+{
     SetHighQoS();
     return SetCurrentTimerResolution(GetMaximumTimerResolution());
 }
 
-void SleepForOneTick() {
+void SleepForOneTick()
+{
     LARGE_INTEGER DelayInterval{
         .QuadPart{-1},
     };

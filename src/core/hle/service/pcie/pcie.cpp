@@ -4,9 +4,10 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/pcie/pcie.h"
+
 #include <memory>
 
-#include "core/hle/service/pcie/pcie.h"
 #include "core/hle/service/server_manager.h"
 #include "core/hle/service/service.h"
 
@@ -14,7 +15,8 @@ namespace Service::PCIe {
 
 class ISession final : public ServiceFramework<ISession> {
 public:
-    explicit ISession(Core::System& system_) : ServiceFramework{system_, "ISession"} {
+    explicit ISession(Core::System& system_) : ServiceFramework{system_, "ISession"}
+    {
         // clang-format off
         static const FunctionInfo functions[] = {
             {0, nullptr, "QueryFunctions"},
@@ -50,7 +52,8 @@ public:
 
 class PCIe final : public ServiceFramework<PCIe> {
 public:
-    explicit PCIe(Core::System& system_) : ServiceFramework{system_, "pcie"} {
+    explicit PCIe(Core::System& system_) : ServiceFramework{system_, "pcie"}
+    {
         // clang-format off
         static const FunctionInfo functions[] = {
             {0, nullptr, "RegisterClassDriver"},
@@ -62,7 +65,8 @@ public:
     }
 };
 
-void LoopProcess(Core::System& system) {
+void LoopProcess(Core::System& system)
+{
     auto server_manager = std::make_unique<ServerManager>(system);
 
     server_manager->RegisterNamedService("pcie", std::make_shared<PCIe>(system));

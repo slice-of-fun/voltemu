@@ -13,7 +13,8 @@
 
 namespace Kernel::Svc {
 
-Result SignalEvent(Core::System& system, Handle event_handle) {
+Result SignalEvent(Core::System& system, Handle event_handle)
+{
     LOG_DEBUG(Kernel_SVC, "called, event_handle=0x{:08X}", event_handle);
 
     // Get the current handle table.
@@ -32,7 +33,6 @@ Result SignalEvent(Core::System& system, Handle event_handle) {
         R_SUCCEED();
     }
 
-
     // Get the event.
     KScopedAutoObject event = handle_table.GetObject<KEvent>(event_handle);
     R_UNLESS(event.IsNotNull(), ResultInvalidHandle);
@@ -40,7 +40,8 @@ Result SignalEvent(Core::System& system, Handle event_handle) {
     R_RETURN(event->Signal());
 }
 
-Result ClearEvent(Core::System& system, Handle event_handle) {
+Result ClearEvent(Core::System& system, Handle event_handle)
+{
     LOG_TRACE(Kernel_SVC, "called, event_handle=0x{:08X}", event_handle);
 
     // Get the current handle table.
@@ -67,7 +68,8 @@ Result ClearEvent(Core::System& system, Handle event_handle) {
     R_THROW(ResultInvalidHandle);
 }
 
-Result CreateEvent(Core::System& system, Handle* out_write, Handle* out_read) {
+Result CreateEvent(Core::System& system, Handle* out_write, Handle* out_read)
+{
     LOG_DEBUG(Kernel_SVC, "called");
 
     // Get the kernel reference and handle table.
@@ -90,7 +92,8 @@ Result CreateEvent(Core::System& system, Handle* out_write, Handle* out_read) {
     event_reservation.Commit();
 
     // Ensure that we clean up the event (and its only references are handle table) on function end.
-    SCOPE_EXIT {
+    SCOPE_EXIT
+    {
         event->GetReadableEvent().Close();
         event->Close();
     };
@@ -102,7 +105,8 @@ Result CreateEvent(Core::System& system, Handle* out_write, Handle* out_read) {
     R_TRY(handle_table.Add(out_write, event));
 
     // Ensure that we maintain a clean handle state on exit.
-    ON_RESULT_FAILURE {
+    ON_RESULT_FAILURE
+    {
         handle_table.Remove(*out_write);
     };
 
@@ -110,28 +114,33 @@ Result CreateEvent(Core::System& system, Handle* out_write, Handle* out_read) {
     R_RETURN(handle_table.Add(out_read, std::addressof(event->GetReadableEvent())));
 }
 
-Result SignalEvent64(Core::System& system, Handle event_handle) {
+Result SignalEvent64(Core::System& system, Handle event_handle)
+{
     R_RETURN(SignalEvent(system, event_handle));
 }
 
-Result ClearEvent64(Core::System& system, Handle event_handle) {
+Result ClearEvent64(Core::System& system, Handle event_handle)
+{
     R_RETURN(ClearEvent(system, event_handle));
 }
 
-Result CreateEvent64(Core::System& system, Handle* out_write_handle, Handle* out_read_handle) {
+Result CreateEvent64(Core::System& system, Handle* out_write_handle, Handle* out_read_handle)
+{
     R_RETURN(CreateEvent(system, out_write_handle, out_read_handle));
 }
 
-Result SignalEvent64From32(Core::System& system, Handle event_handle) {
+Result SignalEvent64From32(Core::System& system, Handle event_handle)
+{
     R_RETURN(SignalEvent(system, event_handle));
 }
 
-Result ClearEvent64From32(Core::System& system, Handle event_handle) {
+Result ClearEvent64From32(Core::System& system, Handle event_handle)
+{
     R_RETURN(ClearEvent(system, event_handle));
 }
 
-Result CreateEvent64From32(Core::System& system, Handle* out_write_handle,
-                           Handle* out_read_handle) {
+Result CreateEvent64From32(Core::System& system, Handle* out_write_handle, Handle* out_read_handle)
+{
     R_RETURN(CreateEvent(system, out_write_handle, out_read_handle));
 }
 

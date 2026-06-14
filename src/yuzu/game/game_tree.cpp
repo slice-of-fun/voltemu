@@ -1,6 +1,8 @@
 // SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+#include "yuzu/game/game_tree.h"
+
 #include <QApplication>
 #include <QHeaderView>
 #include <QScroller>
@@ -8,10 +10,10 @@
 
 #include "qt_common/config/uisettings.h"
 #include "qt_common/game_list/game_list_p.h"
-#include "yuzu/game/game_tree.h"
 #include "qt_common/game_list/model.h"
 
-GameTree::GameTree(QWidget* parent) : QTreeView{parent} {
+GameTree::GameTree(QWidget* parent) : QTreeView{parent}
+{
     setAlternatingRowColors(true);
     setSelectionMode(QHeaderView::SingleSelection);
     setSelectionBehavior(QHeaderView::SelectRows);
@@ -27,13 +29,15 @@ GameTree::GameTree(QWidget* parent) : QTreeView{parent} {
     connect(this, &QTreeView::collapsed, this, &GameTree::OnItemExpanded);
 }
 
-void GameTree::SetModel(GameListModel* model) {
+void GameTree::SetModel(GameListModel* model)
+{
     QTreeView::setModel(model);
     LoadInterfaceLayout();
     UpdateColumnVisibility(model);
 }
 
-void GameTree::OnItemExpanded(const QModelIndex& item) {
+void GameTree::OnItemExpanded(const QModelIndex& item)
+{
     const auto type = item.data(GameListItem::TypeRole).value<GameListItemType>();
     const bool is_dir = type == GameListItemType::CustomDir || type == GameListItemType::SdmcDir ||
                         type == GameListItemType::UserNandDir ||
@@ -51,11 +55,13 @@ void GameTree::OnItemExpanded(const QModelIndex& item) {
     UISettings::values.game_dirs[item_dir_index].expanded = is_expanded;
 }
 
-void GameTree::SaveInterfaceLayout() {
+void GameTree::SaveInterfaceLayout()
+{
     UISettings::values.gamelist_header_state = header()->saveState();
 }
 
-void GameTree::LoadInterfaceLayout() {
+void GameTree::LoadInterfaceLayout()
+{
     auto* hdr = header();
 
     if (hdr->restoreState(UISettings::values.gamelist_header_state))
@@ -64,7 +70,8 @@ void GameTree::LoadInterfaceLayout() {
     hdr->resizeSection(GameListModel::COLUMN_NAME, 840);
 }
 
-void GameTree::UpdateColumnVisibility(GameListModel* model) {
+void GameTree::UpdateColumnVisibility(GameListModel* model)
+{
     Q_UNUSED(model)
     setColumnHidden(GameListModel::COLUMN_ADD_ONS, !UISettings::values.show_add_ons);
     setColumnHidden(GameListModel::COLUMN_COMPATIBILITY, !UISettings::values.show_compat);
@@ -73,7 +80,8 @@ void GameTree::UpdateColumnVisibility(GameListModel* model) {
     setColumnHidden(GameListModel::COLUMN_PLAY_TIME, !UISettings::values.show_play_time);
 }
 
-QString GameTree::GetLastFilterResultItem() const {
+QString GameTree::GetLastFilterResultItem() const
+{
     QString file_path;
 
     auto* model = qobject_cast<GameListModel*>(QTreeView::model());
@@ -98,7 +106,8 @@ QString GameTree::GetLastFilterResultItem() const {
     return file_path;
 }
 
-int GameTree::FilterClosedResultCount(GameListModel* model) {
+int GameTree::FilterClosedResultCount(GameListModel* model)
+{
     int children_total = 0;
 
     auto hide_favorites_row = UISettings::values.favorited_ids.size() == 0;
@@ -117,7 +126,8 @@ int GameTree::FilterClosedResultCount(GameListModel* model) {
     return children_total;
 }
 
-void GameTree::ApplyFilter(const QString& edit_filter_text, GameListModel* model) {
+void GameTree::ApplyFilter(const QString& edit_filter_text, GameListModel* model)
+{
     int children_total = 0;
     int result_count = 0;
 
@@ -148,9 +158,8 @@ void GameTree::ApplyFilter(const QString& edit_filter_text, GameListModel* model
             const QString file_program_id =
                 QStringLiteral("%1").arg(program_id, 16, 16, QLatin1Char{'0'});
 
-            const QString file_name =
-                file_path.mid(file_path.lastIndexOf(QLatin1Char{'/'}) + 1) + QLatin1Char{' '} +
-                file_title;
+            const QString file_name = file_path.mid(file_path.lastIndexOf(QLatin1Char{'/'}) + 1) +
+                                      QLatin1Char{' '} + file_title;
 
             auto ContainsAllWords = [](const QString& haystack, const QString& userinput) {
                 const QStringList userinput_split =

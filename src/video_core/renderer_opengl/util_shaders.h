@@ -3,9 +3,9 @@
 
 #pragma once
 
-#include <span>
-
 #include <glad/glad.h>
+
+#include <span>
 
 #include "common/common_types.h"
 #include "video_core/renderer_opengl/gl_resource_manager.h"

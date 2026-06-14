@@ -48,19 +48,20 @@ struct GraphicsPipelineKey {
     std::array<u32, 3> padding;
     VideoCommon::TransformFeedbackState xfb_state;
 
-    size_t Hash() const noexcept {
+    size_t Hash() const noexcept
+    {
         return static_cast<size_t>(Common::CityHash64(reinterpret_cast<const char*>(this), Size()));
     }
 
-    bool operator==(const GraphicsPipelineKey& rhs) const noexcept {
+    bool operator==(const GraphicsPipelineKey& rhs) const noexcept
+    {
         return std::memcmp(this, &rhs, Size()) == 0;
     }
 
-    bool operator!=(const GraphicsPipelineKey& rhs) const noexcept {
-        return !operator==(rhs);
-    }
+    bool operator!=(const GraphicsPipelineKey& rhs) const noexcept { return !operator==(rhs); }
 
-    [[nodiscard]] size_t Size() const noexcept {
+    [[nodiscard]] size_t Size() const noexcept
+    {
         if (xfb_enabled != 0) {
             return sizeof(GraphicsPipelineKey);
         } else {
@@ -83,45 +84,38 @@ public:
                               const std::array<const Shader::Info*, 5>& infos,
                               const GraphicsPipelineKey& key_, bool force_context_flush = false);
 
-    bool Configure(bool is_indexed) {
-        return configure_func(this, is_indexed);
-    }
+    bool Configure(bool is_indexed) { return configure_func(this, is_indexed); }
 
-    void ConfigureTransformFeedback() const {
+    void ConfigureTransformFeedback() const
+    {
         if (num_xfb_attribs != 0) {
             ConfigureTransformFeedbackImpl();
         }
     }
 
-    [[nodiscard]] const GraphicsPipelineKey& Key() const noexcept {
-        return key;
-    }
+    [[nodiscard]] const GraphicsPipelineKey& Key() const noexcept { return key; }
 
-    [[nodiscard]] bool WritesGlobalMemory() const noexcept {
-        return writes_global_memory;
-    }
+    [[nodiscard]] bool WritesGlobalMemory() const noexcept { return writes_global_memory; }
 
-    [[nodiscard]] bool UsesLocalMemory() const noexcept {
-        return uses_local_memory;
-    }
+    [[nodiscard]] bool UsesLocalMemory() const noexcept { return uses_local_memory; }
 
     [[nodiscard]] bool IsBuilt() noexcept;
 
-    template <typename Spec>
-    static auto MakeConfigureSpecFunc() {
+    template<typename Spec> static auto MakeConfigureSpecFunc()
+    {
         return [](GraphicsPipeline* pipeline, bool is_indexed) {
             return pipeline->ConfigureImpl<Spec>(is_indexed);
         };
     }
 
-    void SetEngine(Tegra::Engines::Maxwell3D* maxwell3d_, Tegra::MemoryManager* gpu_memory_) {
+    void SetEngine(Tegra::Engines::Maxwell3D* maxwell3d_, Tegra::MemoryManager* gpu_memory_)
+    {
         maxwell3d = maxwell3d_;
         gpu_memory = gpu_memory_;
     }
 
 private:
-    template <typename Spec>
-    bool ConfigureImpl(bool is_indexed);
+    template<typename Spec> bool ConfigureImpl(bool is_indexed);
 
     void ConfigureTransformFeedbackImpl() const;
 
@@ -169,10 +163,7 @@ private:
 } // namespace OpenGL
 
 namespace std {
-template <>
-struct hash<OpenGL::GraphicsPipelineKey> {
-    size_t operator()(const OpenGL::GraphicsPipelineKey& k) const noexcept {
-        return k.Hash();
-    }
+template<> struct hash<OpenGL::GraphicsPipelineKey> {
+    size_t operator()(const OpenGL::GraphicsPipelineKey& k) const noexcept { return k.Hash(); }
 };
 } // namespace std

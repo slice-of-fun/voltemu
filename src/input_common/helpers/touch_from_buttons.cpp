@@ -1,9 +1,11 @@
 // SPDX-FileCopyrightText: 2020 Citra Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include <algorithm>
-#include "common/settings.h"
 #include "input_common/helpers/touch_from_buttons.h"
+
+#include <algorithm>
+
+#include "common/settings.h"
 
 namespace InputCommon {
 
@@ -11,7 +13,8 @@ class TouchFromButtonDevice final : public Common::Input::InputDevice {
 public:
     using Button = std::unique_ptr<Common::Input::InputDevice>;
     TouchFromButtonDevice(Button button_, float x_, float y_)
-        : button(std::move(button_)), x(x_), y(y_) {
+        : button(std::move(button_)), x(x_), y(y_)
+    {
         last_button_value = false;
         button->SetCallback({
             .on_change =
@@ -22,11 +25,10 @@ public:
         button->ForceUpdate();
     }
 
-    void ForceUpdate() override {
-        button->ForceUpdate();
-    }
+    void ForceUpdate() override { button->ForceUpdate(); }
 
-    Common::Input::TouchStatus GetStatus(bool pressed) const {
+    Common::Input::TouchStatus GetStatus(bool pressed) const
+    {
         const Common::Input::ButtonStatus button_status{
             .value = pressed,
         };
@@ -47,7 +49,8 @@ public:
         return status;
     }
 
-    void UpdateButtonStatus(const Common::Input::CallbackStatus& button_callback) {
+    void UpdateButtonStatus(const Common::Input::CallbackStatus& button_callback)
+    {
         const Common::Input::CallbackStatus status{
             .type = Common::Input::InputType::Touch,
             .touch_status = GetStatus(button_callback.button_status.value),
@@ -74,8 +77,9 @@ private:
     const float y;
 };
 
-std::unique_ptr<Common::Input::InputDevice> TouchFromButton::Create(
-    const Common::ParamPackage& params) {
+std::unique_ptr<Common::Input::InputDevice>
+TouchFromButton::Create(const Common::ParamPackage& params)
+{
     const std::string null_engine = Common::ParamPackage{{"engine", "null"}}.Serialize();
     auto button = Common::Input::CreateInputDeviceFromString(params.Get("button", null_engine));
     const float x = params.Get("x", 0.0f) / 1280.0f;

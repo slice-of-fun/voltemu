@@ -9,12 +9,12 @@
 #include <memory>
 
 #include "common/common_types.h"
+#include "video_core/dma_pusher.h"
 #include "video_core/engines/fermi_2d.h"
-#include "video_core/engines/kepler_memory.h"
 #include "video_core/engines/kepler_compute.h"
+#include "video_core/engines/kepler_memory.h"
 #include "video_core/engines/maxwell_3d.h"
 #include "video_core/engines/maxwell_dma.h"
-#include "video_core/dma_pusher.h"
 
 namespace Core {
 class System;

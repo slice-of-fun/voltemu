@@ -2,16 +2,19 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "compress.h"
-#include "quazipfileinfo.h"
+
+#include <quazipfile.h>
 
 #include <QDirIterator>
-#include <quazipfile.h>
+
+#include "quazipfileinfo.h"
 
 /** This is a modified version of JlCompress **/
 namespace QtCommon::Compress {
 
 bool compressDir(QString fileCompressed, QString dir, const Options& options,
-                 QtCommon::QtProgressCallback callback) {
+                 QtCommon::QtProgressCallback callback)
+{
     // Create zip
     QuaZip zip(fileCompressed);
     QDir().mkpath(QFileInfo(fileCompressed).absolutePath());
@@ -51,7 +54,8 @@ bool compressDir(QString fileCompressed, QString dir, const Options& options,
 }
 
 bool compressSubDir(QuaZip* zip, QString dir, QString origDir, const Options& options,
-                    std::size_t total, std::size_t& progress, QtProgressCallback callback) {
+                    std::size_t total, std::size_t& progress, QtProgressCallback callback)
+{
     // zip: object where to add the file
     // dir: current real directory
     // origDir: original real directory
@@ -110,7 +114,8 @@ bool compressSubDir(QuaZip* zip, QString dir, QString origDir, const Options& op
 }
 
 bool compressFile(QuaZip* zip, QString fileName, QString fileDest, const Options& options,
-                  std::size_t total, std::size_t& progress, QtCommon::QtProgressCallback callback) {
+                  std::size_t total, std::size_t& progress, QtCommon::QtProgressCallback callback)
+{
     // zip: object where to add the file
     // fileName: real file name
     // fileDest: file name inside the zip object
@@ -158,7 +163,8 @@ bool compressFile(QuaZip* zip, QString fileName, QString fileDest, const Options
 }
 
 bool copyData(QIODevice& inFile, QIODevice& outFile, std::size_t total, std::size_t& progress,
-              QtProgressCallback callback) {
+              QtProgressCallback callback)
+{
     while (!inFile.atEnd()) {
         char buf[4096];
         qint64 readLen = inFile.read(buf, 4096);
@@ -175,13 +181,15 @@ bool copyData(QIODevice& inFile, QIODevice& outFile, std::size_t total, std::siz
     return true;
 }
 
-QStringList extractDir(QString fileCompressed, QString dir, QtCommon::QtProgressCallback callback) {
+QStringList extractDir(QString fileCompressed, QString dir, QtCommon::QtProgressCallback callback)
+{
     // Open zip
     QuaZip zip(fileCompressed);
     return extractDir(zip, dir, callback);
 }
 
-QStringList extractDir(QuaZip& zip, const QString& dir, QtCommon::QtProgressCallback callback) {
+QStringList extractDir(QuaZip& zip, const QString& dir, QtCommon::QtProgressCallback callback)
+{
     if (!zip.open(QuaZip::mdUnzip)) {
         return QStringList();
     }
@@ -227,7 +235,8 @@ QStringList extractDir(QuaZip& zip, const QString& dir, QtCommon::QtProgressCall
 }
 
 bool extractFile(QuaZip* zip, QString fileName, QString fileDest, std::size_t total,
-                 std::size_t& progress, QtCommon::QtProgressCallback callback) {
+                 std::size_t& progress, QtCommon::QtProgressCallback callback)
+{
     // zip: object where to add the file
     // filename: real file name
     // fileincompress: file name of the compressed file
@@ -299,7 +308,8 @@ bool extractFile(QuaZip* zip, QString fileName, QString fileDest, std::size_t to
     return true;
 }
 
-bool removeFile(QStringList listFile) {
+bool removeFile(QStringList listFile)
+{
     bool ret = true;
     // For each file
     for (int i = 0; i < listFile.count(); i++) {

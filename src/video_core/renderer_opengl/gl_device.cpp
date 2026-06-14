@@ -4,23 +4,24 @@
 // SPDX-FileCopyrightText: Copyright 2019 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "video_core/renderer_opengl/gl_device.h"
+
+#include <glad/glad.h>
+
 #include <algorithm>
 #include <array>
 #include <cstddef>
 #include <cstdlib>
 #include <optional>
+#include <ranges>
 #include <span>
 #include <stdexcept>
 #include <vector>
 
-#include <glad/glad.h>
-
 #include "common/literals.h"
 #include "common/logging.h"
-#include <ranges>
 #include "common/settings.h"
 #include "shader_recompiler/stage.h"
-#include "video_core/renderer_opengl/gl_device.h"
 #include "video_core/renderer_opengl/gl_resource_manager.h"
 
 using namespace Common::Literals;
@@ -35,14 +36,15 @@ constexpr std::array LIMIT_UBOS = {
     GL_MAX_FRAGMENT_UNIFORM_BLOCKS,        GL_MAX_COMPUTE_UNIFORM_BLOCKS,
 };
 
-template <typename T>
-T GetInteger(GLenum pname) {
+template<typename T> T GetInteger(GLenum pname)
+{
     GLint temporary;
     glGetIntegerv(pname, &temporary);
     return static_cast<T>(temporary);
 }
 
-bool TestProgram(const GLchar* glsl) {
+bool TestProgram(const GLchar* glsl)
+{
     const GLuint shader{glCreateShaderProgramv(GL_VERTEX_SHADER, 1, &glsl)};
     GLint link_status;
     glGetProgramiv(shader, GL_LINK_STATUS, &link_status);
@@ -53,7 +55,8 @@ bool TestProgram(const GLchar* glsl) {
 /// @brief Query OpenGL extensions
 /// DO NOT use string_view, the driver can immediately free up the extension name and such
 /// do NOT under ANY circumstances use string_view, make a copy, it's required
-std::vector<std::string> GetExtensions() {
+std::vector<std::string> GetExtensions()
+{
     GLint num_extensions;
     glGetIntegerv(GL_NUM_EXTENSIONS, &num_extensions);
     std::vector<std::string> extensions;
@@ -66,17 +69,20 @@ std::vector<std::string> GetExtensions() {
 }
 
 /// @brief Find extension in set of extensions (string)
-bool HasExtension(std::span<const std::string> extensions, std::string_view extension) {
+bool HasExtension(std::span<const std::string> extensions, std::string_view extension)
+{
     return std::ranges::find(extensions, std::string{extension}) != extensions.end();
 }
 
-std::array<u32, Shader::MaxStageTypes> BuildMaxUniformBuffers() noexcept {
+std::array<u32, Shader::MaxStageTypes> BuildMaxUniformBuffers() noexcept
+{
     std::array<u32, Shader::MaxStageTypes> max{};
     std::ranges::transform(LIMIT_UBOS, max.begin(), &GetInteger<u32>);
     return max;
 }
 
-bool IsASTCSupported() {
+bool IsASTCSupported()
+{
     static constexpr std::array targets{
         GL_TEXTURE_2D,
         GL_TEXTURE_2D_ARRAY,
@@ -115,7 +121,8 @@ bool IsASTCSupported() {
     return true;
 }
 
-static bool HasSlowSoftwareAstc(std::string_view vendor_name, std::string_view renderer) {
+static bool HasSlowSoftwareAstc(std::string_view vendor_name, std::string_view renderer)
+{
 // ifdef for Unix reduces string comparisons for non-Windows drivers, and Intel
 #ifdef __unix__
     // Sorted vaguely by how likely a vendor is to appear
@@ -152,21 +159,24 @@ static bool HasSlowSoftwareAstc(std::string_view vendor_name, std::string_view r
     return false;
 }
 
-[[nodiscard]] bool IsDebugToolAttached(std::span<const std::string> extensions) {
+[[nodiscard]] bool IsDebugToolAttached(std::span<const std::string> extensions)
+{
     const bool nsight = std::getenv("NVTX_INJECTION64_PATH") || std::getenv("NSIGHT_LAUNCHED");
     return nsight || HasExtension(extensions, "GL_EXT_debug_tool") ||
            Settings::values.renderer_debug.GetValue();
 }
 } // Anonymous namespace
 
-Device::Device(Core::Frontend::EmuWindow& emu_window) {
+Device::Device(Core::Frontend::EmuWindow& emu_window)
+{
     if (!GLAD_GL_VERSION_4_6) {
         LOG_ERROR(Render_OpenGL, "OpenGL 4.6 is not available");
         throw std::runtime_error{"Insufficient version"};
     }
 #ifdef __HAIKU__
     if (glad_glCreateProgramPipelines == nullptr) {
-        LOG_ERROR(Render_OpenGL, "You must compile Mesa +22 manually or use a different libGL.so (GLES is not supported)");
+        LOG_ERROR(Render_OpenGL, "You must compile Mesa +22 manually or use a different libGL.so "
+                                 "(GLES is not supported)");
         throw std::runtime_error{"Outdated mesa"};
     }
 #endif
@@ -234,16 +244,18 @@ Device::Device(Core::Frontend::EmuWindow& emu_window) {
     has_fast_buffer_sub_data = is_nvidia && !disable_fast_buffer_sub_data;
 
     auto const shader_backend = Settings::values.renderer_backend.GetValue();
-    use_assembly_shaders = shader_backend == Settings::RendererBackend::OpenGL_GLASM
-        && GLAD_GL_NV_gpu_program5 && GLAD_GL_NV_compute_program5
-        && GLAD_GL_NV_transform_feedback && GLAD_GL_NV_transform_feedback2;
+    use_assembly_shaders = shader_backend == Settings::RendererBackend::OpenGL_GLASM &&
+                           GLAD_GL_NV_gpu_program5 && GLAD_GL_NV_compute_program5 &&
+                           GLAD_GL_NV_transform_feedback && GLAD_GL_NV_transform_feedback2;
     if (shader_backend == Settings::RendererBackend::OpenGL_GLASM && !use_assembly_shaders) {
-        LOG_ERROR(Render_OpenGL, "Assembly shaders enabled but not supported - expect instability!");
+        LOG_ERROR(Render_OpenGL,
+                  "Assembly shaders enabled but not supported - expect instability!");
     }
 
     if (shader_backend == Settings::RendererBackend::OpenGL_GLSL && is_nvidia) {
         const std::string driver_version = version.substr(13);
-        const int version_major = std::atoi(driver_version.substr(0, driver_version.find(".")).data());
+        const int version_major =
+            std::atoi(driver_version.substr(0, driver_version.find(".")).data());
         if (version_major >= 495) {
             has_cbuf_ftou_bug = true;
             has_bool_ref_bug = true;
@@ -270,7 +282,8 @@ Device::Device(Core::Frontend::EmuWindow& emu_window) {
     }
 }
 
-std::string Device::GetVendorName() const {
+std::string Device::GetVendorName() const
+{
     if (vendor_name == "NVIDIA Corporation") {
         return "NVIDIA";
     }
@@ -320,7 +333,8 @@ std::string Device::GetVendorName() const {
     return vendor_name;
 }
 
-bool Device::TestVariableAoffi() {
+bool Device::TestVariableAoffi()
+{
     return TestProgram(R"(#version 430 core
 // This is a unit test, please ignore me on apitrace bug reports.
 uniform sampler2D tex;
@@ -331,7 +345,8 @@ void main() {
 })");
 }
 
-bool Device::TestPreciseBug() {
+bool Device::TestPreciseBug()
+{
     return !TestProgram(R"(#version 430 core
 in vec3 coords;
 out float out_value;
@@ -342,7 +357,8 @@ void main() {
 })");
 }
 
-u64 Device::GetCurrentDedicatedVideoMemory() const {
+u64 Device::GetCurrentDedicatedVideoMemory() const
+{
     GLint cur_avail_mem_kb = 0;
     glGetIntegerv(GL_GPU_MEMORY_INFO_TOTAL_AVAILABLE_MEMORY_NVX, &cur_avail_mem_kb);
     return static_cast<u64>(cur_avail_mem_kb) * 1_KiB;

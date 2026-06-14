@@ -4,13 +4,14 @@
 // SPDX-FileCopyrightText: Copyright 2021 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/glue/notif.h"
+
 #include <algorithm>
 #include <cstring>
 
 #include "common/assert.h"
 #include "common/logging.h"
 #include "core/hle/service/cmif_serialization.h"
-#include "core/hle/service/glue/notif.h"
 #include "core/hle/service/ipc_helpers.h"
 #include "core/hle/service/kernel_helpers.h"
 
@@ -24,7 +25,8 @@ constexpr inline std::size_t MaxAlarms = 8;
 
 Result NotificationServiceImpl::RegisterAlarmSetting(AlarmSettingId* out_alarm_setting_id,
                                                      const AlarmSetting& alarm_setting,
-                                                     std::span<const u8> application_parameter) {
+                                                     std::span<const u8> application_parameter)
+{
     if (alarms.size() > MaxAlarms) {
         LOG_ERROR(Service_NOTIF, "Alarm limit reached");
         R_THROW(ResultUnknown);
@@ -49,7 +51,8 @@ Result NotificationServiceImpl::RegisterAlarmSetting(AlarmSettingId* out_alarm_s
 }
 
 Result NotificationServiceImpl::UpdateAlarmSetting(const AlarmSetting& alarm_setting,
-                                                   std::span<const u8> application_parameter) {
+                                                   std::span<const u8> application_parameter)
+{
     ASSERT_MSG(application_parameter.size() <= sizeof(ApplicationParameter),
                "application_parameter_size is bigger than 0x400 bytes");
 
@@ -67,7 +70,8 @@ Result NotificationServiceImpl::UpdateAlarmSetting(const AlarmSetting& alarm_set
 }
 
 Result NotificationServiceImpl::ListAlarmSettings(s32* out_count,
-                                                  std::span<AlarmSetting> out_alarms) {
+                                                  std::span<AlarmSetting> out_alarms)
+{
     LOG_INFO(Service_NOTIF, "called, alarm_count={}", alarms.size());
 
     const auto count = (std::min)(out_alarms.size(), alarms.size());
@@ -81,7 +85,8 @@ Result NotificationServiceImpl::ListAlarmSettings(s32* out_count,
 
 Result NotificationServiceImpl::LoadApplicationParameter(u32* out_size,
                                                          std::span<u8> out_application_parameter,
-                                                         AlarmSettingId alarm_setting_id) {
+                                                         AlarmSettingId alarm_setting_id)
+{
     const auto alarm_it = GetAlarmFromId(alarm_setting_id);
     if (alarm_it == alarms.end()) {
         LOG_ERROR(Service_NOTIF, "Invalid alarm setting id={}", alarm_setting_id);
@@ -99,7 +104,8 @@ Result NotificationServiceImpl::LoadApplicationParameter(u32* out_size,
     R_SUCCEED();
 }
 
-Result NotificationServiceImpl::DeleteAlarmSetting(AlarmSettingId alarm_setting_id) {
+Result NotificationServiceImpl::DeleteAlarmSetting(AlarmSettingId alarm_setting_id)
+{
     std::erase_if(alarms, [alarm_setting_id](const AlarmSetting& alarm) {
         return alarm.alarm_setting_id == alarm_setting_id;
     });
@@ -109,15 +115,17 @@ Result NotificationServiceImpl::DeleteAlarmSetting(AlarmSettingId alarm_setting_
     R_SUCCEED();
 }
 
-Result NotificationServiceImpl::Initialize(u64 aruid) {
+Result NotificationServiceImpl::Initialize(u64 aruid)
+{
     // TODO: Load previous alarms from config
 
     LOG_WARNING(Service_NOTIF, "(STUBBED) called");
     R_SUCCEED();
 }
 
-std::vector<AlarmSetting>::iterator NotificationServiceImpl::GetAlarmFromId(
-    AlarmSettingId alarm_setting_id) {
+std::vector<AlarmSetting>::iterator
+NotificationServiceImpl::GetAlarmFromId(AlarmSettingId alarm_setting_id)
+{
     return std::find_if(alarms.begin(), alarms.end(),
                         [alarm_setting_id](const AlarmSetting& alarm) {
                             return alarm.alarm_setting_id == alarm_setting_id;
@@ -125,7 +133,8 @@ std::vector<AlarmSetting>::iterator NotificationServiceImpl::GetAlarmFromId(
 }
 
 INotificationServicesForApplication::INotificationServicesForApplication(Core::System& system_)
-    : ServiceFramework{system_, "notif:a"} {
+    : ServiceFramework{system_, "notif:a"}
+{
     // clang-format off
     static const FunctionInfo functions[] = {
         {500, D<&INotificationServicesForApplication::RegisterAlarmSetting>, "RegisterAlarmSetting"},
@@ -145,34 +154,40 @@ INotificationServicesForApplication::~INotificationServicesForApplication() = de
 Result INotificationServicesForApplication::RegisterAlarmSetting(
     Out<AlarmSettingId> out_alarm_setting_id,
     InLargeData<AlarmSetting, BufferAttr_HipcMapAlias> alarm_setting,
-    InBuffer<BufferAttr_HipcMapAlias> application_parameter) {
+    InBuffer<BufferAttr_HipcMapAlias> application_parameter)
+{
     R_RETURN(impl.RegisterAlarmSetting(out_alarm_setting_id.Get(), *alarm_setting,
                                        application_parameter));
 }
 
 Result INotificationServicesForApplication::UpdateAlarmSetting(
     InLargeData<AlarmSetting, BufferAttr_HipcMapAlias> alarm_setting,
-    InBuffer<BufferAttr_HipcMapAlias> application_parameter) {
+    InBuffer<BufferAttr_HipcMapAlias> application_parameter)
+{
     R_RETURN(impl.UpdateAlarmSetting(*alarm_setting, application_parameter));
 }
 
 Result INotificationServicesForApplication::ListAlarmSettings(
-    Out<s32> out_count, OutArray<AlarmSetting, BufferAttr_HipcMapAlias> out_alarms) {
+    Out<s32> out_count, OutArray<AlarmSetting, BufferAttr_HipcMapAlias> out_alarms)
+{
     R_RETURN(impl.ListAlarmSettings(out_count.Get(), out_alarms));
 }
 
 Result INotificationServicesForApplication::LoadApplicationParameter(
     Out<u32> out_size, OutBuffer<BufferAttr_HipcMapAlias> out_application_parameter,
-    AlarmSettingId alarm_setting_id) {
+    AlarmSettingId alarm_setting_id)
+{
     R_RETURN(
         impl.LoadApplicationParameter(out_size.Get(), out_application_parameter, alarm_setting_id));
 }
 
-Result INotificationServicesForApplication::DeleteAlarmSetting(AlarmSettingId alarm_setting_id) {
+Result INotificationServicesForApplication::DeleteAlarmSetting(AlarmSettingId alarm_setting_id)
+{
     R_RETURN(impl.DeleteAlarmSetting(alarm_setting_id));
 }
 
-Result INotificationServicesForApplication::Initialize(ClientAppletResourceUserId aruid) {
+Result INotificationServicesForApplication::Initialize(ClientAppletResourceUserId aruid)
+{
     R_RETURN(impl.Initialize(*aruid));
 }
 
@@ -181,7 +196,8 @@ class INotificationSystemEventAccessor final
 public:
     explicit INotificationSystemEventAccessor(Core::System& system_)
         : ServiceFramework{system_, "INotificationSystemEventAccessor"},
-          service_context{system_, "INotificationSystemEventAccessor"} {
+          service_context{system_, "INotificationSystemEventAccessor"}
+    {
         // clang-format off
         static const FunctionInfo functions[] = {
             {0, D<&INotificationSystemEventAccessor::GetSystemEvent>, "GetSystemEvent"},
@@ -194,12 +210,11 @@ public:
             service_context.CreateEvent("INotificationSystemEventAccessor:NotificationEvent");
     }
 
-    ~INotificationSystemEventAccessor() {
-        service_context.CloseEvent(notification_event);
-    }
+    ~INotificationSystemEventAccessor() { service_context.CloseEvent(notification_event); }
 
 private:
-    Result GetSystemEvent(OutCopyHandle<Kernel::KReadableEvent> out_readable_event) {
+    Result GetSystemEvent(OutCopyHandle<Kernel::KReadableEvent> out_readable_event)
+    {
         LOG_WARNING(Service_NOTIF, "(STUBBED) called");
 
         *out_readable_event = &notification_event->GetReadableEvent();
@@ -211,7 +226,8 @@ private:
 };
 
 INotificationServices::INotificationServices(Core::System& system_)
-    : ServiceFramework{system_, "notif:s"} {
+    : ServiceFramework{system_, "notif:s"}
+{
     // clang-format off
     static const FunctionInfo functions[] = {
         {500, D<&INotificationServices::RegisterAlarmSetting>, "RegisterAlarmSetting"},
@@ -245,39 +261,47 @@ INotificationServices::~INotificationServices() = default;
 Result INotificationServices::RegisterAlarmSetting(
     Out<AlarmSettingId> out_alarm_setting_id,
     InLargeData<AlarmSetting, BufferAttr_HipcMapAlias> alarm_setting,
-    InBuffer<BufferAttr_HipcMapAlias> application_parameter) {
+    InBuffer<BufferAttr_HipcMapAlias> application_parameter)
+{
     R_RETURN(impl.RegisterAlarmSetting(out_alarm_setting_id.Get(), *alarm_setting,
                                        application_parameter));
 }
 
 Result INotificationServices::UpdateAlarmSetting(
     InLargeData<AlarmSetting, BufferAttr_HipcMapAlias> alarm_setting,
-    InBuffer<BufferAttr_HipcMapAlias> application_parameter) {
+    InBuffer<BufferAttr_HipcMapAlias> application_parameter)
+{
     R_RETURN(impl.UpdateAlarmSetting(*alarm_setting, application_parameter));
 }
 
-Result INotificationServices::ListAlarmSettings(
-    Out<s32> out_count, OutArray<AlarmSetting, BufferAttr_HipcMapAlias> out_alarms) {
+Result
+INotificationServices::ListAlarmSettings(Out<s32> out_count,
+                                         OutArray<AlarmSetting, BufferAttr_HipcMapAlias> out_alarms)
+{
     R_RETURN(impl.ListAlarmSettings(out_count.Get(), out_alarms));
 }
 
 Result INotificationServices::LoadApplicationParameter(
     Out<u32> out_size, OutBuffer<BufferAttr_HipcMapAlias> out_application_parameter,
-    AlarmSettingId alarm_setting_id) {
+    AlarmSettingId alarm_setting_id)
+{
     R_RETURN(
         impl.LoadApplicationParameter(out_size.Get(), out_application_parameter, alarm_setting_id));
 }
 
-Result INotificationServices::DeleteAlarmSetting(AlarmSettingId alarm_setting_id) {
+Result INotificationServices::DeleteAlarmSetting(AlarmSettingId alarm_setting_id)
+{
     R_RETURN(impl.DeleteAlarmSetting(alarm_setting_id));
 }
 
-Result INotificationServices::Initialize(ClientAppletResourceUserId aruid) {
+Result INotificationServices::Initialize(ClientAppletResourceUserId aruid)
+{
     R_RETURN(impl.Initialize(*aruid));
 }
 
 Result INotificationServices::OpenNotificationSystemEventAccessor(
-    Out<SharedPointer<INotificationSystemEventAccessor>> out_notification_system_event_accessor) {
+    Out<SharedPointer<INotificationSystemEventAccessor>> out_notification_system_event_accessor)
+{
     LOG_WARNING(Service_NOTIF, "(STUBBED) called");
 
     *out_notification_system_event_accessor =
@@ -287,7 +311,8 @@ Result INotificationServices::OpenNotificationSystemEventAccessor(
 
 Result INotificationServices::GetNotificationPresentationSetting(
     Out<NotificationPresentationSetting> out_notification_presentation_setting,
-    NotificationChannel notification_channel) {
+    NotificationChannel notification_channel)
+{
     LOG_WARNING(Service_NOTIF, "(STUBBED) called");
 
     *out_notification_presentation_setting = {};

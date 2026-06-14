@@ -8,7 +8,8 @@ namespace FileSys {
 Result IntegrityRomFsStorage::Initialize(
     HierarchicalIntegrityVerificationInformation level_hash_info, Hash master_hash,
     HierarchicalIntegrityVerificationStorage::HierarchicalStorageInformation storage_info,
-    int max_data_cache_entries, int max_hash_cache_entries, s8 buffer_level) {
+    int max_data_cache_entries, int max_hash_cache_entries, s8 buffer_level)
+{
     // Set master hash.
     m_master_hash = master_hash;
     m_master_hash_storage = std::make_shared<ArrayVfsFile<sizeof(Hash)>>(m_master_hash.value);
@@ -23,7 +24,8 @@ Result IntegrityRomFsStorage::Initialize(
                                             max_hash_cache_entries, buffer_level));
 }
 
-void IntegrityRomFsStorage::Finalize() {
+void IntegrityRomFsStorage::Finalize()
+{
     m_integrity_storage.Finalize();
 }
 

@@ -4,17 +4,16 @@
 // SPDX-FileCopyrightText: Copyright 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include <mutex>
-
 #include <openssl/bio.h>
 #include <openssl/err.h>
 #include <openssl/ssl.h>
 #include <openssl/x509.h>
 
+#include <mutex>
+
 #include "common/fs/file.h"
 #include "common/hex_util.h"
 #include "common/string_util.h"
-
 #include "core/hle/service/ssl/ssl_backend.h"
 #include "core/internal_network/network.h"
 #include "core/internal_network/sockets.h"
@@ -48,47 +47,63 @@ bool OneTimeInitBIO();
 #ifdef YUZU_BUNDLED_OPENSSL
 // This is ported from httplib
 struct scope_exit {
-  explicit scope_exit(std::function<void(void)> &&f)
-      : exit_function(std::move(f)), execute_on_destruction{true} {}
+    explicit scope_exit(std::function<void(void)>&& f)
+        : exit_function(std::move(f)), execute_on_destruction{true}
+    {
+    }
 
-  scope_exit(scope_exit &&rhs) noexcept
-      : exit_function(std::move(rhs.exit_function)),
-        execute_on_destruction{rhs.execute_on_destruction} {
-    rhs.release();
-  }
+    scope_exit(scope_exit&& rhs) noexcept
+        : exit_function(std::move(rhs.exit_function)), execute_on_destruction{
+                                                           rhs.execute_on_destruction}
+    {
+        rhs.release();
+    }
 
-  ~scope_exit() {
-    if (execute_on_destruction) { this->exit_function(); }
-  }
+    ~scope_exit()
+    {
+        if (execute_on_destruction) {
+            this->exit_function();
+        }
+    }
 
-  void release() { this->execute_on_destruction = false; }
+    void release() { this->execute_on_destruction = false; }
 
 private:
-  scope_exit(const scope_exit &) = delete;
-  void operator=(const scope_exit &) = delete;
-  scope_exit &operator=(scope_exit &&) = delete;
+    scope_exit(const scope_exit&) = delete;
+    void operator=(const scope_exit&) = delete;
+    scope_exit& operator=(scope_exit&&) = delete;
 
-  std::function<void(void)> exit_function;
-  bool execute_on_destruction;
+    std::function<void(void)> exit_function;
+    bool execute_on_destruction;
 };
 
-inline X509_STORE *CreateCaCertStore(const char *ca_cert,
-                                                    std::size_t size) {
+inline X509_STORE* CreateCaCertStore(const char* ca_cert, std::size_t size)
+{
     auto mem = BIO_new_mem_buf(ca_cert, static_cast<int>(size));
     auto se = scope_exit([&] { BIO_free_all(mem); });
-    if (!mem) { return nullptr; }
+    if (!mem) {
+        return nullptr;
+    }
 
     auto inf = PEM_X509_INFO_read_bio(mem, nullptr, nullptr, nullptr);
-    if (!inf) { return nullptr; }
+    if (!inf) {
+        return nullptr;
+    }
 
     auto cts = X509_STORE_new();
     if (cts) {
         for (auto i = 0; i < static_cast<int>(sk_X509_INFO_num(inf)); i++) {
             auto itmp = sk_X509_INFO_value(inf, i);
-            if (!itmp) { continue; }
+            if (!itmp) {
+                continue;
+            }
 
-            if (itmp->x509) { X509_STORE_add_cert(cts, itmp->x509); }
-            if (itmp->crl) { X509_STORE_add_crl(cts, itmp->crl); }
+            if (itmp->x509) {
+                X509_STORE_add_cert(cts, itmp->x509);
+            }
+            if (itmp->crl) {
+                X509_STORE_add_crl(cts, itmp->crl);
+            }
         }
     }
 
@@ -96,7 +111,8 @@ inline X509_STORE *CreateCaCertStore(const char *ca_cert,
     return cts;
 }
 
-inline void SetCaCertStore(SSL_CTX *ctx, X509_STORE *ca_cert_store) {
+inline void SetCaCertStore(SSL_CTX* ctx, X509_STORE* ca_cert_store)
+{
     if (ca_cert_store) {
         if (ctx) {
             if (SSL_CTX_get_cert_store(ctx) != ca_cert_store) {
@@ -119,7 +135,8 @@ inline void LoadCaCertStore(SSL_CTX* ctx, const char* ca_cert, std::size_t size)
 
 class SSLConnectionBackendOpenSSL final : public SSLConnectionBackend {
 public:
-    Result Init() {
+    Result Init()
+    {
         // on bundled OpenSSL, load ca cert store
 #ifdef YUZU_BUNDLED_OPENSSL
         LoadCaCertStore(ssl_ctx, kCert, sizeof(kCert));
@@ -153,11 +170,13 @@ public:
         return ResultSuccess;
     }
 
-    void SetSocket(std::shared_ptr<Network::SocketBase> socket_in) override {
+    void SetSocket(std::shared_ptr<Network::SocketBase> socket_in) override
+    {
         socket = std::move(socket_in);
     }
 
-    Result SetHostName(const std::string& hostname) override {
+    Result SetHostName(const std::string& hostname) override
+    {
         if (!skip_cert_verification) {
             if (!SSL_set1_host(ssl, hostname.c_str())) {
                 LOG_ERROR(Service_SSL, "SSL_set1_host({}) failed", hostname);
@@ -171,10 +190,10 @@ public:
         return ResultSuccess;
     }
 
-    void SetVerifyOption(u32 option) override {
+    void SetVerifyOption(u32 option) override
+    {
         skip_cert_verification = (option == 0);
-        LOG_WARNING(Service_SSL, "option={} skip_verification={}", option,
-                    skip_cert_verification);
+        LOG_WARNING(Service_SSL, "option={} skip_verification={}", option, skip_cert_verification);
         if (skip_cert_verification) {
             SSL_set_verify(ssl, SSL_VERIFY_NONE, nullptr);
             SSL_set1_host(ssl, nullptr);
@@ -184,7 +203,8 @@ public:
         }
     }
 
-    Result DoHandshake() override {
+    Result DoHandshake() override
+    {
         SSL_set_verify_result(ssl, X509_V_OK);
         const int ret = SSL_do_handshake(ssl);
 
@@ -208,17 +228,20 @@ public:
         return HandleReturn("SSL_do_handshake", 0, ret);
     }
 
-    Result Read(size_t* out_size, std::span<u8> data) override {
+    Result Read(size_t* out_size, std::span<u8> data) override
+    {
         const int ret = SSL_read_ex(ssl, data.data(), data.size(), out_size);
         return HandleReturn("SSL_read_ex", out_size, ret);
     }
 
-    Result Write(size_t* out_size, std::span<const u8> data) override {
+    Result Write(size_t* out_size, std::span<const u8> data) override
+    {
         const int ret = SSL_write_ex(ssl, data.data(), data.size(), out_size);
         return HandleReturn("SSL_write_ex", out_size, ret);
     }
 
-    Result HandleReturn(const char* what, size_t* actual, int ret) {
+    Result HandleReturn(const char* what, size_t* actual, int ret)
+    {
         const int ssl_err = SSL_get_error(ssl, ret);
         CheckOpenSSLErrors();
         switch (ssl_err) {
@@ -246,7 +269,8 @@ public:
         }
     }
 
-    Result GetServerCerts(std::vector<std::vector<u8>>* out_certs) override {
+    Result GetServerCerts(std::vector<std::vector<u8>>* out_certs) override
+    {
         STACK_OF(X509)* chain = SSL_get_peer_cert_chain(ssl);
         if (!chain) {
             LOG_ERROR(Service_SSL, "SSL_get_peer_cert_chain returned nullptr");
@@ -266,12 +290,14 @@ public:
         return ResultSuccess;
     }
 
-    ~SSLConnectionBackendOpenSSL() {
+    ~SSLConnectionBackendOpenSSL()
+    {
         // this is null-tolerant:
         SSL_free(ssl);
     }
 
-    static void KeyLogCallback(const SSL* ssl, const char* line) {
+    static void KeyLogCallback(const SSL* ssl, const char* line)
+    {
         std::string str(line);
         str.push_back('\n');
         // Do this in a single WriteString for atomicity if multiple instances
@@ -283,7 +309,8 @@ public:
         LOG_DEBUG(Service_SSL, "Wrote to SSLKEYLOGFILE: {}", line);
     }
 
-    static int WriteCallback(BIO* bio, const char* buf, size_t len, size_t* actual_p) {
+    static int WriteCallback(BIO* bio, const char* buf, size_t len, size_t* actual_p)
+    {
         auto self = static_cast<SSLConnectionBackendOpenSSL*>(BIO_get_data(bio));
         ASSERT_OR_EXECUTE_MSG(
             self->socket, { return 0; }, "OpenSSL asked to send but we have no socket");
@@ -302,7 +329,8 @@ public:
         }
     }
 
-    static int ReadCallback(BIO* bio, char* buf, size_t len, size_t* actual_p) {
+    static int ReadCallback(BIO* bio, char* buf, size_t len, size_t* actual_p)
+    {
         auto self = static_cast<SSLConnectionBackendOpenSSL*>(BIO_get_data(bio));
         ASSERT_OR_EXECUTE_MSG(
             self->socket, { return 0; }, "OpenSSL asked to recv but we have no socket");
@@ -324,7 +352,8 @@ public:
         }
     }
 
-    static long CtrlCallback(BIO* bio, int cmd, long l_arg, void* p_arg) {
+    static long CtrlCallback(BIO* bio, int cmd, long l_arg, void* p_arg)
+    {
         switch (cmd) {
         case BIO_CTRL_FLUSH:
             // Nothing to flush.
@@ -352,7 +381,8 @@ public:
     std::shared_ptr<Network::SocketBase> socket;
 };
 
-Result CreateSSLConnectionBackend(std::unique_ptr<SSLConnectionBackend>* out_backend) {
+Result CreateSSLConnectionBackend(std::unique_ptr<SSLConnectionBackend>* out_backend)
+{
     auto conn = std::make_unique<SSLConnectionBackendOpenSSL>();
 
     R_TRY(conn->Init());
@@ -363,7 +393,8 @@ Result CreateSSLConnectionBackend(std::unique_ptr<SSLConnectionBackend>* out_bac
 
 namespace {
 
-Result CheckOpenSSLErrors() {
+Result CheckOpenSSLErrors()
+{
     unsigned long rc;
     const char* file;
     int line;
@@ -386,14 +417,14 @@ Result CheckOpenSSLErrors() {
             msg.append(" | ");
             msg.append(data);
         }
-        Common::Log::FmtLogMessage(Common::Log::Class::Service_SSL, Common::Log::Level::Error,
-                                   file, line, func, "OpenSSL: {}",
-                                   msg);
+        Common::Log::FmtLogMessage(Common::Log::Class::Service_SSL, Common::Log::Level::Error, file,
+                                   line, func, "OpenSSL: {}", msg);
     }
     return ResultInternalError;
 }
 
-void OneTimeInit() {
+void OneTimeInit()
+{
     ssl_ctx = SSL_CTX_new(TLS_client_method());
     if (!ssl_ctx) {
         LOG_ERROR(Service_SSL, "SSL_CTX_new failed");
@@ -418,7 +449,8 @@ void OneTimeInit() {
     one_time_init_success = true;
 }
 
-void OneTimeInitLogFile() {
+void OneTimeInitLogFile()
+{
     const char* logfile = getenv("SSLKEYLOGFILE");
     if (logfile) {
         key_log_file.Open(logfile, FileAccessMode::Append, FileType::TextFile,
@@ -432,7 +464,8 @@ void OneTimeInitLogFile() {
     }
 }
 
-bool OneTimeInitBIO() {
+bool OneTimeInitBIO()
+{
     bio_meth =
         BIO_meth_new(BIO_get_new_index() | BIO_TYPE_SOURCE_SINK, "SSLConnectionBackendOpenSSL");
     if (!bio_meth ||

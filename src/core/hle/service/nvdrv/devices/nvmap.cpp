@@ -4,6 +4,8 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/nvdrv/core/nvmap.h"
+
 #include <algorithm>
 #include <bit>
 #include <cstring>
@@ -15,7 +17,6 @@
 #include "core/hle/kernel/k_page_table.h"
 #include "core/hle/kernel/k_process.h"
 #include "core/hle/service/nvdrv/core/container.h"
-#include "core/hle/service/nvdrv/core/nvmap.h"
 #include "core/hle/service/nvdrv/devices/ioctl_serialization.h"
 #include "core/hle/service/nvdrv/devices/nvmap.h"
 #include "core/memory.h"
@@ -25,12 +26,14 @@ using Core::Memory::YUZU_PAGESIZE;
 namespace Service::Nvidia::Devices {
 
 nvmap::nvmap(Core::System& system_, NvCore::Container& container_)
-    : nvdevice{system_}, container{container_}, file{container.GetNvMapFile()} {}
+    : nvdevice{system_}, container{container_}, file{container.GetNvMapFile()}
+{
+}
 
 nvmap::~nvmap() = default;
 
-NvResult nvmap::Ioctl1(DeviceFD fd, Ioctl command, std::span<const u8> input,
-                       std::span<u8> output) {
+NvResult nvmap::Ioctl1(DeviceFD fd, Ioctl command, std::span<const u8> input, std::span<u8> output)
+{
     switch (command.group) {
     case 0x1:
         switch (command.cmd) {
@@ -59,28 +62,33 @@ NvResult nvmap::Ioctl1(DeviceFD fd, Ioctl command, std::span<const u8> input,
 }
 
 NvResult nvmap::Ioctl2(DeviceFD fd, Ioctl command, std::span<const u8> input,
-                       std::span<const u8> inline_input, std::span<u8> output) {
+                       std::span<const u8> inline_input, std::span<u8> output)
+{
     UNIMPLEMENTED_MSG("Unimplemented ioctl={:08X}", command.raw);
     return NvResult::NotImplemented;
 }
 
 NvResult nvmap::Ioctl3(DeviceFD fd, Ioctl command, std::span<const u8> input, std::span<u8> output,
-                       std::span<u8> inline_output) {
+                       std::span<u8> inline_output)
+{
     UNIMPLEMENTED_MSG("Unimplemented ioctl={:08X}", command.raw);
     return NvResult::NotImplemented;
 }
 
-void nvmap::OnOpen(NvCore::SessionId session_id, DeviceFD fd) {
+void nvmap::OnOpen(NvCore::SessionId session_id, DeviceFD fd)
+{
     sessions[fd] = session_id;
 }
-void nvmap::OnClose(DeviceFD fd) {
+void nvmap::OnClose(DeviceFD fd)
+{
     auto it = sessions.find(fd);
     if (it != sessions.end()) {
         sessions.erase(it);
     }
 }
 
-NvResult nvmap::IocCreate(IocCreateParams& params) {
+NvResult nvmap::IocCreate(IocCreateParams& params)
+{
     LOG_DEBUG(Service_NVDRV, "called, size=0x{:08X}", params.size);
 
     std::shared_ptr<NvCore::NvMap::Handle> handle_description{};
@@ -97,7 +105,8 @@ NvResult nvmap::IocCreate(IocCreateParams& params) {
     return NvResult::Success;
 }
 
-NvResult nvmap::IocAlloc(IocAllocParams& params, DeviceFD fd) {
+NvResult nvmap::IocAlloc(IocAllocParams& params, DeviceFD fd)
+{
     LOG_DEBUG(Service_NVDRV, "called, addr={:X}", params.address);
 
     if (!params.handle) {
@@ -142,7 +151,8 @@ NvResult nvmap::IocAlloc(IocAllocParams& params, DeviceFD fd) {
     return result;
 }
 
-NvResult nvmap::IocGetId(IocGetIdParams& params) {
+NvResult nvmap::IocGetId(IocGetIdParams& params)
+{
     LOG_DEBUG(Service_NVDRV, "called");
 
     // See the comment in FromId for extra info on this function
@@ -162,7 +172,8 @@ NvResult nvmap::IocGetId(IocGetIdParams& params) {
     return NvResult::Success;
 }
 
-NvResult nvmap::IocFromId(IocFromIdParams& params) {
+NvResult nvmap::IocFromId(IocFromIdParams& params)
+{
     LOG_DEBUG(Service_NVDRV, "called, id:{}", params.id);
 
     // Handles and IDs are always the same value in nvmap however IDs can be used globally given the
@@ -189,7 +200,8 @@ NvResult nvmap::IocFromId(IocFromIdParams& params) {
     return NvResult::Success;
 }
 
-NvResult nvmap::IocParam(IocParamParams& params) {
+NvResult nvmap::IocParam(IocParamParams& params)
+{
     enum class ParamTypes { Size = 1, Alignment = 2, Base = 3, Heap = 4, Kind = 5, Compr = 6 };
 
     LOG_DEBUG(Service_NVDRV, "called type={}", params.param);
@@ -234,7 +246,8 @@ NvResult nvmap::IocParam(IocParamParams& params) {
     return NvResult::Success;
 }
 
-NvResult nvmap::IocFree(IocFreeParams& params, DeviceFD fd) {
+NvResult nvmap::IocFree(IocFreeParams& params, DeviceFD fd)
+{
     LOG_DEBUG(Service_NVDRV, "called");
 
     if (!params.handle) {

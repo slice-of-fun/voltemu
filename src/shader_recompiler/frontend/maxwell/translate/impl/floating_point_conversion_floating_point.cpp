@@ -21,7 +21,8 @@ enum class RoundingOp : u64 {
     Trunc = 11,
 };
 
-[[nodiscard]] u32 WidthSize(FloatFormat width) {
+[[nodiscard]] u32 WidthSize(FloatFormat width)
+{
     switch (width) {
     case FloatFormat::F16:
         return 16;
@@ -34,7 +35,8 @@ enum class RoundingOp : u64 {
     }
 }
 
-void F2F(TranslatorVisitor& v, u64 insn, const IR::F16F32F64& src_a, bool abs) {
+void F2F(TranslatorVisitor& v, u64 insn, const IR::F16F32F64& src_a, bool abs)
+{
     union {
         u64 insn;
         BitField<0, 8, IR::Reg> dest_reg;
@@ -47,7 +49,8 @@ void F2F(TranslatorVisitor& v, u64 insn, const IR::F16F32F64& src_a, bool abs) {
         BitField<10, 2, FloatFormat> src_size;
         BitField<8, 2, FloatFormat> dst_size;
 
-        [[nodiscard]] RoundingOp RoundingOperation() const {
+        [[nodiscard]] RoundingOp RoundingOperation() const
+        {
             constexpr u64 rounding_mask = 0x0B;
             return static_cast<RoundingOp>(rounding_op.Value() & rounding_mask);
         }
@@ -123,7 +126,8 @@ void F2F(TranslatorVisitor& v, u64 insn, const IR::F16F32F64& src_a, bool abs) {
 }
 } // Anonymous namespace
 
-void TranslatorVisitor::F2F_reg(u64 insn) {
+void TranslatorVisitor::F2F_reg(u64 insn)
+{
     union {
         u64 insn;
         BitField<49, 1, u64> abs;
@@ -150,7 +154,8 @@ void TranslatorVisitor::F2F_reg(u64 insn) {
     F2F(*this, insn, src_a, f2f.abs != 0);
 }
 
-void TranslatorVisitor::F2F_cbuf(u64 insn) {
+void TranslatorVisitor::F2F_cbuf(u64 insn)
+{
     union {
         u64 insn;
         BitField<49, 1, u64> abs;
@@ -177,7 +182,8 @@ void TranslatorVisitor::F2F_cbuf(u64 insn) {
     F2F(*this, insn, src_a, f2f.abs != 0);
 }
 
-void TranslatorVisitor::F2F_imm([[maybe_unused]] u64 insn) {
+void TranslatorVisitor::F2F_imm([[maybe_unused]] u64 insn)
+{
     union {
         u64 insn;
         BitField<49, 1, u64> abs;

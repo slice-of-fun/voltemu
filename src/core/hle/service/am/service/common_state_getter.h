@@ -51,8 +51,8 @@ private:
     Result SetLcdBacklighOffEnabled(bool is_lcd_backlight_off_enabled);
     Result BeginVrModeEx();
     Result EndVrModeEx();
-    Result IsInControllerFirmwareUpdateSection(
-        Out<bool> out_is_in_controller_firmware_update_section);
+    Result
+    IsInControllerFirmwareUpdateSection(Out<bool> out_is_in_controller_firmware_update_section);
     Result GetDefaultDisplayResolution(Out<s32> out_width, Out<s32> out_height);
     Result GetBuiltInDisplayType(Out<s32> out_display_type);
     Result PerformSystemButtonPressingIfInFocus(SystemButtonType type);

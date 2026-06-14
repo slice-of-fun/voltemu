@@ -23,9 +23,7 @@ public:
                        Kernel::KProcess* handle, u64 applet_resource_user_id);
     ~IAudioOut() override;
 
-    std::shared_ptr<AudioCore::AudioOut::Out> GetImpl() {
-        return impl;
-    }
+    std::shared_ptr<AudioCore::AudioOut::Out> GetImpl() { return impl; }
 
     Result GetAudioOutState(Out<u32> out_state);
     Result Start();

@@ -4,14 +4,15 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include <array>
-#include <string>
+#include "core/file_sys/card_image.h"
 
 #include <fmt/ostream.h>
 
+#include <array>
+#include <string>
+
 #include "common/logging.h"
 #include "core/crypto/key_manager.h"
-#include "core/file_sys/card_image.h"
 #include "core/file_sys/content_archive.h"
 #include "core/file_sys/nca_metadata.h"
 #include "core/file_sys/partition_filesystem.h"
@@ -33,7 +34,8 @@ constexpr std::array partition_names{
 XCI::XCI(VirtualFile file_, u64 program_id, size_t program_index)
     : file(std::move(file_)), program_nca_status{Loader::ResultStatus::ErrorXCIMissingProgramNCA},
       partitions(partition_names.size()),
-      partitions_raw(partition_names.size()), keys{Core::Crypto::KeyManager::Instance()} {
+      partitions_raw(partition_names.size()), keys{Core::Crypto::KeyManager::Instance()}
+{
     const auto header_status = TryReadHeader();
     if (header_status != Loader::ResultStatus::Success) {
         status = header_status;
@@ -89,15 +91,18 @@ XCI::XCI(VirtualFile file_, u64 program_id, size_t program_index)
 
 XCI::~XCI() = default;
 
-Loader::ResultStatus XCI::GetStatus() const {
+Loader::ResultStatus XCI::GetStatus() const
+{
     return status;
 }
 
-Loader::ResultStatus XCI::GetProgramNCAStatus() const {
+Loader::ResultStatus XCI::GetProgramNCAStatus() const
+{
     return program_nca_status;
 }
 
-VirtualDir XCI::GetPartition(XCIPartition partition) {
+VirtualDir XCI::GetPartition(XCIPartition partition)
+{
     const auto id = static_cast<std::size_t>(partition);
     if (partitions[id] == nullptr && partitions_raw[id] != nullptr) {
         partitions[id] = std::make_shared<PartitionFilesystem>(partitions_raw[id]);
@@ -106,7 +111,8 @@ VirtualDir XCI::GetPartition(XCIPartition partition) {
     return partitions[static_cast<std::size_t>(partition)];
 }
 
-std::vector<VirtualDir> XCI::GetPartitions() {
+std::vector<VirtualDir> XCI::GetPartitions()
+{
     std::vector<VirtualDir> out;
     for (const auto& id :
          {XCIPartition::Update, XCIPartition::Normal, XCIPartition::Secure, XCIPartition::Logo}) {
@@ -118,64 +124,79 @@ std::vector<VirtualDir> XCI::GetPartitions() {
     return out;
 }
 
-std::shared_ptr<NSP> XCI::GetSecurePartitionNSP() const {
+std::shared_ptr<NSP> XCI::GetSecurePartitionNSP() const
+{
     return secure_partition;
 }
 
-VirtualDir XCI::GetSecurePartition() {
+VirtualDir XCI::GetSecurePartition()
+{
     return GetPartition(XCIPartition::Secure);
 }
 
-VirtualDir XCI::GetNormalPartition() {
+VirtualDir XCI::GetNormalPartition()
+{
     return GetPartition(XCIPartition::Normal);
 }
 
-VirtualDir XCI::GetUpdatePartition() {
+VirtualDir XCI::GetUpdatePartition()
+{
     return GetPartition(XCIPartition::Update);
 }
 
-VirtualDir XCI::GetLogoPartition() {
+VirtualDir XCI::GetLogoPartition()
+{
     return GetPartition(XCIPartition::Logo);
 }
 
-VirtualFile XCI::GetPartitionRaw(XCIPartition partition) const {
+VirtualFile XCI::GetPartitionRaw(XCIPartition partition) const
+{
     return partitions_raw[static_cast<std::size_t>(partition)];
 }
 
-VirtualFile XCI::GetSecurePartitionRaw() const {
+VirtualFile XCI::GetSecurePartitionRaw() const
+{
     return GetPartitionRaw(XCIPartition::Secure);
 }
 
-VirtualFile XCI::GetStoragePartition0() const {
+VirtualFile XCI::GetStoragePartition0() const
+{
     return std::make_shared<OffsetVfsFile>(file, update_normal_partition_end, 0, "partition0");
 }
 
-VirtualFile XCI::GetStoragePartition1() const {
+VirtualFile XCI::GetStoragePartition1() const
+{
     return std::make_shared<OffsetVfsFile>(file, file->GetSize() - update_normal_partition_end,
                                            update_normal_partition_end, "partition1");
 }
 
-VirtualFile XCI::GetNormalPartitionRaw() const {
+VirtualFile XCI::GetNormalPartitionRaw() const
+{
     return GetPartitionRaw(XCIPartition::Normal);
 }
 
-VirtualFile XCI::GetUpdatePartitionRaw() const {
+VirtualFile XCI::GetUpdatePartitionRaw() const
+{
     return GetPartitionRaw(XCIPartition::Update);
 }
 
-VirtualFile XCI::GetLogoPartitionRaw() const {
+VirtualFile XCI::GetLogoPartitionRaw() const
+{
     return GetPartitionRaw(XCIPartition::Logo);
 }
 
-u64 XCI::GetProgramTitleID() const {
+u64 XCI::GetProgramTitleID() const
+{
     return secure_partition->GetProgramTitleID();
 }
 
-std::vector<u64> XCI::GetProgramTitleIDs() const {
+std::vector<u64> XCI::GetProgramTitleIDs() const
+{
     return secure_partition->GetProgramTitleIDs();
 }
 
-u32 XCI::GetSystemUpdateVersion() {
+u32 XCI::GetSystemUpdateVersion()
+{
     const auto update = GetPartition(XCIPartition::Update);
     if (update == nullptr) {
         return 0;
@@ -209,15 +230,18 @@ u32 XCI::GetSystemUpdateVersion() {
     return 0;
 }
 
-u64 XCI::GetSystemUpdateTitleID() const {
+u64 XCI::GetSystemUpdateTitleID() const
+{
     return 0x0100000000000816;
 }
 
-bool XCI::HasProgramNCA() const {
+bool XCI::HasProgramNCA() const
+{
     return program != nullptr;
 }
 
-VirtualFile XCI::GetProgramNCAFile() const {
+VirtualFile XCI::GetProgramNCAFile() const
+{
     if (!HasProgramNCA()) {
         return nullptr;
     }
@@ -225,11 +249,13 @@ VirtualFile XCI::GetProgramNCAFile() const {
     return program->GetBaseFile();
 }
 
-const std::vector<std::shared_ptr<NCA>>& XCI::GetNCAs() const {
+const std::vector<std::shared_ptr<NCA>>& XCI::GetNCAs() const
+{
     return ncas;
 }
 
-std::shared_ptr<NCA> XCI::GetNCAByType(NCAContentType type) const {
+std::shared_ptr<NCA> XCI::GetNCAByType(NCAContentType type) const
+{
     const auto program_id = secure_partition->GetProgramTitleID();
     const auto iter =
         std::find_if(ncas.begin(), ncas.end(), [type, program_id](const std::shared_ptr<NCA>& nca) {
@@ -238,7 +264,8 @@ std::shared_ptr<NCA> XCI::GetNCAByType(NCAContentType type) const {
     return iter == ncas.end() ? nullptr : *iter;
 }
 
-VirtualFile XCI::GetNCAFileByType(NCAContentType type) const {
+VirtualFile XCI::GetNCAFileByType(NCAContentType type) const
+{
     auto nca = GetNCAByType(type);
     if (nca != nullptr) {
         return nca->GetBaseFile();
@@ -246,23 +273,28 @@ VirtualFile XCI::GetNCAFileByType(NCAContentType type) const {
     return nullptr;
 }
 
-std::vector<VirtualFile> XCI::GetFiles() const {
+std::vector<VirtualFile> XCI::GetFiles() const
+{
     return {};
 }
 
-std::vector<VirtualDir> XCI::GetSubdirectories() const {
+std::vector<VirtualDir> XCI::GetSubdirectories() const
+{
     return {};
 }
 
-std::string XCI::GetName() const {
+std::string XCI::GetName() const
+{
     return file->GetName();
 }
 
-VirtualDir XCI::GetParentDirectory() const {
+VirtualDir XCI::GetParentDirectory() const
+{
     return file->GetContainingDirectory();
 }
 
-VirtualDir XCI::ConcatenatedPseudoDirectory() {
+VirtualDir XCI::ConcatenatedPseudoDirectory()
+{
     const auto out = std::make_shared<VectorVfsDirectory>();
     for (const auto& part_id : {XCIPartition::Normal, XCIPartition::Logo, XCIPartition::Secure}) {
         const auto& part = GetPartition(part_id);
@@ -276,13 +308,15 @@ VirtualDir XCI::ConcatenatedPseudoDirectory() {
     return out;
 }
 
-std::array<u8, 0x200> XCI::GetCertificate() const {
+std::array<u8, 0x200> XCI::GetCertificate() const
+{
     std::array<u8, 0x200> out;
     file->Read(out.data(), out.size(), GAMECARD_CERTIFICATE_OFFSET);
     return out;
 }
 
-Loader::ResultStatus XCI::AddNCAFromPartition(XCIPartition part) {
+Loader::ResultStatus XCI::AddNCAFromPartition(XCIPartition part)
+{
     const auto partition_index = static_cast<std::size_t>(part);
     const auto partition = GetPartition(part);
 
@@ -315,7 +349,8 @@ Loader::ResultStatus XCI::AddNCAFromPartition(XCIPartition part) {
     return Loader::ResultStatus::Success;
 }
 
-Loader::ResultStatus XCI::TryReadHeader() {
+Loader::ResultStatus XCI::TryReadHeader()
+{
     constexpr size_t CardInitialDataRegionSize = 0x1000;
 
     // Define the function we'll use to determine if we read a valid header.
@@ -353,7 +388,8 @@ Loader::ResultStatus XCI::TryReadHeader() {
     return Loader::ResultStatus::ErrorBadXCIHeader;
 }
 
-u8 XCI::GetFormatVersion() {
+u8 XCI::GetFormatVersion()
+{
     return GetLogoPartition() == nullptr ? 0x1 : 0x2;
 }
 } // namespace FileSys

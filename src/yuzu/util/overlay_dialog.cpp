@@ -3,6 +3,8 @@
 // SPDX-FileCopyrightText: Copyright 2021 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "yuzu/util/overlay_dialog.h"
+
 #include <QKeyEvent>
 #include <QScreen>
 #include <QWindow>
@@ -11,7 +13,6 @@
 #include "hid_core/frontend/input_interpreter.h"
 #include "hid_core/hid_types.h"
 #include "ui_overlay_dialog.h"
-#include "yuzu/util/overlay_dialog.h"
 
 namespace {
 
@@ -26,7 +27,8 @@ OverlayDialog::OverlayDialog(QWidget* parent, Core::System& system, const QStrin
                              const QString& body_text, const QString& left_button_text,
                              const QString& right_button_text, Qt::Alignment alignment,
                              bool use_rich_text_)
-    : QDialog(parent), ui{std::make_unique<Ui::OverlayDialog>()}, use_rich_text{use_rich_text_} {
+    : QDialog(parent), ui{std::make_unique<Ui::OverlayDialog>()}, use_rich_text{use_rich_text_}
+{
     ui->setupUi(this);
 
     setWindowFlags(Qt::Dialog | Qt::FramelessWindowHint | Qt::WindowTitleHint |
@@ -52,14 +54,16 @@ OverlayDialog::OverlayDialog(QWidget* parent, Core::System& system, const QStrin
     }
 }
 
-OverlayDialog::~OverlayDialog() {
+OverlayDialog::~OverlayDialog()
+{
     StopInputThread();
 }
 
 void OverlayDialog::InitializeRegularTextDialog(const QString& title_text, const QString& body_text,
                                                 const QString& left_button_text,
                                                 const QString& right_button_text,
-                                                Qt::Alignment alignment) {
+                                                Qt::Alignment alignment)
+{
     ui->stackedDialog->setCurrentIndex(0);
 
     ui->label_title->setText(title_text);
@@ -110,7 +114,8 @@ void OverlayDialog::InitializeRegularTextDialog(const QString& title_text, const
 void OverlayDialog::InitializeRichTextDialog(const QString& title_text, const QString& body_text,
                                              const QString& left_button_text,
                                              const QString& right_button_text,
-                                             Qt::Alignment alignment) {
+                                             Qt::Alignment alignment)
+{
     ui->stackedDialog->setCurrentIndex(1);
 
     ui->label_title_rich->setText(title_text);
@@ -159,7 +164,8 @@ void OverlayDialog::InitializeRichTextDialog(const QString& title_text, const QS
         Qt::QueuedConnection);
 }
 
-void OverlayDialog::MoveAndResizeWindow() {
+void OverlayDialog::MoveAndResizeWindow()
+{
     const auto pos = parentWidget()->mapToGlobal(parentWidget()->rect().topLeft());
     const auto width = static_cast<float>(parentWidget()->width());
     const auto height = static_cast<float>(parentWidget()->height());
@@ -192,8 +198,8 @@ void OverlayDialog::MoveAndResizeWindow() {
     QDialog::resize(width, height);
 }
 
-template <Core::HID::NpadButton... T>
-void OverlayDialog::HandleButtonPressedOnce() {
+template<Core::HID::NpadButton... T> void OverlayDialog::HandleButtonPressedOnce()
+{
     const auto f = [this](Core::HID::NpadButton button) {
         if (input_interpreter->IsButtonPressedOnce(button)) {
             TranslateButtonPress(button);
@@ -203,7 +209,8 @@ void OverlayDialog::HandleButtonPressedOnce() {
     (f(T), ...);
 }
 
-void OverlayDialog::TranslateButtonPress(Core::HID::NpadButton button) {
+void OverlayDialog::TranslateButtonPress(Core::HID::NpadButton button)
+{
     QPushButton* left_button = use_rich_text ? ui->button_cancel_rich : ui->button_cancel;
     QPushButton* right_button = use_rich_text ? ui->button_ok_rich : ui->button_ok_label;
 
@@ -232,7 +239,8 @@ void OverlayDialog::TranslateButtonPress(Core::HID::NpadButton button) {
     }
 }
 
-void OverlayDialog::StartInputThread() {
+void OverlayDialog::StartInputThread()
+{
     input_thread = std::jthread([&](std::stop_token stoken) {
         while (!stoken.stop_requested()) {
             input_interpreter->PollInput();
@@ -245,11 +253,13 @@ void OverlayDialog::StartInputThread() {
     });
 }
 
-void OverlayDialog::StopInputThread() {
+void OverlayDialog::StopInputThread()
+{
     input_thread.request_stop();
 }
 
-void OverlayDialog::keyPressEvent(QKeyEvent* e) {
+void OverlayDialog::keyPressEvent(QKeyEvent* e)
+{
     if (!ui->buttonsDialog->isHidden() || e->key() != Qt::Key_Escape) {
         QDialog::keyPressEvent(e);
     }

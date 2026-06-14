@@ -1,11 +1,11 @@
 // SPDX-FileCopyrightText: Copyright 2021 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "input_common/input_poller.h"
+
 #include "common/common_types.h"
 #include "common/input.h"
-
 #include "input_common/input_engine.h"
-#include "input_common/input_poller.h"
 
 namespace InputCommon {
 
@@ -19,7 +19,8 @@ public:
     explicit InputFromButton(PadIdentifier identifier_, int button_, bool turbo_, bool toggle_,
                              bool inverted_, InputEngine* input_engine_)
         : identifier(identifier_), button(button_), turbo(turbo_), toggle(toggle_),
-          inverted(inverted_), input_engine(input_engine_) {
+          inverted(inverted_), input_engine(input_engine_)
+    {
         UpdateCallback engine_callback{[this]() { OnChange(); }};
         const InputIdentifier input_identifier{
             .identifier = identifier,
@@ -31,11 +32,10 @@ public:
         callback_key = input_engine->SetCallback(input_identifier);
     }
 
-    ~InputFromButton() override {
-        input_engine->DeleteCallback(callback_key);
-    }
+    ~InputFromButton() override { input_engine->DeleteCallback(callback_key); }
 
-    Common::Input::ButtonStatus GetStatus() const {
+    Common::Input::ButtonStatus GetStatus() const
+    {
         return {
             .value = input_engine->GetButton(identifier, button),
             .inverted = inverted,
@@ -44,7 +44,8 @@ public:
         };
     }
 
-    void ForceUpdate() override {
+    void ForceUpdate() override
+    {
         const Common::Input::CallbackStatus status{
             .type = Common::Input::InputType::Button,
             .button_status = GetStatus(),
@@ -54,7 +55,8 @@ public:
         TriggerOnChange(status);
     }
 
-    void OnChange() {
+    void OnChange()
+    {
         const Common::Input::CallbackStatus status{
             .type = Common::Input::InputType::Button,
             .button_status = GetStatus(),
@@ -82,7 +84,8 @@ public:
     explicit InputFromHatButton(PadIdentifier identifier_, int button_, u8 direction_, bool turbo_,
                                 bool toggle_, bool inverted_, InputEngine* input_engine_)
         : identifier(identifier_), button(button_), direction(direction_), turbo(turbo_),
-          toggle(toggle_), inverted(inverted_), input_engine(input_engine_) {
+          toggle(toggle_), inverted(inverted_), input_engine(input_engine_)
+    {
         UpdateCallback engine_callback{[this]() { OnChange(); }};
         const InputIdentifier input_identifier{
             .identifier = identifier,
@@ -94,11 +97,10 @@ public:
         callback_key = input_engine->SetCallback(input_identifier);
     }
 
-    ~InputFromHatButton() override {
-        input_engine->DeleteCallback(callback_key);
-    }
+    ~InputFromHatButton() override { input_engine->DeleteCallback(callback_key); }
 
-    Common::Input::ButtonStatus GetStatus() const {
+    Common::Input::ButtonStatus GetStatus() const
+    {
         return {
             .value = input_engine->GetHatButton(identifier, button, direction),
             .inverted = inverted,
@@ -107,7 +109,8 @@ public:
         };
     }
 
-    void ForceUpdate() override {
+    void ForceUpdate() override
+    {
         const Common::Input::CallbackStatus status{
             .type = Common::Input::InputType::Button,
             .button_status = GetStatus(),
@@ -117,7 +120,8 @@ public:
         TriggerOnChange(status);
     }
 
-    void OnChange() {
+    void OnChange()
+    {
         const Common::Input::CallbackStatus status{
             .type = Common::Input::InputType::Button,
             .button_status = GetStatus(),
@@ -149,7 +153,8 @@ public:
                             InputEngine* input_engine_)
         : identifier(identifier_), axis_x(axis_x_), axis_y(axis_y_), properties_x(properties_x_),
           properties_y(properties_y_),
-          input_engine(input_engine_), invert_axis_y{input_engine_->GetEngineName() == "sdl"} {
+          input_engine(input_engine_), invert_axis_y{input_engine_->GetEngineName() == "sdl"}
+    {
         UpdateCallback engine_callback{[this]() { OnChange(); }};
         const InputIdentifier x_input_identifier{
             .identifier = identifier,
@@ -169,12 +174,14 @@ public:
         callback_key_y = input_engine->SetCallback(y_input_identifier);
     }
 
-    ~InputFromStick() override {
+    ~InputFromStick() override
+    {
         input_engine->DeleteCallback(callback_key_x);
         input_engine->DeleteCallback(callback_key_y);
     }
 
-    Common::Input::StickStatus GetStatus() const {
+    Common::Input::StickStatus GetStatus() const
+    {
         Common::Input::StickStatus status;
         status.x = {
             .raw_value = input_engine->GetAxis(identifier, axis_x),
@@ -192,7 +199,8 @@ public:
         return status;
     }
 
-    void ForceUpdate() override {
+    void ForceUpdate() override
+    {
         const Common::Input::CallbackStatus status{
             .type = Common::Input::InputType::Stick,
             .stick_status = GetStatus(),
@@ -203,7 +211,8 @@ public:
         TriggerOnChange(status);
     }
 
-    void OnChange() {
+    void OnChange()
+    {
         const Common::Input::CallbackStatus status{
             .type = Common::Input::InputType::Stick,
             .stick_status = GetStatus(),
@@ -239,7 +248,8 @@ public:
                             InputEngine* input_engine_)
         : identifier(identifier_), button(button_), toggle(toggle_), inverted(inverted_),
           axis_x(axis_x_), axis_y(axis_y_), properties_x(properties_x_),
-          properties_y(properties_y_), input_engine(input_engine_) {
+          properties_y(properties_y_), input_engine(input_engine_)
+    {
         UpdateCallback engine_callback{[this]() { OnChange(); }};
         const InputIdentifier button_input_identifier{
             .identifier = identifier,
@@ -267,13 +277,15 @@ public:
         callback_key_y = input_engine->SetCallback(y_input_identifier);
     }
 
-    ~InputFromTouch() override {
+    ~InputFromTouch() override
+    {
         input_engine->DeleteCallback(callback_key_button);
         input_engine->DeleteCallback(callback_key_x);
         input_engine->DeleteCallback(callback_key_y);
     }
 
-    Common::Input::TouchStatus GetStatus() const {
+    Common::Input::TouchStatus GetStatus() const
+    {
         Common::Input::TouchStatus status{};
         status.pressed = {
             .value = input_engine->GetButton(identifier, button),
@@ -291,7 +303,8 @@ public:
         return status;
     }
 
-    void OnChange() {
+    void OnChange()
+    {
         const Common::Input::CallbackStatus status{
             .type = Common::Input::InputType::Touch,
             .touch_status = GetStatus(),
@@ -331,7 +344,8 @@ public:
                               int axis_, Common::Input::AnalogProperties properties_,
                               InputEngine* input_engine_)
         : identifier(identifier_), button(button_), toggle(toggle_), inverted(inverted_),
-          axis(axis_), properties(properties_), input_engine(input_engine_) {
+          axis(axis_), properties(properties_), input_engine(input_engine_)
+    {
         UpdateCallback engine_callback{[this]() { OnChange(); }};
         const InputIdentifier button_input_identifier{
             .identifier = identifier,
@@ -351,12 +365,14 @@ public:
         axis_callback_key = input_engine->SetCallback(axis_input_identifier);
     }
 
-    ~InputFromTrigger() override {
+    ~InputFromTrigger() override
+    {
         input_engine->DeleteCallback(callback_key_button);
         input_engine->DeleteCallback(axis_callback_key);
     }
 
-    Common::Input::TriggerStatus GetStatus() const {
+    Common::Input::TriggerStatus GetStatus() const
+    {
         const Common::Input::AnalogStatus analog_status{
             .raw_value = input_engine->GetAxis(identifier, axis),
             .properties = properties,
@@ -372,7 +388,8 @@ public:
         };
     }
 
-    void OnChange() {
+    void OnChange()
+    {
         const Common::Input::CallbackStatus status{
             .type = Common::Input::InputType::Trigger,
             .trigger_status = GetStatus(),
@@ -405,8 +422,8 @@ public:
     explicit InputFromAnalog(PadIdentifier identifier_, int axis_,
                              Common::Input::AnalogProperties properties_,
                              InputEngine* input_engine_)
-        : identifier(identifier_), axis(axis_), properties(properties_),
-          input_engine(input_engine_) {
+        : identifier(identifier_), axis(axis_), properties(properties_), input_engine(input_engine_)
+    {
         UpdateCallback engine_callback{[this]() { OnChange(); }};
         const InputIdentifier input_identifier{
             .identifier = identifier,
@@ -418,18 +435,18 @@ public:
         callback_key = input_engine->SetCallback(input_identifier);
     }
 
-    ~InputFromAnalog() override {
-        input_engine->DeleteCallback(callback_key);
-    }
+    ~InputFromAnalog() override { input_engine->DeleteCallback(callback_key); }
 
-    Common::Input::AnalogStatus GetStatus() const {
+    Common::Input::AnalogStatus GetStatus() const
+    {
         return {
             .raw_value = input_engine->GetAxis(identifier, axis),
             .properties = properties,
         };
     }
 
-    void OnChange() {
+    void OnChange()
+    {
         const Common::Input::CallbackStatus status{
             .type = Common::Input::InputType::Analog,
             .analog_status = GetStatus(),
@@ -453,7 +470,8 @@ private:
 class InputFromBattery final : public Common::Input::InputDevice {
 public:
     explicit InputFromBattery(PadIdentifier identifier_, InputEngine* input_engine_)
-        : identifier(identifier_), input_engine(input_engine_) {
+        : identifier(identifier_), input_engine(input_engine_)
+    {
         UpdateCallback engine_callback{[this]() { OnChange(); }};
         const InputIdentifier input_identifier{
             .identifier = identifier,
@@ -465,15 +483,12 @@ public:
         callback_key = input_engine->SetCallback(input_identifier);
     }
 
-    ~InputFromBattery() override {
-        input_engine->DeleteCallback(callback_key);
-    }
+    ~InputFromBattery() override { input_engine->DeleteCallback(callback_key); }
 
-    Common::Input::BatteryStatus GetStatus() const {
-        return input_engine->GetBattery(identifier);
-    }
+    Common::Input::BatteryStatus GetStatus() const { return input_engine->GetBattery(identifier); }
 
-    void ForceUpdate() override {
+    void ForceUpdate() override
+    {
         const Common::Input::CallbackStatus status{
             .type = Common::Input::InputType::Battery,
             .battery_status = GetStatus(),
@@ -483,7 +498,8 @@ public:
         TriggerOnChange(status);
     }
 
-    void OnChange() {
+    void OnChange()
+    {
         const Common::Input::CallbackStatus status{
             .type = Common::Input::InputType::Battery,
             .battery_status = GetStatus(),
@@ -505,7 +521,8 @@ private:
 class InputFromColor final : public Common::Input::InputDevice {
 public:
     explicit InputFromColor(PadIdentifier identifier_, InputEngine* input_engine_)
-        : identifier(identifier_), input_engine(input_engine_) {
+        : identifier(identifier_), input_engine(input_engine_)
+    {
         UpdateCallback engine_callback{[this]() { OnChange(); }};
         const InputIdentifier input_identifier{
             .identifier = identifier,
@@ -517,15 +534,12 @@ public:
         callback_key = input_engine->SetCallback(input_identifier);
     }
 
-    ~InputFromColor() override {
-        input_engine->DeleteCallback(callback_key);
-    }
+    ~InputFromColor() override { input_engine->DeleteCallback(callback_key); }
 
-    Common::Input::BodyColorStatus GetStatus() const {
-        return input_engine->GetColor(identifier);
-    }
+    Common::Input::BodyColorStatus GetStatus() const { return input_engine->GetColor(identifier); }
 
-    void ForceUpdate() override {
+    void ForceUpdate() override
+    {
         const Common::Input::CallbackStatus status{
             .type = Common::Input::InputType::Color,
             .color_status = GetStatus(),
@@ -535,7 +549,8 @@ public:
         TriggerOnChange(status);
     }
 
-    void OnChange() {
+    void OnChange()
+    {
         const Common::Input::CallbackStatus status{
             .type = Common::Input::InputType::Color,
             .color_status = GetStatus(),
@@ -559,7 +574,8 @@ public:
     explicit InputFromMotion(PadIdentifier identifier_, int motion_sensor_, float gyro_threshold_,
                              InputEngine* input_engine_)
         : identifier(identifier_), motion_sensor(motion_sensor_), gyro_threshold(gyro_threshold_),
-          input_engine(input_engine_) {
+          input_engine(input_engine_)
+    {
         UpdateCallback engine_callback{[this]() { OnChange(); }};
         const InputIdentifier input_identifier{
             .identifier = identifier,
@@ -570,11 +586,10 @@ public:
         callback_key = input_engine->SetCallback(input_identifier);
     }
 
-    ~InputFromMotion() override {
-        input_engine->DeleteCallback(callback_key);
-    }
+    ~InputFromMotion() override { input_engine->DeleteCallback(callback_key); }
 
-    Common::Input::MotionStatus GetStatus() const {
+    Common::Input::MotionStatus GetStatus() const
+    {
         const auto basic_motion = input_engine->GetMotion(identifier, motion_sensor);
         Common::Input::MotionStatus status{};
         const Common::Input::AnalogProperties properties = {
@@ -593,7 +608,8 @@ public:
         return status;
     }
 
-    void OnChange() {
+    void OnChange()
+    {
         const Common::Input::CallbackStatus status{
             .type = Common::Input::InputType::Motion,
             .motion_status = GetStatus(),
@@ -619,7 +635,8 @@ public:
                                  InputEngine* input_engine_)
         : identifier(identifier_), axis_x(axis_x_), axis_y(axis_y_), axis_z(axis_z_),
           properties_x(properties_x_), properties_y(properties_y_), properties_z(properties_z_),
-          input_engine(input_engine_) {
+          input_engine(input_engine_)
+    {
         UpdateCallback engine_callback{[this]() { OnChange(); }};
         const InputIdentifier x_input_identifier{
             .identifier = identifier,
@@ -647,13 +664,15 @@ public:
         callback_key_z = input_engine->SetCallback(z_input_identifier);
     }
 
-    ~InputFromAxisMotion() override {
+    ~InputFromAxisMotion() override
+    {
         input_engine->DeleteCallback(callback_key_x);
         input_engine->DeleteCallback(callback_key_y);
         input_engine->DeleteCallback(callback_key_z);
     }
 
-    Common::Input::MotionStatus GetStatus() const {
+    Common::Input::MotionStatus GetStatus() const
+    {
         Common::Input::MotionStatus status{};
         status.gyro.x = {
             .raw_value = input_engine->GetAxis(identifier, axis_x),
@@ -672,7 +691,8 @@ public:
         return status;
     }
 
-    void ForceUpdate() override {
+    void ForceUpdate() override
+    {
         const Common::Input::CallbackStatus status{
             .type = Common::Input::InputType::Motion,
             .motion_status = GetStatus(),
@@ -684,7 +704,8 @@ public:
         TriggerOnChange(status);
     }
 
-    void OnChange() {
+    void OnChange()
+    {
         const Common::Input::CallbackStatus status{
             .type = Common::Input::InputType::Motion,
             .motion_status = GetStatus(),
@@ -720,7 +741,8 @@ private:
 class InputFromCamera final : public Common::Input::InputDevice {
 public:
     explicit InputFromCamera(PadIdentifier identifier_, InputEngine* input_engine_)
-        : identifier(identifier_), input_engine(input_engine_) {
+        : identifier(identifier_), input_engine(input_engine_)
+    {
         UpdateCallback engine_callback{[this]() { OnChange(); }};
         const InputIdentifier input_identifier{
             .identifier = identifier,
@@ -731,19 +753,14 @@ public:
         callback_key = input_engine->SetCallback(input_identifier);
     }
 
-    ~InputFromCamera() override {
-        input_engine->DeleteCallback(callback_key);
-    }
+    ~InputFromCamera() override { input_engine->DeleteCallback(callback_key); }
 
-    Common::Input::CameraStatus GetStatus() const {
-        return input_engine->GetCamera(identifier);
-    }
+    Common::Input::CameraStatus GetStatus() const { return input_engine->GetCamera(identifier); }
 
-    void ForceUpdate() override {
-        OnChange();
-    }
+    void ForceUpdate() override { OnChange(); }
 
-    void OnChange() {
+    void OnChange()
+    {
         const auto camera_status = GetStatus();
 
         const Common::Input::CallbackStatus status{
@@ -764,7 +781,8 @@ private:
 class InputFromNfc final : public Common::Input::InputDevice {
 public:
     explicit InputFromNfc(PadIdentifier identifier_, InputEngine* input_engine_)
-        : identifier(identifier_), input_engine(input_engine_) {
+        : identifier(identifier_), input_engine(input_engine_)
+    {
         UpdateCallback engine_callback{[this]() { OnChange(); }};
         const InputIdentifier input_identifier{
             .identifier = identifier,
@@ -775,19 +793,14 @@ public:
         callback_key = input_engine->SetCallback(input_identifier);
     }
 
-    ~InputFromNfc() override {
-        input_engine->DeleteCallback(callback_key);
-    }
+    ~InputFromNfc() override { input_engine->DeleteCallback(callback_key); }
 
-    Common::Input::NfcStatus GetStatus() const {
-        return input_engine->GetNfc(identifier);
-    }
+    Common::Input::NfcStatus GetStatus() const { return input_engine->GetNfc(identifier); }
 
-    void ForceUpdate() override {
-        OnChange();
-    }
+    void ForceUpdate() override { OnChange(); }
 
-    void OnChange() {
+    void OnChange()
+    {
         const auto nfc_status = GetStatus();
 
         const Common::Input::CallbackStatus status{
@@ -807,56 +820,66 @@ private:
 class OutputFromIdentifier final : public Common::Input::OutputDevice {
 public:
     explicit OutputFromIdentifier(PadIdentifier identifier_, InputEngine* input_engine_)
-        : identifier(identifier_), input_engine(input_engine_) {}
+        : identifier(identifier_), input_engine(input_engine_)
+    {
+    }
 
-    Common::Input::DriverResult SetLED(const Common::Input::LedStatus& led_status) override {
+    Common::Input::DriverResult SetLED(const Common::Input::LedStatus& led_status) override
+    {
         return input_engine->SetLeds(identifier, led_status);
     }
 
-    Common::Input::DriverResult SetVibration(
-        const Common::Input::VibrationStatus& vibration_status) override {
+    Common::Input::DriverResult
+    SetVibration(const Common::Input::VibrationStatus& vibration_status) override
+    {
         return input_engine->SetVibration(identifier, vibration_status);
     }
 
-    bool IsVibrationEnabled() override {
-        return input_engine->IsVibrationEnabled(identifier);
-    }
+    bool IsVibrationEnabled() override { return input_engine->IsVibrationEnabled(identifier); }
 
-    Common::Input::DriverResult SetPollingMode(Common::Input::PollingMode polling_mode) override {
+    Common::Input::DriverResult SetPollingMode(Common::Input::PollingMode polling_mode) override
+    {
         return input_engine->SetPollingMode(identifier, polling_mode);
     }
 
-    Common::Input::DriverResult SetCameraFormat(
-        Common::Input::CameraFormat camera_format) override {
+    Common::Input::DriverResult SetCameraFormat(Common::Input::CameraFormat camera_format) override
+    {
         return input_engine->SetCameraFormat(identifier, camera_format);
     }
 
-    Common::Input::NfcState SupportsNfc() const override {
+    Common::Input::NfcState SupportsNfc() const override
+    {
         return input_engine->SupportsNfc(identifier);
     }
 
-    Common::Input::NfcState StartNfcPolling() override {
+    Common::Input::NfcState StartNfcPolling() override
+    {
         return input_engine->StartNfcPolling(identifier);
     }
 
-    Common::Input::NfcState StopNfcPolling() override {
+    Common::Input::NfcState StopNfcPolling() override
+    {
         return input_engine->StopNfcPolling(identifier);
     }
 
-    Common::Input::NfcState ReadAmiiboData(std::vector<u8>& out_data) override {
+    Common::Input::NfcState ReadAmiiboData(std::vector<u8>& out_data) override
+    {
         return input_engine->ReadAmiiboData(identifier, out_data);
     }
 
-    Common::Input::NfcState WriteNfcData(const std::vector<u8>& data) override {
+    Common::Input::NfcState WriteNfcData(const std::vector<u8>& data) override
+    {
         return input_engine->WriteNfcData(identifier, data);
     }
 
     Common::Input::NfcState ReadMifareData(const Common::Input::MifareRequest& request,
-                                           Common::Input::MifareRequest& out_data) override {
+                                           Common::Input::MifareRequest& out_data) override
+    {
         return input_engine->ReadMifareData(identifier, request, out_data);
     }
 
-    Common::Input::NfcState WriteMifareData(const Common::Input::MifareRequest& request) override {
+    Common::Input::NfcState WriteMifareData(const Common::Input::MifareRequest& request) override
+    {
         return input_engine->WriteMifareData(identifier, request);
     }
 
@@ -865,8 +888,9 @@ private:
     InputEngine* input_engine;
 };
 
-std::unique_ptr<Common::Input::InputDevice> InputFactory::CreateButtonDevice(
-    const Common::ParamPackage& params) {
+std::unique_ptr<Common::Input::InputDevice>
+InputFactory::CreateButtonDevice(const Common::ParamPackage& params)
+{
     const PadIdentifier identifier = {
         .guid = Common::UUID{params.Get("guid", "")},
         .port = static_cast<std::size_t>(params.Get("port", 0)),
@@ -889,8 +913,9 @@ std::unique_ptr<Common::Input::InputDevice> InputFactory::CreateButtonDevice(
                                              input_engine.get());
 }
 
-std::unique_ptr<Common::Input::InputDevice> InputFactory::CreateHatButtonDevice(
-    const Common::ParamPackage& params) {
+std::unique_ptr<Common::Input::InputDevice>
+InputFactory::CreateHatButtonDevice(const Common::ParamPackage& params)
+{
     const PadIdentifier identifier = {
         .guid = Common::UUID{params.Get("guid", "")},
         .port = static_cast<std::size_t>(params.Get("port", 0)),
@@ -909,8 +934,9 @@ std::unique_ptr<Common::Input::InputDevice> InputFactory::CreateHatButtonDevice(
                                                 inverted, input_engine.get());
 }
 
-std::unique_ptr<Common::Input::InputDevice> InputFactory::CreateStickDevice(
-    const Common::ParamPackage& params) {
+std::unique_ptr<Common::Input::InputDevice>
+InputFactory::CreateStickDevice(const Common::ParamPackage& params)
+{
     const auto deadzone = std::clamp(params.Get("deadzone", 0.15f), 0.0f, 1.0f);
     const auto range = std::clamp(params.Get("range", 0.95f), 0.25f, 1.50f);
     const auto threshold = std::clamp(params.Get("threshold", 0.5f), 0.0f, 1.0f);
@@ -944,8 +970,9 @@ std::unique_ptr<Common::Input::InputDevice> InputFactory::CreateStickDevice(
                                             input_engine.get());
 }
 
-std::unique_ptr<Common::Input::InputDevice> InputFactory::CreateAnalogDevice(
-    const Common::ParamPackage& params) {
+std::unique_ptr<Common::Input::InputDevice>
+InputFactory::CreateAnalogDevice(const Common::ParamPackage& params)
+{
     const PadIdentifier identifier = {
         .guid = Common::UUID{params.Get("guid", "")},
         .port = static_cast<std::size_t>(params.Get("port", 0)),
@@ -967,8 +994,9 @@ std::unique_ptr<Common::Input::InputDevice> InputFactory::CreateAnalogDevice(
     return std::make_unique<InputFromAnalog>(identifier, axis, properties, input_engine.get());
 }
 
-std::unique_ptr<Common::Input::InputDevice> InputFactory::CreateTriggerDevice(
-    const Common::ParamPackage& params) {
+std::unique_ptr<Common::Input::InputDevice>
+InputFactory::CreateTriggerDevice(const Common::ParamPackage& params)
+{
     const PadIdentifier identifier = {
         .guid = Common::UUID{params.Get("guid", "")},
         .port = static_cast<std::size_t>(params.Get("port", 0)),
@@ -994,8 +1022,9 @@ std::unique_ptr<Common::Input::InputDevice> InputFactory::CreateTriggerDevice(
                                               properties, input_engine.get());
 }
 
-std::unique_ptr<Common::Input::InputDevice> InputFactory::CreateTouchDevice(
-    const Common::ParamPackage& params) {
+std::unique_ptr<Common::Input::InputDevice>
+InputFactory::CreateTouchDevice(const Common::ParamPackage& params)
+{
     const auto deadzone = std::clamp(params.Get("deadzone", 0.0f), 0.0f, 1.0f);
     const auto range = std::clamp(params.Get("range", 1.0f), 0.25f, 1.50f);
     const auto threshold = std::clamp(params.Get("threshold", 0.5f), 0.0f, 1.0f);
@@ -1034,8 +1063,9 @@ std::unique_ptr<Common::Input::InputDevice> InputFactory::CreateTouchDevice(
                                             properties_x, properties_y, input_engine.get());
 }
 
-std::unique_ptr<Common::Input::InputDevice> InputFactory::CreateBatteryDevice(
-    const Common::ParamPackage& params) {
+std::unique_ptr<Common::Input::InputDevice>
+InputFactory::CreateBatteryDevice(const Common::ParamPackage& params)
+{
     const PadIdentifier identifier = {
         .guid = Common::UUID{params.Get("guid", "")},
         .port = static_cast<std::size_t>(params.Get("port", 0)),
@@ -1046,8 +1076,9 @@ std::unique_ptr<Common::Input::InputDevice> InputFactory::CreateBatteryDevice(
     return std::make_unique<InputFromBattery>(identifier, input_engine.get());
 }
 
-std::unique_ptr<Common::Input::InputDevice> InputFactory::CreateColorDevice(
-    const Common::ParamPackage& params) {
+std::unique_ptr<Common::Input::InputDevice>
+InputFactory::CreateColorDevice(const Common::ParamPackage& params)
+{
     const PadIdentifier identifier = {
         .guid = Common::UUID{params.Get("guid", "")},
         .port = static_cast<std::size_t>(params.Get("port", 0)),
@@ -1058,8 +1089,9 @@ std::unique_ptr<Common::Input::InputDevice> InputFactory::CreateColorDevice(
     return std::make_unique<InputFromColor>(identifier, input_engine.get());
 }
 
-std::unique_ptr<Common::Input::InputDevice> InputFactory::CreateMotionDevice(
-    Common::ParamPackage params) {
+std::unique_ptr<Common::Input::InputDevice>
+InputFactory::CreateMotionDevice(Common::ParamPackage params)
+{
     const PadIdentifier identifier = {
         .guid = Common::UUID{params.Get("guid", "")},
         .port = static_cast<std::size_t>(params.Get("port", 0)),
@@ -1113,8 +1145,9 @@ std::unique_ptr<Common::Input::InputDevice> InputFactory::CreateMotionDevice(
                                                  properties_y, properties_z, input_engine.get());
 }
 
-std::unique_ptr<Common::Input::InputDevice> InputFactory::CreateCameraDevice(
-    const Common::ParamPackage& params) {
+std::unique_ptr<Common::Input::InputDevice>
+InputFactory::CreateCameraDevice(const Common::ParamPackage& params)
+{
     const PadIdentifier identifier = {
         .guid = Common::UUID{params.Get("guid", "")},
         .port = static_cast<std::size_t>(params.Get("port", 0)),
@@ -1125,8 +1158,9 @@ std::unique_ptr<Common::Input::InputDevice> InputFactory::CreateCameraDevice(
     return std::make_unique<InputFromCamera>(identifier, input_engine.get());
 }
 
-std::unique_ptr<Common::Input::InputDevice> InputFactory::CreateNfcDevice(
-    const Common::ParamPackage& params) {
+std::unique_ptr<Common::Input::InputDevice>
+InputFactory::CreateNfcDevice(const Common::ParamPackage& params)
+{
     const PadIdentifier identifier = {
         .guid = Common::UUID{params.Get("guid", "")},
         .port = static_cast<std::size_t>(params.Get("port", 0)),
@@ -1138,10 +1172,12 @@ std::unique_ptr<Common::Input::InputDevice> InputFactory::CreateNfcDevice(
 }
 
 InputFactory::InputFactory(std::shared_ptr<InputEngine> input_engine_)
-    : input_engine(std::move(input_engine_)) {}
+    : input_engine(std::move(input_engine_))
+{
+}
 
-std::unique_ptr<Common::Input::InputDevice> InputFactory::Create(
-    const Common::ParamPackage& params) {
+std::unique_ptr<Common::Input::InputDevice> InputFactory::Create(const Common::ParamPackage& params)
+{
     if (params.Has("battery")) {
         return CreateBatteryDevice(params);
     }
@@ -1183,10 +1219,13 @@ std::unique_ptr<Common::Input::InputDevice> InputFactory::Create(
 }
 
 OutputFactory::OutputFactory(std::shared_ptr<InputEngine> input_engine_)
-    : input_engine(std::move(input_engine_)) {}
+    : input_engine(std::move(input_engine_))
+{
+}
 
-std::unique_ptr<Common::Input::OutputDevice> OutputFactory::Create(
-    const Common::ParamPackage& params) {
+std::unique_ptr<Common::Input::OutputDevice>
+OutputFactory::Create(const Common::ParamPackage& params)
+{
     const PadIdentifier identifier = {
         .guid = Common::UUID{params.Get("guid", "")},
         .port = static_cast<std::size_t>(params.Get("port", 0)),

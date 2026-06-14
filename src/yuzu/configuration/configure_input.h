@@ -6,12 +6,11 @@
 
 #pragma once
 
-#include <array>
-#include <memory>
-
 #include <QKeyEvent>
 #include <QList>
 #include <QWidget>
+#include <array>
+#include <memory>
 
 namespace Core {
 class System;

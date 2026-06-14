@@ -7,12 +7,12 @@
 #pragma once
 
 #include <ankerl/unordered_dense.h>
-#include <unordered_map>
-#include <queue>
 
-#include "common/common_types.h"
+#include <queue>
+#include <unordered_map>
 
 #include "common/address_space.h"
+#include "common/common_types.h"
 #include "video_core/cdma_pusher.h"
 #include "video_core/host1x/gpu_device_memory_manager.h"
 #include "video_core/host1x/syncpoint_manager.h"
@@ -31,19 +31,22 @@ class Nvdec;
 
 class FrameQueue {
 public:
-    void Open(s32 fd) {
+    void Open(s32 fd)
+    {
         std::scoped_lock l{m_mutex};
         m_presentation_order.insert({fd, {}});
         m_decode_order.insert({fd, {}});
     }
 
-    void Close(s32 fd) {
+    void Close(s32 fd)
+    {
         std::scoped_lock l{m_mutex};
         m_presentation_order.erase(fd);
         m_decode_order.erase(fd);
     }
 
-    s32 VicFindNvdecFdFromOffset(u64 search_offset) {
+    s32 VicFindNvdecFdFromOffset(u64 search_offset)
+    {
         std::scoped_lock l{m_mutex};
         for (auto& map : m_presentation_order) {
             for (auto& [offset, frame] : map.second) {
@@ -62,7 +65,8 @@ public:
         return -1;
     }
 
-    void PushPresentOrder(s32 fd, u64 offset, std::shared_ptr<FFmpeg::Frame>&& frame) {
+    void PushPresentOrder(s32 fd, u64 offset, std::shared_ptr<FFmpeg::Frame>&& frame)
+    {
         std::scoped_lock l{m_mutex};
         auto map = m_presentation_order.find(fd);
         if (map == m_presentation_order.end()) {
@@ -76,7 +80,8 @@ public:
         map->second.emplace_back(offset, std::move(frame));
     }
 
-    void PushDecodeOrder(s32 fd, u64 offset, std::shared_ptr<FFmpeg::Frame>&& frame) {
+    void PushDecodeOrder(s32 fd, u64 offset, std::shared_ptr<FFmpeg::Frame>&& frame)
+    {
         std::scoped_lock l{m_mutex};
         auto map = m_decode_order.find(fd);
         if (map == m_decode_order.end()) {
@@ -92,7 +97,8 @@ public:
         }
     }
 
-    std::shared_ptr<FFmpeg::Frame> GetFrame(s32 fd, u64 offset) {
+    std::shared_ptr<FFmpeg::Frame> GetFrame(s32 fd, u64 offset)
+    {
         if (fd == -1) {
             return {};
         }
@@ -113,7 +119,8 @@ public:
     }
 
 private:
-    std::shared_ptr<FFmpeg::Frame> GetPresentOrderLocked(s32 fd) {
+    std::shared_ptr<FFmpeg::Frame> GetPresentOrderLocked(s32 fd)
+    {
         auto map = m_presentation_order.find(fd);
         if (map == m_presentation_order.end() || map->second.empty()) {
             return {};
@@ -124,7 +131,8 @@ private:
         return frame;
     }
 
-    std::shared_ptr<FFmpeg::Frame> GetDecodeOrderLocked(s32 fd, u64 offset) {
+    std::shared_ptr<FFmpeg::Frame> GetDecodeOrderLocked(s32 fd, u64 offset)
+    {
         auto map = m_decode_order.find(fd);
         if (map == m_decode_order.end() || map->second.empty()) {
             return {};
@@ -164,38 +172,25 @@ public:
     explicit Host1x(Core::System& system);
     ~Host1x();
 
-    Core::System& System() {
-        return system;
-    }
+    Core::System& System() { return system; }
 
-    SyncpointManager& GetSyncpointManager() {
-        return syncpoint_manager;
-    }
+    SyncpointManager& GetSyncpointManager() { return syncpoint_manager; }
 
-    const SyncpointManager& GetSyncpointManager() const {
-        return syncpoint_manager;
-    }
+    const SyncpointManager& GetSyncpointManager() const { return syncpoint_manager; }
 
-    Tegra::MaxwellDeviceMemoryManager& MemoryManager() {
-        return memory_manager;
-    }
+    Tegra::MaxwellDeviceMemoryManager& MemoryManager() { return memory_manager; }
 
-    const Tegra::MaxwellDeviceMemoryManager& MemoryManager() const {
-        return memory_manager;
-    }
+    const Tegra::MaxwellDeviceMemoryManager& MemoryManager() const { return memory_manager; }
 
-    Common::FlatAllocator<u32, 0, 32>& Allocator() {
-        return allocator;
-    }
+    Common::FlatAllocator<u32, 0, 32>& Allocator() { return allocator; }
 
-    const Common::FlatAllocator<u32, 0, 32>& Allocator() const {
-        return allocator;
-    }
+    const Common::FlatAllocator<u32, 0, 32>& Allocator() const { return allocator; }
 
     void StartDevice(s32 fd, ChannelType type, u32 syncpt);
     void StopDevice(s32 fd, ChannelType type);
 
-    void PushEntries(s32 fd, ChCommandHeaderList&& entries) {
+    void PushEntries(s32 fd, ChCommandHeaderList&& entries)
+    {
         auto it = devices.find(fd);
         if (it == devices.end()) {
             return;

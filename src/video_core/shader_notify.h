@@ -11,13 +11,9 @@ class ShaderNotify {
 public:
     [[nodiscard]] int ShadersBuilding() noexcept;
 
-    void MarkShaderComplete() noexcept {
-        ++num_complete;
-    }
+    void MarkShaderComplete() noexcept { ++num_complete; }
 
-    void MarkShaderBuilding() noexcept {
-        ++num_building;
-    }
+    void MarkShaderBuilding() noexcept { ++num_building; }
 
 private:
     std::atomic_int num_building{};

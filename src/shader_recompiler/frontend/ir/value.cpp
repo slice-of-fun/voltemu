@@ -5,31 +5,56 @@
 
 namespace Shader::IR {
 
-Value::Value(IR::Inst* value) noexcept : type{Type::Opaque}, inst{value} {}
+Value::Value(IR::Inst* value) noexcept : type{Type::Opaque}, inst{value}
+{
+}
 
-Value::Value(IR::Reg value) noexcept : type{Type::Reg}, reg{value} {}
+Value::Value(IR::Reg value) noexcept : type{Type::Reg}, reg{value}
+{
+}
 
-Value::Value(IR::Pred value) noexcept : type{Type::Pred}, pred{value} {}
+Value::Value(IR::Pred value) noexcept : type{Type::Pred}, pred{value}
+{
+}
 
-Value::Value(IR::Attribute value) noexcept : type{Type::Attribute}, attribute{value} {}
+Value::Value(IR::Attribute value) noexcept : type{Type::Attribute}, attribute{value}
+{
+}
 
-Value::Value(IR::Patch value) noexcept : type{Type::Patch}, patch{value} {}
+Value::Value(IR::Patch value) noexcept : type{Type::Patch}, patch{value}
+{
+}
 
-Value::Value(bool value) noexcept : type{Type::U1}, imm_u1{value} {}
+Value::Value(bool value) noexcept : type{Type::U1}, imm_u1{value}
+{
+}
 
-Value::Value(u8 value) noexcept : type{Type::U8}, imm_u8{value} {}
+Value::Value(u8 value) noexcept : type{Type::U8}, imm_u8{value}
+{
+}
 
-Value::Value(u16 value) noexcept : type{Type::U16}, imm_u16{value} {}
+Value::Value(u16 value) noexcept : type{Type::U16}, imm_u16{value}
+{
+}
 
-Value::Value(u32 value) noexcept : type{Type::U32}, imm_u32{value} {}
+Value::Value(u32 value) noexcept : type{Type::U32}, imm_u32{value}
+{
+}
 
-Value::Value(f32 value) noexcept : type{Type::F32}, imm_f32{value} {}
+Value::Value(f32 value) noexcept : type{Type::F32}, imm_f32{value}
+{
+}
 
-Value::Value(u64 value) noexcept : type{Type::U64}, imm_u64{value} {}
+Value::Value(u64 value) noexcept : type{Type::U64}, imm_u64{value}
+{
+}
 
-Value::Value(f64 value) noexcept : type{Type::F64}, imm_f64{value} {}
+Value::Value(f64 value) noexcept : type{Type::F64}, imm_f64{value}
+{
+}
 
-IR::Type Value::Type() const noexcept {
+IR::Type Value::Type() const noexcept
+{
     if (IsPhi()) {
         // The type of a phi node is stored in its flags
         return inst->Flags<IR::Type>();
@@ -43,7 +68,8 @@ IR::Type Value::Type() const noexcept {
     return type;
 }
 
-bool Value::operator==(const Value& other) const {
+bool Value::operator==(const Value& other) const
+{
     if (type != other.type) {
         return false;
     }
@@ -90,7 +116,8 @@ bool Value::operator==(const Value& other) const {
     throw LogicError("Invalid type {}", type);
 }
 
-bool Value::operator!=(const Value& other) const {
+bool Value::operator!=(const Value& other) const
+{
     return !operator==(other);
 }
 

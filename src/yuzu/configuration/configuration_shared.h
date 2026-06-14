@@ -3,11 +3,12 @@
 
 #pragma once
 
-#include <memory>
-#include <vector>
+#include <qobjectdefs.h>
+
 #include <QString>
 #include <QWidget>
-#include <qobjectdefs.h>
+#include <memory>
+#include <vector>
 
 class QObject;
 

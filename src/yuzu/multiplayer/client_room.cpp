@@ -3,7 +3,8 @@
 // SPDX-FileCopyrightText: Copyright 2017 Citra Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include <future>
+#include "yuzu/multiplayer/client_room.h"
+
 #include <QColor>
 #include <QImage>
 #include <QList>
@@ -11,18 +12,20 @@
 #include <QMetaType>
 #include <QTime>
 #include <QtConcurrentRun>
+#include <future>
+
 #include "common/logging.h"
 #include "network/announce_multiplayer_session.h"
-#include "ui_client_room.h"
 #include "qt_common/game_list/game_list_p.h"
-#include "yuzu/multiplayer/client_room.h"
+#include "ui_client_room.h"
 #include "yuzu/multiplayer/message.h"
 #include "yuzu/multiplayer/moderation_dialog.h"
 #include "yuzu/multiplayer/state.h"
 
 ClientRoomWindow::ClientRoomWindow(QWidget* parent)
     : QDialog(parent, Qt::WindowTitleHint | Qt::WindowCloseButtonHint | Qt::WindowSystemMenuHint),
-      ui(std::make_unique<Ui::ClientRoom>()) {
+      ui(std::make_unique<Ui::ClientRoom>())
+{
     ui->setupUi(this);
     ui->chat->Initialize();
 
@@ -57,23 +60,27 @@ ClientRoomWindow::ClientRoomWindow(QWidget* parent)
 
 ClientRoomWindow::~ClientRoomWindow() = default;
 
-void ClientRoomWindow::SetModPerms(bool is_mod) {
+void ClientRoomWindow::SetModPerms(bool is_mod)
+{
     ui->chat->SetModPerms(is_mod);
     ui->moderation->setVisible(is_mod);
     ui->moderation->setDefault(false);
     ui->moderation->setAutoDefault(false);
 }
 
-void ClientRoomWindow::RetranslateUi() {
+void ClientRoomWindow::RetranslateUi()
+{
     ui->retranslateUi(this);
     ui->chat->RetranslateUi();
 }
 
-void ClientRoomWindow::OnRoomUpdate(const Network::RoomInformation& info) {
+void ClientRoomWindow::OnRoomUpdate(const Network::RoomInformation& info)
+{
     UpdateView();
 }
 
-void ClientRoomWindow::OnStateChange(const Network::RoomMember::State& state) {
+void ClientRoomWindow::OnStateChange(const Network::RoomMember::State& state)
+{
     if (state == Network::RoomMember::State::Joined ||
         state == Network::RoomMember::State::Moderator) {
         ui->chat->Clear();
@@ -83,7 +90,8 @@ void ClientRoomWindow::OnStateChange(const Network::RoomMember::State& state) {
     UpdateView();
 }
 
-void ClientRoomWindow::Disconnect() {
+void ClientRoomWindow::Disconnect()
+{
     auto parent = static_cast<MultiplayerState*>(parentWidget());
     if (parent->OnCloseRoom()) {
         ui->chat->AppendStatusMessage(tr("Disconnected"));
@@ -91,7 +99,8 @@ void ClientRoomWindow::Disconnect() {
     }
 }
 
-void ClientRoomWindow::UpdateView() {
+void ClientRoomWindow::UpdateView()
+{
     if (auto member = Network::GetRoomMember().lock()) {
         if (member->IsConnected()) {
             ui->chat->Enable();
@@ -112,6 +121,7 @@ void ClientRoomWindow::UpdateView() {
     close();
 }
 
-void ClientRoomWindow::UpdateIconDisplay() {
+void ClientRoomWindow::UpdateIconDisplay()
+{
     ui->chat->UpdateIconDisplay();
 }

@@ -6,8 +6,9 @@
 
 #pragma once
 
-#include <string>
 #include <ankerl/unordered_dense.h>
+
+#include <string>
 
 #include "qt_common/config/qt_config.h"
 

@@ -4,17 +4,20 @@
 // SPDX-FileCopyrightText: Copyright 2020 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "yuzu/configuration/configure_input_advanced.h"
+
 #include <QColorDialog>
+
 #include "common/settings.h"
 #include "core/core.h"
 #include "hid_core/frontend/emulated_controller.h"
 #include "hid_core/hid_core.h"
 #include "qt_common/qt_compat.h"
 #include "ui_configure_input_advanced.h"
-#include "yuzu/configuration/configure_input_advanced.h"
 
 ConfigureInputAdvanced::ConfigureInputAdvanced(Core::HID::HIDCore& hid_core_, QWidget* parent)
-    : QWidget(parent), ui(std::make_unique<Ui::ConfigureInputAdvanced>()), hid_core{hid_core_} {
+    : QWidget(parent), ui(std::make_unique<Ui::ConfigureInputAdvanced>()), hid_core{hid_core_}
+{
     ui->setupUi(this);
 
     controllers_color_buttons = {{
@@ -106,8 +109,8 @@ ConfigureInputAdvanced::ConfigureInputAdvanced(Core::HID::HIDCore& hid_core_, QW
 
 ConfigureInputAdvanced::~ConfigureInputAdvanced() = default;
 
-void ConfigureInputAdvanced::OnControllerButtonClick(std::size_t player_idx,
-                                                     std::size_t button_idx) {
+void ConfigureInputAdvanced::OnControllerButtonClick(std::size_t player_idx, std::size_t button_idx)
+{
     const QColor new_bg_color = QColorDialog::getColor(controllers_colors[player_idx][button_idx]);
     if (!new_bg_color.isValid()) {
         return;
@@ -118,7 +121,8 @@ void ConfigureInputAdvanced::OnControllerButtonClick(std::size_t player_idx,
             .arg(controllers_colors[player_idx][button_idx].name()));
 }
 
-void ConfigureInputAdvanced::ApplyConfiguration() {
+void ConfigureInputAdvanced::ApplyConfiguration()
+{
     for (std::size_t player_idx = 0; player_idx < controllers_color_buttons.size(); ++player_idx) {
         auto& player = Settings::values.players.GetValue()[player_idx];
         std::array<u32, 4> colors{};
@@ -148,7 +152,8 @@ void ConfigureInputAdvanced::ApplyConfiguration() {
     Settings::values.random_amiibo_id = ui->random_amiibo_id->isChecked();
 }
 
-void ConfigureInputAdvanced::LoadConfiguration() {
+void ConfigureInputAdvanced::LoadConfiguration()
+{
     for (std::size_t player_idx = 0; player_idx < controllers_color_buttons.size(); ++player_idx) {
         auto& player = Settings::values.players.GetValue()[player_idx];
         std::array<u32, 4> colors = {
@@ -185,7 +190,8 @@ void ConfigureInputAdvanced::LoadConfiguration() {
     UpdateUIEnabled();
 }
 
-void ConfigureInputAdvanced::changeEvent(QEvent* event) {
+void ConfigureInputAdvanced::changeEvent(QEvent* event)
+{
     if (event->type() == QEvent::LanguageChange) {
         RetranslateUI();
     }
@@ -193,11 +199,13 @@ void ConfigureInputAdvanced::changeEvent(QEvent* event) {
     QWidget::changeEvent(event);
 }
 
-void ConfigureInputAdvanced::RetranslateUI() {
+void ConfigureInputAdvanced::RetranslateUI()
+{
     ui->retranslateUi(this);
 }
 
-void ConfigureInputAdvanced::UpdateUIEnabled() {
+void ConfigureInputAdvanced::UpdateUIEnabled()
+{
     ui->debug_configure->setEnabled(ui->debug_enabled->isChecked());
     ui->touchscreen_advanced->setEnabled(ui->touchscreen_enabled->isChecked());
     ui->ring_controller_configure->setEnabled(ui->enable_ring_controller->isChecked());

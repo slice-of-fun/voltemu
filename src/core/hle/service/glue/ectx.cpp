@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include "core/hle/service/glue/ectx.h"
+
 #include "core/hle/service/ipc_helpers.h"
 
 namespace Service::Glue {
@@ -9,7 +10,8 @@ namespace Service::Glue {
 // This is nn::err::context::IContextRegistrar
 class IContextRegistrar : public ServiceFramework<IContextRegistrar> {
 public:
-    IContextRegistrar(Core::System& system_) : ServiceFramework{system_, "IContextRegistrar"} {
+    IContextRegistrar(Core::System& system_) : ServiceFramework{system_, "IContextRegistrar"}
+    {
         // clang-format off
         static const FunctionInfo functions[] = {
             {0, &IContextRegistrar::Complete, "Complete"},
@@ -22,7 +24,8 @@ public:
     ~IContextRegistrar() override = default;
 
 private:
-    void Complete(HLERequestContext& ctx) {
+    void Complete(HLERequestContext& ctx)
+    {
         struct InputParameters {
             u32 unk;
         };
@@ -40,7 +43,8 @@ private:
     }
 };
 
-ECTX_AW::ECTX_AW(Core::System& system_) : ServiceFramework{system_, "ectx:aw"} {
+ECTX_AW::ECTX_AW(Core::System& system_) : ServiceFramework{system_, "ectx:aw"}
+{
     // clang-format off
     static const FunctionInfo functions[] = {
         {0, &ECTX_AW::CreateContextRegistrar, "CreateContextRegistrar"},
@@ -53,7 +57,8 @@ ECTX_AW::ECTX_AW(Core::System& system_) : ServiceFramework{system_, "ectx:aw"} {
 
 ECTX_AW::~ECTX_AW() = default;
 
-void ECTX_AW::CreateContextRegistrar(HLERequestContext& ctx) {
+void ECTX_AW::CreateContextRegistrar(HLERequestContext& ctx)
+{
     IPC::ResponseBuilder rb{ctx, 2, 0, 1};
     rb.Push(ResultSuccess);
     rb.PushIpcInterface<IContextRegistrar>(std::make_shared<IContextRegistrar>(system));

@@ -4,20 +4,22 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include <array>
-#include <map>
-#include <span>
-#include <boost/icl/interval_set.hpp>
+#include "core/hle/service/jit/jit_context.h"
+
 #include <dynarmic/interface/A64/a64.h>
 #include <dynarmic/interface/A64/config.h>
 #include <dynarmic/interface/code_page.h>
+
+#include <array>
+#include <boost/icl/interval_set.hpp>
+#include <map>
+#include <span>
 
 #include "common/alignment.h"
 #include "common/common_funcs.h"
 #include "common/div_ceil.h"
 #include "common/elf.h"
 #include "common/logging.h"
-#include "core/hle/service/jit/jit_context.h"
 #include "core/memory.h"
 
 using namespace Common::ELF;
@@ -52,14 +54,15 @@ using IntervalType = boost::icl::interval_set<VAddr>::interval_type;
 
 class DynarmicCallbacks64 : public Dynarmic::A64::UserCallbacks {
 public:
-    explicit DynarmicCallbacks64(Core::Memory::Memory& memory_, std::vector<u8>& local_memory_, IntervalSet& mapped_ranges_, JITContextImpl& parent_)
-        : memory{memory_}
-        , local_memory{local_memory_}
-        , mapped_ranges{mapped_ranges_}
-        , parent{parent_}
-    {}
+    explicit DynarmicCallbacks64(Core::Memory::Memory& memory_, std::vector<u8>& local_memory_,
+                                 IntervalSet& mapped_ranges_, JITContextImpl& parent_)
+        : memory{memory_}, local_memory{local_memory_}, mapped_ranges{mapped_ranges_}, parent{
+                                                                                           parent_}
+    {
+    }
 
-    std::optional<std::uint32_t> MemoryReadCode(VAddr vaddr) override {
+    std::optional<std::uint32_t> MemoryReadCode(VAddr vaddr) override
+    {
         static_assert(Core::Memory::YUZU_PAGESIZE == Dynarmic::CODE_PAGE_SIZE);
         auto const aligned_vaddr = vaddr & ~Core::Memory::YUZU_PAGEMASK;
         if (last_code_addr != aligned_vaddr) {
@@ -68,25 +71,17 @@ public:
         }
         return cached_code_page.inst[(vaddr & Core::Memory::YUZU_PAGEMASK) / sizeof(u32)];
     }
-    void InstructionSynchronizationBarrierRaised() override {
-        last_code_addr = u64(-1); //reset back, force refetch
+    void InstructionSynchronizationBarrierRaised() override
+    {
+        last_code_addr = u64(-1); // reset back, force refetch
     }
-    u8 MemoryRead8(u64 vaddr) override {
-        return ReadMemory<u8>(vaddr);
-    }
-    u16 MemoryRead16(u64 vaddr) override {
-        return ReadMemory<u16>(vaddr);
-    }
-    u32 MemoryRead32(u64 vaddr) override {
-        return ReadMemory<u32>(vaddr);
-    }
-    u64 MemoryRead64(u64 vaddr) override {
-        return ReadMemory<u64>(vaddr);
-    }
-    u128 MemoryRead128(u64 vaddr) override {
-        return ReadMemory<u128>(vaddr);
-    }
-    std::string MemoryReadCString(u64 vaddr) {
+    u8 MemoryRead8(u64 vaddr) override { return ReadMemory<u8>(vaddr); }
+    u16 MemoryRead16(u64 vaddr) override { return ReadMemory<u16>(vaddr); }
+    u32 MemoryRead32(u64 vaddr) override { return ReadMemory<u32>(vaddr); }
+    u64 MemoryRead64(u64 vaddr) override { return ReadMemory<u64>(vaddr); }
+    u128 MemoryRead128(u64 vaddr) override { return ReadMemory<u128>(vaddr); }
+    std::string MemoryReadCString(u64 vaddr)
+    {
         std::string result{};
         u8 next;
         while ((next = MemoryRead8(vaddr++)) != 0)
@@ -94,35 +89,30 @@ public:
         return result;
     }
 
-    void MemoryWrite8(u64 vaddr, u8 value) override {
-        WriteMemory<u8>(vaddr, value);
-    }
-    void MemoryWrite16(u64 vaddr, u16 value) override {
-        WriteMemory<u16>(vaddr, value);
-    }
-    void MemoryWrite32(u64 vaddr, u32 value) override {
-        WriteMemory<u32>(vaddr, value);
-    }
-    void MemoryWrite64(u64 vaddr, u64 value) override {
-        WriteMemory<u64>(vaddr, value);
-    }
-    void MemoryWrite128(u64 vaddr, u128 value) override {
-        WriteMemory<u128>(vaddr, value);
-    }
+    void MemoryWrite8(u64 vaddr, u8 value) override { WriteMemory<u8>(vaddr, value); }
+    void MemoryWrite16(u64 vaddr, u16 value) override { WriteMemory<u16>(vaddr, value); }
+    void MemoryWrite32(u64 vaddr, u32 value) override { WriteMemory<u32>(vaddr, value); }
+    void MemoryWrite64(u64 vaddr, u64 value) override { WriteMemory<u64>(vaddr, value); }
+    void MemoryWrite128(u64 vaddr, u128 value) override { WriteMemory<u128>(vaddr, value); }
 
-    bool MemoryWriteExclusive8(u64 vaddr, u8 value, u8) override {
+    bool MemoryWriteExclusive8(u64 vaddr, u8 value, u8) override
+    {
         return WriteMemory<u8>(vaddr, value);
     }
-    bool MemoryWriteExclusive16(u64 vaddr, u16 value, u16) override {
+    bool MemoryWriteExclusive16(u64 vaddr, u16 value, u16) override
+    {
         return WriteMemory<u16>(vaddr, value);
     }
-    bool MemoryWriteExclusive32(u64 vaddr, u32 value, u32) override {
+    bool MemoryWriteExclusive32(u64 vaddr, u32 value, u32) override
+    {
         return WriteMemory<u32>(vaddr, value);
     }
-    bool MemoryWriteExclusive64(u64 vaddr, u64 value, u64) override {
+    bool MemoryWriteExclusive64(u64 vaddr, u64 value, u64) override
+    {
         return WriteMemory<u64>(vaddr, value);
     }
-    bool MemoryWriteExclusive128(u64 vaddr, u128 value, u128) override {
+    bool MemoryWriteExclusive128(u64 vaddr, u128 value, u128) override
+    {
         return WriteMemory<u128>(vaddr, value);
     }
 
@@ -130,14 +120,11 @@ public:
     void ExceptionRaised(u64 pc, Dynarmic::A64::Exception exception) override;
 
     void AddTicks(u64 ticks) override {}
-    u64 GetTicksRemaining() override {
-        return (std::numeric_limits<u32>::max)();
-    }
-    u64 GetCNTPCT() override {
-        return 0;
-    }
+    u64 GetTicksRemaining() override { return (std::numeric_limits<u32>::max)(); }
+    u64 GetCNTPCT() override { return 0; }
 
-    template<typename T> T ReadMemory(u64 vaddr) {
+    template<typename T> T ReadMemory(u64 vaddr)
+    {
         T ret{};
         if (boost::icl::contains(mapped_ranges, vaddr)) {
             memory.ReadBlock(vaddr, &ret, sizeof(T));
@@ -149,8 +136,8 @@ public:
         return ret;
     }
 
-    template <class T>
-    bool WriteMemory(u64 vaddr, const T value) {
+    template<class T> bool WriteMemory(u64 vaddr, const T value)
+    {
         if (boost::icl::contains(mapped_ranges, vaddr)) {
             memory.WriteBlock(vaddr, &value, sizeof(T));
         } else if (vaddr + sizeof(T) > local_memory.size()) {
@@ -172,13 +159,15 @@ private:
 
 class JITContextImpl {
 public:
-    explicit JITContextImpl(Core::Memory::Memory& memory_) : memory{memory_} {
+    explicit JITContextImpl(Core::Memory::Memory& memory_) : memory{memory_}
+    {
         callbacks.emplace(memory, local_memory, mapped_ranges, *this);
         user_config.callbacks = std::addressof(callbacks.value());
         jit.emplace(user_config);
     }
 
-    bool LoadNRO(std::span<const u8> data) {
+    bool LoadNRO(std::span<const u8> data)
+    {
         relocbase = local_memory.size();
         local_memory.insert(local_memory.end(), data.begin(), data.end());
         if (FixupRelocations()) {
@@ -189,7 +178,8 @@ public:
         return false;
     }
 
-    bool FixupRelocations() {
+    bool FixupRelocations()
+    {
         // The loaded NRO file has ELF relocations that must be processed before it can run.
         // Normally this would be processed by RTLD, but in HLE context, we don't have
         // the linker available, so we have to do it ourselves.
@@ -251,34 +241,40 @@ public:
         return true;
     }
 
-    void InsertHelperFunctions() {
+    void InsertHelperFunctions()
+    {
         for (size_t i = 0; i < size_t(HelperFn::Count); ++i) {
             helpers[i] = local_memory.size();
             local_memory.insert(local_memory.end(), SVC0_ARM64.begin(), SVC0_ARM64.end());
         }
     }
 
-    void InsertStack() {
+    void InsertStack()
+    {
         // Allocate enough space to avoid any reasonable risk of
         // overflowing the stack during plugin execution
-        const u64 pad_amount = Common::AlignUp(local_memory.size(), STACK_ALIGN) - local_memory.size();
+        const u64 pad_amount =
+            Common::AlignUp(local_memory.size(), STACK_ALIGN) - local_memory.size();
         local_memory.insert(local_memory.end(), (4096 * 32) + pad_amount, 0);
         top_of_stack = local_memory.size();
         heap_pointer = top_of_stack;
     }
 
-    void MapProcessMemory(VAddr dest_address, std::size_t size) {
+    void MapProcessMemory(VAddr dest_address, std::size_t size)
+    {
         mapped_ranges.add(IntervalType{dest_address, dest_address + size});
     }
 
-    void PushArgument(const void* data, size_t size) {
+    void PushArgument(const void* data, size_t size)
+    {
         const size_t num_words = Common::DivCeil(size, sizeof(u64));
         const size_t current_pos = argument_stack.size();
         argument_stack.insert(argument_stack.end(), num_words, 0);
         std::memcpy(argument_stack.data() + current_pos, data, size);
     }
 
-    void SetupArguments() {
+    void SetupArguments()
+    {
         // The first 8 integer registers are used for the first 8 integer
         // arguments. Floating-point arguments are not handled at this time.
         //
@@ -292,7 +288,8 @@ public:
         for (size_t i = 0; i < 8 && i < argument_stack.size(); i++)
             jit->SetRegister(i, argument_stack[i]);
         if (argument_stack.size() > 8) {
-            const VAddr new_sp = Common::AlignDown(top_of_stack - (argument_stack.size() - 8) * sizeof(u64), STACK_ALIGN);
+            const VAddr new_sp = Common::AlignDown(
+                top_of_stack - (argument_stack.size() - 8) * sizeof(u64), STACK_ALIGN);
             for (size_t i = 8; i < argument_stack.size(); i++)
                 callbacks->MemoryWrite64(new_sp + (i - 8) * sizeof(u64), argument_stack[i]);
             jit->SetSP(new_sp);
@@ -302,7 +299,8 @@ public:
         heap_pointer = top_of_stack;
     }
 
-    u64 CallFunction(VAddr func) {
+    u64 CallFunction(VAddr func)
+    {
         jit->SetRegister(30, helpers[size_t(HelperFn::Stop)]);
         jit->SetSP(top_of_stack);
         SetupArguments();
@@ -312,13 +310,15 @@ public:
         return jit->GetRegister(0);
     }
 
-    VAddr AddHeap(const void* data, size_t size) {
+    VAddr AddHeap(const void* data, size_t size)
+    {
         // Require all heap data types to have the same alignment as the
         // stack pointer, for compatibility
         const size_t num_bytes = Common::AlignUp(size, STACK_ALIGN);
         // Make additional memory space if required
         if (heap_pointer + num_bytes > local_memory.size()) {
-            local_memory.insert(local_memory.end(), (heap_pointer + num_bytes) - local_memory.size(), 0);
+            local_memory.insert(local_memory.end(),
+                                (heap_pointer + num_bytes) - local_memory.size(), 0);
         }
         const VAddr location{heap_pointer};
         std::memcpy(local_memory.data() + location, data, size);
@@ -326,20 +326,31 @@ public:
         return location;
     }
 
-    void GetHeap(VAddr location, void* data, size_t size) {
+    void GetHeap(VAddr location, void* data, size_t size)
+    {
         std::memcpy(data, local_memory.data() + location, size);
     }
 
-    VAddr GetHelper(const std::string& name) {
-        if (name == "_resolve") return helpers[HelperFn::Resolve];
-        else if (name == "_panic") return helpers[HelperFn::Panic];
-        else if (name == "_stop") return helpers[HelperFn::Stop];
-        else if (name == "memset") return helpers[HelperFn::Memset];
-        else if (name == "memcpy") return helpers[HelperFn::Memcpy];
-        else if (name == "memmove") return helpers[HelperFn::Memmove];
-        else if (name == "PanicForPlugin") return helpers[HelperFn::PanicForPlugin];
-        else if (name == "_ZN2nn4diag6detail9AbortImplEPKcS3_S3_i") return helpers[HelperFn::AbortImpl];
-        else if (name == "_ZN2nn6detail21UnexpectedDefaultImplEPKcS2_i") return helpers[HelperFn::UnexpectedImpl];
+    VAddr GetHelper(const std::string& name)
+    {
+        if (name == "_resolve")
+            return helpers[HelperFn::Resolve];
+        else if (name == "_panic")
+            return helpers[HelperFn::Panic];
+        else if (name == "_stop")
+            return helpers[HelperFn::Stop];
+        else if (name == "memset")
+            return helpers[HelperFn::Memset];
+        else if (name == "memcpy")
+            return helpers[HelperFn::Memcpy];
+        else if (name == "memmove")
+            return helpers[HelperFn::Memmove];
+        else if (name == "PanicForPlugin")
+            return helpers[HelperFn::PanicForPlugin];
+        else if (name == "_ZN2nn4diag6detail9AbortImplEPKcS3_S3_i")
+            return helpers[HelperFn::AbortImpl];
+        else if (name == "_ZN2nn6detail21UnexpectedDefaultImplEPKcS2_i")
+            return helpers[HelperFn::UnexpectedImpl];
         else {
             LOG_CRITICAL(Service_JIT, "unresolved {}", name);
             return helpers[HelperFn::Panic];
@@ -359,7 +370,8 @@ public:
     VAddr relocbase;
 };
 
-void DynarmicCallbacks64::CallSVC(u32 swi) {
+void DynarmicCallbacks64::CallSVC(u32 swi)
+{
     // Service calls are used to implement helper functionality.
     //
     // The most important of these is the _stop helper, which transfers control
@@ -378,7 +390,8 @@ void DynarmicCallbacks64::CallSVC(u32 swi) {
     }
 
     u64 pc{parent.jit->GetPC() - 4};
-    if (pc == parent.helpers[size_t(HelperFn::Memcpy)] || pc == parent.helpers[size_t(HelperFn::Memmove)]) {
+    if (pc == parent.helpers[size_t(HelperFn::Memcpy)] ||
+        pc == parent.helpers[size_t(HelperFn::Memmove)]) {
         const VAddr dest{parent.jit->GetRegister(0)};
         const VAddr src{parent.jit->GetRegister(1)};
         const size_t n{parent.jit->GetRegister(2)};
@@ -405,7 +418,7 @@ void DynarmicCallbacks64::CallSVC(u32 swi) {
     } else if (pc == parent.helpers[size_t(HelperFn::Panic)]) {
         LOG_CRITICAL(Service_JIT, "plugin panicked!");
         parent.jit->HaltExecution();
-    // SM64
+        // SM64
     } else if (pc == parent.helpers[size_t(HelperFn::PanicForPlugin)]) {
         LOG_CRITICAL(Service_JIT, "plugin panicked!");
         parent.jit->HaltExecution();
@@ -421,42 +434,54 @@ void DynarmicCallbacks64::CallSVC(u32 swi) {
     }
 }
 
-void DynarmicCallbacks64::ExceptionRaised(u64 pc, Dynarmic::A64::Exception exception) {
+void DynarmicCallbacks64::ExceptionRaised(u64 pc, Dynarmic::A64::Exception exception)
+{
     auto const inst = MemoryRead32(pc);
     LOG_CRITICAL(Service_JIT, "{} PC @ {:08x}, data = {:08x}", exception, pc, inst);
     parent.jit->HaltExecution();
 }
 
 JITContext::JITContext(Core::Memory::Memory& memory)
-    : impl{std::make_unique<JITContextImpl>(memory)} {}
+    : impl{std::make_unique<JITContextImpl>(memory)}
+{
+}
 
-JITContext::~JITContext() {}
+JITContext::~JITContext()
+{
+}
 
-bool JITContext::LoadNRO(std::span<const u8> data) {
+bool JITContext::LoadNRO(std::span<const u8> data)
+{
     return impl->LoadNRO(data);
 }
 
-void JITContext::MapProcessMemory(VAddr dest_address, std::size_t size) {
+void JITContext::MapProcessMemory(VAddr dest_address, std::size_t size)
+{
     impl->MapProcessMemory(dest_address, size);
 }
 
-u64 JITContext::CallFunction(VAddr func) {
+u64 JITContext::CallFunction(VAddr func)
+{
     return impl->CallFunction(func);
 }
 
-void JITContext::PushArgument(const void* data, size_t size) {
+void JITContext::PushArgument(const void* data, size_t size)
+{
     impl->PushArgument(data, size);
 }
 
-VAddr JITContext::GetHelper(const std::string& name) {
+VAddr JITContext::GetHelper(const std::string& name)
+{
     return impl->GetHelper(name);
 }
 
-VAddr JITContext::AddHeap(const void* data, size_t size) {
+VAddr JITContext::AddHeap(const void* data, size_t size)
+{
     return impl->AddHeap(data, size);
 }
 
-void JITContext::GetHeap(VAddr location, void* data, size_t size) {
+void JITContext::GetHeap(VAddr location, void* data, size_t size)
+{
     impl->GetHeap(location, data, size);
 }
 

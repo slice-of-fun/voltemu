@@ -459,10 +459,8 @@ public:
     BehaviorInfo* behavior{};
 
 private:
-    template <typename T, CommandId Id>
-    T& GenerateStart(const s32 node_id);
-    template <typename T>
-    void GenerateEnd(T& cmd);
+    template<typename T, CommandId Id> T& GenerateStart(const s32 node_id);
+    template<typename T> void GenerateEnd(T& cmd);
 };
 
 } // namespace AudioCore::Renderer

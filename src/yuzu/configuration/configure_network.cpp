@@ -4,15 +4,18 @@
 // SPDX-FileCopyrightText: Copyright 2019 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "yuzu/configuration/configure_network.h"
+
 #include <QtConcurrent/QtConcurrent>
+
 #include "common/settings.h"
 #include "core/core.h"
 #include "core/internal_network/network_interface.h"
 #include "ui_configure_network.h"
-#include "yuzu/configuration/configure_network.h"
 
 ConfigureNetwork::ConfigureNetwork(const Core::System& system_, QWidget* parent)
-    : QWidget(parent), ui(std::make_unique<Ui::ConfigureNetwork>()), system{system_} {
+    : QWidget(parent), ui(std::make_unique<Ui::ConfigureNetwork>()), system{system_}
+{
     ui->setupUi(this);
     for (const auto& iface : Network::GetAvailableNetworkInterfaces())
         ui->network_interface->addItem(QString::fromStdString(iface.name));
@@ -21,12 +24,14 @@ ConfigureNetwork::ConfigureNetwork(const Core::System& system_, QWidget* parent)
 
 ConfigureNetwork::~ConfigureNetwork() = default;
 
-void ConfigureNetwork::ApplyConfiguration() {
+void ConfigureNetwork::ApplyConfiguration()
+{
     Settings::values.network_interface = ui->network_interface->currentText().toStdString();
     Settings::values.airplane_mode = ui->airplane_mode->isChecked();
 }
 
-void ConfigureNetwork::changeEvent(QEvent* event) {
+void ConfigureNetwork::changeEvent(QEvent* event)
+{
     if (event->type() == QEvent::LanguageChange) {
         RetranslateUI();
     }
@@ -34,11 +39,13 @@ void ConfigureNetwork::changeEvent(QEvent* event) {
     QWidget::changeEvent(event);
 }
 
-void ConfigureNetwork::RetranslateUI() {
+void ConfigureNetwork::RetranslateUI()
+{
     ui->retranslateUi(this);
 }
 
-void ConfigureNetwork::SetConfiguration() {
+void ConfigureNetwork::SetConfiguration()
+{
     const bool runtime_lock = !system.IsPoweredOn();
     auto const network_interface = Settings::values.network_interface.GetValue();
     auto const airplane_mode = Settings::values.airplane_mode.GetValue();

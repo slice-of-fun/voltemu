@@ -45,7 +45,7 @@ static_assert(sizeof(PlayTimerSettingsOld) == 0x34, "PlayTimerSettingsOld has in
 
 // This is nn::pctl::PlayTimerSettings
 struct PlayTimerSettings {
-    std::array<u32, 17> settings; //21.0.0+ now takes 0x44
+    std::array<u32, 17> settings; // 21.0.0+ now takes 0x44
 };
 static_assert(sizeof(PlayTimerSettings) == 0x44, "PlayTimerSettings has incorrect size.");
 

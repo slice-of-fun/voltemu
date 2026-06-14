@@ -4,12 +4,13 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include <algorithm>
+#include <concepts>
 #include <memory>
 #include <optional>
 #include <ostream>
 #include <string>
-#include <concepts>
-#include <algorithm>
+
 #include "common/concepts.h"
 #include "common/fs/path_util.h"
 #include "common/logging.h"
@@ -32,8 +33,9 @@ namespace Loader {
 
 namespace {
 
-template <std::derived_from<AppLoader> T>
-std::optional<FileType> IdentifyFileLoader(FileSys::VirtualFile file) {
+template<std::derived_from<AppLoader> T>
+std::optional<FileType> IdentifyFileLoader(FileSys::VirtualFile file)
+{
     const auto file_type = T::IdentifyType(file);
     if (file_type != FileType::Error) {
         return file_type;
@@ -42,8 +44,8 @@ std::optional<FileType> IdentifyFileLoader(FileSys::VirtualFile file) {
 }
 
 std::shared_ptr<FileSys::NSP> OpenContainerAsNsp(FileSys::VirtualFile file, FileType type,
-                                                 u64 program_id = 0,
-                                                 std::size_t program_index = 0) {
+                                                 u64 program_id = 0, std::size_t program_index = 0)
+{
     if (!file) {
         return nullptr;
     }
@@ -70,7 +72,8 @@ std::shared_ptr<FileSys::NSP> OpenContainerAsNsp(FileSys::VirtualFile file, File
     return nullptr;
 }
 
-bool HasApplicationProgramContent(const std::shared_ptr<FileSys::NSP>& nsp) {
+bool HasApplicationProgramContent(const std::shared_ptr<FileSys::NSP>& nsp)
+{
     if (!nsp) {
         return false;
     }
@@ -78,15 +81,15 @@ bool HasApplicationProgramContent(const std::shared_ptr<FileSys::NSP>& nsp) {
     const auto& ncas = nsp->GetNCAs();
     return std::any_of(ncas.cbegin(), ncas.cend(), [](const auto& title_entry) {
         const auto& nca_map = title_entry.second;
-        return nca_map.find(
-                   {FileSys::TitleType::Application, FileSys::ContentRecordType::Program}) !=
-               nca_map.end();
+        return nca_map.find({FileSys::TitleType::Application,
+                             FileSys::ContentRecordType::Program}) != nca_map.end();
     });
 }
 
 } // namespace
 
-FileType IdentifyFile(FileSys::VirtualFile file) {
+FileType IdentifyFile(FileSys::VirtualFile file)
+{
     if (const auto nsp_type = IdentifyFileLoader<AppLoader_NSP>(file)) {
         return *nsp_type;
     } else if (const auto xci_type = IdentifyFileLoader<AppLoader_XCI>(file)) {
@@ -109,12 +112,14 @@ FileType IdentifyFile(FileSys::VirtualFile file) {
     }
 }
 
-bool IsContainerType(FileType type) {
+bool IsContainerType(FileType type)
+{
     return type == FileType::NSP || type == FileType::XCI;
 }
 
 bool IsBootableGameContainer(FileSys::VirtualFile file, FileType type, u64 program_id,
-                             std::size_t program_index) {
+                             std::size_t program_index)
+{
     if (!file) {
         return false;
     }
@@ -130,14 +135,14 @@ bool IsBootableGameContainer(FileSys::VirtualFile file, FileType type, u64 progr
     return HasApplicationProgramContent(OpenContainerAsNsp(file, type, program_id, program_index));
 }
 
-FileType GuessFromFilename(const std::string& name) {
+FileType GuessFromFilename(const std::string& name)
+{
     if (name == "main")
         return FileType::DeconstructedRomDirectory;
     else if (name == "00")
         return FileType::NCA;
 
-    auto const extension =
-        Common::ToLower(std::string(Common::FS::GetExtensionFromFilename(name)));
+    auto const extension = Common::ToLower(std::string(Common::FS::GetExtensionFromFilename(name)));
     if (extension == "nro")
         return FileType::NRO;
     else if (extension == "nso")
@@ -153,7 +158,8 @@ FileType GuessFromFilename(const std::string& name) {
     return FileType::Unknown;
 }
 
-std::string GetFileTypeString(FileType type) {
+std::string GetFileTypeString(FileType type)
+{
     switch (type) {
     case FileType::NRO:
         return "NRO";
@@ -250,16 +256,20 @@ constexpr std::array<const char*, 68> RESULT_MESSAGES{
     "Integrity verification failed.",
 };
 
-std::string GetResultStatusString(ResultStatus status) {
+std::string GetResultStatusString(ResultStatus status)
+{
     return RESULT_MESSAGES.at(static_cast<std::size_t>(status));
 }
 
-std::ostream& operator<<(std::ostream& os, ResultStatus status) {
+std::ostream& operator<<(std::ostream& os, ResultStatus status)
+{
     os << RESULT_MESSAGES.at(static_cast<std::size_t>(status));
     return os;
 }
 
-AppLoader::AppLoader(FileSys::VirtualFile file_) : file(std::move(file_)) {}
+AppLoader::AppLoader(FileSys::VirtualFile file_) : file(std::move(file_))
+{
+}
 AppLoader::~AppLoader() = default;
 
 /**
@@ -272,7 +282,8 @@ AppLoader::~AppLoader() = default;
  */
 static std::unique_ptr<AppLoader> GetFileLoader(Core::System& system, FileSys::VirtualFile file,
                                                 FileType type, u64 program_id,
-                                                std::size_t program_index) {
+                                                std::size_t program_index)
+{
     switch (type) {
     // NX NSO file format.
     case FileType::NSO:
@@ -316,7 +327,8 @@ static std::unique_ptr<AppLoader> GetFileLoader(Core::System& system, FileSys::V
 }
 
 std::unique_ptr<AppLoader> GetLoader(Core::System& system, FileSys::VirtualFile file,
-                                     u64 program_id, std::size_t program_index) {
+                                     u64 program_id, std::size_t program_index)
+{
     if (!file) {
         return nullptr;
     }

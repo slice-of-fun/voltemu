@@ -4,13 +4,14 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/glue/arp.h"
+
 #include <memory>
 
 #include "common/logging.h"
 #include "core/core.h"
 #include "core/hle/kernel/k_process.h"
 #include "core/hle/kernel/kernel.h"
-#include "core/hle/service/glue/arp.h"
 #include "core/hle/service/glue/errors.h"
 #include "core/hle/service/glue/glue_manager.h"
 #include "core/hle/service/ipc_helpers.h"
@@ -18,7 +19,8 @@
 namespace Service::Glue {
 
 namespace {
-std::optional<u64> GetTitleIDForProcessID(Core::System& system, u64 process_id) {
+std::optional<u64> GetTitleIDForProcessID(Core::System& system, u64 process_id)
+{
     auto list = system.Kernel().GetProcessList();
 
     const auto iter = std::find_if(list.begin(), list.end(), [&process_id](auto& process) {
@@ -34,7 +36,8 @@ std::optional<u64> GetTitleIDForProcessID(Core::System& system, u64 process_id) 
 } // Anonymous namespace
 
 ARP_R::ARP_R(Core::System& system_, const ARPManager& manager_)
-    : ServiceFramework{system_, "arp:r"}, manager{manager_} {
+    : ServiceFramework{system_, "arp:r"}, manager{manager_}
+{
     // clang-format off
         static const FunctionInfo functions[] = {
             {0, &ARP_R::GetApplicationLaunchProperty, "GetApplicationLaunchProperty"},
@@ -55,7 +58,8 @@ ARP_R::ARP_R(Core::System& system_, const ARPManager& manager_)
 
 ARP_R::~ARP_R() = default;
 
-void ARP_R::GetApplicationLaunchProperty(HLERequestContext& ctx) {
+void ARP_R::GetApplicationLaunchProperty(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     const auto process_id = rp.PopRaw<u64>();
 
@@ -84,7 +88,8 @@ void ARP_R::GetApplicationLaunchProperty(HLERequestContext& ctx) {
     rb.PushRaw(launch_property);
 }
 
-void ARP_R::GetApplicationLaunchPropertyWithApplicationId(HLERequestContext& ctx) {
+void ARP_R::GetApplicationLaunchPropertyWithApplicationId(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     const auto title_id = rp.PopRaw<u64>();
 
@@ -105,7 +110,8 @@ void ARP_R::GetApplicationLaunchPropertyWithApplicationId(HLERequestContext& ctx
     rb.PushRaw(launch_property);
 }
 
-void ARP_R::GetApplicationControlProperty(HLERequestContext& ctx) {
+void ARP_R::GetApplicationControlProperty(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     const auto process_id = rp.PopRaw<u64>();
 
@@ -135,7 +141,8 @@ void ARP_R::GetApplicationControlProperty(HLERequestContext& ctx) {
     rb.Push(ResultSuccess);
 }
 
-void ARP_R::GetApplicationControlPropertyWithApplicationId(HLERequestContext& ctx) {
+void ARP_R::GetApplicationControlPropertyWithApplicationId(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     const auto title_id = rp.PopRaw<u64>();
 
@@ -164,7 +171,8 @@ public:
     using IssuerFn = std::function<Result(u64, ApplicationLaunchProperty, std::vector<u8>)>;
 
     explicit IRegistrar(Core::System& system_, IssuerFn&& issuer)
-        : ServiceFramework{system_, "IRegistrar"}, issue_process_id{std::move(issuer)} {
+        : ServiceFramework{system_, "IRegistrar"}, issue_process_id{std::move(issuer)}
+    {
         // clang-format off
         static const FunctionInfo functions[] = {
             {0, &IRegistrar::Issue, "Issue"},
@@ -177,7 +185,8 @@ public:
     }
 
 private:
-    void Issue(HLERequestContext& ctx) {
+    void Issue(HLERequestContext& ctx)
+    {
         IPC::RequestParser rp{ctx};
         const auto process_id = rp.PopRaw<u64>();
 
@@ -205,7 +214,8 @@ private:
         rb.Push(ResultSuccess);
     }
 
-    void SetApplicationLaunchProperty(HLERequestContext& ctx) {
+    void SetApplicationLaunchProperty(HLERequestContext& ctx)
+    {
         LOG_DEBUG(Service_ARP, "called");
 
         if (issued) {
@@ -224,7 +234,8 @@ private:
         rb.Push(ResultSuccess);
     }
 
-    void SetApplicationControlProperty(HLERequestContext& ctx) {
+    void SetApplicationControlProperty(HLERequestContext& ctx)
+    {
         LOG_DEBUG(Service_ARP, "called");
 
         if (issued) {
@@ -250,7 +261,8 @@ private:
 };
 
 ARP_W::ARP_W(Core::System& system_, ARPManager& manager_)
-    : ServiceFramework{system_, "arp:w"}, manager{manager_} {
+    : ServiceFramework{system_, "arp:w"}, manager{manager_}
+{
     // clang-format off
         static const FunctionInfo functions[] = {
             {0, &ARP_W::AcquireRegistrar, "AcquireRegistrar"},
@@ -264,7 +276,8 @@ ARP_W::ARP_W(Core::System& system_, ARPManager& manager_)
 
 ARP_W::~ARP_W() = default;
 
-void ARP_W::AcquireRegistrar(HLERequestContext& ctx) {
+void ARP_W::AcquireRegistrar(HLERequestContext& ctx)
+{
     LOG_DEBUG(Service_ARP, "called");
 
     registrar = std::make_shared<IRegistrar>(
@@ -282,7 +295,8 @@ void ARP_W::AcquireRegistrar(HLERequestContext& ctx) {
     rb.PushIpcInterface(registrar);
 }
 
-void ARP_W::UnregisterApplicationInstance(HLERequestContext& ctx) {
+void ARP_W::UnregisterApplicationInstance(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     const auto process_id = rp.PopRaw<u64>();
 

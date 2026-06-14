@@ -2,12 +2,14 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include "core/file_sys/fssystem/fssystem_hierarchical_integrity_verification_storage.h"
+
 #include "core/file_sys/vfs/vfs_offset.h"
 
 namespace FileSys {
 
 HierarchicalIntegrityVerificationStorage::HierarchicalIntegrityVerificationStorage()
-    : m_data_size(-1) {
+    : m_data_size(-1)
+{
     for (size_t i = 0; i < MaxLayers - 1; i++) {
         m_verify_storages[i] = std::make_shared<IntegrityVerificationStorage>();
     }
@@ -16,7 +18,8 @@ HierarchicalIntegrityVerificationStorage::HierarchicalIntegrityVerificationStora
 Result HierarchicalIntegrityVerificationStorage::Initialize(
     const HierarchicalIntegrityVerificationInformation& info,
     HierarchicalStorageInformation storage, int max_data_cache_entries, int max_hash_cache_entries,
-    s8 buffer_level) {
+    s8 buffer_level)
+{
     // Validate preconditions.
     ASSERT(IntegrityMinLayerCount <= info.max_layers && info.max_layers <= IntegrityMaxLayerCount);
 
@@ -30,7 +33,8 @@ Result HierarchicalIntegrityVerificationStorage::Initialize(
                                      false);
 
     // Ensure we don't leak state if further initialization goes wrong.
-    ON_RESULT_FAILURE {
+    ON_RESULT_FAILURE
+    {
         m_verify_storages[0]->Finalize();
         m_data_size = -1;
     };
@@ -43,7 +47,8 @@ Result HierarchicalIntegrityVerificationStorage::Initialize(
     s32 level = 0;
 
     // Ensure we don't leak state if further initialization goes wrong.
-    ON_RESULT_FAILURE_2 {
+    ON_RESULT_FAILURE_2
+    {
         m_verify_storages[level + 1]->Finalize();
         for (; level > 0; --level) {
             m_buffer_storages[level].reset();
@@ -90,7 +95,8 @@ Result HierarchicalIntegrityVerificationStorage::Initialize(
     R_SUCCEED();
 }
 
-void HierarchicalIntegrityVerificationStorage::Finalize() {
+void HierarchicalIntegrityVerificationStorage::Finalize()
+{
     if (m_data_size >= 0) {
         m_data_size = 0;
 
@@ -103,8 +109,8 @@ void HierarchicalIntegrityVerificationStorage::Finalize() {
     }
 }
 
-size_t HierarchicalIntegrityVerificationStorage::Read(u8* buffer, size_t size,
-                                                      size_t offset) const {
+size_t HierarchicalIntegrityVerificationStorage::Read(u8* buffer, size_t size, size_t offset) const
+{
     // Validate preconditions.
     ASSERT(m_data_size >= 0);
 
@@ -120,7 +126,8 @@ size_t HierarchicalIntegrityVerificationStorage::Read(u8* buffer, size_t size,
     return m_buffer_storages[m_max_layers - 2]->Read(buffer, size, offset);
 }
 
-size_t HierarchicalIntegrityVerificationStorage::GetSize() const {
+size_t HierarchicalIntegrityVerificationStorage::GetSize() const
+{
     return m_data_size;
 }
 

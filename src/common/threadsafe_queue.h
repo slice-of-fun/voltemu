@@ -18,31 +18,23 @@
 #include "common/polyfill_thread.h"
 
 namespace Common {
-template <typename T, bool with_stop_token = false>
-class SPSCQueue {
+template<typename T, bool with_stop_token = false> class SPSCQueue {
 public:
-    SPSCQueue() {
-        write_ptr = read_ptr = new ElementPtr();
-    }
-    ~SPSCQueue() {
+    SPSCQueue() { write_ptr = read_ptr = new ElementPtr(); }
+    ~SPSCQueue()
+    {
         // this will empty out the whole queue
         delete read_ptr;
     }
 
-    [[nodiscard]] std::size_t Size() const {
-        return size.load();
-    }
+    [[nodiscard]] std::size_t Size() const { return size.load(); }
 
-    [[nodiscard]] bool Empty() const {
-        return Size() == 0;
-    }
+    [[nodiscard]] bool Empty() const { return Size() == 0; }
 
-    [[nodiscard]] T& Front() const {
-        return read_ptr->current;
-    }
+    [[nodiscard]] T& Front() const { return read_ptr->current; }
 
-    template <typename Arg>
-    void Push(Arg&& t) {
+    template<typename Arg> void Push(Arg&& t)
+    {
         // create the element, add it to the queue
         write_ptr->current = std::move(t);
         // set the next pointer to a new element ptr
@@ -60,7 +52,8 @@ public:
         cv.notify_one();
     }
 
-    void Pop() {
+    void Pop()
+    {
         --size;
 
         ElementPtr* tmpptr = read_ptr;
@@ -71,7 +64,8 @@ public:
         delete tmpptr; // this also deletes the element
     }
 
-    bool Pop(T& t) {
+    bool Pop(T& t)
+    {
         if (Empty())
             return false;
 
@@ -85,21 +79,24 @@ public:
         return true;
     }
 
-    void Wait() {
+    void Wait()
+    {
         if (Empty()) {
             std::unique_lock lock{cv_mutex};
             cv.wait(lock, [this] { return !Empty(); });
         }
     }
 
-    T PopWait() {
+    T PopWait()
+    {
         Wait();
         T t;
         Pop(t);
         return t;
     }
 
-    T PopWait(std::stop_token stop_token) {
+    T PopWait(std::stop_token stop_token)
+    {
         if (Empty()) {
             std::unique_lock lock{cv_mutex};
             if constexpr (with_stop_token) {
@@ -117,7 +114,8 @@ public:
     }
 
     // not thread-safe
-    void Clear() {
+    void Clear()
+    {
         size.store(0);
         delete read_ptr;
         write_ptr = read_ptr = new ElementPtr();
@@ -129,7 +127,8 @@ private:
     class ElementPtr {
     public:
         ElementPtr() {}
-        ~ElementPtr() {
+        ~ElementPtr()
+        {
             ElementPtr* next_ptr = next.load();
 
             if (next_ptr)
@@ -150,51 +149,32 @@ private:
 // a simple thread-safe,
 // single reader, multiple writer queue
 
-template <typename T, bool with_stop_token = false>
-class MPSCQueue {
+template<typename T, bool with_stop_token = false> class MPSCQueue {
 public:
-    [[nodiscard]] std::size_t Size() const {
-        return spsc_queue.Size();
-    }
+    [[nodiscard]] std::size_t Size() const { return spsc_queue.Size(); }
 
-    [[nodiscard]] bool Empty() const {
-        return spsc_queue.Empty();
-    }
+    [[nodiscard]] bool Empty() const { return spsc_queue.Empty(); }
 
-    [[nodiscard]] T& Front() const {
-        return spsc_queue.Front();
-    }
+    [[nodiscard]] T& Front() const { return spsc_queue.Front(); }
 
-    template <typename Arg>
-    void Push(Arg&& t) {
+    template<typename Arg> void Push(Arg&& t)
+    {
         std::scoped_lock lock{write_lock};
         spsc_queue.Push(t);
     }
 
-    void Pop() {
-        return spsc_queue.Pop();
-    }
+    void Pop() { return spsc_queue.Pop(); }
 
-    bool Pop(T& t) {
-        return spsc_queue.Pop(t);
-    }
+    bool Pop(T& t) { return spsc_queue.Pop(t); }
 
-    void Wait() {
-        spsc_queue.Wait();
-    }
+    void Wait() { spsc_queue.Wait(); }
 
-    T PopWait() {
-        return spsc_queue.PopWait();
-    }
+    T PopWait() { return spsc_queue.PopWait(); }
 
-    T PopWait(std::stop_token stop_token) {
-        return spsc_queue.PopWait(stop_token);
-    }
+    T PopWait(std::stop_token stop_token) { return spsc_queue.PopWait(stop_token); }
 
     // not thread-safe
-    void Clear() {
-        spsc_queue.Clear();
-    }
+    void Clear() { spsc_queue.Clear(); }
 
 private:
     SPSCQueue<T, with_stop_token> spsc_queue;

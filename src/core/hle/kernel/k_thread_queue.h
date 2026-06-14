@@ -15,9 +15,7 @@ public:
     explicit KThreadQueue(KernelCore& kernel) : m_kernel{kernel}, m_hardware_timer{} {}
     virtual ~KThreadQueue() = default;
 
-    void SetHardwareTimer(KHardwareTimer* timer) {
-        m_hardware_timer = timer;
-    }
+    void SetHardwareTimer(KHardwareTimer* timer) { m_hardware_timer = timer; }
 
     virtual void NotifyAvailable(KThread* waiting_thread, KSynchronizationObject* signaled_object,
                                  Result wait_result);

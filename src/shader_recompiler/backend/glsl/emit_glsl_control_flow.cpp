@@ -7,11 +7,13 @@
 
 namespace Shader::Backend::GLSL {
 
-void EmitJoin(EmitContext&) {
+void EmitJoin(EmitContext&)
+{
     throw NotImplementedException("Join shouldn't be emitted");
 }
 
-void EmitDemoteToHelperInvocation(EmitContext& ctx) {
+void EmitDemoteToHelperInvocation(EmitContext& ctx)
+{
     ctx.Add("discard;");
 }
 

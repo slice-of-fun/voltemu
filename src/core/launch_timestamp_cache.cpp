@@ -3,18 +3,18 @@
 
 #include "core/launch_timestamp_cache.h"
 
+#include <ankerl/unordered_dense.h>
+#include <fmt/format.h>
+
 #include <filesystem>
 #include <fstream>
 #include <mutex>
+#include <nlohmann/json.hpp>
 #include <sstream>
 #include <string>
-#include <ankerl/unordered_dense.h>
 
-#include <fmt/format.h>
-#include <nlohmann/json.hpp>
-
-#include "common/fs/fs.h"
 #include "common/fs/file.h"
+#include "common/fs/fs.h"
 #include "common/fs/path_util.h"
 #include "common/logging.h"
 
@@ -29,11 +29,13 @@ CacheMap g_cache;
 CountMap g_counts;
 bool g_loaded = false;
 
-std::filesystem::path GetCachePath() {
+std::filesystem::path GetCachePath()
+{
     return Common::FS::GetVoltPath(Common::FS::VoltPath::CacheDir) / "launched.json";
 }
 
-std::optional<std::string> ReadFileToString(const std::filesystem::path& path) {
+std::optional<std::string> ReadFileToString(const std::filesystem::path& path)
+{
     const std::ifstream file{path, std::ios::in | std::ios::binary};
     if (!file) {
         return std::nullopt;
@@ -43,7 +45,8 @@ std::optional<std::string> ReadFileToString(const std::filesystem::path& path) {
     return ss.str();
 }
 
-bool WriteStringToFile(const std::filesystem::path& path, const std::string& data) {
+bool WriteStringToFile(const std::filesystem::path& path, const std::string& data)
+{
     if (!Common::FS::CreateParentDirs(path)) {
         return false;
     }
@@ -55,7 +58,8 @@ bool WriteStringToFile(const std::filesystem::path& path, const std::string& dat
     return static_cast<bool>(file);
 }
 
-void Load() {
+void Load()
+{
     if (g_loaded) {
         return;
     }
@@ -105,7 +109,8 @@ void Load() {
     }
 }
 
-void Save() {
+void Save()
+{
     nlohmann::json json = nlohmann::json::object();
     for (const auto& [key, value] : g_cache) {
         nlohmann::json entry = nlohmann::json::object();
@@ -122,13 +127,15 @@ void Save() {
     }
 }
 
-s64 NowSeconds() {
+s64 NowSeconds()
+{
     return std::time(nullptr);
 }
 
 } // namespace
 
-void SaveLaunchTimestamp(u64 title_id) {
+void SaveLaunchTimestamp(u64 title_id)
+{
     std::scoped_lock lk{g_mutex};
     Load();
     g_cache[title_id] = NowSeconds();
@@ -136,7 +143,8 @@ void SaveLaunchTimestamp(u64 title_id) {
     Save();
 }
 
-s64 GetLaunchTimestamp(u64 title_id) {
+s64 GetLaunchTimestamp(u64 title_id)
+{
     std::scoped_lock lk{g_mutex};
     Load();
     const auto it = g_cache.find(title_id);
@@ -147,7 +155,8 @@ s64 GetLaunchTimestamp(u64 title_id) {
     return 1767225600;
 }
 
-u64 GetLaunchCount(u64 title_id) {
+u64 GetLaunchCount(u64 title_id)
+{
     std::scoped_lock lk{g_mutex};
     Load();
     const auto it = g_counts.find(title_id);

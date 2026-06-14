@@ -11,11 +11,13 @@
 
 namespace Service::News {
 
-void MsgPack::Writer::WriteBytes(std::span<const u8> bytes) {
+void MsgPack::Writer::WriteBytes(std::span<const u8> bytes)
+{
     out.insert(out.end(), bytes.begin(), bytes.end());
 }
 
-void MsgPack::Writer::WriteFixMap(size_t count) {
+void MsgPack::Writer::WriteFixMap(size_t count)
+{
     if (count <= 15) {
         out.push_back(static_cast<u8>(0x80 | count));
     } else if (count <= 0xFFFF) {
@@ -27,7 +29,8 @@ void MsgPack::Writer::WriteFixMap(size_t count) {
     }
 }
 
-void MsgPack::Writer::WriteMap32(size_t count) {
+void MsgPack::Writer::WriteMap32(size_t count)
+{
     out.push_back(0xDF);
     out.push_back(static_cast<u8>((count >> 24) & 0xFF));
     out.push_back(static_cast<u8>((count >> 16) & 0xFF));
@@ -35,11 +38,13 @@ void MsgPack::Writer::WriteMap32(size_t count) {
     out.push_back(static_cast<u8>(count & 0xFF));
 }
 
-void MsgPack::Writer::WriteKey(std::string_view s) {
+void MsgPack::Writer::WriteKey(std::string_view s)
+{
     WriteString(s);
 }
 
-void MsgPack::Writer::WriteString(std::string_view s) {
+void MsgPack::Writer::WriteString(std::string_view s)
+{
     if (s.size() <= 31) {
         out.push_back(static_cast<u8>(0xA0 | s.size()));
     } else if (s.size() <= 0xFF) {
@@ -59,7 +64,8 @@ void MsgPack::Writer::WriteString(std::string_view s) {
     WriteBytes({reinterpret_cast<const u8*>(s.data()), s.size()});
 }
 
-void MsgPack::Writer::WriteInt64(s64 v) {
+void MsgPack::Writer::WriteInt64(s64 v)
+{
     if (v >= 0) {
         WriteUInt(static_cast<u64>(v));
         return;
@@ -87,7 +93,8 @@ void MsgPack::Writer::WriteInt64(s64 v) {
     }
 }
 
-void MsgPack::Writer::WriteUInt(u64 v) {
+void MsgPack::Writer::WriteUInt(u64 v)
+{
     if (v < 0x80) {
         out.push_back(static_cast<u8>(v));
     } else if (v <= 0xFF) {
@@ -111,11 +118,13 @@ void MsgPack::Writer::WriteUInt(u64 v) {
     }
 }
 
-void MsgPack::Writer::WriteNil() {
+void MsgPack::Writer::WriteNil()
+{
     out.push_back(0xC0);
 }
 
-void MsgPack::Writer::WriteFixArray(size_t count) {
+void MsgPack::Writer::WriteFixArray(size_t count)
+{
     if (count <= 15) {
         out.push_back(static_cast<u8>(0x90 | count));
     } else if (count <= 0xFFFF) {
@@ -131,7 +140,8 @@ void MsgPack::Writer::WriteFixArray(size_t count) {
     }
 }
 
-void MsgPack::Writer::WriteBinary(const std::vector<u8>& data) {
+void MsgPack::Writer::WriteBinary(const std::vector<u8>& data)
+{
     if (data.size() <= 0xFF) {
         out.push_back(0xC4);
         out.push_back(static_cast<u8>(data.size()));
@@ -149,37 +159,46 @@ void MsgPack::Writer::WriteBinary(const std::vector<u8>& data) {
     WriteBytes(data);
 }
 
-void MsgPack::Writer::WriteBool(bool v) {
+void MsgPack::Writer::WriteBool(bool v)
+{
     out.push_back(v ? 0xC3 : 0xC2);
 }
 
-std::vector<u8> MsgPack::Writer::Take() {
+std::vector<u8> MsgPack::Writer::Take()
+{
     return std::move(out);
 }
 
-MsgPack::Reader::Reader(std::span<const u8> buffer) : data(buffer) {}
+MsgPack::Reader::Reader(std::span<const u8> buffer) : data(buffer)
+{
+}
 
-bool MsgPack::Reader::Fail(const char* msg) {
+bool MsgPack::Reader::Fail(const char* msg)
+{
     error = msg;
     return false;
 }
 
-bool MsgPack::Reader::Ensure(size_t n) const {
+bool MsgPack::Reader::Ensure(size_t n) const
+{
     return offset + n <= data.size();
 }
 
-u8 MsgPack::Reader::Peek() const {
+u8 MsgPack::Reader::Peek() const
+{
     return Ensure(1) ? data[offset] : 0;
 }
 
-u8 MsgPack::Reader::ReadByte() {
+u8 MsgPack::Reader::ReadByte()
+{
     if (!Ensure(1)) {
         return 0;
     }
     return data[offset++];
 }
 
-bool MsgPack::Reader::ReadSize(size_t byte_count, size_t& out_size) {
+bool MsgPack::Reader::ReadSize(size_t byte_count, size_t& out_size)
+{
     if (!Ensure(byte_count)) {
         return Fail("size out of range");
     }
@@ -192,7 +211,8 @@ bool MsgPack::Reader::ReadSize(size_t byte_count, size_t& out_size) {
     return true;
 }
 
-bool MsgPack::Reader::SkipBytes(size_t n) {
+bool MsgPack::Reader::SkipBytes(size_t n)
+{
     if (!Ensure(n)) {
         return Fail("skip out of range");
     }
@@ -200,7 +220,8 @@ bool MsgPack::Reader::SkipBytes(size_t n) {
     return true;
 }
 
-bool MsgPack::Reader::SkipValue() {
+bool MsgPack::Reader::SkipValue()
+{
     if (End()) {
         return Fail("unexpected end");
     }
@@ -320,7 +341,8 @@ bool MsgPack::Reader::SkipValue() {
     }
 }
 
-bool MsgPack::Reader::SkipContainer(size_t count, bool /*map_mode*/) {
+bool MsgPack::Reader::SkipContainer(size_t count, bool /*map_mode*/)
+{
     for (size_t i = 0; i < count; ++i) {
         if (!SkipValue()) {
             return false;
@@ -329,7 +351,8 @@ bool MsgPack::Reader::SkipContainer(size_t count, bool /*map_mode*/) {
     return true;
 }
 
-bool MsgPack::Reader::SkipAll() {
+bool MsgPack::Reader::SkipAll()
+{
     while (!End()) {
         if (!SkipValue()) {
             return false;
@@ -338,7 +361,8 @@ bool MsgPack::Reader::SkipAll() {
     return true;
 }
 
-bool MsgPack::Reader::ReadMapHeader(size_t& count) {
+bool MsgPack::Reader::ReadMapHeader(size_t& count)
+{
     if (End()) {
         return Fail("unexpected end");
     }
@@ -359,7 +383,8 @@ bool MsgPack::Reader::ReadMapHeader(size_t& count) {
     return Fail("not a map");
 }
 
-bool MsgPack::Reader::ReadArrayHeader(size_t& count) {
+bool MsgPack::Reader::ReadArrayHeader(size_t& count)
+{
     if (End()) {
         return Fail("unexpected end");
     }
@@ -380,7 +405,8 @@ bool MsgPack::Reader::ReadArrayHeader(size_t& count) {
     return Fail("not an array");
 }
 
-bool MsgPack::Reader::ReadUInt(u64& value) {
+bool MsgPack::Reader::ReadUInt(u64& value)
+{
     if (End()) {
         return Fail("unexpected end");
     }
@@ -432,7 +458,8 @@ bool MsgPack::Reader::ReadUInt(u64& value) {
     return Fail("not uint");
 }
 
-bool MsgPack::Reader::ReadInt(s64& value) {
+bool MsgPack::Reader::ReadInt(s64& value)
+{
     if (End()) {
         return Fail("unexpected end");
     }
@@ -492,7 +519,8 @@ bool MsgPack::Reader::ReadInt(s64& value) {
     return Fail("not int");
 }
 
-bool MsgPack::Reader::ReadBool(bool& value) {
+bool MsgPack::Reader::ReadBool(bool& value)
+{
     if (End()) {
         return Fail("unexpected end");
     }
@@ -508,7 +536,8 @@ bool MsgPack::Reader::ReadBool(bool& value) {
     return Fail("not bool");
 }
 
-bool MsgPack::Reader::ReadString(std::string& value) {
+bool MsgPack::Reader::ReadString(std::string& value)
+{
     if (End()) {
         return Fail("unexpected end");
     }
@@ -540,7 +569,8 @@ bool MsgPack::Reader::ReadString(std::string& value) {
     return true;
 }
 
-bool MsgPack::Reader::ReadBinary(std::vector<u8>& value) {
+bool MsgPack::Reader::ReadBinary(std::vector<u8>& value)
+{
     if (End()) {
         return Fail("unexpected end");
     }
@@ -569,7 +599,8 @@ bool MsgPack::Reader::ReadBinary(std::vector<u8>& value) {
     return true;
 }
 
-bool MsgPack::Reader::ReadBinaryCompat(std::vector<u8>& value) {
+bool MsgPack::Reader::ReadBinaryCompat(std::vector<u8>& value)
+{
     if (!ReadBinary(value)) {
         value.clear();
         return false;
@@ -577,7 +608,8 @@ bool MsgPack::Reader::ReadBinaryCompat(std::vector<u8>& value) {
     return true;
 }
 
-bool MsgPack::Reader::ReadStringArray(std::vector<std::string>& out) {
+bool MsgPack::Reader::ReadStringArray(std::vector<std::string>& out)
+{
     size_t count = 0;
     if (!ReadArrayHeader(count)) {
         return false;
@@ -594,7 +626,8 @@ bool MsgPack::Reader::ReadStringArray(std::vector<std::string>& out) {
     return true;
 }
 
-bool MsgPack::Reader::ReadNewsVersion(NewsStruct::Version& out) {
+bool MsgPack::Reader::ReadNewsVersion(NewsStruct::Version& out)
+{
     size_t count = 0;
     if (!ReadMapHeader(count)) {
         return false;
@@ -621,7 +654,8 @@ bool MsgPack::Reader::ReadNewsVersion(NewsStruct::Version& out) {
     return true;
 }
 
-bool MsgPack::Reader::ReadNewsSubject(NewsStruct::Subject& out) {
+bool MsgPack::Reader::ReadNewsSubject(NewsStruct::Subject& out)
+{
     size_t count = 0;
     if (!ReadMapHeader(count)) {
         return false;
@@ -648,7 +682,8 @@ bool MsgPack::Reader::ReadNewsSubject(NewsStruct::Subject& out) {
     return true;
 }
 
-bool MsgPack::Reader::ReadNewsFooter(NewsStruct::Footer& out) {
+bool MsgPack::Reader::ReadNewsFooter(NewsStruct::Footer& out)
+{
     size_t count = 0;
     if (!ReadMapHeader(count)) {
         return false;
@@ -671,7 +706,8 @@ bool MsgPack::Reader::ReadNewsFooter(NewsStruct::Footer& out) {
     return true;
 }
 
-bool MsgPack::Reader::ReadByteArray(std::vector<u8>& out) {
+bool MsgPack::Reader::ReadByteArray(std::vector<u8>& out)
+{
     if (!ReadBinary(out)) {
         out.clear();
         return false;
@@ -679,7 +715,8 @@ bool MsgPack::Reader::ReadByteArray(std::vector<u8>& out) {
     return true;
 }
 
-bool MsgPack::Reader::ReadNewsBody(NewsStruct::Body& out) {
+bool MsgPack::Reader::ReadNewsBody(NewsStruct::Body& out)
+{
     size_t count = 0;
     if (!ReadMapHeader(count)) {
         return false;
@@ -714,7 +751,8 @@ bool MsgPack::Reader::ReadNewsBody(NewsStruct::Body& out) {
     return true;
 }
 
-bool MsgPack::Reader::ReadNewsBrowser(NewsStruct::More::Browser& out) {
+bool MsgPack::Reader::ReadNewsBrowser(NewsStruct::More::Browser& out)
+{
     size_t count = 0;
     if (!ReadMapHeader(count)) {
         return false;
@@ -742,7 +780,8 @@ bool MsgPack::Reader::ReadNewsBrowser(NewsStruct::More::Browser& out) {
     return true;
 }
 
-bool MsgPack::Reader::ReadNewsMore(NewsStruct::More& out) {
+bool MsgPack::Reader::ReadNewsMore(NewsStruct::More& out)
+{
     size_t count = 0;
     if (!ReadMapHeader(count)) {
         return false;
@@ -767,7 +806,8 @@ bool MsgPack::Reader::ReadNewsMore(NewsStruct::More& out) {
     return true;
 }
 
-bool MsgPack::Reader::ReadNewsStruct(NewsStruct& out) {
+bool MsgPack::Reader::ReadNewsStruct(NewsStruct& out)
+{
     size_t count = 0;
     if (!ReadMapHeader(count)) {
         return false;
@@ -778,9 +818,7 @@ bool MsgPack::Reader::ReadNewsStruct(NewsStruct& out) {
             return false;
         }
 
-        auto read_u64 = [&](u64& target) -> bool {
-            return ReadUInt(target);
-        };
+        auto read_u64 = [&](u64& target) -> bool { return ReadUInt(target); };
 
         if (key == "version") {
             if (!ReadNewsVersion(out.version)) {

@@ -12,9 +12,9 @@
 #include "common/common_funcs.h"
 #include "common/common_types.h"
 #include "common/scratch_buffer.h"
+#include "video_core/host1x/codec_types.h"
 #include "video_core/host1x/codecs/decoder.h"
 #include "video_core/host1x/nvdec_common.h"
-#include "video_core/host1x/codec_types.h"
 
 namespace Tegra {
 
@@ -46,13 +46,9 @@ public:
     std::tuple<u64, u64> GetProgressiveOffsets() override;
     std::tuple<u64, u64, u64, u64> GetInterlacedOffsets() override;
 
-    bool IsInterlaced() override {
-        return false;
-    }
+    bool IsInterlaced() override { return false; }
 
-    std::string_view GetCurrentCodecName() const override {
-        return "VP8";
-    }
+    std::string_view GetCurrentCodecName() const override { return "VP8"; }
 
 private:
     VP8PictureInfo current_context{};

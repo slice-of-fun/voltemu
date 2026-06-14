@@ -4,8 +4,9 @@
 // SPDX-FileCopyrightText: Copyright 2024 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include "core/core.h"
 #include "core/hle/service/am/display_layer_manager.h"
+
+#include "core/core.h"
 #include "core/hle/service/sm/sm.h"
 #include "core/hle/service/vi/application_display_service.h"
 #include "core/hle/service/vi/container.h"
@@ -18,12 +19,14 @@
 namespace Service::AM {
 
 DisplayLayerManager::DisplayLayerManager() = default;
-DisplayLayerManager::~DisplayLayerManager() {
+DisplayLayerManager::~DisplayLayerManager()
+{
     this->Finalize();
 }
 
 void DisplayLayerManager::Initialize(Core::System& system, Kernel::KProcess* process,
-                                     AppletId applet_id, LibraryAppletMode mode) {
+                                     AppletId applet_id, LibraryAppletMode mode)
+{
     R_ASSERT(system.ServiceManager()
                  .GetService<VI::IManagerRootService>("vi:m", true)
                  ->GetDisplayService(&m_display_service, VI::Policy::Compositor));
@@ -38,7 +41,8 @@ void DisplayLayerManager::Initialize(Core::System& system, Kernel::KProcess* pro
                          mode == LibraryAppletMode::PartialForegroundIndirectDisplay;
 }
 
-void DisplayLayerManager::Finalize() {
+void DisplayLayerManager::Finalize()
+{
     if (!m_manager_display_service) {
         return;
     }
@@ -61,7 +65,8 @@ void DisplayLayerManager::Finalize() {
     m_display_service = nullptr;
 }
 
-Result DisplayLayerManager::CreateManagedDisplayLayer(u64* out_layer_id) {
+Result DisplayLayerManager::CreateManagedDisplayLayer(u64* out_layer_id)
+{
     R_UNLESS(m_manager_display_service != nullptr, VI::ResultOperationFailed);
 
     // TODO(Subv): Find out how AM determines the display to use, for now just
@@ -89,7 +94,8 @@ Result DisplayLayerManager::CreateManagedDisplayLayer(u64* out_layer_id) {
 }
 
 Result DisplayLayerManager::CreateManagedDisplaySeparableLayer(u64* out_layer_id,
-                                                               u64* out_recording_layer_id) {
+                                                               u64* out_recording_layer_id)
+{
     R_UNLESS(m_manager_display_service != nullptr, VI::ResultOperationFailed);
 
     // TODO(Subv): Find out how AM determines the display to use, for now just
@@ -102,7 +108,8 @@ Result DisplayLayerManager::CreateManagedDisplaySeparableLayer(u64* out_layer_id
     R_RETURN(this->CreateManagedDisplayLayer(out_layer_id));
 }
 
-Result DisplayLayerManager::IsSystemBufferSharingEnabled() {
+Result DisplayLayerManager::IsSystemBufferSharingEnabled()
+{
     // Succeed if already enabled.
     R_SUCCEED_IF(m_buffer_sharing_enabled);
 
@@ -133,7 +140,8 @@ Result DisplayLayerManager::IsSystemBufferSharingEnabled() {
 }
 
 Result DisplayLayerManager::GetSystemSharedLayerHandle(u64* out_system_shared_buffer_id,
-                                                       u64* out_system_shared_layer_id) {
+                                                       u64* out_system_shared_layer_id)
+{
     R_TRY(this->IsSystemBufferSharingEnabled());
 
     *out_system_shared_buffer_id = m_system_shared_buffer_id;
@@ -142,7 +150,8 @@ Result DisplayLayerManager::GetSystemSharedLayerHandle(u64* out_system_shared_bu
     R_SUCCEED();
 }
 
-void DisplayLayerManager::SetWindowVisibility(bool visible) {
+void DisplayLayerManager::SetWindowVisibility(bool visible)
+{
     if (m_visible == visible) {
         return;
     }
@@ -157,18 +166,20 @@ void DisplayLayerManager::SetWindowVisibility(bool visible) {
         }
 
         for (const auto layer_id : m_managed_display_layers) {
-            LOG_INFO(Service_VI, "managed_layer={} visible={} applet_id={}",
-                     layer_id, m_visible, static_cast<u32>(m_applet_id));
+            LOG_INFO(Service_VI, "managed_layer={} visible={} applet_id={}", layer_id, m_visible,
+                     static_cast<u32>(m_applet_id));
             m_manager_display_service->SetLayerVisibility(m_visible, layer_id);
         }
     }
 }
 
-bool DisplayLayerManager::GetWindowVisibility() const {
+bool DisplayLayerManager::GetWindowVisibility() const
+{
     return m_visible;
 }
 
-void DisplayLayerManager::SetOverlayZIndex(s32 z_index) {
+void DisplayLayerManager::SetOverlayZIndex(s32 z_index)
+{
     if (!m_manager_display_service) {
         return;
     }
@@ -185,7 +196,8 @@ void DisplayLayerManager::SetOverlayZIndex(s32 z_index) {
 }
 
 Result DisplayLayerManager::WriteAppletCaptureBuffer(bool* out_was_written,
-                                                     s32* out_fbshare_layer_index) {
+                                                     s32* out_fbshare_layer_index)
+{
     R_UNLESS(m_buffer_sharing_enabled, VI::ResultPermissionDenied);
     R_RETURN(m_display_service->GetContainer()->GetSharedBufferManager()->WriteAppletCaptureBuffer(
         out_was_written, out_fbshare_layer_index));

@@ -6,12 +6,12 @@
 
 #pragma once
 
+#include <SDL3/SDL.h>
+#include <ankerl/unordered_dense.h>
+
 #include <atomic>
 #include <mutex>
 #include <thread>
-#include <ankerl/unordered_dense.h>
-
-#include <SDL3/SDL.h>
 
 #include "common/common_types.h"
 #include "common/threadsafe_queue.h"
@@ -23,10 +23,8 @@ namespace InputCommon {
 
 class SDLJoystick;
 
-using ButtonBindings =
-    std::array<std::pair<Settings::NativeButton::Values, SDL_GamepadButton>, 20>;
-using ZButtonBindings =
-    std::array<std::pair<Settings::NativeButton::Values, SDL_GamepadAxis>, 2>;
+using ButtonBindings = std::array<std::pair<Settings::NativeButton::Values, SDL_GamepadButton>, 20>;
+using ZButtonBindings = std::array<std::pair<Settings::NativeButton::Values, SDL_GamepadAxis>, 2>;
 
 class SDLDriver : public InputEngine {
 public:
@@ -64,8 +62,9 @@ public:
 
     bool IsStickInverted(const Common::ParamPackage& params) override;
 
-    Common::Input::DriverResult SetVibration(
-        const PadIdentifier& identifier, const Common::Input::VibrationStatus& vibration) override;
+    Common::Input::DriverResult
+    SetVibration(const PadIdentifier& identifier,
+                 const Common::Input::VibrationStatus& vibration) override;
 
     bool IsVibrationEnabled(const PadIdentifier& identifier) override;
 
@@ -89,8 +88,8 @@ private:
 
     Common::ParamPackage BuildMotionParam(int port, const Common::UUID& guid) const;
 
-    Common::ParamPackage BuildParamPackageForBinding(
-        int port, const Common::UUID& guid, const SDL_GamepadBinding& binding) const;
+    Common::ParamPackage BuildParamPackageForBinding(int port, const Common::UUID& guid,
+                                                     const SDL_GamepadBinding& binding) const;
 
     Common::ParamPackage BuildParamPackageForAnalog(PadIdentifier identifier, int axis_x,
                                                     int axis_y, float offset_x,
@@ -117,7 +116,8 @@ private:
     Common::SPSCQueue<VibrationRequest> vibration_queue;
 
     /// Map of GUID of a list of corresponding virtual Joysticks
-    ankerl::unordered_dense::map<Common::UUID, std::vector<std::shared_ptr<SDLJoystick>>> joystick_map;
+    ankerl::unordered_dense::map<Common::UUID, std::vector<std::shared_ptr<SDLJoystick>>>
+        joystick_map;
     std::mutex joystick_map_mutex;
 
     bool start_thread = false;

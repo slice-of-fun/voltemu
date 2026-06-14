@@ -34,9 +34,7 @@ class NodeStates {
          * @param count - Maximum number of nodes for the stack.
          * @return Required buffer size.
          */
-        static u32 CalcBufferSize(u32 count) {
-            return count * sizeof(u32);
-        }
+        static u32 CalcBufferSize(u32 count) { return count * sizeof(u32); }
 
         /**
          * Reset the stack back to default.
@@ -44,7 +42,8 @@ class NodeStates {
          * @param buffer_ - The new buffer to use.
          * @param size_   - The size of the new buffer.
          */
-        void Reset(u32* buffer_, u32 size_) {
+        void Reset(u32* buffer_, u32 size_)
+        {
             stack = {buffer_, size_};
             size = size_;
             pos = 0;
@@ -56,36 +55,28 @@ class NodeStates {
          *
          * @return The current stack position.
          */
-        u32 Count() const {
-            return pos;
-        }
+        u32 Count() const { return pos; }
 
         /**
          * Push a new node to the stack.
          *
          * @param data - The node to push.
          */
-        void push(u32 data) {
-            stack[pos++] = data;
-        }
+        void push(u32 data) { stack[pos++] = data; }
 
         /**
          * Pop a node from the stack.
          *
          * @return The node on the top of the stack.
          */
-        u32 pop() {
-            return stack[--pos];
-        }
+        u32 pop() { return stack[--pos]; }
 
         /**
          * Get the top of the stack without popping.
          *
          * @return The node on the top of the stack.
          */
-        u32 top() const {
-            return stack[pos - 1];
-        }
+        u32 top() const { return stack[pos - 1]; }
 
         /// Buffer for the stack
         std::span<u32> stack{};
@@ -104,7 +95,8 @@ public:
      * @param count - The number of nodes.
      * @return The required workbuffer size.
      */
-    static u64 GetWorkBufferSize(u32 count) {
+    static u64 GetWorkBufferSize(u32 count)
+    {
         return (Common::AlignUp(count, 0x40) / sizeof(u64)) * 2 + count * sizeof(BitArray) +
                count * Stack::CalcBufferSize(count);
     }

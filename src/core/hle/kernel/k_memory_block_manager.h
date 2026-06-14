@@ -23,7 +23,8 @@ private:
     KMemoryBlockSlabManager* m_slab_manager{};
 
 private:
-    Result Initialize(size_t num_blocks) {
+    Result Initialize(size_t num_blocks)
+    {
         // Check num blocks.
         ASSERT(num_blocks <= MaxBlocks);
 
@@ -42,11 +43,13 @@ private:
 public:
     KMemoryBlockManagerUpdateAllocator(Result* out_result, KMemoryBlockSlabManager* sm,
                                        size_t num_blocks = MaxBlocks)
-        : m_slab_manager(sm) {
+        : m_slab_manager(sm)
+    {
         *out_result = this->Initialize(num_blocks);
     }
 
-    ~KMemoryBlockManagerUpdateAllocator() {
+    ~KMemoryBlockManagerUpdateAllocator()
+    {
         for (const auto& block : m_blocks) {
             if (block != nullptr) {
                 m_slab_manager->Free(block);
@@ -54,7 +57,8 @@ public:
         }
     }
 
-    KMemoryBlock* Allocate() {
+    KMemoryBlock* Allocate()
+    {
         ASSERT(m_index < MaxBlocks);
         ASSERT(m_blocks[m_index] != nullptr);
         KMemoryBlock* block = nullptr;
@@ -62,7 +66,8 @@ public:
         return block;
     }
 
-    void Free(KMemoryBlock* block) {
+    void Free(KMemoryBlock* block)
+    {
         ASSERT(m_index <= MaxBlocks);
         ASSERT(block != nullptr);
         if (m_index == 0) {
@@ -91,15 +96,9 @@ public:
                       KMemoryBlockSlabManager* slab_manager);
     void Finalize(KMemoryBlockSlabManager* slab_manager, BlockCallback&& block_callback);
 
-    iterator end() {
-        return m_memory_block_tree.end();
-    }
-    const_iterator end() const {
-        return m_memory_block_tree.end();
-    }
-    const_iterator cend() const {
-        return m_memory_block_tree.cend();
-    }
+    iterator end() { return m_memory_block_tree.end(); }
+    const_iterator end() const { return m_memory_block_tree.end(); }
+    const_iterator cend() const { return m_memory_block_tree.cend(); }
 
     KProcessAddress FindFreeArea(KProcessAddress region_start, size_t region_num_pages,
                                  size_t num_pages, size_t alignment, size_t offset,
@@ -121,12 +120,14 @@ public:
     void UpdateAttribute(KMemoryBlockManagerUpdateAllocator* allocator, KProcessAddress address,
                          size_t num_pages, KMemoryAttribute mask, KMemoryAttribute attr);
 
-    iterator FindIterator(KProcessAddress address) const {
+    iterator FindIterator(KProcessAddress address) const
+    {
         return m_memory_block_tree.find(KMemoryBlock(
             address, 1, KMemoryState::Free, KMemoryPermission::None, KMemoryAttribute::None));
     }
 
-    const KMemoryBlock* FindBlock(KProcessAddress address) const {
+    const KMemoryBlock* FindBlock(KProcessAddress address) const
+    {
         if (const_iterator it = this->FindIterator(address); it != m_memory_block_tree.end()) {
             return std::addressof(*it);
         }
@@ -150,7 +151,9 @@ class KScopedMemoryBlockManagerAuditor {
 public:
     explicit KScopedMemoryBlockManagerAuditor(KMemoryBlockManager* m) : m_manager(m) {}
     explicit KScopedMemoryBlockManagerAuditor(KMemoryBlockManager& m)
-        : KScopedMemoryBlockManagerAuditor(std::addressof(m)) {}
+        : KScopedMemoryBlockManagerAuditor(std::addressof(m))
+    {
+    }
     ~KScopedMemoryBlockManagerAuditor() = default;
 
 private:

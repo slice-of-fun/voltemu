@@ -4,19 +4,23 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/crypto/xts_encryption_layer.h"
+
 #include <algorithm>
 #include <array>
 #include <cstring>
-#include "core/crypto/xts_encryption_layer.h"
 
 namespace Core::Crypto {
 
 constexpr std::size_t XTS_SECTOR_SIZE = 0x4000;
 
 XTSEncryptionLayer::XTSEncryptionLayer(FileSys::VirtualFile base_, Key256 key_)
-    : EncryptionLayer(std::move(base_)), cipher(key_, Mode::XTS) {}
+    : EncryptionLayer(std::move(base_)), cipher(key_, Mode::XTS)
+{
+}
 
-std::size_t XTSEncryptionLayer::Read(u8* data, std::size_t length, std::size_t offset) const {
+std::size_t XTSEncryptionLayer::Read(u8* data, std::size_t length, std::size_t offset) const
+{
     if (length == 0)
         return 0;
 
@@ -33,10 +37,8 @@ std::size_t XTSEncryptionLayer::Read(u8* data, std::size_t length, std::size_t o
         const std::size_t sector_index = current_offset / XTS_SECTOR_SIZE;
         const std::size_t sector_offset = current_offset % XTS_SECTOR_SIZE;
 
-        const std::size_t sectors_to_read = std::min<std::size_t>(PrefetchSectors,
-                                                                  (remaining + sector_offset +
-                                                                   XTS_SECTOR_SIZE - 1) /
-                                                                      XTS_SECTOR_SIZE);
+        const std::size_t sectors_to_read = std::min<std::size_t>(
+            PrefetchSectors, (remaining + sector_offset + XTS_SECTOR_SIZE - 1) / XTS_SECTOR_SIZE);
 
         for (std::size_t s = 0; s < sectors_to_read && remaining > 0; ++s) {
             const std::size_t index = sector_index + s;
@@ -48,8 +50,8 @@ std::size_t XTSEncryptionLayer::Read(u8* data, std::size_t length, std::size_t o
             if (got < XTS_SECTOR_SIZE)
                 std::memset(sector.data() + got, 0, XTS_SECTOR_SIZE - got);
 
-            cipher.XTSTranscode(sector.data(), XTS_SECTOR_SIZE, sector.data(), index, XTS_SECTOR_SIZE,
-                                Op::Decrypt);
+            cipher.XTSTranscode(sector.data(), XTS_SECTOR_SIZE, sector.data(), index,
+                                XTS_SECTOR_SIZE, Op::Decrypt);
 
             const std::size_t local_offset = (s == 0) ? sector_offset : 0;
             const std::size_t available = XTS_SECTOR_SIZE - local_offset;

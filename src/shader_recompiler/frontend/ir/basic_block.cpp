@@ -4,31 +4,37 @@
 // SPDX-FileCopyrightText: Copyright 2021 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "shader_recompiler/frontend/ir/basic_block.h"
+
 #include <algorithm>
 #include <initializer_list>
 #include <map>
 
 #include "common/common_types.h"
-#include "shader_recompiler/frontend/ir/basic_block.h"
 #include "shader_recompiler/frontend/ir/value.h"
 
 namespace Shader::IR {
 
-Block::Block(ObjectPool<Inst>& inst_pool_) : inst_pool{&inst_pool_} {}
+Block::Block(ObjectPool<Inst>& inst_pool_) : inst_pool{&inst_pool_}
+{
+}
 
 Block::~Block() = default;
 
-void Block::AppendNewInst(Opcode op, std::initializer_list<Value> args) {
+void Block::AppendNewInst(Opcode op, std::initializer_list<Value> args)
+{
     PrependNewInst(instructions.end(), op, args);
 }
 
-Block::iterator Block::PrependNewInst(iterator insertion_point, const Inst& base_inst) {
+Block::iterator Block::PrependNewInst(iterator insertion_point, const Inst& base_inst)
+{
     Inst* const inst{inst_pool->Create(base_inst)};
     return instructions.insert(insertion_point, *inst);
 }
 
 Block::iterator Block::PrependNewInst(iterator insertion_point, Opcode op,
-                                      std::initializer_list<Value> args, u32 flags) {
+                                      std::initializer_list<Value> args, u32 flags)
+{
     Inst* const inst{inst_pool->Create(op, flags)};
     const auto result_it{instructions.insert(insertion_point, *inst)};
 
@@ -42,7 +48,8 @@ Block::iterator Block::PrependNewInst(iterator insertion_point, Opcode op,
     return result_it;
 }
 
-void Block::AddBranch(Block* block) {
+void Block::AddBranch(Block* block)
+{
     if (std::ranges::find(imm_successors, block) != imm_successors.end()) {
         throw LogicError("Successor already inserted");
     }
@@ -53,8 +60,8 @@ void Block::AddBranch(Block* block) {
     block->imm_predecessors.push_back(this);
 }
 
-static std::string BlockToIndex(const std::map<const Block*, size_t>& block_to_index,
-                                Block* block) {
+static std::string BlockToIndex(const std::map<const Block*, size_t>& block_to_index, Block* block)
+{
     if (const auto it{block_to_index.find(block)}; it != block_to_index.end()) {
         return fmt::format("{{Block ${}}}", it->second);
     }
@@ -62,7 +69,8 @@ static std::string BlockToIndex(const std::map<const Block*, size_t>& block_to_i
 }
 
 static size_t InstIndex(std::map<const Inst*, size_t>& inst_to_index, size_t& inst_index,
-                        const Inst* inst) {
+                        const Inst* inst)
+{
     const auto [it, is_inserted]{inst_to_index.emplace(inst, inst_index + 1)};
     if (is_inserted) {
         ++inst_index;
@@ -71,7 +79,8 @@ static size_t InstIndex(std::map<const Inst*, size_t>& inst_to_index, size_t& in
 }
 
 static std::string ArgToIndex(std::map<const Inst*, size_t>& inst_to_index, size_t& inst_index,
-                              const Value& arg) {
+                              const Value& arg)
+{
     if (arg.IsEmpty()) {
         return "<null>";
     }
@@ -102,14 +111,16 @@ static std::string ArgToIndex(std::map<const Inst*, size_t>& inst_to_index, size
     }
 }
 
-std::string DumpBlock(const Block& block) {
+std::string DumpBlock(const Block& block)
+{
     size_t inst_index{0};
     std::map<const Inst*, size_t> inst_to_index;
     return DumpBlock(block, {}, inst_to_index, inst_index);
 }
 
 std::string DumpBlock(const Block& block, const std::map<const Block*, size_t>& block_to_index,
-                      std::map<const Inst*, size_t>& inst_to_index, size_t& inst_index) {
+                      std::map<const Inst*, size_t>& inst_to_index, size_t& inst_index)
+{
     std::string ret{"Block"};
     if (const auto it{block_to_index.find(&block)}; it != block_to_index.end()) {
         ret += fmt::format(" ${}", it->second);

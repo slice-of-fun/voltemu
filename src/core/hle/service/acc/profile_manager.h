@@ -51,7 +51,8 @@ struct ProfileBase {
     ProfileUsername username;
 
     // Zero out all the fields to make the profile slot considered "Empty"
-    void Invalidate() {
+    void Invalidate()
+    {
         user_uuid = {};
         timestamp = 0;
         username.fill(0);

@@ -3,11 +3,11 @@
 
 #pragma once
 
+#include <fmt/ranges.h>
+
 #include <string>
 #include <utility>
 #include <vector>
-
-#include <fmt/ranges.h>
 
 #include "shader_recompiler/backend/glsl/var_alloc.h"
 #include "shader_recompiler/stage.h"
@@ -45,8 +45,9 @@ public:
     explicit EmitContext(IR::Program& program, Bindings& bindings, const Profile& profile_,
                          const RuntimeInfo& runtime_info_);
 
-    template <GlslVarType type, typename... Args>
-    void Add(const char* format_str, IR::Inst& inst, Args&&... args) {
+    template<GlslVarType type, typename... Args>
+    void Add(const char* format_str, IR::Inst& inst, Args&&... args)
+    {
         const auto var_def{var_alloc.AddDefine(inst, type)};
         if (var_def.empty()) {
             // skip assignment.
@@ -58,78 +59,80 @@ public:
         code += '\n';
     }
 
-    template <typename... Args>
-    void AddU1(const char* format_str, IR::Inst& inst, Args&&... args) {
+    template<typename... Args> void AddU1(const char* format_str, IR::Inst& inst, Args&&... args)
+    {
         Add<GlslVarType::U1>(format_str, inst, args...);
     }
 
-    template <typename... Args>
-    void AddF16x2(const char* format_str, IR::Inst& inst, Args&&... args) {
+    template<typename... Args> void AddF16x2(const char* format_str, IR::Inst& inst, Args&&... args)
+    {
         Add<GlslVarType::F16x2>(format_str, inst, args...);
     }
 
-    template <typename... Args>
-    void AddU32(const char* format_str, IR::Inst& inst, Args&&... args) {
+    template<typename... Args> void AddU32(const char* format_str, IR::Inst& inst, Args&&... args)
+    {
         Add<GlslVarType::U32>(format_str, inst, args...);
     }
 
-    template <typename... Args>
-    void AddF32(const char* format_str, IR::Inst& inst, Args&&... args) {
+    template<typename... Args> void AddF32(const char* format_str, IR::Inst& inst, Args&&... args)
+    {
         Add<GlslVarType::F32>(format_str, inst, args...);
     }
 
-    template <typename... Args>
-    void AddU64(const char* format_str, IR::Inst& inst, Args&&... args) {
+    template<typename... Args> void AddU64(const char* format_str, IR::Inst& inst, Args&&... args)
+    {
         Add<GlslVarType::U64>(format_str, inst, args...);
     }
 
-    template <typename... Args>
-    void AddF64(const char* format_str, IR::Inst& inst, Args&&... args) {
+    template<typename... Args> void AddF64(const char* format_str, IR::Inst& inst, Args&&... args)
+    {
         Add<GlslVarType::F64>(format_str, inst, args...);
     }
 
-    template <typename... Args>
-    void AddU32x2(const char* format_str, IR::Inst& inst, Args&&... args) {
+    template<typename... Args> void AddU32x2(const char* format_str, IR::Inst& inst, Args&&... args)
+    {
         Add<GlslVarType::U32x2>(format_str, inst, args...);
     }
 
-    template <typename... Args>
-    void AddF32x2(const char* format_str, IR::Inst& inst, Args&&... args) {
+    template<typename... Args> void AddF32x2(const char* format_str, IR::Inst& inst, Args&&... args)
+    {
         Add<GlslVarType::F32x2>(format_str, inst, args...);
     }
 
-    template <typename... Args>
-    void AddU32x3(const char* format_str, IR::Inst& inst, Args&&... args) {
+    template<typename... Args> void AddU32x3(const char* format_str, IR::Inst& inst, Args&&... args)
+    {
         Add<GlslVarType::U32x3>(format_str, inst, args...);
     }
 
-    template <typename... Args>
-    void AddF32x3(const char* format_str, IR::Inst& inst, Args&&... args) {
+    template<typename... Args> void AddF32x3(const char* format_str, IR::Inst& inst, Args&&... args)
+    {
         Add<GlslVarType::F32x3>(format_str, inst, args...);
     }
 
-    template <typename... Args>
-    void AddU32x4(const char* format_str, IR::Inst& inst, Args&&... args) {
+    template<typename... Args> void AddU32x4(const char* format_str, IR::Inst& inst, Args&&... args)
+    {
         Add<GlslVarType::U32x4>(format_str, inst, args...);
     }
 
-    template <typename... Args>
-    void AddF32x4(const char* format_str, IR::Inst& inst, Args&&... args) {
+    template<typename... Args> void AddF32x4(const char* format_str, IR::Inst& inst, Args&&... args)
+    {
         Add<GlslVarType::F32x4>(format_str, inst, args...);
     }
 
-    template <typename... Args>
-    void AddPrecF32(const char* format_str, IR::Inst& inst, Args&&... args) {
+    template<typename... Args>
+    void AddPrecF32(const char* format_str, IR::Inst& inst, Args&&... args)
+    {
         Add<GlslVarType::PrecF32>(format_str, inst, args...);
     }
 
-    template <typename... Args>
-    void AddPrecF64(const char* format_str, IR::Inst& inst, Args&&... args) {
+    template<typename... Args>
+    void AddPrecF64(const char* format_str, IR::Inst& inst, Args&&... args)
+    {
         Add<GlslVarType::PrecF64>(format_str, inst, args...);
     }
 
-    template <typename... Args>
-    void Add(const char* format_str, Args&&... args) {
+    template<typename... Args> void Add(const char* format_str, Args&&... args)
+    {
         code += fmt::format(fmt::runtime(format_str), std::forward<Args>(args)...);
         // TODO: Remove this
         code += '\n';

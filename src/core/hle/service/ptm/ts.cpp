@@ -1,11 +1,12 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+#include "core/hle/service/ptm/ts.h"
+
 #include <memory>
 
 #include "core/core.h"
 #include "core/hle/service/ipc_helpers.h"
-#include "core/hle/service/ptm/ts.h"
 
 namespace Service::PTM {
 
@@ -16,7 +17,8 @@ enum class Location : u8 {
 
 class ISession : public ServiceFramework<ISession> {
 public:
-    explicit ISession(Core::System& system_) : ServiceFramework{system_, "ISession"} {
+    explicit ISession(Core::System& system_) : ServiceFramework{system_, "ISession"}
+    {
         // clang-format off
         static const FunctionInfo functions[] = {
             {0, nullptr, "GetTemperatureRange"},
@@ -29,7 +31,8 @@ public:
     }
 
 private:
-    void GetTemperature(HLERequestContext& ctx) {
+    void GetTemperature(HLERequestContext& ctx)
+    {
         constexpr f32 temperature = 35;
 
         IPC::ResponseBuilder rb{ctx, 3};
@@ -38,7 +41,8 @@ private:
     }
 };
 
-TS::TS(Core::System& system_) : ServiceFramework{system_, "ts"} {
+TS::TS(Core::System& system_) : ServiceFramework{system_, "ts"}
+{
     // clang-format off
     static const FunctionInfo functions[] = {
         {0, nullptr, "GetTemperatureRange"},
@@ -54,7 +58,8 @@ TS::TS(Core::System& system_) : ServiceFramework{system_, "ts"} {
 
 TS::~TS() = default;
 
-void TS::GetTemperature(HLERequestContext& ctx) {
+void TS::GetTemperature(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     const auto location{rp.PopEnum<Location>()};
 
@@ -65,7 +70,8 @@ void TS::GetTemperature(HLERequestContext& ctx) {
     rb.Push(temperature);
 }
 
-void TS::GetTemperatureMilliC(HLERequestContext& ctx) {
+void TS::GetTemperatureMilliC(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     const auto location{rp.PopEnum<Location>()};
 
@@ -76,7 +82,8 @@ void TS::GetTemperatureMilliC(HLERequestContext& ctx) {
     rb.Push(temperature);
 }
 
-void TS::OpenSession(HLERequestContext& ctx) {
+void TS::OpenSession(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     [[maybe_unused]] const u32 device_code = rp.Pop<u32>();
 

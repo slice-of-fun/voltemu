@@ -4,13 +4,14 @@
 // SPDX-FileCopyrightText: 2017 Citra Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "common/param_package.h"
+
 #include <array>
 #include <stdexcept>
 #include <utility>
 #include <vector>
 
 #include "common/logging.h"
-#include "common/param_package.h"
 #include "common/string_util.h"
 
 namespace Common {
@@ -27,7 +28,8 @@ constexpr char ESCAPE_CHARACTER_ESCAPE[] = "$2";
 /// (they may be recognized as "not set" by some frontend libraries like qt)
 constexpr char EMPTY_PLACEHOLDER[] = "[empty]";
 
-ParamPackage::ParamPackage(const std::string& serialized) {
+ParamPackage::ParamPackage(const std::string& serialized)
+{
     if (serialized == EMPTY_PLACEHOLDER) {
         return;
     }
@@ -53,9 +55,12 @@ ParamPackage::ParamPackage(const std::string& serialized) {
     }
 }
 
-ParamPackage::ParamPackage(std::initializer_list<DataType::value_type> list) : data(list) {}
+ParamPackage::ParamPackage(std::initializer_list<DataType::value_type> list) : data(list)
+{
+}
 
-std::string ParamPackage::Serialize() const {
+std::string ParamPackage::Serialize() const
+{
     if (data.empty())
         return EMPTY_PLACEHOLDER;
 
@@ -75,7 +80,8 @@ std::string ParamPackage::Serialize() const {
     return result;
 }
 
-std::string ParamPackage::Get(const std::string& key, const std::string& default_value) const {
+std::string ParamPackage::Get(const std::string& key, const std::string& default_value) const
+{
     auto pair = data.find(key);
     if (pair == data.end()) {
         LOG_TRACE(Common, "key '{}' not found", key);
@@ -85,7 +91,8 @@ std::string ParamPackage::Get(const std::string& key, const std::string& default
     return pair->second;
 }
 
-int ParamPackage::Get(const std::string& key, int default_value) const {
+int ParamPackage::Get(const std::string& key, int default_value) const
+{
     auto pair = data.find(key);
     if (pair == data.end()) {
         LOG_TRACE(Common, "key '{}' not found", key);
@@ -100,7 +107,8 @@ int ParamPackage::Get(const std::string& key, int default_value) const {
     }
 }
 
-float ParamPackage::Get(const std::string& key, float default_value) const {
+float ParamPackage::Get(const std::string& key, float default_value) const
+{
     auto pair = data.find(key);
     if (pair == data.end()) {
         LOG_TRACE(Common, "key {} not found", key);
@@ -115,27 +123,33 @@ float ParamPackage::Get(const std::string& key, float default_value) const {
     }
 }
 
-void ParamPackage::Set(const std::string& key, std::string value) {
+void ParamPackage::Set(const std::string& key, std::string value)
+{
     data.insert_or_assign(key, std::move(value));
 }
 
-void ParamPackage::Set(const std::string& key, int value) {
+void ParamPackage::Set(const std::string& key, int value)
+{
     data.insert_or_assign(key, std::to_string(value));
 }
 
-void ParamPackage::Set(const std::string& key, float value) {
+void ParamPackage::Set(const std::string& key, float value)
+{
     data.insert_or_assign(key, std::to_string(value));
 }
 
-bool ParamPackage::Has(const std::string& key) const {
+bool ParamPackage::Has(const std::string& key) const
+{
     return data.find(key) != data.end();
 }
 
-void ParamPackage::Erase(const std::string& key) {
+void ParamPackage::Erase(const std::string& key)
+{
     data.erase(key);
 }
 
-void ParamPackage::Clear() {
+void ParamPackage::Clear()
+{
     data.clear();
 }
 

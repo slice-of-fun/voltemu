@@ -3,10 +3,11 @@
 
 #pragma once
 
-#include <map>
 #include <QKeySequence>
 #include <QString>
 #include <QWidget>
+#include <map>
+
 #include "hid_core/hid_types.h"
 
 class QDialog;

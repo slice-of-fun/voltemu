@@ -4,10 +4,11 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "audio_core/renderer/command/data_source/decode.h"
+
 #include <array>
 #include <vector>
 
-#include "audio_core/renderer/command/data_source/decode.h"
 #include "audio_core/renderer/command/resample/resample.h"
 #include "common/fixed_point.h"
 #include "common/logging.h"
@@ -29,9 +30,9 @@ constexpr std::array<u8, 3> PitchBySrcQuality = {4, 8, 4};
  * @param req        - Information for how to decode.
  * @return Number of samples decoded.
  */
-template <typename T>
-static u32 DecodePcm(Core::Memory::Memory& memory, std::span<s16> out_buffer,
-                     const DecodeArg& req) {
+template<typename T>
+static u32 DecodePcm(Core::Memory::Memory& memory, std::span<s16> out_buffer, const DecodeArg& req)
+{
     constexpr s32 min{(std::numeric_limits<s16>::min)()};
     constexpr s32 max{(std::numeric_limits<s16>::max)()};
 
@@ -103,7 +104,8 @@ static u32 DecodePcm(Core::Memory::Memory& memory, std::span<s16> out_buffer,
  * @return Number of samples decoded.
  */
 static u32 DecodeAdpcm(Core::Memory::Memory& memory, std::span<s16> out_buffer,
-                       const DecodeArg& req) {
+                       const DecodeArg& req)
+{
     constexpr u32 SamplesPerFrame{14};
     constexpr u32 NibblesPerFrame{16};
 
@@ -230,7 +232,8 @@ static u32 DecodeAdpcm(Core::Memory::Memory& memory, std::span<s16> out_buffer,
  * @param memory - Core memory to read data from.
  * @param args   - The wavebuffer data, and information for how to decode it.
  */
-void DecodeFromWaveBuffers(Core::Memory::Memory& memory, const DecodeFromWaveBuffersArgs& args) {
+void DecodeFromWaveBuffers(Core::Memory::Memory& memory, const DecodeFromWaveBuffersArgs& args)
+{
     static constexpr auto EndWaveBuffer = [](auto& voice_state, auto& wavebuffer, auto& index,
                                              auto& played_samples, auto& consumed) -> void {
         voice_state.wave_buffer_valid[index] = false;

@@ -49,7 +49,9 @@ public:
 class CommandProcessingTimeEstimatorVersion1 final : public ICommandProcessingTimeEstimator {
 public:
     CommandProcessingTimeEstimatorVersion1(u32 sample_count_, u32 buffer_count_)
-        : sample_count{sample_count_}, buffer_count{buffer_count_} {}
+        : sample_count{sample_count_}, buffer_count{buffer_count_}
+    {
+    }
 
     u32 Estimate(const PcmInt16DataSourceVersion1Command& command) const override;
     u32 Estimate(const PcmInt16DataSourceVersion2Command& command) const override;
@@ -90,7 +92,9 @@ private:
 class CommandProcessingTimeEstimatorVersion2 final : public ICommandProcessingTimeEstimator {
 public:
     CommandProcessingTimeEstimatorVersion2(u32 sample_count_, u32 buffer_count_)
-        : sample_count{sample_count_}, buffer_count{buffer_count_} {}
+        : sample_count{sample_count_}, buffer_count{buffer_count_}
+    {
+    }
 
     u32 Estimate(const PcmInt16DataSourceVersion1Command& command) const override;
     u32 Estimate(const PcmInt16DataSourceVersion2Command& command) const override;
@@ -131,7 +135,9 @@ private:
 class CommandProcessingTimeEstimatorVersion3 final : public ICommandProcessingTimeEstimator {
 public:
     CommandProcessingTimeEstimatorVersion3(u32 sample_count_, u32 buffer_count_)
-        : sample_count{sample_count_}, buffer_count{buffer_count_} {}
+        : sample_count{sample_count_}, buffer_count{buffer_count_}
+    {
+    }
 
     u32 Estimate(const PcmInt16DataSourceVersion1Command& command) const override;
     u32 Estimate(const PcmInt16DataSourceVersion2Command& command) const override;
@@ -172,7 +178,9 @@ private:
 class CommandProcessingTimeEstimatorVersion4 final : public ICommandProcessingTimeEstimator {
 public:
     CommandProcessingTimeEstimatorVersion4(u32 sample_count_, u32 buffer_count_)
-        : sample_count{sample_count_}, buffer_count{buffer_count_} {}
+        : sample_count{sample_count_}, buffer_count{buffer_count_}
+    {
+    }
 
     u32 Estimate(const PcmInt16DataSourceVersion1Command& command) const override;
     u32 Estimate(const PcmInt16DataSourceVersion2Command& command) const override;
@@ -213,7 +221,9 @@ private:
 class CommandProcessingTimeEstimatorVersion5 final : public ICommandProcessingTimeEstimator {
 public:
     CommandProcessingTimeEstimatorVersion5(u32 sample_count_, u32 buffer_count_)
-        : sample_count{sample_count_}, buffer_count{buffer_count_} {}
+        : sample_count{sample_count_}, buffer_count{buffer_count_}
+    {
+    }
 
     u32 Estimate(const PcmInt16DataSourceVersion1Command& command) const override;
     u32 Estimate(const PcmInt16DataSourceVersion2Command& command) const override;

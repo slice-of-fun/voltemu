@@ -4,15 +4,17 @@
 // SPDX-FileCopyrightText: Copyright 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include <cmath>
-#include <bit>
 #include "video_core/fsr.h"
+
+#include <bit>
+#include <cmath>
 
 namespace FSR {
 namespace {
 // Reimplementations of the constant generating functions in ffx_fsr1.h
 // GCC generated a lot of warnings when using the official header.
-u32 AU1_AH1_AF1(f32 f) {
+u32 AU1_AH1_AF1(f32 f)
+{
     static constexpr u32 base[512]{
         0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
         0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
@@ -104,13 +106,15 @@ u32 AU1_AH1_AF1(f32 f) {
     return base[i] + ((u & 0x7fffff) >> shift[i]);
 }
 
-u32 AU1_AH2_AF2(f32 a[2]) {
+u32 AU1_AH2_AF2(f32 a[2])
+{
     return AU1_AH1_AF1(a[0]) + (AU1_AH1_AF1(a[1]) << 16);
 }
 
 void FsrEasuCon(u32 con0[4], u32 con1[4], u32 con2[4], u32 con3[4], f32 inputViewportInPixelsX,
                 f32 inputViewportInPixelsY, f32 inputSizeInPixelsX, f32 inputSizeInPixelsY,
-                f32 outputSizeInPixelsX, f32 outputSizeInPixelsY) {
+                f32 outputSizeInPixelsX, f32 outputSizeInPixelsY)
+{
     con0[0] = std::bit_cast<u32>(inputViewportInPixelsX / outputSizeInPixelsX);
     con0[1] = std::bit_cast<u32>(inputViewportInPixelsY / outputSizeInPixelsY);
     con0[2] = std::bit_cast<u32>(0.5f * inputViewportInPixelsX / outputSizeInPixelsX - 0.5f);
@@ -132,16 +136,18 @@ void FsrEasuCon(u32 con0[4], u32 con1[4], u32 con2[4], u32 con3[4], f32 inputVie
 void FsrEasuConOffset(u32 con0[4], u32 con1[4], u32 con2[4], u32 con3[4],
                       f32 inputViewportInPixelsX, f32 inputViewportInPixelsY,
                       f32 inputSizeInPixelsX, f32 inputSizeInPixelsY, f32 outputSizeInPixelsX,
-                      f32 outputSizeInPixelsY, f32 inputOffsetInPixelsX, f32 inputOffsetInPixelsY) {
+                      f32 outputSizeInPixelsY, f32 inputOffsetInPixelsX, f32 inputOffsetInPixelsY)
+{
     FsrEasuCon(con0, con1, con2, con3, inputViewportInPixelsX, inputViewportInPixelsY,
                inputSizeInPixelsX, inputSizeInPixelsY, outputSizeInPixelsX, outputSizeInPixelsY);
     con0[2] = std::bit_cast<u32>(0.5f * inputViewportInPixelsX / outputSizeInPixelsX - 0.5f +
-                                   inputOffsetInPixelsX);
+                                 inputOffsetInPixelsX);
     con0[3] = std::bit_cast<u32>(0.5f * inputViewportInPixelsY / outputSizeInPixelsY - 0.5f +
-                                   inputOffsetInPixelsY);
+                                 inputOffsetInPixelsY);
 }
 
-void FsrRcasCon(u32* con, f32 sharpness) {
+void FsrRcasCon(u32* con, f32 sharpness)
+{
     sharpness = std::exp2f(-sharpness);
     f32 hSharp[2]{sharpness, sharpness};
     con[0] = std::bit_cast<u32>(sharpness);

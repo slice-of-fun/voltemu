@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include "core/file_sys/system_archive/mii_model.h"
+
 #include "core/file_sys/vfs/vfs_vector.h"
 
 namespace FileSys::SystemArchive {
@@ -22,7 +23,8 @@ constexpr auto SHAPE_MID = NFSR_STANDARD;
 
 } // namespace MiiModelData
 
-VirtualDir MiiModel() {
+VirtualDir MiiModel()
+{
     auto out = std::make_shared<VectorVfsDirectory>(std::vector<VirtualFile>{},
                                                     std::vector<VirtualDir>{}, "data");
 

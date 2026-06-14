@@ -1,8 +1,9 @@
 // SPDX-FileCopyrightText: Copyright 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include "common/scope_exit.h"
+#include "core/hle/service/server_manager.h"
 
+#include "common/scope_exit.h"
 #include "core/core.h"
 #include "core/hle/kernel/k_client_port.h"
 #include "core/hle/kernel/k_client_session.h"
@@ -15,7 +16,6 @@
 #include "core/hle/kernel/svc_results.h"
 #include "core/hle/service/hle_ipc.h"
 #include "core/hle/service/ipc_helpers.h"
-#include "core/hle/service/server_manager.h"
 #include "core/hle/service/sm/sm.h"
 
 namespace Service {
@@ -29,17 +29,14 @@ enum class UserDataTag {
 class Port : public MultiWaitHolder, public Common::IntrusiveListBaseNode<Port> {
 public:
     explicit Port(Kernel::KServerPort* server_port, SessionRequestHandlerFactory&& handler_factory)
-        : MultiWaitHolder(server_port), m_handler_factory(std::move(handler_factory)) {
+        : MultiWaitHolder(server_port), m_handler_factory(std::move(handler_factory))
+    {
         this->SetUserData(static_cast<uintptr_t>(UserDataTag::Port));
     }
 
-    ~Port() {
-        this->GetNativeHandle()->Close();
-    }
+    ~Port() { this->GetNativeHandle()->Close(); }
 
-    SessionRequestHandlerPtr CreateHandler() {
-        return m_handler_factory();
-    }
+    SessionRequestHandlerPtr CreateHandler() { return m_handler_factory(); }
 
 private:
     const SessionRequestHandlerFactory m_handler_factory;
@@ -49,28 +46,24 @@ class Session : public MultiWaitHolder, public Common::IntrusiveListBaseNode<Ses
 public:
     explicit Session(Kernel::KServerSession* server_session,
                      std::shared_ptr<SessionRequestManager>&& manager)
-        : MultiWaitHolder(server_session), m_manager(std::move(manager)) {
+        : MultiWaitHolder(server_session), m_manager(std::move(manager))
+    {
         this->SetUserData(static_cast<uintptr_t>(UserDataTag::Session));
     }
 
-    ~Session() {
-        this->GetNativeHandle()->Close();
-    }
+    ~Session() { this->GetNativeHandle()->Close(); }
 
-    std::shared_ptr<SessionRequestManager>& GetManager() {
-        return m_manager;
-    }
+    std::shared_ptr<SessionRequestManager>& GetManager() { return m_manager; }
 
-    std::shared_ptr<HLERequestContext>& GetContext() {
-        return m_context;
-    }
+    std::shared_ptr<HLERequestContext>& GetContext() { return m_context; }
 
 private:
     std::shared_ptr<SessionRequestManager> m_manager;
     std::shared_ptr<HLERequestContext> m_context;
 };
 
-ServerManager::ServerManager(Core::System& system) : m_system{system}, m_selection_mutex{system} {
+ServerManager::ServerManager(Core::System& system) : m_system{system}, m_selection_mutex{system}
+{
     // Initialize event.
     m_wakeup_event = Kernel::KEvent::Create(system.Kernel());
     m_wakeup_event->Initialize(nullptr);
@@ -83,7 +76,8 @@ ServerManager::ServerManager(Core::System& system) : m_system{system}, m_selecti
     m_wakeup_holder->LinkToMultiWait(std::addressof(m_deferred_list));
 }
 
-ServerManager::~ServerManager() {
+ServerManager::~ServerManager()
+{
     // Signal stop.
     m_stop_source.request_stop();
     m_wakeup_event->Signal();
@@ -118,12 +112,14 @@ ServerManager::~ServerManager() {
     }
 }
 
-void ServerManager::RunServer(std::unique_ptr<ServerManager>&& server_manager) {
+void ServerManager::RunServer(std::unique_ptr<ServerManager>&& server_manager)
+{
     server_manager->m_system.RunServer(std::move(server_manager));
 }
 
 Result ServerManager::RegisterSession(Kernel::KServerSession* server_session,
-                                      std::shared_ptr<SessionRequestManager> manager) {
+                                      std::shared_ptr<SessionRequestManager> manager)
+{
     // We are taking ownership of the server session, so don't open it.
     auto* session = new Session(server_session, std::move(manager));
 
@@ -141,7 +137,8 @@ Result ServerManager::RegisterSession(Kernel::KServerSession* server_session,
 
 Result ServerManager::RegisterNamedService(const std::string& service_name,
                                            SessionRequestHandlerFactory&& handler_factory,
-                                           u32 max_sessions) {
+                                           u32 max_sessions)
+{
     // Add the new server to sm: and get the moved server port.
     Kernel::KServerPort* server_port{};
     R_ASSERT(m_system.ServiceManager().RegisterService(std::addressof(server_port), service_name,
@@ -164,7 +161,8 @@ Result ServerManager::RegisterNamedService(const std::string& service_name,
 
 Result ServerManager::RegisterNamedService(const std::string& service_name,
                                            std::shared_ptr<SessionRequestHandler>&& handler,
-                                           u32 max_sessions) {
+                                           u32 max_sessions)
+{
     // Make the factory.
     const auto HandlerFactory = [handler]() { return handler; };
 
@@ -174,7 +172,8 @@ Result ServerManager::RegisterNamedService(const std::string& service_name,
 
 Result ServerManager::ManageNamedPort(const std::string& service_name,
                                       SessionRequestHandlerFactory&& handler_factory,
-                                      u32 max_sessions) {
+                                      u32 max_sessions)
+{
     // Create a new port.
     auto* port = Kernel::KPort::Create(m_system.Kernel());
     port->Initialize(max_sessions, false, 0);
@@ -183,7 +182,8 @@ Result ServerManager::ManageNamedPort(const std::string& service_name,
     Kernel::KPort::Register(m_system.Kernel(), port);
 
     // Ensure that our reference to the port is closed if we fail to register it.
-    SCOPE_EXIT {
+    SCOPE_EXIT
+    {
         port->GetClientPort().Close();
         port->GetServerPort().Close();
     };
@@ -211,7 +211,8 @@ Result ServerManager::ManageNamedPort(const std::string& service_name,
     R_SUCCEED();
 }
 
-Result ServerManager::ManageDeferral(Kernel::KEvent** out_event) {
+Result ServerManager::ManageDeferral(Kernel::KEvent** out_event)
+{
     // Create a new event.
     m_deferral_event = Kernel::KEvent::Create(m_system.Kernel());
     ASSERT(m_deferral_event != nullptr);
@@ -234,7 +235,8 @@ Result ServerManager::ManageDeferral(Kernel::KEvent** out_event) {
     R_SUCCEED();
 }
 
-void ServerManager::StartAdditionalHostThreads(const char* name, size_t num_threads) {
+void ServerManager::StartAdditionalHostThreads(const char* name, size_t num_threads)
+{
     for (size_t i = 0; i < num_threads; i++) {
         auto thread_name = fmt::format("{}:{}", name, i + 1);
         m_threads.emplace_back(m_system.Kernel().RunOnHostCoreThread(
@@ -242,15 +244,18 @@ void ServerManager::StartAdditionalHostThreads(const char* name, size_t num_thre
     }
 }
 
-Result ServerManager::LoopProcess() {
-    SCOPE_EXIT {
+Result ServerManager::LoopProcess()
+{
+    SCOPE_EXIT
+    {
         m_stopped.Set();
     };
 
     R_RETURN(this->LoopProcessImpl());
 }
 
-void ServerManager::LinkToDeferredList(MultiWaitHolder* holder) {
+void ServerManager::LinkToDeferredList(MultiWaitHolder* holder)
+{
     // Link.
     {
         std::scoped_lock lk{m_deferred_list_mutex};
@@ -261,12 +266,14 @@ void ServerManager::LinkToDeferredList(MultiWaitHolder* holder) {
     m_wakeup_event->Signal();
 }
 
-void ServerManager::LinkDeferred() {
+void ServerManager::LinkDeferred()
+{
     std::scoped_lock lk{m_deferred_list_mutex};
     m_multi_wait.MoveAll(std::addressof(m_deferred_list));
 }
 
-MultiWaitHolder* ServerManager::WaitSignaled() {
+MultiWaitHolder* ServerManager::WaitSignaled()
+{
     // Ensure we are the only thread waiting for this server.
     std::scoped_lock lk{m_selection_mutex};
 
@@ -290,7 +297,8 @@ MultiWaitHolder* ServerManager::WaitSignaled() {
     }
 }
 
-Result ServerManager::Process(MultiWaitHolder* holder) {
+Result ServerManager::Process(MultiWaitHolder* holder)
+{
     switch (static_cast<UserDataTag>(holder->GetUserData())) {
     case UserDataTag::Session:
         R_RETURN(this->OnSessionEvent(static_cast<Session*>(holder)));
@@ -303,7 +311,8 @@ Result ServerManager::Process(MultiWaitHolder* holder) {
     }
 }
 
-bool ServerManager::WaitAndProcessImpl() {
+bool ServerManager::WaitAndProcessImpl()
+{
     if (auto* signaled_holder = this->WaitSignaled(); signaled_holder != nullptr) {
         R_ASSERT(this->Process(signaled_holder));
         return true;
@@ -312,7 +321,8 @@ bool ServerManager::WaitAndProcessImpl() {
     }
 }
 
-Result ServerManager::LoopProcessImpl() {
+Result ServerManager::LoopProcessImpl()
+{
     while (!m_stop_source.stop_requested()) {
         this->WaitAndProcessImpl();
     }
@@ -320,7 +330,8 @@ Result ServerManager::LoopProcessImpl() {
     R_SUCCEED();
 }
 
-Result ServerManager::OnPortEvent(Port* server) {
+Result ServerManager::OnPortEvent(Port* server)
+{
     // Accept a new server session.
     auto* server_port = static_cast<Kernel::KServerPort*>(server->GetNativeHandle());
     Kernel::KServerSession* server_session = server_port->AcceptSession();
@@ -340,7 +351,8 @@ Result ServerManager::OnPortEvent(Port* server) {
     R_SUCCEED();
 }
 
-Result ServerManager::OnSessionEvent(Session* session) {
+Result ServerManager::OnSessionEvent(Session* session)
+{
     Result res = ResultSuccess;
 
     // Try to receive a message.
@@ -359,7 +371,8 @@ Result ServerManager::OnSessionEvent(Session* session) {
     R_RETURN(this->CompleteSyncRequest(session));
 }
 
-Result ServerManager::CompleteSyncRequest(Session* session) {
+Result ServerManager::CompleteSyncRequest(Session* session)
+{
     Result res = ResultSuccess;
     Result service_res = ResultSuccess;
 
@@ -399,7 +412,8 @@ Result ServerManager::CompleteSyncRequest(Session* session) {
     R_SUCCEED();
 }
 
-Result ServerManager::OnDeferralEvent() {
+Result ServerManager::OnDeferralEvent()
+{
     // Clear event before grabbing the list.
     m_deferral_event->Clear();
 
@@ -420,7 +434,8 @@ Result ServerManager::OnDeferralEvent() {
     R_SUCCEED();
 }
 
-void ServerManager::DestroySession(Session* session) {
+void ServerManager::DestroySession(Session* session)
+{
     // Unlink.
     {
         std::scoped_lock lk{m_deferred_list_mutex};

@@ -51,8 +51,9 @@ private:
     Result NotifyRunning(Out<bool> out_became_running);
     Result GetPseudoDeviceId(Out<Common::UUID> out_pseudo_device_id);
     Result IsGamePlayRecordingSupported(Out<bool> out_is_game_play_recording_supported);
-    Result InitializeGamePlayRecording(
-        u64 transfer_memory_size, InCopyHandle<Kernel::KTransferMemory> transfer_memory_handle);
+    Result
+    InitializeGamePlayRecording(u64 transfer_memory_size,
+                                InCopyHandle<Kernel::KTransferMemory> transfer_memory_handle);
     Result SetMediaPlaybackStateForApplication(bool enabled);
     Result SetGamePlayRecordingState(GamePlayRecordingState game_play_recording_state);
     Result EnableApplicationCrashReport(bool enabled);

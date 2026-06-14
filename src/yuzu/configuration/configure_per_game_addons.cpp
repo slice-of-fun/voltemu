@@ -4,9 +4,7 @@
 // SPDX-FileCopyrightText: 2016 Citra Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include <algorithm>
-#include <memory>
-#include <utility>
+#include "yuzu/configuration/configure_per_game_addons.h"
 
 #include <fmt/format.h>
 
@@ -18,6 +16,9 @@
 #include <QString>
 #include <QTimer>
 #include <QTreeView>
+#include <algorithm>
+#include <memory>
+#include <utility>
 
 #include "common/common_types.h"
 #include "common/fs/fs.h"
@@ -32,10 +33,10 @@
 #include "qt_common/util/mod.h"
 #include "ui_configure_per_game_addons.h"
 #include "yuzu/configuration/configure_input.h"
-#include "yuzu/configuration/configure_per_game_addons.h"
 
 ConfigurePerGameAddons::ConfigurePerGameAddons(Core::System& system_, QWidget* parent)
-    : QWidget(parent), ui{std::make_unique<Ui::ConfigurePerGameAddons>()}, system{system_} {
+    : QWidget(parent), ui{std::make_unique<Ui::ConfigurePerGameAddons>()}, system{system_}
+{
     ui->setupUi(this);
 
     layout = new QVBoxLayout;
@@ -86,7 +87,8 @@ ConfigurePerGameAddons::ConfigurePerGameAddons(Core::System& system_, QWidget* p
 
 ConfigurePerGameAddons::~ConfigurePerGameAddons() = default;
 
-void ConfigurePerGameAddons::OnItemChanged(QStandardItem* item) {
+void ConfigurePerGameAddons::OnItemChanged(QStandardItem* item)
+{
     if (update_items.size() > 1 && item->checkState() == Qt::Checked) {
         auto it = std::find(update_items.begin(), update_items.end(), item);
         if (it != update_items.end()) {
@@ -103,7 +105,8 @@ void ConfigurePerGameAddons::OnItemChanged(QStandardItem* item) {
     }
 }
 
-void ConfigurePerGameAddons::ApplyConfiguration() {
+void ConfigurePerGameAddons::ApplyConfiguration()
+{
     std::vector<std::string> disabled_addons;
 
     for (const auto& item : list_items) {
@@ -131,16 +134,19 @@ void ConfigurePerGameAddons::ApplyConfiguration() {
     Settings::values.disabled_addons[title_id] = disabled_addons;
 }
 
-void ConfigurePerGameAddons::LoadFromFile(FileSys::VirtualFile file_) {
+void ConfigurePerGameAddons::LoadFromFile(FileSys::VirtualFile file_)
+{
     file = std::move(file_);
     LoadConfiguration();
 }
 
-void ConfigurePerGameAddons::SetTitleId(u64 id) {
+void ConfigurePerGameAddons::SetTitleId(u64 id)
+{
     this->title_id = id;
 }
 
-void ConfigurePerGameAddons::InstallMods(const QStringList& mods) {
+void ConfigurePerGameAddons::InstallMods(const QStringList& mods)
+{
     QStringList failed;
     for (const auto& mod : mods) {
         if (FrontendCommon::InstallMod(mod.toStdString(), title_id, true) ==
@@ -166,7 +172,8 @@ void ConfigurePerGameAddons::InstallMods(const QStringList& mods) {
     }
 }
 
-void ConfigurePerGameAddons::InstallModPath(const QString& path, const QString& fallbackName) {
+void ConfigurePerGameAddons::InstallModPath(const QString& path, const QString& fallbackName)
+{
     const auto mods = QtCommon::Mod::GetModFolders(path, fallbackName);
 
     if (mods.size() > 1) {
@@ -178,7 +185,8 @@ void ConfigurePerGameAddons::InstallModPath(const QString& path, const QString& 
     }
 }
 
-void ConfigurePerGameAddons::InstallModFolder() {
+void ConfigurePerGameAddons::InstallModFolder()
+{
     const auto path = QtCommon::Frontend::GetExistingDirectory(
         tr("Mod Folder"), QStandardPaths::writableLocation(QStandardPaths::DownloadLocation));
     if (path.isEmpty()) {
@@ -188,7 +196,8 @@ void ConfigurePerGameAddons::InstallModFolder() {
     InstallModPath(path);
 }
 
-void ConfigurePerGameAddons::InstallModZip() {
+void ConfigurePerGameAddons::InstallModZip()
+{
     // TODO(crueter): use GetOpenFileName to allow select multiple ZIPs
     const auto path = QtCommon::Frontend::GetOpenFileName(
         tr("Zipped Mod Location"),
@@ -203,7 +212,8 @@ void ConfigurePerGameAddons::InstallModZip() {
         InstallModPath(extracted, QFileInfo(path).baseName());
 }
 
-void ConfigurePerGameAddons::AddonDeleteRequested(QList<QModelIndex> selected) {
+void ConfigurePerGameAddons::AddonDeleteRequested(QList<QModelIndex> selected)
+{
     QList<QModelIndex> filtered;
     for (const QModelIndex& index : selected) {
         if (!index.data(PATCH_LOCATION).toString().isEmpty())
@@ -250,7 +260,8 @@ void ConfigurePerGameAddons::AddonDeleteRequested(QList<QModelIndex> selected) {
     UISettings::values.is_game_list_reload_pending.exchange(true);
 }
 
-void ConfigurePerGameAddons::showContextMenu(const QPoint& pos) {
+void ConfigurePerGameAddons::showContextMenu(const QPoint& pos)
+{
     const QModelIndex index = tree_view->indexAt(pos);
     auto selected = tree_view->selectionModel()->selectedRows();
     if (index.isValid() && selected.empty()) {
@@ -280,7 +291,8 @@ void ConfigurePerGameAddons::showContextMenu(const QPoint& pos) {
     menu.exec(tree_view->viewport()->mapToGlobal(pos));
 }
 
-void ConfigurePerGameAddons::changeEvent(QEvent* event) {
+void ConfigurePerGameAddons::changeEvent(QEvent* event)
+{
     if (event->type() == QEvent::LanguageChange) {
         RetranslateUI();
     }
@@ -288,11 +300,13 @@ void ConfigurePerGameAddons::changeEvent(QEvent* event) {
     QWidget::changeEvent(event);
 }
 
-void ConfigurePerGameAddons::RetranslateUI() {
+void ConfigurePerGameAddons::RetranslateUI()
+{
     ui->retranslateUi(this);
 }
 
-void ConfigurePerGameAddons::LoadConfiguration() {
+void ConfigurePerGameAddons::LoadConfiguration()
+{
     if (file == nullptr) {
         return;
     }

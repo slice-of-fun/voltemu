@@ -228,43 +228,36 @@ union Result {
     constexpr explicit Result(u32 raw_) : raw(raw_) {}
 
     constexpr Result(ErrorModule module_, u32 description_)
-        : raw(Module::FormatValue(module_) | Description::FormatValue(description_)) {}
-
-    [[nodiscard]] constexpr bool IsSuccess() const {
-        return raw == 0;
+        : raw(Module::FormatValue(module_) | Description::FormatValue(description_))
+    {
     }
 
-    [[nodiscard]] constexpr bool IsError() const {
-        return !IsSuccess();
-    }
+    [[nodiscard]] constexpr bool IsSuccess() const { return raw == 0; }
 
-    [[nodiscard]] constexpr bool IsFailure() const {
-        return !IsSuccess();
-    }
+    [[nodiscard]] constexpr bool IsError() const { return !IsSuccess(); }
 
-    [[nodiscard]] constexpr u32 GetInnerValue() const {
-        return raw;
-    }
+    [[nodiscard]] constexpr bool IsFailure() const { return !IsSuccess(); }
 
-    [[nodiscard]] constexpr ErrorModule GetModule() const {
-        return Module::ExtractValue(raw);
-    }
+    [[nodiscard]] constexpr u32 GetInnerValue() const { return raw; }
 
-    [[nodiscard]] constexpr u32 GetDescription() const {
-        return Description::ExtractValue(raw);
-    }
+    [[nodiscard]] constexpr ErrorModule GetModule() const { return Module::ExtractValue(raw); }
 
-    [[nodiscard]] constexpr bool Includes(Result result) const {
+    [[nodiscard]] constexpr u32 GetDescription() const { return Description::ExtractValue(raw); }
+
+    [[nodiscard]] constexpr bool Includes(Result result) const
+    {
         return GetInnerValue() == result.GetInnerValue();
     }
 };
 static_assert(std::is_trivial_v<Result>);
 
-[[nodiscard]] constexpr bool operator==(const Result& a, const Result& b) {
+[[nodiscard]] constexpr bool operator==(const Result& a, const Result& b)
+{
     return a.raw == b.raw;
 }
 
-[[nodiscard]] constexpr bool operator!=(const Result& a, const Result& b) {
+[[nodiscard]] constexpr bool operator!=(const Result& a, const Result& b)
+{
     return !operator==(a, b);
 }
 
@@ -307,13 +300,14 @@ constexpr Result ResultUnknown(UINT32_MAX);
 class ResultRange {
 public:
     consteval ResultRange(ErrorModule module, u32 description_start, u32 description_end_)
-        : code{module, description_start}, description_end{description_end_} {}
-
-    [[nodiscard]] constexpr operator Result() const {
-        return code;
+        : code{module, description_start}, description_end{description_end_}
+    {
     }
 
-    [[nodiscard]] constexpr bool Includes(Result other) const {
+    [[nodiscard]] constexpr operator Result() const { return code; }
+
+    [[nodiscard]] constexpr bool Includes(Result other) const
+    {
         return code.GetModule() == other.GetModule() &&
                code.GetDescription() <= other.GetDescription() &&
                other.GetDescription() <= description_end;
@@ -325,11 +319,10 @@ private:
 };
 
 #define R_SUCCEEDED(res) (static_cast<Result>(res).IsSuccess())
-#define R_FAILED(res) (static_cast<Result>(res).IsFailure())
+#define R_FAILED(res)    (static_cast<Result>(res).IsFailure())
 
 namespace ResultImpl {
-template <auto EvaluateResult, class F>
-class ScopedResultGuard {
+template<auto EvaluateResult, class F> class ScopedResultGuard {
     YUZU_NON_COPYABLE(ScopedResultGuard);
     YUZU_NON_MOVEABLE(ScopedResultGuard);
 
@@ -339,59 +332,63 @@ private:
 
 public:
     constexpr ScopedResultGuard(Result& ref, F f) : m_ref(ref), m_f(std::move(f)) {}
-    constexpr ~ScopedResultGuard() {
+    constexpr ~ScopedResultGuard()
+    {
         if (EvaluateResult(m_ref)) {
             m_f();
         }
     }
 };
 
-template <auto EvaluateResult>
-class ResultReferenceForScopedResultGuard {
+template<auto EvaluateResult> class ResultReferenceForScopedResultGuard {
 private:
     Result& m_ref;
 
 public:
     constexpr ResultReferenceForScopedResultGuard(Result& r) : m_ref(r) {}
-    constexpr operator Result&() const {
-        return m_ref;
-    }
+    constexpr operator Result&() const { return m_ref; }
 };
 
-template <auto EvaluateResult, typename F>
-constexpr ScopedResultGuard<EvaluateResult, F> operator+(
-    ResultReferenceForScopedResultGuard<EvaluateResult> ref, F&& f) {
+template<auto EvaluateResult, typename F>
+constexpr ScopedResultGuard<EvaluateResult, F>
+operator+(ResultReferenceForScopedResultGuard<EvaluateResult> ref, F&& f)
+{
     return ScopedResultGuard<EvaluateResult, F>(static_cast<Result&>(ref), std::forward<F>(f));
 }
 
-constexpr bool EvaluateResultSuccess(const Result& r) {
+constexpr bool EvaluateResultSuccess(const Result& r)
+{
     return R_SUCCEEDED(r);
 }
-constexpr bool EvaluateResultFailure(const Result& r) {
+constexpr bool EvaluateResultFailure(const Result& r)
+{
     return R_FAILED(r);
 }
 
-template <auto... R>
-constexpr bool EvaluateAnyResultIncludes(const Result& r) {
+template<auto... R> constexpr bool EvaluateAnyResultIncludes(const Result& r)
+{
     return ((r == R) || ...);
 }
 
-template <auto... R>
-constexpr bool EvaluateResultNotIncluded(const Result& r) {
+template<auto... R> constexpr bool EvaluateResultNotIncluded(const Result& r)
+{
     return !EvaluateAnyResultIncludes<R...>(r);
 }
 
-template <typename T>
+template<typename T>
 constexpr void UpdateCurrentResultReference(T result_reference, Result result) = delete;
 // Intentionally not defined
 
-template <>
-constexpr void UpdateCurrentResultReference<Result&>(Result& result_reference, Result result) {
+template<>
+constexpr void UpdateCurrentResultReference<Result&>(Result& result_reference, Result result)
+{
     result_reference = result;
 }
 
-template <>
-constexpr void UpdateCurrentResultReference<const Result>(Result result_reference, Result result) {}
+template<>
+constexpr void UpdateCurrentResultReference<const Result>(Result result_reference, Result result)
+{
+}
 } // namespace ResultImpl
 
 #define DECLARE_CURRENT_RESULT_REFERENCE_AND_STORAGE(COUNTER_VALUE)                                \
@@ -473,7 +470,8 @@ constexpr inline Result __TmpCurrentResultReference = ResultSuccess;
             if (false)
 
 #define R_END_TRY_CATCH                                                                            \
-    else if (R_FAILED(R_CURRENT_RESULT)) {                                                         \
+    else if (R_FAILED(R_CURRENT_RESULT))                                                           \
+    {                                                                                              \
         R_THROW(R_CURRENT_RESULT);                                                                 \
     }                                                                                              \
     }                                                                                              \
@@ -481,18 +479,26 @@ constexpr inline Result __TmpCurrentResultReference = ResultSuccess;
 
 #define R_CATCH_ALL()                                                                              \
     }                                                                                              \
-    else if (R_FAILED(R_CURRENT_RESULT)) {                                                         \
+    else if (R_FAILED(R_CURRENT_RESULT))                                                           \
+    {                                                                                              \
         if (true)
 
 #define R_CATCH(res_expr)                                                                          \
     }                                                                                              \
-    else if ((res_expr) == (R_CURRENT_RESULT)) {                                                   \
+    else if ((res_expr) == (R_CURRENT_RESULT))                                                     \
+    {                                                                                              \
         if (true)
 
 #define R_CONVERT(catch_type, convert_type)                                                        \
-    R_CATCH(catch_type) { R_THROW(static_cast<Result>(convert_type)); }
+    R_CATCH(catch_type)                                                                            \
+    {                                                                                              \
+        R_THROW(static_cast<Result>(convert_type));                                                \
+    }
 
 #define R_CONVERT_ALL(convert_type)                                                                \
-    R_CATCH_ALL() { R_THROW(static_cast<Result>(convert_type)); }
+    R_CATCH_ALL()                                                                                  \
+    {                                                                                              \
+        R_THROW(static_cast<Result>(convert_type));                                                \
+    }
 
 #define R_ASSERT(res_expr) ASSERT(R_SUCCEEDED(res_expr))

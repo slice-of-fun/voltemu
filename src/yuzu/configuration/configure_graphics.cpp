@@ -4,8 +4,17 @@
 // SPDX-FileCopyrightText: 2016 Citra Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include <functional>
-#include <vector>
+#include "yuzu/configuration/configure_graphics.h"
+
+#include <QtCore/qobjectdefs.h>
+#include <qabstractbutton.h>
+#include <qboxlayout.h>
+#include <qcombobox.h>
+#include <qcoreevent.h>
+#include <qglobal.h>
+#include <qgridlayout.h>
+#include <vulkan/vulkan_core.h>
+
 #include <QBoxLayout>
 #include <QCheckBox>
 #include <QColorDialog>
@@ -17,14 +26,8 @@
 #include <QPushButton>
 #include <QSlider>
 #include <QStringLiteral>
-#include <QtCore/qobjectdefs.h>
-#include <qabstractbutton.h>
-#include <qboxlayout.h>
-#include <qcombobox.h>
-#include <qcoreevent.h>
-#include <qglobal.h>
-#include <qgridlayout.h>
-#include <vulkan/vulkan_core.h>
+#include <functional>
+#include <vector>
 
 #include "common/common_types.h"
 #include "common/settings.h"
@@ -34,7 +37,6 @@
 #include "qt_common/util/vk.h"
 #include "ui_configure_graphics.h"
 #include "yuzu/configuration/configuration_shared.h"
-#include "yuzu/configuration/configure_graphics.h"
 #include "yuzu/configuration/shared_widget.h"
 
 ConfigureGraphics::ConfigureGraphics(
@@ -47,7 +49,8 @@ ConfigureGraphics::ConfigureGraphics(
     : ConfigurationShared::Tab(group_, parent), ui{std::make_unique<Ui::ConfigureGraphics>()},
       records{records_}, expose_compute_option{expose_compute_option_},
       update_aspect_ratio{update_aspect_ratio_}, system{system_},
-      combobox_translations{builder.ComboboxTranslations()} {
+      combobox_translations{builder.ComboboxTranslations()}
+{
     vulkan_device = Settings::values.vulkan_device.GetValue();
     RetrieveVulkanDevices();
 
@@ -127,7 +130,8 @@ ConfigureGraphics::ConfigureGraphics(
     }
 }
 
-void ConfigureGraphics::PopulateVSyncModeSelection(bool use_setting) {
+void ConfigureGraphics::PopulateVSyncModeSelection(bool use_setting)
+{
     const Settings::RendererBackend backend{GetCurrentGraphicsBackend()};
     if (backend == Settings::RendererBackend::Null) {
         vsync_mode_combobox->setEnabled(false);
@@ -179,7 +183,8 @@ void ConfigureGraphics::PopulateVSyncModeSelection(bool use_setting) {
     }
 }
 
-void ConfigureGraphics::UpdateVsyncSetting() const {
+void ConfigureGraphics::UpdateVsyncSetting() const
+{
     const Settings::RendererBackend backend{GetCurrentGraphicsBackend()};
     if (backend == Settings::RendererBackend::Null) {
         return;
@@ -190,7 +195,8 @@ void ConfigureGraphics::UpdateVsyncSetting() const {
     Settings::values.vsync_mode.SetValue(vsync_mode);
 }
 
-void ConfigureGraphics::UpdateDeviceSelection(int device) {
+void ConfigureGraphics::UpdateDeviceSelection(int device)
+{
     if (device == -1) {
         return;
     }
@@ -201,9 +207,12 @@ void ConfigureGraphics::UpdateDeviceSelection(int device) {
 
 ConfigureGraphics::~ConfigureGraphics() = default;
 
-void ConfigureGraphics::SetConfiguration() {}
+void ConfigureGraphics::SetConfiguration()
+{
+}
 
-void ConfigureGraphics::Setup(const ConfigurationShared::Builder& builder) {
+void ConfigureGraphics::Setup(const ConfigurationShared::Builder& builder)
+{
     QLayout* api_layout = ui->api_widget->layout();
     QWidget* api_grid_widget = new QWidget(this);
     QVBoxLayout* api_grid_layout = new QVBoxLayout(api_grid_widget);
@@ -352,7 +361,8 @@ void ConfigureGraphics::Setup(const ConfigurationShared::Builder& builder) {
 }
 
 const QString ConfigureGraphics::TranslateVSyncMode(VkPresentModeKHR mode,
-                                                    Settings::RendererBackend backend) const {
+                                                    Settings::RendererBackend backend) const
+{
     switch (mode) {
     case VK_PRESENT_MODE_IMMEDIATE_KHR:
         return (backend == Settings::RendererBackend::OpenGL_GLSL ||
@@ -375,7 +385,8 @@ const QString ConfigureGraphics::TranslateVSyncMode(VkPresentModeKHR mode,
     }
 }
 
-int ConfigureGraphics::FindIndex(u32 enumeration, int value) const {
+int ConfigureGraphics::FindIndex(u32 enumeration, int value) const
+{
     for (u32 i = 0; enumeration < combobox_translations.size() &&
                     i < combobox_translations.at(enumeration).size();
          i++)
@@ -384,7 +395,8 @@ int ConfigureGraphics::FindIndex(u32 enumeration, int value) const {
     return -1;
 }
 
-void ConfigureGraphics::ApplyConfiguration() {
+void ConfigureGraphics::ApplyConfiguration()
+{
     const bool powered_on = system.IsPoweredOn();
     for (const auto& func : apply_funcs) {
         func(powered_on);
@@ -416,7 +428,8 @@ void ConfigureGraphics::ApplyConfiguration() {
     }
 }
 
-void ConfigureGraphics::changeEvent(QEvent* event) {
+void ConfigureGraphics::changeEvent(QEvent* event)
+{
     if (event->type() == QEvent::LanguageChange) {
         RetranslateUI();
     }
@@ -424,11 +437,13 @@ void ConfigureGraphics::changeEvent(QEvent* event) {
     QWidget::changeEvent(event);
 }
 
-void ConfigureGraphics::RetranslateUI() {
+void ConfigureGraphics::RetranslateUI()
+{
     ui->retranslateUi(this);
 }
 
-void ConfigureGraphics::UpdateBackgroundColorButton(QColor color) {
+void ConfigureGraphics::UpdateBackgroundColorButton(QColor color)
+{
     bg_color = color;
 
     QPixmap pixmap(ui->bg_button->size());
@@ -438,7 +453,8 @@ void ConfigureGraphics::UpdateBackgroundColorButton(QColor color) {
     ui->bg_button->setIcon(color_icon);
 }
 
-void ConfigureGraphics::UpdateAPILayout() {
+void ConfigureGraphics::UpdateAPILayout()
+{
     bool runtime_lock = !system.IsPoweredOn();
     bool need_global = !(Settings::IsConfiguringGlobal() || api_restore_global_button->isEnabled());
     vulkan_device = Settings::values.vulkan_device.GetValue(need_global);
@@ -452,7 +468,8 @@ void ConfigureGraphics::UpdateAPILayout() {
     }
 }
 
-void ConfigureGraphics::RetrieveVulkanDevices() {
+void ConfigureGraphics::RetrieveVulkanDevices()
+{
     vulkan_devices.clear();
     vulkan_devices.reserve(records.size());
     device_present_modes.clear();
@@ -467,7 +484,8 @@ void ConfigureGraphics::RetrieveVulkanDevices() {
     }
 }
 
-Settings::RendererBackend ConfigureGraphics::GetCurrentGraphicsBackend() const {
+Settings::RendererBackend ConfigureGraphics::GetCurrentGraphicsBackend() const
+{
     const auto selected_backend = [&]() {
         auto const index = Settings::EnumMetadata<Settings::RendererBackend>::Index();
         if (!Settings::IsConfiguringGlobal() && !api_restore_global_button->isEnabled())

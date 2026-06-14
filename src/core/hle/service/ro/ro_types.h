@@ -42,64 +42,45 @@ public:
     static constexpr u32 Magic = Common::MakeMagic('N', 'R', 'R', '0');
 
 public:
-    bool IsMagicValid() const {
-        return m_magic == Magic;
-    }
+    bool IsMagicValid() const { return m_magic == Magic; }
 
-    bool IsProgramIdValid() const {
+    bool IsProgramIdValid() const
+    {
         return (m_program_id & m_certification.program_id_mask) ==
                m_certification.program_id_pattern;
     }
 
-    NrrKind GetNrrKind() const {
+    NrrKind GetNrrKind() const
+    {
         const NrrKind kind = static_cast<NrrKind>(m_nrr_kind);
         ASSERT(kind < NrrKind::Count);
         return kind;
     }
 
-    u64 GetProgramId() const {
-        return m_program_id;
-    }
+    u64 GetProgramId() const { return m_program_id; }
 
-    u32 GetSize() const {
-        return m_size;
-    }
+    u32 GetSize() const { return m_size; }
 
-    u32 GetNumHashes() const {
-        return m_num_hashes;
-    }
+    u32 GetNumHashes() const { return m_num_hashes; }
 
-    size_t GetHashesOffset() const {
-        return m_hashes_offset;
-    }
+    size_t GetHashesOffset() const { return m_hashes_offset; }
 
-    u32 GetKeyGeneration() const {
-        return m_key_generation;
-    }
+    u32 GetKeyGeneration() const { return m_key_generation; }
 
-    const u8* GetCertificationSignature() const {
-        return m_certification.signature.data();
-    }
+    const u8* GetCertificationSignature() const { return m_certification.signature.data(); }
 
-    const u8* GetCertificationSignedArea() const {
+    const u8* GetCertificationSignedArea() const
+    {
         return reinterpret_cast<const u8*>(std::addressof(m_certification));
     }
 
-    const u8* GetCertificationModulus() const {
-        return m_certification.modulus.data();
-    }
+    const u8* GetCertificationModulus() const { return m_certification.modulus.data(); }
 
-    const u8* GetSignature() const {
-        return m_signature.data();
-    }
+    const u8* GetSignature() const { return m_signature.data(); }
 
-    size_t GetSignedAreaSize() const {
-        return m_size - GetSignedAreaOffset();
-    }
+    size_t GetSignedAreaSize() const { return m_size - GetSignedAreaOffset(); }
 
-    static constexpr size_t GetSignedAreaOffset() {
-        return offsetof(NrrHeader, m_program_id);
-    }
+    static constexpr size_t GetSignedAreaOffset() { return offsetof(NrrHeader, m_program_id); }
 
 private:
     u32 m_magic;

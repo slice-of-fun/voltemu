@@ -1,11 +1,13 @@
 // SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+#include "fs.h"
+
 #include <algorithm>
 #include <filesystem>
+
 #include "common/fs/ryujinx_compat.h"
 #include "common/fs/symlink.h"
-#include "fs.h"
 #include "qt_common/abstract/frontend.h"
 #include "qt_common/qt_string_lookup.h"
 
@@ -13,7 +15,8 @@ namespace fs = std::filesystem;
 
 namespace QtCommon::FS {
 
-void LinkRyujinx(std::filesystem::path& from, std::filesystem::path& to) {
+void LinkRyujinx(std::filesystem::path& from, std::filesystem::path& to)
+{
     std::error_code ec;
 
     // "ignore" errors--if the dir fails to be deleted, error handling later will handle it
@@ -29,7 +32,8 @@ void LinkRyujinx(std::filesystem::path& from, std::filesystem::path& to) {
     }
 }
 
-bool CheckUnlink(const fs::path& eden_dir, const fs::path& ryu_dir) {
+bool CheckUnlink(const fs::path& eden_dir, const fs::path& ryu_dir)
+{
     bool eden_link = Common::FS::IsSymlink(eden_dir);
     bool ryu_link = Common::FS::IsSymlink(ryu_dir);
 
@@ -86,7 +90,8 @@ bool CheckUnlink(const fs::path& eden_dir, const fs::path& ryu_dir) {
     return true;
 }
 
-const fs::path GetRyujinxSavePath(const fs::path& path_hint, const u64& program_id) {
+const fs::path GetRyujinxSavePath(const fs::path& path_hint, const u64& program_id)
+{
     auto ryu_path = path_hint;
 
     auto kvdb_path = Common::FS::GetKvdbPath(ryu_path);

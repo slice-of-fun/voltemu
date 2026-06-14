@@ -7,6 +7,7 @@
 #pragma once
 
 #include <memory>
+
 #include "core/file_sys/fs_save_data_types.h"
 #include "core/hle/service/cmif_types.h"
 #include "core/hle/service/filesystem/fsp/fsp_types.h"
@@ -56,8 +57,9 @@ private:
     Result OpenSdCardFileSystem(OutInterface<IFileSystem> out_interface);
     Result CreateSaveDataFileSystem(FileSys::SaveDataCreationInfo save_create_struct,
                                     FileSys::SaveDataAttribute save_struct, u128 uid);
-    Result CreateSaveDataFileSystemBySystemSaveDataId(
-        FileSys::SaveDataAttribute save_struct, FileSys::SaveDataCreationInfo save_create_struct);
+    Result
+    CreateSaveDataFileSystemBySystemSaveDataId(FileSys::SaveDataAttribute save_struct,
+                                               FileSys::SaveDataCreationInfo save_create_struct);
     Result CreateSaveDataFileSystemWithCreationInfo2(
         FileSys::SaveDataCreationInfo2 save_data_creation_info);
     Result IsExFatSupported(Out<bool> out_is_supported);
@@ -86,9 +88,10 @@ private:
     Result ReadSaveDataFileSystemExtraDataBySaveDataAttribute(
         OutBuffer<BufferAttr_HipcMapAlias> out_buffer, FileSys::SaveDataSpaceId space_id,
         FileSys::SaveDataAttribute attribute);
-    Result ReadSaveDataFileSystemExtraDataBySaveDataSpaceId(
-        OutBuffer<BufferAttr_HipcMapAlias> out_buffer, FileSys::SaveDataSpaceId space_id,
-        u64 save_data_id);
+    Result
+    ReadSaveDataFileSystemExtraDataBySaveDataSpaceId(OutBuffer<BufferAttr_HipcMapAlias> out_buffer,
+                                                     FileSys::SaveDataSpaceId space_id,
+                                                     u64 save_data_id);
     Result ReadSaveDataFileSystemExtraDataWithMaskBySaveDataAttribute(
         FileSys::SaveDataSpaceId space_id, FileSys::SaveDataAttribute attribute,
         InBuffer<BufferAttr_HipcMapAlias> mask_buffer,

@@ -4,18 +4,21 @@
 // SPDX-FileCopyrightText: Copyright 2019 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include "common/logging.h"
 #include "core/file_sys/system_archive/system_version.h"
+
+#include "common/logging.h"
 #include "core/file_sys/vfs/vfs_vector.h"
 #include "core/hle/api_version.h"
 
 namespace FileSys::SystemArchive {
 
-std::string GetLongDisplayVersion() {
+std::string GetLongDisplayVersion()
+{
     return HLE::ApiVersion::DISPLAY_TITLE;
 }
 
-VirtualDir SystemVersion() {
+VirtualDir SystemVersion()
+{
     LOG_WARNING(Common_Filesystem, "called - Using hardcoded firmware version '{}'",
                 GetLongDisplayVersion());
 

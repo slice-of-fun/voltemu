@@ -3,41 +3,48 @@
 // SPDX-FileCopyrightText: Copyright 2021 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include "common/logging.h"
 #include "input_common/input_engine.h"
+
+#include "common/logging.h"
 
 namespace InputCommon {
 
-void InputEngine::PreSetController(const PadIdentifier& identifier) {
+void InputEngine::PreSetController(const PadIdentifier& identifier)
+{
     std::scoped_lock lock{mutex};
     controller_list.try_emplace(identifier);
 }
 
-void InputEngine::PreSetButton(const PadIdentifier& identifier, int button) {
+void InputEngine::PreSetButton(const PadIdentifier& identifier, int button)
+{
     std::scoped_lock lock{mutex};
     ControllerData& controller = controller_list.at(identifier);
     controller.buttons.try_emplace(button, false);
 }
 
-void InputEngine::PreSetHatButton(const PadIdentifier& identifier, int button) {
+void InputEngine::PreSetHatButton(const PadIdentifier& identifier, int button)
+{
     std::scoped_lock lock{mutex};
     ControllerData& controller = controller_list.at(identifier);
     controller.hat_buttons.try_emplace(button, u8{0});
 }
 
-void InputEngine::PreSetAxis(const PadIdentifier& identifier, int axis) {
+void InputEngine::PreSetAxis(const PadIdentifier& identifier, int axis)
+{
     std::scoped_lock lock{mutex};
     ControllerData& controller = controller_list.at(identifier);
     controller.axes.try_emplace(axis, 0.0f);
 }
 
-void InputEngine::PreSetMotion(const PadIdentifier& identifier, int motion) {
+void InputEngine::PreSetMotion(const PadIdentifier& identifier, int motion)
+{
     std::scoped_lock lock{mutex};
     ControllerData& controller = controller_list.at(identifier);
     controller.motions.try_emplace(motion);
 }
 
-void InputEngine::SetButton(const PadIdentifier& identifier, int button, bool value) {
+void InputEngine::SetButton(const PadIdentifier& identifier, int button, bool value)
+{
     {
         std::scoped_lock lock{mutex};
         ControllerData& controller = controller_list.at(identifier);
@@ -48,7 +55,8 @@ void InputEngine::SetButton(const PadIdentifier& identifier, int button, bool va
     TriggerOnButtonChange(identifier, button, value);
 }
 
-void InputEngine::SetHatButton(const PadIdentifier& identifier, int button, u8 value) {
+void InputEngine::SetHatButton(const PadIdentifier& identifier, int button, u8 value)
+{
     {
         std::scoped_lock lock{mutex};
         ControllerData& controller = controller_list.at(identifier);
@@ -59,7 +67,8 @@ void InputEngine::SetHatButton(const PadIdentifier& identifier, int button, u8 v
     TriggerOnHatButtonChange(identifier, button, value);
 }
 
-void InputEngine::SetAxis(const PadIdentifier& identifier, int axis, f32 value) {
+void InputEngine::SetAxis(const PadIdentifier& identifier, int axis, f32 value)
+{
     {
         std::scoped_lock lock{mutex};
         ControllerData& controller = controller_list.at(identifier);
@@ -70,7 +79,8 @@ void InputEngine::SetAxis(const PadIdentifier& identifier, int axis, f32 value) 
     TriggerOnAxisChange(identifier, axis, value);
 }
 
-void InputEngine::SetBattery(const PadIdentifier& identifier, Common::Input::BatteryLevel value) {
+void InputEngine::SetBattery(const PadIdentifier& identifier, Common::Input::BatteryLevel value)
+{
     {
         std::scoped_lock lock{mutex};
         ControllerData& controller = controller_list.at(identifier);
@@ -81,7 +91,8 @@ void InputEngine::SetBattery(const PadIdentifier& identifier, Common::Input::Bat
     TriggerOnBatteryChange(identifier, value);
 }
 
-void InputEngine::SetColor(const PadIdentifier& identifier, Common::Input::BodyColorStatus value) {
+void InputEngine::SetColor(const PadIdentifier& identifier, Common::Input::BodyColorStatus value)
+{
     {
         std::scoped_lock lock{mutex};
         ControllerData& controller = controller_list.at(identifier);
@@ -92,7 +103,8 @@ void InputEngine::SetColor(const PadIdentifier& identifier, Common::Input::BodyC
     TriggerOnColorChange(identifier, value);
 }
 
-void InputEngine::SetMotion(const PadIdentifier& identifier, int motion, const BasicMotion& value) {
+void InputEngine::SetMotion(const PadIdentifier& identifier, int motion, const BasicMotion& value)
+{
     {
         std::scoped_lock lock{mutex};
         ControllerData& controller = controller_list.at(identifier);
@@ -104,7 +116,8 @@ void InputEngine::SetMotion(const PadIdentifier& identifier, int motion, const B
 }
 
 void InputEngine::SetCamera(const PadIdentifier& identifier,
-                            const Common::Input::CameraStatus& value) {
+                            const Common::Input::CameraStatus& value)
+{
     {
         std::scoped_lock lock{mutex};
         ControllerData& controller = controller_list.at(identifier);
@@ -115,7 +128,8 @@ void InputEngine::SetCamera(const PadIdentifier& identifier,
     TriggerOnCameraChange(identifier, value);
 }
 
-void InputEngine::SetNfc(const PadIdentifier& identifier, const Common::Input::NfcStatus& value) {
+void InputEngine::SetNfc(const PadIdentifier& identifier, const Common::Input::NfcStatus& value)
+{
     {
         std::scoped_lock lock{mutex};
         ControllerData& controller = controller_list.at(identifier);
@@ -126,7 +140,8 @@ void InputEngine::SetNfc(const PadIdentifier& identifier, const Common::Input::N
     TriggerOnNfcChange(identifier, value);
 }
 
-bool InputEngine::GetButton(const PadIdentifier& identifier, int button) const {
+bool InputEngine::GetButton(const PadIdentifier& identifier, int button) const
+{
     std::scoped_lock lock{mutex};
     const auto controller_iter = controller_list.find(identifier);
     if (controller_iter == controller_list.cend()) {
@@ -143,7 +158,8 @@ bool InputEngine::GetButton(const PadIdentifier& identifier, int button) const {
     return button_iter->second;
 }
 
-bool InputEngine::GetHatButton(const PadIdentifier& identifier, int button, u8 direction) const {
+bool InputEngine::GetHatButton(const PadIdentifier& identifier, int button, u8 direction) const
+{
     std::scoped_lock lock{mutex};
     const auto controller_iter = controller_list.find(identifier);
     if (controller_iter == controller_list.cend()) {
@@ -160,7 +176,8 @@ bool InputEngine::GetHatButton(const PadIdentifier& identifier, int button, u8 d
     return (hat_iter->second & direction) != 0;
 }
 
-f32 InputEngine::GetAxis(const PadIdentifier& identifier, int axis) const {
+f32 InputEngine::GetAxis(const PadIdentifier& identifier, int axis) const
+{
     std::scoped_lock lock{mutex};
     const auto controller_iter = controller_list.find(identifier);
     if (controller_iter == controller_list.cend()) {
@@ -177,7 +194,8 @@ f32 InputEngine::GetAxis(const PadIdentifier& identifier, int axis) const {
     return axis_iter->second;
 }
 
-Common::Input::BatteryLevel InputEngine::GetBattery(const PadIdentifier& identifier) const {
+Common::Input::BatteryLevel InputEngine::GetBattery(const PadIdentifier& identifier) const
+{
     std::scoped_lock lock{mutex};
     const auto controller_iter = controller_list.find(identifier);
     if (controller_iter == controller_list.cend()) {
@@ -189,7 +207,8 @@ Common::Input::BatteryLevel InputEngine::GetBattery(const PadIdentifier& identif
     return controller.battery;
 }
 
-Common::Input::BodyColorStatus InputEngine::GetColor(const PadIdentifier& identifier) const {
+Common::Input::BodyColorStatus InputEngine::GetColor(const PadIdentifier& identifier) const
+{
     std::scoped_lock lock{mutex};
     const auto controller_iter = controller_list.find(identifier);
     if (controller_iter == controller_list.cend()) {
@@ -201,7 +220,8 @@ Common::Input::BodyColorStatus InputEngine::GetColor(const PadIdentifier& identi
     return controller.color;
 }
 
-BasicMotion InputEngine::GetMotion(const PadIdentifier& identifier, int motion) const {
+BasicMotion InputEngine::GetMotion(const PadIdentifier& identifier, int motion) const
+{
     std::scoped_lock lock{mutex};
     const auto controller_iter = controller_list.find(identifier);
     if (controller_iter == controller_list.cend()) {
@@ -213,7 +233,8 @@ BasicMotion InputEngine::GetMotion(const PadIdentifier& identifier, int motion) 
     return controller.motions.at(motion);
 }
 
-Common::Input::CameraStatus InputEngine::GetCamera(const PadIdentifier& identifier) const {
+Common::Input::CameraStatus InputEngine::GetCamera(const PadIdentifier& identifier) const
+{
     std::scoped_lock lock{mutex};
     const auto controller_iter = controller_list.find(identifier);
     if (controller_iter == controller_list.cend()) {
@@ -225,7 +246,8 @@ Common::Input::CameraStatus InputEngine::GetCamera(const PadIdentifier& identifi
     return controller.camera;
 }
 
-Common::Input::NfcStatus InputEngine::GetNfc(const PadIdentifier& identifier) const {
+Common::Input::NfcStatus InputEngine::GetNfc(const PadIdentifier& identifier) const
+{
     std::scoped_lock lock{mutex};
     const auto controller_iter = controller_list.find(identifier);
     if (controller_iter == controller_list.cend()) {
@@ -237,7 +259,8 @@ Common::Input::NfcStatus InputEngine::GetNfc(const PadIdentifier& identifier) co
     return controller.nfc;
 }
 
-void InputEngine::ResetButtonState() {
+void InputEngine::ResetButtonState()
+{
     for (const auto& controller : controller_list) {
         for (const auto& button : controller.second.buttons) {
             SetButton(controller.first, button.first, false);
@@ -248,7 +271,8 @@ void InputEngine::ResetButtonState() {
     }
 }
 
-void InputEngine::ResetAnalogState() {
+void InputEngine::ResetAnalogState()
+{
     for (const auto& controller : controller_list) {
         for (const auto& axis : controller.second.axes) {
             SetAxis(controller.first, axis.first, 0.0f);
@@ -256,7 +280,8 @@ void InputEngine::ResetAnalogState() {
     }
 }
 
-void InputEngine::TriggerOnButtonChange(const PadIdentifier& identifier, int button, bool value) {
+void InputEngine::TriggerOnButtonChange(const PadIdentifier& identifier, int button, bool value)
+{
     std::scoped_lock lock{mutex_callback};
     for (const auto& poller_pair : callback_list) {
         const InputIdentifier& poller = poller_pair.second;
@@ -284,7 +309,8 @@ void InputEngine::TriggerOnButtonChange(const PadIdentifier& identifier, int but
     });
 }
 
-void InputEngine::TriggerOnHatButtonChange(const PadIdentifier& identifier, int button, u8 value) {
+void InputEngine::TriggerOnHatButtonChange(const PadIdentifier& identifier, int button, u8 value)
+{
     std::scoped_lock lock{mutex_callback};
     for (const auto& poller_pair : callback_list) {
         const InputIdentifier& poller = poller_pair.second;
@@ -313,7 +339,8 @@ void InputEngine::TriggerOnHatButtonChange(const PadIdentifier& identifier, int 
     }
 }
 
-void InputEngine::TriggerOnAxisChange(const PadIdentifier& identifier, int axis, f32 value) {
+void InputEngine::TriggerOnAxisChange(const PadIdentifier& identifier, int axis, f32 value)
+{
     std::scoped_lock lock{mutex_callback};
     for (const auto& poller_pair : callback_list) {
         const InputIdentifier& poller = poller_pair.second;
@@ -340,7 +367,8 @@ void InputEngine::TriggerOnAxisChange(const PadIdentifier& identifier, int axis,
 }
 
 void InputEngine::TriggerOnBatteryChange(const PadIdentifier& identifier,
-                                         [[maybe_unused]] Common::Input::BatteryLevel value) {
+                                         [[maybe_unused]] Common::Input::BatteryLevel value)
+{
     std::scoped_lock lock{mutex_callback};
     for (const auto& poller_pair : callback_list) {
         const InputIdentifier& poller = poller_pair.second;
@@ -354,7 +382,8 @@ void InputEngine::TriggerOnBatteryChange(const PadIdentifier& identifier,
 }
 
 void InputEngine::TriggerOnColorChange(const PadIdentifier& identifier,
-                                       [[maybe_unused]] Common::Input::BodyColorStatus value) {
+                                       [[maybe_unused]] Common::Input::BodyColorStatus value)
+{
     std::scoped_lock lock{mutex_callback};
     for (const auto& poller_pair : callback_list) {
         const InputIdentifier& poller = poller_pair.second;
@@ -368,7 +397,8 @@ void InputEngine::TriggerOnColorChange(const PadIdentifier& identifier,
 }
 
 void InputEngine::TriggerOnMotionChange(const PadIdentifier& identifier, int motion,
-                                        const BasicMotion& value) {
+                                        const BasicMotion& value)
+{
     std::scoped_lock lock{mutex_callback};
     for (const auto& poller_pair : callback_list) {
         const InputIdentifier& poller = poller_pair.second;
@@ -407,7 +437,8 @@ void InputEngine::TriggerOnMotionChange(const PadIdentifier& identifier, int mot
 }
 
 void InputEngine::TriggerOnCameraChange(const PadIdentifier& identifier,
-                                        [[maybe_unused]] const Common::Input::CameraStatus& value) {
+                                        [[maybe_unused]] const Common::Input::CameraStatus& value)
+{
     std::scoped_lock lock{mutex_callback};
     for (const auto& poller_pair : callback_list) {
         const InputIdentifier& poller = poller_pair.second;
@@ -421,7 +452,8 @@ void InputEngine::TriggerOnCameraChange(const PadIdentifier& identifier,
 }
 
 void InputEngine::TriggerOnNfcChange(const PadIdentifier& identifier,
-                                     [[maybe_unused]] const Common::Input::NfcStatus& value) {
+                                     [[maybe_unused]] const Common::Input::NfcStatus& value)
+{
     std::scoped_lock lock{mutex_callback};
     for (const auto& poller_pair : callback_list) {
         const InputIdentifier& poller = poller_pair.second;
@@ -436,7 +468,8 @@ void InputEngine::TriggerOnNfcChange(const PadIdentifier& identifier,
 
 bool InputEngine::IsInputIdentifierEqual(const InputIdentifier& input_identifier,
                                          const PadIdentifier& identifier, EngineInputType type,
-                                         int index) const {
+                                         int index) const
+{
     if (input_identifier.type != type) {
         return false;
     }
@@ -449,30 +482,36 @@ bool InputEngine::IsInputIdentifierEqual(const InputIdentifier& input_identifier
     return true;
 }
 
-void InputEngine::BeginConfiguration() {
+void InputEngine::BeginConfiguration()
+{
     configuring = true;
 }
 
-void InputEngine::EndConfiguration() {
+void InputEngine::EndConfiguration()
+{
     configuring = false;
 }
 
-const std::string& InputEngine::GetEngineName() const {
+const std::string& InputEngine::GetEngineName() const
+{
     return input_engine;
 }
 
-int InputEngine::SetCallback(InputIdentifier input_identifier) {
+int InputEngine::SetCallback(InputIdentifier input_identifier)
+{
     std::scoped_lock lock{mutex_callback};
     callback_list.insert_or_assign(last_callback_key, std::move(input_identifier));
     return last_callback_key++;
 }
 
-void InputEngine::SetMappingCallback(MappingCallback callback) {
+void InputEngine::SetMappingCallback(MappingCallback callback)
+{
     std::scoped_lock lock{mutex_callback};
     mapping_callback = std::move(callback);
 }
 
-void InputEngine::DeleteCallback(int key) {
+void InputEngine::DeleteCallback(int key)
+{
     std::scoped_lock lock{mutex_callback};
     const auto& iterator = callback_list.find(key);
     if (iterator == callback_list.end()) {

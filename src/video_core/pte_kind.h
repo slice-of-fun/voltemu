@@ -257,7 +257,8 @@ enum class PTEKind : u8 {
     SMHOST_MESSAGE = 0xcb,
 };
 
-constexpr bool IsPitchKind(PTEKind kind) {
+constexpr bool IsPitchKind(PTEKind kind)
+{
     return kind == PTEKind::PITCH || kind == PTEKind::PITCH_NO_SWIZZLE;
 }
 

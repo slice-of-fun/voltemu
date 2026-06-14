@@ -18,9 +18,7 @@ class OpusDecoderManager {
 public:
     OpusDecoderManager(Core::System& system);
 
-    HardwareOpus& GetHardwareOpus() {
-        return hardware_opus;
-    }
+    HardwareOpus& GetHardwareOpus() { return hardware_opus; }
 
     Result GetWorkBufferSize(const OpusParameters& params, u32& out_size);
     Result GetWorkBufferSizeEx(const OpusParametersEx& params, u32& out_size);

@@ -4,6 +4,8 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/file_sys/partition_filesystem.h"
+
 #include <algorithm>
 #include <cstddef>
 #include <cstring>
@@ -11,18 +13,19 @@
 #include <utility>
 
 #include "common/logging.h"
-#include "core/file_sys/partition_filesystem.h"
 #include "core/file_sys/vfs/vfs_offset.h"
 #include "core/loader/loader.h"
 
 namespace FileSys {
 
-bool PartitionFilesystem::Header::HasValidMagicValue() const {
+bool PartitionFilesystem::Header::HasValidMagicValue() const
+{
     return magic == Common::MakeMagic('H', 'F', 'S', '0') ||
            magic == Common::MakeMagic('P', 'F', 'S', '0');
 }
 
-PartitionFilesystem::PartitionFilesystem(VirtualFile file) {
+PartitionFilesystem::PartitionFilesystem(VirtualFile file)
+{
     // At least be as large as the header
     if (file->GetSize() < sizeof(Header)) {
         status = Loader::ResultStatus::ErrorBadPFSHeader;
@@ -79,31 +82,38 @@ PartitionFilesystem::PartitionFilesystem(VirtualFile file) {
 
 PartitionFilesystem::~PartitionFilesystem() = default;
 
-Loader::ResultStatus PartitionFilesystem::GetStatus() const {
+Loader::ResultStatus PartitionFilesystem::GetStatus() const
+{
     return status;
 }
 
-std::map<std::string, u64> PartitionFilesystem::GetFileOffsets() const {
+std::map<std::string, u64> PartitionFilesystem::GetFileOffsets() const
+{
     return offsets;
 }
 
-std::map<std::string, u64> PartitionFilesystem::GetFileSizes() const {
+std::map<std::string, u64> PartitionFilesystem::GetFileSizes() const
+{
     return sizes;
 }
 
-std::vector<VirtualFile> PartitionFilesystem::GetFiles() const {
+std::vector<VirtualFile> PartitionFilesystem::GetFiles() const
+{
     return pfs_files;
 }
 
-std::vector<VirtualDir> PartitionFilesystem::GetSubdirectories() const {
+std::vector<VirtualDir> PartitionFilesystem::GetSubdirectories() const
+{
     return {};
 }
 
-std::string PartitionFilesystem::GetName() const {
+std::string PartitionFilesystem::GetName() const
+{
     return is_hfs ? "HFS0" : "PFS0";
 }
 
-VirtualDir PartitionFilesystem::GetParentDirectory() const {
+VirtualDir PartitionFilesystem::GetParentDirectory() const
+{
     // TODO(DarkLordZach): Add support for nested containers.
     return nullptr;
 }

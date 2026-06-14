@@ -4,6 +4,8 @@
 // SPDX-FileCopyrightText: 2014 Dolphin Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "input_common/drivers/gc_adapter.h"
+
 #include <fmt/ranges.h>
 #include <libusb.h>
 
@@ -12,19 +14,14 @@
 #include "common/polyfill_thread.h"
 #include "common/settings_input.h"
 #include "common/thread.h"
-#include "input_common/drivers/gc_adapter.h"
 
 namespace InputCommon {
 
 class LibUSBContext {
 public:
-    explicit LibUSBContext() {
-        init_result = libusb_init(&ctx);
-    }
+    explicit LibUSBContext() { init_result = libusb_init(&ctx); }
 
-    ~LibUSBContext() {
-        libusb_exit(ctx);
-    }
+    ~LibUSBContext() { libusb_exit(ctx); }
 
     LibUSBContext& operator=(const LibUSBContext&) = delete;
     LibUSBContext(const LibUSBContext&) = delete;
@@ -32,13 +29,9 @@ public:
     LibUSBContext& operator=(LibUSBContext&&) noexcept = delete;
     LibUSBContext(LibUSBContext&&) noexcept = delete;
 
-    [[nodiscard]] int InitResult() const noexcept {
-        return init_result;
-    }
+    [[nodiscard]] int InitResult() const noexcept { return init_result; }
 
-    [[nodiscard]] libusb_context* get() noexcept {
-        return ctx;
-    }
+    [[nodiscard]] libusb_context* get() noexcept { return ctx; }
 
 private:
     libusb_context* ctx;
@@ -47,11 +40,13 @@ private:
 
 class LibUSBDeviceHandle {
 public:
-    explicit LibUSBDeviceHandle(libusb_context* ctx, uint16_t vid, uint16_t pid) noexcept {
+    explicit LibUSBDeviceHandle(libusb_context* ctx, uint16_t vid, uint16_t pid) noexcept
+    {
         handle = libusb_open_device_with_vid_pid(ctx, vid, pid);
     }
 
-    ~LibUSBDeviceHandle() noexcept {
+    ~LibUSBDeviceHandle() noexcept
+    {
         if (handle) {
             libusb_release_interface(handle, 1);
             libusb_close(handle);
@@ -64,15 +59,14 @@ public:
     LibUSBDeviceHandle& operator=(LibUSBDeviceHandle&&) noexcept = delete;
     LibUSBDeviceHandle(LibUSBDeviceHandle&&) noexcept = delete;
 
-    [[nodiscard]] libusb_device_handle* get() noexcept {
-        return handle;
-    }
+    [[nodiscard]] libusb_device_handle* get() noexcept { return handle; }
 
 private:
     libusb_device_handle* handle{};
 };
 
-GCAdapter::GCAdapter(std::string input_engine_) : InputEngine(std::move(input_engine_)) {
+GCAdapter::GCAdapter(std::string input_engine_) : InputEngine(std::move(input_engine_))
+{
     if (usb_adapter_handle) {
         return;
     }
@@ -88,11 +82,13 @@ GCAdapter::GCAdapter(std::string input_engine_) : InputEngine(std::move(input_en
     }
 }
 
-GCAdapter::~GCAdapter() {
+GCAdapter::~GCAdapter()
+{
     Reset();
 }
 
-void GCAdapter::AdapterInputThread(std::stop_token stop_token) {
+void GCAdapter::AdapterInputThread(std::stop_token stop_token)
+{
     LOG_DEBUG(Input, "Input thread started");
     Common::SetCurrentThreadName("GCAdapter");
     s32 payload_size{};
@@ -117,7 +113,8 @@ void GCAdapter::AdapterInputThread(std::stop_token stop_token) {
     }
 }
 
-bool GCAdapter::IsPayloadCorrect(const AdapterPayload& adapter_payload, s32 payload_size) {
+bool GCAdapter::IsPayloadCorrect(const AdapterPayload& adapter_payload, s32 payload_size)
+{
     if (payload_size != static_cast<s32>(adapter_payload.size()) ||
         adapter_payload[0] != LIBUSB_DT_HID) {
         LOG_DEBUG(Input, "Error reading payload (size: {}, type: {:02x})", payload_size,
@@ -134,7 +131,8 @@ bool GCAdapter::IsPayloadCorrect(const AdapterPayload& adapter_payload, s32 payl
     return true;
 }
 
-void GCAdapter::UpdateControllers(const AdapterPayload& adapter_payload) {
+void GCAdapter::UpdateControllers(const AdapterPayload& adapter_payload)
+{
     for (std::size_t port = 0; port < pads.size(); ++port) {
         const std::size_t offset = 1 + (9 * port);
         const auto type = static_cast<ControllerTypes>(adapter_payload[offset] >> 4);
@@ -148,7 +146,8 @@ void GCAdapter::UpdateControllers(const AdapterPayload& adapter_payload) {
     }
 }
 
-void GCAdapter::UpdatePadType(std::size_t port, ControllerTypes pad_type) {
+void GCAdapter::UpdatePadType(std::size_t port, ControllerTypes pad_type)
+{
     if (pads[port].type == pad_type) {
         return;
     }
@@ -160,8 +159,8 @@ void GCAdapter::UpdatePadType(std::size_t port, ControllerTypes pad_type) {
     pads[port].type = pad_type;
 }
 
-void GCAdapter::UpdateStateButtons(std::size_t port, [[maybe_unused]] u8 b1,
-                                   [[maybe_unused]] u8 b2) {
+void GCAdapter::UpdateStateButtons(std::size_t port, [[maybe_unused]] u8 b1, [[maybe_unused]] u8 b2)
+{
     if (port >= pads.size()) {
         return;
     }
@@ -191,7 +190,8 @@ void GCAdapter::UpdateStateButtons(std::size_t port, [[maybe_unused]] u8 b1,
     }
 }
 
-void GCAdapter::UpdateStateAxes(std::size_t port, const AdapterPayload& adapter_payload) {
+void GCAdapter::UpdateStateAxes(std::size_t port, const AdapterPayload& adapter_payload)
+{
     if (port >= pads.size()) {
         return;
     }
@@ -217,7 +217,8 @@ void GCAdapter::UpdateStateAxes(std::size_t port, const AdapterPayload& adapter_
     }
 }
 
-void GCAdapter::AdapterScanThread(std::stop_token stop_token) {
+void GCAdapter::AdapterScanThread(std::stop_token stop_token)
+{
     Common::SetCurrentThreadName("ScanGCAdapter");
     usb_adapter_handle = nullptr;
     pads = {};
@@ -225,7 +226,8 @@ void GCAdapter::AdapterScanThread(std::stop_token stop_token) {
     }
 }
 
-bool GCAdapter::Setup() {
+bool GCAdapter::Setup()
+{
     constexpr u16 nintendo_vid = 0x057e;
     constexpr u16 gc_adapter_pid = 0x0337;
     usb_adapter_handle =
@@ -264,7 +266,8 @@ bool GCAdapter::Setup() {
     return false;
 }
 
-bool GCAdapter::CheckDeviceAccess() {
+bool GCAdapter::CheckDeviceAccess()
+{
     s32 kernel_driver_error = libusb_kernel_driver_active(usb_adapter_handle->get(), 0);
     if (kernel_driver_error == 1) {
         kernel_driver_error = libusb_detach_kernel_driver(usb_adapter_handle->get(), 0);
@@ -296,7 +299,8 @@ bool GCAdapter::CheckDeviceAccess() {
     return true;
 }
 
-bool GCAdapter::GetGCEndpoint(libusb_device* device) {
+bool GCAdapter::GetGCEndpoint(libusb_device* device)
+{
     libusb_config_descriptor* config = nullptr;
     const int config_descriptor_return = libusb_get_config_descriptor(device, 0, &config);
     if (config_descriptor_return != LIBUSB_SUCCESS) {
@@ -327,8 +331,9 @@ bool GCAdapter::GetGCEndpoint(libusb_device* device) {
     return true;
 }
 
-Common::Input::DriverResult GCAdapter::SetVibration(
-    const PadIdentifier& identifier, const Common::Input::VibrationStatus& vibration) {
+Common::Input::DriverResult GCAdapter::SetVibration(const PadIdentifier& identifier,
+                                                    const Common::Input::VibrationStatus& vibration)
+{
     const auto mean_amplitude = (vibration.low_amplitude + vibration.high_amplitude) * 0.5f;
     const auto processed_amplitude =
         static_cast<u8>((mean_amplitude + std::pow(mean_amplitude, 0.3f)) * 0.5f * 0x8);
@@ -341,11 +346,13 @@ Common::Input::DriverResult GCAdapter::SetVibration(
     return Common::Input::DriverResult::Success;
 }
 
-bool GCAdapter::IsVibrationEnabled([[maybe_unused]] const PadIdentifier& identifier) {
+bool GCAdapter::IsVibrationEnabled([[maybe_unused]] const PadIdentifier& identifier)
+{
     return rumble_enabled;
 }
 
-void GCAdapter::UpdateVibrations() {
+void GCAdapter::UpdateVibrations()
+{
     // Use 8 states to keep the switching between on/off fast enough for
     // a human to feel different vibration strength
     // More states == more rumble strengths == slower update time
@@ -361,7 +368,8 @@ void GCAdapter::UpdateVibrations() {
     SendVibrations();
 }
 
-void GCAdapter::SendVibrations() {
+void GCAdapter::SendVibrations()
+{
     if (!rumble_enabled || !vibration_changed) {
         return;
     }
@@ -387,11 +395,13 @@ void GCAdapter::SendVibrations() {
     vibration_changed = false;
 }
 
-bool GCAdapter::DeviceConnected(std::size_t port) const {
+bool GCAdapter::DeviceConnected(std::size_t port) const
+{
     return pads[port].type != ControllerTypes::None;
 }
 
-void GCAdapter::Reset() {
+void GCAdapter::Reset()
+{
     adapter_scan_thread = {};
     adapter_input_thread = {};
     usb_adapter_handle = nullptr;
@@ -399,7 +409,8 @@ void GCAdapter::Reset() {
     libusb_ctx = nullptr;
 }
 
-std::vector<Common::ParamPackage> GCAdapter::GetInputDevices() const {
+std::vector<Common::ParamPackage> GCAdapter::GetInputDevices() const
+{
     std::vector<Common::ParamPackage> devices;
     for (std::size_t port = 0; port < pads.size(); ++port) {
         if (!DeviceConnected(port)) {
@@ -414,7 +425,8 @@ std::vector<Common::ParamPackage> GCAdapter::GetInputDevices() const {
     return devices;
 }
 
-ButtonMapping GCAdapter::GetButtonMappingForDevice(const Common::ParamPackage& params) {
+ButtonMapping GCAdapter::GetButtonMappingForDevice(const Common::ParamPackage& params)
+{
     // This list is missing ZL/ZR since those are not considered buttons.
     // We will add those afterwards
     // This list also excludes any button that can't be really mapped
@@ -468,7 +480,8 @@ ButtonMapping GCAdapter::GetButtonMappingForDevice(const Common::ParamPackage& p
     return mapping;
 }
 
-AnalogMapping GCAdapter::GetAnalogMappingForDevice(const Common::ParamPackage& params) {
+AnalogMapping GCAdapter::GetAnalogMappingForDevice(const Common::ParamPackage& params)
+{
     if (!params.Has("port")) {
         return {};
     }
@@ -489,7 +502,8 @@ AnalogMapping GCAdapter::GetAnalogMappingForDevice(const Common::ParamPackage& p
     return mapping;
 }
 
-Common::Input::ButtonNames GCAdapter::GetUIButtonName(const Common::ParamPackage& params) const {
+Common::Input::ButtonNames GCAdapter::GetUIButtonName(const Common::ParamPackage& params) const
+{
     PadButton button = static_cast<PadButton>(params.Get("button", 0));
     switch (button) {
     case PadButton::ButtonLeft:
@@ -521,7 +535,8 @@ Common::Input::ButtonNames GCAdapter::GetUIButtonName(const Common::ParamPackage
     }
 }
 
-Common::Input::ButtonNames GCAdapter::GetUIName(const Common::ParamPackage& params) const {
+Common::Input::ButtonNames GCAdapter::GetUIName(const Common::ParamPackage& params) const
+{
     if (params.Has("button")) {
         return GetUIButtonName(params);
     }
@@ -532,7 +547,8 @@ Common::Input::ButtonNames GCAdapter::GetUIName(const Common::ParamPackage& para
     return Common::Input::ButtonNames::Invalid;
 }
 
-bool GCAdapter::IsStickInverted(const Common::ParamPackage& params) {
+bool GCAdapter::IsStickInverted(const Common::ParamPackage& params)
+{
     if (!params.Has("port")) {
         return false;
     }

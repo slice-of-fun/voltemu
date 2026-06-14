@@ -6,11 +6,12 @@
 
 #pragma once
 
+#include <ankerl/unordered_dense.h>
+
 #include <optional>
 #include <set>
 #include <span>
 #include <string>
-#include <ankerl/unordered_dense.h>
 #include <vector>
 
 #include "common/common_types.h"
@@ -70,7 +71,6 @@ VK_DEFINE_HANDLE(VmaAllocator)
             pipeline_executable_properties)                                                        \
     FEATURE(KHR, WorkgroupMemoryExplicitLayout, WORKGROUP_MEMORY_EXPLICIT_LAYOUT,                  \
             workgroup_memory_explicit_layout)
-
 
 // Define miscellaneous extensions which may be used by the implementation here.
 #define FOR_EACH_VK_EXTENSION(EXTENSION)                                                           \
@@ -240,499 +240,432 @@ public:
     std::string GetDriverName() const;
 
     /// Returns the dispatch loader with direct function pointers of the device.
-    const vk::DeviceDispatch& GetDispatchLoader() const {
-        return dld;
-    }
+    const vk::DeviceDispatch& GetDispatchLoader() const { return dld; }
 
     /// Returns the VMA allocator.
-    VmaAllocator GetAllocator() const {
-        return allocator;
-    }
+    VmaAllocator GetAllocator() const { return allocator; }
 
     /// Returns the logical device.
-    const vk::Device& GetLogical() const {
-        return logical;
-    }
+    const vk::Device& GetLogical() const { return logical; }
 
     /// Returns the physical device.
-    vk::PhysicalDevice GetPhysical() const {
-        return physical;
-    }
+    vk::PhysicalDevice GetPhysical() const { return physical; }
 
     /// Returns the main graphics queue.
-    vk::Queue GetGraphicsQueue() const {
-        return graphics_queue;
-    }
+    vk::Queue GetGraphicsQueue() const { return graphics_queue; }
 
     /// Returns the main present queue.
-    vk::Queue GetPresentQueue() const {
-        return present_queue;
-    }
+    vk::Queue GetPresentQueue() const { return present_queue; }
 
     /// Returns main graphics queue family index.
-    u32 GetGraphicsFamily() const {
-        return graphics_family;
-    }
+    u32 GetGraphicsFamily() const { return graphics_family; }
 
     /// Returns main present queue family index.
-    u32 GetPresentFamily() const {
-        return present_family;
-    }
+    u32 GetPresentFamily() const { return present_family; }
 
     /// Returns the current Vulkan API version provided in Vulkan-formatted version numbers.
-    u32 ApiVersion() const {
-        return properties.properties.apiVersion;
-    }
+    u32 ApiVersion() const { return properties.properties.apiVersion; }
 
     /// Returns the current driver version provided in Vulkan-formatted version numbers.
-    u32 GetDriverVersion() const {
-        return properties.properties.driverVersion;
-    }
+    u32 GetDriverVersion() const { return properties.properties.driverVersion; }
 
     /// Returns the device name.
-    std::string_view GetModelName() const {
-        return properties.properties.deviceName;
-    }
+    std::string_view GetModelName() const { return properties.properties.deviceName; }
 
     /// Returns the driver ID.
-    VkDriverIdKHR GetDriverID() const {
-        return properties.driver.driverID;
-    }
+    VkDriverIdKHR GetDriverID() const { return properties.driver.driverID; }
 
     bool ShouldBoostClocks() const;
 
     /// Returns uniform buffer alignment requirement.
-    VkDeviceSize GetUniformBufferAlignment() const {
+    VkDeviceSize GetUniformBufferAlignment() const
+    {
         return properties.properties.limits.minUniformBufferOffsetAlignment;
     }
 
     /// Returns storage alignment requirement.
-    VkDeviceSize GetStorageBufferAlignment() const {
+    VkDeviceSize GetStorageBufferAlignment() const
+    {
         return properties.properties.limits.minStorageBufferOffsetAlignment;
     }
 
     /// Returns the maximum range for storage buffers.
-    VkDeviceSize GetMaxStorageBufferRange() const {
+    VkDeviceSize GetMaxStorageBufferRange() const
+    {
         return properties.properties.limits.maxStorageBufferRange;
     }
 
     /// Returns the maximum size for push constants.
-    VkDeviceSize GetMaxPushConstantsSize() const {
+    VkDeviceSize GetMaxPushConstantsSize() const
+    {
         return properties.properties.limits.maxPushConstantsSize;
     }
 
     /// Returns the maximum size for shared memory.
-    u32 GetMaxComputeSharedMemorySize() const {
+    u32 GetMaxComputeSharedMemorySize() const
+    {
         return properties.properties.limits.maxComputeSharedMemorySize;
     }
 
     /// Returns the maximum number of dynamic storage buffer descriptors per set.
-    u32 GetMaxDescriptorSetStorageBuffersDynamic() const {
+    u32 GetMaxDescriptorSetStorageBuffersDynamic() const
+    {
         return properties.properties.limits.maxDescriptorSetStorageBuffersDynamic;
     }
 
     /// Returns the maximum number of dynamic uniform buffer descriptors per set.
-    u32 GetMaxDescriptorSetUniformBuffersDynamic() const {
+    u32 GetMaxDescriptorSetUniformBuffersDynamic() const
+    {
         return properties.properties.limits.maxDescriptorSetUniformBuffersDynamic;
     }
 
-    u32 GetMaxPerStageDescriptorSampledImages() const {
+    u32 GetMaxPerStageDescriptorSampledImages() const
+    {
         return properties.properties.limits.maxPerStageDescriptorSampledImages;
     }
 
-    u32 GetMaxPerStageResources() const {
+    u32 GetMaxPerStageResources() const
+    {
         return properties.properties.limits.maxPerStageResources;
     }
 
-    u32 GetMaxDescriptorSetSampledImages() const {
+    u32 GetMaxDescriptorSetSampledImages() const
+    {
         return properties.properties.limits.maxDescriptorSetSampledImages;
     }
 
     /// Returns float control properties of the device.
-    const VkPhysicalDeviceFloatControlsPropertiesKHR& FloatControlProperties() const {
+    const VkPhysicalDeviceFloatControlsPropertiesKHR& FloatControlProperties() const
+    {
         return properties.float_controls;
     }
 
     /// Returns true if ASTC is natively supported.
-    bool IsOptimalAstcSupported() const {
-        return features.features.textureCompressionASTC_LDR;
-    }
+    bool IsOptimalAstcSupported() const { return features.features.textureCompressionASTC_LDR; }
 
     /// Returns true if BCn is natively supported.
-    bool IsOptimalBcnSupported() const {
-        return features.features.textureCompressionBC;
-    }
+    bool IsOptimalBcnSupported() const { return features.features.textureCompressionBC; }
 
     /// Returns true if ETC2 is natively supported.
-    bool IsOptimalEtc2Supported() const {
-        return features.features.textureCompressionETC2;
-    }
+    bool IsOptimalEtc2Supported() const { return features.features.textureCompressionETC2; }
 
     /// Returns true if descriptor aliasing is natively supported.
-    bool IsDescriptorAliasingSupported() const {
+    bool IsDescriptorAliasingSupported() const
+    {
         return GetDriverID() != VK_DRIVER_ID_QUALCOMM_PROPRIETARY;
     }
 
-    bool IsSampledImageArrayNonUniformIndexingSupported() const {
+    bool IsSampledImageArrayNonUniformIndexingSupported() const
+    {
         return features.descriptor_indexing.shaderSampledImageArrayNonUniformIndexing;
     }
 
     /// Returns true if the device supports float64 natively.
-    bool IsFloat64Supported() const {
-        return features.features.shaderFloat64;
-    }
+    bool IsFloat64Supported() const { return features.features.shaderFloat64; }
 
     /// Returns true if the device supports float16 natively.
-    bool IsFloat16Supported() const {
-        return features.shader_float16_int8.shaderFloat16;
-    }
+    bool IsFloat16Supported() const { return features.shader_float16_int8.shaderFloat16; }
 
     /// Returns true if the device supports int8 natively.
-    bool IsInt8Supported() const {
-        return features.shader_float16_int8.shaderInt8;
-    }
+    bool IsInt8Supported() const { return features.shader_float16_int8.shaderInt8; }
 
     /// Returns true if the device supports binding multisample images as storage images.
-    bool IsStorageImageMultisampleSupported() const {
+    bool IsStorageImageMultisampleSupported() const
+    {
         return features.features.shaderStorageImageMultisample;
     }
 
     /// Returns true if the device warp size can potentially be bigger than guest's warp size.
-    bool IsWarpSizePotentiallyBiggerThanGuest() const {
-        return is_warp_potentially_bigger;
-    }
+    bool IsWarpSizePotentiallyBiggerThanGuest() const { return is_warp_potentially_bigger; }
 
     /// Returns true if the device can be forced to use the guest warp size.
-    bool IsGuestWarpSizeSupported(VkShaderStageFlagBits stage) const {
+    bool IsGuestWarpSizeSupported(VkShaderStageFlagBits stage) const
+    {
         return properties.subgroup_size_control.requiredSubgroupSizeStages & stage;
     }
 
     /// Returns true if the device supports the provided subgroup feature.
-    bool IsSubgroupFeatureSupported(VkSubgroupFeatureFlagBits feature) const {
+    bool IsSubgroupFeatureSupported(VkSubgroupFeatureFlagBits feature) const
+    {
         return properties.subgroup_properties.supportedOperations & feature;
     }
 
     /// Returns the maximum number of push descriptors.
-    u32 MaxPushDescriptors() const {
-        return properties.push_descriptor.maxPushDescriptors;
-    }
+    u32 MaxPushDescriptors() const { return properties.push_descriptor.maxPushDescriptors; }
 
     /// Returns true if formatless image load is supported.
-    bool IsFormatlessImageLoadSupported() const {
+    bool IsFormatlessImageLoadSupported() const
+    {
         return features.features.shaderStorageImageReadWithoutFormat;
     }
 
     /// Returns true if shader int64 is supported.
-    bool IsShaderInt64Supported() const {
-        return features.features.shaderInt64;
-    }
+    bool IsShaderInt64Supported() const { return features.features.shaderInt64; }
 
     /// Returns true if shader int16 is supported.
-    bool IsShaderInt16Supported() const {
-        return features.features.shaderInt16;
-    }
+    bool IsShaderInt16Supported() const { return features.features.shaderInt16; }
 
     // Returns true if depth bounds is supported.
-    bool IsDepthBoundsSupported() const {
-        return features.features.depthBounds;
-    }
+    bool IsDepthBoundsSupported() const { return features.features.depthBounds; }
 
     /// Returns true when blitting from and to D24S8 images is supported.
-    bool IsBlitDepth24Stencil8Supported() const {
-        return is_blit_depth24_stencil8_supported;
-    }
+    bool IsBlitDepth24Stencil8Supported() const { return is_blit_depth24_stencil8_supported; }
 
     /// Returns true when blitting from and to D32S8 images is supported.
-    bool IsBlitDepth32Stencil8Supported() const {
-        return is_blit_depth32_stencil8_supported;
-    }
+    bool IsBlitDepth32Stencil8Supported() const { return is_blit_depth32_stencil8_supported; }
 
     /// Returns true if the device supports VK_NV_viewport_swizzle.
-    bool IsNvViewportSwizzleSupported() const {
-        return extensions.viewport_swizzle;
-    }
+    bool IsNvViewportSwizzleSupported() const { return extensions.viewport_swizzle; }
 
     /// Returns true if the device supports VK_NV_viewport_array2.
-    bool IsNvViewportArray2Supported() const {
-        return extensions.viewport_array2;
-    }
+    bool IsNvViewportArray2Supported() const { return extensions.viewport_array2; }
 
     /// Returns true if the device supports VK_NV_geometry_shader_passthrough.
-    bool IsNvGeometryShaderPassthroughSupported() const {
+    bool IsNvGeometryShaderPassthroughSupported() const
+    {
         return extensions.geometry_shader_passthrough;
     }
 
     /// Returns true if the device supports VK_KHR_uniform_buffer_standard_layout.
-    bool IsKhrUniformBufferStandardLayoutSupported() const {
+    bool IsKhrUniformBufferStandardLayoutSupported() const
+    {
         return extensions.uniform_buffer_standard_layout;
     }
 
     /// Returns true if the device supports VK_KHR_push_descriptor.
-    bool IsKhrPushDescriptorSupported() const {
-        return extensions.push_descriptor;
-    }
+    bool IsKhrPushDescriptorSupported() const { return extensions.push_descriptor; }
 
     /// Returns true if VK_KHR_pipeline_executable_properties is enabled.
-    bool IsKhrPipelineExecutablePropertiesEnabled() const {
+    bool IsKhrPipelineExecutablePropertiesEnabled() const
+    {
         return extensions.pipeline_executable_properties;
     }
 
     /// Returns true if VK_KHR_swapchain_mutable_format is enabled.
-    bool IsKhrSwapchainMutableFormatEnabled() const {
-        return extensions.swapchain_mutable_format;
-    }
+    bool IsKhrSwapchainMutableFormatEnabled() const { return extensions.swapchain_mutable_format; }
 
     /// Returns true if VK_KHR_shader_float_controls is enabled.
-    bool IsKhrShaderFloatControlsSupported() const {
-        return extensions.shader_float_controls;
-    }
+    bool IsKhrShaderFloatControlsSupported() const { return extensions.shader_float_controls; }
 
     /// Returns true if the device supports VK_KHR_workgroup_memory_explicit_layout.
-    bool IsKhrWorkgroupMemoryExplicitLayoutSupported() const {
+    bool IsKhrWorkgroupMemoryExplicitLayoutSupported() const
+    {
         return extensions.workgroup_memory_explicit_layout;
     }
 
     /// Returns true if the device supports VK_KHR_image_format_list.
-    bool IsKhrImageFormatListSupported() const {
+    bool IsKhrImageFormatListSupported() const
+    {
         return extensions.image_format_list || instance_version >= VK_API_VERSION_1_2;
     }
 
     /// Returns true if the device supports VK_EXT_primitive_topology_list_restart.
-    bool IsTopologyListPrimitiveRestartSupported() const {
+    bool IsTopologyListPrimitiveRestartSupported() const
+    {
         return features.primitive_topology_list_restart.primitiveTopologyListRestart;
     }
 
     /// Returns true if the device supports VK_EXT_primitive_topology_list_restart.
-    bool IsPatchListPrimitiveRestartSupported() const {
+    bool IsPatchListPrimitiveRestartSupported() const
+    {
         return features.primitive_topology_list_restart.primitiveTopologyPatchListRestart;
     }
 
     /// Returns true if the device supports VK_EXT_index_type_uint8.
-    bool IsExtIndexTypeUint8Supported() const {
-        return extensions.index_type_uint8;
-    }
+    bool IsExtIndexTypeUint8Supported() const { return extensions.index_type_uint8; }
 
     /// Returns true if the device supports VK_EXT_sampler_filter_minmax.
-    bool IsExtSamplerFilterMinmaxSupported() const {
-        return extensions.sampler_filter_minmax;
-    }
+    bool IsExtSamplerFilterMinmaxSupported() const { return extensions.sampler_filter_minmax; }
 
     /// Returns true if the device supports VK_EXT_shader_stencil_export.
     /// Note: Most Mali/NVIDIA drivers don't support this. Use hardware blits as fallback.
-    bool IsExtShaderStencilExportSupported() const {
-        return extensions.shader_stencil_export;
-    }
+    bool IsExtShaderStencilExportSupported() const { return extensions.shader_stencil_export; }
 
     /// Returns true if depth/stencil operations can be performed efficiently.
     /// Either through shader export or hardware blits.
-    bool CanPerformDepthStencilOperations() const {
+    bool CanPerformDepthStencilOperations() const
+    {
         return extensions.shader_stencil_export || is_blit_depth24_stencil8_supported ||
                is_blit_depth32_stencil8_supported;
     }
 
     /// Returns true if the device supports VK_EXT_depth_range_unrestricted.
-    bool IsExtDepthRangeUnrestrictedSupported() const {
+    bool IsExtDepthRangeUnrestrictedSupported() const
+    {
         return extensions.depth_range_unrestricted;
     }
 
     /// Returns true if the device supports VK_EXT_depth_clip_control.
-    bool IsExtDepthClipControlSupported() const {
-        return extensions.depth_clip_control;
-    }
+    bool IsExtDepthClipControlSupported() const { return extensions.depth_clip_control; }
 
     /// Returns true if the device supports VK_EXT_depth_bias_control.
-    bool IsExtDepthBiasControlSupported() const {
-        return extensions.depth_bias_control;
-    }
+    bool IsExtDepthBiasControlSupported() const { return extensions.depth_bias_control; }
 
     /// Returns true if the device supports VK_EXT_shader_viewport_index_layer.
-    bool IsExtShaderViewportIndexLayerSupported() const {
+    bool IsExtShaderViewportIndexLayerSupported() const
+    {
         return extensions.shader_viewport_index_layer;
     }
 
     /// Returns true if the device supports VK_EXT_subgroup_size_control.
-    bool IsExtSubgroupSizeControlSupported() const {
-        return extensions.subgroup_size_control;
-    }
+    bool IsExtSubgroupSizeControlSupported() const { return extensions.subgroup_size_control; }
 
     /// Returns true if the device supports VK_EXT_transform_feedback.
-    bool IsExtTransformFeedbackSupported() const {
-        return extensions.transform_feedback;
-    }
+    bool IsExtTransformFeedbackSupported() const { return extensions.transform_feedback; }
 
     /// Returns true if transform feedback draw commands are supported.
-    bool IsTransformFeedbackDrawSupported() const {
+    bool IsTransformFeedbackDrawSupported() const
+    {
         return extensions.transform_feedback && properties.transform_feedback.transformFeedbackDraw;
     }
 
     /// Returns true if transform feedback query types are supported.
-    bool IsTransformFeedbackQueriesSupported() const {
+    bool IsTransformFeedbackQueriesSupported() const
+    {
         return extensions.transform_feedback &&
                properties.transform_feedback.transformFeedbackQueries;
     }
 
     /// Returns true if the device supports VK_EXT_transform_feedback properly.
-    bool AreTransformFeedbackGeometryStreamsSupported() const {
+    bool AreTransformFeedbackGeometryStreamsSupported() const
+    {
         return features.transform_feedback.geometryStreams;
     }
 
     /// Returns true if the device supports VK_EXT_custom_border_color.
-    bool IsExtCustomBorderColorSupported() const {
-        return extensions.custom_border_color;
-    }
+    bool IsExtCustomBorderColorSupported() const { return extensions.custom_border_color; }
 
     /// Returns true if customBorderColors feature is available.
-    bool IsCustomBorderColorsSupported() const {
+    bool IsCustomBorderColorsSupported() const
+    {
         return features.custom_border_color.customBorderColors;
     }
 
     /// Returns true if customBorderColorWithoutFormat feature is available.
-    bool IsCustomBorderColorWithoutFormatSupported() const {
+    bool IsCustomBorderColorWithoutFormatSupported() const
+    {
         return features.custom_border_color.customBorderColorWithoutFormat;
     }
 
     /// Returns true if the device supports VK_EXT_extended_dynamic_state.
-    bool IsExtExtendedDynamicStateSupported() const {
-        return extensions.extended_dynamic_state;
-    }
+    bool IsExtExtendedDynamicStateSupported() const { return extensions.extended_dynamic_state; }
 
     /// Returns true if the device supports VK_EXT_extended_dynamic_state2.
-    bool IsExtExtendedDynamicState2Supported() const {
-        return extensions.extended_dynamic_state2;
-    }
+    bool IsExtExtendedDynamicState2Supported() const { return extensions.extended_dynamic_state2; }
 
-    bool IsExtExtendedDynamicState2ExtrasSupported() const {
+    bool IsExtExtendedDynamicState2ExtrasSupported() const
+    {
         return features.extended_dynamic_state2.extendedDynamicState2LogicOp;
     }
 
     /// Returns true if the device supports VK_EXT_extended_dynamic_state3.
-    bool IsExtExtendedDynamicState3Supported() const {
-        return extensions.extended_dynamic_state3;
-    }
+    bool IsExtExtendedDynamicState3Supported() const { return extensions.extended_dynamic_state3; }
 
     /// Returns true if the device supports VK_EXT_4444_formats.
-    bool IsExt4444FormatsSupported() const {
-        return features.format_a4b4g4r4.formatA4B4G4R4;
-    }
+    bool IsExt4444FormatsSupported() const { return features.format_a4b4g4r4.formatA4B4G4R4; }
 
     /// Returns true if the device supports VK_EXT_extended_dynamic_state3.
-    bool IsExtExtendedDynamicState3BlendingSupported() const {
-        return dynamic_state3_blending;
-    }
+    bool IsExtExtendedDynamicState3BlendingSupported() const { return dynamic_state3_blending; }
 
     /// Returns true if the device supports VK_EXT_extended_dynamic_state3.
-    bool IsExtExtendedDynamicState3EnablesSupported() const {
-        return dynamic_state3_enables;
-    }
+    bool IsExtExtendedDynamicState3EnablesSupported() const { return dynamic_state3_enables; }
 
     /// Returns true if the device supports VK_EXT_filter_cubic
-    bool IsExtFilterCubicSupported() const {
-        return extensions.filter_cubic;
-    }
+    bool IsExtFilterCubicSupported() const { return extensions.filter_cubic; }
 
     /// Returns true if the device supports VK_QCOM_filter_cubic_weights
-    bool IsQcomFilterCubicWeightsSupported() const {
-        return extensions.filter_cubic_weights;
-    }
+    bool IsQcomFilterCubicWeightsSupported() const { return extensions.filter_cubic_weights; }
 
     /// Returns true if the device supports VK_EXT_line_rasterization.
-    bool IsExtLineRasterizationSupported() const {
-        return extensions.line_rasterization;
-    }
+    bool IsExtLineRasterizationSupported() const { return extensions.line_rasterization; }
 
-    bool SupportsRectangularLines() const {
+    bool SupportsRectangularLines() const
+    {
         return features.line_rasterization.rectangularLines != VK_FALSE;
     }
 
-    bool SupportsSmoothLines() const {
-        return features.line_rasterization.smoothLines != VK_FALSE;
-    }
+    bool SupportsSmoothLines() const { return features.line_rasterization.smoothLines != VK_FALSE; }
 
-    bool SupportsStippledRectangularLines() const {
+    bool SupportsStippledRectangularLines() const
+    {
         return features.line_rasterization.stippledRectangularLines != VK_FALSE;
     }
 
-    bool SupportsAlphaToOne() const {
-        return features.features.alphaToOne != VK_FALSE;
-    }
+    bool SupportsAlphaToOne() const { return features.features.alphaToOne != VK_FALSE; }
 
-    bool SupportsDynamicState3DepthClampEnable() const {
-        return dynamic_state3_depth_clamp_enable;
-    }
+    bool SupportsDynamicState3DepthClampEnable() const { return dynamic_state3_depth_clamp_enable; }
 
-    bool SupportsDynamicState3LogicOpEnable() const {
-        return dynamic_state3_logic_op_enable;
-    }
+    bool SupportsDynamicState3LogicOpEnable() const { return dynamic_state3_logic_op_enable; }
 
-    bool SupportsDynamicState3LineRasterizationMode() const {
+    bool SupportsDynamicState3LineRasterizationMode() const
+    {
         return dynamic_state3_line_raster_mode;
     }
 
-    bool SupportsDynamicState3ConservativeRasterizationMode() const {
+    bool SupportsDynamicState3ConservativeRasterizationMode() const
+    {
         return dynamic_state3_conservative_raster_mode;
     }
 
-    bool SupportsDynamicState3LineStippleEnable() const {
+    bool SupportsDynamicState3LineStippleEnable() const
+    {
         return dynamic_state3_line_stipple_enable;
     }
 
-    bool SupportsDynamicState3AlphaToCoverageEnable() const {
+    bool SupportsDynamicState3AlphaToCoverageEnable() const
+    {
         return dynamic_state3_alpha_to_coverage;
     }
 
-    bool SupportsDynamicState3AlphaToOneEnable() const {
-        return dynamic_state3_alpha_to_one;
-    }
+    bool SupportsDynamicState3AlphaToOneEnable() const { return dynamic_state3_alpha_to_one; }
 
     /// Returns true if the device supports VK_EXT_vertex_input_dynamic_state.
-    bool IsExtVertexInputDynamicStateSupported() const {
+    bool IsExtVertexInputDynamicStateSupported() const
+    {
         return extensions.vertex_input_dynamic_state;
     }
 
     /// Returns true if the device supports VK_EXT_shader_demote_to_helper_invocation
-    bool IsExtShaderDemoteToHelperInvocationSupported() const {
+    bool IsExtShaderDemoteToHelperInvocationSupported() const
+    {
         return extensions.shader_demote_to_helper_invocation;
     }
 
     /// Returns true if the device supports VK_EXT_conservative_rasterization.
-    bool IsExtConservativeRasterizationSupported() const {
+    bool IsExtConservativeRasterizationSupported() const
+    {
         return extensions.conservative_rasterization;
     }
 
     /// Returns true if the device supports VK_EXT_provoking_vertex.
-    bool IsExtProvokingVertexSupported() const {
-        return extensions.provoking_vertex;
-    }
+    bool IsExtProvokingVertexSupported() const { return extensions.provoking_vertex; }
 
     /// Returns true if first vertex provoking mode can be used.
-    bool SupportsProvokingVertexFirstMode() const {
-        return extensions.provoking_vertex;
-    }
+    bool SupportsProvokingVertexFirstMode() const { return extensions.provoking_vertex; }
 
     /// Returns true if last vertex provoking mode can be used.
-    bool SupportsProvokingVertexLastMode() const {
+    bool SupportsProvokingVertexLastMode() const
+    {
         return extensions.provoking_vertex && features.provoking_vertex.provokingVertexLast;
     }
 
     /// Returns true if transform feedback preserves provoking vertex mode semantics.
-    bool SupportsTransformFeedbackProvokingVertexPreservation() const {
+    bool SupportsTransformFeedbackProvokingVertexPreservation() const
+    {
         return extensions.provoking_vertex &&
                features.provoking_vertex.transformFeedbackPreservesProvokingVertex;
     }
 
     /// Returns true if the device supports VK_KHR_shader_atomic_int64.
-    bool IsExtShaderAtomicInt64Supported() const {
-        return extensions.shader_atomic_int64;
-    }
+    bool IsExtShaderAtomicInt64Supported() const { return extensions.shader_atomic_int64; }
 
-    bool IsExtConditionalRendering() const {
-        return extensions.conditional_rendering;
-    }
+    bool IsExtConditionalRendering() const { return extensions.conditional_rendering; }
 
     bool HasTimelineSemaphore() const;
 
     /// Returns the minimum supported version of SPIR-V.
-    u32 SupportedSpirvVersion() const {
+    u32 SupportedSpirvVersion() const
+    {
         if (instance_version >= VK_API_VERSION_1_3) {
             return 0x00010600U;
         }
@@ -743,162 +676,122 @@ public:
     }
 
     /// Returns true when a known debugging tool is attached.
-    bool HasDebuggingToolAttached() const {
+    bool HasDebuggingToolAttached() const
+    {
         return has_renderdoc || has_nsight_graphics || has_radeon_gpu_profiler;
     }
 
     /// @returns True if compute pipelines can cause crashing.
-    bool HasBrokenCompute() const {
-        return has_broken_compute;
-    }
+    bool HasBrokenCompute() const { return has_broken_compute; }
 
     /// Returns true when the device does not properly support cube compatibility.
-    bool HasBrokenCubeImageCompatibility() const {
-        return has_broken_cube_compatibility;
-    }
+    bool HasBrokenCubeImageCompatibility() const { return has_broken_cube_compatibility; }
 
     /// Returns true if parallel shader compiling has issues with the current driver.
-    bool HasBrokenParallelShaderCompiling() const {
-        return has_broken_parallel_compiling;
-    }
+    bool HasBrokenParallelShaderCompiling() const { return has_broken_parallel_compiling; }
 
     std::optional<size_t> GetSamplerHeapBudget() const;
 
     /// Returns the vendor name reported from Vulkan.
-    std::string_view GetVendorName() const {
-        return properties.driver.driverName;
-    }
+    std::string_view GetVendorName() const { return properties.driver.driverName; }
 
     /// Returns the list of available extensions.
-    const std::set<std::string, std::less<>>& GetAvailableExtensions() const {
+    const std::set<std::string, std::less<>>& GetAvailableExtensions() const
+    {
         return supported_extensions;
     }
 
-    u64 GetDeviceLocalMemory() const {
-        return device_access_memory;
-    }
+    u64 GetDeviceLocalMemory() const { return device_access_memory; }
 
-    bool CanReportMemoryUsage() const {
-        return extensions.memory_budget;
-    }
+    bool CanReportMemoryUsage() const { return extensions.memory_budget; }
 
     u64 GetDeviceMemoryUsage() const;
 
-    u32 GetSetsPerPool() const {
-        return sets_per_pool;
-    }
+    u32 GetSetsPerPool() const { return sets_per_pool; }
 
-    bool SupportsD24DepthBuffer() const {
-        return supports_d24_depth;
-    }
+    bool SupportsD24DepthBuffer() const { return supports_d24_depth; }
 
-    bool CantBlitMSAA() const {
-        return cant_blit_msaa;
-    }
+    bool CantBlitMSAA() const { return cant_blit_msaa; }
 
-    bool MustEmulateScaledFormats() const {
-        return must_emulate_scaled_formats;
-    }
+    bool MustEmulateScaledFormats() const { return must_emulate_scaled_formats; }
 
-    bool HasNullDescriptor() const {
-        return features.robustness2.nullDescriptor;
-    }
+    bool HasNullDescriptor() const { return features.robustness2.nullDescriptor; }
 
     bool MustEmulateBGR565() const;
 
-    bool HasExactDepthBiasControl() const {
-        return features.depth_bias_control.depthBiasExact;
-    }
+    bool HasExactDepthBiasControl() const { return features.depth_bias_control.depthBiasExact; }
 
-    u32 GetMaxVertexInputAttributes() const {
+    u32 GetMaxVertexInputAttributes() const
+    {
         return properties.properties.limits.maxVertexInputAttributes;
     }
 
-    u32 GetMaxVertexInputBindings() const {
+    u32 GetMaxVertexInputBindings() const
+    {
         return properties.properties.limits.maxVertexInputBindings;
     }
 
-    u32 GetMaxViewports() const {
-        return properties.properties.limits.maxViewports;
-    }
+    u32 GetMaxViewports() const { return properties.properties.limits.maxViewports; }
 
-    u32 GetMaxUserClipDistances() const {
-        return properties.properties.limits.maxClipDistances;
-    }
+    u32 GetMaxUserClipDistances() const { return properties.properties.limits.maxClipDistances; }
 
-    bool SupportsConditionalBarriers() const {
-        return supports_conditional_barriers;
-    }
+    bool SupportsConditionalBarriers() const { return supports_conditional_barriers; }
 
-    bool SupportsMultiViewport() const {
-        return features2.features.multiViewport;
-    }
+    bool SupportsMultiViewport() const { return features2.features.multiViewport; }
 
     /// Returns true if the device supports VK_KHR_maintenance1.
-    bool IsKhrMaintenance1Supported() const {
-        return extensions.maintenance1;
-    }
+    bool IsKhrMaintenance1Supported() const { return extensions.maintenance1; }
 
     /// Returns true if the device supports VK_KHR_maintenance2.
-    bool IsKhrMaintenance2Supported() const {
-        return extensions.maintenance2;
-    }
+    bool IsKhrMaintenance2Supported() const { return extensions.maintenance2; }
 
     /// Returns true if the device supports VK_KHR_maintenance3.
-    bool IsKhrMaintenance3Supported() const {
-        return extensions.maintenance3;
-    }
+    bool IsKhrMaintenance3Supported() const { return extensions.maintenance3; }
 
     /// Returns true if the device supports VK_KHR_maintenance4.
-    bool IsKhrMaintenance4Supported() const {
-        return extensions.maintenance4;
-    }
+    bool IsKhrMaintenance4Supported() const { return extensions.maintenance4; }
 
     /// Returns true if the device supports VK_KHR_maintenance5.
-    bool IsKhrMaintenance5Supported() const {
-        return extensions.maintenance5;
-    }
+    bool IsKhrMaintenance5Supported() const { return extensions.maintenance5; }
 
     /// Returns true if polygon mode POINT supports gl_PointSize.
-    bool SupportsPolygonModePointSize() const {
+    bool SupportsPolygonModePointSize() const
+    {
         return extensions.maintenance5 && properties.maintenance5.polygonModePointSize;
     }
 
     /// Returns true if depth/stencil swizzle ONE is supported.
-    bool SupportsDepthStencilSwizzleOne() const {
+    bool SupportsDepthStencilSwizzleOne() const
+    {
         return extensions.maintenance5 && properties.maintenance5.depthStencilSwizzleOneSupport;
     }
 
     /// Returns true if early fragment tests optimizations are available.
-    bool SupportsEarlyFragmentTests() const {
+    bool SupportsEarlyFragmentTests() const
+    {
         return extensions.maintenance5 &&
                properties.maintenance5.earlyFragmentMultisampleCoverageAfterSampleCounting &&
                properties.maintenance5.earlyFragmentSampleMaskTestBeforeSampleCounting;
     }
 
     /// Returns true if the device supports VK_KHR_maintenance6.
-    bool IsKhrMaintenance6Supported() const {
-        return extensions.maintenance6;
-    }
+    bool IsKhrMaintenance6Supported() const { return extensions.maintenance6; }
 
     /// Returns true if the device supports VK_KHR_maintenance7.
-    bool IsKhrMaintenance7Supported() const {
-        return extensions.maintenance7;
-    }
+    bool IsKhrMaintenance7Supported() const { return extensions.maintenance7; }
 
     /// Returns true if the device supports VK_KHR_maintenance8.
-    bool IsKhrMaintenance8Supported() const {
-        return extensions.maintenance8;
-    }
+    bool IsKhrMaintenance8Supported() const { return extensions.maintenance8; }
 
     /// Returns true if the device supports UINT8 index buffer conversion via compute shader.
-    bool SupportsUint8Indices() const {
+    bool SupportsUint8Indices() const
+    {
         return features.bit8_storage.storageBuffer8BitAccess &&
                features.bit16_storage.storageBuffer16BitAccess;
     }
 
-    [[nodiscard]] static constexpr bool CheckBrokenCompute(VkDriverId driver_id,
-                                                           u32 driver_version) {
+    [[nodiscard]] static constexpr bool CheckBrokenCompute(VkDriverId driver_id, u32 driver_version)
+    {
         if (driver_id == VK_DRIVER_ID_INTEL_PROPRIETARY_WINDOWS) {
             const u32 major = VK_API_VERSION_MAJOR(driver_version);
             const u32 minor = VK_API_VERSION_MINOR(driver_version);
@@ -913,17 +806,14 @@ public:
         return false;
     }
 
-    bool IsNvidia() const noexcept {
+    bool IsNvidia() const noexcept
+    {
         return properties.driver.driverID == VK_DRIVER_ID_NVIDIA_PROPRIETARY;
     }
 
-    bool IsMoltenVK() const noexcept {
-        return properties.driver.driverID == VK_DRIVER_ID_MOLTENVK;
-    }
+    bool IsMoltenVK() const noexcept { return properties.driver.driverID == VK_DRIVER_ID_MOLTENVK; }
 
-    NvidiaArchitecture GetNvidiaArch() const noexcept {
-        return nvidia_arch;
-    }
+    NvidiaArchitecture GetNvidiaArch() const noexcept { return nvidia_arch; }
 
     /// GPU logging integration
     void InitializeGPULogging();
@@ -940,10 +830,10 @@ private:
     void RemoveExtension(bool& extension, const std::string& extension_name);
     void RemoveExtensionIfUnsuitable(bool is_suitable, const std::string& extension_name);
 
-    template <typename Feature>
+    template<typename Feature>
     void RemoveExtensionFeature(bool& extension, Feature& feature,
                                 const std::string& extension_name);
-    template <typename Feature>
+    template<typename Feature>
     void RemoveExtensionFeatureIfUnsuitable(bool is_suitable, Feature& feature,
                                             const std::string& extension_name);
 
@@ -978,7 +868,7 @@ private:
     u32 present_family{};        ///< Main present queue family index.
 
     struct Extensions {
-#define EXTENSION(prefix, macro_name, var_name) bool var_name{};
+#define EXTENSION(prefix, macro_name, var_name)            bool var_name{};
 #define FEATURE(prefix, struct_name, macro_name, var_name) bool var_name{};
 
         FOR_EACH_VK_FEATURE_1_1(FEATURE);
@@ -1047,7 +937,7 @@ private:
     bool cant_blit_msaa{};                     ///< Does not support MSAA<->MSAA blitting.
     bool must_emulate_scaled_formats{};        ///< Requires scaled vertex format emulation
     bool dynamic_state3_blending{};            ///< Has blending features of dynamic_state3.
-    bool dynamic_state3_enables{};             ///< Has at least one enable feature of dynamic_state3.
+    bool dynamic_state3_enables{}; ///< Has at least one enable feature of dynamic_state3.
     bool dynamic_state3_depth_clamp_enable{};
     bool dynamic_state3_logic_op_enable{};
     bool dynamic_state3_line_raster_mode{};
@@ -1055,10 +945,10 @@ private:
     bool dynamic_state3_line_stipple_enable{};
     bool dynamic_state3_alpha_to_coverage{};
     bool dynamic_state3_alpha_to_one{};
-    bool supports_conditional_barriers{};      ///< Allows barriers in conditional control flow.
-    size_t sampler_heap_budget{};              ///< Sampler budget for buggy drivers (0 = unlimited).
-    u64 device_access_memory{};                ///< Total size of device local memory in bytes.
-    u32 sets_per_pool{};                       ///< Sets per Description Pool
+    bool supports_conditional_barriers{}; ///< Allows barriers in conditional control flow.
+    size_t sampler_heap_budget{};         ///< Sampler budget for buggy drivers (0 = unlimited).
+    u64 device_access_memory{};           ///< Total size of device local memory in bytes.
+    u32 sets_per_pool{};                  ///< Sets per Description Pool
     NvidiaArchitecture nvidia_arch{NvidiaArchitecture::Arch_AmpereOrNewer};
 
     // Telemetry parameters

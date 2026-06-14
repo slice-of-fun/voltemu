@@ -6,6 +6,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+
 #include "common/common_types.h"
 #include "core/loader/loader.h"
 
@@ -40,9 +41,7 @@ public:
 
     bool IsHomebrew();
 
-    FileType GetFileType() const override {
-        return IdentifyType(file);
-    }
+    FileType GetFileType() const override { return IdentifyType(file); }
 
     LoadResult Load(Kernel::KProcess& process, Core::System& system) override;
 

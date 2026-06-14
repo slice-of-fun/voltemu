@@ -6,10 +6,13 @@
 namespace AudioCore::Renderer {
 
 void CompressorInfo::Update(BehaviorInfo::ErrorInfo& error_info,
-                            const InParameterVersion1& in_params, const PoolMapper& pool_mapper) {}
+                            const InParameterVersion1& in_params, const PoolMapper& pool_mapper)
+{
+}
 
 void CompressorInfo::Update(BehaviorInfo::ErrorInfo& error_info,
-                            const InParameterVersion2& in_params, const PoolMapper& pool_mapper) {
+                            const InParameterVersion2& in_params, const PoolMapper& pool_mapper)
+{
     auto in_specific{reinterpret_cast<const ParameterVersion1*>(in_params.specific.data())};
     auto params{reinterpret_cast<ParameterVersion1*>(parameter.data())};
 
@@ -22,7 +25,8 @@ void CompressorInfo::Update(BehaviorInfo::ErrorInfo& error_info,
     error_info.address = CpuAddr(0);
 }
 
-void CompressorInfo::UpdateForCommandGeneration() {
+void CompressorInfo::UpdateForCommandGeneration()
+{
     if (enabled) {
         usage_state = UsageState::Enabled;
     } else {
@@ -33,7 +37,8 @@ void CompressorInfo::UpdateForCommandGeneration() {
     params->state = ParameterState::Updated;
 }
 
-CpuAddr CompressorInfo::GetWorkbuffer(s32 index) {
+CpuAddr CompressorInfo::GetWorkbuffer(s32 index)
+{
     return GetSingleBuffer(index);
 }
 

@@ -7,16 +7,17 @@
 // Parts of this implementation were based on:
 // https://cs.android.com/android/platform/superproject/+/android-5.1.1_r38:frameworks/native/libs/gui/BufferQueueProducer.cpp
 
+#include "core/hle/service/nvnflinger/buffer_queue_producer.h"
+
 #include "common/assert.h"
+#include "common/cpu_features.h"
 #include "common/logging.h"
 #include "common/settings.h"
-#include "common/cpu_features.h"
 #include "core/hle/kernel/k_event.h"
 #include "core/hle/kernel/k_readable_event.h"
 #include "core/hle/kernel/kernel.h"
 #include "core/hle/service/kernel_helpers.h"
 #include "core/hle/service/nvnflinger/buffer_queue_core.h"
-#include "core/hle/service/nvnflinger/buffer_queue_producer.h"
 #include "core/hle/service/nvnflinger/consumer_listener.h"
 #include "core/hle/service/nvnflinger/parcel.h"
 #include "core/hle/service/nvnflinger/ui/graphic_buffer.h"
@@ -27,18 +28,19 @@ namespace Service::android {
 BufferQueueProducer::BufferQueueProducer(Service::KernelHelpers::ServiceContext& service_context_,
                                          std::shared_ptr<BufferQueueCore> buffer_queue_core_,
                                          Service::Nvidia::NvCore::NvMap& nvmap_)
-    : service_context{service_context_}, core{std::move(buffer_queue_core_)}
-    , slots(core->slots)
-    , nvmap(nvmap_)
+    : service_context{service_context_}, core{std::move(buffer_queue_core_)}, slots(core->slots),
+      nvmap(nvmap_)
 {
     buffer_wait_event = service_context.CreateEvent("BufferQueue:WaitEvent");
 }
 
-BufferQueueProducer::~BufferQueueProducer() {
+BufferQueueProducer::~BufferQueueProducer()
+{
     service_context.CloseEvent(buffer_wait_event);
 }
 
-Status BufferQueueProducer::RequestBuffer(s32 slot, std::shared_ptr<GraphicBuffer>* buf) {
+Status BufferQueueProducer::RequestBuffer(s32 slot, std::shared_ptr<GraphicBuffer>* buf)
+{
     LOG_DEBUG(Service_Nvnflinger, "slot {}", slot);
 
     std::scoped_lock lock{core->mutex};
@@ -63,7 +65,8 @@ Status BufferQueueProducer::RequestBuffer(s32 slot, std::shared_ptr<GraphicBuffe
     return Status::NoError;
 }
 
-Status BufferQueueProducer::SetBufferCount(s32 buffer_count) {
+Status BufferQueueProducer::SetBufferCount(s32 buffer_count)
+{
     LOG_DEBUG(Service_Nvnflinger, "count = {}", buffer_count);
 
     std::shared_ptr<IConsumerListener> listener;
@@ -124,7 +127,8 @@ Status BufferQueueProducer::SetBufferCount(s32 buffer_count) {
 }
 
 Status BufferQueueProducer::WaitForFreeSlotThenRelock(bool async, s32* found, Status* return_flags,
-                                                      std::unique_lock<std::mutex>& lk) const {
+                                                      std::unique_lock<std::mutex>& lk) const
+{
     bool try_again = true;
 
     while (try_again) {
@@ -228,7 +232,8 @@ Status BufferQueueProducer::WaitForFreeSlotThenRelock(bool async, s32* found, St
 }
 
 Status BufferQueueProducer::DequeueBuffer(s32* out_slot, Fence* out_fence, bool async, u32 width,
-                                          u32 height, PixelFormat format, u32 usage) {
+                                          u32 height, PixelFormat format, u32 usage)
+{
     LOG_DEBUG(Service_Nvnflinger, "async={} w={} h={} format={}, usage={}",
               async ? "true" : "false", width, height, format, usage);
 
@@ -321,7 +326,8 @@ Status BufferQueueProducer::DequeueBuffer(s32* out_slot, Fence* out_fence, bool 
     return return_flags;
 }
 
-Status BufferQueueProducer::DetachBuffer(s32 slot) {
+Status BufferQueueProducer::DetachBuffer(s32 slot)
+{
     LOG_DEBUG(Service_Nvnflinger, "slot {}", slot);
 
     std::scoped_lock lock{core->mutex};
@@ -351,7 +357,8 @@ Status BufferQueueProducer::DetachBuffer(s32 slot) {
 }
 
 Status BufferQueueProducer::DetachNextBuffer(std::shared_ptr<GraphicBuffer>* out_buffer,
-                                             Fence* out_fence) {
+                                             Fence* out_fence)
+{
     if (out_buffer == nullptr) {
         LOG_ERROR(Service_Nvnflinger, "out_buffer must not be nullptr");
         return Status::BadValue;
@@ -394,7 +401,8 @@ Status BufferQueueProducer::DetachNextBuffer(std::shared_ptr<GraphicBuffer>* out
 }
 
 Status BufferQueueProducer::AttachBuffer(s32* out_slot,
-                                         const std::shared_ptr<GraphicBuffer>& buffer) {
+                                         const std::shared_ptr<GraphicBuffer>& buffer)
+{
     if (out_slot == nullptr) {
         LOG_ERROR(Service_Nvnflinger, "out_slot must not be nullptr");
         return Status::BadValue;
@@ -432,7 +440,9 @@ Status BufferQueueProducer::AttachBuffer(s32* out_slot,
     return return_flags;
 }
 
-Status BufferQueueProducer::QueueBuffer(s32 slot, const QueueBufferInput& input, QueueBufferOutput* output) {
+Status BufferQueueProducer::QueueBuffer(s32 slot, const QueueBufferInput& input,
+                                        QueueBufferOutput* output)
+{
     s64 timestamp{};
     bool is_auto_timestamp{};
     Common::Rectangle<s32> crop;
@@ -443,7 +453,8 @@ Status BufferQueueProducer::QueueBuffer(s32 slot, const QueueBufferInput& input,
     s32 swap_interval{};
     Fence fence{};
 
-    input.Deflate(&timestamp, &is_auto_timestamp, &crop, &scaling_mode, &transform, &sticky_transform_, &async, &swap_interval, &fence);
+    input.Deflate(&timestamp, &is_auto_timestamp, &crop, &scaling_mode, &transform,
+                  &sticky_transform_, &async, &swap_interval, &fence);
 
     switch (scaling_mode) {
     case NativeWindowScalingMode::Freeze:
@@ -498,7 +509,8 @@ Status BufferQueueProducer::QueueBuffer(s32 slot, const QueueBufferInput& input,
         item.is_auto_timestamp = is_auto_timestamp;
         item.crop = crop;
         item.transform = transform & ~NativeWindowTransform::InverseDisplay;
-        item.transform_to_display_inverse = (transform & NativeWindowTransform::InverseDisplay) != NativeWindowTransform::None;
+        item.transform_to_display_inverse =
+            (transform & NativeWindowTransform::InverseDisplay) != NativeWindowTransform::None;
         item.scaling_mode = static_cast<u32>(scaling_mode);
         item.fence = fence;
         item.is_droppable = core->dequeue_buffer_cannot_block || async;
@@ -530,13 +542,15 @@ Status BufferQueueProducer::QueueBuffer(s32 slot, const QueueBufferInput& input,
         }
 
         if (Settings::values.enable_buffer_history.GetValue()) {
-            core->PushHistory(core->frame_counter, slots[slot].queue_time, slots[slot].presentation_time, BufferState::Queued);
+            core->PushHistory(core->frame_counter, slots[slot].queue_time,
+                              slots[slot].presentation_time, BufferState::Queued);
         }
 
         core->buffer_has_been_queued = true;
         core->SignalDequeueCondition();
 
-        output->Inflate(core->default_width, core->default_height, core->transform_hint, static_cast<u32>(core->queue.size()));
+        output->Inflate(core->default_width, core->default_height, core->transform_hint,
+                        static_cast<u32>(core->queue.size()));
     }
 
     item.graphic_buffer.reset();
@@ -551,7 +565,8 @@ Status BufferQueueProducer::QueueBuffer(s32 slot, const QueueBufferInput& input,
     return Status::NoError;
 }
 
-void BufferQueueProducer::CancelBuffer(s32 slot, const Fence& fence) {
+void BufferQueueProducer::CancelBuffer(s32 slot, const Fence& fence)
+{
     LOG_DEBUG(Service_Nvnflinger, "slot {}", slot);
 
     std::scoped_lock lock{core->mutex};
@@ -579,7 +594,8 @@ void BufferQueueProducer::CancelBuffer(s32 slot, const Fence& fence) {
     buffer_wait_event->Signal();
 }
 
-Status BufferQueueProducer::Query(NativeWindow what, s32* out_value) {
+Status BufferQueueProducer::Query(NativeWindow what, s32* out_value)
+{
     std::scoped_lock lock{core->mutex};
 
     if (out_value == nullptr) {
@@ -632,7 +648,8 @@ Status BufferQueueProducer::Query(NativeWindow what, s32* out_value) {
 
 Status BufferQueueProducer::Connect(const std::shared_ptr<IProducerListener>& listener,
                                     NativeWindowApi api, bool producer_controlled_by_app,
-                                    QueueBufferOutput* output) {
+                                    QueueBufferOutput* output)
+{
     std::scoped_lock lock{core->mutex};
 
     LOG_DEBUG(Service_Nvnflinger, "api = {} producer_controlled_by_app = {}", api,
@@ -684,7 +701,8 @@ Status BufferQueueProducer::Connect(const std::shared_ptr<IProducerListener>& li
 }
 
 // https://android.googlesource.com/platform/frameworks/native/%2B/master/libs/gui/BufferQueueProducer.cpp#1457
-Status BufferQueueProducer::Disconnect(NativeWindowApi api) {
+Status BufferQueueProducer::Disconnect(NativeWindowApi api)
+{
     LOG_DEBUG(Service_Nvnflinger, "disconnect api = {}", api);
 
     std::shared_ptr<IConsumerListener> listener;
@@ -738,7 +756,8 @@ Status BufferQueueProducer::Disconnect(NativeWindowApi api) {
 }
 
 Status BufferQueueProducer::SetPreallocatedBuffer(s32 slot,
-                                                  const std::shared_ptr<NvGraphicBuffer>& buffer) {
+                                                  const std::shared_ptr<NvGraphicBuffer>& buffer)
+{
     LOG_DEBUG(Service_Nvnflinger, "slot {}", slot);
 
     if (slot < 0 || slot >= BufferQueueDefs::NUM_BUFFER_SLOTS) {
@@ -769,12 +788,14 @@ Status BufferQueueProducer::SetPreallocatedBuffer(s32 slot,
     return Status::NoError;
 }
 
-Kernel::KReadableEvent* BufferQueueProducer::GetNativeHandle(u32 type_id) {
+Kernel::KReadableEvent* BufferQueueProducer::GetNativeHandle(u32 type_id)
+{
     return &buffer_wait_event->GetReadableEvent();
 }
 
 void BufferQueueProducer::Transact(u32 code, std::span<const u8> parcel_data,
-                                   std::span<u8> parcel_reply, u32 flags) {
+                                   std::span<u8> parcel_reply, u32 flags)
+{
     // Values used by BnGraphicBufferProducer onTransact
     enum class TransactionId {
         RequestBuffer = 1,
@@ -916,9 +937,8 @@ void BufferQueueProducer::Transact(u32 code, std::span<const u8> parcel_data,
             }
         }
 
-        std::sort(snapshot.begin(), snapshot.end(), [](auto& a, auto& b){
-            return a.frame_number > b.frame_number;
-        });
+        std::sort(snapshot.begin(), snapshot.end(),
+                  [](auto& a, auto& b) { return a.frame_number > b.frame_number; });
 
         const s32 limit = std::min(request, (s32)snapshot.size());
         parcel_out.Write(Status::NoError);

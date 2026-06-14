@@ -4,6 +4,7 @@
 #pragma once
 
 #include <QWidget>
+
 #include "yuzu/configuration/configuration_shared.h"
 
 class QCheckBox;

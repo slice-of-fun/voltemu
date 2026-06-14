@@ -4,6 +4,8 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/file_sys/romfs.h"
+
 #include <memory>
 
 #include "common/assert.h"
@@ -11,7 +13,6 @@
 #include "common/string_util.h"
 #include "common/swap.h"
 #include "core/file_sys/fsmitm_romfsbuild.h"
-#include "core/file_sys/romfs.h"
 #include "core/file_sys/vfs/vfs.h"
 #include "core/file_sys/vfs/vfs_cached.h"
 #include "core/file_sys/vfs/vfs_concat.h"
@@ -65,8 +66,9 @@ struct RomFSTraversalContext {
     std::vector<u8> file_meta;
 };
 
-template <typename EntryType, auto Member>
-std::pair<EntryType, std::string> GetEntry(const RomFSTraversalContext& ctx, size_t offset) {
+template<typename EntryType, auto Member>
+std::pair<EntryType, std::string> GetEntry(const RomFSTraversalContext& ctx, size_t offset)
+{
     const size_t entry_end = offset + sizeof(EntryType);
     const std::vector<u8>& vec = ctx.*Member;
     const size_t size = vec.size();
@@ -85,17 +87,19 @@ std::pair<EntryType, std::string> GetEntry(const RomFSTraversalContext& ctx, siz
 }
 
 std::pair<DirectoryEntry, std::string> GetDirectoryEntry(const RomFSTraversalContext& ctx,
-                                                         size_t directory_offset) {
+                                                         size_t directory_offset)
+{
     return GetEntry<DirectoryEntry, &RomFSTraversalContext::directory_meta>(ctx, directory_offset);
 }
 
-std::pair<FileEntry, std::string> GetFileEntry(const RomFSTraversalContext& ctx,
-                                               size_t file_offset) {
+std::pair<FileEntry, std::string> GetFileEntry(const RomFSTraversalContext& ctx, size_t file_offset)
+{
     return GetEntry<FileEntry, &RomFSTraversalContext::file_meta>(ctx, file_offset);
 }
 
 void ProcessFile(const RomFSTraversalContext& ctx, u32 this_file_offset,
-                 std::shared_ptr<VectorVfsDirectory>& parent) {
+                 std::shared_ptr<VectorVfsDirectory>& parent)
+{
     while (this_file_offset != ROMFS_ENTRY_EMPTY) {
         auto entry = GetFileEntry(ctx, this_file_offset);
 
@@ -108,7 +112,8 @@ void ProcessFile(const RomFSTraversalContext& ctx, u32 this_file_offset,
 }
 
 void ProcessDirectory(const RomFSTraversalContext& ctx, u32 this_dir_offset,
-                      std::shared_ptr<VectorVfsDirectory>& parent) {
+                      std::shared_ptr<VectorVfsDirectory>& parent)
+{
     while (this_dir_offset != ROMFS_ENTRY_EMPTY) {
         auto entry = GetDirectoryEntry(ctx, this_dir_offset);
         auto current = std::make_shared<VectorVfsDirectory>(
@@ -128,7 +133,8 @@ void ProcessDirectory(const RomFSTraversalContext& ctx, u32 this_dir_offset,
 }
 } // Anonymous namespace
 
-VirtualDir ExtractRomFS(VirtualFile file) {
+VirtualDir ExtractRomFS(VirtualFile file)
+{
     auto root_container = std::make_shared<VectorVfsDirectory>();
     if (!file) {
         return root_container;
@@ -159,7 +165,8 @@ VirtualDir ExtractRomFS(VirtualFile file) {
     return nullptr;
 }
 
-VirtualFile CreateRomFS(VirtualDir dir, VirtualDir ext) {
+VirtualFile CreateRomFS(VirtualDir dir, VirtualDir ext)
+{
     if (dir == nullptr)
         return nullptr;
 

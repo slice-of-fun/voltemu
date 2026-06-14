@@ -4,6 +4,8 @@
 // SPDX-FileCopyrightText: Copyright 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/caps/caps_manager.h"
+
 #include <sstream>
 
 #include "common/fs/file.h"
@@ -11,7 +13,6 @@
 #include "common/logging.h"
 #include "common/stb.h"
 #include "core/core.h"
-#include "core/hle/service/caps/caps_manager.h"
 #include "core/hle/service/caps/caps_result.h"
 #include "core/hle/service/glue/time/static.h"
 #include "core/hle/service/psc/time/system_clock.h"
@@ -20,11 +21,14 @@
 
 namespace Service::Capture {
 
-AlbumManager::AlbumManager(Core::System& system_) : system{system_} {}
+AlbumManager::AlbumManager(Core::System& system_) : system{system_}
+{
+}
 
 AlbumManager::~AlbumManager() = default;
 
-Result AlbumManager::DeleteAlbumFile(const AlbumFileId& file_id) {
+Result AlbumManager::DeleteAlbumFile(const AlbumFileId& file_id)
+{
     if (file_id.storage > AlbumStorage::Sd) {
         return ResultInvalidStorage;
     }
@@ -47,7 +51,8 @@ Result AlbumManager::DeleteAlbumFile(const AlbumFileId& file_id) {
     return ResultSuccess;
 }
 
-Result AlbumManager::IsAlbumMounted(AlbumStorage storage) {
+Result AlbumManager::IsAlbumMounted(AlbumStorage storage)
+{
     if (storage > AlbumStorage::Sd) {
         return ResultInvalidStorage;
     }
@@ -62,7 +67,8 @@ Result AlbumManager::IsAlbumMounted(AlbumStorage storage) {
 }
 
 Result AlbumManager::GetAlbumFileList(std::span<AlbumEntry> out_entries, u64& out_entries_count,
-                                      AlbumStorage storage, u8 flags) const {
+                                      AlbumStorage storage, u8 flags) const
+{
     if (storage > AlbumStorage::Sd) {
         return ResultInvalidStorage;
     }
@@ -94,7 +100,8 @@ Result AlbumManager::GetAlbumFileList(std::span<AlbumEntry> out_entries, u64& ou
 
 Result AlbumManager::GetAlbumFileList(std::span<ApplicationAlbumFileEntry> out_entries,
                                       u64& out_entries_count, ContentType content_type,
-                                      s64 start_posix_time, s64 end_posix_time, u64 aruid) const {
+                                      s64 start_posix_time, s64 end_posix_time, u64 aruid) const
+{
     if (!is_mounted) {
         return ResultIsNotMounted;
     }
@@ -123,7 +130,8 @@ Result AlbumManager::GetAlbumFileList(std::span<ApplicationAlbumFileEntry> out_e
 Result AlbumManager::GetAlbumFileList(std::span<ApplicationAlbumEntry> out_entries,
                                       u64& out_entries_count, ContentType content_type,
                                       AlbumFileDateTime start_date, AlbumFileDateTime end_date,
-                                      u64 aruid) const {
+                                      u64 aruid) const
+{
     if (!is_mounted) {
         return ResultIsNotMounted;
     }
@@ -159,14 +167,16 @@ Result AlbumManager::GetAlbumFileList(std::span<ApplicationAlbumEntry> out_entri
     return ResultSuccess;
 }
 
-Result AlbumManager::GetAutoSavingStorage(bool& out_is_autosaving) const {
+Result AlbumManager::GetAutoSavingStorage(bool& out_is_autosaving) const
+{
     out_is_autosaving = false;
     return ResultSuccess;
 }
 
 Result AlbumManager::LoadAlbumScreenShotImage(LoadAlbumScreenShotImageOutput& out_image_output,
                                               std::span<u8> out_image, const AlbumFileId& file_id,
-                                              const ScreenShotDecodeOption& decoder_options) const {
+                                              const ScreenShotDecodeOption& decoder_options) const
+{
     if (file_id.storage > AlbumStorage::Sd) {
         return ResultInvalidStorage;
     }
@@ -200,9 +210,11 @@ Result AlbumManager::LoadAlbumScreenShotImage(LoadAlbumScreenShotImageOutput& ou
                      +static_cast<int>(out_image_output.height), decoder_options.flags);
 }
 
-Result AlbumManager::LoadAlbumScreenShotThumbnail(
-    LoadAlbumScreenShotImageOutput& out_image_output, std::span<u8> out_image,
-    const AlbumFileId& file_id, const ScreenShotDecodeOption& decoder_options) const {
+Result
+AlbumManager::LoadAlbumScreenShotThumbnail(LoadAlbumScreenShotImageOutput& out_image_output,
+                                           std::span<u8> out_image, const AlbumFileId& file_id,
+                                           const ScreenShotDecodeOption& decoder_options) const
+{
     if (file_id.storage > AlbumStorage::Sd) {
         return ResultInvalidStorage;
     }
@@ -239,7 +251,8 @@ Result AlbumManager::LoadAlbumScreenShotThumbnail(
 Result AlbumManager::SaveScreenShot(ApplicationAlbumEntry& out_entry,
                                     const ScreenShotAttribute& attribute,
                                     AlbumReportOption report_option, std::span<const u8> image_data,
-                                    u64 aruid) {
+                                    u64 aruid)
+{
     return SaveScreenShot(out_entry, attribute, report_option, {}, image_data, aruid);
 }
 
@@ -247,7 +260,8 @@ Result AlbumManager::SaveScreenShot(ApplicationAlbumEntry& out_entry,
                                     const ScreenShotAttribute& attribute,
                                     AlbumReportOption report_option,
                                     const ApplicationData& app_data, std::span<const u8> image_data,
-                                    u64 aruid) {
+                                    u64 aruid)
+{
     const u64 title_id = system.GetApplicationProcessProgramID();
 
     auto static_service =
@@ -271,7 +285,8 @@ Result AlbumManager::SaveScreenShot(ApplicationAlbumEntry& out_entry,
 Result AlbumManager::SaveEditedScreenShot(ApplicationAlbumEntry& out_entry,
                                           const ScreenShotAttribute& attribute,
                                           const AlbumFileId& file_id,
-                                          std::span<const u8> image_data) {
+                                          std::span<const u8> image_data)
+{
     auto static_service =
         system.ServiceManager().GetService<Service::Glue::Time::StaticService>("time:u", true);
 
@@ -290,7 +305,8 @@ Result AlbumManager::SaveEditedScreenShot(ApplicationAlbumEntry& out_entry,
     return SaveImage(out_entry, image_data, file_id.application_id, date);
 }
 
-Result AlbumManager::GetFile(std::filesystem::path& out_path, const AlbumFileId& file_id) const {
+Result AlbumManager::GetFile(std::filesystem::path& out_path, const AlbumFileId& file_id) const
+{
     const auto file = album_files.find(file_id);
 
     if (file == album_files.end()) {
@@ -301,7 +317,8 @@ Result AlbumManager::GetFile(std::filesystem::path& out_path, const AlbumFileId&
     return ResultSuccess;
 }
 
-void AlbumManager::FindScreenshots() {
+void AlbumManager::FindScreenshots()
+{
     is_mounted = false;
     album_files.clear();
 
@@ -327,7 +344,8 @@ void AlbumManager::FindScreenshots() {
     is_mounted = true;
 }
 
-Result AlbumManager::GetAlbumEntry(AlbumEntry& out_entry, const std::filesystem::path& path) const {
+Result AlbumManager::GetAlbumEntry(AlbumEntry& out_entry, const std::filesystem::path& path) const
+{
     std::istringstream line_stream(path.filename().string());
     std::string date;
     std::string application;
@@ -387,7 +405,8 @@ Result AlbumManager::GetAlbumEntry(AlbumEntry& out_entry, const std::filesystem:
 }
 
 Result AlbumManager::LoadImage(std::span<u8> out_image, const std::filesystem::path& path,
-                               int width, int height, ScreenShotDecoderFlag flag) const {
+                               int width, int height, ScreenShotDecoderFlag flag) const
+{
     if (out_image.size() != static_cast<std::size_t>(width * height * STBI_rgb_alpha)) {
         return ResultUnknown;
     }
@@ -428,23 +447,26 @@ Result AlbumManager::LoadImage(std::span<u8> out_image, const std::filesystem::p
     return ResultSuccess;
 }
 
-void AlbumManager::FlipVerticallyOnWrite(bool flip) {
+void AlbumManager::FlipVerticallyOnWrite(bool flip)
+{
     stbi_flip_vertically_on_write(flip);
 }
 
-static void PNGToMemory(void* context, void* data, int len) {
+static void PNGToMemory(void* context, void* data, int len)
+{
     std::vector<u8>* png_image = static_cast<std::vector<u8>*>(context);
     unsigned char* png = static_cast<unsigned char*>(data);
     png_image->insert(png_image->end(), png, png + len);
 }
 
 Result AlbumManager::SaveImage(ApplicationAlbumEntry& out_entry, std::span<const u8> image,
-                               u64 title_id, const AlbumFileDateTime& date) const {
+                               u64 title_id, const AlbumFileDateTime& date) const
+{
     const auto screenshot_path =
         Common::FS::GetVoltPathString(Common::FS::VoltPath::ScreenshotsDir);
     const std::string formatted_date =
-        fmt::format("{:04}-{:02}-{:02}_{:02}-{:02}-{:02}-{:03}", u16(date.year), u8(date.month), u8(date.day),
-                    u8(date.hour), u8(date.minute), u8(date.second), 0);
+        fmt::format("{:04}-{:02}-{:02}_{:02}-{:02}-{:02}-{:03}", u16(date.year), u8(date.month),
+                    u8(date.day), u8(date.hour), u8(date.minute), u8(date.second), 0);
     const std::string file_path =
         fmt::format("{}/{:016x}_{}.png", screenshot_path, title_id, formatted_date);
 
@@ -473,7 +495,8 @@ Result AlbumManager::SaveImage(ApplicationAlbumEntry& out_entry, std::span<const
     return ResultSuccess;
 }
 
-AlbumFileDateTime AlbumManager::ConvertToAlbumDateTime(u64 posix_time) const {
+AlbumFileDateTime AlbumManager::ConvertToAlbumDateTime(u64 posix_time) const
+{
     auto static_service =
         system.ServiceManager().GetService<Service::Glue::Time::StaticService>("time:u", true);
 

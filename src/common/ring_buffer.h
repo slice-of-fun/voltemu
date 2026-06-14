@@ -11,19 +11,18 @@
 #include <cstddef>
 #include <cstring>
 #include <limits>
+#include <mutex>
 #include <new>
 #include <span>
 #include <type_traits>
 #include <vector>
-#include <mutex>
 
 namespace Common {
 
 /// SPSC ring buffer
 /// @tparam T            Element type
 /// @tparam capacity     Number of slots in ring buffer
-template <typename T, std::size_t capacity>
-class RingBuffer {
+template<typename T, std::size_t capacity> class RingBuffer {
     /// A "slot" is made of a single `T`.
     static constexpr std::size_t slot_size = sizeof(T);
     // T must be safely memcpy-able and have a trivial default constructor.
@@ -39,7 +38,8 @@ public:
     /// @param new_slots   Pointer to the slots to push
     /// @param slot_count  Number of slots to push
     /// @returns The number of slots actually pushed
-    std::size_t Push(const void* new_slots, std::size_t slot_count) {
+    std::size_t Push(const void* new_slots, std::size_t slot_count)
+    {
         std::lock_guard lock(rb_mutex);
 
         const std::size_t slots_free = capacity + read_index - write_index;
@@ -57,15 +57,14 @@ public:
         return push_count;
     }
 
-    std::size_t Push(std::span<const T> input) {
-        return Push(input.data(), input.size());
-    }
+    std::size_t Push(std::span<const T> input) { return Push(input.data(), input.size()); }
 
     /// Pops slots from the ring buffer
     /// @param output     Where to store the popped slots
     /// @param max_slots  Maximum number of slots to pop
     /// @returns The number of slots actually popped
-    std::size_t Pop(void* output, std::size_t max_slots = ~std::size_t(0)) {
+    std::size_t Pop(void* output, std::size_t max_slots = ~std::size_t(0))
+    {
         std::lock_guard lock(rb_mutex);
 
         const std::size_t slots_filled = write_index - read_index;
@@ -83,7 +82,8 @@ public:
         return pop_count;
     }
 
-    std::vector<T> Pop(std::size_t max_slots = ~std::size_t(0)) {
+    std::vector<T> Pop(std::size_t max_slots = ~std::size_t(0))
+    {
         std::vector<T> out((std::min)(max_slots, capacity));
         const std::size_t count = Pop(out.data(), out.size());
         out.resize(count);
@@ -91,14 +91,10 @@ public:
     }
 
     /// @returns Number of slots used
-    [[nodiscard]] inline std::size_t Size() const {
-        return write_index - read_index;
-    }
+    [[nodiscard]] inline std::size_t Size() const { return write_index - read_index; }
 
     /// @returns Maximum size of ring buffer
-    [[nodiscard]] consteval std::size_t Capacity() const {
-        return capacity;
-    }
+    [[nodiscard]] consteval std::size_t Capacity() const { return capacity; }
 
 private:
     std::array<T, capacity> m_data;

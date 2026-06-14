@@ -4,12 +4,13 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/am/frontend/applet_mii_edit.h"
+
 #include "common/assert.h"
 #include "common/logging.h"
 #include "core/core.h"
 #include "core/frontend/applets/mii_edit.h"
 #include "core/hle/service/am/am.h"
-#include "core/hle/service/am/frontend/applet_mii_edit.h"
 #include "core/hle/service/am/service/storage.h"
 #include "core/hle/service/mii/mii.h"
 #include "core/hle/service/mii/mii_manager.h"
@@ -19,11 +20,14 @@ namespace Service::AM::Frontend {
 
 MiiEdit::MiiEdit(Core::System& system_, std::shared_ptr<Applet> applet_,
                  LibraryAppletMode applet_mode_, const Core::Frontend::MiiEditApplet& frontend_)
-    : FrontendApplet{system_, applet_, applet_mode_}, frontend{frontend_} {}
+    : FrontendApplet{system_, applet_, applet_mode_}, frontend{frontend_}
+{
+}
 
 MiiEdit::~MiiEdit() = default;
 
-void MiiEdit::Initialize() {
+void MiiEdit::Initialize()
+{
     // Note: MiiEdit is not initialized with common arguments.
     //       Instead, it is initialized by an AppletInput storage with size 0x100 bytes.
     //       Do NOT call Applet::Initialize() here.
@@ -70,15 +74,18 @@ void MiiEdit::Initialize() {
     manager->Initialize(metadata);
 }
 
-Result MiiEdit::GetStatus() const {
+Result MiiEdit::GetStatus() const
+{
     return ResultSuccess;
 }
 
-void MiiEdit::ExecuteInteractive() {
+void MiiEdit::ExecuteInteractive()
+{
     ASSERT_MSG(false, "Attempted to call interactive execution on non-interactive applet.");
 }
 
-void MiiEdit::Execute() {
+void MiiEdit::Execute()
+{
     if (is_complete) {
         return;
     }
@@ -139,7 +146,8 @@ void MiiEdit::Execute() {
     }
 }
 
-void MiiEdit::MiiEditOutput(MiiEditResult result, s32 index) {
+void MiiEdit::MiiEditOutput(MiiEditResult result, s32 index)
+{
     const MiiEditAppletOutput applet_output{
         .result{result},
         .index{index},
@@ -157,7 +165,8 @@ void MiiEdit::MiiEditOutput(MiiEditResult result, s32 index) {
 }
 
 void MiiEdit::MiiEditOutputForCharInfoEditing(MiiEditResult result,
-                                              const MiiEditCharInfo& char_info) {
+                                              const MiiEditCharInfo& char_info)
+{
     const MiiEditAppletOutputForCharInfoEditing applet_output{
         .result{result},
         .char_info{char_info},
@@ -172,7 +181,8 @@ void MiiEdit::MiiEditOutputForCharInfoEditing(MiiEditResult result,
     Exit();
 }
 
-Result MiiEdit::RequestExit() {
+Result MiiEdit::RequestExit()
+{
     frontend.Close();
     R_SUCCEED();
 }

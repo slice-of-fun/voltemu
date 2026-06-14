@@ -1,13 +1,15 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include "core/hle/kernel/k_page_buffer.h"
 #include "core/hle/kernel/k_session_request.h"
+
+#include "core/hle/kernel/k_page_buffer.h"
 
 namespace Kernel {
 
 Result KSessionRequest::SessionMappings::PushMap(KProcessAddress client, KProcessAddress server,
-                                                 size_t size, KMemoryState state, size_t index) {
+                                                 size_t size, KMemoryState state, size_t index)
+{
     // At most 15 buffers of each type (4-bit descriptor counts).
     ASSERT(index < ((1ul << 4) - 1) * 3);
 
@@ -34,25 +36,29 @@ Result KSessionRequest::SessionMappings::PushMap(KProcessAddress client, KProces
 }
 
 Result KSessionRequest::SessionMappings::PushSend(KProcessAddress client, KProcessAddress server,
-                                                  size_t size, KMemoryState state) {
+                                                  size_t size, KMemoryState state)
+{
     ASSERT(m_num_recv == 0);
     ASSERT(m_num_exch == 0);
     R_RETURN(this->PushMap(client, server, size, state, m_num_send++));
 }
 
 Result KSessionRequest::SessionMappings::PushReceive(KProcessAddress client, KProcessAddress server,
-                                                     size_t size, KMemoryState state) {
+                                                     size_t size, KMemoryState state)
+{
     ASSERT(m_num_exch == 0);
     R_RETURN(this->PushMap(client, server, size, state, m_num_send + m_num_recv++));
 }
 
 Result KSessionRequest::SessionMappings::PushExchange(KProcessAddress client,
                                                       KProcessAddress server, size_t size,
-                                                      KMemoryState state) {
+                                                      KMemoryState state)
+{
     R_RETURN(this->PushMap(client, server, size, state, m_num_send + m_num_recv + m_num_exch++));
 }
 
-void KSessionRequest::SessionMappings::Finalize() {
+void KSessionRequest::SessionMappings::Finalize()
+{
     if (m_mappings) {
         KPageBuffer::Free(m_kernel, reinterpret_cast<KPageBuffer*>(m_mappings));
         m_mappings = nullptr;

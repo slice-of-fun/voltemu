@@ -16,10 +16,11 @@
 //      https://link.springer.com/chapter/10.1007/978-3-642-37051-9_6
 //
 
+#include <ankerl/unordered_dense.h>
+
 #include <deque>
 #include <map>
 #include <span>
-#include <ankerl/unordered_dense.h>
 #include <variant>
 #include <vector>
 
@@ -53,64 +54,69 @@ struct IndirectBranchVariable {
     auto operator<=>(const IndirectBranchVariable&) const noexcept = default;
 };
 
-using Variant = std::variant<IR::Reg, IR::Pred, ZeroFlagTag, SignFlagTag, CarryFlagTag, OverflowFlagTag, GotoVariable, IndirectBranchVariable>;
+using Variant = std::variant<IR::Reg, IR::Pred, ZeroFlagTag, SignFlagTag, CarryFlagTag,
+                             OverflowFlagTag, GotoVariable, IndirectBranchVariable>;
 // TODO: majority of these require stable iterators, test with XC beforehand
 using ValueMap = std::unordered_map<IR::Block*, IR::Value>;
 
 struct DefTable {
-    const IR::Value& Def(IR::Block* block, IR::Reg variable) {
+    const IR::Value& Def(IR::Block* block, IR::Reg variable)
+    {
         return block->SsaRegValue(variable);
     }
-    void SetDef(IR::Block* block, IR::Reg variable, const IR::Value& value) {
+    void SetDef(IR::Block* block, IR::Reg variable, const IR::Value& value)
+    {
         block->SetSsaRegValue(variable, value);
     }
 
-    const IR::Value& Def(IR::Block* block, IR::Pred variable) {
+    const IR::Value& Def(IR::Block* block, IR::Pred variable)
+    {
         return preds[IR::PredIndex(variable)][block];
     }
-    void SetDef(IR::Block* block, IR::Pred variable, const IR::Value& value) {
+    void SetDef(IR::Block* block, IR::Pred variable, const IR::Value& value)
+    {
         preds[IR::PredIndex(variable)].insert_or_assign(block, value);
     }
 
-    const IR::Value& Def(IR::Block* block, GotoVariable variable) {
+    const IR::Value& Def(IR::Block* block, GotoVariable variable)
+    {
         return goto_vars[variable.index][block];
     }
-    void SetDef(IR::Block* block, GotoVariable variable, const IR::Value& value) {
+    void SetDef(IR::Block* block, GotoVariable variable, const IR::Value& value)
+    {
         goto_vars[variable.index].insert_or_assign(block, value);
     }
 
-    const IR::Value& Def(IR::Block* block, IndirectBranchVariable) {
+    const IR::Value& Def(IR::Block* block, IndirectBranchVariable)
+    {
         return indirect_branch_var[block];
     }
-    void SetDef(IR::Block* block, IndirectBranchVariable, const IR::Value& value) {
+    void SetDef(IR::Block* block, IndirectBranchVariable, const IR::Value& value)
+    {
         indirect_branch_var.insert_or_assign(block, value);
     }
 
-    const IR::Value& Def(IR::Block* block, ZeroFlagTag) {
-        return zero_flag[block];
-    }
-    void SetDef(IR::Block* block, ZeroFlagTag, const IR::Value& value) {
+    const IR::Value& Def(IR::Block* block, ZeroFlagTag) { return zero_flag[block]; }
+    void SetDef(IR::Block* block, ZeroFlagTag, const IR::Value& value)
+    {
         zero_flag.insert_or_assign(block, value);
     }
 
-    const IR::Value& Def(IR::Block* block, SignFlagTag) {
-        return sign_flag[block];
-    }
-    void SetDef(IR::Block* block, SignFlagTag, const IR::Value& value) {
+    const IR::Value& Def(IR::Block* block, SignFlagTag) { return sign_flag[block]; }
+    void SetDef(IR::Block* block, SignFlagTag, const IR::Value& value)
+    {
         sign_flag.insert_or_assign(block, value);
     }
 
-    const IR::Value& Def(IR::Block* block, CarryFlagTag) {
-        return carry_flag[block];
-    }
-    void SetDef(IR::Block* block, CarryFlagTag, const IR::Value& value) {
+    const IR::Value& Def(IR::Block* block, CarryFlagTag) { return carry_flag[block]; }
+    void SetDef(IR::Block* block, CarryFlagTag, const IR::Value& value)
+    {
         carry_flag.insert_or_assign(block, value);
     }
 
-    const IR::Value& Def(IR::Block* block, OverflowFlagTag) {
-        return overflow_flag[block];
-    }
-    void SetDef(IR::Block* block, OverflowFlagTag, const IR::Value& value) {
+    const IR::Value& Def(IR::Block* block, OverflowFlagTag) { return overflow_flag[block]; }
+    void SetDef(IR::Block* block, OverflowFlagTag, const IR::Value& value)
+    {
         overflow_flag.insert_or_assign(block, value);
     }
 
@@ -124,19 +130,23 @@ struct DefTable {
     ValueMap overflow_flag;
 };
 
-IR::Opcode UndefOpcode(IR::Reg) noexcept {
+IR::Opcode UndefOpcode(IR::Reg) noexcept
+{
     return IR::Opcode::UndefU32;
 }
 
-IR::Opcode UndefOpcode(IR::Pred) noexcept {
+IR::Opcode UndefOpcode(IR::Pred) noexcept
+{
     return IR::Opcode::UndefU1;
 }
 
-IR::Opcode UndefOpcode(const FlagTag&) noexcept {
+IR::Opcode UndefOpcode(const FlagTag&) noexcept
+{
     return IR::Opcode::UndefU1;
 }
 
-IR::Opcode UndefOpcode(IndirectBranchVariable) noexcept {
+IR::Opcode UndefOpcode(IndirectBranchVariable) noexcept
+{
     return IR::Opcode::UndefU32;
 }
 
@@ -147,8 +157,7 @@ enum class Status {
     PushPhiArgument,
 };
 
-template <typename Type>
-struct ReadState {
+template<typename Type> struct ReadState {
     ReadState(IR::Block* block_) : block{block_} {}
     ReadState() = default;
 
@@ -162,13 +171,14 @@ struct ReadState {
 
 class Pass {
 public:
-    template <typename Type>
-    void WriteVariable(Type variable, IR::Block* block, const IR::Value& value) {
+    template<typename Type>
+    void WriteVariable(Type variable, IR::Block* block, const IR::Value& value)
+    {
         current_def.SetDef(block, variable, value);
     }
 
-    template <typename Type>
-    IR::Value ReadVariable(Type variable, IR::Block* root_block) {
+    template<typename Type> IR::Value ReadVariable(Type variable, IR::Block* root_block)
+    {
         // TODO: Windows commits sodoku if you use small_vector
         std::vector<ReadState<Type>> stack{
             ReadState<Type>(nullptr),
@@ -243,7 +253,8 @@ public:
         return stack.back().result;
     }
 
-    void SealBlock(IR::Block* block) {
+    void SealBlock(IR::Block* block)
+    {
         const auto it{incomplete_phis.find(block)};
         if (it != incomplete_phis.end()) {
             for (auto& pair : it->second) {
@@ -256,15 +267,16 @@ public:
     }
 
 private:
-    template <typename Type>
-    IR::Value AddPhiOperands(Type variable, IR::Inst& phi, IR::Block* block) {
+    template<typename Type> IR::Value AddPhiOperands(Type variable, IR::Inst& phi, IR::Block* block)
+    {
         for (IR::Block* const imm_pred : block->ImmPredecessors()) {
             phi.AddPhiOperand(imm_pred, ReadVariable(variable, imm_pred));
         }
         return TryRemoveTrivialPhi(phi, block, UndefOpcode(variable));
     }
 
-    IR::Value TryRemoveTrivialPhi(IR::Inst& phi, IR::Block* block, IR::Opcode undef_opcode) {
+    IR::Value TryRemoveTrivialPhi(IR::Inst& phi, IR::Block* block, IR::Opcode undef_opcode)
+    {
         IR::Value same;
         const size_t num_args{phi.NumArgs()};
         for (size_t arg_index = 0; arg_index < num_args; ++arg_index) {
@@ -305,7 +317,8 @@ private:
     DefTable current_def;
 };
 
-void VisitInst(Pass& pass, IR::Block* block, IR::Inst& inst) {
+void VisitInst(Pass& pass, IR::Block* block, IR::Inst& inst)
+{
     switch (inst.GetOpcode()) {
     case IR::Opcode::SetRegister:
         if (const IR::Reg reg{inst.Arg(0).Reg()}; reg != IR::Reg::RZ) {
@@ -368,14 +381,16 @@ void VisitInst(Pass& pass, IR::Block* block, IR::Inst& inst) {
     }
 }
 
-void VisitBlock(Pass& pass, IR::Block* block) {
+void VisitBlock(Pass& pass, IR::Block* block)
+{
     for (IR::Inst& inst : block->Instructions()) {
         VisitInst(pass, block, inst);
     }
     pass.SealBlock(block);
 }
 
-IR::Type GetConcreteType(IR::Inst* inst) {
+IR::Type GetConcreteType(IR::Inst* inst)
+{
     std::deque<IR::Inst*> queue;
     queue.push_back(inst);
     while (!queue.empty()) {
@@ -396,7 +411,8 @@ IR::Type GetConcreteType(IR::Inst* inst) {
 }
 } // Anonymous namespace
 
-void SsaRewritePass(IR::Program& program) {
+void SsaRewritePass(IR::Program& program)
+{
     Pass pass;
     const auto end{program.post_order_blocks.rend()};
     for (auto block = program.post_order_blocks.rbegin(); block != end; ++block) {

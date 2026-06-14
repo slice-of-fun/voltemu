@@ -3,9 +3,9 @@
 
 #pragma once
 
-#include <string>
-
 #include <fmt/ranges.h>
+
+#include <string>
 
 #include "common/common_funcs.h"
 #include "shader_recompiler/exception.h"
@@ -48,13 +48,11 @@ DECLARE_ENUM_FLAG_OPERATORS(Type)
 
 } // namespace Shader::IR
 
-template <>
-struct fmt::formatter<Shader::IR::Type> {
-    constexpr auto parse(format_parse_context& ctx) {
-        return ctx.begin();
-    }
-    template <typename FormatContext>
-    auto format(const Shader::IR::Type& type, FormatContext& ctx) const {
+template<> struct fmt::formatter<Shader::IR::Type> {
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(const Shader::IR::Type& type, FormatContext& ctx) const
+    {
         return fmt::format_to(ctx.out(), "{}", NameOf(type));
     }
 };

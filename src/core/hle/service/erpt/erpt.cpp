@@ -4,11 +4,12 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/erpt/erpt.h"
+
 #include <memory>
 
 #include "common/logging.h"
 #include "core/hle/service/cmif_serialization.h"
-#include "core/hle/service/erpt/erpt.h"
 #include "core/hle/service/server_manager.h"
 #include "core/hle/service/service.h"
 #include "core/hle/service/sm/sm.h"
@@ -17,7 +18,8 @@ namespace Service::ERPT {
 
 class ErrorReportContext final : public ServiceFramework<ErrorReportContext> {
 public:
-    explicit ErrorReportContext(Core::System& system_) : ServiceFramework{system_, "erpt:c"} {
+    explicit ErrorReportContext(Core::System& system_) : ServiceFramework{system_, "erpt:c"}
+    {
         // clang-format off
         static const FunctionInfo functions[] = {
             {0, C<&ErrorReportContext::SubmitContext>, "SubmitContext"},
@@ -45,7 +47,8 @@ public:
 
 private:
     Result SubmitContext(InBuffer<BufferAttr_HipcMapAlias> context_entry,
-                         InBuffer<BufferAttr_HipcMapAlias> field_list) {
+                         InBuffer<BufferAttr_HipcMapAlias> field_list)
+    {
         LOG_WARNING(Service_SET, "(STUBBED) called, context_entry_size={}, field_list_size={}",
                     context_entry.size(), field_list.size());
         R_SUCCEED();
@@ -53,7 +56,8 @@ private:
 
     Result CreateReportV0(u32 report_type, InBuffer<BufferAttr_HipcMapAlias> context_entry,
                           InBuffer<BufferAttr_HipcMapAlias> report_list,
-                          InBuffer<BufferAttr_HipcMapAlias> report_meta_data) {
+                          InBuffer<BufferAttr_HipcMapAlias> report_meta_data)
+    {
         LOG_WARNING(Service_SET, "(STUBBED) called, report_type={:#x}", report_type);
         R_SUCCEED();
     }
@@ -61,7 +65,8 @@ private:
     Result CreateReportV1(u32 report_type, u32 unknown,
                           InBuffer<BufferAttr_HipcMapAlias> context_entry,
                           InBuffer<BufferAttr_HipcMapAlias> report_list,
-                          InBuffer<BufferAttr_HipcMapAlias> report_meta_data) {
+                          InBuffer<BufferAttr_HipcMapAlias> report_meta_data)
+    {
         LOG_WARNING(Service_SET, "(STUBBED) called, report_type={:#x}, unknown={:#x}", report_type,
                     unknown);
         R_SUCCEED();
@@ -70,7 +75,8 @@ private:
     Result CreateReport(u32 report_type, u32 unknown, u32 create_report_option_flag,
                         InBuffer<BufferAttr_HipcMapAlias> context_entry,
                         InBuffer<BufferAttr_HipcMapAlias> report_list,
-                        InBuffer<BufferAttr_HipcMapAlias> report_meta_data) {
+                        InBuffer<BufferAttr_HipcMapAlias> report_meta_data)
+    {
         LOG_WARNING(
             Service_SET,
             "(STUBBED) called, report_type={:#x}, unknown={:#x}, create_report_option_flag={:#x}",
@@ -79,7 +85,8 @@ private:
     }
 
     Result UpdateAwakeTime(InBuffer<BufferAttr_HipcMapAlias> data_a,
-                           InBuffer<BufferAttr_HipcMapAlias> data_b, u32 flag_a, u32 flag_b) {
+                           InBuffer<BufferAttr_HipcMapAlias> data_b, u32 flag_a, u32 flag_b)
+    {
         LOG_WARNING(Service_SET,
                     "(STUBBED) called, data_a_size={}, data_b_size={}, flag_a={}, flag_b={}",
                     data_a.size(), data_b.size(), flag_a, flag_b);
@@ -89,7 +96,8 @@ private:
 
 class ErrorReportSession final : public ServiceFramework<ErrorReportSession> {
 public:
-    explicit ErrorReportSession(Core::System& system_) : ServiceFramework{system_, "erpt:r"} {
+    explicit ErrorReportSession(Core::System& system_) : ServiceFramework{system_, "erpt:r"}
+    {
         // clang-format off
         static const FunctionInfo functions[] = {
             {0, nullptr, "OpenReport"},
@@ -102,7 +110,8 @@ public:
     }
 };
 
-void LoopProcess(Core::System& system) {
+void LoopProcess(Core::System& system)
+{
     auto server_manager = std::make_unique<ServerManager>(system);
 
     server_manager->RegisterNamedService("erpt:c", std::make_shared<ErrorReportContext>(system));

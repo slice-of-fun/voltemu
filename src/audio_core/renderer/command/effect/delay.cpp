@@ -1,8 +1,9 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include "audio_core/adsp/apps/audio_renderer/command_list_processor.h"
 #include "audio_core/renderer/command/effect/delay.h"
+
+#include "audio_core/adsp/apps/audio_renderer/command_list_processor.h"
 
 namespace AudioCore::Renderer {
 /**
@@ -12,7 +13,8 @@ namespace AudioCore::Renderer {
  * @param state  - State to be updated.
  */
 static void SetDelayEffectParameter(const DelayInfo::ParameterVersion1& params,
-                                    DelayInfo::State& state) {
+                                    DelayInfo::State& state)
+{
     auto channel_spread{params.channel_spread};
     state.feedback_gain = params.feedback_gain * 0.97998046875f;
     state.delay_feedback_gain = state.feedback_gain * (1.0f - channel_spread);
@@ -33,7 +35,8 @@ static void SetDelayEffectParameter(const DelayInfo::ParameterVersion1& params,
  */
 static void InitializeDelayEffect(const DelayInfo::ParameterVersion1& params,
                                   DelayInfo::State& state,
-                                  [[maybe_unused]] const CpuAddr workbuffer) {
+                                  [[maybe_unused]] const CpuAddr workbuffer)
+{
     state = {};
 
     for (u32 channel = 0; channel < params.channel_count; channel++) {
@@ -72,10 +75,11 @@ static void InitializeDelayEffect(const DelayInfo::ParameterVersion1& params,
  * @param outputs      - Output mix buffers to receive the delayed samples.
  * @param sample_count - Number of samples to process.
  */
-template <size_t NumChannels>
+template<size_t NumChannels>
 static void ApplyDelay(const DelayInfo::ParameterVersion1& params, DelayInfo::State& state,
                        std::span<std::span<const s32>> inputs, std::span<std::span<s32>> outputs,
-                       const u32 sample_count) {
+                       const u32 sample_count)
+{
     for (u32 sample_index = 0; sample_index < sample_count; sample_index++) {
         std::array<Common::FixedPoint<50, 14>, NumChannels> input_samples{};
         for (u32 channel = 0; channel < NumChannels; channel++) {
@@ -154,7 +158,8 @@ static void ApplyDelay(const DelayInfo::ParameterVersion1& params, DelayInfo::St
  */
 static void ApplyDelayEffect(const DelayInfo::ParameterVersion1& params, DelayInfo::State& state,
                              const bool enabled, std::span<std::span<const s32>> inputs,
-                             std::span<std::span<s32>> outputs, const u32 sample_count) {
+                             std::span<std::span<s32>> outputs, const u32 sample_count)
+{
 
     if (!IsChannelCountValid(params.channel_count)) {
         LOG_ERROR(Service_Audio, "Invalid delay channels {}", params.channel_count);
@@ -195,7 +200,8 @@ static void ApplyDelayEffect(const DelayInfo::ParameterVersion1& params, DelayIn
 }
 
 void DelayCommand::Dump([[maybe_unused]] const AudioRenderer::CommandListProcessor& processor,
-                        std::string& string) {
+                        std::string& string)
+{
     string += fmt::format("DelayCommand\n\tenabled {} \n\tinputs: ", effect_enabled);
     for (u32 i = 0; i < MaxChannels; i++) {
         string += fmt::format("{:02X}, ", inputs[i]);
@@ -207,7 +213,8 @@ void DelayCommand::Dump([[maybe_unused]] const AudioRenderer::CommandListProcess
     string += "\n";
 }
 
-void DelayCommand::Process(const AudioRenderer::CommandListProcessor& processor) {
+void DelayCommand::Process(const AudioRenderer::CommandListProcessor& processor)
+{
     std::array<std::span<const s32>, MaxChannels> input_buffers{};
     std::array<std::span<s32>, MaxChannels> output_buffers{};
 
@@ -231,7 +238,8 @@ void DelayCommand::Process(const AudioRenderer::CommandListProcessor& processor)
                      processor.sample_count);
 }
 
-bool DelayCommand::Verify(const AudioRenderer::CommandListProcessor& processor) {
+bool DelayCommand::Verify(const AudioRenderer::CommandListProcessor& processor)
+{
     return true;
 }
 

@@ -8,24 +8,28 @@
 #include "video_core/vulkan_common/vulkan_wrapper.h"
 
 #ifdef _WIN32
-#include <cstring>
 #include <processthreadsapi.h>
 #include <windows.h>
-#else
+
 #include <cstring>
+#else
 #include <errno.h>
 #include <spawn.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
+
+#include <cstring>
 #endif
 
 #include <fmt/core.h>
+
 #include "video_core/vulkan_common/vulkan_instance.h"
 #include "video_core/vulkan_common/vulkan_library.h"
 #include "yuzu/startup_checks.h"
 
-void CheckVulkan() {
+void CheckVulkan()
+{
     // Just start the Vulkan loader, this will crash if something is wrong
     try {
         Vulkan::vk::InstanceDispatch dld;
@@ -38,7 +42,8 @@ void CheckVulkan() {
     }
 }
 
-bool CheckEnvVars(bool* is_child) {
+bool CheckEnvVars(bool* is_child)
+{
 #ifdef _WIN32
     // Check environment variable to see if we are the child
     char variable_contents[8];
@@ -71,7 +76,8 @@ bool CheckEnvVars(bool* is_child) {
     return false;
 }
 
-bool StartupChecks(const char* arg0, bool* has_broken_vulkan, bool perform_vulkan_check) {
+bool StartupChecks(const char* arg0, bool* has_broken_vulkan, bool perform_vulkan_check)
+{
 #ifdef _WIN32
     // Set the startup variable for child processes
     const bool env_var_set = SetEnvironmentVariableA(STARTUP_CHECK_ENV_VAR, ENV_VAR_ENABLED_TEXT);
@@ -151,7 +157,8 @@ bool StartupChecks(const char* arg0, bool* has_broken_vulkan, bool perform_vulka
 }
 
 #ifdef _WIN32
-bool SpawnChild(const char* arg0, PROCESS_INFORMATION* pi, int flags) {
+bool SpawnChild(const char* arg0, PROCESS_INFORMATION* pi, int flags)
+{
     STARTUPINFOA startup_info;
 
     std::memset(&startup_info, '\0', sizeof(startup_info));
@@ -180,7 +187,8 @@ bool SpawnChild(const char* arg0, PROCESS_INFORMATION* pi, int flags) {
     return true;
 }
 #else
-pid_t SpawnChild(const char* arg0) {
+pid_t SpawnChild(const char* arg0)
+{
     const pid_t pid = fork();
 
     if (pid == -1) {

@@ -4,7 +4,10 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/nvdrv/devices/nvhost_gpu.h"
+
 #include <cstring>
+
 #include "common/assert.h"
 #include "common/logging.h"
 #include "core/core.h"
@@ -13,7 +16,6 @@
 #include "core/hle/service/nvdrv/core/nvmap.h"
 #include "core/hle/service/nvdrv/core/syncpoint_manager.h"
 #include "core/hle/service/nvdrv/devices/ioctl_serialization.h"
-#include "core/hle/service/nvdrv/devices/nvhost_gpu.h"
 #include "core/hle/service/nvdrv/nvdrv.h"
 #include "core/memory.h"
 #include "video_core/control/channel_state.h"
@@ -23,7 +25,8 @@
 
 namespace Service::Nvidia::Devices {
 namespace {
-Tegra::CommandHeader BuildFenceAction(Tegra::Engines::Puller::FenceOperation op, u32 syncpoint_id) {
+Tegra::CommandHeader BuildFenceAction(Tegra::Engines::Puller::FenceOperation op, u32 syncpoint_id)
+{
     Tegra::Engines::Puller::FenceAction result{};
     result.op.Assign(op);
     result.syncpoint_id.Assign(syncpoint_id);
@@ -35,7 +38,8 @@ nvhost_gpu::nvhost_gpu(Core::System& system_, EventInterface& events_interface_,
                        NvCore::Container& core_)
     : nvdevice{system_}, events_interface{events_interface_}, core{core_},
       syncpoint_manager{core_.GetSyncpointManager()}, nvmap{core.GetNvMapFile()},
-      channel_state{system.GPU().AllocateChannel()} {
+      channel_state{system.GPU().AllocateChannel()}
+{
     channel_syncpoint = syncpoint_manager.AllocateSyncpoint(false);
     sm_exception_breakpoint_int_report_event =
         events_interface.CreateEvent("GpuChannelSMExceptionBreakpointInt");
@@ -44,7 +48,8 @@ nvhost_gpu::nvhost_gpu(Core::System& system_, EventInterface& events_interface_,
     error_notifier_event = events_interface.CreateEvent("GpuChannelErrorNotifier");
 }
 
-nvhost_gpu::~nvhost_gpu() {
+nvhost_gpu::~nvhost_gpu()
+{
     events_interface.FreeEvent(sm_exception_breakpoint_int_report_event);
     events_interface.FreeEvent(sm_exception_breakpoint_pause_report_event);
     events_interface.FreeEvent(error_notifier_event);
@@ -52,7 +57,8 @@ nvhost_gpu::~nvhost_gpu() {
 }
 
 NvResult nvhost_gpu::Ioctl1(DeviceFD fd, Ioctl command, std::span<const u8> input,
-                            std::span<u8> output) {
+                            std::span<u8> output)
+{
     switch (command.group) {
     case 0x0:
         switch (command.cmd) {
@@ -106,7 +112,8 @@ NvResult nvhost_gpu::Ioctl1(DeviceFD fd, Ioctl command, std::span<const u8> inpu
 };
 
 NvResult nvhost_gpu::Ioctl2(DeviceFD fd, Ioctl command, std::span<const u8> input,
-                            std::span<const u8> inline_input, std::span<u8> output) {
+                            std::span<const u8> inline_input, std::span<u8> output)
+{
     switch (command.group) {
     case 'H':
         switch (command.cmd) {
@@ -121,98 +128,83 @@ NvResult nvhost_gpu::Ioctl2(DeviceFD fd, Ioctl command, std::span<const u8> inpu
 }
 
 NvResult nvhost_gpu::Ioctl3(DeviceFD fd, Ioctl command, std::span<const u8> input,
-                            std::span<u8> output, std::span<u8> inline_output) {
+                            std::span<u8> output, std::span<u8> inline_output)
+{
     UNIMPLEMENTED_MSG("Unimplemented ioctl={:08X}", command.raw);
     return NvResult::NotImplemented;
 }
 
-void nvhost_gpu::OnOpen(NvCore::SessionId session_id, DeviceFD fd) {
+void nvhost_gpu::OnOpen(NvCore::SessionId session_id, DeviceFD fd)
+{
     sessions[fd] = session_id;
 }
 
-void nvhost_gpu::OnClose(DeviceFD fd) {
+void nvhost_gpu::OnClose(DeviceFD fd)
+{
     sessions.erase(fd);
 }
 
-NvResult nvhost_gpu::SetNVMAPfd(IoctlSetNvmapFD& params) {
+NvResult nvhost_gpu::SetNVMAPfd(IoctlSetNvmapFD& params)
+{
     LOG_DEBUG(Service_NVDRV, "called, fd={}", params.nvmap_fd);
 
     nvmap_fd = params.nvmap_fd;
     return NvResult::Success;
 }
 
-NvResult nvhost_gpu::SetClientData(IoctlClientData& params) {
+NvResult nvhost_gpu::SetClientData(IoctlClientData& params)
+{
     LOG_DEBUG(Service_NVDRV, "called");
     user_data = params.data;
     return NvResult::Success;
 }
 
-NvResult nvhost_gpu::GetClientData(IoctlClientData& params) {
+NvResult nvhost_gpu::GetClientData(IoctlClientData& params)
+{
     LOG_DEBUG(Service_NVDRV, "called");
     params.data = user_data;
     return NvResult::Success;
 }
 
-NvResult nvhost_gpu::ZCullBind(IoctlZCullBind& params) {
+NvResult nvhost_gpu::ZCullBind(IoctlZCullBind& params)
+{
     zcull_params = params;
     LOG_DEBUG(Service_NVDRV, "called, gpu_va={:X}, mode={:X}", zcull_params.gpu_va,
               zcull_params.mode);
     return NvResult::Success;
 }
 
-NvResult nvhost_gpu::SetErrorNotifier(IoctlSetErrorNotifier& params) {
+NvResult nvhost_gpu::SetErrorNotifier(IoctlSetErrorNotifier& params)
+{
     LOG_WARNING(Service_NVDRV, "(STUBBED) called, offset={:X}, size={:X}, mem={:X}", params.offset,
                 params.size, params.mem);
     return NvResult::Success;
 }
 
-NvResult nvhost_gpu::SetChannelPriority(IoctlChannelSetPriority& params) {
+NvResult nvhost_gpu::SetChannelPriority(IoctlChannelSetPriority& params)
+{
     channel_priority = params.priority;
     LOG_INFO(Service_NVDRV, "called, priority={:X}", channel_priority);
 
     switch (static_cast<ChannelPriority>(channel_priority)) {
-    case ChannelPriority::Low: channel_timeslice = 1300; break;
-    case ChannelPriority::Medium: channel_timeslice = 2600; break;
-    case ChannelPriority::High: channel_timeslice = 5200; break;
-    default : return NvResult::BadParameter;
+    case ChannelPriority::Low:
+        channel_timeslice = 1300;
+        break;
+    case ChannelPriority::Medium:
+        channel_timeslice = 2600;
+        break;
+    case ChannelPriority::High:
+        channel_timeslice = 5200;
+        break;
+    default:
+        return NvResult::BadParameter;
     }
 
     return NvResult::Success;
 }
 
-NvResult nvhost_gpu::AllocGPFIFOEx(IoctlAllocGpfifoEx& params, DeviceFD fd) {
-    LOG_DEBUG(Service_NVDRV, "called, num_entries={:X}, flags={:X}, reserved1={:X}, "
-              "reserved2={:X}, reserved3={:X}",
-              params.num_entries, params.flags, params.reserved[0], params.reserved[1],
-              params.reserved[2]);
-
-    if (channel_state->initialized) {
-        LOG_DEBUG(Service_NVDRV, "Channel already initialized; AllocGPFIFOEx returning AlreadyAllocated");
-        return NvResult::AlreadyAllocated;
-    }
-
-    u64 program_id{};
-    if (auto* const session = core.GetSession(sessions[fd]); session != nullptr) {
-        program_id = session->process->GetProgramId();
-    }
-
-    // Store program id for later lazy initialization
-    channel_state->program_id = program_id;
-
-    // If address space is not yet bound, defer channel initialization.
-    if (!channel_state->memory_manager) {
-        params.fence_out = syncpoint_manager.GetSyncpointFence(channel_syncpoint);
-        return NvResult::Success;
-    }
-
-    system.GPU().InitChannel(*channel_state, program_id);
-
-    params.fence_out = syncpoint_manager.GetSyncpointFence(channel_syncpoint);
-
-    return NvResult::Success;
-}
-
-NvResult nvhost_gpu::AllocGPFIFOEx2(IoctlAllocGpfifoEx& params, DeviceFD fd) {
+NvResult nvhost_gpu::AllocGPFIFOEx(IoctlAllocGpfifoEx& params, DeviceFD fd)
+{
     LOG_DEBUG(Service_NVDRV,
               "called, num_entries={:X}, flags={:X}, reserved1={:X}, "
               "reserved2={:X}, reserved3={:X}",
@@ -220,7 +212,8 @@ NvResult nvhost_gpu::AllocGPFIFOEx2(IoctlAllocGpfifoEx& params, DeviceFD fd) {
               params.reserved[2]);
 
     if (channel_state->initialized) {
-        LOG_DEBUG(Service_NVDRV, "Channel already initialized; AllocGPFIFOEx2 returning AlreadyAllocated");
+        LOG_DEBUG(Service_NVDRV,
+                  "Channel already initialized; AllocGPFIFOEx returning AlreadyAllocated");
         return NvResult::AlreadyAllocated;
     }
 
@@ -245,20 +238,64 @@ NvResult nvhost_gpu::AllocGPFIFOEx2(IoctlAllocGpfifoEx& params, DeviceFD fd) {
     return NvResult::Success;
 }
 
-s32_le nvhost_gpu::GetObjectContextClassNumberIndex(CtxClasses class_number) {
+NvResult nvhost_gpu::AllocGPFIFOEx2(IoctlAllocGpfifoEx& params, DeviceFD fd)
+{
+    LOG_DEBUG(Service_NVDRV,
+              "called, num_entries={:X}, flags={:X}, reserved1={:X}, "
+              "reserved2={:X}, reserved3={:X}",
+              params.num_entries, params.flags, params.reserved[0], params.reserved[1],
+              params.reserved[2]);
+
+    if (channel_state->initialized) {
+        LOG_DEBUG(Service_NVDRV,
+                  "Channel already initialized; AllocGPFIFOEx2 returning AlreadyAllocated");
+        return NvResult::AlreadyAllocated;
+    }
+
+    u64 program_id{};
+    if (auto* const session = core.GetSession(sessions[fd]); session != nullptr) {
+        program_id = session->process->GetProgramId();
+    }
+
+    // Store program id for later lazy initialization
+    channel_state->program_id = program_id;
+
+    // If address space is not yet bound, defer channel initialization.
+    if (!channel_state->memory_manager) {
+        params.fence_out = syncpoint_manager.GetSyncpointFence(channel_syncpoint);
+        return NvResult::Success;
+    }
+
+    system.GPU().InitChannel(*channel_state, program_id);
+
+    params.fence_out = syncpoint_manager.GetSyncpointFence(channel_syncpoint);
+
+    return NvResult::Success;
+}
+
+s32_le nvhost_gpu::GetObjectContextClassNumberIndex(CtxClasses class_number)
+{
     constexpr s32_le invalid_class_number_index = -1;
     switch (class_number) {
-    case CtxClasses::Ctx2D: return 0;
-    case CtxClasses::Ctx3D: return 1;
-    case CtxClasses::CtxCompute: return 2;
-    case CtxClasses::CtxKepler: return 3;
-    case CtxClasses::CtxDMA: return 4;
-    case CtxClasses::CtxChannelGPFIFO: return 5;
-    default: return invalid_class_number_index;
+    case CtxClasses::Ctx2D:
+        return 0;
+    case CtxClasses::Ctx3D:
+        return 1;
+    case CtxClasses::CtxCompute:
+        return 2;
+    case CtxClasses::CtxKepler:
+        return 3;
+    case CtxClasses::CtxDMA:
+        return 4;
+    case CtxClasses::CtxChannelGPFIFO:
+        return 5;
+    default:
+        return invalid_class_number_index;
     }
 }
 
-NvResult nvhost_gpu::AllocateObjectContext(IoctlAllocObjCtx& params) {
+NvResult nvhost_gpu::AllocateObjectContext(IoctlAllocObjCtx& params)
+{
     LOG_DEBUG(Service_NVDRV, "called, class_num={:#X}, flags={:#X}, obj_id={:#X}", params.class_num,
               params.flags, params.obj_id);
 
@@ -278,7 +315,7 @@ NvResult nvhost_gpu::AllocateObjectContext(IoctlAllocObjCtx& params) {
         params.flags = allowed_mask;
     }
 
-    s32_le ctx_class_number_index = 
+    s32_le ctx_class_number_index =
         GetObjectContextClassNumberIndex(static_cast<CtxClasses>(params.class_num));
     if (ctx_class_number_index < 0) {
         LOG_ERROR(Service_NVDRV, "Invalid class number for object context: {:#X}",
@@ -287,7 +324,8 @@ NvResult nvhost_gpu::AllocateObjectContext(IoctlAllocObjCtx& params) {
     }
 
     if (ctxObjs[ctx_class_number_index].has_value()) {
-        LOG_WARNING(Service_NVDRV, "Object context for class {:#X} already allocated on this channel",
+        LOG_WARNING(Service_NVDRV,
+                    "Object context for class {:#X} already allocated on this channel",
                     params.class_num);
         return NvResult::AlreadyAllocated;
     }
@@ -298,8 +336,8 @@ NvResult nvhost_gpu::AllocateObjectContext(IoctlAllocObjCtx& params) {
     return NvResult::Success;
 }
 
-static boost::container::small_vector<Tegra::CommandHeader, 512> BuildWaitCommandList(
-    NvFence fence) {
+static boost::container::small_vector<Tegra::CommandHeader, 512> BuildWaitCommandList(NvFence fence)
+{
     return {
         Tegra::BuildCommandHeader(Tegra::BufferMethods::SyncpointPayload, 1,
                                   Tegra::SubmissionMode::Increasing),
@@ -310,8 +348,9 @@ static boost::container::small_vector<Tegra::CommandHeader, 512> BuildWaitComman
     };
 }
 
-static boost::container::small_vector<Tegra::CommandHeader, 512> BuildIncrementCommandList(
-    NvFence fence) {
+static boost::container::small_vector<Tegra::CommandHeader, 512>
+BuildIncrementCommandList(NvFence fence)
+{
     boost::container::small_vector<Tegra::CommandHeader, 512> result{
         Tegra::BuildCommandHeader(Tegra::BufferMethods::SyncpointPayload, 1,
                                   Tegra::SubmissionMode::Increasing),
@@ -327,8 +366,9 @@ static boost::container::small_vector<Tegra::CommandHeader, 512> BuildIncrementC
     return result;
 }
 
-static boost::container::small_vector<Tegra::CommandHeader, 512> BuildIncrementWithWfiCommandList(
-    NvFence fence) {
+static boost::container::small_vector<Tegra::CommandHeader, 512>
+BuildIncrementWithWfiCommandList(NvFence fence)
+{
     boost::container::small_vector<Tegra::CommandHeader, 512> result{
         Tegra::BuildCommandHeader(Tegra::BufferMethods::WaitForIdle, 1,
                                   Tegra::SubmissionMode::Increasing),
@@ -338,7 +378,8 @@ static boost::container::small_vector<Tegra::CommandHeader, 512> BuildIncrementW
     return result;
 }
 
-NvResult nvhost_gpu::SubmitGPFIFOImpl(IoctlSubmitGpfifo& params, Tegra::CommandList&& entries) {
+NvResult nvhost_gpu::SubmitGPFIFOImpl(IoctlSubmitGpfifo& params, Tegra::CommandList&& entries)
+{
     LOG_TRACE(Service_NVDRV, "called, gpfifo={:X}, num_entries={:X}, flags={:X}", params.address,
               params.num_entries, params.flags.raw);
 
@@ -388,7 +429,8 @@ NvResult nvhost_gpu::SubmitGPFIFOImpl(IoctlSubmitGpfifo& params, Tegra::CommandL
 }
 
 NvResult nvhost_gpu::SubmitGPFIFOBase1(IoctlSubmitGpfifo& params,
-                                       std::span<Tegra::CommandListHeader> commands, bool kickoff) {
+                                       std::span<Tegra::CommandListHeader> commands, bool kickoff)
+{
     if (params.num_entries > commands.size()) {
         UNIMPLEMENTED();
         return NvResult::InvalidSize;
@@ -407,7 +449,8 @@ NvResult nvhost_gpu::SubmitGPFIFOBase1(IoctlSubmitGpfifo& params,
 }
 
 NvResult nvhost_gpu::SubmitGPFIFOBase2(IoctlSubmitGpfifo& params,
-                                       std::span<const Tegra::CommandListHeader> commands) {
+                                       std::span<const Tegra::CommandListHeader> commands)
+{
     if (params.num_entries > commands.size()) {
         UNIMPLEMENTED();
         return NvResult::InvalidSize;
@@ -419,20 +462,23 @@ NvResult nvhost_gpu::SubmitGPFIFOBase2(IoctlSubmitGpfifo& params,
     return SubmitGPFIFOImpl(params, std::move(entries));
 }
 
-NvResult nvhost_gpu::GetWaitbase(IoctlGetWaitbase& params) {
+NvResult nvhost_gpu::GetWaitbase(IoctlGetWaitbase& params)
+{
     LOG_INFO(Service_NVDRV, "called, unknown={:#X}", params.unknown);
 
     params.value = 0; // Seems to be hard coded at 0
     return NvResult::Success;
 }
 
-NvResult nvhost_gpu::ChannelSetTimeout(IoctlChannelSetTimeout& params) {
+NvResult nvhost_gpu::ChannelSetTimeout(IoctlChannelSetTimeout& params)
+{
     LOG_INFO(Service_NVDRV, "called, timeout={:#X}", params.timeout);
 
     return NvResult::Success;
 }
 
-NvResult nvhost_gpu::ChannelSetTimeslice(IoctlSetTimeslice& params) {
+NvResult nvhost_gpu::ChannelSetTimeslice(IoctlSetTimeslice& params)
+{
     LOG_INFO(Service_NVDRV, "called, timeslice={:#X}", params.timeslice);
 
     if (params.timeslice < 1000 || params.timeslice > 5000) {
@@ -444,7 +490,8 @@ NvResult nvhost_gpu::ChannelSetTimeslice(IoctlSetTimeslice& params) {
     return NvResult::Success;
 }
 
-Kernel::KEvent* nvhost_gpu::QueryEvent(u32 event_id) {
+Kernel::KEvent* nvhost_gpu::QueryEvent(u32 event_id)
+{
     switch (event_id) {
     case 1:
         return sm_exception_breakpoint_int_report_event;

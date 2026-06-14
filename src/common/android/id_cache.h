@@ -3,9 +3,10 @@
 
 #pragma once
 
-#include <future>
 #include <jni.h>
 #include <network/network.h>
+
+#include <future>
 
 #include "video_core/rasterizer_interface.h"
 
@@ -20,8 +21,8 @@ JNIEnv* GetEnvForThread();
  * the JVM
  * @return The result from the work lambda param
  */
-template <typename T = void>
-T RunJNIOnFiber(const std::function<T(JNIEnv*)>& work) {
+template<typename T = void> T RunJNIOnFiber(const std::function<T(JNIEnv*)>& work)
+{
     std::future<T> j_result = std::async(std::launch::async, [&] {
         auto env = GetEnvForThread();
         return work(env);
@@ -115,6 +116,5 @@ jmethodID GetYuzuDeviceGetAxes();
 jmethodID GetYuzuDeviceHasKeys();
 jmethodID GetAddNetPlayMessage();
 jmethodID ClearChat();
-
 
 } // namespace Common::Android

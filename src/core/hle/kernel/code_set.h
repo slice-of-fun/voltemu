@@ -54,44 +54,36 @@ struct CodeSet final {
     CodeSet(CodeSet&&) = default;
     CodeSet& operator=(CodeSet&&) = default;
 
-    Segment& CodeSegment() {
-        return segments[0];
-    }
+    Segment& CodeSegment() { return segments[0]; }
 
-    const Segment& CodeSegment() const {
-        return segments[0];
-    }
+    const Segment& CodeSegment() const { return segments[0]; }
 
-    Segment& RODataSegment() {
-        return segments[1];
-    }
+    Segment& RODataSegment() { return segments[1]; }
 
-    const Segment& RODataSegment() const {
-        return segments[1];
-    }
+    const Segment& RODataSegment() const { return segments[1]; }
 
-    Segment& DataSegment() {
-        return segments[2];
-    }
+    Segment& DataSegment() { return segments[2]; }
 
-    const Segment& DataSegment() const {
-        return segments[2];
-    }
+    const Segment& DataSegment() const { return segments[2]; }
 
 #ifdef HAS_NCE
-    Segment& PatchSegment() {
+    Segment& PatchSegment()
+    {
         return patch_segment;
     }
 
-    const Segment& PatchSegment() const {
+    const Segment& PatchSegment() const
+    {
         return patch_segment;
     }
 
-    Segment& PostPatchSegment() {
+    Segment& PostPatchSegment()
+    {
         return post_patch_segment;
     }
 
-    const Segment& PostPatchSegment() const {
+    const Segment& PostPatchSegment() const
+    {
         return post_patch_segment;
     }
 #endif

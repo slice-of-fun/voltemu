@@ -24,20 +24,15 @@ public:
     explicit KSystemResource(KernelCore& kernel) : KAutoObject(kernel) {}
 
 protected:
-    void SetSecureResource() {
-        m_is_secure_resource = true;
-    }
+    void SetSecureResource() { m_is_secure_resource = true; }
 
 public:
-    virtual void Destroy() override {
-        UNREACHABLE_MSG("KSystemResource::Destroy() was called");
-    }
+    virtual void Destroy() override { UNREACHABLE_MSG("KSystemResource::Destroy() was called"); }
 
-    bool IsSecureResource() const {
-        return m_is_secure_resource;
-    }
+    bool IsSecureResource() const { return m_is_secure_resource; }
 
-    void SetManagers(KMemoryBlockSlabManager& mb, KBlockInfoManager& bi, KPageTableManager& pt) {
+    void SetManagers(KMemoryBlockSlabManager& mb, KBlockInfoManager& bi, KPageTableManager& pt)
+    {
         ASSERT(m_p_memory_block_slab_manager == nullptr);
         ASSERT(m_p_block_info_manager == nullptr);
         ASSERT(m_p_page_table_manager == nullptr);
@@ -47,35 +42,23 @@ public:
         m_p_page_table_manager = std::addressof(pt);
     }
 
-    const KMemoryBlockSlabManager& GetMemoryBlockSlabManager() const {
+    const KMemoryBlockSlabManager& GetMemoryBlockSlabManager() const
+    {
         return *m_p_memory_block_slab_manager;
     }
-    const KBlockInfoManager& GetBlockInfoManager() const {
-        return *m_p_block_info_manager;
-    }
-    const KPageTableManager& GetPageTableManager() const {
-        return *m_p_page_table_manager;
-    }
+    const KBlockInfoManager& GetBlockInfoManager() const { return *m_p_block_info_manager; }
+    const KPageTableManager& GetPageTableManager() const { return *m_p_page_table_manager; }
 
-    KMemoryBlockSlabManager& GetMemoryBlockSlabManager() {
-        return *m_p_memory_block_slab_manager;
-    }
-    KBlockInfoManager& GetBlockInfoManager() {
-        return *m_p_block_info_manager;
-    }
-    KPageTableManager& GetPageTableManager() {
-        return *m_p_page_table_manager;
-    }
+    KMemoryBlockSlabManager& GetMemoryBlockSlabManager() { return *m_p_memory_block_slab_manager; }
+    KBlockInfoManager& GetBlockInfoManager() { return *m_p_block_info_manager; }
+    KPageTableManager& GetPageTableManager() { return *m_p_page_table_manager; }
 
-    KMemoryBlockSlabManager* GetMemoryBlockSlabManagerPointer() {
+    KMemoryBlockSlabManager* GetMemoryBlockSlabManagerPointer()
+    {
         return m_p_memory_block_slab_manager;
     }
-    KBlockInfoManager* GetBlockInfoManagerPointer() {
-        return m_p_block_info_manager;
-    }
-    KPageTableManager* GetPageTableManagerPointer() {
-        return m_p_page_table_manager;
-    }
+    KBlockInfoManager* GetBlockInfoManagerPointer() { return m_p_block_info_manager; }
+    KPageTableManager* GetPageTableManagerPointer() { return m_p_page_table_manager; }
 
 private:
     KMemoryBlockSlabManager* m_p_memory_block_slab_manager{};
@@ -88,7 +71,8 @@ class KSecureSystemResource final
     : public KAutoObjectWithSlabHeap<KSecureSystemResource, KSystemResource> {
 public:
     explicit KSecureSystemResource(KernelCore& kernel)
-        : KAutoObjectWithSlabHeap<KSecureSystemResource, KSystemResource>(kernel) {
+        : KAutoObjectWithSlabHeap<KSecureSystemResource, KSystemResource>(kernel)
+    {
         // Mark ourselves as being a secure resource.
         this->SetSecureResource();
     }
@@ -96,25 +80,18 @@ public:
     Result Initialize(size_t size, KResourceLimit* resource_limit, KMemoryManager::Pool pool);
     void Finalize();
 
-    bool IsInitialized() const {
-        return m_is_initialized;
-    }
+    bool IsInitialized() const { return m_is_initialized; }
     static void PostDestroy(uintptr_t arg) {}
 
-    size_t CalculateRequiredSecureMemorySize() const {
+    size_t CalculateRequiredSecureMemorySize() const
+    {
         return CalculateRequiredSecureMemorySize(m_resource_size, m_resource_pool);
     }
 
-    size_t GetSize() const {
-        return m_resource_size;
-    }
-    size_t GetUsedSize() const {
-        return m_dynamic_page_manager.GetUsed() * PageSize;
-    }
+    size_t GetSize() const { return m_resource_size; }
+    size_t GetUsedSize() const { return m_dynamic_page_manager.GetUsed() * PageSize; }
 
-    const KDynamicPageManager& GetDynamicPageManager() const {
-        return m_dynamic_page_manager;
-    }
+    const KDynamicPageManager& GetDynamicPageManager() const { return m_dynamic_page_manager; }
 
 public:
     static size_t CalculateRequiredSecureMemorySize(size_t size, KMemoryManager::Pool pool);

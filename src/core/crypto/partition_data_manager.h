@@ -7,6 +7,7 @@
 #pragma once
 
 #include <vector>
+
 #include "common/common_types.h"
 #include "core/file_sys/vfs/vfs_types.h"
 
@@ -55,10 +56,10 @@ public:
     FileSys::VirtualFile GetPackage2Raw(Package2Type type = Package2Type::NormalMain) const;
     void DecryptPackage2(const std::array<std::array<u8, 16>, 0x20>& package2_keys,
                          Package2Type type);
-    const std::vector<u8>& GetPackage2FSDecompressed(
-        Package2Type type = Package2Type::NormalMain) const;
-    const std::vector<u8>& GetPackage2SPLDecompressed(
-        Package2Type type = Package2Type::NormalMain) const;
+    const std::vector<u8>&
+    GetPackage2FSDecompressed(Package2Type type = Package2Type::NormalMain) const;
+    const std::vector<u8>&
+    GetPackage2SPLDecompressed(Package2Type type = Package2Type::NormalMain) const;
 
     // PRODINFO
     bool HasProdInfo() const;

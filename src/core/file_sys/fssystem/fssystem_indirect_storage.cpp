@@ -4,12 +4,14 @@
 // SPDX-FileCopyrightText: Copyright 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include "core/file_sys/errors.h"
 #include "core/file_sys/fssystem/fssystem_indirect_storage.h"
+
+#include "core/file_sys/errors.h"
 
 namespace FileSys {
 
-Result IndirectStorage::Initialize(VirtualFile table_storage) {
+Result IndirectStorage::Initialize(VirtualFile table_storage)
+{
     // Read and verify the bucket tree header.
     BucketTree::Header header;
     table_storage->ReadObject(std::addressof(header));
@@ -28,7 +30,8 @@ Result IndirectStorage::Initialize(VirtualFile table_storage) {
         header.entry_count));
 }
 
-void IndirectStorage::Finalize() {
+void IndirectStorage::Finalize()
+{
     if (this->IsInitialized()) {
         m_table.Finalize();
         for (auto i = 0; i < StorageCount; i++) {
@@ -38,7 +41,8 @@ void IndirectStorage::Finalize() {
 }
 
 Result IndirectStorage::GetEntryList(Entry* out_entries, s32* out_entry_count, s32 entry_count,
-                                     s64 offset, s64 size) {
+                                     s64 offset, s64 size)
+{
     // Validate pre-conditions.
     ASSERT(offset >= 0);
     ASSERT(size >= 0);
@@ -99,7 +103,8 @@ Result IndirectStorage::GetEntryList(Entry* out_entries, s32* out_entry_count, s
     R_SUCCEED();
 }
 
-size_t IndirectStorage::Read(u8* buffer, size_t size, size_t offset) const {
+size_t IndirectStorage::Read(u8* buffer, size_t size, size_t offset) const
+{
     // Validate pre-conditions.
     ASSERT(this->IsInitialized());
     ASSERT(buffer != nullptr);

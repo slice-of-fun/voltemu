@@ -39,20 +39,12 @@ public:
     Result MapToOwner(KProcessAddress address, size_t size, Svc::MemoryPermission perm);
     Result UnmapFromOwner(KProcessAddress address, size_t size);
 
-    bool IsInitialized() const override {
-        return m_is_initialized;
-    }
+    bool IsInitialized() const override { return m_is_initialized; }
     static void PostDestroy(uintptr_t arg) {}
 
-    KProcess* GetOwner() const override {
-        return m_owner;
-    }
-    KProcessAddress GetSourceAddress() const {
-        return m_address;
-    }
-    size_t GetSize() const {
-        return m_is_initialized ? m_page_group->GetNumPages() * PageSize : 0;
-    }
+    KProcess* GetOwner() const override { return m_owner; }
+    KProcessAddress GetSourceAddress() const { return m_address; }
+    size_t GetSize() const { return m_is_initialized ? m_page_group->GetNumPages() * PageSize : 0; }
 
 private:
     std::optional<KPageGroup> m_page_group{};

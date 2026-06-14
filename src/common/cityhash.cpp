@@ -12,11 +12,12 @@
 // possible hash functions, by using SIMD instructions, or by
 // compromising on hash quality.
 
+#include "common/cityhash.h"
+
 #include <algorithm>
 #include <cstring>
 #include <utility>
 
-#include "common/cityhash.h"
 #include "common/swap.h"
 
 // #include "config.h"
@@ -31,13 +32,15 @@ using namespace std;
 
 namespace Common {
 
-static u64 unaligned_load64(const char* p) {
+static u64 unaligned_load64(const char* p)
+{
     u64 result;
     std::memcpy(&result, p, sizeof(result));
     return result;
 }
 
-static u32 unaligned_load32(const char* p) {
+static u32 unaligned_load32(const char* p)
+{
     u32 result;
     std::memcpy(&result, p, sizeof(result));
     return result;
@@ -59,11 +62,13 @@ static u32 unaligned_load32(const char* p) {
 #endif
 #endif
 
-static u64 Fetch64(const char* p) {
+static u64 Fetch64(const char* p)
+{
     return uint64_in_expected_order(unaligned_load64(p));
 }
 
-static u32 Fetch32(const char* p) {
+static u32 Fetch32(const char* p)
+{
     return uint32_in_expected_order(unaligned_load32(p));
 }
 
@@ -74,20 +79,24 @@ static constexpr u64 k2 = 0x9ae16a3b2f90404fULL;
 
 // Bitwise right rotate.  Normally this will compile to a single
 // instruction, especially if the shift is a manifest constant.
-static u64 Rotate(u64 val, int shift) {
+static u64 Rotate(u64 val, int shift)
+{
     // Avoid shifting by 64: doing so yields an undefined result.
     return shift == 0 ? val : ((val >> shift) | (val << (64 - shift)));
 }
 
-static u64 ShiftMix(u64 val) {
+static u64 ShiftMix(u64 val)
+{
     return val ^ (val >> 47);
 }
 
-static u64 HashLen16(u64 u, u64 v) {
+static u64 HashLen16(u64 u, u64 v)
+{
     return Hash128to64(u128{u, v});
 }
 
-static u64 HashLen16(u64 u, u64 v, u64 mul) {
+static u64 HashLen16(u64 u, u64 v, u64 mul)
+{
     // Murmur-inspired hashing.
     u64 a = (u ^ v) * mul;
     a ^= (a >> 47);
@@ -97,7 +106,8 @@ static u64 HashLen16(u64 u, u64 v, u64 mul) {
     return b;
 }
 
-static u64 HashLen0to16(const char* s, size_t len) {
+static u64 HashLen0to16(const char* s, size_t len)
+{
     if (len >= 8) {
         u64 mul = k2 + len * 2;
         u64 a = Fetch64(s) + k2;
@@ -124,7 +134,8 @@ static u64 HashLen0to16(const char* s, size_t len) {
 
 // This probably works well for 16-byte strings as well, but it may be overkill
 // in that case.
-static u64 HashLen17to32(const char* s, size_t len) {
+static u64 HashLen17to32(const char* s, size_t len)
+{
     u64 mul = k2 + len * 2;
     u64 a = Fetch64(s) * k1;
     u64 b = Fetch64(s + 8);
@@ -135,7 +146,8 @@ static u64 HashLen17to32(const char* s, size_t len) {
 
 // Return a 16-byte hash for 48 bytes.  Quick and dirty.
 // Callers do best to use "random-looking" values for a and b.
-static pair<u64, u64> WeakHashLen32WithSeeds(u64 w, u64 x, u64 y, u64 z, u64 a, u64 b) {
+static pair<u64, u64> WeakHashLen32WithSeeds(u64 w, u64 x, u64 y, u64 z, u64 a, u64 b)
+{
     a += w;
     b = Rotate(b + a + z, 21);
     u64 c = a;
@@ -146,13 +158,15 @@ static pair<u64, u64> WeakHashLen32WithSeeds(u64 w, u64 x, u64 y, u64 z, u64 a, 
 }
 
 // Return a 16-byte hash for s[0] ... s[31], a, and b.  Quick and dirty.
-static pair<u64, u64> WeakHashLen32WithSeeds(const char* s, u64 a, u64 b) {
+static pair<u64, u64> WeakHashLen32WithSeeds(const char* s, u64 a, u64 b)
+{
     return WeakHashLen32WithSeeds(Fetch64(s), Fetch64(s + 8), Fetch64(s + 16), Fetch64(s + 24), a,
                                   b);
 }
 
 // Return an 8-byte hash for 33 to 64 bytes.
-static u64 HashLen33to64(const char* s, size_t len) {
+static u64 HashLen33to64(const char* s, size_t len)
+{
     u64 mul = k2 + len * 2;
     u64 a = Fetch64(s) * k2;
     u64 b = Fetch64(s + 8);
@@ -173,7 +187,8 @@ static u64 HashLen33to64(const char* s, size_t len) {
     return b + x;
 }
 
-u64 CityHash64(const char* s, size_t len) {
+u64 CityHash64(const char* s, size_t len)
+{
     if (len <= 32) {
         if (len <= 16) {
             return HashLen0to16(s, len);
@@ -211,17 +226,20 @@ u64 CityHash64(const char* s, size_t len) {
                      HashLen16(v.second, w.second) + x);
 }
 
-u64 CityHash64WithSeed(const char* s, size_t len, u64 seed) {
+u64 CityHash64WithSeed(const char* s, size_t len, u64 seed)
+{
     return CityHash64WithSeeds(s, len, k2, seed);
 }
 
-u64 CityHash64WithSeeds(const char* s, size_t len, u64 seed0, u64 seed1) {
+u64 CityHash64WithSeeds(const char* s, size_t len, u64 seed0, u64 seed1)
+{
     return HashLen16(CityHash64(s, len) - seed0, seed1);
 }
 
 // A subroutine for CityHash128().  Returns a decent 128-bit hash for strings
 // of any length representable in signed long.  Based on City and Murmur.
-static u128 CityMurmur(const char* s, size_t len, u128 seed) {
+static u128 CityMurmur(const char* s, size_t len, u128 seed)
+{
     u64 a = seed[0];
     u64 b = seed[1];
     u64 c = 0;
@@ -251,7 +269,8 @@ static u128 CityMurmur(const char* s, size_t len, u128 seed) {
     return u128{a ^ b, HashLen16(b, a)};
 }
 
-u128 CityHash128WithSeed(const char* s, size_t len, u128 seed) {
+u128 CityHash128WithSeed(const char* s, size_t len, u128 seed)
+{
     if (len < 128) {
         return CityMurmur(s, len, seed);
     }
@@ -313,7 +332,8 @@ u128 CityHash128WithSeed(const char* s, size_t len, u128 seed) {
     return u128{HashLen16(x + v.second, w.second) + y, HashLen16(x + w.second, y + v.second)};
 }
 
-u128 CityHash128(const char* s, size_t len) {
+u128 CityHash128(const char* s, size_t len)
+{
     return len >= 16 ? CityHash128WithSeed(s + 16, len - 16, u128{Fetch64(s), Fetch64(s + 8) + k0})
                      : CityHash128WithSeed(s, len, u128{k0, k1});
 }

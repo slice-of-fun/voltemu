@@ -12,7 +12,7 @@
 namespace Common {
 
 // Check if type satisfies the ContiguousContainer named requirement.
-template <typename T>
+template<typename T>
 concept IsContiguousContainer = std::contiguous_iterator<typename T::iterator>;
 
 } // namespace Common

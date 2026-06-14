@@ -7,14 +7,13 @@
 #pragma once
 
 #include "core/hle/service/cmif_types.h"
-#include "core/hle/service/service.h"
-
 #include "core/hle/service/kernel_helpers.h"
+#include "core/hle/service/service.h"
 
 namespace Kernel {
 class KReadableEvent;
 class KEvent;
-}
+} // namespace Kernel
 
 namespace Service::OLSC {
 

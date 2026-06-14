@@ -4,6 +4,7 @@
 #pragma once
 
 #include <memory>
+
 #include "core/file_sys/vfs/vfs_types.h"
 #include "core/hle/result.h"
 

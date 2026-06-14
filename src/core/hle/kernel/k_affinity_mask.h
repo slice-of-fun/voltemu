@@ -13,20 +13,18 @@ class KAffinityMask {
 public:
     constexpr KAffinityMask() = default;
 
-    constexpr u64 GetAffinityMask() const {
-        return m_mask;
-    }
+    constexpr u64 GetAffinityMask() const { return m_mask; }
 
-    constexpr void SetAffinityMask(u64 new_mask) {
+    constexpr void SetAffinityMask(u64 new_mask)
+    {
         ASSERT((new_mask & ~AllowedAffinityMask) == 0);
         m_mask = new_mask;
     }
 
-    constexpr bool GetAffinity(s32 core) const {
-        return (m_mask & GetCoreBit(core)) != 0;
-    }
+    constexpr bool GetAffinity(s32 core) const { return (m_mask & GetCoreBit(core)) != 0; }
 
-    constexpr void SetAffinity(s32 core, bool set) {
+    constexpr void SetAffinity(s32 core, bool set)
+    {
         if (set) {
             m_mask |= GetCoreBit(core);
         } else {
@@ -34,12 +32,11 @@ public:
         }
     }
 
-    constexpr void SetAll() {
-        m_mask = AllowedAffinityMask;
-    }
+    constexpr void SetAll() { m_mask = AllowedAffinityMask; }
 
 private:
-    static constexpr u64 GetCoreBit(s32 core) {
+    static constexpr u64 GetCoreBit(s32 core)
+    {
         ASSERT(0 <= core && core < static_cast<s32>(Core::Hardware::NUM_CPU_CORES));
         return (1ULL << core);
     }

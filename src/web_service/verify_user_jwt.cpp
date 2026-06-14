@@ -15,6 +15,7 @@
 #endif
 
 #include <system_error>
+
 #include "common/logging.h"
 #include "web_service/verify_user_jwt.h"
 #include "web_service/web_backend.h"
@@ -23,7 +24,8 @@
 namespace WebService {
 
 static std::string public_key;
-std::string GetPublicKey(const std::string& host) {
+std::string GetPublicKey(const std::string& host)
+{
     if (public_key.empty()) {
         Client client(host, "", ""); // no need for credentials here
         public_key = client.GetPlain("/jwt/external/key.pem", true).returned_data;
@@ -36,10 +38,13 @@ std::string GetPublicKey(const std::string& host) {
     return public_key;
 }
 
-VerifyUserJWT::VerifyUserJWT(const std::string& host) : pub_key(GetPublicKey(host)) {}
+VerifyUserJWT::VerifyUserJWT(const std::string& host) : pub_key(GetPublicKey(host))
+{
+}
 
 Network::VerifyUser::UserData VerifyUserJWT::LoadUserData(const std::string& verify_uid,
-                                                          const std::string& token) {
+                                                          const std::string& token)
+{
     const std::string audience = fmt::format("external-{}", verify_uid);
     using namespace jwt::params;
     std::error_code error;

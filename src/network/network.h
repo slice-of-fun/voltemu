@@ -6,6 +6,7 @@
 #pragma once
 
 #include <memory>
+
 #include "network/room.h"
 #include "network/room_member.h"
 

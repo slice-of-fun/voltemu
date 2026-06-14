@@ -3,14 +3,13 @@
 
 #pragma once
 
+#include <QWidget>
 #include <array>
 #include <functional>
 #include <memory>
 #include <optional>
 #include <string>
 #include <vector>
-
-#include <QWidget>
 
 #include "common/param_package.h"
 #include "common/settings.h"

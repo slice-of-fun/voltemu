@@ -4,24 +4,28 @@
 // SPDX-FileCopyrightText: Copyright 2021 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "shader_recompiler/backend/glsl/glsl_emit_context.h"
+
 #include "common/div_ceil.h"
 #include "shader_recompiler/backend/bindings.h"
-#include "shader_recompiler/backend/glsl/glsl_emit_context.h"
 #include "shader_recompiler/frontend/ir/program.h"
 #include "shader_recompiler/profile.h"
 #include "shader_recompiler/runtime_info.h"
 
 namespace Shader::Backend::GLSL {
 namespace {
-u32 CbufIndex(size_t offset) {
+u32 CbufIndex(size_t offset)
+{
     return (offset / 4) % 4;
 }
 
-char Swizzle(size_t offset) {
+char Swizzle(size_t offset)
+{
     return "xyzw"[CbufIndex(offset)];
 }
 
-std::string_view InterpDecorator(Interpolation interp) {
+std::string_view InterpDecorator(Interpolation interp)
+{
     switch (interp) {
     case Interpolation::Smooth:
         return "";
@@ -33,7 +37,8 @@ std::string_view InterpDecorator(Interpolation interp) {
     throw InvalidArgument("Invalid interpolation {}", interp);
 }
 
-std::string_view InputArrayDecorator(Stage stage) {
+std::string_view InputArrayDecorator(Stage stage)
+{
     switch (stage) {
     case Stage::Geometry:
     case Stage::TessellationControl:
@@ -44,7 +49,8 @@ std::string_view InputArrayDecorator(Stage stage) {
     }
 }
 
-bool StoresPerVertexAttributes(Stage stage) {
+bool StoresPerVertexAttributes(Stage stage)
+{
     switch (stage) {
     case Stage::VertexA:
     case Stage::VertexB:
@@ -56,7 +62,8 @@ bool StoresPerVertexAttributes(Stage stage) {
     }
 }
 
-std::string OutputDecorator(Stage stage, u32 size) {
+std::string OutputDecorator(Stage stage, u32 size)
+{
     switch (stage) {
     case Stage::TessellationControl:
         return fmt::format("[{}]", size);
@@ -65,7 +72,8 @@ std::string OutputDecorator(Stage stage, u32 size) {
     }
 }
 
-std::string_view DepthSamplerType(TextureType type) {
+std::string_view DepthSamplerType(TextureType type)
+{
     switch (type) {
     case TextureType::Color1D:
         return "sampler1DShadow";
@@ -84,7 +92,8 @@ std::string_view DepthSamplerType(TextureType type) {
     }
 }
 
-std::string_view ColorSamplerType(TextureType type, bool is_multisample = false) {
+std::string_view ColorSamplerType(TextureType type, bool is_multisample = false)
+{
     if (is_multisample) {
         ASSERT(type == TextureType::Color2D || type == TextureType::ColorArray2D);
     }
@@ -111,7 +120,8 @@ std::string_view ColorSamplerType(TextureType type, bool is_multisample = false)
     }
 }
 
-std::string_view ImageType(TextureType type) {
+std::string_view ImageType(TextureType type)
+{
     switch (type) {
     case TextureType::Color1D:
         return "uimage1D";
@@ -134,7 +144,8 @@ std::string_view ImageType(TextureType type) {
     }
 }
 
-std::string_view ImageFormatString(ImageFormat format) {
+std::string_view ImageFormatString(ImageFormat format)
+{
     switch (format) {
     case ImageFormat::Typeless:
         return "";
@@ -157,7 +168,8 @@ std::string_view ImageFormatString(ImageFormat format) {
     }
 }
 
-std::string_view ImageAccessQualifier(bool is_written, bool is_read) {
+std::string_view ImageAccessQualifier(bool is_written, bool is_read)
+{
     if (is_written && !is_read) {
         return "writeonly ";
     }
@@ -167,7 +179,8 @@ std::string_view ImageAccessQualifier(bool is_written, bool is_read) {
     return "";
 }
 
-std::string_view GetTessMode(TessPrimitive primitive) {
+std::string_view GetTessMode(TessPrimitive primitive)
+{
     switch (primitive) {
     case TessPrimitive::Triangles:
         return "triangles";
@@ -179,7 +192,8 @@ std::string_view GetTessMode(TessPrimitive primitive) {
     throw InvalidArgument("Invalid tessellation primitive {}", primitive);
 }
 
-std::string_view GetTessSpacing(TessSpacing spacing) {
+std::string_view GetTessSpacing(TessSpacing spacing)
+{
     switch (spacing) {
     case TessSpacing::Equal:
         return "equal_spacing";
@@ -191,7 +205,8 @@ std::string_view GetTessSpacing(TessSpacing spacing) {
     throw InvalidArgument("Invalid tessellation spacing {}", spacing);
 }
 
-std::string_view InputPrimitive(InputTopology topology) {
+std::string_view InputPrimitive(InputTopology topology)
+{
     switch (topology) {
     case InputTopology::Points:
         return "points";
@@ -207,7 +222,8 @@ std::string_view InputPrimitive(InputTopology topology) {
     throw InvalidArgument("Invalid input topology {}", topology);
 }
 
-std::string_view OutputPrimitive(OutputTopology topology) {
+std::string_view OutputPrimitive(OutputTopology topology)
+{
     switch (topology) {
     case OutputTopology::PointList:
         return "points";
@@ -219,7 +235,8 @@ std::string_view OutputPrimitive(OutputTopology topology) {
     throw InvalidArgument("Invalid output topology {}", topology);
 }
 
-void SetupOutPerVertex(EmitContext& ctx, std::string& header) {
+void SetupOutPerVertex(EmitContext& ctx, std::string& header)
+{
     if (!StoresPerVertexAttributes(ctx.stage)) {
         return;
     }
@@ -243,7 +260,8 @@ void SetupOutPerVertex(EmitContext& ctx, std::string& header) {
     }
 }
 
-void SetupInPerVertex(EmitContext& ctx, std::string& header) {
+void SetupInPerVertex(EmitContext& ctx, std::string& header)
+{
     // Currently only required for TessellationControl to adhere to
     // ARB_separate_shader_objects requirements
     if (ctx.stage != Stage::TessellationControl) {
@@ -274,7 +292,8 @@ EmitContext::EmitContext(IR::Program& program, Bindings& bindings, const Profile
                          const RuntimeInfo& runtime_info_)
     : info{program.info}, profile{profile_}, runtime_info{runtime_info_}, stage{program.stage},
       uses_geometry_passthrough{program.is_geometry_passthrough &&
-                                profile.support_geometry_shader_passthrough} {
+                                profile.support_geometry_shader_passthrough}
+{
     if (profile.need_fastmath_off) {
         header += "#pragma optionNV(fastmath off)\n";
     }
@@ -300,10 +319,12 @@ EmitContext::EmitContext(IR::Program& program, Bindings& bindings, const Profile
         if (uses_geometry_passthrough) {
             // Passthru REQUIRES the layout to be defined with a corresponding name, for our sanity
             // we will just use `gl_in[]`, if you don't the driver will complain with:
-            // 0(56) : error C7593: Builtin block member gl_Position not found in redeclaration of in gl_PerVertex
+            // 0(56) : error C7593: Builtin block member gl_Position not found in redeclaration of
+            // in gl_PerVertex
             header += "layout(passthrough)in gl_PerVertex{vec4 gl_Position;}gl_in[];";
             break;
-        } else if (program.is_geometry_passthrough && !profile.support_geometry_shader_passthrough) {
+        } else if (program.is_geometry_passthrough &&
+                   !profile.support_geometry_shader_passthrough) {
             LOG_WARNING(Shader_GLSL, "Passthrough geometry program used but not supported");
         }
         header += fmt::format(
@@ -374,7 +395,8 @@ EmitContext::EmitContext(IR::Program& program, Bindings& bindings, const Profile
     DefineConstants();
 }
 
-void EmitContext::SetupExtensions() {
+void EmitContext::SetupExtensions()
+{
     header += "#extension GL_ARB_separate_shader_objects : enable\n";
     if (info.uses_shadow_lod && profile.support_gl_texture_shadow_lod) {
         header += "#extension GL_EXT_texture_shadow_lod : enable\n";
@@ -431,7 +453,8 @@ void EmitContext::SetupExtensions() {
     }
 }
 
-void EmitContext::DefineConstantBuffers(Bindings& bindings) {
+void EmitContext::DefineConstantBuffers(Bindings& bindings)
+{
     if (info.constant_buffer_descriptors.empty()) {
         return;
     }
@@ -446,7 +469,8 @@ void EmitContext::DefineConstantBuffers(Bindings& bindings) {
     }
 }
 
-void EmitContext::DefineConstantBufferIndirect() {
+void EmitContext::DefineConstantBufferIndirect()
+{
     if (!info.uses_cbuf_indirect) {
         return;
     }
@@ -464,7 +488,8 @@ void EmitContext::DefineConstantBufferIndirect() {
     header += "}}";
 }
 
-void EmitContext::DefineStorageBuffers(Bindings& bindings) {
+void EmitContext::DefineStorageBuffers(Bindings& bindings)
+{
     if (info.storage_buffers_descriptors.empty()) {
         return;
     }
@@ -478,7 +503,8 @@ void EmitContext::DefineStorageBuffers(Bindings& bindings) {
     }
 }
 
-void EmitContext::DefineGenericOutput(size_t index, u32 invocations) {
+void EmitContext::DefineGenericOutput(size_t index, u32 invocations)
+{
     static constexpr std::string_view swizzle{"xyzw"};
     const size_t base_index{static_cast<size_t>(IR::Attribute::Generic0X) + index * 4};
     u32 element{0};
@@ -518,7 +544,8 @@ void EmitContext::DefineGenericOutput(size_t index, u32 invocations) {
     }
 }
 
-void EmitContext::DefineHelperFunctions() {
+void EmitContext::DefineHelperFunctions()
+{
     header += "\n#define ftoi floatBitsToInt\n#define ftou floatBitsToUint\n"
               "#define itof intBitsToFloat\n#define utof uintBitsToFloat\n";
     if (info.uses_global_increment || info.uses_shared_increment) {
@@ -595,7 +622,8 @@ void EmitContext::DefineHelperFunctions() {
     }
 }
 
-std::string EmitContext::DefineGlobalMemoryFunctions() {
+std::string EmitContext::DefineGlobalMemoryFunctions()
+{
     const auto define_body{[&](std::string& func, size_t index, std::string_view return_statement) {
         const auto& ssbo{info.storage_buffers_descriptors[index]};
         const u32 size_cbuf_offset{ssbo.cbuf_offset + 8};
@@ -658,7 +686,8 @@ std::string EmitContext::DefineGlobalMemoryFunctions() {
     return write_func + write_func_64 + write_func_128 + load_func + load_func_64 + load_func_128;
 }
 
-void EmitContext::SetupImages(Bindings& bindings) {
+void EmitContext::SetupImages(Bindings& bindings)
+{
     image_buffers.reserve(info.image_buffer_descriptors.size());
     for (const auto& desc : info.image_buffer_descriptors) {
         image_buffers.push_back({bindings.image, desc.count});
@@ -682,7 +711,8 @@ void EmitContext::SetupImages(Bindings& bindings) {
     }
 }
 
-void EmitContext::SetupTextures(Bindings& bindings) {
+void EmitContext::SetupTextures(Bindings& bindings)
+{
     texture_buffers.reserve(info.texture_buffer_descriptors.size());
     for (const auto& desc : info.texture_buffer_descriptors) {
         texture_buffers.push_back({bindings.texture, desc.count});
@@ -704,7 +734,8 @@ void EmitContext::SetupTextures(Bindings& bindings) {
     }
 }
 
-void EmitContext::DefineConstants() {
+void EmitContext::DefineConstants()
+{
     if (info.uses_fswzadd) {
         header += "const float FSWZ_A[]=float[4](-1.f,1.f,-1.f,0.f);"
                   "const float FSWZ_B[]=float[4](-1.f,-1.f,1.f,-1.f);";

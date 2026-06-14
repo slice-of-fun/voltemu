@@ -4,21 +4,25 @@
 // SPDX-FileCopyrightText: Copyright 2020 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include <vector>
-#include <QLabel>
+#include "yuzu/configuration/configure_graphics_advanced.h"
+
 #include <qnamespace.h>
+
+#include <QLabel>
+#include <vector>
+
 #include "common/settings.h"
 #include "core/core.h"
 #include "qt_common/config/shared_translation.h"
 #include "ui_configure_graphics_advanced.h"
 #include "yuzu/configuration/configuration_shared.h"
-#include "yuzu/configuration/configure_graphics_advanced.h"
 #include "yuzu/configuration/shared_widget.h"
 
 ConfigureGraphicsAdvanced::ConfigureGraphicsAdvanced(
     const Core::System& system_, std::shared_ptr<std::vector<ConfigurationShared::Tab*>> group_,
     const ConfigurationShared::Builder& builder, QWidget* parent)
-    : Tab(group_, parent), ui{std::make_unique<Ui::ConfigureGraphicsAdvanced>()}, system{system_} {
+    : Tab(group_, parent), ui{std::make_unique<Ui::ConfigureGraphicsAdvanced>()}, system{system_}
+{
 
     ui->setupUi(this);
 
@@ -31,9 +35,12 @@ ConfigureGraphicsAdvanced::ConfigureGraphicsAdvanced(
 
 ConfigureGraphicsAdvanced::~ConfigureGraphicsAdvanced() = default;
 
-void ConfigureGraphicsAdvanced::SetConfiguration() {}
+void ConfigureGraphicsAdvanced::SetConfiguration()
+{
+}
 
-void ConfigureGraphicsAdvanced::Setup(const ConfigurationShared::Builder& builder) {
+void ConfigureGraphicsAdvanced::Setup(const ConfigurationShared::Builder& builder)
+{
     auto& normal_layout = *ui->normal_target->layout();
 
     // A map will sort the data for us
@@ -66,14 +73,16 @@ void ConfigureGraphicsAdvanced::Setup(const ConfigurationShared::Builder& builde
     }
 }
 
-void ConfigureGraphicsAdvanced::ApplyConfiguration() {
+void ConfigureGraphicsAdvanced::ApplyConfiguration()
+{
     const bool is_powered_on = system.IsPoweredOn();
     for (const auto& func : apply_funcs) {
         func(is_powered_on);
     }
 }
 
-void ConfigureGraphicsAdvanced::changeEvent(QEvent* event) {
+void ConfigureGraphicsAdvanced::changeEvent(QEvent* event)
+{
     if (event->type() == QEvent::LanguageChange) {
         RetranslateUI();
     }
@@ -81,10 +90,12 @@ void ConfigureGraphicsAdvanced::changeEvent(QEvent* event) {
     QWidget::changeEvent(event);
 }
 
-void ConfigureGraphicsAdvanced::RetranslateUI() {
+void ConfigureGraphicsAdvanced::RetranslateUI()
+{
     ui->retranslateUi(this);
 }
 
-void ConfigureGraphicsAdvanced::ExposeComputeOption() {
+void ConfigureGraphicsAdvanced::ExposeComputeOption()
+{
     checkbox_enable_compute_pipelines->setVisible(true);
 }

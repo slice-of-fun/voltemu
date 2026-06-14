@@ -4,21 +4,26 @@
 // SPDX-FileCopyrightText: 2014 Citra Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include <mutex>
 #include "core/frontend/emu_window.h"
+
+#include <mutex>
 
 namespace Core::Frontend {
 
-EmuWindow::EmuWindow() {
+EmuWindow::EmuWindow()
+{
     // TODO: Find a better place to set this.
     config.min_client_area_size =
         std::make_pair(Layout::MinimumSize::Width, Layout::MinimumSize::Height);
     active_config = config;
 }
 
-EmuWindow::~EmuWindow() {}
+EmuWindow::~EmuWindow()
+{
+}
 
-std::pair<f32, f32> EmuWindow::MapToTouchScreen(u32 framebuffer_x, u32 framebuffer_y) const {
+std::pair<f32, f32> EmuWindow::MapToTouchScreen(u32 framebuffer_x, u32 framebuffer_y) const
+{
     std::tie(framebuffer_x, framebuffer_y) = ClipToTouchScreen(framebuffer_x, framebuffer_y);
     const float x =
         static_cast<float>(framebuffer_x - framebuffer_layout.screen.left) /
@@ -30,7 +35,8 @@ std::pair<f32, f32> EmuWindow::MapToTouchScreen(u32 framebuffer_x, u32 framebuff
     return std::make_pair(x, y);
 }
 
-std::pair<u32, u32> EmuWindow::ClipToTouchScreen(u32 new_x, u32 new_y) const {
+std::pair<u32, u32> EmuWindow::ClipToTouchScreen(u32 new_x, u32 new_y) const
+{
     new_x = (std::max)(new_x, framebuffer_layout.screen.left);
     new_x = (std::min)(new_x, framebuffer_layout.screen.right - 1);
 
@@ -40,7 +46,8 @@ std::pair<u32, u32> EmuWindow::ClipToTouchScreen(u32 new_x, u32 new_y) const {
     return std::make_pair(new_x, new_y);
 }
 
-void EmuWindow::UpdateCurrentFramebufferLayout(u32 width, u32 height) {
+void EmuWindow::UpdateCurrentFramebufferLayout(u32 width, u32 height)
+{
     NotifyFramebufferLayoutChanged(Layout::DefaultFrameLayout(width, height));
 }
 

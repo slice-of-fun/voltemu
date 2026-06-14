@@ -6,8 +6,8 @@
 
 #pragma once
 
-#include <mutex>
 #include <memory>
+#include <mutex>
 
 #include "common/common_types.h"
 #include "core/hle/result.h"
@@ -54,8 +54,8 @@ public:
                                        u64 aruid) const;
 
     Result SetTouchScreenDefaultConfiguration(const Core::HID::TouchScreenConfigurationForNx& mode);
-    Result GetTouchScreenDefaultConfiguration(
-        Core::HID::TouchScreenConfigurationForNx& out_mode) const;
+    Result
+    GetTouchScreenDefaultConfiguration(Core::HID::TouchScreenConfigurationForNx& out_mode) const;
 
     void OnTouchUpdate(u64 timestamp);
 

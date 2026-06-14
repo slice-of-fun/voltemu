@@ -12,7 +12,8 @@
 namespace Kernel::Svc {
 
 /// Attempts to locks a mutex
-Result ArbitrateLock(Core::System& system, Handle thread_handle, u64 address, u32 tag) {
+Result ArbitrateLock(Core::System& system, Handle thread_handle, u64 address, u32 tag)
+{
     LOG_TRACE(Kernel_SVC, "called thread_handle=0x{:08X}, address={:#X}, tag=0x{:08X}",
               thread_handle, address, tag);
 
@@ -24,7 +25,8 @@ Result ArbitrateLock(Core::System& system, Handle thread_handle, u64 address, u3
 }
 
 /// Unlock a mutex
-Result ArbitrateUnlock(Core::System& system, u64 address) {
+Result ArbitrateUnlock(Core::System& system, u64 address)
+{
     LOG_TRACE(Kernel_SVC, "called address={:#X}", address);
 
     // Validate the input address.
@@ -34,20 +36,24 @@ Result ArbitrateUnlock(Core::System& system, u64 address) {
     R_RETURN(KConditionVariable::SignalToAddress(system.Kernel(), address));
 }
 
-Result ArbitrateLock64(Core::System& system, Handle thread_handle, uint64_t address, uint32_t tag) {
+Result ArbitrateLock64(Core::System& system, Handle thread_handle, uint64_t address, uint32_t tag)
+{
     R_RETURN(ArbitrateLock(system, thread_handle, address, tag));
 }
 
-Result ArbitrateUnlock64(Core::System& system, uint64_t address) {
+Result ArbitrateUnlock64(Core::System& system, uint64_t address)
+{
     R_RETURN(ArbitrateUnlock(system, address));
 }
 
 Result ArbitrateLock64From32(Core::System& system, Handle thread_handle, uint32_t address,
-                             uint32_t tag) {
+                             uint32_t tag)
+{
     R_RETURN(ArbitrateLock(system, thread_handle, address, tag));
 }
 
-Result ArbitrateUnlock64From32(Core::System& system, uint32_t address) {
+Result ArbitrateUnlock64From32(Core::System& system, uint32_t address)
+{
     R_RETURN(ArbitrateUnlock(system, address));
 }
 

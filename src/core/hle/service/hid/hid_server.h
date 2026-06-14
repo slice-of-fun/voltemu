@@ -58,8 +58,9 @@ private:
                                       u32 joy_xpad_id);
     Result ActivateJoySixAxisSensor(u32 joy_xpad_id);
     Result DeactivateJoySixAxisSensor(u32 joy_xpad_id);
-    Result GetJoySixAxisSensorLifoHandle(
-        OutCopyHandle<Kernel::KSharedMemory> out_shared_memory_handle, u32 joy_xpad_id);
+    Result
+    GetJoySixAxisSensorLifoHandle(OutCopyHandle<Kernel::KSharedMemory> out_shared_memory_handle,
+                                  u32 joy_xpad_id);
     Result StartSixAxisSensor(Core::HID::SixAxisSensorHandle sixaxis_handle,
                               ClientAppletResourceUserId aruid);
     Result StopSixAxisSensor(Core::HID::SixAxisSensorHandle sixaxis_handle,

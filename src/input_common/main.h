@@ -6,9 +6,10 @@
 
 #pragma once
 
+#include <ankerl/unordered_dense.h>
+
 #include <memory>
 #include <string>
-#include <ankerl/unordered_dense.h>
 #include <vector>
 
 namespace Common {
@@ -56,9 +57,12 @@ enum class InputType { None, Button, Stick, Motion, Touch };
  * Given a ParamPackage for a Device returned from `GetInputDevices`, attempt to get the default
  * mapping for the device.
  */
-using AnalogMapping = ankerl::unordered_dense::map<Settings::NativeAnalog::Values, Common::ParamPackage>;
-using ButtonMapping = ankerl::unordered_dense::map<Settings::NativeButton::Values, Common::ParamPackage>;
-using MotionMapping = ankerl::unordered_dense::map<Settings::NativeMotion::Values, Common::ParamPackage>;
+using AnalogMapping =
+    ankerl::unordered_dense::map<Settings::NativeAnalog::Values, Common::ParamPackage>;
+using ButtonMapping =
+    ankerl::unordered_dense::map<Settings::NativeButton::Values, Common::ParamPackage>;
+using MotionMapping =
+    ankerl::unordered_dense::map<Settings::NativeMotion::Values, Common::ParamPackage>;
 
 class InputSubsystem {
 public:
@@ -143,8 +147,8 @@ public:
     [[nodiscard]] MotionMapping GetMotionMappingForDevice(const Common::ParamPackage& device) const;
 
     /// Returns an enum containing the name to be displayed from the input engine.
-    [[nodiscard]] Common::Input::ButtonNames GetButtonName(
-        const Common::ParamPackage& params) const;
+    [[nodiscard]] Common::Input::ButtonNames
+    GetButtonName(const Common::ParamPackage& params) const;
 
     /// Returns true if device is a controller.
     [[nodiscard]] bool IsController(const Common::ParamPackage& params) const;

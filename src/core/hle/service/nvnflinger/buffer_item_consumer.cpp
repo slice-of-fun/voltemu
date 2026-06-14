@@ -7,19 +7,23 @@
 // Parts of this implementation were based on:
 // https://cs.android.com/android/platform/superproject/+/android-5.1.1_r38:frameworks/native/libs/gui/BufferItemConsumer.cpp
 
+#include "core/hle/service/nvnflinger/buffer_item_consumer.h"
+
 #include "common/assert.h"
 #include "common/logging.h"
 #include "core/hle/service/nvnflinger/buffer_item.h"
-#include "core/hle/service/nvnflinger/buffer_item_consumer.h"
 #include "core/hle/service/nvnflinger/buffer_queue_consumer.h"
 
 namespace Service::android {
 
 BufferItemConsumer::BufferItemConsumer(std::shared_ptr<BufferQueueConsumer> consumer_)
-    : ConsumerBase{std::move(consumer_)} {}
+    : ConsumerBase{std::move(consumer_)}
+{
+}
 
 Status BufferItemConsumer::AcquireBuffer(BufferItem* item, std::chrono::nanoseconds present_when,
-                                         bool wait_for_fence) {
+                                         bool wait_for_fence)
+{
     if (!item) {
         return Status::BadValue;
     }
@@ -42,7 +46,8 @@ Status BufferItemConsumer::AcquireBuffer(BufferItem* item, std::chrono::nanoseco
     return Status::NoError;
 }
 
-Status BufferItemConsumer::ReleaseBuffer(const BufferItem& item, const Fence& release_fence) {
+Status BufferItemConsumer::ReleaseBuffer(const BufferItem& item, const Fence& release_fence)
+{
     std::scoped_lock lock{mutex};
 
     if (const auto status = AddReleaseFenceLocked(item.buf, item.graphic_buffer, release_fence);

@@ -7,7 +7,6 @@
 #pragma once
 
 #include "common/literals.h"
-
 #include "core/file_sys/errors.h"
 #include "core/file_sys/fssystem/fs_i_storage.h"
 #include "core/file_sys/fssystem/fssystem_bucket_tree.h"
@@ -30,19 +29,19 @@ public:
         CompressionType compression_type;
         s32 phys_size;
 
-        s64 GetPhysicalSize() const {
-            return this->phys_size;
-        }
+        s64 GetPhysicalSize() const { return this->phys_size; }
     };
     static_assert(std::is_trivial_v<Entry>);
     static_assert(sizeof(Entry) == 0x18);
 
 public:
-    static constexpr s64 QueryNodeStorageSize(s32 entry_count) {
+    static constexpr s64 QueryNodeStorageSize(s32 entry_count)
+    {
         return BucketTree::QueryNodeStorageSize(NodeSize, sizeof(Entry), entry_count);
     }
 
-    static constexpr s64 QueryEntryStorageSize(s32 entry_count) {
+    static constexpr s64 QueryEntryStorageSize(s32 entry_count)
+    {
         return BucketTree::QueryEntryStorageSize(NodeSize, sizeof(Entry), entry_count);
     }
 
@@ -54,15 +53,14 @@ private:
     public:
         CompressedStorageCore() : m_table(), m_data_storage() {}
 
-        ~CompressedStorageCore() {
-            this->Finalize();
-        }
+        ~CompressedStorageCore() { this->Finalize(); }
 
     public:
         Result Initialize(VirtualFile data_storage, VirtualFile node_storage,
                           VirtualFile entry_storage, s32 bktr_entry_count, size_t block_size_max,
                           size_t continuous_reading_size_max,
-                          GetDecompressorFunction get_decompressor) {
+                          GetDecompressorFunction get_decompressor)
+        {
             // Check pre-conditions.
             ASSERT(0 < block_size_max);
             ASSERT(block_size_max <= continuous_reading_size_max);
@@ -81,18 +79,18 @@ private:
             R_SUCCEED();
         }
 
-        void Finalize() {
+        void Finalize()
+        {
             if (this->IsInitialized()) {
                 m_table.Finalize();
                 m_data_storage = VirtualFile();
             }
         }
 
-        VirtualFile GetDataStorage() {
-            return m_data_storage;
-        }
+        VirtualFile GetDataStorage() { return m_data_storage; }
 
-        Result GetDataStorageSize(s64* out) {
+        Result GetDataStorageSize(s64* out)
+        {
             // Check pre-conditions.
             ASSERT(out != nullptr);
 
@@ -102,12 +100,11 @@ private:
             R_SUCCEED();
         }
 
-        BucketTree& GetEntryTable() {
-            return m_table;
-        }
+        BucketTree& GetEntryTable() { return m_table; }
 
         Result GetEntryList(Entry* out_entries, s32* out_read_count, s32 max_entry_count,
-                            s64 offset, s64 size) {
+                            s64 offset, s64 size)
+        {
             // Check pre-conditions.
             ASSERT(offset >= 0);
             ASSERT(size >= 0);
@@ -172,7 +169,8 @@ private:
             R_SUCCEED();
         }
 
-        Result GetSize(s64* out) {
+        Result GetSize(s64* out)
+        {
             // Check pre-conditions.
             ASSERT(out != nullptr);
 
@@ -185,7 +183,8 @@ private:
             R_SUCCEED();
         }
 
-        Result OperatePerEntry(s64 offset, s64 size, auto f) {
+        Result OperatePerEntry(s64 offset, s64 size, auto f)
+        {
             // Check pre-conditions.
             ASSERT(offset >= 0);
             ASSERT(size >= 0);
@@ -285,7 +284,8 @@ private:
         using ReadFunction = std::function<Result(size_t, const ReadImplFunction&)>;
 
     public:
-        Result Read(s64 offset, s64 size, const ReadFunction& read_func) {
+        Result Read(s64 offset, s64 size, const ReadFunction& read_func)
+        {
             // Check pre-conditions.
             ASSERT(offset >= 0);
             ASSERT(this->IsInitialized());
@@ -322,7 +322,8 @@ private:
 
                 // Perform the read based on whether we need to allocate a buffer.
                 if (will_allocate_pooled_buffer) {
-                    std::vector<char> pooled_buffer(std::max(m_block_size_max, total_required_size));
+                    std::vector<char> pooled_buffer(
+                        std::max(m_block_size_max, total_required_size));
                     // Read each of the entries.
                     for (s32 entry_idx = 0; entry_idx < entry_count; ++entry_idx) {
                         // Determine the current read size.
@@ -640,7 +641,8 @@ private:
         }
 
     private:
-        DecompressorFunction GetDecompressor(CompressionType type) const {
+        DecompressorFunction GetDecompressor(CompressionType type) const
+        {
             // Check that we can get a decompressor for the type.
             if (CompressionTypeUtility::IsUnknownType(type)) {
                 return nullptr;
@@ -650,9 +652,7 @@ private:
             return m_get_decompressor_function(type);
         }
 
-        bool IsInitialized() const {
-            return m_table.IsInitialized();
-        }
+        bool IsInitialized() const { return m_table.IsInitialized(); }
 
     private:
         size_t m_block_size_max;
@@ -673,9 +673,7 @@ private:
             u32 physical_size;
             bool is_block_alignment_required;
 
-            s64 GetEndVirtualOffset() const {
-                return this->virtual_offset + this->virtual_size;
-            }
+            s64 GetEndVirtualOffset() const { return this->virtual_offset + this->virtual_size; }
         };
         static_assert(std::is_trivial_v<AccessRange>);
 
@@ -684,14 +682,16 @@ private:
 
     public:
         Result Initialize(s64 storage_size, size_t cache_size_0, size_t cache_size_1,
-                          size_t max_cache_entries) {
+                          size_t max_cache_entries)
+        {
             // Set our fields.
             m_storage_size = storage_size;
 
             R_SUCCEED();
         }
 
-        Result Read(CompressedStorageCore& core, s64 offset, void* buffer, size_t size) {
+        Result Read(CompressedStorageCore& core, s64 offset, void* buffer, size_t size)
+        {
             // If we have nothing to read, succeed.
             R_SUCCEED_IF(size == 0);
 
@@ -883,14 +883,13 @@ private:
 
 public:
     CompressedStorage() = default;
-    virtual ~CompressedStorage() {
-        this->Finalize();
-    }
+    virtual ~CompressedStorage() { this->Finalize(); }
 
     Result Initialize(VirtualFile data_storage, VirtualFile node_storage, VirtualFile entry_storage,
                       s32 bktr_entry_count, size_t block_size_max,
                       size_t continuous_reading_size_max, GetDecompressorFunction get_decompressor,
-                      size_t cache_size_0, size_t cache_size_1, s32 max_cache_entries) {
+                      size_t cache_size_0, size_t cache_size_1, s32 max_cache_entries)
+    {
         // Initialize our core.
         R_TRY(m_core.Initialize(data_storage, node_storage, entry_storage, bktr_entry_count,
                                 block_size_max, continuous_reading_size_max, get_decompressor));
@@ -905,35 +904,30 @@ public:
         R_SUCCEED();
     }
 
-    void Finalize() {
-        m_core.Finalize();
-    }
+    void Finalize() { m_core.Finalize(); }
 
-    VirtualFile GetDataStorage() {
-        return m_core.GetDataStorage();
-    }
+    VirtualFile GetDataStorage() { return m_core.GetDataStorage(); }
 
-    Result GetDataStorageSize(s64* out) {
-        R_RETURN(m_core.GetDataStorageSize(out));
-    }
+    Result GetDataStorageSize(s64* out) { R_RETURN(m_core.GetDataStorageSize(out)); }
 
     Result GetEntryList(Entry* out_entries, s32* out_read_count, s32 max_entry_count, s64 offset,
-                        s64 size) {
+                        s64 size)
+    {
         R_RETURN(m_core.GetEntryList(out_entries, out_read_count, max_entry_count, offset, size));
     }
 
-    BucketTree& GetEntryTable() {
-        return m_core.GetEntryTable();
-    }
+    BucketTree& GetEntryTable() { return m_core.GetEntryTable(); }
 
 public:
-    virtual size_t GetSize() const override {
+    virtual size_t GetSize() const override
+    {
         s64 ret{};
         m_core.GetSize(&ret);
         return ret;
     }
 
-    virtual size_t Read(u8* buffer, size_t size, size_t offset) const override {
+    virtual size_t Read(u8* buffer, size_t size, size_t offset) const override
+    {
         if (R_SUCCEEDED(m_cache_manager.Read(m_core, offset, buffer, size))) {
             return size;
         } else {

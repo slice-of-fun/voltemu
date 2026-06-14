@@ -5,19 +5,23 @@
 
 #include "common/settings.h"
 
-static inline Settings::ScalingFilter GetScalingFilter() {
+static inline Settings::ScalingFilter GetScalingFilter()
+{
     return Settings::values.scaling_filter.GetValue();
 }
 
-static inline Settings::AntiAliasing GetAntiAliasing() {
+static inline Settings::AntiAliasing GetAntiAliasing()
+{
     return Settings::values.anti_aliasing.GetValue();
 }
 
-static inline Settings::ScalingFilter GetScalingFilterForAppletCapture() {
+static inline Settings::ScalingFilter GetScalingFilterForAppletCapture()
+{
     return Settings::ScalingFilter::Bilinear;
 }
 
-static inline Settings::AntiAliasing GetAntiAliasingForAppletCapture() {
+static inline Settings::AntiAliasing GetAntiAliasingForAppletCapture()
+{
     return Settings::AntiAliasing::None;
 }
 

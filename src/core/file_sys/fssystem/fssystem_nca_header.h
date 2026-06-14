@@ -6,7 +6,6 @@
 #include "common/common_funcs.h"
 #include "common/common_types.h"
 #include "common/literals.h"
-
 #include "core/file_sys/errors.h"
 #include "core/file_sys/fssystem/fs_types.h"
 
@@ -109,13 +108,12 @@ struct NcaHeader {
     std::array<Hash, FsCountMax> fs_header_hash;
     std::array<u8, EncryptedKeyAreaSize> encrypted_key_area;
 
-    static constexpr u64 SectorToByte(u32 sector) {
+    static constexpr u64 SectorToByte(u32 sector)
+    {
         return static_cast<u64>(sector) << SectorShift;
     }
 
-    static constexpr u32 ByteToSector(u64 byte) {
-        return static_cast<u32>(byte >> SectorShift);
-    }
+    static constexpr u32 ByteToSector(u64 byte) { return static_cast<u32>(byte >> SectorShift); }
 
     u8 GetProperKeyGeneration() const;
 };
@@ -161,15 +159,12 @@ struct NcaSparseInfo {
     u16 generation;
     std::array<u8, 6> reserved;
 
-    s64 GetPhysicalSize() const {
-        return this->bucket.offset + this->bucket.size;
-    }
+    s64 GetPhysicalSize() const { return this->bucket.offset + this->bucket.size; }
 
-    u32 GetGeneration() const {
-        return static_cast<u32>(this->generation) << 16;
-    }
+    u32 GetGeneration() const { return static_cast<u32>(this->generation) << 16; }
 
-    const NcaAesCtrUpperIv MakeAesCtrUpperIv(NcaAesCtrUpperIv upper_iv) const {
+    const NcaAesCtrUpperIv MakeAesCtrUpperIv(NcaAesCtrUpperIv upper_iv) const
+    {
         NcaAesCtrUpperIv sparse_upper_iv = upper_iv;
         sparse_upper_iv.part.generation = this->GetGeneration();
         return sparse_upper_iv;
@@ -292,12 +287,14 @@ struct NcaFsHeader {
     NcaMetaDataHashDataInfo meta_data_hash_data_info;
     std::array<u8, 0x30> pad;
 
-    bool IsSkipLayerHashEncryption() const {
+    bool IsSkipLayerHashEncryption() const
+    {
         return this->encryption_type == EncryptionType::AesCtrSkipLayerHash ||
                this->encryption_type == EncryptionType::AesCtrExSkipLayerHash;
     }
 
-    Result GetHashTargetOffset(s64* out) const {
+    Result GetHashTargetOffset(s64* out) const
+    {
         switch (this->hash_type) {
         case HashType::HierarchicalIntegrityHash:
         case HashType::HierarchicalIntegritySha3Hash:

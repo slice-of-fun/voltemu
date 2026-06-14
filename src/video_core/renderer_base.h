@@ -50,37 +50,21 @@ public:
     // Getter/setter functions:
     // ------------------------
 
-    [[nodiscard]] f32 GetCurrentFPS() const {
-        return m_current_fps;
-    }
+    [[nodiscard]] f32 GetCurrentFPS() const { return m_current_fps; }
 
-    [[nodiscard]] int GetCurrentFrame() const {
-        return m_current_frame;
-    }
+    [[nodiscard]] int GetCurrentFrame() const { return m_current_frame; }
 
-    [[nodiscard]] Core::Frontend::GraphicsContext& Context() {
-        return *context;
-    }
+    [[nodiscard]] Core::Frontend::GraphicsContext& Context() { return *context; }
 
-    [[nodiscard]] const Core::Frontend::GraphicsContext& Context() const {
-        return *context;
-    }
+    [[nodiscard]] const Core::Frontend::GraphicsContext& Context() const { return *context; }
 
-    [[nodiscard]] Core::Frontend::EmuWindow& GetRenderWindow() {
-        return render_window;
-    }
+    [[nodiscard]] Core::Frontend::EmuWindow& GetRenderWindow() { return render_window; }
 
-    [[nodiscard]] const Core::Frontend::EmuWindow& GetRenderWindow() const {
-        return render_window;
-    }
+    [[nodiscard]] const Core::Frontend::EmuWindow& GetRenderWindow() const { return render_window; }
 
-    [[nodiscard]] RendererSettings& Settings() {
-        return renderer_settings;
-    }
+    [[nodiscard]] RendererSettings& Settings() { return renderer_settings; }
 
-    [[nodiscard]] const RendererSettings& Settings() const {
-        return renderer_settings;
-    }
+    [[nodiscard]] const RendererSettings& Settings() const { return renderer_settings; }
 
     /// Refreshes the settings common to all renderers
     void RefreshBaseSettings();

@@ -4,16 +4,19 @@
 // SPDX-FileCopyrightText: Copyright 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include <fstream>
 #include "common/heap_tracker.h"
-#include "common/logging.h"
+
+#include <fstream>
+
 #include "common/assert.h"
+#include "common/logging.h"
 
 namespace Common {
 
 namespace {
 
-s64 GetMaxPermissibleResidentMapCount() {
+s64 GetMaxPermissibleResidentMapCount()
+{
     // Default value.
     s64 value = 65530;
 
@@ -31,11 +34,14 @@ s64 GetMaxPermissibleResidentMapCount() {
 } // namespace
 
 HeapTracker::HeapTracker(Common::HostMemory& buffer)
-    : m_buffer(buffer), m_max_resident_map_count(GetMaxPermissibleResidentMapCount()) {}
+    : m_buffer(buffer), m_max_resident_map_count(GetMaxPermissibleResidentMapCount())
+{
+}
 HeapTracker::~HeapTracker() = default;
 
 void HeapTracker::Map(size_t virtual_offset, size_t host_offset, size_t length,
-                      MemoryPermission perm, bool is_separate_heap) {
+                      MemoryPermission perm, bool is_separate_heap)
+{
     // When mapping other memory, map pages immediately.
     if (!is_separate_heap) {
         m_buffer.Map(virtual_offset, host_offset, length, perm, false);
@@ -64,7 +70,8 @@ void HeapTracker::Map(size_t virtual_offset, size_t host_offset, size_t length,
     this->DeferredMapSeparateHeap(virtual_offset);
 }
 
-void HeapTracker::Unmap(size_t virtual_offset, size_t size, bool is_separate_heap) {
+void HeapTracker::Unmap(size_t virtual_offset, size_t size, bool is_separate_heap)
+{
     // If this is a separate heap...
     if (is_separate_heap) {
         std::scoped_lock lk{m_lock};
@@ -102,7 +109,8 @@ void HeapTracker::Unmap(size_t virtual_offset, size_t size, bool is_separate_hea
     m_buffer.Unmap(virtual_offset, size, false);
 }
 
-void HeapTracker::Protect(size_t virtual_offset, size_t size, MemoryPermission perm) {
+void HeapTracker::Protect(size_t virtual_offset, size_t size, MemoryPermission perm)
+{
     // Ensure no rebuild occurs while reprotecting.
     std::shared_lock lk{m_rebuild_lock};
 
@@ -158,7 +166,8 @@ void HeapTracker::Protect(size_t virtual_offset, size_t size, MemoryPermission p
     }
 }
 
-bool HeapTracker::DeferredMapSeparateHeap(u8* fault_address) {
+bool HeapTracker::DeferredMapSeparateHeap(u8* fault_address)
+{
     if (m_buffer.IsInVirtualRange(fault_address)) {
         return this->DeferredMapSeparateHeap(fault_address - m_buffer.VirtualBasePointer());
     }
@@ -166,7 +175,8 @@ bool HeapTracker::DeferredMapSeparateHeap(u8* fault_address) {
     return false;
 }
 
-bool HeapTracker::DeferredMapSeparateHeap(size_t virtual_offset) {
+bool HeapTracker::DeferredMapSeparateHeap(size_t virtual_offset)
+{
     bool rebuild_required = false;
 
     {
@@ -203,7 +213,8 @@ bool HeapTracker::DeferredMapSeparateHeap(size_t virtual_offset) {
     return true;
 }
 
-void HeapTracker::RebuildSeparateHeapAddressSpace() {
+void HeapTracker::RebuildSeparateHeapAddressSpace()
+{
     std::scoped_lock lk{m_rebuild_lock, m_lock};
 
     ASSERT(!m_resident_mappings.empty());
@@ -213,7 +224,8 @@ void HeapTracker::RebuildSeparateHeapAddressSpace() {
     // Despite being worse in theory, this has proven to be better in practice than more
     // regularly dumping a smaller amount, because it significantly reduces average case
     // lock contention.
-    std::size_t const desired_count = (std::min)(m_resident_map_count, m_max_resident_map_count) / 2;
+    std::size_t const desired_count =
+        (std::min)(m_resident_map_count, m_max_resident_map_count) / 2;
     std::size_t const evict_count = m_resident_map_count - desired_count;
     auto it = m_resident_mappings.begin();
 
@@ -228,14 +240,16 @@ void HeapTracker::RebuildSeparateHeapAddressSpace() {
     }
 }
 
-void HeapTracker::SplitHeapMap(VAddr offset, size_t size) {
+void HeapTracker::SplitHeapMap(VAddr offset, size_t size)
+{
     std::scoped_lock lk{m_lock};
 
     this->SplitHeapMapLocked(offset);
     this->SplitHeapMapLocked(offset + size);
 }
 
-void HeapTracker::SplitHeapMapLocked(VAddr offset) {
+void HeapTracker::SplitHeapMapLocked(VAddr offset)
+{
     const auto it = this->GetNearestHeapMapLocked(offset);
     if (it == m_mappings.end() || it->vaddr == offset) {
         // Not contained or no split required.
@@ -271,7 +285,8 @@ void HeapTracker::SplitHeapMapLocked(VAddr offset) {
     }
 }
 
-HeapTracker::AddrTree::iterator HeapTracker::GetNearestHeapMapLocked(VAddr offset) {
+HeapTracker::AddrTree::iterator HeapTracker::GetNearestHeapMapLocked(VAddr offset)
+{
     const SeparateHeapMap key{
         .vaddr = offset,
     };

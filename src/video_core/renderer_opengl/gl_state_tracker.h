@@ -6,9 +6,9 @@
 
 #pragma once
 
-#include <limits>
-
 #include <glad/glad.h>
+
+#include <limits>
 
 #include "common/common_types.h"
 #include "video_core/dirty_flags.h"
@@ -90,7 +90,8 @@ class StateTracker {
 public:
     explicit StateTracker();
 
-    void BindIndexBuffer(GLuint new_index_buffer) {
+    void BindIndexBuffer(GLuint new_index_buffer)
+    {
         if (index_buffer == new_index_buffer) {
             return;
         }
@@ -98,7 +99,8 @@ public:
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, new_index_buffer);
     }
 
-    void BindFramebuffer(GLuint new_framebuffer) {
+    void BindFramebuffer(GLuint new_framebuffer)
+    {
         if (framebuffer == new_framebuffer) {
             return;
         }
@@ -106,7 +108,8 @@ public:
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffer);
     }
 
-    void ClipControl(GLenum new_origin, GLenum new_depth) {
+    void ClipControl(GLenum new_origin, GLenum new_depth)
+    {
         if (new_origin == origin && new_depth == depth) {
             return;
         }
@@ -115,7 +118,8 @@ public:
         glClipControl(origin, depth);
     }
 
-    void SetYNegate(bool new_y_negate) {
+    void SetYNegate(bool new_y_negate)
+    {
         if (new_y_negate == y_negate) {
             return;
         }
@@ -125,7 +129,8 @@ public:
         glMaterialfv(GL_FRONT, GL_AMBIENT, ambient.data());
     }
 
-    void NotifyScreenDrawVertexArray() {
+    void NotifyScreenDrawVertexArray()
+    {
         (*flags)[OpenGL::Dirty::VertexFormats] = true;
         (*flags)[OpenGL::Dirty::VertexFormat0 + 0] = true;
         (*flags)[OpenGL::Dirty::VertexFormat0 + 1] = true;
@@ -138,81 +143,63 @@ public:
         (*flags)[OpenGL::Dirty::VertexInstance0 + 1] = true;
     }
 
-    void NotifyPolygonModes() {
+    void NotifyPolygonModes()
+    {
         (*flags)[OpenGL::Dirty::PolygonModes] = true;
         (*flags)[OpenGL::Dirty::PolygonModeFront] = true;
         (*flags)[OpenGL::Dirty::PolygonModeBack] = true;
     }
 
-    void NotifyViewport0() {
+    void NotifyViewport0()
+    {
         (*flags)[OpenGL::Dirty::Viewports] = true;
         (*flags)[OpenGL::Dirty::Viewport0] = true;
     }
 
-    void NotifyScissor0() {
+    void NotifyScissor0()
+    {
         (*flags)[OpenGL::Dirty::Scissors] = true;
         (*flags)[OpenGL::Dirty::Scissor0] = true;
     }
 
-    void NotifyColorMask(size_t index) {
+    void NotifyColorMask(size_t index)
+    {
         (*flags)[OpenGL::Dirty::ColorMasks] = true;
         (*flags)[OpenGL::Dirty::ColorMask0 + index] = true;
     }
 
-    void NotifyBlend0() {
+    void NotifyBlend0()
+    {
         (*flags)[OpenGL::Dirty::BlendStates] = true;
         (*flags)[OpenGL::Dirty::BlendState0] = true;
     }
 
-    void NotifyFramebuffer() {
-        (*flags)[VideoCommon::Dirty::RenderTargets] = true;
-    }
+    void NotifyFramebuffer() { (*flags)[VideoCommon::Dirty::RenderTargets] = true; }
 
-    void NotifyFrontFace() {
-        (*flags)[OpenGL::Dirty::FrontFace] = true;
-    }
+    void NotifyFrontFace() { (*flags)[OpenGL::Dirty::FrontFace] = true; }
 
-    void NotifyCullTest() {
-        (*flags)[OpenGL::Dirty::CullTest] = true;
-    }
+    void NotifyCullTest() { (*flags)[OpenGL::Dirty::CullTest] = true; }
 
-    void NotifyDepthMask() {
-        (*flags)[OpenGL::Dirty::DepthMask] = true;
-    }
+    void NotifyDepthMask() { (*flags)[OpenGL::Dirty::DepthMask] = true; }
 
-    void NotifyDepthTest() {
-        (*flags)[OpenGL::Dirty::DepthTest] = true;
-    }
+    void NotifyDepthTest() { (*flags)[OpenGL::Dirty::DepthTest] = true; }
 
-    void NotifyStencilTest() {
-        (*flags)[OpenGL::Dirty::StencilTest] = true;
-    }
+    void NotifyStencilTest() { (*flags)[OpenGL::Dirty::StencilTest] = true; }
 
-    void NotifyPolygonOffset() {
-        (*flags)[OpenGL::Dirty::PolygonOffset] = true;
-    }
+    void NotifyPolygonOffset() { (*flags)[OpenGL::Dirty::PolygonOffset] = true; }
 
-    void NotifyRasterizeEnable() {
-        (*flags)[OpenGL::Dirty::RasterizeEnable] = true;
-    }
+    void NotifyRasterizeEnable() { (*flags)[OpenGL::Dirty::RasterizeEnable] = true; }
 
-    void NotifyFramebufferSRGB() {
-        (*flags)[OpenGL::Dirty::FramebufferSRGB] = true;
-    }
+    void NotifyFramebufferSRGB() { (*flags)[OpenGL::Dirty::FramebufferSRGB] = true; }
 
-    void NotifyLogicOp() {
-        (*flags)[OpenGL::Dirty::LogicOp] = true;
-    }
+    void NotifyLogicOp() { (*flags)[OpenGL::Dirty::LogicOp] = true; }
 
-    void NotifyClipControl() {
-        (*flags)[OpenGL::Dirty::ClipControl] = true;
-    }
+    void NotifyClipControl() { (*flags)[OpenGL::Dirty::ClipControl] = true; }
 
-    void NotifyAlphaTest() {
-        (*flags)[OpenGL::Dirty::AlphaTest] = true;
-    }
+    void NotifyAlphaTest() { (*flags)[OpenGL::Dirty::AlphaTest] = true; }
 
-    void NotifyRange(u8 start, u8 end) {
+    void NotifyRange(u8 start, u8 end)
+    {
         for (auto flag = start; flag <= end; flag++) {
             (*flags)[flag] = true;
         }

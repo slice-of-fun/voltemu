@@ -9,7 +9,8 @@
 namespace Service::Set {
 
 IFirmwareDebugSettingsServer::IFirmwareDebugSettingsServer(Core::System& system_)
-    : ServiceFramework{system_, "set:fd"} {
+    : ServiceFramework{system_, "set:fd"}
+{
     // clang-format off
     static const FunctionInfo functions[] = {
         {2, nullptr, "SetSettingsItemValue"},

@@ -24,7 +24,8 @@ enum class FmzMode : u64 {
     INVALIDFMZ3,
 };
 
-inline IR::FpRounding CastFpRounding(FpRounding fp_rounding) {
+inline IR::FpRounding CastFpRounding(FpRounding fp_rounding)
+{
     switch (fp_rounding) {
     case FpRounding::RN:
         return IR::FpRounding::RN;
@@ -38,7 +39,8 @@ inline IR::FpRounding CastFpRounding(FpRounding fp_rounding) {
     throw NotImplementedException("Invalid floating-point rounding {}", fp_rounding);
 }
 
-inline IR::FmzMode CastFmzMode(FmzMode fmz_mode) {
+inline IR::FmzMode CastFmzMode(FmzMode fmz_mode)
+{
     switch (fmz_mode) {
     case FmzMode::None:
         return IR::FmzMode::None;

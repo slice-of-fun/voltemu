@@ -9,7 +9,8 @@
 namespace Shader::Maxwell {
 namespace {
 
-void DADD(TranslatorVisitor& v, u64 insn, const IR::F64& src_b) {
+void DADD(TranslatorVisitor& v, u64 insn, const IR::F64& src_b)
+{
     union {
         u64 raw;
         BitField<0, 8, IR::Reg> dest_reg;
@@ -39,15 +40,18 @@ void DADD(TranslatorVisitor& v, u64 insn, const IR::F64& src_b) {
 }
 } // Anonymous namespace
 
-void TranslatorVisitor::DADD_reg(u64 insn) {
+void TranslatorVisitor::DADD_reg(u64 insn)
+{
     DADD(*this, insn, GetDoubleReg20(insn));
 }
 
-void TranslatorVisitor::DADD_cbuf(u64 insn) {
+void TranslatorVisitor::DADD_cbuf(u64 insn)
+{
     DADD(*this, insn, GetDoubleCbuf(insn));
 }
 
-void TranslatorVisitor::DADD_imm(u64 insn) {
+void TranslatorVisitor::DADD_imm(u64 insn)
+{
     DADD(*this, insn, GetDoubleImm20(insn));
 }
 

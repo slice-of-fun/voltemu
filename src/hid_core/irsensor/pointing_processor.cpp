@@ -5,7 +5,8 @@
 
 namespace Service::IRS {
 PointingProcessor::PointingProcessor(Core::IrSensor::DeviceFormat& device_format)
-    : device(device_format) {
+    : device(device_format)
+{
     device.mode = Core::IrSensor::IrSensorMode::PointingProcessorMarker;
     device.camera_status = Core::IrSensor::IrCameraStatus::Unconnected;
     device.camera_internal_status = Core::IrSensor::IrCameraInternalStatus::Stopped;
@@ -13,13 +14,20 @@ PointingProcessor::PointingProcessor(Core::IrSensor::DeviceFormat& device_format
 
 PointingProcessor::~PointingProcessor() = default;
 
-void PointingProcessor::StartProcessor() {}
+void PointingProcessor::StartProcessor()
+{
+}
 
-void PointingProcessor::SuspendProcessor() {}
+void PointingProcessor::SuspendProcessor()
+{
+}
 
-void PointingProcessor::StopProcessor() {}
+void PointingProcessor::StopProcessor()
+{
+}
 
-void PointingProcessor::SetConfig(Core::IrSensor::PackedPointingProcessorConfig config) {
+void PointingProcessor::SetConfig(Core::IrSensor::PackedPointingProcessorConfig config)
+{
     current_config.window_of_interest = config.window_of_interest;
 }
 

@@ -4,6 +4,8 @@
 // SPDX-FileCopyrightText: Copyright 2020 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "yuzu/applets/qt_controller.h"
+
 #include <algorithm>
 #include <thread>
 
@@ -19,7 +21,6 @@
 #include "hid_core/resources/npad/npad.h"
 #include "qt_common/qt_compat.h"
 #include "ui_qt_controller.h"
-#include "yuzu/applets/qt_controller.h"
 #include "yuzu/configuration/configure_input.h"
 #include "yuzu/configuration/configure_input_profile_dialog.h"
 #include "yuzu/configuration/configure_motion_touch.h"
@@ -31,7 +32,8 @@
 namespace {
 
 void UpdateController(Core::HID::EmulatedController* controller,
-                      Core::HID::NpadStyleIndex controller_type, bool connected) {
+                      Core::HID::NpadStyleIndex controller_type, bool connected)
+{
     if (controller->IsConnected(true)) {
         controller->Disconnect();
     }
@@ -43,7 +45,8 @@ void UpdateController(Core::HID::EmulatedController* controller,
 
 // Returns true if the given controller type is compatible with the given parameters.
 bool IsControllerCompatible(Core::HID::NpadStyleIndex controller_type,
-                            Core::Frontend::ControllerParameters parameters) {
+                            Core::Frontend::ControllerParameters parameters)
+{
     switch (controller_type) {
     case Core::HID::NpadStyleIndex::Fullkey:
         return parameters.allow_pro_controller;
@@ -69,7 +72,8 @@ QtControllerSelectorDialog::QtControllerSelectorDialog(
     InputCommon::InputSubsystem* input_subsystem_, Core::System& system_)
     : QDialog(parent), ui(std::make_unique<Ui::QtControllerSelectorDialog>()),
       parameters(std::move(parameters_)), input_subsystem{input_subsystem_},
-      input_profiles(std::make_unique<InputProfiles>()), system{system_} {
+      input_profiles(std::make_unique<InputProfiles>()), system{system_}
+{
     ui->setupUi(this);
 
     player_widgets = {
@@ -242,19 +246,22 @@ QtControllerSelectorDialog::QtControllerSelectorDialog(
     resize(0, 0);
 }
 
-QtControllerSelectorDialog::~QtControllerSelectorDialog() {
+QtControllerSelectorDialog::~QtControllerSelectorDialog()
+{
     controller_navigation->UnloadController();
     system.HIDCore().DisableAllControllerConfiguration();
 }
 
-int QtControllerSelectorDialog::exec() {
+int QtControllerSelectorDialog::exec()
+{
     if (parameters_met && parameters.enable_single_mode) {
         return QDialog::Accepted;
     }
     return QDialog::exec();
 }
 
-void QtControllerSelectorDialog::ApplyConfiguration() {
+void QtControllerSelectorDialog::ApplyConfiguration()
+{
     const bool pre_docked_mode = Settings::IsDockedMode();
     const bool docked_mode_selected = ui->radioDocked->isChecked();
     Settings::values.use_docked_mode.SetValue(
@@ -265,7 +272,8 @@ void QtControllerSelectorDialog::ApplyConfiguration() {
     Settings::values.motion_enabled.SetValue(ui->motionGroup->isChecked());
 }
 
-void QtControllerSelectorDialog::LoadConfiguration() {
+void QtControllerSelectorDialog::LoadConfiguration()
+{
     system.HIDCore().EnableAllControllerConfiguration();
 
     const auto* handheld = system.HIDCore().GetEmulatedController(Core::HID::NpadIdType::Handheld);
@@ -285,7 +293,8 @@ void QtControllerSelectorDialog::LoadConfiguration() {
     ui->motionGroup->setChecked(Settings::values.motion_enabled.GetValue());
 }
 
-void QtControllerSelectorDialog::CallConfigureVibrationDialog() {
+void QtControllerSelectorDialog::CallConfigureVibrationDialog()
+{
     ConfigureVibration dialog(this, system.HIDCore());
 
     dialog.setWindowFlags(Qt::Dialog | Qt::CustomizeWindowHint | Qt::WindowTitleHint |
@@ -297,7 +306,8 @@ void QtControllerSelectorDialog::CallConfigureVibrationDialog() {
     }
 }
 
-void QtControllerSelectorDialog::CallConfigureMotionTouchDialog() {
+void QtControllerSelectorDialog::CallConfigureMotionTouchDialog()
+{
     ConfigureMotionTouch dialog(this, input_subsystem);
 
     dialog.setWindowFlags(Qt::Dialog | Qt::CustomizeWindowHint | Qt::WindowTitleHint |
@@ -309,7 +319,8 @@ void QtControllerSelectorDialog::CallConfigureMotionTouchDialog() {
     }
 }
 
-void QtControllerSelectorDialog::CallConfigureInputProfileDialog() {
+void QtControllerSelectorDialog::CallConfigureInputProfileDialog()
+{
     ConfigureInputProfileDialog dialog(this, input_subsystem, input_profiles.get(), system);
 
     dialog.setWindowFlags(Qt::Dialog | Qt::CustomizeWindowHint | Qt::WindowTitleHint |
@@ -318,7 +329,8 @@ void QtControllerSelectorDialog::CallConfigureInputProfileDialog() {
     dialog.exec();
 }
 
-void QtControllerSelectorDialog::keyPressEvent(QKeyEvent* evt) {
+void QtControllerSelectorDialog::keyPressEvent(QKeyEvent* evt)
+{
     const auto num_connected_players = static_cast<int>(
         std::count_if(player_groupboxes.begin(), player_groupboxes.end(),
                       [](const QGroupBox* player) { return player->isChecked(); }));
@@ -343,7 +355,8 @@ void QtControllerSelectorDialog::keyPressEvent(QKeyEvent* evt) {
     QDialog::keyPressEvent(evt);
 }
 
-bool QtControllerSelectorDialog::CheckIfParametersMet() {
+bool QtControllerSelectorDialog::CheckIfParametersMet()
+{
     // Here, we check and validate the current configuration against all applicable parameters.
     const auto num_connected_players = static_cast<int>(
         std::count_if(player_groupboxes.begin(), player_groupboxes.end(),
@@ -387,7 +400,8 @@ bool QtControllerSelectorDialog::CheckIfParametersMet() {
     return parameters_met;
 }
 
-void QtControllerSelectorDialog::SetSupportedControllers() {
+void QtControllerSelectorDialog::SetSupportedControllers()
+{
     const QString theme = [] {
         if (QIcon::themeName().contains(QStringLiteral("dark"))) {
             return QStringLiteral("_dark");
@@ -453,7 +467,8 @@ void QtControllerSelectorDialog::SetSupportedControllers() {
     }
 }
 
-void QtControllerSelectorDialog::SetEmulatedControllers(std::size_t player_index) {
+void QtControllerSelectorDialog::SetEmulatedControllers(std::size_t player_index)
+{
     const auto npad_style_set = system.HIDCore().GetSupportedStyleTag();
     auto& pairs = index_controller_type_pairs[player_index];
 
@@ -516,8 +531,9 @@ void QtControllerSelectorDialog::SetEmulatedControllers(std::size_t player_index
     }
 }
 
-Core::HID::NpadStyleIndex QtControllerSelectorDialog::GetControllerTypeFromIndex(
-    int index, std::size_t player_index) const {
+Core::HID::NpadStyleIndex
+QtControllerSelectorDialog::GetControllerTypeFromIndex(int index, std::size_t player_index) const
+{
     const auto& pairs = index_controller_type_pairs[player_index];
 
     const auto it = std::find_if(pairs.begin(), pairs.end(),
@@ -531,7 +547,8 @@ Core::HID::NpadStyleIndex QtControllerSelectorDialog::GetControllerTypeFromIndex
 }
 
 int QtControllerSelectorDialog::GetIndexFromControllerType(Core::HID::NpadStyleIndex type,
-                                                           std::size_t player_index) const {
+                                                           std::size_t player_index) const
+{
     const auto& pairs = index_controller_type_pairs[player_index];
 
     const auto it = std::find_if(pairs.begin(), pairs.end(),
@@ -544,7 +561,8 @@ int QtControllerSelectorDialog::GetIndexFromControllerType(Core::HID::NpadStyleI
     return it->first;
 }
 
-void QtControllerSelectorDialog::UpdateControllerIcon(std::size_t player_index) {
+void QtControllerSelectorDialog::UpdateControllerIcon(std::size_t player_index)
+{
     if (!player_groupboxes[player_index]->isChecked()) {
         connected_controller_icons[player_index]->setStyleSheet(QString{});
         player_labels[player_index]->show();
@@ -590,7 +608,8 @@ void QtControllerSelectorDialog::UpdateControllerIcon(std::size_t player_index) 
     player_labels[player_index]->hide();
 }
 
-void QtControllerSelectorDialog::UpdateControllerState(std::size_t player_index) {
+void QtControllerSelectorDialog::UpdateControllerState(std::size_t player_index)
+{
     auto* controller = system.HIDCore().GetEmulatedControllerByIndex(player_index);
 
     const auto controller_type = GetControllerTypeFromIndex(
@@ -619,7 +638,8 @@ void QtControllerSelectorDialog::UpdateControllerState(std::size_t player_index)
     UpdateController(controller, controller_type, player_connected);
 }
 
-void QtControllerSelectorDialog::UpdateLEDPattern(std::size_t player_index) {
+void QtControllerSelectorDialog::UpdateLEDPattern(std::size_t player_index)
+{
     if (!player_groupboxes[player_index]->isChecked() ||
         GetControllerTypeFromIndex(emulated_controllers[player_index]->currentIndex(),
                                    player_index) == Core::HID::NpadStyleIndex::Handheld) {
@@ -638,7 +658,8 @@ void QtControllerSelectorDialog::UpdateLEDPattern(std::size_t player_index) {
     led_patterns_boxes[player_index][3]->setChecked(led_pattern.position4);
 }
 
-void QtControllerSelectorDialog::UpdateBorderColor(std::size_t player_index) {
+void QtControllerSelectorDialog::UpdateBorderColor(std::size_t player_index)
+{
     if (!parameters.enable_border_color ||
         player_index >= static_cast<std::size_t>(parameters.max_players) ||
         player_groupboxes[player_index]->styleSheet().contains(QStringLiteral("QGroupBox"))) {
@@ -656,7 +677,8 @@ void QtControllerSelectorDialog::UpdateBorderColor(std::size_t player_index) {
                 .arg(parameters.border_colors[player_index][3])));
 }
 
-void QtControllerSelectorDialog::SetExplainText(std::size_t player_index) {
+void QtControllerSelectorDialog::SetExplainText(std::size_t player_index)
+{
     if (!parameters.enable_explain_text ||
         player_index >= static_cast<std::size_t>(parameters.max_players)) {
         return;
@@ -667,7 +689,8 @@ void QtControllerSelectorDialog::SetExplainText(std::size_t player_index) {
                                                     parameters.explain_text[player_index].size())));
 }
 
-void QtControllerSelectorDialog::UpdateDockedState(bool is_handheld) {
+void QtControllerSelectorDialog::UpdateDockedState(bool is_handheld)
+{
     // Disallow changing the console mode if the controller type is handheld.
     ui->radioDocked->setEnabled(!is_handheld);
     ui->radioUndocked->setEnabled(!is_handheld);
@@ -682,7 +705,8 @@ void QtControllerSelectorDialog::UpdateDockedState(bool is_handheld) {
 }
 
 void QtControllerSelectorDialog::PropagatePlayerNumberChanged(size_t player_index, bool checked,
-                                                              bool reconnect_current) {
+                                                              bool reconnect_current)
+{
     connected_controller_checkboxes[player_index]->setChecked(checked);
     // Hide eventual error message about number of controllers
     ui->labelError->setVisible(false);
@@ -704,7 +728,8 @@ void QtControllerSelectorDialog::PropagatePlayerNumberChanged(size_t player_inde
     }
 }
 
-void QtControllerSelectorDialog::DisableUnsupportedPlayers() {
+void QtControllerSelectorDialog::DisableUnsupportedPlayers()
+{
     const auto max_supported_players = parameters.enable_single_mode ? 1 : parameters.max_players;
 
     switch (max_supported_players) {
@@ -754,7 +779,8 @@ void QtControllerSelectorDialog::DisableUnsupportedPlayers() {
     }
 }
 
-QtControllerSelector::QtControllerSelector(MainWindow& parent) {
+QtControllerSelector::QtControllerSelector(MainWindow& parent)
+{
     connect(this, &QtControllerSelector::MainWindowReconfigureControllers, &parent,
             &MainWindow::ControllerSelectorReconfigureControllers, Qt::QueuedConnection);
     connect(this, &QtControllerSelector::MainWindowRequestExit, &parent,
@@ -765,18 +791,21 @@ QtControllerSelector::QtControllerSelector(MainWindow& parent) {
 
 QtControllerSelector::~QtControllerSelector() = default;
 
-void QtControllerSelector::Close() const {
+void QtControllerSelector::Close() const
+{
     callback = {};
     emit MainWindowRequestExit();
 }
 
 void QtControllerSelector::ReconfigureControllers(
-    ReconfigureCallback callback_, const Core::Frontend::ControllerParameters& parameters) const {
+    ReconfigureCallback callback_, const Core::Frontend::ControllerParameters& parameters) const
+{
     callback = std::move(callback_);
     emit MainWindowReconfigureControllers(parameters);
 }
 
-void QtControllerSelector::MainWindowReconfigureFinished(bool is_success) {
+void QtControllerSelector::MainWindowReconfigureFinished(bool is_success)
+{
     if (callback) {
         callback(is_success);
     }

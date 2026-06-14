@@ -5,20 +5,24 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include "core/hle/service/mii/mii_database.h"
+
 #include "core/hle/service/mii/mii_result.h"
 #include "core/hle/service/mii/mii_util.h"
 
 namespace Service::Mii {
 
-u8 NintendoFigurineDatabase::GetDatabaseLength() const {
+u8 NintendoFigurineDatabase::GetDatabaseLength() const
+{
     return database_length;
 }
 
-bool NintendoFigurineDatabase::IsFull() const {
+bool NintendoFigurineDatabase::IsFull() const
+{
     return database_length >= MaxDatabaseLength;
 }
 
-StoreData NintendoFigurineDatabase::Get(std::size_t index) const {
+StoreData NintendoFigurineDatabase::Get(std::size_t index) const
+{
     StoreData store_data = miis.at(index);
 
     // This hack is to make external database dumps compatible
@@ -27,7 +31,8 @@ StoreData NintendoFigurineDatabase::Get(std::size_t index) const {
     return store_data;
 }
 
-u32 NintendoFigurineDatabase::GetCount(const DatabaseSessionMetadata& metadata) const {
+u32 NintendoFigurineDatabase::GetCount(const DatabaseSessionMetadata& metadata) const
+{
     if (magic == MiiMagic) {
         return GetDatabaseLength();
     }
@@ -44,7 +49,8 @@ u32 NintendoFigurineDatabase::GetCount(const DatabaseSessionMetadata& metadata) 
 }
 
 bool NintendoFigurineDatabase::GetIndexByCreatorId(u32& out_index,
-                                                   const Common::UUID& create_id) const {
+                                                   const Common::UUID& create_id) const
+{
     for (std::size_t index = 0; index < database_length; ++index) {
         if (miis[index].GetCreateId() == create_id) {
             out_index = static_cast<u32>(index);
@@ -55,7 +61,8 @@ bool NintendoFigurineDatabase::GetIndexByCreatorId(u32& out_index,
     return false;
 }
 
-Result NintendoFigurineDatabase::Move(u32 current_index, u32 new_index) {
+Result NintendoFigurineDatabase::Move(u32 current_index, u32 new_index)
+{
     if (current_index == new_index) {
         return ResultNotUpdated;
     }
@@ -81,18 +88,21 @@ Result NintendoFigurineDatabase::Move(u32 current_index, u32 new_index) {
     return ResultSuccess;
 }
 
-void NintendoFigurineDatabase::Replace(u32 index, const StoreData& store_data) {
+void NintendoFigurineDatabase::Replace(u32 index, const StoreData& store_data)
+{
     miis[index] = store_data;
     crc = GenerateDatabaseCrc();
 }
 
-void NintendoFigurineDatabase::Add(const StoreData& store_data) {
+void NintendoFigurineDatabase::Add(const StoreData& store_data)
+{
     miis[database_length] = store_data;
     database_length++;
     crc = GenerateDatabaseCrc();
 }
 
-void NintendoFigurineDatabase::Delete(u32 index) {
+void NintendoFigurineDatabase::Delete(u32 index)
+{
     // Shift left
     const s32 new_database_size = database_length - 1;
     if (static_cast<s32>(index) < new_database_size) {
@@ -105,7 +115,8 @@ void NintendoFigurineDatabase::Delete(u32 index) {
     crc = GenerateDatabaseCrc();
 }
 
-void NintendoFigurineDatabase::CleanDatabase() {
+void NintendoFigurineDatabase::CleanDatabase()
+{
     miis = {};
     version = 1;
     magic = DatabaseMagic;
@@ -113,12 +124,14 @@ void NintendoFigurineDatabase::CleanDatabase() {
     crc = GenerateDatabaseCrc();
 }
 
-void NintendoFigurineDatabase::CorruptCrc() {
+void NintendoFigurineDatabase::CorruptCrc()
+{
     crc = GenerateDatabaseCrc();
     crc = static_cast<u16>(~crc);
 }
 
-Result NintendoFigurineDatabase::CheckIntegrity() {
+Result NintendoFigurineDatabase::CheckIntegrity()
+{
     if (magic != DatabaseMagic) {
         return ResultInvalidDatabaseSignature;
     }
@@ -138,7 +151,8 @@ Result NintendoFigurineDatabase::CheckIntegrity() {
     return ResultSuccess;
 }
 
-u16 NintendoFigurineDatabase::GenerateDatabaseCrc() {
+u16 NintendoFigurineDatabase::GenerateDatabaseCrc()
+{
     return MiiUtil::CalculateCrc16(&magic, sizeof(NintendoFigurineDatabase) - sizeof(crc));
 }
 

@@ -20,13 +20,15 @@ enum class Half : u64 {
     H1, // Most-significant bits (31:16)
 };
 
-IR::U32 ExtractHalf(TranslatorVisitor& v, const IR::U32& src, Half half, bool is_signed) {
+IR::U32 ExtractHalf(TranslatorVisitor& v, const IR::U32& src, Half half, bool is_signed)
+{
     const IR::U32 offset{v.ir.Imm32(half == Half::H1 ? 16 : 0)};
     return v.ir.BitFieldExtract(src, offset, v.ir.Imm32(16), is_signed);
 }
 
 void XMAD(TranslatorVisitor& v, u64 insn, const IR::U32& src_b, const IR::U32& src_c,
-          SelectMode select_mode, Half half_b, bool psl, bool mrg, bool x) {
+          SelectMode select_mode, Half half_b, bool psl, bool mrg, bool x)
+{
     union {
         u64 raw;
         BitField<0, 8, IR::Reg> dest_reg;
@@ -77,7 +79,8 @@ void XMAD(TranslatorVisitor& v, u64 insn, const IR::U32& src_b, const IR::U32& s
 }
 } // Anonymous namespace
 
-void TranslatorVisitor::XMAD_reg(u64 insn) {
+void TranslatorVisitor::XMAD_reg(u64 insn)
+{
     union {
         u64 raw;
         BitField<35, 1, Half> half_b;
@@ -91,7 +94,8 @@ void TranslatorVisitor::XMAD_reg(u64 insn) {
          xmad.mrg != 0, xmad.x != 0);
 }
 
-void TranslatorVisitor::XMAD_rc(u64 insn) {
+void TranslatorVisitor::XMAD_rc(u64 insn)
+{
     union {
         u64 raw;
         BitField<50, 2, SelectMode> select_mode;
@@ -103,7 +107,8 @@ void TranslatorVisitor::XMAD_rc(u64 insn) {
          xmad.x != 0);
 }
 
-void TranslatorVisitor::XMAD_cr(u64 insn) {
+void TranslatorVisitor::XMAD_cr(u64 insn)
+{
     union {
         u64 raw;
         BitField<50, 2, SelectMode> select_mode;
@@ -117,7 +122,8 @@ void TranslatorVisitor::XMAD_cr(u64 insn) {
          xmad.mrg != 0, xmad.x != 0);
 }
 
-void TranslatorVisitor::XMAD_imm(u64 insn) {
+void TranslatorVisitor::XMAD_imm(u64 insn)
+{
     union {
         u64 raw;
         BitField<20, 16, u64> src_b;

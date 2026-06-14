@@ -12,17 +12,21 @@
 
 namespace Kernel::Svc {
 
-constexpr inline u32 ConvertToSvcMajorVersion(u32 sdk) {
+constexpr inline u32 ConvertToSvcMajorVersion(u32 sdk)
+{
     return sdk + 4;
 }
-constexpr inline u32 ConvertToSdkMajorVersion(u32 svc) {
+constexpr inline u32 ConvertToSdkMajorVersion(u32 svc)
+{
     return svc - 4;
 }
 
-constexpr inline u32 ConvertToSvcMinorVersion(u32 sdk) {
+constexpr inline u32 ConvertToSvcMinorVersion(u32 sdk)
+{
     return sdk;
 }
-constexpr inline u32 ConvertToSdkMinorVersion(u32 svc) {
+constexpr inline u32 ConvertToSdkMinorVersion(u32 svc)
+{
     return svc;
 }
 
@@ -32,16 +36,19 @@ union KernelVersion {
     BitField<4, 13, u32> major_version;
 };
 
-constexpr inline u32 EncodeKernelVersion(u32 major, u32 minor) {
+constexpr inline u32 EncodeKernelVersion(u32 major, u32 minor)
+{
     return decltype(KernelVersion::minor_version)::FormatValue(minor) |
            decltype(KernelVersion::major_version)::FormatValue(major);
 }
 
-constexpr inline u32 GetKernelMajorVersion(u32 encoded) {
+constexpr inline u32 GetKernelMajorVersion(u32 encoded)
+{
     return decltype(KernelVersion::major_version)::ExtractValue(encoded);
 }
 
-constexpr inline u32 GetKernelMinorVersion(u32 encoded) {
+constexpr inline u32 GetKernelMinorVersion(u32 encoded)
+{
     return decltype(KernelVersion::minor_version)::ExtractValue(encoded);
 }
 

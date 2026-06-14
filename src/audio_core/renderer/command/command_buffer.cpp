@@ -4,8 +4,9 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include "audio_core/renderer/behavior/behavior_info.h"
 #include "audio_core/renderer/command/command_buffer.h"
+
+#include "audio_core/renderer/behavior/behavior_info.h"
 #include "audio_core/renderer/command/command_list_header.h"
 #include "audio_core/renderer/command/command_processing_time_estimator.h"
 #include "audio_core/renderer/effect/biquad_filter.h"
@@ -24,14 +25,15 @@ namespace AudioCore::Renderer {
 namespace {
 constexpr f32 BiquadParameterFixedScaleQ14 = 16384.0f; // 1 << 14
 
-[[nodiscard]] inline s16 ToQ14Clamped(f32 v) {
+[[nodiscard]] inline s16 ToQ14Clamped(f32 v)
+{
     const f32 scaled = std::clamp(v * BiquadParameterFixedScaleQ14, -32768.0f, 32767.0f);
     return static_cast<s16>(scaled);
 }
 } // namespace
 
-template <typename T, CommandId Id>
-T& CommandBuffer::GenerateStart(const s32 node_id) {
+template<typename T, CommandId Id> T& CommandBuffer::GenerateStart(const s32 node_id)
+{
     if (size + sizeof(T) >= command_list.size_bytes()) {
         LOG_ERROR(
             Service_Audio,
@@ -50,8 +52,8 @@ T& CommandBuffer::GenerateStart(const s32 node_id) {
     return cmd;
 }
 
-template <typename T>
-void CommandBuffer::GenerateEnd(T& cmd) {
+template<typename T> void CommandBuffer::GenerateEnd(T& cmd)
+{
     cmd.estimated_process_time = time_estimator->Estimate(cmd);
     estimated_process_time += cmd.estimated_process_time;
     size += sizeof(T);
@@ -62,7 +64,8 @@ void CommandBuffer::GeneratePcmInt16Version1Command(const s32 node_id,
                                                     const MemoryPoolInfo& memory_pool_,
                                                     VoiceInfo& voice_info,
                                                     const VoiceState& voice_state,
-                                                    const s16 buffer_count, const s8 channel) {
+                                                    const s16 buffer_count, const s8 channel)
+{
     auto& cmd{
         GenerateStart<PcmInt16DataSourceVersion1Command, CommandId::DataSourcePcmInt16Version1>(
             node_id)};
@@ -86,7 +89,8 @@ void CommandBuffer::GeneratePcmInt16Version1Command(const s32 node_id,
 
 void CommandBuffer::GeneratePcmInt16Version2Command(const s32 node_id, VoiceInfo& voice_info,
                                                     const VoiceState& voice_state,
-                                                    const s16 buffer_count, const s8 channel) {
+                                                    const s16 buffer_count, const s8 channel)
+{
     auto& cmd{
         GenerateStart<PcmInt16DataSourceVersion2Command, CommandId::DataSourcePcmInt16Version2>(
             node_id)};
@@ -112,7 +116,8 @@ void CommandBuffer::GeneratePcmFloatVersion1Command(const s32 node_id,
                                                     const MemoryPoolInfo& memory_pool_,
                                                     VoiceInfo& voice_info,
                                                     const VoiceState& voice_state,
-                                                    const s16 buffer_count, const s8 channel) {
+                                                    const s16 buffer_count, const s8 channel)
+{
     auto& cmd{
         GenerateStart<PcmFloatDataSourceVersion1Command, CommandId::DataSourcePcmFloatVersion1>(
             node_id)};
@@ -136,7 +141,8 @@ void CommandBuffer::GeneratePcmFloatVersion1Command(const s32 node_id,
 
 void CommandBuffer::GeneratePcmFloatVersion2Command(const s32 node_id, VoiceInfo& voice_info,
                                                     const VoiceState& voice_state,
-                                                    const s16 buffer_count, const s8 channel) {
+                                                    const s16 buffer_count, const s8 channel)
+{
     auto& cmd{
         GenerateStart<PcmFloatDataSourceVersion2Command, CommandId::DataSourcePcmFloatVersion2>(
             node_id)};
@@ -162,7 +168,8 @@ void CommandBuffer::GenerateAdpcmVersion1Command(const s32 node_id,
                                                  const MemoryPoolInfo& memory_pool_,
                                                  VoiceInfo& voice_info,
                                                  const VoiceState& voice_state,
-                                                 const s16 buffer_count, const s8 channel) {
+                                                 const s16 buffer_count, const s8 channel)
+{
     auto& cmd{
         GenerateStart<AdpcmDataSourceVersion1Command, CommandId::DataSourceAdpcmVersion1>(node_id)};
 
@@ -185,7 +192,8 @@ void CommandBuffer::GenerateAdpcmVersion1Command(const s32 node_id,
 
 void CommandBuffer::GenerateAdpcmVersion2Command(const s32 node_id, VoiceInfo& voice_info,
                                                  const VoiceState& voice_state,
-                                                 const s16 buffer_count, const s8 channel) {
+                                                 const s16 buffer_count, const s8 channel)
+{
     auto& cmd{
         GenerateStart<AdpcmDataSourceVersion2Command, CommandId::DataSourceAdpcmVersion2>(node_id)};
 
@@ -210,7 +218,8 @@ void CommandBuffer::GenerateAdpcmVersion2Command(const s32 node_id, VoiceInfo& v
 
 void CommandBuffer::GenerateVolumeCommand(const s32 node_id, const s16 buffer_offset,
                                           const s16 input_index, const f32 volume,
-                                          const u8 precision) {
+                                          const u8 precision)
+{
     auto& cmd{GenerateStart<VolumeCommand, CommandId::Volume>(node_id)};
 
     cmd.precision = precision;
@@ -222,7 +231,8 @@ void CommandBuffer::GenerateVolumeCommand(const s32 node_id, const s16 buffer_of
 }
 
 void CommandBuffer::GenerateVolumeRampCommand(const s32 node_id, VoiceInfo& voice_info,
-                                              const s16 buffer_count, const u8 precision) {
+                                              const s16 buffer_count, const u8 precision)
+{
     auto& cmd{GenerateStart<VolumeRampCommand, CommandId::VolumeRamp>(node_id)};
 
     cmd.input_index = buffer_count;
@@ -238,7 +248,8 @@ void CommandBuffer::GenerateBiquadFilterCommand(const s32 node_id, VoiceInfo& vo
                                                 const VoiceState& voice_state,
                                                 const s16 buffer_count, const s8 channel,
                                                 const u32 biquad_index,
-                                                const bool use_float_processing) {
+                                                const bool use_float_processing)
+{
     auto& cmd{GenerateStart<BiquadFilterCommand, CommandId::BiquadFilter>(node_id)};
 
     cmd.input = buffer_count + channel;
@@ -265,7 +276,8 @@ void CommandBuffer::GenerateBiquadFilterCommand(const s32 node_id, VoiceInfo& vo
 void CommandBuffer::GenerateBiquadFilterCommand(const s32 node_id, EffectInfoBase& effect_info,
                                                 const s16 buffer_offset, const s8 channel,
                                                 const bool needs_init,
-                                                const bool use_float_processing) {
+                                                const bool use_float_processing)
+{
     auto& cmd{GenerateStart<BiquadFilterCommand, CommandId::BiquadFilter>(node_id)};
 
     const auto state{reinterpret_cast<VoiceState::BiquadFilterState*>(
@@ -309,7 +321,8 @@ void CommandBuffer::GenerateBiquadFilterCommand(const s32 node_id, EffectInfoBas
 
 void CommandBuffer::GenerateMixCommand(const s32 node_id, const s16 input_index,
                                        const s16 output_index, const s16 buffer_offset,
-                                       const f32 volume, const u8 precision) {
+                                       const f32 volume, const u8 precision)
+{
     auto& cmd{GenerateStart<MixCommand, CommandId::Mix>(node_id)};
 
     cmd.input_index = input_index;
@@ -324,7 +337,8 @@ void CommandBuffer::GenerateMixRampCommand(const s32 node_id,
                                            [[maybe_unused]] const s16 buffer_count,
                                            const s16 input_index, const s16 output_index,
                                            const f32 volume, const f32 prev_volume,
-                                           const CpuAddr prev_samples, const u8 precision) {
+                                           const CpuAddr prev_samples, const u8 precision)
+{
     if (volume == 0.0f && prev_volume == 0.0f) {
         return;
     }
@@ -345,7 +359,8 @@ void CommandBuffer::GenerateMixRampGroupedCommand(const s32 node_id, const s16 b
                                                   const s16 input_index, s16 output_index,
                                                   std::span<const f32> volumes,
                                                   std::span<const f32> prev_volumes,
-                                                  const CpuAddr prev_samples, const u8 precision) {
+                                                  const CpuAddr prev_samples, const u8 precision)
+{
     auto& cmd{GenerateStart<MixRampGroupedCommand, CommandId::MixRampGrouped>(node_id)};
 
     cmd.buffer_count = buffer_count;
@@ -365,7 +380,8 @@ void CommandBuffer::GenerateMixRampGroupedCommand(const s32 node_id, const s16 b
 
 void CommandBuffer::GenerateDepopPrepareCommand(const s32 node_id, const VoiceState& voice_state,
                                                 std::span<const s32> buffer, const s16 buffer_count,
-                                                s16 buffer_offset, const bool was_playing) {
+                                                s16 buffer_offset, const bool was_playing)
+{
     auto& cmd{GenerateStart<DepopPrepareCommand, CommandId::DepopPrepare>(node_id)};
 
     cmd.enabled = was_playing;
@@ -383,7 +399,8 @@ void CommandBuffer::GenerateDepopPrepareCommand(const s32 node_id, const VoiceSt
 }
 
 void CommandBuffer::GenerateDepopForMixBuffersCommand(const s32 node_id, const MixInfo& mix_info,
-                                                      std::span<const s32> depop_buffer) {
+                                                      std::span<const s32> depop_buffer)
+{
     auto& cmd{GenerateStart<DepopForMixBuffersCommand, CommandId::DepopForMixBuffers>(node_id)};
 
     cmd.input = mix_info.buffer_offset;
@@ -396,7 +413,8 @@ void CommandBuffer::GenerateDepopForMixBuffersCommand(const s32 node_id, const M
 }
 
 void CommandBuffer::GenerateDelayCommand(const s32 node_id, EffectInfoBase& effect_info,
-                                         const s16 buffer_offset) {
+                                         const s16 buffer_offset)
+{
     auto& cmd{GenerateStart<DelayCommand, CommandId::Delay>(node_id)};
 
     const auto& parameter{
@@ -428,7 +446,8 @@ void CommandBuffer::GenerateDelayCommand(const s32 node_id, EffectInfoBase& effe
 void CommandBuffer::GenerateUpsampleCommand(const s32 node_id, const s16 buffer_offset,
                                             UpsamplerInfo& upsampler_info, const u32 input_count,
                                             std::span<const s8> inputs, const s16 buffer_count,
-                                            const u32 sample_count_, const u32 sample_rate_) {
+                                            const u32 sample_count_, const u32 sample_rate_)
+{
     auto& cmd{GenerateStart<UpsampleCommand, CommandId::Upsample>(node_id)};
 
     cmd.samples_buffer = memory_pool->Translate(upsampler_info.samples_pos,
@@ -451,7 +470,8 @@ void CommandBuffer::GenerateUpsampleCommand(const s32 node_id, const s16 buffer_
 
 void CommandBuffer::GenerateDownMix6chTo2chCommand(const s32 node_id, std::span<const s8> inputs,
                                                    const s16 buffer_offset,
-                                                   std::span<const f32> downmix_coeff) {
+                                                   std::span<const f32> downmix_coeff)
+{
     auto& cmd{GenerateStart<DownMix6chTo2chCommand, CommandId::DownMix6chTo2ch>(node_id)};
 
     for (u32 i = 0; i < MaxChannels; i++) {
@@ -469,7 +489,8 @@ void CommandBuffer::GenerateDownMix6chTo2chCommand(const s32 node_id, std::span<
 void CommandBuffer::GenerateAuxCommand(const s32 node_id, EffectInfoBase& effect_info,
                                        const s16 input_index, const s16 output_index,
                                        const s16 buffer_offset, const u32 update_count,
-                                       const u32 count_max, const u32 write_offset) {
+                                       const u32 count_max, const u32 write_offset)
+{
     auto& cmd{GenerateStart<AuxCommand, CommandId::Aux>(node_id)};
 
     if (effect_info.GetSendBuffer() != 0 && effect_info.GetReturnBuffer() != 0) {
@@ -490,7 +511,8 @@ void CommandBuffer::GenerateAuxCommand(const s32 node_id, EffectInfoBase& effect
 
 void CommandBuffer::GenerateDeviceSinkCommand(const s32 node_id, const s16 buffer_offset,
                                               SinkInfoBase& sink_info, const u32 session_id,
-                                              std::span<s32> samples_buffer) {
+                                              std::span<s32> samples_buffer)
+{
     auto& cmd{GenerateStart<DeviceSinkCommand, CommandId::DeviceSink>(node_id)};
     const auto& parameter{
         *reinterpret_cast<DeviceSinkInfo::DeviceInParameter*>(sink_info.GetParameter())};
@@ -519,7 +541,8 @@ void CommandBuffer::GenerateDeviceSinkCommand(const s32 node_id, const s16 buffe
 }
 
 void CommandBuffer::GenerateCircularBufferSinkCommand(const s32 node_id, SinkInfoBase& sink_info,
-                                                      const s16 buffer_offset) {
+                                                      const s16 buffer_offset)
+{
     auto& cmd{GenerateStart<CircularBufferSinkCommand, CommandId::CircularBufferSink>(node_id)};
     const auto& parameter{*reinterpret_cast<CircularBufferSinkInfo::CircularBufferInParameter*>(
         sink_info.GetParameter())};
@@ -540,7 +563,8 @@ void CommandBuffer::GenerateCircularBufferSinkCommand(const s32 node_id, SinkInf
 
 void CommandBuffer::GenerateReverbCommand(const s32 node_id, EffectInfoBase& effect_info,
                                           const s16 buffer_offset,
-                                          const bool long_size_pre_delay_supported) {
+                                          const bool long_size_pre_delay_supported)
+{
     auto& cmd{GenerateStart<ReverbCommand, CommandId::Reverb>(node_id)};
 
     const auto& parameter{
@@ -571,7 +595,8 @@ void CommandBuffer::GenerateReverbCommand(const s32 node_id, EffectInfoBase& eff
 }
 
 void CommandBuffer::GenerateI3dl2ReverbCommand(const s32 node_id, EffectInfoBase& effect_info,
-                                               const s16 buffer_offset) {
+                                               const s16 buffer_offset)
+{
     auto& cmd{GenerateStart<I3dl2ReverbCommand, CommandId::I3dl2Reverb>(node_id)};
 
     const auto& parameter{
@@ -602,7 +627,8 @@ void CommandBuffer::GenerateI3dl2ReverbCommand(const s32 node_id, EffectInfoBase
 }
 
 void CommandBuffer::GeneratePerformanceCommand(const s32 node_id, const PerformanceState state,
-                                               const PerformanceEntryAddresses& entry_addresses) {
+                                               const PerformanceEntryAddresses& entry_addresses)
+{
     auto& cmd{GenerateStart<PerformanceCommand, CommandId::Performance>(node_id)};
 
     cmd.state = state;
@@ -611,13 +637,15 @@ void CommandBuffer::GeneratePerformanceCommand(const s32 node_id, const Performa
     GenerateEnd<PerformanceCommand>(cmd);
 }
 
-void CommandBuffer::GenerateClearMixCommand(const s32 node_id) {
+void CommandBuffer::GenerateClearMixCommand(const s32 node_id)
+{
     auto& cmd{GenerateStart<ClearMixBufferCommand, CommandId::ClearMixBuffer>(node_id)};
     GenerateEnd<ClearMixBufferCommand>(cmd);
 }
 
 void CommandBuffer::GenerateCopyMixBufferCommand(const s32 node_id, EffectInfoBase& effect_info,
-                                                 const s16 buffer_offset, const s8 channel) {
+                                                 const s16 buffer_offset, const s8 channel)
+{
     auto& cmd{GenerateStart<CopyMixBufferCommand, CommandId::CopyMixBuffer>(node_id)};
 
     if (behavior->IsEffectInfoVersion2Supported()) {
@@ -640,7 +668,8 @@ void CommandBuffer::GenerateCopyMixBufferCommand(const s32 node_id, EffectInfoBa
 void CommandBuffer::GenerateLightLimiterCommand(
     const s32 node_id, const s16 buffer_offset,
     const LightLimiterInfo::ParameterVersion1& parameter, const LightLimiterInfo::State& state,
-    const bool enabled, const CpuAddr workbuffer) {
+    const bool enabled, const CpuAddr workbuffer)
+{
     auto& cmd{GenerateStart<LightLimiterVersion1Command, CommandId::LightLimiterVersion1>(node_id)};
 
     if (IsChannelCountValid(parameter.channel_count)) {
@@ -666,7 +695,8 @@ void CommandBuffer::GenerateLightLimiterCommand(
     const s32 node_id, const s16 buffer_offset,
     const LightLimiterInfo::ParameterVersion2& parameter,
     const LightLimiterInfo::StatisticsInternal& statistics, const LightLimiterInfo::State& state,
-    const bool enabled, const CpuAddr workbuffer) {
+    const bool enabled, const CpuAddr workbuffer)
+{
     auto& cmd{GenerateStart<LightLimiterVersion2Command, CommandId::LightLimiterVersion2>(node_id)};
     if (IsChannelCountValid(parameter.channel_count)) {
         const auto state_buffer{
@@ -695,7 +725,8 @@ void CommandBuffer::GenerateLightLimiterCommand(
 
 void CommandBuffer::GenerateMultitapBiquadFilterCommand(const s32 node_id, VoiceInfo& voice_info,
                                                         const VoiceState& voice_state,
-                                                        const s16 buffer_count, const s8 channel) {
+                                                        const s16 buffer_count, const s8 channel)
+{
     auto& cmd{GenerateStart<MultiTapBiquadFilterCommand, CommandId::MultiTapBiquadFilter>(node_id)};
 
     cmd.input = buffer_count + channel;
@@ -726,7 +757,8 @@ void CommandBuffer::GenerateMultitapBiquadFilterCommand(const s32 node_id, Voice
 void CommandBuffer::GenerateCaptureCommand(const s32 node_id, EffectInfoBase& effect_info,
                                            const s16 input_index, const s16 output_index,
                                            const s16 buffer_offset, const u32 update_count,
-                                           const u32 count_max, const u32 write_offset) {
+                                           const u32 count_max, const u32 write_offset)
+{
     auto& cmd{GenerateStart<CaptureCommand, CommandId::Capture>(node_id)};
 
     if (effect_info.GetSendBuffer()) {
@@ -744,7 +776,8 @@ void CommandBuffer::GenerateCaptureCommand(const s32 node_id, EffectInfoBase& ef
 }
 
 void CommandBuffer::GenerateCompressorCommand(s16 buffer_offset, EffectInfoBase& effect_info,
-                                              s32 node_id) {
+                                              s32 node_id)
+{
     auto& cmd{GenerateStart<CompressorCommand, CommandId::Compressor>(node_id)};
 
     auto& parameter{

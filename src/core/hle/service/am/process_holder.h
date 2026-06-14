@@ -18,13 +18,9 @@ public:
     explicit ProcessHolder(Applet& applet, Process& process);
     ~ProcessHolder();
 
-    Applet& GetApplet() const {
-        return m_applet;
-    }
+    Applet& GetApplet() const { return m_applet; }
 
-    Process& GetProcess() const {
-        return m_process;
-    }
+    Process& GetProcess() const { return m_process; }
 
 private:
     Applet& m_applet;

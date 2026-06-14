@@ -28,17 +28,18 @@ public:
 public:
     KDynamicPageManager() = default;
 
-    template <typename T>
-    T* GetPointer(KVirtualAddress addr) {
+    template<typename T> T* GetPointer(KVirtualAddress addr)
+    {
         return reinterpret_cast<T*>(m_backing_memory.data() + (addr - m_address));
     }
 
-    template <typename T>
-    const T* GetPointer(KVirtualAddress addr) const {
+    template<typename T> const T* GetPointer(KVirtualAddress addr) const
+    {
         return reinterpret_cast<T*>(m_backing_memory.data() + (addr - m_address));
     }
 
-    Result Initialize(KVirtualAddress memory, size_t size, size_t align) {
+    Result Initialize(KVirtualAddress memory, size_t size, size_t align)
+    {
         // We need to have positive size.
         R_UNLESS(size > 0, ResultOutOfMemory);
         m_backing_memory.resize(size);
@@ -82,23 +83,14 @@ public:
         R_SUCCEED();
     }
 
-    KVirtualAddress GetAddress() const {
-        return m_address;
-    }
-    size_t GetSize() const {
-        return m_size;
-    }
-    size_t GetUsed() const {
-        return m_used;
-    }
-    size_t GetPeak() const {
-        return m_peak;
-    }
-    size_t GetCount() const {
-        return m_count;
-    }
+    KVirtualAddress GetAddress() const { return m_address; }
+    size_t GetSize() const { return m_size; }
+    size_t GetUsed() const { return m_used; }
+    size_t GetPeak() const { return m_peak; }
+    size_t GetCount() const { return m_count; }
 
-    PageBuffer* Allocate() {
+    PageBuffer* Allocate()
+    {
         // Take the lock.
         // TODO(bunnei): We should disable interrupts here via KScopedInterruptDisable.
         KScopedSpinLock lk(m_lock);
@@ -118,7 +110,8 @@ public:
         return GetPointer<PageBuffer>(m_aligned_address) + offset;
     }
 
-    PageBuffer* Allocate(size_t count) {
+    PageBuffer* Allocate(size_t count)
+    {
         // Take the lock.
         // TODO(bunnei): We should disable interrupts here via KScopedInterruptDisable.
         KScopedSpinLock lk(m_lock);
@@ -139,7 +132,8 @@ public:
         return GetPointer<PageBuffer>(m_aligned_address) + offset;
     }
 
-    void Free(PageBuffer* pb) {
+    void Free(PageBuffer* pb)
+    {
         // Ensure all pages in the heap are zero.
         std::memset(pb, 0, PageSize);
 

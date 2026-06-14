@@ -6,9 +6,10 @@
 
 #pragma once
 
+#include <jni.h>
+
 #include <string>
 
-#include <jni.h>
 #include "common/common_types.h"
 
 namespace Common::Android {

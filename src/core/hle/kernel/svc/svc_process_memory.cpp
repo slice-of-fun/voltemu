@@ -11,11 +11,13 @@
 namespace Kernel::Svc {
 namespace {
 
-constexpr bool IsValidAddressRange(u64 address, u64 size) {
+constexpr bool IsValidAddressRange(u64 address, u64 size)
+{
     return address + size > address;
 }
 
-constexpr bool IsValidProcessMemoryPermission(Svc::MemoryPermission perm) {
+constexpr bool IsValidProcessMemoryPermission(Svc::MemoryPermission perm)
+{
     switch (perm) {
     case Svc::MemoryPermission::None:
     case Svc::MemoryPermission::Read:
@@ -30,7 +32,8 @@ constexpr bool IsValidProcessMemoryPermission(Svc::MemoryPermission perm) {
 } // namespace
 
 Result SetProcessMemoryPermission(Core::System& system, Handle process_handle, u64 address,
-                                  u64 size, Svc::MemoryPermission perm) {
+                                  u64 size, Svc::MemoryPermission perm)
+{
     LOG_TRACE(Kernel_SVC,
               "called, process_handle={:#X}, addr=0x{:X}, size=0x{:X}, permissions=0x{:08X}",
               process_handle, address, size, perm);
@@ -60,7 +63,8 @@ Result SetProcessMemoryPermission(Core::System& system, Handle process_handle, u
 }
 
 Result MapProcessMemory(Core::System& system, u64 dst_address, Handle process_handle,
-                        u64 src_address, u64 size) {
+                        u64 src_address, u64 size)
+{
     LOG_TRACE(Kernel_SVC,
               "called, dst_address={:#X}, process_handle=0x{:X}, src_address=0x{:X}, size=0x{:X}",
               dst_address, process_handle, src_address, size);
@@ -101,7 +105,8 @@ Result MapProcessMemory(Core::System& system, u64 dst_address, Handle process_ha
 }
 
 Result UnmapProcessMemory(Core::System& system, u64 dst_address, Handle process_handle,
-                          u64 src_address, u64 size) {
+                          u64 src_address, u64 size)
+{
     LOG_TRACE(Kernel_SVC,
               "called, dst_address={:#X}, process_handle=0x{:X}, src_address=0x{:X}, size=0x{:X}",
               dst_address, process_handle, src_address, size);
@@ -134,7 +139,8 @@ Result UnmapProcessMemory(Core::System& system, u64 dst_address, Handle process_
 }
 
 Result MapProcessCodeMemory(Core::System& system, Handle process_handle, u64 dst_address,
-                            u64 src_address, u64 size) {
+                            u64 src_address, u64 size)
+{
     LOG_DEBUG(Kernel_SVC,
               "called. process_handle=0x{:08X}, dst_address=0x{:016X}, "
               "src_address=0x{:016X}, size=0x{:016X}",
@@ -194,7 +200,8 @@ Result MapProcessCodeMemory(Core::System& system, Handle process_handle, u64 dst
 }
 
 Result UnmapProcessCodeMemory(Core::System& system, Handle process_handle, u64 dst_address,
-                              u64 src_address, u64 size) {
+                              u64 src_address, u64 size)
+{
     LOG_DEBUG(Kernel_SVC,
               "called. process_handle=0x{:08X}, dst_address=0x{:016X}, src_address=0x{:016X}, "
               "size=0x{:016X}",
@@ -254,52 +261,62 @@ Result UnmapProcessCodeMemory(Core::System& system, Handle process_handle, u64 d
 }
 
 Result SetProcessMemoryPermission64(Core::System& system, Handle process_handle, uint64_t address,
-                                    uint64_t size, MemoryPermission perm) {
+                                    uint64_t size, MemoryPermission perm)
+{
     R_RETURN(SetProcessMemoryPermission(system, process_handle, address, size, perm));
 }
 
 Result MapProcessMemory64(Core::System& system, uint64_t dst_address, Handle process_handle,
-                          uint64_t src_address, uint64_t size) {
+                          uint64_t src_address, uint64_t size)
+{
     R_RETURN(MapProcessMemory(system, dst_address, process_handle, src_address, size));
 }
 
 Result UnmapProcessMemory64(Core::System& system, uint64_t dst_address, Handle process_handle,
-                            uint64_t src_address, uint64_t size) {
+                            uint64_t src_address, uint64_t size)
+{
     R_RETURN(UnmapProcessMemory(system, dst_address, process_handle, src_address, size));
 }
 
 Result MapProcessCodeMemory64(Core::System& system, Handle process_handle, uint64_t dst_address,
-                              uint64_t src_address, uint64_t size) {
+                              uint64_t src_address, uint64_t size)
+{
     R_RETURN(MapProcessCodeMemory(system, process_handle, dst_address, src_address, size));
 }
 
 Result UnmapProcessCodeMemory64(Core::System& system, Handle process_handle, uint64_t dst_address,
-                                uint64_t src_address, uint64_t size) {
+                                uint64_t src_address, uint64_t size)
+{
     R_RETURN(UnmapProcessCodeMemory(system, process_handle, dst_address, src_address, size));
 }
 
 Result SetProcessMemoryPermission64From32(Core::System& system, Handle process_handle,
-                                          uint64_t address, uint64_t size, MemoryPermission perm) {
+                                          uint64_t address, uint64_t size, MemoryPermission perm)
+{
     R_RETURN(SetProcessMemoryPermission(system, process_handle, address, size, perm));
 }
 
 Result MapProcessMemory64From32(Core::System& system, uint32_t dst_address, Handle process_handle,
-                                uint64_t src_address, uint32_t size) {
+                                uint64_t src_address, uint32_t size)
+{
     R_RETURN(MapProcessMemory(system, dst_address, process_handle, src_address, size));
 }
 
 Result UnmapProcessMemory64From32(Core::System& system, uint32_t dst_address, Handle process_handle,
-                                  uint64_t src_address, uint32_t size) {
+                                  uint64_t src_address, uint32_t size)
+{
     R_RETURN(UnmapProcessMemory(system, dst_address, process_handle, src_address, size));
 }
 
 Result MapProcessCodeMemory64From32(Core::System& system, Handle process_handle,
-                                    uint64_t dst_address, uint64_t src_address, uint64_t size) {
+                                    uint64_t dst_address, uint64_t src_address, uint64_t size)
+{
     R_RETURN(MapProcessCodeMemory(system, process_handle, dst_address, src_address, size));
 }
 
 Result UnmapProcessCodeMemory64From32(Core::System& system, Handle process_handle,
-                                      uint64_t dst_address, uint64_t src_address, uint64_t size) {
+                                      uint64_t dst_address, uint64_t src_address, uint64_t size)
+{
     R_RETURN(UnmapProcessCodeMemory(system, process_handle, dst_address, src_address, size));
 }
 

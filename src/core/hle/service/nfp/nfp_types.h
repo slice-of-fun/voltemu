@@ -123,21 +123,14 @@ static_assert(sizeof(WriteDate) == 0x4, "WriteDate is an invalid size");
 struct AmiiboDate {
     u16 raw_date{};
 
-    u16 GetValue() const {
-        return Common::swap16(raw_date);
-    }
+    u16 GetValue() const { return Common::swap16(raw_date); }
 
-    u16 GetYear() const {
-        return static_cast<u16>(((GetValue() & 0xFE00) >> 9) + 2000);
-    }
-    u8 GetMonth() const {
-        return static_cast<u8>((GetValue() & 0x01E0) >> 5);
-    }
-    u8 GetDay() const {
-        return static_cast<u8>(GetValue() & 0x001F);
-    }
+    u16 GetYear() const { return static_cast<u16>(((GetValue() & 0xFE00) >> 9) + 2000); }
+    u8 GetMonth() const { return static_cast<u8>((GetValue() & 0x01E0) >> 5); }
+    u8 GetDay() const { return static_cast<u8>(GetValue() & 0x001F); }
 
-    WriteDate GetWriteDate() const {
+    WriteDate GetWriteDate() const
+    {
         if (!IsValidDate()) {
             return {
                 .year = 2000,
@@ -152,26 +145,31 @@ struct AmiiboDate {
         };
     }
 
-    void SetWriteDate(const WriteDate& write_date) {
+    void SetWriteDate(const WriteDate& write_date)
+    {
         SetYear(write_date.year);
         SetMonth(write_date.month);
         SetDay(write_date.day);
     }
 
-    void SetYear(u16 year) {
+    void SetYear(u16 year)
+    {
         const u16 year_converted = static_cast<u16>((year - 2000) << 9);
         raw_date = Common::swap16((GetValue() & ~0xFE00) | year_converted);
     }
-    void SetMonth(u8 month) {
+    void SetMonth(u8 month)
+    {
         const u16 month_converted = static_cast<u16>(month << 5);
         raw_date = Common::swap16((GetValue() & ~0x01E0) | month_converted);
     }
-    void SetDay(u8 day) {
+    void SetDay(u8 day)
+    {
         const u16 day_converted = static_cast<u16>(day);
         raw_date = Common::swap16((GetValue() & ~0x001F) | day_converted);
     }
 
-    bool IsValidDate() const {
+    bool IsValidDate() const
+    {
         const bool is_day_valid = GetDay() > 0 && GetDay() < 32;
         const bool is_month_valid = GetMonth() > 0 && GetMonth() < 13;
         const bool is_year_valid = GetYear() >= 2000;

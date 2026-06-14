@@ -58,18 +58,19 @@ public:
     Result GetDeviceLocationNameAndUpdatedTime(
         Out<Service::PSC::Time::LocationName> location_name,
         Out<Service::PSC::Time::SteadyClockTimePoint> out_time_point);
-    Result SetDeviceLocationNameWithTimeZoneRule(
-        const Service::PSC::Time::LocationName& location_name,
-        InBuffer<BufferAttr_HipcAutoSelect> binary);
+    Result
+    SetDeviceLocationNameWithTimeZoneRule(const Service::PSC::Time::LocationName& location_name,
+                                          InBuffer<BufferAttr_HipcAutoSelect> binary);
     Result ParseTimeZoneBinary(OutRule out_rule, InBuffer<BufferAttr_HipcAutoSelect> binary);
     Result GetDeviceLocationNameOperationEventReadableHandle(
         OutCopyHandle<Kernel::KReadableEvent> out_event);
     Result ToCalendarTime(Out<Service::PSC::Time::CalendarTime> out_calendar_time,
                           Out<Service::PSC::Time::CalendarAdditionalInfo> out_additional_info,
                           s64 time, InRule rule);
-    Result ToCalendarTimeWithMyRule(
-        Out<Service::PSC::Time::CalendarTime> out_calendar_time,
-        Out<Service::PSC::Time::CalendarAdditionalInfo> out_additional_info, s64 time);
+    Result
+    ToCalendarTimeWithMyRule(Out<Service::PSC::Time::CalendarTime> out_calendar_time,
+                             Out<Service::PSC::Time::CalendarAdditionalInfo> out_additional_info,
+                             s64 time);
     Result ToPosixTime(Out<u32> out_count, OutArray<s64, BufferAttr_HipcPointer> out_times,
                        const Service::PSC::Time::CalendarTime& calendar_time, InRule rule);
     Result ToPosixTimeWithMyRule(Out<u32> out_count,

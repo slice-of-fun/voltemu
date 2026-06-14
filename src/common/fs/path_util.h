@@ -69,8 +69,8 @@ enum EmuPath {
 [[nodiscard]] bool ValidatePath(const std::filesystem::path& path);
 
 #ifdef _WIN32
-template <typename Path>
-[[nodiscard]] bool ValidatePath(const Path& path) {
+template<typename Path> [[nodiscard]] bool ValidatePath(const Path& path)
+{
     if constexpr (IsChar<typename Path::value_type>) {
         return ValidatePath(ToU8String(path));
     } else {
@@ -96,8 +96,9 @@ template <typename Path>
                                                const std::filesystem::path& second);
 
 #ifdef _WIN32
-template <typename Path1, typename Path2>
-[[nodiscard]] std::filesystem::path ConcatPath(const Path1& first, const Path2& second) {
+template<typename Path1, typename Path2>
+[[nodiscard]] std::filesystem::path ConcatPath(const Path1& first, const Path2& second)
+{
     using ValueType1 = typename Path1::value_type;
     using ValueType2 = typename Path2::value_type;
     if constexpr (IsChar<ValueType1> && IsChar<ValueType2>) {
@@ -128,8 +129,9 @@ template <typename Path1, typename Path2>
                                                    const std::filesystem::path& offset);
 
 #ifdef _WIN32
-template <typename Path1, typename Path2>
-[[nodiscard]] std::filesystem::path ConcatPathSafe(const Path1& base, const Path2& offset) {
+template<typename Path1, typename Path2>
+[[nodiscard]] std::filesystem::path ConcatPathSafe(const Path1& base, const Path2& offset)
+{
     using ValueType1 = typename Path1::value_type;
     using ValueType2 = typename Path2::value_type;
     if constexpr (IsChar<ValueType1> && IsChar<ValueType2>) {
@@ -156,8 +158,9 @@ template <typename Path1, typename Path2>
                                    const std::filesystem::path& path);
 
 #ifdef _WIN32
-template <typename Path1, typename Path2>
-[[nodiscard]] bool IsPathSandboxed(const Path1& base, const Path2& path) {
+template<typename Path1, typename Path2>
+[[nodiscard]] bool IsPathSandboxed(const Path1& base, const Path2& path)
+{
     using ValueType1 = typename Path1::value_type;
     using ValueType2 = typename Path2::value_type;
     if constexpr (IsChar<ValueType1> && IsChar<ValueType2>) {
@@ -200,8 +203,9 @@ template <typename Path1, typename Path2>
 [[nodiscard]] std::filesystem::path RemoveTrailingSeparators(const std::filesystem::path& path);
 
 #ifdef _WIN32
-template <typename Path>
-[[nodiscard]] std::filesystem::path RemoveTrailingSeparators(const Path& path) {
+template<typename Path>
+[[nodiscard]] std::filesystem::path RemoveTrailingSeparators(const Path& path)
+{
     if constexpr (IsChar<typename Path::value_type>) {
         return RemoveTrailingSeparators(ToU8String(path));
     } else {
@@ -269,8 +273,8 @@ void SetVoltPath(VoltPath volt_path, const std::filesystem::path& new_path);
 void CreateEdenPaths();
 
 #ifdef _WIN32
-template <typename Path>
-void SetVoltPath(VoltPath volt_path, const Path& new_path) {
+template<typename Path> void SetVoltPath(VoltPath volt_path, const Path& new_path)
+{
     if constexpr (IsChar<typename Path::value_type>) {
         SetVoltPath(volt_path, ToU8String(new_path));
     } else {
@@ -346,9 +350,9 @@ enum class DirectorySeparator {
 
 // Removes trailing slash, makes all '\\' into '/', and removes duplicate '/'. Makes '/' into '\\'
 // depending if directory_separator is BackwardSlash or PlatformDefault and running on windows
-[[nodiscard]] std::string SanitizePath(
-    std::string_view path,
-    DirectorySeparator directory_separator = DirectorySeparator::ForwardSlash);
+[[nodiscard]] std::string
+SanitizePath(std::string_view path,
+             DirectorySeparator directory_separator = DirectorySeparator::ForwardSlash);
 
 // Gets all of the text up to the last '/' or '\' in the path.
 [[nodiscard]] std::string GetParentPath(std::string_view path);
@@ -357,14 +361,16 @@ enum class DirectorySeparator {
 [[nodiscard]] std::string_view GetPathWithoutTop(std::string_view path);
 
 // Gets the filename of the path
-[[nodiscard]] inline std::string_view GetFilename(const std::string_view path) noexcept {
+[[nodiscard]] inline std::string_view GetFilename(const std::string_view path) noexcept
+{
     if (auto const name_index = path.find_last_of("\\/"); name_index != std::string_view::npos)
         return path.substr(name_index + 1);
     return {};
 }
 
 // Gets the extension of the filename
-[[nodiscard]] inline std::string_view GetExtensionFromFilename(const std::string_view name) noexcept {
+[[nodiscard]] inline std::string_view GetExtensionFromFilename(const std::string_view name) noexcept
+{
     if (auto const index = name.rfind('.'); index != std::string_view::npos)
         return name.substr(index + 1);
     return {};

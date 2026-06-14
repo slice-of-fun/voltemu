@@ -7,7 +7,8 @@
 
 namespace Shader::Maxwell {
 namespace {
-void FMNMX(TranslatorVisitor& v, u64 insn, const IR::F32& src_b) {
+void FMNMX(TranslatorVisitor& v, u64 insn, const IR::F32& src_b)
+{
     union {
         u64 insn;
         BitField<0, 8, IR::Reg> dest_reg;
@@ -46,15 +47,18 @@ void FMNMX(TranslatorVisitor& v, u64 insn, const IR::F32& src_b) {
 }
 } // Anonymous namespace
 
-void TranslatorVisitor::FMNMX_reg(u64 insn) {
+void TranslatorVisitor::FMNMX_reg(u64 insn)
+{
     FMNMX(*this, insn, GetFloatReg20(insn));
 }
 
-void TranslatorVisitor::FMNMX_cbuf(u64 insn) {
+void TranslatorVisitor::FMNMX_cbuf(u64 insn)
+{
     FMNMX(*this, insn, GetFloatCbuf(insn));
 }
 
-void TranslatorVisitor::FMNMX_imm(u64 insn) {
+void TranslatorVisitor::FMNMX_imm(u64 insn)
+{
     FMNMX(*this, insn, GetFloatImm20(insn));
 }
 

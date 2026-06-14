@@ -14,10 +14,10 @@
 #include "video_core/engines/maxwell_3d.h"
 #include "video_core/renderer_vulkan/vk_descriptor_pool.h"
 #include "video_core/renderer_vulkan/vk_update_descriptor.h"
+#include "video_core/texture_cache/accelerated_swizzle.h"
 #include "video_core/texture_cache/types.h"
 #include "video_core/vulkan_common/vulkan_memory_allocator.h"
 #include "video_core/vulkan_common/vulkan_wrapper.h"
-#include "video_core/texture_cache/accelerated_swizzle.h"
 
 namespace VideoCommon {
 struct SwizzleParameters;
@@ -81,9 +81,9 @@ public:
                              ComputePassDescriptorQueue& compute_pass_descriptor_queue_);
     ~QuadIndexedPass();
 
-    std::pair<VkBuffer, VkDeviceSize> Assemble(
-        Tegra::Engines::Maxwell3D::Regs::IndexFormat index_format, u32 num_vertices,
-        u32 base_vertex, VkBuffer src_buffer, u32 src_offset, bool is_strip);
+    std::pair<VkBuffer, VkDeviceSize>
+    Assemble(Tegra::Engines::Maxwell3D::Regs::IndexFormat index_format, u32 num_vertices,
+             u32 base_vertex, VkBuffer src_buffer, u32 src_offset, bool is_strip);
 
 private:
     Scheduler& scheduler;
@@ -140,30 +140,25 @@ private:
 class BlockLinearUnswizzle3DPass final : public ComputePass {
 public:
     explicit BlockLinearUnswizzle3DPass(const Device& device_, Scheduler& scheduler_,
-                             DescriptorPool& descriptor_pool_,
-                             StagingBufferPool& staging_buffer_pool_,
-                             ComputePassDescriptorQueue& compute_pass_descriptor_queue_);
+                                        DescriptorPool& descriptor_pool_,
+                                        StagingBufferPool& staging_buffer_pool_,
+                                        ComputePassDescriptorQueue& compute_pass_descriptor_queue_);
     ~BlockLinearUnswizzle3DPass();
 
-    void Unswizzle(Image& image,
-                   const StagingBufferRef& swizzled,
-                   std::span<const VideoCommon::SwizzleParameters> swizzles,
-                   u32 z_start, u32 z_count);
+    void Unswizzle(Image& image, const StagingBufferRef& swizzled,
+                   std::span<const VideoCommon::SwizzleParameters> swizzles, u32 z_start,
+                   u32 z_count);
 
-    void UnswizzleChunk(
-        Image& image,
-        const StagingBufferRef& swizzled,
-        const VideoCommon::SwizzleParameters& sw,
-        const BlockLinearSwizzle3DParams& params,
-        u32 blocks_x, u32 blocks_y,
-        u32 z_start, u32 z_count);
+    void UnswizzleChunk(Image& image, const StagingBufferRef& swizzled,
+                        const VideoCommon::SwizzleParameters& sw,
+                        const BlockLinearSwizzle3DParams& params, u32 blocks_x, u32 blocks_y,
+                        u32 z_start, u32 z_count);
 
 private:
     Scheduler& scheduler;
     StagingBufferPool& staging_buffer_pool;
     ComputePassDescriptorQueue& compute_pass_descriptor_queue;
 };
-
 
 class MSAACopyPass final : public ComputePass {
 public:

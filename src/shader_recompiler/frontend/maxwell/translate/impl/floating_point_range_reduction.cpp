@@ -12,7 +12,8 @@ enum class Mode : u64 {
     EX2,
 };
 
-void RRO(TranslatorVisitor& v, u64 insn, const IR::F32& src) {
+void RRO(TranslatorVisitor& v, u64 insn, const IR::F32& src)
+{
     union {
         u64 raw;
         BitField<0, 8, IR::Reg> dest_reg;
@@ -25,15 +26,18 @@ void RRO(TranslatorVisitor& v, u64 insn, const IR::F32& src) {
 }
 } // Anonymous namespace
 
-void TranslatorVisitor::RRO_reg(u64 insn) {
+void TranslatorVisitor::RRO_reg(u64 insn)
+{
     RRO(*this, insn, GetFloatReg20(insn));
 }
 
-void TranslatorVisitor::RRO_cbuf(u64 insn) {
+void TranslatorVisitor::RRO_cbuf(u64 insn)
+{
     RRO(*this, insn, GetFloatCbuf(insn));
 }
 
-void TranslatorVisitor::RRO_imm(u64) {
+void TranslatorVisitor::RRO_imm(u64)
+{
     throw NotImplementedException("RRO (imm)");
 }
 

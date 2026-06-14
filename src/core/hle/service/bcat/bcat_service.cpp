@@ -4,13 +4,14 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/bcat/bcat_service.h"
+
 #include "common/hex_util.h"
 #include "common/string_util.h"
 #include "core/core.h"
 #include "core/file_sys/errors.h"
 #include "core/hle/service/bcat/backend/backend.h"
 #include "core/hle/service/bcat/bcat_result.h"
-#include "core/hle/service/bcat/bcat_service.h"
 #include "core/hle/service/bcat/bcat_util.h"
 #include "core/hle/service/bcat/delivery_cache_progress_service.h"
 #include "core/hle/service/bcat/delivery_cache_storage_service.h"
@@ -18,7 +19,8 @@
 
 namespace Service::BCAT {
 
-static u64 GetCurrentBuildID(const Core::System::CurrentBuildProcessID& id) {
+static u64 GetCurrentBuildID(const Core::System::CurrentBuildProcessID& id)
+{
     u64 out{};
     std::memcpy(&out, id.data(), sizeof(u64));
     return out;
@@ -29,7 +31,8 @@ IBcatService::IBcatService(Core::System& system_, BcatBackend& backend_)
       progress{{
           ProgressServiceBackend{system_, "Normal"},
           ProgressServiceBackend{system_, "Directory"},
-      }} {
+      }}
+{
     // clang-format off
         static const FunctionInfo functions[] = {
             {10100, D<&IBcatService::RequestSyncDeliveryCache>, "RequestSyncDeliveryCache"},
@@ -65,8 +68,9 @@ IBcatService::IBcatService(Core::System& system_, BcatBackend& backend_)
 
 IBcatService::~IBcatService() = default;
 
-Result IBcatService::RequestSyncDeliveryCache(
-    OutInterface<IDeliveryCacheProgressService> out_interface) {
+Result
+IBcatService::RequestSyncDeliveryCache(OutInterface<IDeliveryCacheProgressService> out_interface)
+{
     LOG_DEBUG(Service_BCAT, "called");
 
     auto& progress_backend{GetProgressBackend(SyncType::Normal)};
@@ -80,7 +84,8 @@ Result IBcatService::RequestSyncDeliveryCache(
 }
 
 Result IBcatService::RequestSyncDeliveryCacheWithDirectoryName(
-    const DirectoryName& name_raw, OutInterface<IDeliveryCacheProgressService> out_interface) {
+    const DirectoryName& name_raw, OutInterface<IDeliveryCacheProgressService> out_interface)
+{
     const auto name = Common::StringFromFixedZeroTerminatedBuffer(name_raw.data(), name_raw.size());
 
     LOG_DEBUG(Service_BCAT, "called, name={}", name);
@@ -96,7 +101,8 @@ Result IBcatService::RequestSyncDeliveryCacheWithDirectoryName(
 }
 
 Result IBcatService::SetPassphrase(u64 application_id,
-                                   InBuffer<BufferAttr_HipcPointer> passphrase_buffer) {
+                                   InBuffer<BufferAttr_HipcPointer> passphrase_buffer)
+{
     LOG_DEBUG(Service_BCAT, "called, application_id={:016X}, passphrase={}", application_id,
               Common::HexToString(passphrase_buffer));
 
@@ -111,12 +117,14 @@ Result IBcatService::SetPassphrase(u64 application_id,
     R_SUCCEED();
 }
 
-Result IBcatService::RegisterSystemApplicationDeliveryTasks() {
+Result IBcatService::RegisterSystemApplicationDeliveryTasks()
+{
     LOG_WARNING(Service_BCAT, "(STUBBED) called");
     R_SUCCEED();
 }
 
-Result IBcatService::ClearDeliveryCacheStorage(u64 application_id) {
+Result IBcatService::ClearDeliveryCacheStorage(u64 application_id)
+{
     LOG_DEBUG(Service_BCAT, "called, title_id={:016X}", application_id);
 
     R_UNLESS(application_id != 0, ResultInvalidArgument);
@@ -124,11 +132,13 @@ Result IBcatService::ClearDeliveryCacheStorage(u64 application_id) {
     R_SUCCEED();
 }
 
-ProgressServiceBackend& IBcatService::GetProgressBackend(SyncType type) {
+ProgressServiceBackend& IBcatService::GetProgressBackend(SyncType type)
+{
     return progress.at(static_cast<size_t>(type));
 }
 
-const ProgressServiceBackend& IBcatService::GetProgressBackend(SyncType type) const {
+const ProgressServiceBackend& IBcatService::GetProgressBackend(SyncType type) const
+{
     return progress.at(static_cast<size_t>(type));
 }
 

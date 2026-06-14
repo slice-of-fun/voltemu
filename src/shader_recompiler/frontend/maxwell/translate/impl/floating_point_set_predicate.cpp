@@ -8,7 +8,8 @@
 
 namespace Shader::Maxwell {
 namespace {
-void FSETP(TranslatorVisitor& v, u64 insn, const IR::F32& src_b) {
+void FSETP(TranslatorVisitor& v, u64 insn, const IR::F32& src_b)
+{
     union {
         u64 insn;
         BitField<0, 3, IR::Pred> dest_pred_b;
@@ -44,15 +45,18 @@ void FSETP(TranslatorVisitor& v, u64 insn, const IR::F32& src_b) {
 }
 } // Anonymous namespace
 
-void TranslatorVisitor::FSETP_reg(u64 insn) {
+void TranslatorVisitor::FSETP_reg(u64 insn)
+{
     FSETP(*this, insn, GetFloatReg20(insn));
 }
 
-void TranslatorVisitor::FSETP_cbuf(u64 insn) {
+void TranslatorVisitor::FSETP_cbuf(u64 insn)
+{
     FSETP(*this, insn, GetFloatCbuf(insn));
 }
 
-void TranslatorVisitor::FSETP_imm(u64 insn) {
+void TranslatorVisitor::FSETP_imm(u64 insn)
+{
     FSETP(*this, insn, GetFloatImm20(insn));
 }
 

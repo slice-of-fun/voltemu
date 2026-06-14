@@ -1,24 +1,32 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "hid_core/resources/system_buttons/capture_button.h"
+
 #include "core/core_timing.h"
 #include "hid_core/frontend/emulated_controller.h"
 #include "hid_core/hid_core.h"
 #include "hid_core/resources/applet_resource.h"
 #include "hid_core/resources/shared_memory_format.h"
-#include "hid_core/resources/system_buttons/capture_button.h"
 
 namespace Service::HID {
 
-CaptureButton::CaptureButton(Core::HID::HIDCore& hid_core_) : ControllerBase{hid_core_} {}
+CaptureButton::CaptureButton(Core::HID::HIDCore& hid_core_) : ControllerBase{hid_core_}
+{
+}
 
 CaptureButton::~CaptureButton() = default;
 
-void CaptureButton::OnInit() {}
+void CaptureButton::OnInit()
+{
+}
 
-void CaptureButton::OnRelease() {}
+void CaptureButton::OnRelease()
+{
+}
 
-void CaptureButton::OnUpdate(const Core::Timing::CoreTiming& core_timing) {
+void CaptureButton::OnUpdate(const Core::Timing::CoreTiming& core_timing)
+{
     std::scoped_lock shared_lock{*shared_mutex};
     const u64 aruid = applet_resource->GetActiveAruid();
     auto* data = applet_resource->GetAruidData(aruid);

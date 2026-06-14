@@ -174,7 +174,8 @@ enum class KMemoryPermission : u8 {
 };
 DECLARE_ENUM_FLAG_OPERATORS(KMemoryPermission);
 
-constexpr KMemoryPermission ConvertToKMemoryPermission(Svc::MemoryPermission perm) {
+constexpr KMemoryPermission ConvertToKMemoryPermission(Svc::MemoryPermission perm)
+{
     return static_cast<KMemoryPermission>(
         (static_cast<KMemoryPermission>(perm) & KMemoryPermission::UserMask) |
         KMemoryPermission::KernelRead |
@@ -226,7 +227,8 @@ struct KMemoryInfo {
     KMemoryPermission m_original_permission;
     KMemoryBlockDisableMergeAttribute m_disable_merge_attribute;
 
-    constexpr Svc::MemoryInfo GetSvcMemoryInfo() const {
+    constexpr Svc::MemoryInfo GetSvcMemoryInfo() const
+    {
         return {
             .base_address = m_address,
             .size = m_size,
@@ -241,55 +243,35 @@ struct KMemoryInfo {
         };
     }
 
-    constexpr uintptr_t GetAddress() const {
-        return m_address;
-    }
+    constexpr uintptr_t GetAddress() const { return m_address; }
 
-    constexpr size_t GetSize() const {
-        return m_size;
-    }
+    constexpr size_t GetSize() const { return m_size; }
 
-    constexpr size_t GetNumPages() const {
-        return this->GetSize() / PageSize;
-    }
+    constexpr size_t GetNumPages() const { return this->GetSize() / PageSize; }
 
-    constexpr uintptr_t GetEndAddress() const {
-        return this->GetAddress() + this->GetSize();
-    }
+    constexpr uintptr_t GetEndAddress() const { return this->GetAddress() + this->GetSize(); }
 
-    constexpr uintptr_t GetLastAddress() const {
-        return this->GetEndAddress() - 1;
-    }
+    constexpr uintptr_t GetLastAddress() const { return this->GetEndAddress() - 1; }
 
-    constexpr u16 GetIpcLockCount() const {
-        return m_ipc_lock_count;
-    }
+    constexpr u16 GetIpcLockCount() const { return m_ipc_lock_count; }
 
-    constexpr u16 GetIpcDisableMergeCount() const {
-        return m_ipc_disable_merge_count;
-    }
+    constexpr u16 GetIpcDisableMergeCount() const { return m_ipc_disable_merge_count; }
 
-    constexpr KMemoryState GetState() const {
-        return m_state;
-    }
+    constexpr KMemoryState GetState() const { return m_state; }
 
-    constexpr Svc::MemoryState GetSvcState() const {
+    constexpr Svc::MemoryState GetSvcState() const
+    {
         return static_cast<Svc::MemoryState>(m_state & KMemoryState::Mask);
     }
 
-    constexpr KMemoryPermission GetPermission() const {
-        return m_permission;
-    }
+    constexpr KMemoryPermission GetPermission() const { return m_permission; }
 
-    constexpr KMemoryPermission GetOriginalPermission() const {
-        return m_original_permission;
-    }
+    constexpr KMemoryPermission GetOriginalPermission() const { return m_original_permission; }
 
-    constexpr KMemoryAttribute GetAttribute() const {
-        return m_attribute;
-    }
+    constexpr KMemoryAttribute GetAttribute() const { return m_attribute; }
 
-    constexpr KMemoryBlockDisableMergeAttribute GetDisableMergeAttribute() const {
+    constexpr KMemoryBlockDisableMergeAttribute GetDisableMergeAttribute() const
+    {
         return m_disable_merge_attribute;
     }
 };
@@ -311,7 +293,8 @@ private:
         KMemoryBlockDisableMergeAttribute::None};
 
 public:
-    static constexpr int Compare(const KMemoryBlock& lhs, const KMemoryBlock& rhs) {
+    static constexpr int Compare(const KMemoryBlock& lhs, const KMemoryBlock& rhs)
+    {
         if (lhs.GetAddress() < rhs.GetAddress()) {
             return -1;
         } else if (lhs.GetAddress() <= rhs.GetLastAddress()) {
@@ -322,51 +305,30 @@ public:
     }
 
 public:
-    constexpr KProcessAddress GetAddress() const {
-        return m_address;
-    }
+    constexpr KProcessAddress GetAddress() const { return m_address; }
 
-    constexpr size_t GetNumPages() const {
-        return m_num_pages;
-    }
+    constexpr size_t GetNumPages() const { return m_num_pages; }
 
-    constexpr size_t GetSize() const {
-        return this->GetNumPages() * PageSize;
-    }
+    constexpr size_t GetSize() const { return this->GetNumPages() * PageSize; }
 
-    constexpr KProcessAddress GetEndAddress() const {
-        return this->GetAddress() + this->GetSize();
-    }
+    constexpr KProcessAddress GetEndAddress() const { return this->GetAddress() + this->GetSize(); }
 
-    constexpr KProcessAddress GetLastAddress() const {
-        return this->GetEndAddress() - 1;
-    }
+    constexpr KProcessAddress GetLastAddress() const { return this->GetEndAddress() - 1; }
 
-    constexpr KMemoryState GetState() const {
-        return m_memory_state;
-    }
+    constexpr KMemoryState GetState() const { return m_memory_state; }
 
-    constexpr u16 GetIpcLockCount() const {
-        return m_ipc_lock_count;
-    }
+    constexpr u16 GetIpcLockCount() const { return m_ipc_lock_count; }
 
-    constexpr u16 GetIpcDisableMergeCount() const {
-        return m_ipc_disable_merge_count;
-    }
+    constexpr u16 GetIpcDisableMergeCount() const { return m_ipc_disable_merge_count; }
 
-    constexpr KMemoryPermission GetPermission() const {
-        return m_permission;
-    }
+    constexpr KMemoryPermission GetPermission() const { return m_permission; }
 
-    constexpr KMemoryPermission GetOriginalPermission() const {
-        return m_original_permission;
-    }
+    constexpr KMemoryPermission GetOriginalPermission() const { return m_original_permission; }
 
-    constexpr KMemoryAttribute GetAttribute() const {
-        return m_attribute;
-    }
+    constexpr KMemoryAttribute GetAttribute() const { return m_attribute; }
 
-    constexpr KMemoryInfo GetMemoryInfo() const {
+    constexpr KMemoryInfo GetMemoryInfo() const
+    {
         return {
             .m_address = GetInteger(this->GetAddress()),
             .m_size = this->GetSize(),
@@ -389,10 +351,13 @@ public:
     constexpr KMemoryBlock(KProcessAddress addr, size_t np, KMemoryState ms, KMemoryPermission p,
                            KMemoryAttribute attr)
         : Common::IntrusiveRedBlackTreeBaseNode<KMemoryBlock>(), m_address(addr), m_num_pages(np),
-          m_memory_state(ms), m_permission(p), m_attribute(attr) {}
+          m_memory_state(ms), m_permission(p), m_attribute(attr)
+    {
+    }
 
     constexpr void Initialize(KProcessAddress addr, size_t np, KMemoryState ms, KMemoryPermission p,
-                              KMemoryAttribute attr) {
+                              KMemoryAttribute attr)
+    {
         m_device_disable_merge_left_count = 0;
         m_device_disable_merge_right_count = 0;
         m_address = addr;
@@ -406,21 +371,24 @@ public:
         m_disable_merge_attribute = KMemoryBlockDisableMergeAttribute::None;
     }
 
-    constexpr bool HasProperties(KMemoryState s, KMemoryPermission p, KMemoryAttribute a) const {
+    constexpr bool HasProperties(KMemoryState s, KMemoryPermission p, KMemoryAttribute a) const
+    {
         constexpr auto AttributeIgnoreMask =
             KMemoryAttribute::IpcLocked | KMemoryAttribute::DeviceShared;
         return m_memory_state == s && m_permission == p &&
                (m_attribute | AttributeIgnoreMask) == (a | AttributeIgnoreMask);
     }
 
-    constexpr bool HasSameProperties(const KMemoryBlock& rhs) const {
+    constexpr bool HasSameProperties(const KMemoryBlock& rhs) const
+    {
         return m_memory_state == rhs.m_memory_state && m_permission == rhs.m_permission &&
                m_original_permission == rhs.m_original_permission &&
                m_attribute == rhs.m_attribute && m_ipc_lock_count == rhs.m_ipc_lock_count &&
                m_device_use_count == rhs.m_device_use_count;
     }
 
-    constexpr bool CanMergeWith(const KMemoryBlock& rhs) const {
+    constexpr bool CanMergeWith(const KMemoryBlock& rhs) const
+    {
         return this->HasSameProperties(rhs) &&
                (m_disable_merge_attribute & KMemoryBlockDisableMergeAttribute::AllRight) ==
                    KMemoryBlockDisableMergeAttribute::None &&
@@ -428,11 +396,13 @@ public:
                    KMemoryBlockDisableMergeAttribute::None;
     }
 
-    constexpr bool Contains(KProcessAddress addr) const {
+    constexpr bool Contains(KProcessAddress addr) const
+    {
         return this->GetAddress() <= addr && addr <= this->GetEndAddress();
     }
 
-    constexpr void Add(const KMemoryBlock& added_block) {
+    constexpr void Add(const KMemoryBlock& added_block)
+    {
         ASSERT(added_block.GetNumPages() > 0);
         ASSERT(this->GetAddress() + added_block.GetSize() - 1 <
                this->GetEndAddress() + added_block.GetSize() - 1);
@@ -444,7 +414,8 @@ public:
     }
 
     constexpr void Update(KMemoryState s, KMemoryPermission p, KMemoryAttribute a,
-                          bool set_disable_merge_attr, u8 set_mask, u8 clear_mask) {
+                          bool set_disable_merge_attr, u8 set_mask, u8 clear_mask)
+    {
         ASSERT(m_original_permission == KMemoryPermission::None);
         ASSERT((m_attribute & KMemoryAttribute::IpcLocked) == KMemoryAttribute::None);
 
@@ -463,14 +434,16 @@ public:
         }
     }
 
-    constexpr void UpdateAttribute(KMemoryAttribute mask, KMemoryAttribute attr) {
+    constexpr void UpdateAttribute(KMemoryAttribute mask, KMemoryAttribute attr)
+    {
         ASSERT(False(mask & KMemoryAttribute::IpcLocked));
         ASSERT(False(mask & KMemoryAttribute::DeviceShared));
 
         m_attribute = (m_attribute & ~mask) | attr;
     }
 
-    constexpr void Split(KMemoryBlock* block, KProcessAddress addr) {
+    constexpr void Split(KMemoryBlock* block, KProcessAddress addr)
+    {
         ASSERT(this->GetAddress() < addr);
         ASSERT(this->Contains(addr));
         ASSERT(Common::IsAligned(GetInteger(addr), PageSize));
@@ -499,7 +472,8 @@ public:
     }
 
     constexpr void UpdateDeviceDisableMergeStateForShareLeft(KMemoryPermission new_perm, bool left,
-                                                             bool right) {
+                                                             bool right)
+    {
         // New permission/right aren't used.
         if (left) {
             m_disable_merge_attribute = static_cast<KMemoryBlockDisableMergeAttribute>(
@@ -510,7 +484,8 @@ public:
     }
 
     constexpr void UpdateDeviceDisableMergeStateForShareRight(KMemoryPermission new_perm, bool left,
-                                                              bool right) {
+                                                              bool right)
+    {
         // New permission/left aren't used.
         if (right) {
             m_disable_merge_attribute = static_cast<KMemoryBlockDisableMergeAttribute>(
@@ -521,12 +496,14 @@ public:
     }
 
     constexpr void UpdateDeviceDisableMergeStateForShare(KMemoryPermission new_perm, bool left,
-                                                         bool right) {
+                                                         bool right)
+    {
         this->UpdateDeviceDisableMergeStateForShareLeft(new_perm, left, right);
         this->UpdateDeviceDisableMergeStateForShareRight(new_perm, left, right);
     }
 
-    constexpr void ShareToDevice(KMemoryPermission new_perm, bool left, bool right) {
+    constexpr void ShareToDevice(KMemoryPermission new_perm, bool left, bool right)
+    {
         // New permission isn't used.
 
         // We must either be shared or have a zero lock count.
@@ -543,7 +520,8 @@ public:
     }
 
     constexpr void UpdateDeviceDisableMergeStateForUnshareLeft(KMemoryPermission new_perm,
-                                                               bool left, bool right) {
+                                                               bool left, bool right)
+    {
         // New permission/right aren't used.
 
         if (left) {
@@ -563,7 +541,8 @@ public:
     }
 
     constexpr void UpdateDeviceDisableMergeStateForUnshareRight(KMemoryPermission new_perm,
-                                                                bool left, bool right) {
+                                                                bool left, bool right)
+    {
         // New permission/left aren't used.
 
         if (right) {
@@ -577,12 +556,14 @@ public:
     }
 
     constexpr void UpdateDeviceDisableMergeStateForUnshare(KMemoryPermission new_perm, bool left,
-                                                           bool right) {
+                                                           bool right)
+    {
         this->UpdateDeviceDisableMergeStateForUnshareLeft(new_perm, left, right);
         this->UpdateDeviceDisableMergeStateForUnshareRight(new_perm, left, right);
     }
 
-    constexpr void UnshareToDevice(KMemoryPermission new_perm, bool left, bool right) {
+    constexpr void UnshareToDevice(KMemoryPermission new_perm, bool left, bool right)
+    {
         // New permission isn't used.
 
         // We must be shared.
@@ -600,7 +581,8 @@ public:
         this->UpdateDeviceDisableMergeStateForUnshare(new_perm, left, right);
     }
 
-    constexpr void UnshareToDeviceRight(KMemoryPermission new_perm, bool left, bool right) {
+    constexpr void UnshareToDeviceRight(KMemoryPermission new_perm, bool left, bool right)
+    {
         // New permission isn't used.
 
         // We must be shared.
@@ -618,7 +600,8 @@ public:
         this->UpdateDeviceDisableMergeStateForUnshareRight(new_perm, left, right);
     }
 
-    constexpr void LockForIpc(KMemoryPermission new_perm, bool left, bool right) {
+    constexpr void LockForIpc(KMemoryPermission new_perm, bool left, bool right)
+    {
         // We must either be locked or have a zero lock count.
         ASSERT((m_attribute & KMemoryAttribute::IpcLocked) == KMemoryAttribute::IpcLocked ||
                m_ipc_lock_count == 0);
@@ -650,7 +633,8 @@ public:
         }
     }
 
-    constexpr void UnlockForIpc(KMemoryPermission new_perm, bool left, bool right) {
+    constexpr void UnlockForIpc(KMemoryPermission new_perm, bool left, bool right)
+    {
         // New permission isn't used.
 
         // We must be locked.
@@ -678,7 +662,8 @@ public:
         }
     }
 
-    constexpr KMemoryBlockDisableMergeAttribute GetDisableMergeAttribute() const {
+    constexpr KMemoryBlockDisableMergeAttribute GetDisableMergeAttribute() const
+    {
         return m_disable_merge_attribute;
     }
 };

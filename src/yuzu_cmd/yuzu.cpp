@@ -4,12 +4,12 @@
 // SPDX-FileCopyrightText: 2014 Citra Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include <fmt/ostream.h>
+
 #include <iostream>
 #include <memory>
 #include <regex>
 #include <string>
-
-#include <fmt/ostream.h>
 
 #include "common/detached_tasks.h"
 #include "common/logging.h"
@@ -39,9 +39,8 @@
 
 #ifdef _WIN32
 // windows.h needs to be included before shellapi.h
-#include <windows.h>
-
 #include <shellapi.h>
+#include <windows.h>
 
 #include "common/windows/timer_resolution.h"
 #endif
@@ -61,7 +60,8 @@ __declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
 }
 #endif
 
-static void PrintHelp(const char* argv0) {
+static void PrintHelp(const char* argv0)
+{
     std::cout << "Usage: " << argv0
               << " [options] <filename>\n"
                  "-c, --config          Load the specified configuration file\n"
@@ -76,11 +76,13 @@ static void PrintHelp(const char* argv0) {
                  "-v, --version         Output version information and exit\n";
 }
 
-static void PrintVersion() {
+static void PrintVersion()
+{
     std::cout << "Volt Emulator " << Common::g_scm_branch << " " << Common::g_scm_desc << std::endl;
 }
 
-static void OnStateChanged(const Network::RoomMember::State& state) {
+static void OnStateChanged(const Network::RoomMember::State& state)
+{
     switch (state) {
     case Network::RoomMember::State::Idle:
         LOG_DEBUG(Network, "Network is idle");
@@ -99,7 +101,8 @@ static void OnStateChanged(const Network::RoomMember::State& state) {
     }
 }
 
-static void OnNetworkError(const Network::RoomMember::Error& error) {
+static void OnNetworkError(const Network::RoomMember::Error& error)
+{
     switch (error) {
     case Network::RoomMember::Error::LostConnection:
         LOG_DEBUG(Network, "Lost connection to the room");
@@ -150,11 +153,13 @@ static void OnNetworkError(const Network::RoomMember::Error& error) {
     }
 }
 
-static void OnMessageReceived(const Network::ChatEntry& msg) {
+static void OnMessageReceived(const Network::ChatEntry& msg)
+{
     std::cout << std::endl << msg.nickname << ": " << msg.message << std::endl << std::endl;
 }
 
-static void OnStatusMessageReceived(const Network::StatusMessageEntry& msg) {
+static void OnStatusMessageReceived(const Network::StatusMessageEntry& msg)
+{
     std::string message = [&]() {
         switch (msg.type) {
         case Network::IdMemberJoin:
@@ -176,7 +181,8 @@ static void OnStatusMessageReceived(const Network::StatusMessageEntry& msg) {
 }
 
 /// Application entry point
-int main(int argc, char** argv) {
+int main(int argc, char** argv)
+{
 #ifdef _WIN32
     if (AttachConsole(ATTACH_PARENT_PROCESS)) {
         freopen("CONOUT$", "wb", stdout);
@@ -406,7 +412,8 @@ int main(int argc, char** argv) {
             const u16 error_id = static_cast<u16>(load_result) - loader_id;
             LOG_CRITICAL(Frontend,
                          "While attempting to load the ROM requested, an error occurred. Please "
-                         "refer to the Volt Emulator wiki for more information or the Volt Emulator discord for "
+                         "refer to the Volt Emulator wiki for more information or the Volt "
+                         "Emulator discord for "
                          "additional help.\n\nError Code: {:04X}-{:04X}\nError Description: {}",
                          loader_id, error_id, static_cast<Loader::ResultStatus>(error_id));
         }

@@ -39,21 +39,13 @@ struct Registers {
         u32 x;
         u32 y;
 
-        GPUVAddr Address() const {
-            return (GPUVAddr{address_high} << 32) | GPUVAddr{address_low};
-        }
+        GPUVAddr Address() const { return (GPUVAddr{address_high} << 32) | GPUVAddr{address_low}; }
 
-        u32 BlockWidth() const {
-            return block_width.Value();
-        }
+        u32 BlockWidth() const { return block_width.Value(); }
 
-        u32 BlockHeight() const {
-            return block_height.Value();
-        }
+        u32 BlockHeight() const { return block_height.Value(); }
 
-        u32 BlockDepth() const {
-            return block_depth.Value();
-        }
+        u32 BlockDepth() const { return block_depth.Value(); }
     } dest;
 };
 
@@ -69,13 +61,9 @@ public:
     /// Binds a rasterizer to this engine.
     void BindRasterizer(VideoCore::RasterizerInterface* rasterizer);
 
-    GPUVAddr ExecTargetAddress() const {
-        return regs.dest.Address();
-    }
+    GPUVAddr ExecTargetAddress() const { return regs.dest.Address(); }
 
-    u32 GetUploadSize() const {
-        return copy_size;
-    }
+    u32 GetUploadSize() const { return copy_size; }
 
 private:
     void ProcessData(std::span<const u8> read_buffer);

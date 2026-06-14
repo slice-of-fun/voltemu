@@ -4,16 +4,19 @@
 // SPDX-FileCopyrightText: Copyright 2019 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include <algorithm>
-#include <vector>
+#include "video_core/renderer_vulkan/vk_compute_pipeline.h"
 
-#include <boost/container/small_vector.hpp>
 #include <fmt/format.h>
 
+#include <algorithm>
+#include <boost/container/small_vector.hpp>
+#include <vector>
+
+#include "common/settings.h"
+#include "video_core/gpu_logging/gpu_logging.h"
 #include "video_core/renderer_vulkan/pipeline_helper.h"
 #include "video_core/renderer_vulkan/pipeline_statistics.h"
 #include "video_core/renderer_vulkan/vk_buffer_cache.h"
-#include "video_core/renderer_vulkan/vk_compute_pipeline.h"
 #include "video_core/renderer_vulkan/vk_descriptor_pool.h"
 #include "video_core/renderer_vulkan/vk_pipeline_cache.h"
 #include "video_core/renderer_vulkan/vk_scheduler.h"
@@ -21,8 +24,6 @@
 #include "video_core/shader_notify.h"
 #include "video_core/vulkan_common/vulkan_device.h"
 #include "video_core/vulkan_common/vulkan_wrapper.h"
-#include "video_core/gpu_logging/gpu_logging.h"
-#include "common/settings.h"
 
 namespace Vulkan {
 
@@ -39,7 +40,8 @@ ComputePipeline::ComputePipeline(const Device& device_, vk::PipelineCache& pipel
                                  vk::ShaderModule spv_module_)
     : device{device_},
       pipeline_cache(pipeline_cache_), guest_descriptor_queue{guest_descriptor_queue_}, info{info_},
-      spv_module(std::move(spv_module_)) {
+      spv_module(std::move(spv_module_))
+{
     if (shader_notify) {
         shader_notify->MarkShaderBuilding();
     }
@@ -64,33 +66,35 @@ ComputePipeline::ComputePipeline(const Device& device_, vk::PipelineCache& pipel
             .requiredSubgroupSize = GuestWarpSize,
         };
         VkPipelineCreateFlags flags{};
-        if (device.IsKhrPipelineExecutablePropertiesEnabled() && Settings::values.renderer_debug.GetValue()) {
+        if (device.IsKhrPipelineExecutablePropertiesEnabled() &&
+            Settings::values.renderer_debug.GetValue()) {
             flags |= VK_PIPELINE_CREATE_CAPTURE_STATISTICS_BIT_KHR;
         }
-        pipeline = device.GetLogical().CreateComputePipeline(VkComputePipelineCreateInfo{
-            .sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
-            .pNext = nullptr,
-            .flags = flags,
-            .stage{
-                .sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
-                .pNext =
-                    device.IsExtSubgroupSizeControlSupported() ? &subgroup_size_ci : nullptr,
-                .flags = 0,
-                .stage = VK_SHADER_STAGE_COMPUTE_BIT,
-                .module = *spv_module,
-                .pName = "main",
-                .pSpecializationInfo = nullptr,
+        pipeline = device.GetLogical().CreateComputePipeline(
+            VkComputePipelineCreateInfo{
+                .sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
+                .pNext = nullptr,
+                .flags = flags,
+                .stage{
+                    .sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+                    .pNext =
+                        device.IsExtSubgroupSizeControlSupported() ? &subgroup_size_ci : nullptr,
+                    .flags = 0,
+                    .stage = VK_SHADER_STAGE_COMPUTE_BIT,
+                    .module = *spv_module,
+                    .pName = "main",
+                    .pSpecializationInfo = nullptr,
+                },
+                .layout = *pipeline_layout,
+                .basePipelineHandle = 0,
+                .basePipelineIndex = 0,
             },
-            .layout = *pipeline_layout,
-            .basePipelineHandle = 0,
-            .basePipelineIndex = 0,
-        }, *pipeline_cache);
+            *pipeline_cache);
 
         // Log compute pipeline creation
         if (Settings::values.gpu_logging_enabled.GetValue()) {
             GPU::Logging::GPULogger::GetInstance().LogPipelineStateChange(
-                "ComputePipeline created"
-            );
+                "ComputePipeline created");
         }
 
         if (pipeline_statistics) {
@@ -112,7 +116,8 @@ ComputePipeline::ComputePipeline(const Device& device_, vk::PipelineCache& pipel
 
 void ComputePipeline::Configure(Tegra::Engines::KeplerCompute& kepler_compute,
                                 Tegra::MemoryManager& gpu_memory, Scheduler& scheduler,
-                                BufferCache& buffer_cache, TextureCache& texture_cache) {
+                                BufferCache& buffer_cache, TextureCache& texture_cache)
+{
     guest_descriptor_queue.Acquire();
 
     buffer_cache.SetComputeUniformBufferState(info.constant_buffer_mask, &uniform_buffer_sizes);

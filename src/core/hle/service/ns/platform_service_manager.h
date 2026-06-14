@@ -5,6 +5,7 @@
 
 #include <memory>
 #include <vector>
+
 #include "core/hle/service/cmif_types.h"
 #include "core/hle/service/service.h"
 #include "core/hle/service/set/settings_types.h"

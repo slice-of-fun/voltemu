@@ -6,19 +6,23 @@
 
 namespace Shader::Backend::GLASM {
 
-void EmitLogicalOr(EmitContext& ctx, IR::Inst& inst, ScalarS32 a, ScalarS32 b) {
+void EmitLogicalOr(EmitContext& ctx, IR::Inst& inst, ScalarS32 a, ScalarS32 b)
+{
     ctx.Add("OR.S {},{},{};", inst, a, b);
 }
 
-void EmitLogicalAnd(EmitContext& ctx, IR::Inst& inst, ScalarS32 a, ScalarS32 b) {
+void EmitLogicalAnd(EmitContext& ctx, IR::Inst& inst, ScalarS32 a, ScalarS32 b)
+{
     ctx.Add("AND.S {},{},{};", inst, a, b);
 }
 
-void EmitLogicalXor(EmitContext& ctx, IR::Inst& inst, ScalarS32 a, ScalarS32 b) {
+void EmitLogicalXor(EmitContext& ctx, IR::Inst& inst, ScalarS32 a, ScalarS32 b)
+{
     ctx.Add("XOR.S {},{},{};", inst, a, b);
 }
 
-void EmitLogicalNot(EmitContext& ctx, IR::Inst& inst, ScalarS32 value) {
+void EmitLogicalNot(EmitContext& ctx, IR::Inst& inst, ScalarS32 value)
+{
     ctx.Add("SEQ.S {},{},0;", inst, value);
 }
 

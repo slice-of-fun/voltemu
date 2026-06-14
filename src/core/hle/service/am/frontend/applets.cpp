@@ -1,6 +1,8 @@
 // SPDX-FileCopyrightText: Copyright 2025 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+#include "core/hle/service/am/frontend/applets.h"
+
 #include <cstring>
 
 #include "common/assert.h"
@@ -27,7 +29,6 @@
 #include "core/hle/service/am/frontend/applet_profile_select.h"
 #include "core/hle/service/am/frontend/applet_software_keyboard.h"
 #include "core/hle/service/am/frontend/applet_web_browser.h"
-#include "core/hle/service/am/frontend/applets.h"
 #include "core/hle/service/am/service/storage.h"
 #include "core/hle/service/sm/sm.h"
 
@@ -35,11 +36,14 @@ namespace Service::AM::Frontend {
 
 FrontendApplet::FrontendApplet(Core::System& system_, std::shared_ptr<Applet> applet_,
                                LibraryAppletMode applet_mode_)
-    : system{system_}, applet{std::move(applet_)}, applet_mode{applet_mode_} {}
+    : system{system_}, applet{std::move(applet_)}, applet_mode{applet_mode_}
+{
+}
 
 FrontendApplet::~FrontendApplet() = default;
 
-void FrontendApplet::Initialize() {
+void FrontendApplet::Initialize()
+{
     std::shared_ptr<IStorage> common = PopInData();
     ASSERT(common != nullptr);
     const auto common_data = common->GetData();
@@ -50,27 +54,32 @@ void FrontendApplet::Initialize() {
     initialized = true;
 }
 
-std::shared_ptr<IStorage> FrontendApplet::PopInData() {
+std::shared_ptr<IStorage> FrontendApplet::PopInData()
+{
     std::shared_ptr<IStorage> ret;
     applet.lock()->caller_applet_broker->GetInData().Pop(&ret);
     return ret;
 }
 
-std::shared_ptr<IStorage> FrontendApplet::PopInteractiveInData() {
+std::shared_ptr<IStorage> FrontendApplet::PopInteractiveInData()
+{
     std::shared_ptr<IStorage> ret;
     applet.lock()->caller_applet_broker->GetInteractiveInData().Pop(&ret);
     return ret;
 }
 
-void FrontendApplet::PushOutData(std::shared_ptr<IStorage> storage) {
+void FrontendApplet::PushOutData(std::shared_ptr<IStorage> storage)
+{
     applet.lock()->caller_applet_broker->GetOutData().Push(storage);
 }
 
-void FrontendApplet::PushInteractiveOutData(std::shared_ptr<IStorage> storage) {
+void FrontendApplet::PushInteractiveOutData(std::shared_ptr<IStorage> storage)
+{
     applet.lock()->caller_applet_broker->GetInteractiveOutData().Push(storage);
 }
 
-void FrontendApplet::Exit() {
+void FrontendApplet::Exit()
+{
     auto applet_ = applet.lock();
 
     std::scoped_lock lk{applet_->lock};
@@ -85,13 +94,16 @@ FrontendAppletSet::FrontendAppletSet(CabinetApplet cabinet_applet,
                                      MiiEdit mii_edit_,
                                      ParentalControlsApplet parental_controls_applet,
                                      PhotoViewer photo_viewer_, ProfileSelect profile_select_,
-                                     SoftwareKeyboard software_keyboard_, WebBrowser web_browser_, NetConnect net_connect_)
+                                     SoftwareKeyboard software_keyboard_, WebBrowser web_browser_,
+                                     NetConnect net_connect_)
     : cabinet{std::move(cabinet_applet)}, controller{std::move(controller_applet)},
       error{std::move(error_applet)}, mii_edit{std::move(mii_edit_)},
-      parental_controls{std::move(parental_controls_applet)},
-      photo_viewer{std::move(photo_viewer_)}, profile_select{std::move(profile_select_)},
-      software_keyboard{std::move(software_keyboard_)}, web_browser{std::move(web_browser_)},
-      net_connect{std::move(net_connect_)} {}
+      parental_controls{std::move(parental_controls_applet)}, photo_viewer{std::move(
+                                                                  photo_viewer_)},
+      profile_select{std::move(profile_select_)}, software_keyboard{std::move(software_keyboard_)},
+      web_browser{std::move(web_browser_)}, net_connect{std::move(net_connect_)}
+{
+}
 
 FrontendAppletSet::~FrontendAppletSet() = default;
 
@@ -99,23 +111,29 @@ FrontendAppletSet::FrontendAppletSet(FrontendAppletSet&&) noexcept = default;
 
 FrontendAppletSet& FrontendAppletSet::operator=(FrontendAppletSet&&) noexcept = default;
 
-FrontendAppletHolder::FrontendAppletHolder(Core::System& system_) : system{system_} {}
+FrontendAppletHolder::FrontendAppletHolder(Core::System& system_) : system{system_}
+{
+}
 
 FrontendAppletHolder::~FrontendAppletHolder() = default;
 
-const FrontendAppletSet& FrontendAppletHolder::GetFrontendAppletSet() const {
+const FrontendAppletSet& FrontendAppletHolder::GetFrontendAppletSet() const
+{
     return frontend;
 }
 
-NFP::CabinetMode FrontendAppletHolder::GetCabinetMode() const {
+NFP::CabinetMode FrontendAppletHolder::GetCabinetMode() const
+{
     return cabinet_mode;
 }
 
-AppletId FrontendAppletHolder::GetCurrentAppletId() const {
+AppletId FrontendAppletHolder::GetCurrentAppletId() const
+{
     return current_applet_id;
 }
 
-void FrontendAppletHolder::SetFrontendAppletSet(FrontendAppletSet set) {
+void FrontendAppletHolder::SetFrontendAppletSet(FrontendAppletSet set)
+{
     if (set.cabinet != nullptr) {
         frontend.cabinet = std::move(set.cabinet);
     }
@@ -157,15 +175,18 @@ void FrontendAppletHolder::SetFrontendAppletSet(FrontendAppletSet set) {
     }
 }
 
-void FrontendAppletHolder::SetCabinetMode(NFP::CabinetMode mode) {
+void FrontendAppletHolder::SetCabinetMode(NFP::CabinetMode mode)
+{
     cabinet_mode = mode;
 }
 
-void FrontendAppletHolder::SetCurrentAppletId(AppletId applet_id) {
+void FrontendAppletHolder::SetCurrentAppletId(AppletId applet_id)
+{
     current_applet_id = applet_id;
 }
 
-void FrontendAppletHolder::SetDefaultAppletsIfMissing() {
+void FrontendAppletHolder::SetDefaultAppletsIfMissing()
+{
     if (frontend.cabinet == nullptr) {
         frontend.cabinet = std::make_unique<Core::Frontend::DefaultCabinetApplet>();
     }
@@ -210,13 +231,15 @@ void FrontendAppletHolder::SetDefaultAppletsIfMissing() {
     }
 }
 
-void FrontendAppletHolder::ClearAll() {
+void FrontendAppletHolder::ClearAll()
+{
     frontend = {};
 }
 
 std::shared_ptr<FrontendApplet> FrontendAppletHolder::GetApplet(std::shared_ptr<Applet> applet,
                                                                 AppletId id,
-                                                                LibraryAppletMode mode) const {
+                                                                LibraryAppletMode mode) const
+{
     switch (id) {
     case AppletId::Auth:
         return std::make_shared<Auth>(system, applet, mode, *frontend.parental_controls);
@@ -229,7 +252,8 @@ std::shared_ptr<FrontendApplet> FrontendAppletHolder::GetApplet(std::shared_ptr<
     case AppletId::ProfileSelect:
         return std::make_shared<ProfileSelect>(system, applet, mode, *frontend.profile_select);
     case AppletId::SoftwareKeyboard:
-        return std::make_shared<SoftwareKeyboard>(system, applet, mode, *frontend.software_keyboard);
+        return std::make_shared<SoftwareKeyboard>(system, applet, mode,
+                                                  *frontend.software_keyboard);
     case AppletId::MiiEdit:
         return std::make_shared<MiiEdit>(system, applet, mode, *frontend.mii_edit);
     case AppletId::Web:
@@ -244,8 +268,10 @@ std::shared_ptr<FrontendApplet> FrontendAppletHolder::GetApplet(std::shared_ptr<
     case AppletId::NetConnect:
         return std::make_shared<NetConnect>(system, applet, mode, *frontend.net_connect);
     default:
-        LOG_ERROR(Service_AM, "No backend implementation exists for applet_id={:02X} program_id={:016X}"
-                              "Falling back to stub applet", static_cast<u8>(id), applet->program_id);
+        LOG_ERROR(Service_AM,
+                  "No backend implementation exists for applet_id={:02X} program_id={:016X}"
+                  "Falling back to stub applet",
+                  static_cast<u8>(id), applet->program_id);
         return std::make_shared<StubApplet>(system, applet, id, mode);
     }
 }

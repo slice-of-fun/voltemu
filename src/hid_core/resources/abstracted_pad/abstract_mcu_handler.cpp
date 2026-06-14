@@ -4,27 +4,33 @@
 // SPDX-FileCopyrightText: Copyright 2024 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#include "hid_core/hid_result.h"
 #include "hid_core/resources/abstracted_pad/abstract_mcu_handler.h"
+
+#include "hid_core/hid_result.h"
 #include "hid_core/resources/abstracted_pad/abstract_pad_holder.h"
 #include "hid_core/resources/abstracted_pad/abstract_properties_handler.h"
 #include "hid_core/resources/npad/npad_types.h"
 
 namespace Service::HID {
 
-NpadAbstractMcuHandler::NpadAbstractMcuHandler() {}
+NpadAbstractMcuHandler::NpadAbstractMcuHandler()
+{
+}
 
 NpadAbstractMcuHandler::~NpadAbstractMcuHandler() = default;
 
-void NpadAbstractMcuHandler::SetAbstractPadHolder(NpadAbstractedPadHolder* holder) {
+void NpadAbstractMcuHandler::SetAbstractPadHolder(NpadAbstractedPadHolder* holder)
+{
     abstract_pad_holder = holder;
 }
 
-void NpadAbstractMcuHandler::SetPropertiesHandler(NpadAbstractPropertiesHandler* handler) {
+void NpadAbstractMcuHandler::SetPropertiesHandler(NpadAbstractPropertiesHandler* handler)
+{
     properties_handler = handler;
 }
 
-Result NpadAbstractMcuHandler::IncrementRefCounter() {
+Result NpadAbstractMcuHandler::IncrementRefCounter()
+{
     if (ref_counter == (std::numeric_limits<s32>::max)() - 1) {
         return ResultNpadHandlerOverflow;
     }
@@ -32,7 +38,8 @@ Result NpadAbstractMcuHandler::IncrementRefCounter() {
     return ResultSuccess;
 }
 
-Result NpadAbstractMcuHandler::DecrementRefCounter() {
+Result NpadAbstractMcuHandler::DecrementRefCounter()
+{
     if (ref_counter == 0) {
         return ResultNpadHandlerNotInitialized;
     }
@@ -40,7 +47,8 @@ Result NpadAbstractMcuHandler::DecrementRefCounter() {
     return ResultSuccess;
 }
 
-void NpadAbstractMcuHandler::UpdateMcuState() {
+void NpadAbstractMcuHandler::UpdateMcuState()
+{
     std::array<IAbstractedPad*, 5> abstract_pads{};
     const std::size_t count = properties_handler->GetAbstractedPads(abstract_pads);
 
@@ -72,7 +80,8 @@ void NpadAbstractMcuHandler::UpdateMcuState() {
     }
 }
 
-Result NpadAbstractMcuHandler::GetAbstractedPad(IAbstractedPad** data, u32 mcu_index) {
+Result NpadAbstractMcuHandler::GetAbstractedPad(IAbstractedPad** data, u32 mcu_index)
+{
     if (mcu_holder[mcu_index].state == NpadMcuState::None ||
         mcu_holder[mcu_index].abstracted_pad == nullptr) {
         return ResultMcuIsNotReady;
@@ -81,11 +90,13 @@ Result NpadAbstractMcuHandler::GetAbstractedPad(IAbstractedPad** data, u32 mcu_i
     return ResultSuccess;
 }
 
-NpadMcuState NpadAbstractMcuHandler::GetMcuState(u32 mcu_index) {
+NpadMcuState NpadAbstractMcuHandler::GetMcuState(u32 mcu_index)
+{
     return mcu_holder[mcu_index].state;
 }
 
-Result NpadAbstractMcuHandler::SetMcuState(bool is_enabled, u32 mcu_index) {
+Result NpadAbstractMcuHandler::SetMcuState(bool is_enabled, u32 mcu_index)
+{
     NpadMcuState& state = mcu_holder[mcu_index].state;
 
     if (state == NpadMcuState::None) {

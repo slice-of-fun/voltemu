@@ -17,7 +17,8 @@ constexpr u64 BASE_TITLE_ID_MASK = 0xFFFFFFFFFFFFE000;
  * @param title_id The title ID.
  * @returns The base title ID.
  */
-[[nodiscard]] constexpr u64 GetBaseTitleID(u64 title_id) {
+[[nodiscard]] constexpr u64 GetBaseTitleID(u64 title_id)
+{
     return title_id & BASE_TITLE_ID_MASK;
 }
 
@@ -28,7 +29,8 @@ constexpr u64 BASE_TITLE_ID_MASK = 0xFFFFFFFFFFFFE000;
  * @param program_index The program index.
  * @returns The base title ID with a program index offset.
  */
-[[nodiscard]] constexpr u64 GetBaseTitleIDWithProgramIndex(u64 title_id, u64 program_index) {
+[[nodiscard]] constexpr u64 GetBaseTitleIDWithProgramIndex(u64 title_id, u64 program_index)
+{
     return GetBaseTitleID(title_id) + program_index;
 }
 
@@ -38,7 +40,8 @@ constexpr u64 BASE_TITLE_ID_MASK = 0xFFFFFFFFFFFFE000;
  * @param title_id The title ID.
  * @returns The AOC base title ID.
  */
-[[nodiscard]] constexpr u64 GetAOCBaseTitleID(u64 title_id) {
+[[nodiscard]] constexpr u64 GetAOCBaseTitleID(u64 title_id)
+{
     return GetBaseTitleID(title_id) + AOC_TITLE_ID_OFFSET;
 }
 
@@ -48,7 +51,8 @@ constexpr u64 BASE_TITLE_ID_MASK = 0xFFFFFFFFFFFFE000;
  * @param aoc_title_id The AOC title ID.
  * @returns The AOC ID.
  */
-[[nodiscard]] constexpr u64 GetAOCID(u64 aoc_title_id) {
+[[nodiscard]] constexpr u64 GetAOCID(u64 aoc_title_id)
+{
     return aoc_title_id & AOC_TITLE_ID_MASK;
 }
 

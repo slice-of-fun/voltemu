@@ -6,15 +6,14 @@
 
 #pragma once
 
-#include <atomic>
-#include <deque>
-#include <memory>
-#include <string>
-
 #include <QList>
 #include <QObject>
 #include <QRunnable>
 #include <QString>
+#include <atomic>
+#include <deque>
+#include <memory>
+#include <string>
 
 #include "common/thread.h"
 #include "core/file_sys/registered_cache.h"
@@ -68,8 +67,7 @@ signals:
     void DataAvailable();
 
 private:
-    template <typename F>
-    void RecordEvent(F&& func);
+    template<typename F> void RecordEvent(F&& func);
 
 private:
     void AddTitlesToGameList(GameListDir* parent_dir);

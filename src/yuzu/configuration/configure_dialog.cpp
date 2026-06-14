@@ -4,7 +4,10 @@
 // SPDX-FileCopyrightText: 2016 Citra Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "yuzu/configuration/configure_dialog.h"
+
 #include <memory>
+
 #include "common/logging.h"
 #include "common/settings.h"
 #include "common/settings_enums.h"
@@ -16,7 +19,6 @@
 #include "yuzu/configuration/configure_audio.h"
 #include "yuzu/configuration/configure_cpu.h"
 #include "yuzu/configuration/configure_debug_tab.h"
-#include "yuzu/configuration/configure_dialog.h"
 #include "yuzu/configuration/configure_filesystem.h"
 #include "yuzu/configuration/configure_general.h"
 #include "yuzu/configuration/configure_graphics.h"
@@ -36,9 +38,9 @@ ConfigureDialog::ConfigureDialog(QWidget* parent, HotkeyRegistry& registry_,
                                  InputCommon::InputSubsystem* input_subsystem,
                                  std::vector<VkDeviceInfo::Record>& vk_device_records,
                                  Core::System& system_, bool enable_web_config)
-    : QDialog(parent), ui{std::make_unique<Ui::ConfigureDialog>()}, registry(registry_),
-      system{system_},
-      builder{std::make_unique<ConfigurationShared::Builder>(this, !system_.IsPoweredOn())},
+    : QDialog(parent), ui{std::make_unique<Ui::ConfigureDialog>()},
+      registry(registry_), system{system_}, builder{std::make_unique<ConfigurationShared::Builder>(
+                                                this, !system_.IsPoweredOn())},
       applets_tab{std::make_unique<ConfigureApplets>(system_, nullptr, *builder, this)},
       audio_tab{std::make_unique<ConfigureAudio>(system_, nullptr, *builder, this)},
       cpu_tab{std::make_unique<ConfigureCpu>(system_, nullptr, *builder, this)},
@@ -61,7 +63,8 @@ ConfigureDialog::ConfigureDialog(QWidget* parent, HotkeyRegistry& registry_,
       network_tab{std::make_unique<ConfigureNetwork>(system_, this)},
       profile_tab{std::make_unique<ConfigureProfileManager>(system_, this)},
       system_tab{std::make_unique<ConfigureSystem>(system_, nullptr, *builder, this)},
-      web_tab{std::make_unique<ConfigureWeb>(this)} {
+      web_tab{std::make_unique<ConfigureWeb>(this)}
+{
     Settings::SetConfiguringGlobal(true);
 
     ui->setupUi(this);
@@ -119,9 +122,12 @@ ConfigureDialog::ConfigureDialog(QWidget* parent, HotkeyRegistry& registry_,
 
 ConfigureDialog::~ConfigureDialog() = default;
 
-void ConfigureDialog::SetConfiguration() {}
+void ConfigureDialog::SetConfiguration()
+{
+}
 
-void ConfigureDialog::ApplyConfiguration() {
+void ConfigureDialog::ApplyConfiguration()
+{
     general_tab->ApplyConfiguration();
     ui_tab->ApplyConfiguration();
     system_tab->ApplyConfiguration();
@@ -142,7 +148,8 @@ void ConfigureDialog::ApplyConfiguration() {
     Settings::LogSettings();
 }
 
-void ConfigureDialog::changeEvent(QEvent* event) {
+void ConfigureDialog::changeEvent(QEvent* event)
+{
     if (event->type() == QEvent::LanguageChange) {
         RetranslateUI();
     }
@@ -150,7 +157,8 @@ void ConfigureDialog::changeEvent(QEvent* event) {
     QDialog::changeEvent(event);
 }
 
-void ConfigureDialog::RetranslateUI() {
+void ConfigureDialog::RetranslateUI()
+{
     const int old_row = ui->selectorList->currentRow();
     const int old_index = ui->tabWidget->currentIndex();
 
@@ -163,14 +171,16 @@ void ConfigureDialog::RetranslateUI() {
     ui->tabWidget->setCurrentIndex(old_index);
 }
 
-void ConfigureDialog::HandleApplyButtonClicked() {
+void ConfigureDialog::HandleApplyButtonClicked()
+{
     UISettings::values.configuration_applied = true;
     ApplyConfiguration();
 }
 
 Q_DECLARE_METATYPE(QList<QWidget*>);
 
-void ConfigureDialog::PopulateSelectionList() {
+void ConfigureDialog::PopulateSelectionList()
+{
     const std::array<std::pair<QString, QList<QWidget*>>, 6> items{
         {{tr("General"),
           {general_tab.get(), hotkeys_tab.get(), ui_tab.get(), web_tab.get(), debug_tab_tab.get()}},
@@ -195,7 +205,8 @@ void ConfigureDialog::PopulateSelectionList() {
     }
 }
 
-void ConfigureDialog::OnLanguageChanged(const QString& locale) {
+void ConfigureDialog::OnLanguageChanged(const QString& locale)
+{
     emit LanguageChanged(locale);
     //  Reloading the game list is needed to force retranslation.
     UISettings::values.is_game_list_reload_pending = true;
@@ -205,7 +216,8 @@ void ConfigureDialog::OnLanguageChanged(const QString& locale) {
     SetConfiguration();
 }
 
-void ConfigureDialog::UpdateVisibleTabs() {
+void ConfigureDialog::UpdateVisibleTabs()
+{
     const auto items = ui->selectorList->selectedItems();
     if (items.isEmpty()) {
         return;

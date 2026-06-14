@@ -6,13 +6,13 @@
 
 #pragma once
 
-#include <memory>
 #include <ankerl/unordered_dense.h>
+
+#include <memory>
 
 #include "common/common_types.h"
 #include "common/polyfill_thread.h"
 #include "common/thread.h"
-
 #include "core/hle/service/vi/vsync_manager.h"
 
 namespace Core {

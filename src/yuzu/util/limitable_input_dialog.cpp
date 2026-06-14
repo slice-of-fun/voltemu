@@ -4,21 +4,24 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "yuzu/util/limitable_input_dialog.h"
+
 #include <QDialogButtonBox>
 #include <QLabel>
 #include <QLineEdit>
 #include <QPushButton>
 #include <QVBoxLayout>
-#include "yuzu/util/limitable_input_dialog.h"
 
-LimitableInputDialog::LimitableInputDialog(QWidget* parent) : QDialog{parent} {
+LimitableInputDialog::LimitableInputDialog(QWidget* parent) : QDialog{parent}
+{
     CreateUI();
     ConnectEvents();
 }
 
 LimitableInputDialog::~LimitableInputDialog() = default;
 
-void LimitableInputDialog::CreateUI() {
+void LimitableInputDialog::CreateUI()
+{
     text_label = new QLabel(this);
     text_entry = new QLineEdit(this);
     text_label_invalid = new QLabel(this);
@@ -31,14 +34,16 @@ void LimitableInputDialog::CreateUI() {
     layout->addWidget(buttons);
 }
 
-void LimitableInputDialog::ConnectEvents() {
+void LimitableInputDialog::ConnectEvents()
+{
     connect(buttons, &QDialogButtonBox::accepted, this, &QDialog::accept);
     connect(buttons, &QDialogButtonBox::rejected, this, &QDialog::reject);
 }
 
 QString LimitableInputDialog::GetText(QWidget* parent, const QString& title, const QString& text,
                                       int min_character_limit, int max_character_limit,
-                                      InputLimiter limit_type) {
+                                      InputLimiter limit_type)
+{
     Q_ASSERT(min_character_limit <= max_character_limit);
 
     LimitableInputDialog dialog{parent};
@@ -76,7 +81,8 @@ QString LimitableInputDialog::GetText(QWidget* parent, const QString& title, con
     return dialog.text_entry->text();
 }
 
-void LimitableInputDialog::RemoveInvalidCharacters() {
+void LimitableInputDialog::RemoveInvalidCharacters()
+{
     auto cpos = text_entry->cursorPosition();
     for (int i = 0; i < text_entry->text().length(); i++) {
         if (invalid_characters.contains(text_entry->text().at(i))) {

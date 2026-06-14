@@ -4,8 +4,9 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include "audio_core/adsp/apps/audio_renderer/command_list_processor.h"
 #include "audio_core/renderer/command/mix/volume.h"
+
+#include "audio_core/adsp/apps/audio_renderer/command_list_processor.h"
 #include "common/fixed_point.h"
 #include "common/logging.h"
 
@@ -19,9 +20,10 @@ namespace AudioCore::Renderer {
  * @param volume       - Volume applied to the input.
  * @param sample_count - Number of samples to process.
  */
-template <size_t Q>
+template<size_t Q>
 static void ApplyUniformGain(std::span<s32> output, std::span<const s32> input, const f32 volume,
-                             const u32 sample_count) {
+                             const u32 sample_count)
+{
     if (volume == 1.0f) {
         std::memcpy(output.data(), input.data(), input.size_bytes());
     } else {
@@ -33,7 +35,8 @@ static void ApplyUniformGain(std::span<s32> output, std::span<const s32> input, 
 }
 
 void VolumeCommand::Dump([[maybe_unused]] const AudioRenderer::CommandListProcessor& processor,
-                         std::string& string) {
+                         std::string& string)
+{
     string += fmt::format("VolumeCommand");
     string += fmt::format("\n\tinput {:02X}", input_index);
     string += fmt::format("\n\toutput {:02X}", output_index);
@@ -41,7 +44,8 @@ void VolumeCommand::Dump([[maybe_unused]] const AudioRenderer::CommandListProces
     string += "\n";
 }
 
-void VolumeCommand::Process(const AudioRenderer::CommandListProcessor& processor) {
+void VolumeCommand::Process(const AudioRenderer::CommandListProcessor& processor)
+{
     // If input and output buffers are the same, and the volume is 1.0f, this won't do
     // anything, so just skip.
     if (input_index == output_index && volume == 1.0f) {
@@ -68,7 +72,8 @@ void VolumeCommand::Process(const AudioRenderer::CommandListProcessor& processor
     }
 }
 
-bool VolumeCommand::Verify(const AudioRenderer::CommandListProcessor& processor) {
+bool VolumeCommand::Verify(const AudioRenderer::CommandListProcessor& processor)
+{
     return true;
 }
 

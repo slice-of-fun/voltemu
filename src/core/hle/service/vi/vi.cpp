@@ -1,17 +1,19 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/vi/vi.h"
+
 #include "core/core.h"
 #include "core/hle/service/server_manager.h"
 #include "core/hle/service/vi/application_root_service.h"
 #include "core/hle/service/vi/container.h"
 #include "core/hle/service/vi/manager_root_service.h"
 #include "core/hle/service/vi/system_root_service.h"
-#include "core/hle/service/vi/vi.h"
 
 namespace Service::VI {
 
-void LoopProcess(Core::System& system, std::stop_token token) {
+void LoopProcess(Core::System& system, std::stop_token token)
+{
     const auto container = std::make_shared<Container>(system);
 
     auto server_manager = std::make_unique<ServerManager>(system);

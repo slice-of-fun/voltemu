@@ -60,9 +60,7 @@ public:
      *
      * @return Number of device channels.
      */
-    u32 GetDeviceChannels() const {
-        return device_channels;
-    }
+    u32 GetDeviceChannels() const { return device_channels; }
 
     /**
      * Get the device volume. Set from calls to the IAudioDevice service.
@@ -91,9 +89,7 @@ public:
      *
      * @return Number of device channels.
      */
-    u32 GetSystemChannels() const {
-        return system_channels;
-    }
+    u32 GetSystemChannels() const { return system_channels; }
 
 protected:
     /// Number of device channels supported by the hardware

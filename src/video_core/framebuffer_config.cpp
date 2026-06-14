@@ -1,13 +1,15 @@
 // SPDX-FileCopyrightText: Copyright 2024 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include "common/assert.h"
 #include "video_core/framebuffer_config.h"
+
+#include "common/assert.h"
 
 namespace Tegra {
 
 Common::Rectangle<f32> NormalizeCrop(const FramebufferConfig& framebuffer, u32 texture_width,
-                                     u32 texture_height) {
+                                     u32 texture_height)
+{
     f32 left, top, right, bottom;
 
     if (!framebuffer.crop_rect.IsEmpty()) {

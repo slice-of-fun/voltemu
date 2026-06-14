@@ -3,24 +3,26 @@
 
 #pragma once
 
+#include <fmt/ranges.h>
+
 #include <compare>
 #include <type_traits>
-#include <fmt/ranges.h>
 
 #include "common/common_types.h"
 
 namespace Common {
 
-template <bool Virtual, typename T>
-class TypedAddress {
+template<bool Virtual, typename T> class TypedAddress {
 public:
     // Constructors.
     constexpr inline TypedAddress() : m_address(0) {}
     constexpr inline TypedAddress(uint64_t a) : m_address(a) {}
 
-    template <typename U>
+    template<typename U>
     constexpr inline explicit TypedAddress(const U* ptr)
-        : m_address(reinterpret_cast<uint64_t>(ptr)) {}
+        : m_address(reinterpret_cast<uint64_t>(ptr))
+    {
+    }
 
     // Copy constructor.
     constexpr inline TypedAddress(const TypedAddress& rhs) = default;
@@ -29,88 +31,72 @@ public:
     constexpr inline TypedAddress& operator=(const TypedAddress& rhs) = default;
 
     // Arithmetic operators.
-    template <typename I>
-    constexpr inline TypedAddress operator+(I rhs) const {
+    template<typename I> constexpr inline TypedAddress operator+(I rhs) const
+    {
         static_assert(std::is_integral_v<I>);
         return m_address + rhs;
     }
 
-    constexpr inline TypedAddress operator+(TypedAddress rhs) const {
+    constexpr inline TypedAddress operator+(TypedAddress rhs) const
+    {
         return m_address + rhs.m_address;
     }
 
-    constexpr inline TypedAddress operator++() {
-        return ++m_address;
-    }
+    constexpr inline TypedAddress operator++() { return ++m_address; }
 
-    constexpr inline TypedAddress operator++(int) {
-        return m_address++;
-    }
+    constexpr inline TypedAddress operator++(int) { return m_address++; }
 
-    template <typename I>
-    constexpr inline TypedAddress operator-(I rhs) const {
+    template<typename I> constexpr inline TypedAddress operator-(I rhs) const
+    {
         static_assert(std::is_integral_v<I>);
         return m_address - rhs;
     }
 
-    constexpr inline ptrdiff_t operator-(TypedAddress rhs) const {
+    constexpr inline ptrdiff_t operator-(TypedAddress rhs) const
+    {
         return m_address - rhs.m_address;
     }
 
-    constexpr inline TypedAddress operator--() {
-        return --m_address;
-    }
+    constexpr inline TypedAddress operator--() { return --m_address; }
 
-    constexpr inline TypedAddress operator--(int) {
-        return m_address--;
-    }
+    constexpr inline TypedAddress operator--(int) { return m_address--; }
 
-    template <typename I>
-    constexpr inline TypedAddress operator+=(I rhs) {
+    template<typename I> constexpr inline TypedAddress operator+=(I rhs)
+    {
         static_assert(std::is_integral_v<I>);
         m_address += rhs;
         return *this;
     }
 
-    template <typename I>
-    constexpr inline TypedAddress operator-=(I rhs) {
+    template<typename I> constexpr inline TypedAddress operator-=(I rhs)
+    {
         static_assert(std::is_integral_v<I>);
         m_address -= rhs;
         return *this;
     }
 
     // Logical operators.
-    constexpr inline uint64_t operator&(uint64_t mask) const {
-        return m_address & mask;
-    }
+    constexpr inline uint64_t operator&(uint64_t mask) const { return m_address & mask; }
 
-    constexpr inline uint64_t operator|(uint64_t mask) const {
-        return m_address | mask;
-    }
+    constexpr inline uint64_t operator|(uint64_t mask) const { return m_address | mask; }
 
-    template <typename I>
-    constexpr inline TypedAddress operator|=(I rhs) {
+    template<typename I> constexpr inline TypedAddress operator|=(I rhs)
+    {
         static_assert(std::is_integral_v<I>);
         m_address |= rhs;
         return *this;
     }
 
-    constexpr inline uint64_t operator<<(int shift) const {
-        return m_address << shift;
-    }
+    constexpr inline uint64_t operator<<(int shift) const { return m_address << shift; }
 
-    constexpr inline uint64_t operator>>(int shift) const {
-        return m_address >> shift;
-    }
+    constexpr inline uint64_t operator>>(int shift) const { return m_address >> shift; }
 
-    template <typename U>
-    constexpr inline size_t operator/(U size) const {
+    template<typename U> constexpr inline size_t operator/(U size) const
+    {
         return m_address / size;
     }
 
-    constexpr explicit operator bool() const {
-        return m_address != 0;
-    }
+    constexpr explicit operator bool() const { return m_address != 0; }
 
     // constexpr inline uint64_t operator%(U align) const { return m_address % align; }
 
@@ -119,14 +105,10 @@ public:
     constexpr auto operator<=>(const TypedAddress&) const = default;
 
     // For convenience, also define comparison operators versus uint64_t.
-    constexpr inline bool operator==(uint64_t rhs) const {
-        return m_address == rhs;
-    }
+    constexpr inline bool operator==(uint64_t rhs) const { return m_address == rhs; }
 
     // Allow getting the address explicitly, for use in accessors.
-    constexpr inline uint64_t GetValue() const {
-        return m_address;
-    }
+    constexpr inline uint64_t GetValue() const { return m_address; }
 
 private:
     uint64_t m_address{};
@@ -141,11 +123,11 @@ using VirtualAddress = TypedAddress<true, VirtualAddressTag>;
 using ProcessAddress = TypedAddress<true, ProcessAddressTag>;
 
 // Define accessors.
-template <typename T>
+template<typename T>
 concept IsTypedAddress = std::same_as<T, PhysicalAddress> || std::same_as<T, VirtualAddress> ||
-                         std::same_as<T, ProcessAddress>;
+    std::same_as<T, ProcessAddress>;
 
-template <typename T>
+template<typename T>
 constexpr inline T Null = [] {
     if constexpr (std::is_same<T, uint64_t>::value) {
         return 0;
@@ -251,65 +233,51 @@ static_assert(!(PhysicalAddress(0U) >= PhysicalAddress(1U)));
 
 } // namespace Common
 
-template <bool Virtual, typename T>
-constexpr inline uint64_t GetInteger(Common::TypedAddress<Virtual, T> address) {
+template<bool Virtual, typename T>
+constexpr inline uint64_t GetInteger(Common::TypedAddress<Virtual, T> address)
+{
     return address.GetValue();
 }
 
-template <>
-struct fmt::formatter<Common::PhysicalAddress> {
-    constexpr auto parse(fmt::format_parse_context& ctx) {
-        return ctx.begin();
-    }
-    template <typename FormatContext>
-    auto format(const Common::PhysicalAddress& addr, FormatContext& ctx) const {
+template<> struct fmt::formatter<Common::PhysicalAddress> {
+    constexpr auto parse(fmt::format_parse_context& ctx) { return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(const Common::PhysicalAddress& addr, FormatContext& ctx) const
+    {
         return fmt::format_to(ctx.out(), "{:#x}", static_cast<u64>(addr.GetValue()));
     }
 };
 
-template <>
-struct fmt::formatter<Common::ProcessAddress> {
-    constexpr auto parse(fmt::format_parse_context& ctx) {
-        return ctx.begin();
-    }
-    template <typename FormatContext>
-    auto format(const Common::ProcessAddress& addr, FormatContext& ctx) const {
+template<> struct fmt::formatter<Common::ProcessAddress> {
+    constexpr auto parse(fmt::format_parse_context& ctx) { return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(const Common::ProcessAddress& addr, FormatContext& ctx) const
+    {
         return fmt::format_to(ctx.out(), "{:#x}", static_cast<u64>(addr.GetValue()));
     }
 };
 
-template <>
-struct fmt::formatter<Common::VirtualAddress> {
-    constexpr auto parse(fmt::format_parse_context& ctx) {
-        return ctx.begin();
-    }
-    template <typename FormatContext>
-    auto format(const Common::VirtualAddress& addr, FormatContext& ctx) const {
+template<> struct fmt::formatter<Common::VirtualAddress> {
+    constexpr auto parse(fmt::format_parse_context& ctx) { return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(const Common::VirtualAddress& addr, FormatContext& ctx) const
+    {
         return fmt::format_to(ctx.out(), "{:#x}", static_cast<u64>(addr.GetValue()));
     }
 };
 
 namespace std {
 
-template <>
-struct hash<Common::PhysicalAddress> {
-    size_t operator()(const Common::PhysicalAddress& k) const noexcept {
-        return k.GetValue();
-    }
+template<> struct hash<Common::PhysicalAddress> {
+    size_t operator()(const Common::PhysicalAddress& k) const noexcept { return k.GetValue(); }
 };
 
-template <>
-struct hash<Common::ProcessAddress> {
-    size_t operator()(const Common::ProcessAddress& k) const noexcept {
-        return k.GetValue();
-    }
+template<> struct hash<Common::ProcessAddress> {
+    size_t operator()(const Common::ProcessAddress& k) const noexcept { return k.GetValue(); }
 };
 
-template <>
-struct hash<Common::VirtualAddress> {
-    size_t operator()(const Common::VirtualAddress& k) const noexcept {
-        return k.GetValue();
-    }
+template<> struct hash<Common::VirtualAddress> {
+    size_t operator()(const Common::VirtualAddress& k) const noexcept { return k.GetValue(); }
 };
 
 } // namespace std

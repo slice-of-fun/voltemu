@@ -5,14 +5,14 @@
 // SPDX-FileCopyrightText: 2014 Citra Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "common/string_util.h"
+
 #include <algorithm>
 #include <cctype>
 #include <codecvt>
 #include <locale>
 #include <sstream>
 #include <string_view>
-
-#include "common/string_util.h"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -25,7 +25,8 @@
 namespace Common {
 
 /// Make a string lowercase
-std::string ToLower(const std::string_view sv) {
+std::string ToLower(const std::string_view sv)
+{
     std::string str{sv};
     std::transform(str.begin(), str.end(), str.begin(),
                    [](auto const c) { return char(std::tolower(c)); });
@@ -33,7 +34,8 @@ std::string ToLower(const std::string_view sv) {
 }
 
 /// Make a string uppercase
-std::string ToUpper(const std::string_view sv) {
+std::string ToUpper(const std::string_view sv)
+{
     std::string str{sv};
     std::transform(str.begin(), str.end(), str.begin(),
                    [](auto const c) { return char(std::toupper(c)); });
@@ -41,7 +43,8 @@ std::string ToUpper(const std::string_view sv) {
 }
 
 bool SplitPath(const std::string& full_path, std::string* _pPath, std::string* _pFilename,
-               std::string* _pExtension) {
+               std::string* _pExtension)
+{
     if (full_path.empty())
         return false;
 
@@ -80,7 +83,8 @@ bool SplitPath(const std::string& full_path, std::string* _pPath, std::string* _
     return true;
 }
 
-void SplitString(const std::string& str, const char delim, std::vector<std::string>& output) {
+void SplitString(const std::string& str, const char delim, std::vector<std::string>& output)
+{
     std::istringstream iss(str);
     output.resize(1);
 
@@ -91,7 +95,8 @@ void SplitString(const std::string& str, const char delim, std::vector<std::stri
     output.pop_back();
 }
 
-std::string TabsToSpaces(int tab_size, std::string in) {
+std::string TabsToSpaces(int tab_size, std::string in)
+{
     std::size_t i = 0;
 
     while ((i = in.find('\t')) != std::string::npos) {
@@ -101,7 +106,8 @@ std::string TabsToSpaces(int tab_size, std::string in) {
     return in;
 }
 
-std::string ReplaceAll(std::string result, const std::string& src, const std::string& dest) {
+std::string ReplaceAll(std::string result, const std::string& src, const std::string& dest)
+{
     std::size_t pos = 0;
 
     if (src == dest)
@@ -115,23 +121,27 @@ std::string ReplaceAll(std::string result, const std::string& src, const std::st
     return result;
 }
 
-std::string UTF16ToUTF8(std::u16string_view input) {
+std::string UTF16ToUTF8(std::u16string_view input)
+{
     std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> convert;
     return convert.to_bytes(input.data(), input.data() + input.size());
 }
 
-std::u16string UTF8ToUTF16(std::string_view input) {
+std::u16string UTF8ToUTF16(std::string_view input)
+{
     std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> convert;
     return convert.from_bytes(input.data(), input.data() + input.size());
 }
 
-std::u32string UTF8ToUTF32(std::string_view input) {
+std::u32string UTF8ToUTF32(std::string_view input)
+{
     std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> convert;
     return convert.from_bytes(input.data(), input.data() + input.size());
 }
 
 #ifdef _WIN32
-static std::wstring CPToUTF16(u32 code_page, std::string_view input) {
+static std::wstring CPToUTF16(u32 code_page, std::string_view input)
+{
     const auto size =
         MultiByteToWideChar(code_page, 0, input.data(), static_cast<int>(input.size()), nullptr, 0);
 
@@ -149,7 +159,8 @@ static std::wstring CPToUTF16(u32 code_page, std::string_view input) {
     return output;
 }
 
-std::string UTF16ToUTF8(std::wstring_view input) {
+std::string UTF16ToUTF8(std::wstring_view input)
+{
     const auto size = WideCharToMultiByte(CP_UTF8, 0, input.data(), static_cast<int>(input.size()),
                                           nullptr, 0, nullptr, nullptr);
     if (size == 0) {
@@ -167,17 +178,20 @@ std::string UTF16ToUTF8(std::wstring_view input) {
     return output;
 }
 
-std::wstring UTF8ToUTF16W(std::string_view input) {
+std::wstring UTF8ToUTF16W(std::string_view input)
+{
     return CPToUTF16(CP_UTF8, input);
 }
 
 #endif
 
-std::u16string U16StringFromBuffer(const u16* input, std::size_t length) {
+std::u16string U16StringFromBuffer(const u16* input, std::size_t length)
+{
     return std::u16string(reinterpret_cast<const char16_t*>(input), length);
 }
 
-std::string StringFromFixedZeroTerminatedBuffer(std::string_view buffer, std::size_t max_len) {
+std::string StringFromFixedZeroTerminatedBuffer(std::string_view buffer, std::size_t max_len)
+{
     std::size_t len = 0;
     while (len < buffer.length() && len < max_len && buffer[len] != '\0') {
         ++len;
@@ -186,7 +200,8 @@ std::string StringFromFixedZeroTerminatedBuffer(std::string_view buffer, std::si
 }
 
 std::u16string UTF16StringFromFixedZeroTerminatedBuffer(std::u16string_view buffer,
-                                                        std::size_t max_len) {
+                                                        std::size_t max_len)
+{
     std::size_t len = 0;
     while (len < buffer.length() && len < max_len && buffer[len] != '\0') {
         ++len;

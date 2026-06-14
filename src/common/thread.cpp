@@ -4,28 +4,30 @@
 // SPDX-FileCopyrightText: 2014 Citra Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "common/thread.h"
+
 #include <chrono>
 #include <limits>
 #include <string>
 #include <thread>
 
+#include "common/assert.h"
 #include "common/error.h"
 #include "common/logging.h"
-#include "common/assert.h"
-#include "common/thread.h"
 #ifdef __APPLE__
 #include <mach/mach.h>
 #elif defined(__HAIKU__)
 #include <kernel/OS.h>
 #elif defined(_WIN32)
 #include <windows.h>
+
 #include "common/string_util.h"
 #include "common/windows/timer_resolution.h"
 #else
 #if defined(__FreeBSD__)
-#include <sys/cpuset.h>
-#include <sys/_cpuset.h>
 #include <pthread_np.h>
+#include <sys/_cpuset.h>
+#include <sys/cpuset.h>
 // Compatibility with CPUset
 #define cpu_set_t cpuset_t
 #elif defined(__DragonFly__) || defined(__OpenBSD__) || defined(__Bitrig__)
@@ -52,16 +54,23 @@
 
 namespace Common {
 
-void SetCurrentThreadPriority(ThreadPriority new_priority) {
+void SetCurrentThreadPriority(ThreadPriority new_priority)
+{
 #ifdef _WIN32
     int windows_priority = [&]() {
         switch (new_priority) {
-        case ThreadPriority::Low: return THREAD_PRIORITY_BELOW_NORMAL;
-        case ThreadPriority::Normal: return THREAD_PRIORITY_NORMAL;
-        case ThreadPriority::High: return THREAD_PRIORITY_ABOVE_NORMAL;
-        case ThreadPriority::VeryHigh: return THREAD_PRIORITY_HIGHEST;
-        case ThreadPriority::Critical: return THREAD_PRIORITY_TIME_CRITICAL;
-        default: return THREAD_PRIORITY_NORMAL;
+        case ThreadPriority::Low:
+            return THREAD_PRIORITY_BELOW_NORMAL;
+        case ThreadPriority::Normal:
+            return THREAD_PRIORITY_NORMAL;
+        case ThreadPriority::High:
+            return THREAD_PRIORITY_ABOVE_NORMAL;
+        case ThreadPriority::VeryHigh:
+            return THREAD_PRIORITY_HIGHEST;
+        case ThreadPriority::Critical:
+            return THREAD_PRIORITY_TIME_CRITICAL;
+        default:
+            return THREAD_PRIORITY_NORMAL;
         }
     }();
     SetThreadPriority(GetCurrentThread(), windows_priority);
@@ -69,12 +78,18 @@ void SetCurrentThreadPriority(ThreadPriority new_priority) {
     // TODO: We have priorities for 3D rendering applications - may help lavapipe?
     int priority = [&]() {
         switch (new_priority) {
-        case ThreadPriority::Low: return B_LOW_PRIORITY;
-        case ThreadPriority::Normal: return B_NORMAL_PRIORITY;
-        case ThreadPriority::High: return B_DISPLAY_PRIORITY;
-        case ThreadPriority::VeryHigh: return B_URGENT_DISPLAY_PRIORITY;
-        case ThreadPriority::Critical: return B_URGENT_PRIORITY;
-        default: return B_NORMAL_PRIORITY;
+        case ThreadPriority::Low:
+            return B_LOW_PRIORITY;
+        case ThreadPriority::Normal:
+            return B_NORMAL_PRIORITY;
+        case ThreadPriority::High:
+            return B_DISPLAY_PRIORITY;
+        case ThreadPriority::VeryHigh:
+            return B_URGENT_DISPLAY_PRIORITY;
+        case ThreadPriority::Critical:
+            return B_URGENT_PRIORITY;
+        default:
+            return B_NORMAL_PRIORITY;
         }
     }();
     set_thread_priority(find_thread(NULL), priority);
@@ -96,14 +111,17 @@ void SetCurrentThreadPriority(ThreadPriority new_priority) {
 #endif
 }
 
-void SetCurrentThreadName(const char* name) {
+void SetCurrentThreadName(const char* name)
+{
 #ifdef _MSC_VER
     // Sets the debugger-visible name of the current thread.
-    if (auto pf = (decltype(&SetThreadDescription))(void*)GetProcAddress(GetModuleHandle(TEXT("KernelBase.dll")), "SetThreadDescription"); pf)
+    if (auto pf = (decltype(&SetThreadDescription))(void*)GetProcAddress(
+            GetModuleHandle(TEXT("KernelBase.dll")), "SetThreadDescription");
+        pf)
         pf(GetCurrentThread(), UTF8ToUTF16W(name).data()); // Windows 10+
     else
         ; // No-op
-#elif  defined(__APPLE__)
+#elif defined(__APPLE__)
     pthread_setname_np(name);
 #elif defined(__HAIKU__)
     rename_thread(find_thread(NULL), name);
@@ -111,7 +129,8 @@ void SetCurrentThreadName(const char* name) {
     pthread_set_name_np(pthread_self(), name);
 #elif defined(__NetBSD__)
     pthread_setname_np(pthread_self(), "%s", (void*)name);
-#elif defined(__linux__) || defined(__CYGWIN__) || defined(__sun__) || defined(__glibc__) || defined(__managarm__)
+#elif defined(__linux__) || defined(__CYGWIN__) || defined(__sun__) || defined(__glibc__) ||       \
+    defined(__managarm__)
     int ret = pthread_setname_np(pthread_self(), name);
     if (ret == ERANGE) {
         // Linux limits thread names to 15 characters and will outright reject any
@@ -132,7 +151,8 @@ void SetCurrentThreadName(const char* name) {
 #endif
 }
 
-void PinCurrentThreadToPerformanceCore(size_t core_id) {
+void PinCurrentThreadToPerformanceCore(size_t core_id)
+{
     ASSERT(core_id < 4);
     // If we set a flag for a CPU that doesn't exist, the thread may not be allowed to
     // run in ANY processor!
@@ -159,8 +179,8 @@ void PinCurrentThreadToPerformanceCore(size_t core_id) {
 
 #ifdef ARCHITECTURE_x86_64
 // On Linux and UNIX systems, a futex would nominally be used to cover the costs
-// the idea is that it's intuitivelly cheaper to use a direct instruction as opposed to a full futex call
-// the underlying libc++ implementation uses pthread_cond_timedwait which MAY invoke a futex
+// the idea is that it's intuitivelly cheaper to use a direct instruction as opposed to a full futex
+// call the underlying libc++ implementation uses pthread_cond_timedwait which MAY invoke a futex
 // Let's pretend the OS is too expensive to jump into, and avoid ANY context switches
 // this should *IN THEORY* lower CPU usage while just waiting for stuff effectively
 // For windows the minimal quanta resolution is about 500us, and normal CRT cond var is 1.5ms(?)
@@ -172,15 +192,16 @@ __attribute__((target("waitpkg,mwaitx")))
 #pragma GCC target("waitpkg")
 #pragma GCC target("mwaitx")
 #endif
-bool Event::WaitFor(const std::chrono::nanoseconds time) {
+bool Event::WaitFor(const std::chrono::nanoseconds time)
+{
 #ifdef _WIN32
     auto const start = Common::X64::FencedRDTSC();
     auto const& caps = Common::g_cpu_caps;
     [[maybe_unused]] auto const end = start + Common::g_wall_clock.NsToTicks(time);
     if (caps.monitorx) {
         while (true) {
-            // Armed monitor, as per manual, MWAITX must be conditional if the condition isn't satisfied
-            // to prevent a race condition.
+            // Armed monitor, as per manual, MWAITX must be conditional if the condition isn't
+            // satisfied to prevent a race condition.
             _mm_monitorx(reinterpret_cast<u64*>(std::addressof(is_set)), 0, 0);
             if (!is_set.load()) {
                 // RDTSC may be fenced here due to atomic load
@@ -190,17 +211,19 @@ bool Event::WaitFor(const std::chrono::nanoseconds time) {
                 auto const now = _rdtsc();
 #endif
                 if (end > now) {
-                    u32 const cycles = std::min<u32>((std::numeric_limits<u32>::max)(), s64(end) - s64(now));
-                    // See here: https://github.com/torvalds/linux/blob/948a64995aca6820abefd17f1a4258f5835c5ad9/arch/x86/lib/delay.c#L93
-                    // MWAITX accepts a 32-bit input timer which determines the total number of cycles to wait for
-                    // NOT THE TOTAL ABSOLUTE TSC VALUE, it's just a delta
-                    // BIT[1] = use a timer
-                    // Hint = 0: Use C1 state when sleepy (means slower wakeup but better savings)
+                    u32 const cycles =
+                        std::min<u32>((std::numeric_limits<u32>::max)(), s64(end) - s64(now));
+                    // See here:
+                    // https://github.com/torvalds/linux/blob/948a64995aca6820abefd17f1a4258f5835c5ad9/arch/x86/lib/delay.c#L93
+                    // MWAITX accepts a 32-bit input timer which determines the total number of
+                    // cycles to wait for NOT THE TOTAL ABSOLUTE TSC VALUE, it's just a delta BIT[1]
+                    // = use a timer Hint = 0: Use C1 state when sleepy (means slower wakeup but
+                    // better savings)
                     _mm_mwaitx(1 << 1, 0u, cycles);
                     if (!is_set.load())
                         return false;
                 } else
-                    return false; //timeout
+                    return false; // timeout
             }
             bool expected = true;
             if (is_set.compare_exchange_weak(expected, false, std::memory_order_release))
@@ -210,7 +233,7 @@ bool Event::WaitFor(const std::chrono::nanoseconds time) {
         // #UD If CPUID.7.0:ECX.WAITPKG[bit 5]=0.
         while (true) {
             _umonitor(std::addressof(is_set));
-            if (!is_set.load() && !_umwait(0, end)) //umwait is absolute time!!!
+            if (!is_set.load() && !_umwait(0, end)) // umwait is absolute time!!!
                 return false;
             bool expected = true;
             if (is_set.compare_exchange_weak(expected, false, std::memory_order_release))
@@ -237,7 +260,8 @@ bool Event::WaitFor(const std::chrono::nanoseconds time) {
 #endif
 }
 #else
-bool Event::WaitFor(const std::chrono::nanoseconds time) {
+bool Event::WaitFor(const std::chrono::nanoseconds time)
+{
 #ifdef _WIN32
     auto const end = Common::g_wall_clock.GetTimeNS() + time;
     while (!is_set.load() && end > Common::g_wall_clock.GetTimeNS())

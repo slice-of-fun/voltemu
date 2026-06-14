@@ -10,7 +10,8 @@
 
 namespace Shader::Backend::SPIRV {
 namespace {
-void ConvertDepthMode(EmitContext& ctx) {
+void ConvertDepthMode(EmitContext& ctx)
+{
     const Id type{ctx.F32[1]};
     const Id position{ctx.OpLoad(ctx.F32[4], ctx.output_position)};
     const Id z{ctx.OpCompositeExtract(type, position, 2u)};
@@ -20,7 +21,8 @@ void ConvertDepthMode(EmitContext& ctx) {
     ctx.OpStore(ctx.output_position, vector);
 }
 
-void SetFixedPipelinePointSize(EmitContext& ctx) {
+void SetFixedPipelinePointSize(EmitContext& ctx)
+{
     if (ctx.runtime_info.fixed_state_point_size) {
         const float point_size{*ctx.runtime_info.fixed_state_point_size};
         ctx.OpStore(ctx.output_point_size, ctx.Const(point_size));
@@ -28,7 +30,8 @@ void SetFixedPipelinePointSize(EmitContext& ctx) {
 }
 
 Id DefaultVarying(EmitContext& ctx, u32 num_components, u32 element, Id zero, Id one,
-                  Id default_vector) {
+                  Id default_vector)
+{
     switch (num_components) {
     case 1:
         return element == 3 ? one : zero;
@@ -42,7 +45,8 @@ Id DefaultVarying(EmitContext& ctx, u32 num_components, u32 element, Id zero, Id
     throw InvalidArgument("Bad element");
 }
 
-Id ComparisonFunction(EmitContext& ctx, CompareFunction comparison, Id operand_1, Id operand_2) {
+Id ComparisonFunction(EmitContext& ctx, CompareFunction comparison, Id operand_1, Id operand_2)
+{
     switch (comparison) {
     case CompareFunction::Never:
         return ctx.false_value;
@@ -64,7 +68,8 @@ Id ComparisonFunction(EmitContext& ctx, CompareFunction comparison, Id operand_1
     throw InvalidArgument("Comparison function {}", comparison);
 }
 
-void AlphaTest(EmitContext& ctx) {
+void AlphaTest(EmitContext& ctx)
+{
     if (!ctx.runtime_info.alpha_test_func) {
         return;
     }
@@ -93,7 +98,8 @@ void AlphaTest(EmitContext& ctx) {
 }
 } // Anonymous namespace
 
-void EmitPrologue(EmitContext& ctx) {
+void EmitPrologue(EmitContext& ctx)
+{
     if (ctx.stage == Stage::Fragment && ctx.runtime_info.dual_source_blend) {
         // Initialize dual-source blending outputs - prevents MoltenVK crash.
         const Id zero{ctx.Const(0.0f)};
@@ -139,7 +145,8 @@ void EmitPrologue(EmitContext& ctx) {
     }
 }
 
-void EmitEpilogue(EmitContext& ctx) {
+void EmitEpilogue(EmitContext& ctx)
+{
     if (ctx.stage == Stage::VertexB && ctx.runtime_info.convert_depth_mode &&
         !ctx.profile.support_native_ndc) {
         ConvertDepthMode(ctx);
@@ -149,7 +156,8 @@ void EmitEpilogue(EmitContext& ctx) {
     }
 }
 
-void EmitEmitVertex(EmitContext& ctx, const IR::Value& stream) {
+void EmitEmitVertex(EmitContext& ctx, const IR::Value& stream)
+{
     if (ctx.runtime_info.convert_depth_mode && !ctx.profile.support_native_ndc) {
         ConvertDepthMode(ctx);
     }
@@ -165,7 +173,8 @@ void EmitEmitVertex(EmitContext& ctx, const IR::Value& stream) {
     SetFixedPipelinePointSize(ctx);
 }
 
-void EmitEndPrimitive(EmitContext& ctx, const IR::Value& stream) {
+void EmitEndPrimitive(EmitContext& ctx, const IR::Value& stream)
+{
     if (!ctx.profile.support_geometry_streams) {
         throw NotImplementedException("Geometry streams");
     } else if (stream.IsImmediate()) {

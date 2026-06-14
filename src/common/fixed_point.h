@@ -9,22 +9,21 @@
 
 #pragma once
 
+#include <common/concepts.h>
+
 #include <cstddef> // for size_t
 #include <cstdint>
 #include <exception>
 #include <ostream>
 #include <type_traits>
 
-#include <common/concepts.h>
-
 namespace Common {
 
 // No equivalent for "std::arithmetic" in the stdlib
-template <typename T>
+template<typename T>
 concept IsArithmetic = std::is_arithmetic_v<T>;
 
-template <size_t I, size_t F>
-class FixedPoint;
+template<size_t I, size_t F> class FixedPoint;
 
 namespace detail {
 
@@ -32,8 +31,7 @@ namespace detail {
 // these allow us to determine reasonable types from
 // a desired size, they also let us infer the next largest type
 // from a type which is nice for the division op
-template <size_t T>
-struct type_from_size {
+template<size_t T> struct type_from_size {
     using value_type = void;
     using unsigned_type = void;
     using signed_type = void;
@@ -41,8 +39,7 @@ struct type_from_size {
 };
 
 #if defined(__GNUC__) && defined(__x86_64__) && !defined(__STRICT_ANSI__)
-template <>
-struct type_from_size<128> {
+template<> struct type_from_size<128> {
     static constexpr bool is_specialized = true;
     static constexpr size_t size = 128;
 
@@ -53,8 +50,7 @@ struct type_from_size<128> {
 };
 #endif
 
-template <>
-struct type_from_size<64> {
+template<> struct type_from_size<64> {
     static constexpr bool is_specialized = true;
     static constexpr size_t size = 64;
 
@@ -64,8 +60,7 @@ struct type_from_size<64> {
     using next_size = type_from_size<128>;
 };
 
-template <>
-struct type_from_size<32> {
+template<> struct type_from_size<32> {
     static constexpr bool is_specialized = true;
     static constexpr size_t size = 32;
 
@@ -75,8 +70,7 @@ struct type_from_size<32> {
     using next_size = type_from_size<64>;
 };
 
-template <>
-struct type_from_size<16> {
+template<> struct type_from_size<16> {
     static constexpr bool is_specialized = true;
     static constexpr size_t size = 16;
 
@@ -86,8 +80,7 @@ struct type_from_size<16> {
     using next_size = type_from_size<32>;
 };
 
-template <>
-struct type_from_size<8> {
+template<> struct type_from_size<8> {
     static constexpr bool is_specialized = true;
     static constexpr size_t size = 8;
 
@@ -100,17 +93,18 @@ struct type_from_size<8> {
 // this is to assist in adding support for non-native base
 // types (for adding big-int support), this should be fine
 // unless your bit-int class doesn't nicely support casting
-template <class B, class N>
-constexpr B next_to_base(N rhs) {
+template<class B, class N> constexpr B next_to_base(N rhs)
+{
     return static_cast<B>(rhs);
 }
 
 struct divide_by_zero : std::exception {};
 
-template <size_t I, size_t F>
-constexpr FixedPoint<I, F> divide(
-    FixedPoint<I, F> numerator, FixedPoint<I, F> denominator, FixedPoint<I, F>& remainder,
-    std::enable_if_t<type_from_size<I + F>::next_size::is_specialized>* = nullptr) {
+template<size_t I, size_t F>
+constexpr FixedPoint<I, F>
+divide(FixedPoint<I, F> numerator, FixedPoint<I, F> denominator, FixedPoint<I, F>& remainder,
+       std::enable_if_t<type_from_size<I + F>::next_size::is_specialized>* = nullptr)
+{
 
     using next_type = typename FixedPoint<I, F>::next_type;
     using base_type = typename FixedPoint<I, F>::base_type;
@@ -127,10 +121,11 @@ constexpr FixedPoint<I, F> divide(
     return quotient;
 }
 
-template <size_t I, size_t F>
-constexpr FixedPoint<I, F> divide(
-    FixedPoint<I, F> numerator, FixedPoint<I, F> denominator, FixedPoint<I, F>& remainder,
-    std::enable_if_t<!type_from_size<I + F>::next_size::is_specialized>* = nullptr) {
+template<size_t I, size_t F>
+constexpr FixedPoint<I, F>
+divide(FixedPoint<I, F> numerator, FixedPoint<I, F> denominator, FixedPoint<I, F>& remainder,
+       std::enable_if_t<!type_from_size<I + F>::next_size::is_specialized>* = nullptr)
+{
 
     using unsigned_type = typename FixedPoint<I, F>::unsigned_type;
 
@@ -197,10 +192,11 @@ constexpr FixedPoint<I, F> divide(
 }
 
 // this is the usual implementation of multiplication
-template <size_t I, size_t F>
-constexpr FixedPoint<I, F> multiply(
-    FixedPoint<I, F> lhs, FixedPoint<I, F> rhs,
-    std::enable_if_t<type_from_size<I + F>::next_size::is_specialized>* = nullptr) {
+template<size_t I, size_t F>
+constexpr FixedPoint<I, F>
+multiply(FixedPoint<I, F> lhs, FixedPoint<I, F> rhs,
+         std::enable_if_t<type_from_size<I + F>::next_size::is_specialized>* = nullptr)
+{
 
     using next_type = typename FixedPoint<I, F>::next_type;
     using base_type = typename FixedPoint<I, F>::base_type;
@@ -216,10 +212,11 @@ constexpr FixedPoint<I, F> multiply(
 // this is the fall back version we use when we don't have a next size
 // it is slightly slower, but is more robust since it doesn't
 // require and upgraded type
-template <size_t I, size_t F>
-constexpr FixedPoint<I, F> multiply(
-    FixedPoint<I, F> lhs, FixedPoint<I, F> rhs,
-    std::enable_if_t<!type_from_size<I + F>::next_size::is_specialized>* = nullptr) {
+template<size_t I, size_t F>
+constexpr FixedPoint<I, F>
+multiply(FixedPoint<I, F> lhs, FixedPoint<I, F> rhs,
+         std::enable_if_t<!type_from_size<I + F>::next_size::is_specialized>* = nullptr)
+{
 
     using base_type = typename FixedPoint<I, F>::base_type;
 
@@ -243,8 +240,7 @@ constexpr FixedPoint<I, F> multiply(
 }
 } // namespace detail
 
-template <size_t I, size_t F>
-class FixedPoint {
+template<size_t I, size_t F> class FixedPoint {
     static_assert(detail::type_from_size<I + F>::is_specialized, "invalid combination of sizes");
 
 public:
@@ -282,12 +278,14 @@ public: // constructors
     constexpr FixedPoint(FixedPoint&&) noexcept = default;
     constexpr FixedPoint& operator=(FixedPoint&&) noexcept = default;
 
-    template <IsArithmetic Number>
-    constexpr FixedPoint(Number n) : data_(static_cast<base_type>(n * one)) {}
+    template<IsArithmetic Number>
+    constexpr FixedPoint(Number n) : data_(static_cast<base_type>(n * one))
+    {
+    }
 
 public: // conversion
-    template <size_t I2, size_t F2>
-    constexpr explicit FixedPoint(FixedPoint<I2, F2> other) {
+    template<size_t I2, size_t F2> constexpr explicit FixedPoint(FixedPoint<I2, F2> other)
+    {
         static_assert(I2 <= I && F2 <= F, "Scaling conversion can only upgrade types");
         using T = FixedPoint<I2, F2>;
 
@@ -303,10 +301,13 @@ private:
     // use "FixedPoint::from_base" in order to perform this.
     struct NoScale {};
 
-    constexpr FixedPoint(base_type n, const NoScale&) : data_(n) {}
+    constexpr FixedPoint(base_type n, const NoScale&) : data_(n)
+    {
+    }
 
 public:
-    static constexpr FixedPoint from_base(base_type n) {
+    static constexpr FixedPoint from_base(base_type n)
+    {
         return FixedPoint(n, NoScale());
     }
 
@@ -314,11 +315,13 @@ public: // comparison operators
     friend constexpr auto operator<=>(FixedPoint lhs, FixedPoint rhs) = default;
 
 public: // unary operators
-    [[nodiscard]] constexpr bool operator!() const {
+    [[nodiscard]] constexpr bool operator!() const
+    {
         return !data_;
     }
 
-    [[nodiscard]] constexpr FixedPoint operator~() const {
+    [[nodiscard]] constexpr FixedPoint operator~() const
+    {
         // NOTE(eteran): this will often appear to "just negate" the value
         // that is not an error, it is because -x == (~x+1)
         // and that "+1" is adding an infinitesimally small fraction to the
@@ -326,145 +329,172 @@ public: // unary operators
         return FixedPoint::from_base(~data_);
     }
 
-    [[nodiscard]] constexpr FixedPoint operator-() const {
+    [[nodiscard]] constexpr FixedPoint operator-() const
+    {
         return FixedPoint::from_base(-data_);
     }
 
-    [[nodiscard]] constexpr FixedPoint operator+() const {
+    [[nodiscard]] constexpr FixedPoint operator+() const
+    {
         return FixedPoint::from_base(+data_);
     }
 
-    constexpr FixedPoint& operator++() {
+    constexpr FixedPoint& operator++()
+    {
         data_ += one;
         return *this;
     }
 
-    constexpr FixedPoint& operator--() {
+    constexpr FixedPoint& operator--()
+    {
         data_ -= one;
         return *this;
     }
 
-    constexpr FixedPoint operator++(int) {
+    constexpr FixedPoint operator++(int)
+    {
         FixedPoint tmp(*this);
         data_ += one;
         return tmp;
     }
 
-    constexpr FixedPoint operator--(int) {
+    constexpr FixedPoint operator--(int)
+    {
         FixedPoint tmp(*this);
         data_ -= one;
         return tmp;
     }
 
 public: // basic math operators
-    constexpr FixedPoint& operator+=(FixedPoint n) {
+    constexpr FixedPoint& operator+=(FixedPoint n)
+    {
         data_ += n.data_;
         return *this;
     }
 
-    constexpr FixedPoint& operator-=(FixedPoint n) {
+    constexpr FixedPoint& operator-=(FixedPoint n)
+    {
         data_ -= n.data_;
         return *this;
     }
 
-    constexpr FixedPoint& operator*=(FixedPoint n) {
+    constexpr FixedPoint& operator*=(FixedPoint n)
+    {
         return assign(detail::multiply(*this, n));
     }
 
-    constexpr FixedPoint& operator/=(FixedPoint n) {
+    constexpr FixedPoint& operator/=(FixedPoint n)
+    {
         FixedPoint temp;
         return assign(detail::divide(*this, n, temp));
     }
 
 private:
-    constexpr FixedPoint& assign(FixedPoint rhs) {
+    constexpr FixedPoint& assign(FixedPoint rhs)
+    {
         data_ = rhs.data_;
         return *this;
     }
 
 public: // binary math operators, effects underlying bit pattern since these
         // don't really typically make sense for non-integer values
-    constexpr FixedPoint& operator&=(FixedPoint n) {
+    constexpr FixedPoint& operator&=(FixedPoint n)
+    {
         data_ &= n.data_;
         return *this;
     }
 
-    constexpr FixedPoint& operator|=(FixedPoint n) {
+    constexpr FixedPoint& operator|=(FixedPoint n)
+    {
         data_ |= n.data_;
         return *this;
     }
 
-    constexpr FixedPoint& operator^=(FixedPoint n) {
+    constexpr FixedPoint& operator^=(FixedPoint n)
+    {
         data_ ^= n.data_;
         return *this;
     }
 
-    template <std::integral Integer>
-    constexpr FixedPoint& operator>>=(Integer n) {
+    template<std::integral Integer> constexpr FixedPoint& operator>>=(Integer n)
+    {
         data_ >>= n;
         return *this;
     }
 
-    template <std::integral Integer>
-    constexpr FixedPoint& operator<<=(Integer n) {
+    template<std::integral Integer> constexpr FixedPoint& operator<<=(Integer n)
+    {
         data_ <<= n;
         return *this;
     }
 
 public: // conversion to basic types
-    constexpr void round_up() {
+    constexpr void round_up()
+    {
         data_ += (data_ & fractional_mask) >> 1;
     }
 
-    [[nodiscard]] constexpr int to_int() {
+    [[nodiscard]] constexpr int to_int()
+    {
         round_up();
         return static_cast<int>((data_ & integer_mask) >> fractional_bits);
     }
 
-    [[nodiscard]] constexpr unsigned int to_uint() {
+    [[nodiscard]] constexpr unsigned int to_uint()
+    {
         round_up();
         return static_cast<unsigned int>((data_ & integer_mask) >> fractional_bits);
     }
 
-    [[nodiscard]] constexpr int64_t to_long() {
+    [[nodiscard]] constexpr int64_t to_long()
+    {
         round_up();
         return static_cast<int64_t>((data_ & integer_mask) >> fractional_bits);
     }
 
-    [[nodiscard]] constexpr int to_int_floor() const {
+    [[nodiscard]] constexpr int to_int_floor() const
+    {
         return static_cast<int>((data_ & integer_mask) >> fractional_bits);
     }
 
-    [[nodiscard]] constexpr int64_t to_long_floor() const {
+    [[nodiscard]] constexpr int64_t to_long_floor() const
+    {
         return static_cast<int64_t>((data_ & integer_mask) >> fractional_bits);
     }
 
-    [[nodiscard]] constexpr unsigned int to_uint_floor() const {
+    [[nodiscard]] constexpr unsigned int to_uint_floor() const
+    {
         return static_cast<unsigned int>((data_ & integer_mask) >> fractional_bits);
     }
 
-    [[nodiscard]] constexpr float to_float() const {
+    [[nodiscard]] constexpr float to_float() const
+    {
         return static_cast<float>(data_) / FixedPoint::one;
     }
 
-    [[nodiscard]] constexpr double to_double() const {
+    [[nodiscard]] constexpr double to_double() const
+    {
         return static_cast<double>(data_) / FixedPoint::one;
     }
 
-    [[nodiscard]] constexpr base_type to_raw() const {
+    [[nodiscard]] constexpr base_type to_raw() const
+    {
         return data_;
     }
 
-    constexpr void clear_int() {
+    constexpr void clear_int()
+    {
         data_ &= fractional_mask;
     }
 
-    [[nodiscard]] constexpr base_type get_frac() const {
+    [[nodiscard]] constexpr base_type get_frac() const
+    {
         return data_ & fractional_mask;
     }
 
 public:
-    constexpr void swap(FixedPoint& rhs) noexcept {
+    constexpr void swap(FixedPoint& rhs) noexcept
+    {
         using std::swap;
         swap(data_, rhs.data_);
     }
@@ -475,9 +505,10 @@ public:
 
 // if we have the same fractional portion, but differing integer portions, we trivially upgrade the
 // smaller type
-template <size_t I1, size_t I2, size_t F>
-constexpr std::conditional_t<I1 >= I2, FixedPoint<I1, F>, FixedPoint<I2, F>> operator+(
-    FixedPoint<I1, F> lhs, FixedPoint<I2, F> rhs) {
+template<size_t I1, size_t I2, size_t F>
+constexpr std::conditional_t<I1 >= I2, FixedPoint<I1, F>, FixedPoint<I2, F>>
+operator+(FixedPoint<I1, F> lhs, FixedPoint<I2, F> rhs)
+{
 
     using T = std::conditional_t<I1 >= I2, FixedPoint<I1, F>, FixedPoint<I2, F>>;
 
@@ -486,9 +517,10 @@ constexpr std::conditional_t<I1 >= I2, FixedPoint<I1, F>, FixedPoint<I2, F>> ope
     return l + r;
 }
 
-template <size_t I1, size_t I2, size_t F>
-constexpr std::conditional_t<I1 >= I2, FixedPoint<I1, F>, FixedPoint<I2, F>> operator-(
-    FixedPoint<I1, F> lhs, FixedPoint<I2, F> rhs) {
+template<size_t I1, size_t I2, size_t F>
+constexpr std::conditional_t<I1 >= I2, FixedPoint<I1, F>, FixedPoint<I2, F>>
+operator-(FixedPoint<I1, F> lhs, FixedPoint<I2, F> rhs)
+{
 
     using T = std::conditional_t<I1 >= I2, FixedPoint<I1, F>, FixedPoint<I2, F>>;
 
@@ -497,9 +529,10 @@ constexpr std::conditional_t<I1 >= I2, FixedPoint<I1, F>, FixedPoint<I2, F>> ope
     return l - r;
 }
 
-template <size_t I1, size_t I2, size_t F>
-constexpr std::conditional_t<I1 >= I2, FixedPoint<I1, F>, FixedPoint<I2, F>> operator*(
-    FixedPoint<I1, F> lhs, FixedPoint<I2, F> rhs) {
+template<size_t I1, size_t I2, size_t F>
+constexpr std::conditional_t<I1 >= I2, FixedPoint<I1, F>, FixedPoint<I2, F>>
+operator*(FixedPoint<I1, F> lhs, FixedPoint<I2, F> rhs)
+{
 
     using T = std::conditional_t<I1 >= I2, FixedPoint<I1, F>, FixedPoint<I2, F>>;
 
@@ -508,9 +541,10 @@ constexpr std::conditional_t<I1 >= I2, FixedPoint<I1, F>, FixedPoint<I2, F>> ope
     return l * r;
 }
 
-template <size_t I1, size_t I2, size_t F>
-constexpr std::conditional_t<I1 >= I2, FixedPoint<I1, F>, FixedPoint<I2, F>> operator/(
-    FixedPoint<I1, F> lhs, FixedPoint<I2, F> rhs) {
+template<size_t I1, size_t I2, size_t F>
+constexpr std::conditional_t<I1 >= I2, FixedPoint<I1, F>, FixedPoint<I2, F>>
+operator/(FixedPoint<I1, F> lhs, FixedPoint<I2, F> rhs)
+{
 
     using T = std::conditional_t<I1 >= I2, FixedPoint<I1, F>, FixedPoint<I2, F>>;
 
@@ -519,140 +553,166 @@ constexpr std::conditional_t<I1 >= I2, FixedPoint<I1, F>, FixedPoint<I2, F>> ope
     return l / r;
 }
 
-template <size_t I, size_t F>
-std::ostream& operator<<(std::ostream& os, FixedPoint<I, F> f) {
+template<size_t I, size_t F> std::ostream& operator<<(std::ostream& os, FixedPoint<I, F> f)
+{
     os << f.to_double();
     return os;
 }
 
 // basic math operators
-template <size_t I, size_t F>
-constexpr FixedPoint<I, F> operator+(FixedPoint<I, F> lhs, FixedPoint<I, F> rhs) {
+template<size_t I, size_t F>
+constexpr FixedPoint<I, F> operator+(FixedPoint<I, F> lhs, FixedPoint<I, F> rhs)
+{
     lhs += rhs;
     return lhs;
 }
-template <size_t I, size_t F>
-constexpr FixedPoint<I, F> operator-(FixedPoint<I, F> lhs, FixedPoint<I, F> rhs) {
+template<size_t I, size_t F>
+constexpr FixedPoint<I, F> operator-(FixedPoint<I, F> lhs, FixedPoint<I, F> rhs)
+{
     lhs -= rhs;
     return lhs;
 }
-template <size_t I, size_t F>
-constexpr FixedPoint<I, F> operator*(FixedPoint<I, F> lhs, FixedPoint<I, F> rhs) {
+template<size_t I, size_t F>
+constexpr FixedPoint<I, F> operator*(FixedPoint<I, F> lhs, FixedPoint<I, F> rhs)
+{
     lhs *= rhs;
     return lhs;
 }
-template <size_t I, size_t F>
-constexpr FixedPoint<I, F> operator/(FixedPoint<I, F> lhs, FixedPoint<I, F> rhs) {
+template<size_t I, size_t F>
+constexpr FixedPoint<I, F> operator/(FixedPoint<I, F> lhs, FixedPoint<I, F> rhs)
+{
     lhs /= rhs;
     return lhs;
 }
 
-template <size_t I, size_t F, IsArithmetic Number>
-constexpr FixedPoint<I, F> operator+(FixedPoint<I, F> lhs, Number rhs) {
+template<size_t I, size_t F, IsArithmetic Number>
+constexpr FixedPoint<I, F> operator+(FixedPoint<I, F> lhs, Number rhs)
+{
     lhs += FixedPoint<I, F>(rhs);
     return lhs;
 }
-template <size_t I, size_t F, IsArithmetic Number>
-constexpr FixedPoint<I, F> operator-(FixedPoint<I, F> lhs, Number rhs) {
+template<size_t I, size_t F, IsArithmetic Number>
+constexpr FixedPoint<I, F> operator-(FixedPoint<I, F> lhs, Number rhs)
+{
     lhs -= FixedPoint<I, F>(rhs);
     return lhs;
 }
-template <size_t I, size_t F, IsArithmetic Number>
-constexpr FixedPoint<I, F> operator*(FixedPoint<I, F> lhs, Number rhs) {
+template<size_t I, size_t F, IsArithmetic Number>
+constexpr FixedPoint<I, F> operator*(FixedPoint<I, F> lhs, Number rhs)
+{
     lhs *= FixedPoint<I, F>(rhs);
     return lhs;
 }
-template <size_t I, size_t F, IsArithmetic Number>
-constexpr FixedPoint<I, F> operator/(FixedPoint<I, F> lhs, Number rhs) {
+template<size_t I, size_t F, IsArithmetic Number>
+constexpr FixedPoint<I, F> operator/(FixedPoint<I, F> lhs, Number rhs)
+{
     lhs /= FixedPoint<I, F>(rhs);
     return lhs;
 }
 
-template <size_t I, size_t F, IsArithmetic Number>
-constexpr FixedPoint<I, F> operator+(Number lhs, FixedPoint<I, F> rhs) {
+template<size_t I, size_t F, IsArithmetic Number>
+constexpr FixedPoint<I, F> operator+(Number lhs, FixedPoint<I, F> rhs)
+{
     FixedPoint<I, F> tmp(lhs);
     tmp += rhs;
     return tmp;
 }
-template <size_t I, size_t F, IsArithmetic Number>
-constexpr FixedPoint<I, F> operator-(Number lhs, FixedPoint<I, F> rhs) {
+template<size_t I, size_t F, IsArithmetic Number>
+constexpr FixedPoint<I, F> operator-(Number lhs, FixedPoint<I, F> rhs)
+{
     FixedPoint<I, F> tmp(lhs);
     tmp -= rhs;
     return tmp;
 }
-template <size_t I, size_t F, IsArithmetic Number>
-constexpr FixedPoint<I, F> operator*(Number lhs, FixedPoint<I, F> rhs) {
+template<size_t I, size_t F, IsArithmetic Number>
+constexpr FixedPoint<I, F> operator*(Number lhs, FixedPoint<I, F> rhs)
+{
     FixedPoint<I, F> tmp(lhs);
     tmp *= rhs;
     return tmp;
 }
-template <size_t I, size_t F, IsArithmetic Number>
-constexpr FixedPoint<I, F> operator/(Number lhs, FixedPoint<I, F> rhs) {
+template<size_t I, size_t F, IsArithmetic Number>
+constexpr FixedPoint<I, F> operator/(Number lhs, FixedPoint<I, F> rhs)
+{
     FixedPoint<I, F> tmp(lhs);
     tmp /= rhs;
     return tmp;
 }
 
 // shift operators
-template <size_t I, size_t F, std::integral Integer>
-constexpr FixedPoint<I, F> operator<<(FixedPoint<I, F> lhs, Integer rhs) {
+template<size_t I, size_t F, std::integral Integer>
+constexpr FixedPoint<I, F> operator<<(FixedPoint<I, F> lhs, Integer rhs)
+{
     lhs <<= rhs;
     return lhs;
 }
-template <size_t I, size_t F, std::integral Integer>
-constexpr FixedPoint<I, F> operator>>(FixedPoint<I, F> lhs, Integer rhs) {
+template<size_t I, size_t F, std::integral Integer>
+constexpr FixedPoint<I, F> operator>>(FixedPoint<I, F> lhs, Integer rhs)
+{
     lhs >>= rhs;
     return lhs;
 }
 
 // comparison operators
-template <size_t I, size_t F, IsArithmetic Number>
-constexpr bool operator>(FixedPoint<I, F> lhs, Number rhs) {
+template<size_t I, size_t F, IsArithmetic Number>
+constexpr bool operator>(FixedPoint<I, F> lhs, Number rhs)
+{
     return lhs > FixedPoint<I, F>(rhs);
 }
-template <size_t I, size_t F, IsArithmetic Number>
-constexpr bool operator<(FixedPoint<I, F> lhs, Number rhs) {
+template<size_t I, size_t F, IsArithmetic Number>
+constexpr bool operator<(FixedPoint<I, F> lhs, Number rhs)
+{
     return lhs < FixedPoint<I, F>(rhs);
 }
-template <size_t I, size_t F, IsArithmetic Number>
-constexpr bool operator>=(FixedPoint<I, F> lhs, Number rhs) {
+template<size_t I, size_t F, IsArithmetic Number>
+constexpr bool operator>=(FixedPoint<I, F> lhs, Number rhs)
+{
     return lhs >= FixedPoint<I, F>(rhs);
 }
-template <size_t I, size_t F, IsArithmetic Number>
-constexpr bool operator<=(FixedPoint<I, F> lhs, Number rhs) {
+template<size_t I, size_t F, IsArithmetic Number>
+constexpr bool operator<=(FixedPoint<I, F> lhs, Number rhs)
+{
     return lhs <= FixedPoint<I, F>(rhs);
 }
-template <size_t I, size_t F, IsArithmetic Number>
-constexpr bool operator==(FixedPoint<I, F> lhs, Number rhs) {
+template<size_t I, size_t F, IsArithmetic Number>
+constexpr bool operator==(FixedPoint<I, F> lhs, Number rhs)
+{
     return lhs == FixedPoint<I, F>(rhs);
 }
-template <size_t I, size_t F, IsArithmetic Number>
-constexpr bool operator!=(FixedPoint<I, F> lhs, Number rhs) {
+template<size_t I, size_t F, IsArithmetic Number>
+constexpr bool operator!=(FixedPoint<I, F> lhs, Number rhs)
+{
     return lhs != FixedPoint<I, F>(rhs);
 }
 
-template <size_t I, size_t F, IsArithmetic Number>
-constexpr bool operator>(Number lhs, FixedPoint<I, F> rhs) {
+template<size_t I, size_t F, IsArithmetic Number>
+constexpr bool operator>(Number lhs, FixedPoint<I, F> rhs)
+{
     return FixedPoint<I, F>(lhs) > rhs;
 }
-template <size_t I, size_t F, IsArithmetic Number>
-constexpr bool operator<(Number lhs, FixedPoint<I, F> rhs) {
+template<size_t I, size_t F, IsArithmetic Number>
+constexpr bool operator<(Number lhs, FixedPoint<I, F> rhs)
+{
     return FixedPoint<I, F>(lhs) < rhs;
 }
-template <size_t I, size_t F, IsArithmetic Number>
-constexpr bool operator>=(Number lhs, FixedPoint<I, F> rhs) {
+template<size_t I, size_t F, IsArithmetic Number>
+constexpr bool operator>=(Number lhs, FixedPoint<I, F> rhs)
+{
     return FixedPoint<I, F>(lhs) >= rhs;
 }
-template <size_t I, size_t F, IsArithmetic Number>
-constexpr bool operator<=(Number lhs, FixedPoint<I, F> rhs) {
+template<size_t I, size_t F, IsArithmetic Number>
+constexpr bool operator<=(Number lhs, FixedPoint<I, F> rhs)
+{
     return FixedPoint<I, F>(lhs) <= rhs;
 }
-template <size_t I, size_t F, IsArithmetic Number>
-constexpr bool operator==(Number lhs, FixedPoint<I, F> rhs) {
+template<size_t I, size_t F, IsArithmetic Number>
+constexpr bool operator==(Number lhs, FixedPoint<I, F> rhs)
+{
     return FixedPoint<I, F>(lhs) == rhs;
 }
-template <size_t I, size_t F, IsArithmetic Number>
-constexpr bool operator!=(Number lhs, FixedPoint<I, F> rhs) {
+template<size_t I, size_t F, IsArithmetic Number>
+constexpr bool operator!=(Number lhs, FixedPoint<I, F> rhs)
+{
     return FixedPoint<I, F>(lhs) != rhs;
 }
 

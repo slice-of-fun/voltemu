@@ -5,6 +5,7 @@
 
 #include <array>
 #include <span>
+
 #include "common/typed_address.h"
 #include "core/hle/result.h"
 
@@ -150,19 +151,13 @@ public:
     virtual void OnUpdate() {}
 
     // Returns the device ID of the joycon
-    virtual u8 GetDeviceId() const {
-        return {};
-    }
+    virtual u8 GetDeviceId() const { return {}; }
 
     // Assigns a command from data
-    virtual bool SetCommand(std::span<const u8> data) {
-        return {};
-    }
+    virtual bool SetCommand(std::span<const u8> data) { return {}; }
 
     // Returns a reply from a command
-    virtual u64 GetReply(std::span<u8> out_data) const {
-        return {};
-    }
+    virtual u64 GetReply(std::span<u8> out_data) const { return {}; }
 
 protected:
     bool is_activated{};

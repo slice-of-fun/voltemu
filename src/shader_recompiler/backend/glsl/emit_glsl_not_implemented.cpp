@@ -9,91 +9,113 @@
 
 namespace Shader::Backend::GLSL {
 
-void EmitGetRegister(EmitContext& ctx) {
+void EmitGetRegister(EmitContext& ctx)
+{
     NotImplemented();
 }
 
-void EmitSetRegister(EmitContext& ctx) {
+void EmitSetRegister(EmitContext& ctx)
+{
     NotImplemented();
 }
 
-void EmitGetPred(EmitContext& ctx) {
+void EmitGetPred(EmitContext& ctx)
+{
     NotImplemented();
 }
 
-void EmitSetPred(EmitContext& ctx) {
+void EmitSetPred(EmitContext& ctx)
+{
     NotImplemented();
 }
 
-void EmitSetGotoVariable(EmitContext& ctx) {
+void EmitSetGotoVariable(EmitContext& ctx)
+{
     NotImplemented();
 }
 
-void EmitGetGotoVariable(EmitContext& ctx) {
+void EmitGetGotoVariable(EmitContext& ctx)
+{
     NotImplemented();
 }
 
-void EmitSetIndirectBranchVariable(EmitContext& ctx) {
+void EmitSetIndirectBranchVariable(EmitContext& ctx)
+{
     NotImplemented();
 }
 
-void EmitGetIndirectBranchVariable(EmitContext& ctx) {
+void EmitGetIndirectBranchVariable(EmitContext& ctx)
+{
     NotImplemented();
 }
 
-void EmitGetZFlag(EmitContext& ctx) {
+void EmitGetZFlag(EmitContext& ctx)
+{
     NotImplemented();
 }
 
-void EmitGetSFlag(EmitContext& ctx) {
+void EmitGetSFlag(EmitContext& ctx)
+{
     NotImplemented();
 }
 
-void EmitGetCFlag(EmitContext& ctx) {
+void EmitGetCFlag(EmitContext& ctx)
+{
     NotImplemented();
 }
 
-void EmitGetOFlag(EmitContext& ctx) {
+void EmitGetOFlag(EmitContext& ctx)
+{
     NotImplemented();
 }
 
-void EmitSetZFlag(EmitContext& ctx) {
+void EmitSetZFlag(EmitContext& ctx)
+{
     NotImplemented();
 }
 
-void EmitSetSFlag(EmitContext& ctx) {
+void EmitSetSFlag(EmitContext& ctx)
+{
     NotImplemented();
 }
 
-void EmitSetCFlag(EmitContext& ctx) {
+void EmitSetCFlag(EmitContext& ctx)
+{
     NotImplemented();
 }
 
-void EmitSetOFlag(EmitContext& ctx) {
+void EmitSetOFlag(EmitContext& ctx)
+{
     NotImplemented();
 }
 
-void EmitGetZeroFromOp(EmitContext& ctx) {
+void EmitGetZeroFromOp(EmitContext& ctx)
+{
     NotImplemented();
 }
 
-void EmitGetSignFromOp(EmitContext& ctx) {
+void EmitGetSignFromOp(EmitContext& ctx)
+{
     NotImplemented();
 }
 
-void EmitGetCarryFromOp(EmitContext& ctx) {
+void EmitGetCarryFromOp(EmitContext& ctx)
+{
     NotImplemented();
 }
 
-void EmitGetOverflowFromOp(EmitContext& ctx) {
+void EmitGetOverflowFromOp(EmitContext& ctx)
+{
     NotImplemented();
 }
 
-void EmitGetSparseFromOp(EmitContext& ctx) {
+void EmitGetSparseFromOp(EmitContext& ctx)
+{
     NotImplemented();
 }
 
-void EmitGetInBoundsFromOp(EmitContext& ctx) {
+void EmitGetInBoundsFromOp(EmitContext& ctx)
+{
     NotImplemented();
 }
 

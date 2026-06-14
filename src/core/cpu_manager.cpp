@@ -4,13 +4,14 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/cpu_manager.h"
+
 #include "common/fiber.h"
 #include "common/scope_exit.h"
-#include "common/thread.h"
 #include "common/settings.h"
+#include "common/thread.h"
 #include "core/core.h"
 #include "core/core_timing.h"
-#include "core/cpu_manager.h"
 #include "core/hle/kernel/k_interrupt_manager.h"
 #include "core/hle/kernel/k_scheduler.h"
 #include "core/hle/kernel/k_thread.h"
@@ -20,17 +21,22 @@
 
 namespace Core {
 
-CpuManager::CpuManager(System& system_) : system{system_} {}
+CpuManager::CpuManager(System& system_) : system{system_}
+{
+}
 CpuManager::~CpuManager() = default;
 
-void CpuManager::Initialize() {
+void CpuManager::Initialize()
+{
     num_cores = is_multicore ? Core::Hardware::NUM_CPU_CORES : 1;
     gpu_barrier = std::make_unique<Common::Barrier>(num_cores + 1);
     for (std::size_t core = 0; core < num_cores; core++)
-        core_data[core].host_thread = std::jthread([this, core](std::stop_token token) { RunThread(token, core); });
+        core_data[core].host_thread =
+            std::jthread([this, core](std::stop_token token) { RunThread(token, core); });
 }
 
-void CpuManager::Shutdown() {
+void CpuManager::Shutdown()
+{
     for (std::size_t core = 0; core < num_cores; core++) {
         if (core_data[core].host_thread.joinable()) {
             core_data[core].host_thread.request_stop();
@@ -39,7 +45,8 @@ void CpuManager::Shutdown() {
     }
 }
 
-void CpuManager::GuestThreadFunction() {
+void CpuManager::GuestThreadFunction()
+{
     if (is_multicore) {
         MultiCoreRunGuestThread();
     } else {
@@ -47,7 +54,8 @@ void CpuManager::GuestThreadFunction() {
     }
 }
 
-void CpuManager::IdleThreadFunction() {
+void CpuManager::IdleThreadFunction()
+{
     if (is_multicore) {
         MultiCoreRunIdleThread();
     } else {
@@ -55,11 +63,13 @@ void CpuManager::IdleThreadFunction() {
     }
 }
 
-void CpuManager::ShutdownThreadFunction() {
+void CpuManager::ShutdownThreadFunction()
+{
     ShutdownThread();
 }
 
-void CpuManager::HandleInterrupt() {
+void CpuManager::HandleInterrupt()
+{
     auto& kernel = system.Kernel();
     auto core_index = kernel.CurrentPhysicalCoreIndex();
 
@@ -70,7 +80,8 @@ void CpuManager::HandleInterrupt() {
 ///                             MultiCore                                   ///
 ///////////////////////////////////////////////////////////////////////////////
 
-void CpuManager::MultiCoreRunGuestThread() {
+void CpuManager::MultiCoreRunGuestThread()
+{
     // Similar to UserModeThreadStarter in HOS
     auto& kernel = system.Kernel();
     auto* thread = Kernel::GetCurrentThreadPointer(kernel);
@@ -87,7 +98,8 @@ void CpuManager::MultiCoreRunGuestThread() {
     }
 }
 
-void CpuManager::MultiCoreRunIdleThread() {
+void CpuManager::MultiCoreRunIdleThread()
+{
     // Not accurate to HOS. Remove this entire method when singlecore is removed.
     // See notes in KScheduler::ScheduleImpl for more information about why this
     // is inaccurate.
@@ -109,7 +121,8 @@ void CpuManager::MultiCoreRunIdleThread() {
 ///                             SingleCore                                   ///
 ///////////////////////////////////////////////////////////////////////////////
 
-void CpuManager::SingleCoreRunGuestThread() {
+void CpuManager::SingleCoreRunGuestThread()
+{
     auto& kernel = system.Kernel();
     auto* thread = Kernel::GetCurrentThreadPointer(kernel);
     kernel.CurrentScheduler()->OnThreadStart();
@@ -130,7 +143,8 @@ void CpuManager::SingleCoreRunGuestThread() {
     }
 }
 
-void CpuManager::SingleCoreRunIdleThread() {
+void CpuManager::SingleCoreRunIdleThread()
+{
     auto& kernel = system.Kernel();
     kernel.CurrentScheduler()->OnThreadStart();
 
@@ -142,7 +156,8 @@ void CpuManager::SingleCoreRunIdleThread() {
     }
 }
 
-void CpuManager::PreemptSingleCore(bool from_running_environment) {
+void CpuManager::PreemptSingleCore(bool from_running_environment)
+{
     auto& kernel = system.Kernel();
 
     if (idle_count >= 4 || from_running_environment) {
@@ -165,7 +180,8 @@ void CpuManager::PreemptSingleCore(bool from_running_environment) {
     }
 }
 
-void CpuManager::GuestActivate() {
+void CpuManager::GuestActivate()
+{
     // Similar to the HorizonKernelMain callback in HOS
     auto& kernel = system.Kernel();
     auto* scheduler = kernel.CurrentScheduler();
@@ -174,7 +190,8 @@ void CpuManager::GuestActivate() {
     UNREACHABLE();
 }
 
-void CpuManager::ShutdownThread() {
+void CpuManager::ShutdownThread()
+{
     auto& kernel = system.Kernel();
     auto* thread = kernel.GetCurrentEmuThread();
     auto core = is_multicore ? kernel.CurrentPhysicalCoreIndex() : 0;
@@ -183,10 +200,12 @@ void CpuManager::ShutdownThread() {
     UNREACHABLE();
 }
 
-void CpuManager::RunThread(std::stop_token token, std::size_t core) {
+void CpuManager::RunThread(std::stop_token token, std::size_t core)
+{
     /// Initialization
     system.RegisterCoreThread(core);
-    std::string name = is_multicore ? ("CPUCore_" + std::to_string(core)) : std::string{"CPUThread"};
+    std::string name =
+        is_multicore ? ("CPUCore_" + std::to_string(core)) : std::string{"CPUThread"};
     Common::SetCurrentThreadName(name.c_str());
     Common::SetCurrentThreadPriority(Common::ThreadPriority::Critical);
 #ifdef __ANDROID__
@@ -199,7 +218,8 @@ void CpuManager::RunThread(std::stop_token token, std::size_t core) {
     data.host_context = Common::Fiber::ThreadToFiber();
 
     // Cleanup
-    SCOPE_EXIT {
+    SCOPE_EXIT
+    {
         data.host_context->Exit();
     };
 

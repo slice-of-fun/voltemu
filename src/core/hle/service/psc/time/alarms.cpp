@@ -1,13 +1,15 @@
 // SPDX-FileCopyrightText: Copyright 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include "core/core.h"
 #include "core/hle/service/psc/time/alarms.h"
+
+#include "core/core.h"
 #include "core/hle/service/psc/time/manager.h"
 
 namespace Service::PSC::Time {
 Alarm::Alarm(Core::System& system, KernelHelpers::ServiceContext& ctx, AlarmType type)
-    : m_ctx{ctx}, m_event{ctx.CreateEvent("Psc:Alarm:Event")} {
+    : m_ctx{ctx}, m_event{ctx.CreateEvent("Psc:Alarm:Event")}
+{
     m_event->Clear();
 
     switch (type) {
@@ -23,7 +25,8 @@ Alarm::Alarm(Core::System& system, KernelHelpers::ServiceContext& ctx, AlarmType
     }
 }
 
-Alarm::~Alarm() {
+Alarm::~Alarm()
+{
     m_ctx.CloseEvent(m_event);
 }
 
@@ -31,13 +34,17 @@ Alarms::Alarms(Core::System& system, StandardSteadyClockCore& steady_clock,
                PowerStateRequestManager& power_state_request_manager)
     : m_system{system}, m_ctx{system, "Psc:Alarms"}, m_steady_clock{steady_clock},
       m_power_state_request_manager{power_state_request_manager}, m_event{m_ctx.CreateEvent(
-                                                                      "Psc:Alarms:Event")} {}
+                                                                      "Psc:Alarms:Event")}
+{
+}
 
-Alarms::~Alarms() {
+Alarms::~Alarms()
+{
     m_ctx.CloseEvent(m_event);
 }
 
-Result Alarms::Enable(Alarm& alarm, s64 time) {
+Result Alarms::Enable(Alarm& alarm, s64 time)
+{
     R_UNLESS(m_steady_clock.IsInitialized(), ResultClockUninitialized);
 
     std::scoped_lock l{m_mutex};
@@ -53,7 +60,8 @@ Result Alarms::Enable(Alarm& alarm, s64 time) {
     R_RETURN(UpdateClosestAndSignal());
 }
 
-void Alarms::Disable(Alarm& alarm) {
+void Alarms::Disable(Alarm& alarm)
+{
     std::scoped_lock l{m_mutex};
     if (!alarm.IsLinked()) {
         return;
@@ -63,7 +71,8 @@ void Alarms::Disable(Alarm& alarm) {
     UpdateClosestAndSignal();
 }
 
-void Alarms::CheckAndSignal() {
+void Alarms::CheckAndSignal()
+{
     std::scoped_lock l{m_mutex};
     if (m_alarms.empty()) {
         return;
@@ -90,14 +99,16 @@ void Alarms::CheckAndSignal() {
     UpdateClosestAndSignal();
 }
 
-bool Alarms::GetClosestAlarm(Alarm** out_alarm) {
+bool Alarms::GetClosestAlarm(Alarm** out_alarm)
+{
     std::scoped_lock l{m_mutex};
     auto alarm = m_alarms.empty() ? nullptr : std::addressof(m_alarms.front());
     *out_alarm = alarm;
     return alarm != nullptr;
 }
 
-void Alarms::Insert(Alarm& alarm) {
+void Alarms::Insert(Alarm& alarm)
+{
     // Alarms are sorted by alert time, then priority
     auto it{m_alarms.begin()};
     while (it != m_alarms.end()) {
@@ -113,11 +124,13 @@ void Alarms::Insert(Alarm& alarm) {
     m_alarms.push_back(alarm);
 }
 
-void Alarms::Erase(Alarm& alarm) {
+void Alarms::Erase(Alarm& alarm)
+{
     m_alarms.erase(m_alarms.iterator_to(alarm));
 }
 
-Result Alarms::UpdateClosestAndSignal() {
+Result Alarms::UpdateClosestAndSignal()
+{
     m_closest_alarm = m_alarms.empty() ? nullptr : std::addressof(m_alarms.front());
     R_SUCCEED_IF(m_closest_alarm == nullptr);
 
@@ -127,7 +140,8 @@ Result Alarms::UpdateClosestAndSignal() {
 }
 
 IAlarmService::IAlarmService(Core::System& system_, std::shared_ptr<TimeManager> manager)
-    : ServiceFramework{system_, "time:al"}, m_system{system}, m_alarms{manager->m_alarms} {
+    : ServiceFramework{system_, "time:al"}, m_system{system}, m_alarms{manager->m_alarms}
+{
     // clang-format off
     static const FunctionInfo functions[] = {
         {0, &IAlarmService::CreateWakeupAlarm, "CreateWakeupAlarm"},
@@ -137,7 +151,8 @@ IAlarmService::IAlarmService(Core::System& system_, std::shared_ptr<TimeManager>
     RegisterHandlers(functions);
 }
 
-void IAlarmService::CreateWakeupAlarm(HLERequestContext& ctx) {
+void IAlarmService::CreateWakeupAlarm(HLERequestContext& ctx)
+{
     LOG_DEBUG(Service_Time, "called.");
 
     IPC::ResponseBuilder rb{ctx, 2, 0, 1};
@@ -145,7 +160,8 @@ void IAlarmService::CreateWakeupAlarm(HLERequestContext& ctx) {
     rb.PushIpcInterface<ISteadyClockAlarm>(system, m_alarms, AlarmType::WakeupAlarm);
 }
 
-void IAlarmService::CreateBackgroundTaskAlarm(HLERequestContext& ctx) {
+void IAlarmService::CreateBackgroundTaskAlarm(HLERequestContext& ctx)
+{
     LOG_DEBUG(Service_Time, "called.");
 
     IPC::ResponseBuilder rb{ctx, 2, 0, 1};
@@ -155,7 +171,8 @@ void IAlarmService::CreateBackgroundTaskAlarm(HLERequestContext& ctx) {
 
 ISteadyClockAlarm::ISteadyClockAlarm(Core::System& system_, Alarms& alarms, AlarmType type)
     : ServiceFramework{system_, "ISteadyClockAlarm"}, m_ctx{system, "Psc:ISteadyClockAlarm"},
-      m_alarms{alarms}, m_alarm{system, m_ctx, type} {
+      m_alarms{alarms}, m_alarm{system, m_ctx, type}
+{
     // clang-format off
     static const FunctionInfo functions[] = {
         {0,  &ISteadyClockAlarm::GetAlarmEvent, "GetAlarmEvent"},
@@ -169,7 +186,8 @@ ISteadyClockAlarm::ISteadyClockAlarm(Core::System& system_, Alarms& alarms, Alar
     RegisterHandlers(functions);
 }
 
-void ISteadyClockAlarm::GetAlarmEvent(HLERequestContext& ctx) {
+void ISteadyClockAlarm::GetAlarmEvent(HLERequestContext& ctx)
+{
     LOG_DEBUG(Service_Time, "called.");
 
     IPC::ResponseBuilder rb{ctx, 2, 1};
@@ -177,7 +195,8 @@ void ISteadyClockAlarm::GetAlarmEvent(HLERequestContext& ctx) {
     rb.PushCopyObjects(m_alarm.GetEventHandle());
 }
 
-void ISteadyClockAlarm::Enable(HLERequestContext& ctx) {
+void ISteadyClockAlarm::Enable(HLERequestContext& ctx)
+{
     LOG_DEBUG(Service_Time, "called.");
 
     IPC::RequestParser rp{ctx};
@@ -189,7 +208,8 @@ void ISteadyClockAlarm::Enable(HLERequestContext& ctx) {
     rb.Push(res);
 }
 
-void ISteadyClockAlarm::Disable(HLERequestContext& ctx) {
+void ISteadyClockAlarm::Disable(HLERequestContext& ctx)
+{
     LOG_DEBUG(Service_Time, "called.");
 
     m_alarms.Disable(m_alarm);
@@ -198,7 +218,8 @@ void ISteadyClockAlarm::Disable(HLERequestContext& ctx) {
     rb.Push(ResultSuccess);
 }
 
-void ISteadyClockAlarm::IsEnabled(HLERequestContext& ctx) {
+void ISteadyClockAlarm::IsEnabled(HLERequestContext& ctx)
+{
     LOG_DEBUG(Service_Time, "called.");
 
     IPC::ResponseBuilder rb{ctx, 3};

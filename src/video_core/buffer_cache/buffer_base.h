@@ -42,8 +42,10 @@ public:
     static constexpr u64 BASE_PAGE_SIZE = 1ULL << BASE_PAGE_BITS;
 
     explicit BufferBase(VAddr cpu_addr_, u64 size_bytes_)
-        : cpu_addr_cached{static_cast<DAddr>(cpu_addr_)}, cpu_addr{cpu_addr_},
-          size_bytes{size_bytes_} {}
+        : cpu_addr_cached{static_cast<DAddr>(cpu_addr_)}, cpu_addr{cpu_addr_}, size_bytes{
+                                                                                   size_bytes_}
+    {
+    }
 
     explicit BufferBase(NullBufferParams) {}
 
@@ -54,72 +56,56 @@ public:
     BufferBase(BufferBase&&) = default;
 
     /// Mark buffer as picked
-    void Pick() noexcept {
-        flags |= BufferFlagBits::Picked;
-    }
+    void Pick() noexcept { flags |= BufferFlagBits::Picked; }
 
-    void MarkPreemtiveDownload() noexcept {
-        flags |= BufferFlagBits::PreemtiveDownload;
-    }
+    void MarkPreemtiveDownload() noexcept { flags |= BufferFlagBits::PreemtiveDownload; }
 
     /// Unmark buffer as picked
-    void Unpick() noexcept {
-        flags &= ~BufferFlagBits::Picked;
-    }
+    void Unpick() noexcept { flags &= ~BufferFlagBits::Picked; }
 
     /// Increases the likeliness of this being a stream buffer
-    void IncreaseStreamScore(int score) noexcept {
-        stream_score += score;
-    }
+    void IncreaseStreamScore(int score) noexcept { stream_score += score; }
 
     /// Returns the likeliness of this being a stream buffer
-    [[nodiscard]] int StreamScore() const noexcept {
-        return stream_score;
-    }
+    [[nodiscard]] int StreamScore() const noexcept { return stream_score; }
 
     /// Returns true when vaddr -> vaddr+size is fully contained in the buffer
-    [[nodiscard]] bool IsInBounds(VAddr addr, u64 size) const noexcept {
+    [[nodiscard]] bool IsInBounds(VAddr addr, u64 size) const noexcept
+    {
         return addr >= cpu_addr && addr + size <= cpu_addr + SizeBytes();
     }
 
     /// Returns true if the buffer has been marked as picked
-    [[nodiscard]] bool IsPicked() const noexcept {
-        return True(flags & BufferFlagBits::Picked);
-    }
+    [[nodiscard]] bool IsPicked() const noexcept { return True(flags & BufferFlagBits::Picked); }
 
     /// Returns true when the buffer has pending cached writes
-    [[nodiscard]] bool HasCachedWrites() const noexcept {
+    [[nodiscard]] bool HasCachedWrites() const noexcept
+    {
         return True(flags & BufferFlagBits::CachedWrites);
     }
 
-    bool IsPreemtiveDownload() const noexcept {
+    bool IsPreemtiveDownload() const noexcept
+    {
         return True(flags & BufferFlagBits::PreemtiveDownload);
     }
 
     /// Returns the base CPU address of the buffer
-    [[nodiscard]] VAddr CpuAddr() const noexcept {
-        return cpu_addr;
-    }
+    [[nodiscard]] VAddr CpuAddr() const noexcept { return cpu_addr; }
 
     DAddr cpu_addr_cached = 0;
 
     /// Returns the offset relative to the given CPU address
     /// @pre IsInBounds returns true
-    [[nodiscard]] u32 Offset(VAddr other_cpu_addr) const noexcept {
+    [[nodiscard]] u32 Offset(VAddr other_cpu_addr) const noexcept
+    {
         return static_cast<u32>(other_cpu_addr - cpu_addr);
     }
 
-    size_t getLRUID() const noexcept {
-        return lru_id;
-    }
+    size_t getLRUID() const noexcept { return lru_id; }
 
-    void setLRUID(size_t lru_id_) {
-        lru_id = lru_id_;
-    }
+    void setLRUID(size_t lru_id_) { lru_id = lru_id_; }
 
-    size_t SizeBytes() const {
-        return size_bytes;
-    }
+    size_t SizeBytes() const { return size_bytes; }
 
 private:
     VAddr cpu_addr = 0;

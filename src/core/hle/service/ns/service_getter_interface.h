@@ -32,15 +32,15 @@ public:
     Result GetReadOnlyApplicationRecordInterface(
         Out<SharedPointer<IReadOnlyApplicationRecordInterface>> out_interface);
     Result GetECommerceInterface(Out<SharedPointer<IECommerceInterface>> out_interface);
-    Result GetApplicationVersionInterface(
-        Out<SharedPointer<IApplicationVersionInterface>> out_interface);
+    Result
+    GetApplicationVersionInterface(Out<SharedPointer<IApplicationVersionInterface>> out_interface);
     Result GetFactoryResetInterface(Out<SharedPointer<IFactoryResetInterface>> out_interface);
     Result GetAccountProxyInterface(Out<SharedPointer<IAccountProxyInterface>> out_interface);
-    Result GetApplicationManagerInterface(
-        Out<SharedPointer<IApplicationManagerInterface>> out_interface);
+    Result
+    GetApplicationManagerInterface(Out<SharedPointer<IApplicationManagerInterface>> out_interface);
     Result GetDownloadTaskInterface(Out<SharedPointer<IDownloadTaskInterface>> out_interface);
-    Result GetContentManagementInterface(
-        Out<SharedPointer<IContentManagementInterface>> out_interface);
+    Result
+    GetContentManagementInterface(Out<SharedPointer<IContentManagementInterface>> out_interface);
     Result GetDocumentInterface(Out<SharedPointer<IDocumentInterface>> out_interface);
 };
 

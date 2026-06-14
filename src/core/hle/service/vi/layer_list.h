@@ -12,7 +12,8 @@ public:
     constexpr LayerList() = default;
 
     Layer* CreateLayer(u64 owner_aruid, Display* display, s32 consumer_binder_id,
-                       s32 producer_binder_id) {
+                       s32 producer_binder_id)
+    {
         Layer* const layer = GetFreeLayer();
         if (!layer) {
             return nullptr;
@@ -23,7 +24,8 @@ public:
         return layer;
     }
 
-    bool DestroyLayer(u64 layer_id) {
+    bool DestroyLayer(u64 layer_id)
+    {
         Layer* const layer = GetLayerById(layer_id);
         if (!layer) {
             return false;
@@ -33,7 +35,8 @@ public:
         return true;
     }
 
-    Layer* GetLayerById(u64 layer_id) {
+    Layer* GetLayerById(u64 layer_id)
+    {
         for (auto& layer : m_layers) {
             if (layer.IsInitialized() && layer.GetId() == layer_id) {
                 return &layer;
@@ -43,8 +46,8 @@ public:
         return nullptr;
     }
 
-    template <typename F>
-    void ForEachLayer(F&& cb) {
+    template<typename F> void ForEachLayer(F&& cb)
+    {
         for (auto& layer : m_layers) {
             if (layer.IsInitialized()) {
                 cb(layer);
@@ -53,7 +56,8 @@ public:
     }
 
 private:
-    Layer* GetFreeLayer() {
+    Layer* GetFreeLayer()
+    {
         for (auto& layer : m_layers) {
             if (!layer.IsInitialized()) {
                 return &layer;

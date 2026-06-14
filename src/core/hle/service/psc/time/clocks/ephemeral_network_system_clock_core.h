@@ -14,7 +14,9 @@ namespace Service::PSC::Time {
 class EphemeralNetworkSystemClockCore : public SystemClockCore {
 public:
     explicit EphemeralNetworkSystemClockCore(SteadyClockCore& steady_clock)
-        : SystemClockCore{steady_clock} {}
+        : SystemClockCore{steady_clock}
+    {
+    }
     ~EphemeralNetworkSystemClockCore() override = default;
 };
 

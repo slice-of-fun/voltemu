@@ -1,10 +1,11 @@
 // SPDX-FileCopyrightText: Copyright 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/psc/time/system_clock.h"
+
 #include "common/scope_exit.h"
 #include "core/core.h"
 #include "core/hle/service/cmif_serialization.h"
-#include "core/hle/service/psc/time/system_clock.h"
 
 namespace Service::PSC::Time {
 
@@ -12,7 +13,8 @@ SystemClock::SystemClock(Core::System& system_, SystemClockCore& clock_core, boo
                          bool can_write_uninitialized_clock)
     : ServiceFramework{system_, "ISystemClock"}, m_system{system}, m_clock_core{clock_core},
       m_can_write_clock{can_write_clock}, m_can_write_uninitialized_clock{
-                                              can_write_uninitialized_clock} {
+                                              can_write_uninitialized_clock}
+{
     // clang-format off
     static const FunctionInfo functions[] = {
         {0, D<&SystemClock::GetCurrentTime>, "GetCurrentTime"},
@@ -25,8 +27,10 @@ SystemClock::SystemClock(Core::System& system_, SystemClockCore& clock_core, boo
     RegisterHandlers(functions);
 }
 
-Result SystemClock::GetCurrentTime(Out<s64> out_time) {
-    SCOPE_EXIT {
+Result SystemClock::GetCurrentTime(Out<s64> out_time)
+{
+    SCOPE_EXIT
+    {
         LOG_DEBUG(Service_Time, "called. out_time={}", *out_time);
     };
 
@@ -36,7 +40,8 @@ Result SystemClock::GetCurrentTime(Out<s64> out_time) {
     R_RETURN(m_clock_core.GetCurrentTime(out_time.Get()));
 }
 
-Result SystemClock::SetCurrentTime(s64 time) {
+Result SystemClock::SetCurrentTime(s64 time)
+{
     LOG_DEBUG(Service_Time, "called. time={}", time);
 
     R_UNLESS(m_can_write_clock, ResultPermissionDenied);
@@ -46,8 +51,10 @@ Result SystemClock::SetCurrentTime(s64 time) {
     R_RETURN(m_clock_core.SetCurrentTime(time));
 }
 
-Result SystemClock::GetSystemClockContext(Out<SystemClockContext> out_context) {
-    SCOPE_EXIT {
+Result SystemClock::GetSystemClockContext(Out<SystemClockContext> out_context)
+{
+    SCOPE_EXIT
+    {
         LOG_DEBUG(Service_Time, "called. out_context={}", *out_context);
     };
 
@@ -57,7 +64,8 @@ Result SystemClock::GetSystemClockContext(Out<SystemClockContext> out_context) {
     R_RETURN(m_clock_core.GetContext(*out_context));
 }
 
-Result SystemClock::SetSystemClockContext(const SystemClockContext& context) {
+Result SystemClock::SetSystemClockContext(const SystemClockContext& context)
+{
     LOG_DEBUG(Service_Time, "called. context={}", context);
 
     R_UNLESS(m_can_write_clock, ResultPermissionDenied);
@@ -67,8 +75,8 @@ Result SystemClock::SetSystemClockContext(const SystemClockContext& context) {
     R_RETURN(m_clock_core.SetContextAndWrite(context));
 }
 
-Result SystemClock::GetOperationEventReadableHandle(
-    OutCopyHandle<Kernel::KReadableEvent> out_event) {
+Result SystemClock::GetOperationEventReadableHandle(OutCopyHandle<Kernel::KReadableEvent> out_event)
+{
     LOG_DEBUG(Service_Time, "called.");
 
     if (!m_operation_event) {

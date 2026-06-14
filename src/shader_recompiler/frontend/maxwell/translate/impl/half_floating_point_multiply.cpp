@@ -7,7 +7,8 @@ namespace Shader::Maxwell {
 namespace {
 void HMUL2(TranslatorVisitor& v, u64 insn, Merge merge, bool sat, bool abs_a, bool neg_a,
            Swizzle swizzle_a, bool abs_b, bool neg_b, Swizzle swizzle_b, const IR::U32& src_b,
-           HalfPrecision precision) {
+           HalfPrecision precision)
+{
     union {
         u64 raw;
         BitField<0, 8, IR::Reg> dest_reg;
@@ -66,7 +67,8 @@ void HMUL2(TranslatorVisitor& v, u64 insn, Merge merge, bool sat, bool abs_a, bo
 }
 
 void HMUL2(TranslatorVisitor& v, u64 insn, bool sat, bool abs_a, bool neg_a, bool abs_b, bool neg_b,
-           Swizzle swizzle_b, const IR::U32& src_b) {
+           Swizzle swizzle_b, const IR::U32& src_b)
+{
     union {
         u64 raw;
         BitField<49, 2, Merge> merge;
@@ -79,7 +81,8 @@ void HMUL2(TranslatorVisitor& v, u64 insn, bool sat, bool abs_a, bool neg_a, boo
 }
 } // Anonymous namespace
 
-void TranslatorVisitor::HMUL2_reg(u64 insn) {
+void TranslatorVisitor::HMUL2_reg(u64 insn)
+{
     union {
         u64 raw;
         BitField<32, 1, u64> sat;
@@ -93,7 +96,8 @@ void TranslatorVisitor::HMUL2_reg(u64 insn) {
           hmul2.swizzle_b, GetReg20(insn));
 }
 
-void TranslatorVisitor::HMUL2_cbuf(u64 insn) {
+void TranslatorVisitor::HMUL2_cbuf(u64 insn)
+{
     union {
         u64 raw;
         BitField<52, 1, u64> sat;
@@ -106,7 +110,8 @@ void TranslatorVisitor::HMUL2_cbuf(u64 insn) {
           Swizzle::F32, GetCbuf(insn));
 }
 
-void TranslatorVisitor::HMUL2_imm(u64 insn) {
+void TranslatorVisitor::HMUL2_imm(u64 insn)
+{
     union {
         u64 raw;
         BitField<52, 1, u64> sat;
@@ -125,7 +130,8 @@ void TranslatorVisitor::HMUL2_imm(u64 insn) {
           Swizzle::H1_H0, ir.Imm32(imm));
 }
 
-void TranslatorVisitor::HMUL2_32I(u64 insn) {
+void TranslatorVisitor::HMUL2_32I(u64 insn)
+{
     union {
         u64 raw;
         BitField<55, 2, HalfPrecision> precision;

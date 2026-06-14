@@ -4,10 +4,12 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/ns/platform_service_manager.h"
+
 #include <algorithm>
+#include <boost/container/static_vector.hpp>
 #include <cstring>
 #include <vector>
-#include <boost/container/static_vector.hpp>
 
 #include "common/assert.h"
 #include "common/common_types.h"
@@ -23,7 +25,6 @@
 #include "core/hle/kernel/kernel.h"
 #include "core/hle/service/cmif_serialization.h"
 #include "core/hle/service/filesystem/filesystem.h"
-#include "core/hle/service/ns/platform_service_manager.h"
 
 namespace Service::NS {
 
@@ -40,19 +41,25 @@ constexpr u32 EXPECTED_MAGIC{0x36f81a1e};  // What we expect the encrypted bfttf
 constexpr u64 SHARED_FONT_MEM_SIZE{0x1100000};
 constexpr FontRegion EMPTY_REGION{0, 0};
 
-static void DecryptSharedFont(const std::span<u32 const> input, std::span<u8> output, std::size_t& offset) {
-    ASSERT(offset + (input.size() * sizeof(u32)) < SHARED_FONT_MEM_SIZE && "Shared fonts exceeds 17mb!");
+static void DecryptSharedFont(const std::span<u32 const> input, std::span<u8> output,
+                              std::size_t& offset)
+{
+    ASSERT(offset + (input.size() * sizeof(u32)) < SHARED_FONT_MEM_SIZE &&
+           "Shared fonts exceeds 17mb!");
     ASSERT(input[0] == EXPECTED_MAGIC && "Failed to derive key, unexpected magic number");
     const u32 KEY = input[0] ^ EXPECTED_RESULT; // Derive key using an inverse xor
     std::vector<u32> transformed_font(input.size());
     // TODO(ogniK): Figure out a better way to do this
-    std::transform(input.begin(), input.end(), transformed_font.begin(), [&KEY](u32 font_data) { return Common::swap32(font_data ^ KEY); });
+    std::transform(input.begin(), input.end(), transformed_font.begin(),
+                   [&KEY](u32 font_data) { return Common::swap32(font_data ^ KEY); });
     transformed_font[1] = Common::swap32(transformed_font[1]) ^ KEY; // "re-encrypt" the size
-    std::memcpy(output.data() + offset, transformed_font.data(), transformed_font.size() * sizeof(u32));
+    std::memcpy(output.data() + offset, transformed_font.data(),
+                transformed_font.size() * sizeof(u32));
     offset += transformed_font.size() * sizeof(u32);
 }
 
-void DecryptSharedFontToTTF(const std::vector<u32>& input, std::vector<u8>& output) {
+void DecryptSharedFontToTTF(const std::vector<u32>& input, std::vector<u8>& output)
+{
     ASSERT_MSG(input[0] == EXPECTED_MAGIC, "Failed to derive key, unexpected magic number");
     if (input.size() < 2) {
         LOG_ERROR(Service_NS, "Input font is empty");
@@ -61,23 +68,30 @@ void DecryptSharedFontToTTF(const std::vector<u32>& input, std::vector<u8>& outp
     const u32 KEY = input[0] ^ EXPECTED_RESULT; // Derive key using an inverse xor
     std::vector<u32> transformed_font(input.size());
     // TODO(ogniK): Figure out a better way to do this
-    std::transform(input.begin(), input.end(), transformed_font.begin(), [&KEY](u32 font_data) { return Common::swap32(font_data ^ KEY); });
-    std::memcpy(output.data(), transformed_font.data() + 2, (transformed_font.size() - 2) * sizeof(u32));
+    std::transform(input.begin(), input.end(), transformed_font.begin(),
+                   [&KEY](u32 font_data) { return Common::swap32(font_data ^ KEY); });
+    std::memcpy(output.data(), transformed_font.data() + 2,
+                (transformed_font.size() - 2) * sizeof(u32));
 }
 
-void EncryptSharedFont(const std::vector<u32>& input, std::vector<u8>& output, std::size_t& offset) {
-    ASSERT(offset + (input.size() * sizeof(u32)) < SHARED_FONT_MEM_SIZE && "Shared fonts exceeds 17mb!");
+void EncryptSharedFont(const std::vector<u32>& input, std::vector<u8>& output, std::size_t& offset)
+{
+    ASSERT(offset + (input.size() * sizeof(u32)) < SHARED_FONT_MEM_SIZE &&
+           "Shared fonts exceeds 17mb!");
     const auto key = Common::swap32(EXPECTED_RESULT ^ EXPECTED_MAGIC);
     std::vector<u32> transformed_font(input.size() + 2);
     transformed_font[0] = Common::swap32(EXPECTED_MAGIC);
     transformed_font[1] = Common::swap32(static_cast<u32>(input.size() * sizeof(u32))) ^ key;
-    std::transform(input.begin(), input.end(), transformed_font.begin() + 2, [key](u32 in) { return in ^ key; });
-    std::memcpy(output.data() + offset, transformed_font.data(), transformed_font.size() * sizeof(u32));
+    std::transform(input.begin(), input.end(), transformed_font.begin() + 2,
+                   [key](u32 in) { return in ^ key; });
+    std::memcpy(output.data() + offset, transformed_font.data(),
+                transformed_font.size() * sizeof(u32));
     offset += transformed_font.size() * sizeof(u32);
 }
 
 struct IPlatformServiceManager::Impl {
-    const FontRegion& GetSharedFontRegion(std::size_t index) const {
+    const FontRegion& GetSharedFontRegion(std::size_t index) const
+    {
         return index < shared_font_regions.size() ? shared_font_regions[index] : EMPTY_REGION;
     }
     // Automatically populated based on shared_fonts dump or system archives.
@@ -88,7 +102,8 @@ struct IPlatformServiceManager::Impl {
 };
 
 IPlatformServiceManager::IPlatformServiceManager(Core::System& system_, const char* service_name_)
-    : ServiceFramework{system_, service_name_}, impl{std::make_unique<Impl>()} {
+    : ServiceFramework{system_, service_name_}, impl{std::make_unique<Impl>()}
+{
     // clang-format off
     static const FunctionInfo functions[] = {
         {0, D<&IPlatformServiceManager::RequestLoad>, "RequestLoad"},
@@ -158,37 +173,44 @@ IPlatformServiceManager::IPlatformServiceManager(Core::System& system_, const ch
 
 IPlatformServiceManager::~IPlatformServiceManager() = default;
 
-Result IPlatformServiceManager::RequestLoad(SharedFontType type) {
+Result IPlatformServiceManager::RequestLoad(SharedFontType type)
+{
     // Games don't call this so all fonts should be loaded
     LOG_DEBUG(Service_NS, "called, shared_font_type={}", type);
     R_SUCCEED();
 }
 
-Result IPlatformServiceManager::GetLoadState(Out<LoadState> out_load_state, SharedFontType type) {
+Result IPlatformServiceManager::GetLoadState(Out<LoadState> out_load_state, SharedFontType type)
+{
     LOG_DEBUG(Service_NS, "called, shared_font_type={}", type);
     *out_load_state = LoadState::Loaded;
     R_SUCCEED();
 }
 
-Result IPlatformServiceManager::GetSize(Out<u32> out_size, SharedFontType type) {
+Result IPlatformServiceManager::GetSize(Out<u32> out_size, SharedFontType type)
+{
     LOG_DEBUG(Service_NS, "called, shared_font_type={}", type);
     *out_size = impl->GetSharedFontRegion(static_cast<size_t>(type)).size;
     R_SUCCEED();
 }
 
 Result IPlatformServiceManager::GetSharedMemoryAddressOffset(Out<u32> out_shared_memory_offset,
-                                                             SharedFontType type) {
+                                                             SharedFontType type)
+{
     LOG_DEBUG(Service_NS, "called, shared_font_type={}", type);
     *out_shared_memory_offset = impl->GetSharedFontRegion(static_cast<size_t>(type)).offset;
     R_SUCCEED();
 }
 
-Result IPlatformServiceManager::GetSharedMemoryNativeHandle(OutCopyHandle<Kernel::KSharedMemory> out_shared_memory_native_handle) {
+Result IPlatformServiceManager::GetSharedMemoryNativeHandle(
+    OutCopyHandle<Kernel::KSharedMemory> out_shared_memory_native_handle)
+{
     // Map backing memory for the font data
     LOG_DEBUG(Service_NS, "called");
 
     // Create shared font memory object
-    std::memcpy(kernel.GetFontSharedMem().GetPointer(), impl->shared_font.data(), impl->shared_font.size());
+    std::memcpy(kernel.GetFontSharedMem().GetPointer(), impl->shared_font.data(),
+                impl->shared_font.size());
 
     // FIXME: this shouldn't belong to the kernel
     *out_shared_memory_native_handle = &kernel.GetFontSharedMem();
@@ -199,7 +221,8 @@ Result IPlatformServiceManager::GetSharedFontInOrderOfPriority(
     OutArray<u32, BufferAttr_HipcMapAlias> out_font_codes,
     OutArray<u32, BufferAttr_HipcMapAlias> out_font_offsets,
     OutArray<u32, BufferAttr_HipcMapAlias> out_font_sizes, Out<bool> out_fonts_are_loaded,
-    Out<u32> out_font_count, Set::LanguageCode language_code) {
+    Out<u32> out_font_count, Set::LanguageCode language_code)
+{
     LOG_DEBUG(Service_NS, "called, language_code={:#x}", language_code);
 
     // The maximum number of elements that can be returned is 6. Regardless of the available fonts
@@ -207,8 +230,9 @@ Result IPlatformServiceManager::GetSharedFontInOrderOfPriority(
     constexpr size_t MaxElementCount = 6;
 
     // TODO(ogniK): Have actual priority order
-    const auto max_size = (std::min)({MaxElementCount, out_font_codes.size(), out_font_offsets.size(),
-                                    out_font_sizes.size(), impl->shared_font_regions.size()});
+    const auto max_size =
+        (std::min)({MaxElementCount, out_font_codes.size(), out_font_offsets.size(),
+                    out_font_sizes.size(), impl->shared_font_regions.size()});
 
     for (size_t i = 0; i < max_size; i++) {
         auto& region = impl->GetSharedFontRegion(i);

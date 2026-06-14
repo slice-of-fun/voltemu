@@ -8,15 +8,17 @@
 
 #include <memory>
 #include <string>
+
 #include "common/settings.h"
 
 // May be defined on command line by system provided packages (FreeBSD devel/simpleini)
 // but if building from source, it will not be defined, so just do it conditionally.
 // Should probably define on CMake anyways but eh
 #ifndef SI_NO_CONVERSION
-#   define SI_NO_CONVERSION 1
+#define SI_NO_CONVERSION 1
 #endif
 #include <SimpleIni.h>
+
 #include <boost/algorithm/string/replace.hpp>
 
 // Workaround for conflicting definition in libloaderapi.h caused by SimpleIni
@@ -172,11 +174,12 @@ protected:
     void WriteStringSetting(const std::string& key, const std::string& value,
                             const std::optional<std::string>& default_value = std::nullopt,
                             const std::optional<bool>& use_global = std::nullopt);
-    template <typename T>
-    std::enable_if_t<std::is_integral_v<T>> WriteIntegerSetting(
-        const std::string& key, const T& value,
-        const std::optional<T>& default_value = std::nullopt,
-        const std::optional<bool>& use_global = std::nullopt) {
+    template<typename T>
+    std::enable_if_t<std::is_integral_v<T>>
+    WriteIntegerSetting(const std::string& key, const T& value,
+                        const std::optional<T>& default_value = std::nullopt,
+                        const std::optional<bool>& use_global = std::nullopt)
+    {
         std::optional<std::string> string_default = std::nullopt;
         if (default_value.has_value()) {
             string_default = std::make_optional(ToString(default_value.value()));
@@ -189,8 +192,8 @@ protected:
     void ReadSettingGeneric(Settings::BasicSetting* setting);
     void WriteSettingGeneric(const Settings::BasicSetting* setting);
 
-    template <typename T>
-    [[nodiscard]] std::string ToString(const T& value_) {
+    template<typename T> [[nodiscard]] std::string ToString(const T& value_)
+    {
         if constexpr (std::is_same_v<T, std::string>) {
             return value_;
         } else if constexpr (std::is_same_v<T, std::optional<u32>>) {

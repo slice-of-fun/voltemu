@@ -58,9 +58,7 @@ public:
     // Check if this core is interrupted.
     bool IsInterrupted() const;
 
-    std::size_t CoreIndex() const {
-        return m_core_index;
-    }
+    std::size_t CoreIndex() const { return m_core_index; }
 
 private:
     KernelCore& m_kernel;

@@ -4,10 +4,11 @@
 // SPDX-FileCopyrightText: Copyright 2024 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/am/service/common_state_getter.h"
+
 #include "common/settings.h"
 #include "core/hle/service/am/am_results.h"
 #include "core/hle/service/am/applet.h"
-#include "core/hle/service/am/service/common_state_getter.h"
 #include "core/hle/service/am/service/lock_accessor.h"
 #include "core/hle/service/am/service/storage.h"
 #include "core/hle/service/apm/apm_interface.h"
@@ -19,7 +20,8 @@
 namespace Service::AM {
 
 ICommonStateGetter::ICommonStateGetter(Core::System& system_, std::shared_ptr<Applet> applet)
-    : ServiceFramework{system_, "ICommonStateGetter"}, m_applet{std::move(applet)} {
+    : ServiceFramework{system_, "ICommonStateGetter"}, m_applet{std::move(applet)}
+{
     // clang-format off
     static const FunctionInfo functions[] = {
         {0, D<&ICommonStateGetter::GetEventHandle>, "GetEventHandle"},
@@ -90,13 +92,15 @@ ICommonStateGetter::ICommonStateGetter(Core::System& system_, std::shared_ptr<Ap
 
 ICommonStateGetter::~ICommonStateGetter() = default;
 
-Result ICommonStateGetter::GetEventHandle(OutCopyHandle<Kernel::KReadableEvent> out_event) {
+Result ICommonStateGetter::GetEventHandle(OutCopyHandle<Kernel::KReadableEvent> out_event)
+{
     LOG_DEBUG(Service_AM, "called");
     *out_event = m_applet->lifecycle_manager.GetSystemEvent().GetHandle();
     R_SUCCEED();
 }
 
-Result ICommonStateGetter::ReceiveMessage(Out<AppletMessage> out_applet_message) {
+Result ICommonStateGetter::ReceiveMessage(Out<AppletMessage> out_applet_message)
+{
     LOG_DEBUG(Service_AM, "called");
 
     if (!m_applet->lifecycle_manager.PopMessage(out_applet_message)) {
@@ -105,12 +109,13 @@ Result ICommonStateGetter::ReceiveMessage(Out<AppletMessage> out_applet_message)
     }
 
     LOG_DEBUG(Service_AM, "called, returning message={} to applet_id={}",
-             static_cast<u32>(*out_applet_message), static_cast<u32>(m_applet->applet_id));
+              static_cast<u32>(*out_applet_message), static_cast<u32>(m_applet->applet_id));
 
     R_SUCCEED();
 }
 
-Result ICommonStateGetter::GetCurrentFocusState(Out<FocusState> out_focus_state) {
+Result ICommonStateGetter::GetCurrentFocusState(Out<FocusState> out_focus_state)
+{
     LOG_DEBUG(Service_AM, "called");
 
     std::scoped_lock lk{m_applet->lock};
@@ -119,7 +124,8 @@ Result ICommonStateGetter::GetCurrentFocusState(Out<FocusState> out_focus_state)
     R_SUCCEED();
 }
 
-Result ICommonStateGetter::RequestToAcquireSleepLock() {
+Result ICommonStateGetter::RequestToAcquireSleepLock()
+{
     LOG_WARNING(Service_AM, "(STUBBED) called");
 
     // Sleep lock is acquired immediately.
@@ -127,81 +133,95 @@ Result ICommonStateGetter::RequestToAcquireSleepLock() {
     R_SUCCEED();
 }
 
-Result ICommonStateGetter::ReleaseSleepLock() {
+Result ICommonStateGetter::ReleaseSleepLock()
+{
     LOG_WARNING(Service_AM, "(STUBBED) called");
 
     m_applet->sleep_lock_event.Clear();
     R_SUCCEED();
 }
 
-Result ICommonStateGetter::ReleaseSleepLockTransiently() {
+Result ICommonStateGetter::ReleaseSleepLockTransiently()
+{
     LOG_WARNING(Service_AM, "(STUBBED) called");
 
     m_applet->sleep_lock_event.Clear();
     R_SUCCEED();
 }
 
-Result ICommonStateGetter::GetAcquiredSleepLockEvent(
-    OutCopyHandle<Kernel::KReadableEvent> out_event) {
+Result
+ICommonStateGetter::GetAcquiredSleepLockEvent(OutCopyHandle<Kernel::KReadableEvent> out_event)
+{
     LOG_WARNING(Service_AM, "called");
     *out_event = m_applet->sleep_lock_event.GetHandle();
     R_SUCCEED();
 }
 
-Result ICommonStateGetter::GetReaderLockAccessorEx(
-    Out<SharedPointer<ILockAccessor>> out_lock_accessor, u32 button_type) {
+Result
+ICommonStateGetter::GetReaderLockAccessorEx(Out<SharedPointer<ILockAccessor>> out_lock_accessor,
+                                            u32 button_type)
+{
     LOG_INFO(Service_AM, "called, button_type={}", button_type);
     *out_lock_accessor = std::make_shared<ILockAccessor>(system);
     R_SUCCEED();
 }
 
-Result ICommonStateGetter::GetWriterLockAccessorEx(
-    Out<SharedPointer<ILockAccessor>> out_lock_accessor, u32 button_type) {
+Result
+ICommonStateGetter::GetWriterLockAccessorEx(Out<SharedPointer<ILockAccessor>> out_lock_accessor,
+                                            u32 button_type)
+{
     LOG_INFO(Service_AM, "called, button_type={}", button_type);
     *out_lock_accessor = std::make_shared<ILockAccessor>(system);
     R_SUCCEED();
 }
 
 Result ICommonStateGetter::GetDefaultDisplayResolutionChangeEvent(
-    OutCopyHandle<Kernel::KReadableEvent> out_event) {
+    OutCopyHandle<Kernel::KReadableEvent> out_event)
+{
     LOG_DEBUG(Service_AM, "called");
     *out_event = m_applet->lifecycle_manager.GetOperationModeChangedSystemEvent().GetHandle();
     R_SUCCEED();
 }
 
-Result ICommonStateGetter::GetHdcpAuthenticationState(Out<s32> out_state) {
+Result ICommonStateGetter::GetHdcpAuthenticationState(Out<s32> out_state)
+{
     LOG_DEBUG(Service_AM, "called");
     *out_state = 1;
     R_SUCCEED();
 }
 
 Result ICommonStateGetter::GetHdcpAuthenticationStateChangeEvent(
-    OutCopyHandle<Kernel::KReadableEvent> out_event) {
+    OutCopyHandle<Kernel::KReadableEvent> out_event)
+{
     LOG_DEBUG(Service_AM, "called");
     *out_event = m_applet->lifecycle_manager.GetHDCPStateChangedEvent().GetHandle();
     R_SUCCEED();
 }
 
-Result ICommonStateGetter::GetOperationMode(Out<OperationMode> out_operation_mode) {
+Result ICommonStateGetter::GetOperationMode(Out<OperationMode> out_operation_mode)
+{
     const bool use_docked_mode{Settings::IsDockedMode()};
     LOG_DEBUG(Service_AM, "called, use_docked_mode={}", use_docked_mode);
     *out_operation_mode = use_docked_mode ? OperationMode::Docked : OperationMode::Handheld;
     R_SUCCEED();
 }
 
-Result ICommonStateGetter::GetPerformanceMode(Out<APM::PerformanceMode> out_performance_mode) {
+Result ICommonStateGetter::GetPerformanceMode(Out<APM::PerformanceMode> out_performance_mode)
+{
     LOG_DEBUG(Service_AM, "called");
     *out_performance_mode = system.GetAPMController().GetCurrentPerformanceMode();
     R_SUCCEED();
 }
 
-Result ICommonStateGetter::GetBootMode(Out<PM::SystemBootMode> out_boot_mode) {
+Result ICommonStateGetter::GetBootMode(Out<PM::SystemBootMode> out_boot_mode)
+{
     LOG_DEBUG(Service_AM, "called");
     *out_boot_mode = Service::PM::SystemBootMode::Normal;
     R_SUCCEED();
 }
 
-Result ICommonStateGetter::IsVrModeEnabled(Out<bool> out_is_vr_mode_enabled) {
+Result ICommonStateGetter::IsVrModeEnabled(Out<bool> out_is_vr_mode_enabled)
+{
     LOG_DEBUG(Service_AM, "called");
 
     std::scoped_lock lk{m_applet->lock};
@@ -209,27 +229,31 @@ Result ICommonStateGetter::IsVrModeEnabled(Out<bool> out_is_vr_mode_enabled) {
     R_SUCCEED();
 }
 
-Result ICommonStateGetter::SetVrModeEnabled(bool is_vr_mode_enabled) {
+Result ICommonStateGetter::SetVrModeEnabled(bool is_vr_mode_enabled)
+{
     std::scoped_lock lk{m_applet->lock};
     m_applet->vr_mode_enabled = is_vr_mode_enabled;
     LOG_WARNING(Service_AM, "VR Mode is {}", m_applet->vr_mode_enabled ? "on" : "off");
     R_SUCCEED();
 }
 
-Result ICommonStateGetter::SetLcdBacklighOffEnabled(bool is_lcd_backlight_off_enabled) {
+Result ICommonStateGetter::SetLcdBacklighOffEnabled(bool is_lcd_backlight_off_enabled)
+{
     LOG_WARNING(Service_AM, "(STUBBED) called. is_lcd_backlight_off_enabled={}",
                 is_lcd_backlight_off_enabled);
     R_SUCCEED();
 }
 
-Result ICommonStateGetter::BeginVrModeEx() {
+Result ICommonStateGetter::BeginVrModeEx()
+{
     LOG_WARNING(Service_AM, "(STUBBED) called");
     std::scoped_lock lk{m_applet->lock};
     m_applet->vr_mode_enabled = true;
     R_SUCCEED();
 }
 
-Result ICommonStateGetter::EndVrModeEx() {
+Result ICommonStateGetter::EndVrModeEx()
+{
     LOG_WARNING(Service_AM, "(STUBBED) called");
     std::scoped_lock lk{m_applet->lock};
     m_applet->vr_mode_enabled = false;
@@ -237,13 +261,15 @@ Result ICommonStateGetter::EndVrModeEx() {
 }
 
 Result ICommonStateGetter::IsInControllerFirmwareUpdateSection(
-    Out<bool> out_is_in_controller_firmware_update_section) {
+    Out<bool> out_is_in_controller_firmware_update_section)
+{
     LOG_INFO(Service_AM, "called");
     *out_is_in_controller_firmware_update_section = false;
     R_SUCCEED();
 }
 
-Result ICommonStateGetter::GetDefaultDisplayResolution(Out<s32> out_width, Out<s32> out_height) {
+Result ICommonStateGetter::GetDefaultDisplayResolution(Out<s32> out_width, Out<s32> out_height)
+{
     LOG_DEBUG(Service_AM, "called");
 
     if (Settings::IsDockedMode()) {
@@ -257,7 +283,8 @@ Result ICommonStateGetter::GetDefaultDisplayResolution(Out<s32> out_width, Out<s
     R_SUCCEED();
 }
 
-void ICommonStateGetter::SetCpuBoostMode(HLERequestContext& ctx) {
+void ICommonStateGetter::SetCpuBoostMode(HLERequestContext& ctx)
+{
     LOG_DEBUG(Service_AM, "called, forwarding to APM:SYS");
 
     const auto& sm = system.ServiceManager();
@@ -267,13 +294,15 @@ void ICommonStateGetter::SetCpuBoostMode(HLERequestContext& ctx) {
     apm_sys->SetCpuBoostMode(ctx);
 }
 
-Result ICommonStateGetter::GetBuiltInDisplayType(Out<s32> out_display_type) {
+Result ICommonStateGetter::GetBuiltInDisplayType(Out<s32> out_display_type)
+{
     LOG_WARNING(Service_AM, "(STUBBED) called");
     *out_display_type = 0;
     R_SUCCEED();
 }
 
-Result ICommonStateGetter::PerformSystemButtonPressingIfInFocus(SystemButtonType type) {
+Result ICommonStateGetter::PerformSystemButtonPressingIfInFocus(SystemButtonType type)
+{
     LOG_DEBUG(Service_AM, "called, type={}", type);
 
     std::scoped_lock lk{m_applet->lock};
@@ -311,14 +340,16 @@ Result ICommonStateGetter::PerformSystemButtonPressingIfInFocus(SystemButtonType
     R_SUCCEED();
 }
 
-Result ICommonStateGetter::GetOperationModeSystemInfo(Out<u32> out_operation_mode_system_info) {
+Result ICommonStateGetter::GetOperationModeSystemInfo(Out<u32> out_operation_mode_system_info)
+{
     LOG_WARNING(Service_AM, "(STUBBED) called");
     *out_operation_mode_system_info = 0;
     R_SUCCEED();
 }
 
 Result ICommonStateGetter::GetAppletLaunchedHistory(
-    Out<s32> out_count, OutArray<AppletId, BufferAttr_HipcMapAlias> out_applet_ids) {
+    Out<s32> out_count, OutArray<AppletId, BufferAttr_HipcMapAlias> out_applet_ids)
+{
     LOG_INFO(Service_AM, "called");
 
     std::shared_ptr<Applet> current_applet = m_applet;
@@ -333,14 +364,16 @@ Result ICommonStateGetter::GetAppletLaunchedHistory(
     R_SUCCEED();
 }
 
-Result ICommonStateGetter::GetSettingsPlatformRegion(
-    Out<Set::PlatformRegion> out_settings_platform_region) {
+Result
+ICommonStateGetter::GetSettingsPlatformRegion(Out<Set::PlatformRegion> out_settings_platform_region)
+{
     LOG_INFO(Service_AM, "called");
     *out_settings_platform_region = Set::PlatformRegion::Global;
     R_SUCCEED();
 }
 
-Result ICommonStateGetter::SetRequestExitToLibraryAppletAtExecuteNextProgramEnabled() {
+Result ICommonStateGetter::SetRequestExitToLibraryAppletAtExecuteNextProgramEnabled()
+{
     LOG_WARNING(Service_AM, "(STUBBED) called");
 
     std::scoped_lock lk{m_applet->lock};
@@ -349,13 +382,15 @@ Result ICommonStateGetter::SetRequestExitToLibraryAppletAtExecuteNextProgramEnab
     R_SUCCEED();
 }
 
-Result ICommonStateGetter::PushToGeneralChannel(SharedPointer<IStorage> storage) {
+Result ICommonStateGetter::PushToGeneralChannel(SharedPointer<IStorage> storage)
+{
     LOG_DEBUG(Service_AM, "called");
     system.PushGeneralChannelData(storage->GetData());
     R_SUCCEED();
 }
 
-Result ICommonStateGetter::SetHandlingHomeButtonShortPressedEnabled(bool enabled) {
+Result ICommonStateGetter::SetHandlingHomeButtonShortPressedEnabled(bool enabled)
+{
     LOG_DEBUG(Service_AM, "called, enabled={} applet_id={}", enabled, m_applet->applet_id);
 
     std::scoped_lock lk{m_applet->lock};
@@ -363,12 +398,14 @@ Result ICommonStateGetter::SetHandlingHomeButtonShortPressedEnabled(bool enabled
     R_SUCCEED();
 }
 
-Result ICommonStateGetter::Unknown610() {
+Result ICommonStateGetter::Unknown610()
+{
     LOG_WARNING(Service_AM, "(STUBBED) called");
     R_SUCCEED();
 }
 
-Result ICommonStateGetter::Unknown611() {
+Result ICommonStateGetter::Unknown611()
+{
     LOG_WARNING(Service_AM, "(STUBBED) called");
     R_SUCCEED();
 }

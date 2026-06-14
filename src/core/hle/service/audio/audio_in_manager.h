@@ -41,8 +41,9 @@ private:
                            InCopyHandle<Kernel::KProcess> process_handle,
                            ClientAppletResourceUserId aruid);
 
-    Result ListAudioInsAutoFiltered(
-        OutArray<AudioDeviceName, BufferAttr_HipcAutoSelect> out_audio_ins, Out<u32> out_count);
+    Result
+    ListAudioInsAutoFiltered(OutArray<AudioDeviceName, BufferAttr_HipcAutoSelect> out_audio_ins,
+                             Out<u32> out_count);
     Result OpenAudioInProtocolSpecified(
         Out<AudioCore::AudioIn::AudioInParameterInternal> out_parameter_internal,
         Out<SharedPointer<IAudioIn>> out_audio_in,

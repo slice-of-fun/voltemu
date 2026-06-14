@@ -5,4 +5,5 @@
 
 #include "common/common_types.h"
 
-namespace Service::HID {} // namespace Service::HID
+namespace Service::HID {
+} // namespace Service::HID

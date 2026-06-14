@@ -1,15 +1,17 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/kernel/k_page_group.h"
+
 #include "core/hle/kernel/k_dynamic_resource_manager.h"
 #include "core/hle/kernel/k_memory_manager.h"
-#include "core/hle/kernel/k_page_group.h"
 #include "core/hle/kernel/kernel.h"
 #include "core/hle/kernel/svc_results.h"
 
 namespace Kernel {
 
-void KPageGroup::Finalize() {
+void KPageGroup::Finalize()
+{
     KBlockInfo* cur = m_first_block;
     while (cur != nullptr) {
         KBlockInfo* next = cur->GetNext();
@@ -21,7 +23,8 @@ void KPageGroup::Finalize() {
     m_last_block = nullptr;
 }
 
-void KPageGroup::CloseAndReset() {
+void KPageGroup::CloseAndReset()
+{
     auto& mm = m_kernel.MemoryManager();
 
     KBlockInfo* cur = m_first_block;
@@ -36,7 +39,8 @@ void KPageGroup::CloseAndReset() {
     m_last_block = nullptr;
 }
 
-size_t KPageGroup::GetNumPages() const {
+size_t KPageGroup::GetNumPages() const
+{
     size_t num_pages = 0;
 
     for (const auto& it : *this) {
@@ -46,7 +50,8 @@ size_t KPageGroup::GetNumPages() const {
     return num_pages;
 }
 
-Result KPageGroup::AddBlock(KPhysicalAddress addr, size_t num_pages) {
+Result KPageGroup::AddBlock(KPhysicalAddress addr, size_t num_pages)
+{
     // Succeed immediately if we're adding no pages.
     R_SUCCEED_IF(num_pages == 0);
 
@@ -76,7 +81,8 @@ Result KPageGroup::AddBlock(KPhysicalAddress addr, size_t num_pages) {
     R_SUCCEED();
 }
 
-void KPageGroup::Open() const {
+void KPageGroup::Open() const
+{
     auto& mm = m_kernel.MemoryManager();
 
     for (const auto& it : *this) {
@@ -84,7 +90,8 @@ void KPageGroup::Open() const {
     }
 }
 
-void KPageGroup::OpenFirst() const {
+void KPageGroup::OpenFirst() const
+{
     auto& mm = m_kernel.MemoryManager();
 
     for (const auto& it : *this) {
@@ -92,7 +99,8 @@ void KPageGroup::OpenFirst() const {
     }
 }
 
-void KPageGroup::Close() const {
+void KPageGroup::Close() const
+{
     auto& mm = m_kernel.MemoryManager();
 
     for (const auto& it : *this) {
@@ -100,7 +108,8 @@ void KPageGroup::Close() const {
     }
 }
 
-bool KPageGroup::IsEquivalentTo(const KPageGroup& rhs) const {
+bool KPageGroup::IsEquivalentTo(const KPageGroup& rhs) const
+{
     auto lit = this->begin();
     auto rit = rhs.begin();
     auto lend = this->end();

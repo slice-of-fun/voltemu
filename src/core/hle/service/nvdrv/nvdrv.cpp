@@ -2,9 +2,12 @@
 // SPDX-FileCopyrightText: 2021 Skyline Team and Contributors
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#include <utility>
+#include "core/hle/service/nvdrv/nvdrv.h"
 
 #include <fmt/ranges.h>
+
+#include <utility>
+
 #include "core/core.h"
 #include "core/hle/kernel/k_event.h"
 #include "core/hle/service/ipc_helpers.h"
@@ -20,7 +23,6 @@
 #include "core/hle/service/nvdrv/devices/nvhost_nvjpg.h"
 #include "core/hle/service/nvdrv/devices/nvhost_vic.h"
 #include "core/hle/service/nvdrv/devices/nvmap.h"
-#include "core/hle/service/nvdrv/nvdrv.h"
 #include "core/hle/service/nvdrv/nvdrv_interface.h"
 #include "core/hle/service/nvdrv/nvmemp.h"
 #include "core/hle/service/nvnflinger/nvnflinger.h"
@@ -29,20 +31,25 @@
 
 namespace Service::Nvidia {
 
-EventInterface::EventInterface(Module& module_) : module{module_}, guard{}, on_signal{} {}
+EventInterface::EventInterface(Module& module_) : module{module_}, guard{}, on_signal{}
+{
+}
 
 EventInterface::~EventInterface() = default;
 
-Kernel::KEvent* EventInterface::CreateEvent(std::string name) {
+Kernel::KEvent* EventInterface::CreateEvent(std::string name)
+{
     Kernel::KEvent* new_event = module.service_context.CreateEvent(std::move(name));
     return new_event;
 }
 
-void EventInterface::FreeEvent(Kernel::KEvent* event) {
+void EventInterface::FreeEvent(Kernel::KEvent* event)
+{
     module.service_context.CloseEvent(event);
 }
 
-void LoopProcess(Core::System& system) {
+void LoopProcess(Core::System& system)
+{
     auto server_manager = std::make_unique<ServerManager>(system);
     auto module = std::make_shared<Module>(system);
     const auto NvdrvInterfaceFactoryForApplication = [&, module] {
@@ -66,7 +73,8 @@ void LoopProcess(Core::System& system) {
 }
 
 Module::Module(Core::System& system)
-    : container{system.Host1x()}, service_context{system, "nvdrv"}, events_interface{*this} {
+    : container{system.Host1x()}, service_context{system, "nvdrv"}, events_interface{*this}
+{
     builders["/dev/nvhost-as-gpu"] = [this, &system](DeviceFD fd) {
         auto device = std::make_shared<Devices::nvhost_as_gpu>(system, *this, container);
         return open_files.emplace(fd, std::move(device)).first;
@@ -105,9 +113,12 @@ Module::Module(Core::System& system)
     };
 }
 
-Module::~Module() {}
+Module::~Module()
+{
+}
 
-NvResult Module::VerifyFD(DeviceFD fd) const {
+NvResult Module::VerifyFD(DeviceFD fd) const
+{
     if (fd < 0) {
         LOG_ERROR(Service_NVDRV, "Invalid DeviceFD={}!", fd);
         return NvResult::InvalidState;
@@ -121,7 +132,8 @@ NvResult Module::VerifyFD(DeviceFD fd) const {
     return NvResult::Success;
 }
 
-DeviceFD Module::Open(const std::string& device_name, NvCore::SessionId session_id) {
+DeviceFD Module::Open(const std::string& device_name, NvCore::SessionId session_id)
+{
     auto it = builders.find(device_name);
     if (it == builders.end()) {
         LOG_ERROR(Service_NVDRV, "Trying to open unknown device {}", device_name);
@@ -137,8 +149,8 @@ DeviceFD Module::Open(const std::string& device_name, NvCore::SessionId session_
     return fd;
 }
 
-NvResult Module::Ioctl1(DeviceFD fd, Ioctl command, std::span<const u8> input,
-                        std::span<u8> output) {
+NvResult Module::Ioctl1(DeviceFD fd, Ioctl command, std::span<const u8> input, std::span<u8> output)
+{
     if (fd < 0) {
         LOG_ERROR(Service_NVDRV, "Invalid DeviceFD={}!", fd);
         return NvResult::InvalidState;
@@ -155,7 +167,8 @@ NvResult Module::Ioctl1(DeviceFD fd, Ioctl command, std::span<const u8> input,
 }
 
 NvResult Module::Ioctl2(DeviceFD fd, Ioctl command, std::span<const u8> input,
-                        std::span<const u8> inline_input, std::span<u8> output) {
+                        std::span<const u8> inline_input, std::span<u8> output)
+{
     if (fd < 0) {
         LOG_ERROR(Service_NVDRV, "Invalid DeviceFD={}!", fd);
         return NvResult::InvalidState;
@@ -172,7 +185,8 @@ NvResult Module::Ioctl2(DeviceFD fd, Ioctl command, std::span<const u8> input,
 }
 
 NvResult Module::Ioctl3(DeviceFD fd, Ioctl command, std::span<const u8> input, std::span<u8> output,
-                        std::span<u8> inline_output) {
+                        std::span<u8> inline_output)
+{
     if (fd < 0) {
         LOG_ERROR(Service_NVDRV, "Invalid DeviceFD={}!", fd);
         return NvResult::InvalidState;
@@ -188,7 +202,8 @@ NvResult Module::Ioctl3(DeviceFD fd, Ioctl command, std::span<const u8> input, s
     return itr->second->Ioctl3(fd, command, input, output, inline_output);
 }
 
-NvResult Module::Close(DeviceFD fd) {
+NvResult Module::Close(DeviceFD fd)
+{
     if (fd < 0) {
         LOG_ERROR(Service_NVDRV, "Invalid DeviceFD={}!", fd);
         return NvResult::InvalidState;
@@ -208,7 +223,8 @@ NvResult Module::Close(DeviceFD fd) {
     return NvResult::Success;
 }
 
-NvResult Module::QueryEvent(DeviceFD fd, u32 event_id, Kernel::KEvent*& event) {
+NvResult Module::QueryEvent(DeviceFD fd, u32 event_id, Kernel::KEvent*& event)
+{
     if (fd < 0) {
         LOG_ERROR(Service_NVDRV, "Invalid DeviceFD={}!", fd);
         return NvResult::InvalidState;

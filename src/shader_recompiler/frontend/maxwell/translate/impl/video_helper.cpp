@@ -1,13 +1,15 @@
 // SPDX-FileCopyrightText: Copyright 2021 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include "shader_recompiler/exception.h"
 #include "shader_recompiler/frontend/maxwell/translate/impl/video_helper.h"
+
+#include "shader_recompiler/exception.h"
 
 namespace Shader::Maxwell {
 
 IR::U32 ExtractVideoOperandValue(IR::IREmitter& ir, const IR::U32& value, VideoWidth width,
-                                 u32 selector, bool is_signed) {
+                                 u32 selector, bool is_signed)
+{
     switch (width) {
     case VideoWidth::Byte:
     case VideoWidth::Unknown:
@@ -21,7 +23,8 @@ IR::U32 ExtractVideoOperandValue(IR::IREmitter& ir, const IR::U32& value, VideoW
     }
 }
 
-VideoWidth GetVideoSourceWidth(VideoWidth width, bool is_immediate) {
+VideoWidth GetVideoSourceWidth(VideoWidth width, bool is_immediate)
+{
     // immediates must be 16-bit format.
     return is_immediate ? VideoWidth::Short : width;
 }

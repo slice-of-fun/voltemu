@@ -1,19 +1,23 @@
 // SPDX-FileCopyrightText: Copyright 2021 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/kernel/k_session.h"
+
 #include "core/hle/kernel/k_client_port.h"
 #include "core/hle/kernel/k_client_session.h"
 #include "core/hle/kernel/k_scoped_resource_reservation.h"
 #include "core/hle/kernel/k_server_session.h"
-#include "core/hle/kernel/k_session.h"
 
 namespace Kernel {
 
 KSession::KSession(KernelCore& kernel)
-    : KAutoObjectWithSlabHeapAndContainer{kernel}, m_server{kernel}, m_client{kernel} {}
+    : KAutoObjectWithSlabHeapAndContainer{kernel}, m_server{kernel}, m_client{kernel}
+{
+}
 KSession::~KSession() = default;
 
-void KSession::Initialize(KClientPort* client_port, uintptr_t name) {
+void KSession::Initialize(KClientPort* client_port, uintptr_t name)
+{
     // Increment reference count.
     // Because reference count is one on creation, this will result
     // in a reference count of two. Thus, when both server and client are closed
@@ -46,28 +50,32 @@ void KSession::Initialize(KClientPort* client_port, uintptr_t name) {
     m_initialized = true;
 }
 
-void KSession::Finalize() {
+void KSession::Finalize()
+{
     if (m_port != nullptr) {
         m_port->OnSessionFinalized();
         m_port->Close();
     }
 }
 
-void KSession::OnServerClosed() {
+void KSession::OnServerClosed()
+{
     if (this->GetState() == State::Normal) {
         this->SetState(State::ServerClosed);
         m_client.OnServerClosed();
     }
 }
 
-void KSession::OnClientClosed() {
+void KSession::OnClientClosed()
+{
     if (this->GetState() == State::Normal) {
         SetState(State::ClientClosed);
         m_server.OnClientClosed();
     }
 }
 
-void KSession::PostDestroy(uintptr_t arg) {
+void KSession::PostDestroy(uintptr_t arg)
+{
     // Release the session count resource the owner process holds.
     KProcess* owner = reinterpret_cast<KProcess*>(arg);
     owner->GetResourceLimit()->Release(LimitableResource::SessionCountMax, 1);

@@ -22,9 +22,9 @@ struct HostTranslateInfo {
     u32 min_ssbo_alignment{};            ///< Minimum alignment supported by the device for SSBOs
     u32 max_per_stage_descriptor_sampled_images{1024}; ///< maximum sampled descriptors per stage
     u32 max_per_stage_resources{4096};                 ///< maximum resources per stage
-    u32 max_descriptor_set_sampled_images{1024};        ///< maximum sampled descriptors per set
-    bool support_geometry_shader_passthrough{}; ///< True when the device supports geometry
-                                                ///< passthrough shaders
+    u32 max_descriptor_set_sampled_images{1024};       ///< maximum sampled descriptors per set
+    bool support_geometry_shader_passthrough{};        ///< True when the device supports geometry
+                                                       ///< passthrough shaders
     bool support_conditional_barrier{}; ///< True when the device supports barriers in conditional
                                         ///< control flow
 };

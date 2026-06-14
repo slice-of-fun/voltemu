@@ -6,9 +6,10 @@
 
 #pragma once
 
+#include <QDialog>
 #include <array>
 #include <memory>
-#include <QDialog>
+
 #include "core/frontend/applets/cabinet.h"
 
 class MainWindow;

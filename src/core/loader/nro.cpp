@@ -4,14 +4,16 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/loader/nro.h"
+
 #include <utility>
 #include <vector>
 
 #include "common/common_funcs.h"
 #include "common/common_types.h"
 #include "common/logging.h"
-#include "common/settings.h"
 #include "common/random.h"
+#include "common/settings.h"
 #include "common/swap.h"
 #include "core/core.h"
 #include "core/file_sys/control_metadata.h"
@@ -22,7 +24,6 @@
 #include "core/hle/kernel/k_process.h"
 #include "core/hle/kernel/k_thread.h"
 #include "core/hle/service/filesystem/filesystem.h"
-#include "core/loader/nro.h"
 #include "core/loader/nso.h"
 #include "core/memory.h"
 
@@ -79,7 +80,8 @@ struct AssetHeader {
 };
 static_assert(sizeof(AssetHeader) == 0x38, "AssetHeader has incorrect size.");
 
-AppLoader_NRO::AppLoader_NRO(FileSys::VirtualFile file_) : AppLoader(std::move(file_)) {
+AppLoader_NRO::AppLoader_NRO(FileSys::VirtualFile file_) : AppLoader(std::move(file_))
+{
     NroHeader nro_header{};
     if (file->ReadObject(&nro_header) != sizeof(NroHeader)) {
         return;
@@ -121,7 +123,8 @@ AppLoader_NRO::AppLoader_NRO(FileSys::VirtualFile file_) : AppLoader(std::move(f
 
 AppLoader_NRO::~AppLoader_NRO() = default;
 
-FileType AppLoader_NRO::IdentifyType(const FileSys::VirtualFile& nro_file) {
+FileType AppLoader_NRO::IdentifyType(const FileSys::VirtualFile& nro_file)
+{
     // Read NSO header
     NroHeader nro_header{};
     if (sizeof(NroHeader) != nro_file->ReadObject(&nro_header)) {
@@ -133,7 +136,8 @@ FileType AppLoader_NRO::IdentifyType(const FileSys::VirtualFile& nro_file) {
     return FileType::Error;
 }
 
-bool AppLoader_NRO::IsHomebrew() {
+bool AppLoader_NRO::IsHomebrew()
+{
     // Read NSO header
     NroHeader nro_header{};
     if (sizeof(NroHeader) != file->ReadObject(&nro_header)) {
@@ -143,12 +147,14 @@ bool AppLoader_NRO::IsHomebrew() {
            nro_header.magic_ext2 == Common::MakeMagic('B', 'R', 'E', 'W');
 }
 
-static constexpr u32 PageAlignSize(u32 size) {
+static constexpr u32 PageAlignSize(u32 size)
+{
     return static_cast<u32>((size + Core::Memory::YUZU_PAGEMASK) & ~Core::Memory::YUZU_PAGEMASK);
 }
 
 static bool LoadNroImpl(Core::System& system, Kernel::KProcess& process,
-                        const std::vector<u8>& data) {
+                        const std::vector<u8>& data)
+{
     if (data.size() < sizeof(NroHeader)) {
         return {};
     }
@@ -242,12 +248,16 @@ static bool LoadNroImpl(Core::System& system, Kernel::KProcess& process,
     }();
 
     // TODO: this is bad form of ASLR, it sucks
-    std::uintptr_t aslr_offset = ((::Settings::values.rng_seed_enabled.GetValue()
-        ? ::Settings::values.rng_seed.GetValue() : Common::Random::Random64(0)) << 12) & 0xfff000;
+    std::uintptr_t aslr_offset =
+        ((::Settings::values.rng_seed_enabled.GetValue() ? ::Settings::values.rng_seed.GetValue()
+                                                         : Common::Random::Random64(0))
+         << 12) &
+        0xfff000;
 
     // Setup the process code layout
     if (process
-            .LoadFromMetadata(FileSys::ProgramMetadata::GetDefault(), image_size, fastmem_base, aslr_offset)
+            .LoadFromMetadata(FileSys::ProgramMetadata::GetDefault(), image_size, fastmem_base,
+                              aslr_offset)
             .IsError()) {
         return false;
     }
@@ -269,11 +279,13 @@ static bool LoadNroImpl(Core::System& system, Kernel::KProcess& process,
 }
 
 bool AppLoader_NRO::LoadNro(Core::System& system, Kernel::KProcess& process,
-                            const FileSys::VfsFile& nro_file) {
+                            const FileSys::VfsFile& nro_file)
+{
     return LoadNroImpl(system, process, nro_file.ReadAllBytes());
 }
 
-AppLoader_NRO::LoadResult AppLoader_NRO::Load(Kernel::KProcess& process, Core::System& system) {
+AppLoader_NRO::LoadResult AppLoader_NRO::Load(Kernel::KProcess& process, Core::System& system)
+{
     if (is_loaded) {
         return {ResultStatus::ErrorAlreadyLoaded, {}};
     }
@@ -294,7 +306,8 @@ AppLoader_NRO::LoadResult AppLoader_NRO::Load(Kernel::KProcess& process, Core::S
                                                   Core::Memory::DEFAULT_STACK_SIZE}};
 }
 
-ResultStatus AppLoader_NRO::ReadIcon(std::vector<u8>& buffer) {
+ResultStatus AppLoader_NRO::ReadIcon(std::vector<u8>& buffer)
+{
     if (icon_data.empty()) {
         return ResultStatus::ErrorNoIcon;
     }
@@ -303,7 +316,8 @@ ResultStatus AppLoader_NRO::ReadIcon(std::vector<u8>& buffer) {
     return ResultStatus::Success;
 }
 
-ResultStatus AppLoader_NRO::ReadProgramId(u64& out_program_id) {
+ResultStatus AppLoader_NRO::ReadProgramId(u64& out_program_id)
+{
     if (nacp == nullptr) {
         return ResultStatus::ErrorNoControl;
     }
@@ -312,7 +326,8 @@ ResultStatus AppLoader_NRO::ReadProgramId(u64& out_program_id) {
     return ResultStatus::Success;
 }
 
-ResultStatus AppLoader_NRO::ReadRomFS(FileSys::VirtualFile& dir) {
+ResultStatus AppLoader_NRO::ReadRomFS(FileSys::VirtualFile& dir)
+{
     if (romfs == nullptr) {
         return ResultStatus::ErrorNoRomFS;
     }
@@ -321,7 +336,8 @@ ResultStatus AppLoader_NRO::ReadRomFS(FileSys::VirtualFile& dir) {
     return ResultStatus::Success;
 }
 
-ResultStatus AppLoader_NRO::ReadTitle(std::string& title) {
+ResultStatus AppLoader_NRO::ReadTitle(std::string& title)
+{
     if (nacp == nullptr) {
         return ResultStatus::ErrorNoControl;
     }
@@ -330,7 +346,8 @@ ResultStatus AppLoader_NRO::ReadTitle(std::string& title) {
     return ResultStatus::Success;
 }
 
-ResultStatus AppLoader_NRO::ReadControlData(FileSys::NACP& control) {
+ResultStatus AppLoader_NRO::ReadControlData(FileSys::NACP& control)
+{
     if (nacp == nullptr) {
         return ResultStatus::ErrorNoControl;
     }
@@ -339,7 +356,8 @@ ResultStatus AppLoader_NRO::ReadControlData(FileSys::NACP& control) {
     return ResultStatus::Success;
 }
 
-bool AppLoader_NRO::IsRomFSUpdatable() const {
+bool AppLoader_NRO::IsRomFSUpdatable() const
+{
     return false;
 }
 

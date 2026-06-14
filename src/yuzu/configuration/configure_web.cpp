@@ -4,9 +4,10 @@
 // SPDX-FileCopyrightText: 2017 Citra Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "yuzu/configuration/configure_web.h"
+
 #include <QIcon>
 #include <QMessageBox>
-#include "yuzu/configuration/configure_web.h"
 
 #if QT_VERSION_MAJOR >= 6
 #include <QRegularExpressionValidator>
@@ -15,12 +16,14 @@
 #endif
 
 #include <QtConcurrentRun>
+
 #include "common/settings.h"
 #include "qt_common/config/uisettings.h"
 #include "ui_configure_web.h"
 
 ConfigureWeb::ConfigureWeb(QWidget* parent)
-    : QWidget(parent), ui(std::make_unique<Ui::ConfigureWeb>()), m_rng{QRandomGenerator::system()} {
+    : QWidget(parent), ui(std::make_unique<Ui::ConfigureWeb>()), m_rng{QRandomGenerator::system()}
+{
     ui->setupUi(this);
 
     QString user_regex = QStringLiteral(".{4,20}");
@@ -55,7 +58,8 @@ ConfigureWeb::ConfigureWeb(QWidget* parent)
 
 ConfigureWeb::~ConfigureWeb() = default;
 
-void ConfigureWeb::changeEvent(QEvent* event) {
+void ConfigureWeb::changeEvent(QEvent* event)
+{
     if (event->type() == QEvent::LanguageChange) {
         RetranslateUI();
     }
@@ -63,11 +67,13 @@ void ConfigureWeb::changeEvent(QEvent* event) {
     QWidget::changeEvent(event);
 }
 
-void ConfigureWeb::RetranslateUI() {
+void ConfigureWeb::RetranslateUI()
+{
     ui->retranslateUi(this);
 }
 
-void ConfigureWeb::SetConfiguration() {
+void ConfigureWeb::SetConfiguration()
+{
     connect(ui->edit_username, &QLineEdit::textChanged, this, &ConfigureWeb::VerifyLogin);
     connect(ui->edit_token, &QLineEdit::textChanged, this, &ConfigureWeb::VerifyLogin);
 
@@ -79,7 +85,8 @@ void ConfigureWeb::SetConfiguration() {
     ui->toggle_discordrpc->setChecked(UISettings::values.enable_discord_presence.GetValue());
 }
 
-void ConfigureWeb::GenerateToken() {
+void ConfigureWeb::GenerateToken()
+{
     constexpr size_t length = 48;
     QString set = QStringLiteral("abcdefghijklmnopqrstuvwxyz");
     QString result;
@@ -92,13 +99,15 @@ void ConfigureWeb::GenerateToken() {
     ui->edit_token->setText(result);
 }
 
-void ConfigureWeb::ApplyConfiguration() {
+void ConfigureWeb::ApplyConfiguration()
+{
     UISettings::values.enable_discord_presence = ui->toggle_discordrpc->isChecked();
     Settings::values.eden_username = ui->edit_username->text().toStdString();
     Settings::values.eden_token = ui->edit_token->text().toStdString();
 }
 
-void ConfigureWeb::VerifyLogin() {
+void ConfigureWeb::VerifyLogin()
+{
     const QPixmap checked = QIcon::fromTheme(QStringLiteral("checked")).pixmap(16);
     const QPixmap failed = QIcon::fromTheme(QStringLiteral("failed")).pixmap(16);
 
@@ -123,7 +132,8 @@ void ConfigureWeb::VerifyLogin() {
     }
 }
 
-void ConfigureWeb::SetWebServiceConfigEnabled(bool enabled) {
+void ConfigureWeb::SetWebServiceConfigEnabled(bool enabled)
+{
     ui->label_disable_info->setVisible(!enabled);
     ui->groupBoxWebConfig->setEnabled(enabled);
 }

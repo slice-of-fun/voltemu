@@ -13,6 +13,7 @@
 #include <cstddef>
 #include <mutex>
 #include <thread>
+
 #include "common/common_types.h"
 #include "common/polyfill_thread.h"
 
@@ -20,7 +21,8 @@ namespace Common {
 
 class Event {
 public:
-    void Set() {
+    void Set()
+    {
         std::scoped_lock lk{mutex};
         if (!is_set) {
             is_set = true;
@@ -28,7 +30,8 @@ public:
         }
     }
 
-    void Wait() {
+    void Wait()
+    {
         std::unique_lock lk{mutex};
         condvar.wait(lk, [&] { return is_set.load(); });
         is_set = false;
@@ -37,7 +40,8 @@ public:
     bool WaitFor(const std::chrono::nanoseconds time);
 
     template<class Clock, class Duration>
-    bool WaitUntil(const std::chrono::time_point<Clock, Duration> time) {
+    bool WaitUntil(const std::chrono::time_point<Clock, Duration> time)
+    {
         std::unique_lock lk{mutex};
         if (!condvar.wait_until(lk, time, [this] { return is_set.load(); }))
             return false;
@@ -45,16 +49,15 @@ public:
         return true;
     }
 
-    void Reset() {
+    void Reset()
+    {
         std::unique_lock lk{mutex};
         // no other action required, since wait loops on the predicate and any lingering signal will
         // get cleared on the first iteration
         is_set = false;
     }
 
-    [[nodiscard]] bool IsSet() const {
-        return is_set;
-    }
+    [[nodiscard]] bool IsSet() const { return is_set; }
 
 private:
     alignas(64) std::atomic<bool> is_set{false};
@@ -67,7 +70,8 @@ public:
     explicit Barrier(std::size_t count_) : count(count_) {}
 
     /// Blocks until all "count" threads have called Sync()
-    bool Sync(std::stop_token token = {}) {
+    bool Sync(std::stop_token token = {})
+    {
         std::unique_lock lk{mutex};
         const std::size_t current_generation = generation;
 
@@ -78,7 +82,7 @@ public:
             return true;
         } else {
             condvar.wait(lk, token,
-                        [this, current_generation] { return current_generation != generation; });
+                         [this, current_generation] { return current_generation != generation; });
             return !token.stop_requested();
         }
     }

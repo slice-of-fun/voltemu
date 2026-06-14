@@ -18,8 +18,7 @@ class KSharedMemory;
 
 namespace Service::PSC::Time {
 
-template <typename T>
-struct LockFreeAtomicType {
+template<typename T> struct LockFreeAtomicType {
     u32 m_counter;
     std::array<T, 2> m_value;
 };
@@ -50,9 +49,7 @@ class SharedMemory {
 public:
     explicit SharedMemory(Core::System& system);
 
-    Kernel::KSharedMemory& GetKSharedMemory() {
-        return m_k_shared_memory;
-    }
+    Kernel::KSharedMemory& GetKSharedMemory() { return m_k_shared_memory; }
 
     void SetLocalSystemContext(const SystemClockContext& context);
     void SetNetworkSystemContext(const SystemClockContext& context);

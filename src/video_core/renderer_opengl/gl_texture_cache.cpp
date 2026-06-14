@@ -4,12 +4,14 @@
 // SPDX-FileCopyrightText: Copyright 2019 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "video_core/renderer_opengl/gl_texture_cache.h"
+
+#include <glad/glad.h>
+
 #include <algorithm>
 #include <array>
 #include <bit>
 #include <string>
-
-#include <glad/glad.h>
 
 #include "common/bit_util.h"
 #include "common/literals.h"
@@ -17,7 +19,6 @@
 #include "video_core/renderer_opengl/gl_device.h"
 #include "video_core/renderer_opengl/gl_shader_manager.h"
 #include "video_core/renderer_opengl/gl_state_tracker.h"
-#include "video_core/renderer_opengl/gl_texture_cache.h"
 #include "video_core/renderer_opengl/maxwell_to_gl.h"
 #include "video_core/renderer_opengl/util_shaders.h"
 #include "video_core/surface.h"
@@ -70,7 +71,8 @@ constexpr std::array ACCELERATED_FORMATS{
     GL_RG8_SNORM, GL_R16_SNORM, GL_R8_SNORM,
 };
 
-GLenum ImageTarget(const VideoCommon::ImageInfo& info) {
+GLenum ImageTarget(const VideoCommon::ImageInfo& info)
+{
     switch (info.type) {
     case ImageType::e1D:
         return GL_TEXTURE_1D_ARRAY;
@@ -90,7 +92,8 @@ GLenum ImageTarget(const VideoCommon::ImageInfo& info) {
     return GL_NONE;
 }
 
-GLenum ImageTarget(Shader::TextureType type, int num_samples = 1) {
+GLenum ImageTarget(Shader::TextureType type, int num_samples = 1)
+{
     const bool is_multisampled = num_samples > 1;
     switch (type) {
     case Shader::TextureType::Color1D:
@@ -115,7 +118,8 @@ GLenum ImageTarget(Shader::TextureType type, int num_samples = 1) {
     return GL_NONE;
 }
 
-GLenum TextureMode(PixelFormat format, std::array<SwizzleSource, 4> swizzle) {
+GLenum TextureMode(PixelFormat format, std::array<SwizzleSource, 4> swizzle)
+{
     bool any_r =
         std::ranges::any_of(swizzle, [](SwizzleSource s) { return s == SwizzleSource::R; });
     switch (format) {
@@ -132,7 +136,8 @@ GLenum TextureMode(PixelFormat format, std::array<SwizzleSource, 4> swizzle) {
     }
 }
 
-GLint Swizzle(SwizzleSource source) {
+GLint Swizzle(SwizzleSource source)
+{
     switch (source) {
     case SwizzleSource::Zero:
         return GL_ZERO;
@@ -152,7 +157,8 @@ GLint Swizzle(SwizzleSource source) {
     return GL_NONE;
 }
 
-GLenum AttachmentType(PixelFormat format) {
+GLenum AttachmentType(PixelFormat format)
+{
     switch (const SurfaceType type = VideoCore::Surface::GetFormatType(format); type) {
     case SurfaceType::Depth:
         return GL_DEPTH_ATTACHMENT;
@@ -166,7 +172,8 @@ GLenum AttachmentType(PixelFormat format) {
     }
 }
 
-[[nodiscard]] bool IsConverted(const Device& device, PixelFormat format, ImageType type) {
+[[nodiscard]] bool IsConverted(const Device& device, PixelFormat format, ImageType type)
+{
     if (!device.HasASTC() && IsPixelFormatASTC(format)) {
         return true;
     }
@@ -180,7 +187,8 @@ GLenum AttachmentType(PixelFormat format) {
     return false;
 }
 
-[[nodiscard]] constexpr SwizzleSource ConvertGreenRed(SwizzleSource value) {
+[[nodiscard]] constexpr SwizzleSource ConvertGreenRed(SwizzleSource value)
+{
     switch (value) {
     case SwizzleSource::G:
         return SwizzleSource::R;
@@ -189,7 +197,8 @@ GLenum AttachmentType(PixelFormat format) {
     }
 }
 
-GLint ConvertA5B5G5R1_UNORM(SwizzleSource source) {
+GLint ConvertA5B5G5R1_UNORM(SwizzleSource source)
+{
     switch (source) {
     case SwizzleSource::Zero:
         return GL_ZERO;
@@ -209,7 +218,8 @@ GLint ConvertA5B5G5R1_UNORM(SwizzleSource source) {
     return GL_NONE;
 }
 
-void ApplySwizzle(GLuint handle, PixelFormat format, std::array<SwizzleSource, 4> swizzle) {
+void ApplySwizzle(GLuint handle, PixelFormat format, std::array<SwizzleSource, 4> swizzle)
+{
     switch (format) {
     case PixelFormat::D24_UNORM_S8_UINT:
     case PixelFormat::D32_FLOAT_S8_UINT:
@@ -233,7 +243,8 @@ void ApplySwizzle(GLuint handle, PixelFormat format, std::array<SwizzleSource, 4
 }
 
 [[nodiscard]] bool CanBeAccelerated(const TextureCacheRuntime& runtime,
-                                    const VideoCommon::ImageInfo& info) {
+                                    const VideoCommon::ImageInfo& info)
+{
     if (IsPixelFormatASTC(info.format) && info.size.depth == 1 && !runtime.HasNativeASTC()) {
         return Settings::values.accelerate_astc.GetValue() == Settings::AstcDecodeMode::Gpu &&
                Settings::values.astc_recompression.GetValue() ==
@@ -267,7 +278,8 @@ void ApplySwizzle(GLuint handle, PixelFormat format, std::array<SwizzleSource, 4
 }
 
 [[nodiscard]] bool CanBeDecodedAsync(const TextureCacheRuntime& runtime,
-                                     const VideoCommon::ImageInfo& info) {
+                                     const VideoCommon::ImageInfo& info)
+{
     if (IsPixelFormatASTC(info.format) && !runtime.HasNativeASTC()) {
         return Settings::values.accelerate_astc.GetValue() ==
                Settings::AstcDecodeMode::CpuAsynchronous;
@@ -276,7 +288,8 @@ void ApplySwizzle(GLuint handle, PixelFormat format, std::array<SwizzleSource, 4
 }
 
 [[nodiscard]] CopyOrigin MakeCopyOrigin(VideoCommon::Offset3D offset,
-                                        VideoCommon::SubresourceLayers subresource, GLenum target) {
+                                        VideoCommon::SubresourceLayers subresource, GLenum target)
+{
     switch (target) {
     case GL_TEXTURE_1D:
         return CopyOrigin{
@@ -315,7 +328,8 @@ void ApplySwizzle(GLuint handle, PixelFormat format, std::array<SwizzleSource, 4
 
 [[nodiscard]] CopyRegion MakeCopyRegion(VideoCommon::Extent3D extent,
                                         VideoCommon::SubresourceLayers dst_subresource,
-                                        GLenum target) {
+                                        GLenum target)
+{
     switch (target) {
     case GL_TEXTURE_1D:
         return CopyRegion{
@@ -348,7 +362,8 @@ void ApplySwizzle(GLuint handle, PixelFormat format, std::array<SwizzleSource, 4
     }
 }
 
-void AttachTexture(GLuint fbo, GLenum attachment, const ImageView* image_view) {
+void AttachTexture(GLuint fbo, GLenum attachment, const ImageView* image_view)
+{
     if (False(image_view->flags & VideoCommon::ImageViewFlagBits::Slice)) {
         glNamedFramebufferTexture(fbo, attachment, image_view->DefaultHandle(), 0);
         return;
@@ -364,7 +379,8 @@ void AttachTexture(GLuint fbo, GLenum attachment, const ImageView* image_view) {
 }
 
 OGLTexture MakeImage(const VideoCommon::ImageInfo& info, GLenum gl_internal_format,
-                     GLsizei gl_num_levels) {
+                     GLsizei gl_num_levels)
+{
     const GLenum target = ImageTarget(info);
     const GLsizei width = info.size.width;
     const GLsizei height = info.size.height;
@@ -408,7 +424,8 @@ OGLTexture MakeImage(const VideoCommon::ImageInfo& info, GLenum gl_internal_form
     return texture;
 }
 
-[[nodiscard]] bool IsPixelFormatBGR(PixelFormat format) {
+[[nodiscard]] bool IsPixelFormatBGR(PixelFormat format)
+{
     switch (format) {
     case PixelFormat::B5G6R5_UNORM:
     case PixelFormat::B8G8R8A8_UNORM:
@@ -419,7 +436,8 @@ OGLTexture MakeImage(const VideoCommon::ImageInfo& info, GLenum gl_internal_form
     }
 }
 
-[[nodiscard]] GLenum ShaderFormat(Shader::ImageFormat format) {
+[[nodiscard]] GLenum ShaderFormat(Shader::ImageFormat format)
+{
     switch (format) {
     case Shader::ImageFormat::Typeless:
         break;
@@ -442,12 +460,14 @@ OGLTexture MakeImage(const VideoCommon::ImageInfo& info, GLenum gl_internal_form
     return GL_R32UI;
 }
 
-[[nodiscard]] bool IsAstcRecompressionEnabled() {
+[[nodiscard]] bool IsAstcRecompressionEnabled()
+{
     return Settings::values.astc_recompression.GetValue() !=
            Settings::AstcRecompression::Uncompressed;
 }
 
-[[nodiscard]] GLenum SelectAstcFormat(PixelFormat format, bool is_srgb) {
+[[nodiscard]] GLenum SelectAstcFormat(PixelFormat format, bool is_srgb)
+{
     switch (Settings::values.astc_recompression.GetValue()) {
     case Settings::AstcRecompression::Bc1:
         return is_srgb ? GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT : GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
@@ -466,7 +486,8 @@ TextureCacheRuntime::TextureCacheRuntime(const Device& device_, ProgramManager& 
                                          StagingBufferPool& staging_buffer_pool_)
     : device{device_}, state_tracker{state_tracker_}, staging_buffer_pool{staging_buffer_pool_},
       util_shaders(program_manager), format_conversion_pass{util_shaders},
-      resolution{Settings::values.resolution_info} {
+      resolution{Settings::values.resolution_info}
+{
     static constexpr std::array TARGETS{GL_TEXTURE_1D_ARRAY, GL_TEXTURE_2D_ARRAY, GL_TEXTURE_3D};
     for (size_t i = 0; i < TARGETS.size(); ++i) {
         const GLenum target = TARGETS[i];
@@ -552,23 +573,28 @@ TextureCacheRuntime::TextureCacheRuntime(const Device& device_, ProgramManager& 
 
 TextureCacheRuntime::~TextureCacheRuntime() = default;
 
-void TextureCacheRuntime::Finish() {
+void TextureCacheRuntime::Finish()
+{
     glFinish();
 }
 
-StagingBufferMap TextureCacheRuntime::UploadStagingBuffer(size_t size, bool deferred) {
+StagingBufferMap TextureCacheRuntime::UploadStagingBuffer(size_t size, bool deferred)
+{
     return staging_buffer_pool.RequestUploadBuffer(size);
 }
 
-StagingBufferMap TextureCacheRuntime::DownloadStagingBuffer(size_t size, bool deferred) {
+StagingBufferMap TextureCacheRuntime::DownloadStagingBuffer(size_t size, bool deferred)
+{
     return staging_buffer_pool.RequestDownloadBuffer(size, deferred);
 }
 
-void TextureCacheRuntime::FreeDeferredStagingBuffer(StagingBufferMap& buffer) {
+void TextureCacheRuntime::FreeDeferredStagingBuffer(StagingBufferMap& buffer)
+{
     staging_buffer_pool.FreeDeferredStagingBuffer(buffer);
 }
 
-u64 TextureCacheRuntime::GetDeviceMemoryUsage() const {
+u64 TextureCacheRuntime::GetDeviceMemoryUsage() const
+{
     if (device.CanReportMemoryUsage()) {
         return device_access_memory - device.GetCurrentDedicatedVideoMemory();
     }
@@ -576,7 +602,8 @@ u64 TextureCacheRuntime::GetDeviceMemoryUsage() const {
 }
 
 void TextureCacheRuntime::CopyImage(Image& dst_image, Image& src_image,
-                                    std::span<const ImageCopy> copies) {
+                                    std::span<const ImageCopy> copies)
+{
     const GLuint dst_name = dst_image.Handle();
     const GLuint src_name = src_image.Handle();
     const GLenum dst_target = ImageTarget(dst_image.info);
@@ -592,7 +619,8 @@ void TextureCacheRuntime::CopyImage(Image& dst_image, Image& src_image,
 }
 
 void TextureCacheRuntime::CopyImageMSAA(Image& dst_image, Image& src_image,
-                                        std::span<const VideoCommon::ImageCopy> copies) {
+                                        std::span<const VideoCommon::ImageCopy> copies)
+{
     LOG_DEBUG(Render_OpenGL, "Copying from {} samples to {} samples", src_image.info.num_samples,
               dst_image.info.num_samples);
     // TODO: Leverage the format conversion pass if possible/accurate.
@@ -600,12 +628,14 @@ void TextureCacheRuntime::CopyImageMSAA(Image& dst_image, Image& src_image,
 }
 
 void TextureCacheRuntime::ReinterpretImage(Image& dst, Image& src,
-                                           std::span<const VideoCommon::ImageCopy> copies) {
+                                           std::span<const VideoCommon::ImageCopy> copies)
+{
     LOG_DEBUG(Render_OpenGL, "Converting {} to {}", src.info.format, dst.info.format);
     format_conversion_pass.ConvertImage(dst, src, copies);
 }
 
-bool TextureCacheRuntime::CanImageBeCopied(const Image& dst, const Image& src) {
+bool TextureCacheRuntime::CanImageBeCopied(const Image& dst, const Image& src)
+{
     if (dst.info.type == ImageType::e3D && dst.info.format == PixelFormat::BC4_UNORM) {
         return false;
     }
@@ -616,7 +646,8 @@ bool TextureCacheRuntime::CanImageBeCopied(const Image& dst, const Image& src) {
 }
 
 void TextureCacheRuntime::EmulateCopyImage(Image& dst, Image& src,
-                                           std::span<const ImageCopy> copies) {
+                                           std::span<const ImageCopy> copies)
+{
     if (dst.info.type == ImageType::e3D && dst.info.format == PixelFormat::BC4_UNORM) {
         ASSERT(src.info.type == ImageType::e3D);
         util_shaders.CopyBC4(dst, src, copies);
@@ -630,7 +661,8 @@ void TextureCacheRuntime::EmulateCopyImage(Image& dst, Image& src,
 void TextureCacheRuntime::BlitFramebuffer(Framebuffer* dst, Framebuffer* src,
                                           const Region2D& dst_region, const Region2D& src_region,
                                           Tegra::Engines::Fermi2D::Filter filter,
-                                          Tegra::Engines::Fermi2D::Operation operation) {
+                                          Tegra::Engines::Fermi2D::Operation operation)
+{
     state_tracker.NotifyScissor0();
     state_tracker.NotifyRasterizeEnable();
     state_tracker.NotifyFramebufferSRGB();
@@ -652,7 +684,8 @@ void TextureCacheRuntime::BlitFramebuffer(Framebuffer* dst, Framebuffer* src,
 
 void TextureCacheRuntime::AccelerateImageUpload(Image& image, const StagingBufferMap& map,
                                                 std::span<const SwizzleParameters> swizzles,
-                                                u32 z_start, u32 z_count) {
+                                                u32 z_start, u32 z_count)
+{
     switch (image.info.type) {
     case ImageType::e2D:
         if (IsPixelFormatASTC(image.info.format)) {
@@ -670,11 +703,13 @@ void TextureCacheRuntime::AccelerateImageUpload(Image& image, const StagingBuffe
     }
 }
 
-void TextureCacheRuntime::InsertUploadMemoryBarrier() {
+void TextureCacheRuntime::InsertUploadMemoryBarrier()
+{
     glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT | GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 }
 
-FormatProperties TextureCacheRuntime::FormatInfo(ImageType type, GLenum internal_format) const {
+FormatProperties TextureCacheRuntime::FormatInfo(ImageType type, GLenum internal_format) const
+{
     switch (type) {
     case ImageType::e1D:
         return format_properties[0].at(internal_format);
@@ -689,13 +724,15 @@ FormatProperties TextureCacheRuntime::FormatInfo(ImageType type, GLenum internal
     }
 }
 
-bool TextureCacheRuntime::HasNativeASTC() const noexcept {
+bool TextureCacheRuntime::HasNativeASTC() const noexcept
+{
     return device.HasASTC();
 }
 
 Image::Image(TextureCacheRuntime& runtime_, const VideoCommon::ImageInfo& info_, GPUVAddr gpu_addr_,
              VAddr cpu_addr_)
-    : VideoCommon::ImageBase(info_, gpu_addr_, cpu_addr_), runtime{&runtime_} {
+    : VideoCommon::ImageBase(info_, gpu_addr_, cpu_addr_), runtime{&runtime_}
+{
     if (CanBeDecodedAsync(*runtime, info)) {
         flags |= ImageFlagBits::AsynchronousDecode;
     } else if (CanBeAccelerated(*runtime, info)) {
@@ -731,12 +768,15 @@ Image::Image(TextureCacheRuntime& runtime_, const VideoCommon::ImageInfo& info_,
     }
 }
 
-Image::Image(const VideoCommon::NullImageParams& params) : VideoCommon::ImageBase{params} {}
+Image::Image(const VideoCommon::NullImageParams& params) : VideoCommon::ImageBase{params}
+{
+}
 
 Image::~Image() = default;
 
 void Image::UploadMemory(GLuint buffer_handle, size_t buffer_offset,
-                         std::span<const VideoCommon::BufferImageCopy> copies) {
+                         std::span<const VideoCommon::BufferImageCopy> copies)
+{
     const bool is_rescaled = True(flags & ImageFlagBits::Rescaled);
     if (is_rescaled) {
         ScaleDown(true);
@@ -769,19 +809,22 @@ void Image::UploadMemory(GLuint buffer_handle, size_t buffer_offset,
 }
 
 void Image::UploadMemory(const StagingBufferMap& map,
-                         std::span<const VideoCommon::BufferImageCopy> copies) {
+                         std::span<const VideoCommon::BufferImageCopy> copies)
+{
     UploadMemory(map.buffer, map.offset, copies);
 }
 
 void Image::DownloadMemory(GLuint buffer_handle, size_t buffer_offset,
-                           std::span<const VideoCommon::BufferImageCopy> copies) {
+                           std::span<const VideoCommon::BufferImageCopy> copies)
+{
     std::array buffer_handles{buffer_handle};
     std::array buffer_offsets{buffer_offset};
     DownloadMemory(buffer_handles, buffer_offsets, copies);
 }
 
 void Image::DownloadMemory(std::span<GLuint> buffer_handles, std::span<size_t> buffer_offsets,
-                           std::span<const VideoCommon::BufferImageCopy> copies) {
+                           std::span<const VideoCommon::BufferImageCopy> copies)
+{
     const bool is_rescaled = True(flags & ImageFlagBits::Rescaled);
     if (is_rescaled) {
         ScaleDown();
@@ -816,11 +859,13 @@ void Image::DownloadMemory(std::span<GLuint> buffer_handles, std::span<size_t> b
 }
 
 void Image::DownloadMemory(StagingBufferMap& map,
-                           std::span<const VideoCommon::BufferImageCopy> copies) {
+                           std::span<const VideoCommon::BufferImageCopy> copies)
+{
     DownloadMemory(map.buffer, map.offset, copies);
 }
 
-GLuint Image::StorageHandle() noexcept {
+GLuint Image::StorageHandle() noexcept
+{
     switch (info.format) {
     case PixelFormat::A8B8G8R8_SRGB:
     case PixelFormat::B8G8R8A8_SRGB:
@@ -854,7 +899,8 @@ GLuint Image::StorageHandle() noexcept {
     }
 }
 
-void Image::CopyBufferToImage(const VideoCommon::BufferImageCopy& copy, size_t buffer_offset) {
+void Image::CopyBufferToImage(const VideoCommon::BufferImageCopy& copy, size_t buffer_offset)
+{
     // Compressed formats don't have a pixel format or type
     const bool is_compressed = gl_format == GL_NONE;
     const void* const offset = reinterpret_cast<const void*>(copy.buffer_offset + buffer_offset);
@@ -910,7 +956,8 @@ void Image::CopyBufferToImage(const VideoCommon::BufferImageCopy& copy, size_t b
     }
 }
 
-void Image::CopyImageToBuffer(const VideoCommon::BufferImageCopy& copy, size_t buffer_offset) {
+void Image::CopyImageToBuffer(const VideoCommon::BufferImageCopy& copy, size_t buffer_offset)
+{
     const GLint x_offset = copy.image_offset.x;
     const GLsizei width = copy.image_extent.width;
 
@@ -956,7 +1003,8 @@ void Image::CopyImageToBuffer(const VideoCommon::BufferImageCopy& copy, size_t b
     }
 }
 
-void Image::Scale(bool up_scale) {
+void Image::Scale(bool up_scale)
+{
     const auto format_type = GetFormatType(info.format);
     const GLenum attachment = [format_type] {
         switch (format_type) {
@@ -1055,11 +1103,13 @@ void Image::Scale(bool up_scale) {
     state_tracker.NotifyScissor0();
 }
 
-bool Image::IsRescaled() const {
+bool Image::IsRescaled() const
+{
     return True(flags & ImageFlagBits::Rescaled);
 }
 
-bool Image::ScaleUp(bool ignore) {
+bool Image::ScaleUp(bool ignore)
+{
     const auto& resolution = runtime->resolution;
     if (!resolution.active) {
         return false;
@@ -1085,7 +1135,8 @@ bool Image::ScaleUp(bool ignore) {
     return true;
 }
 
-bool Image::ScaleDown(bool ignore) {
+bool Image::ScaleDown(bool ignore)
+{
     const auto& resolution = runtime->resolution;
     if (!resolution.active) {
         return false;
@@ -1105,7 +1156,8 @@ bool Image::ScaleDown(bool ignore) {
 ImageView::ImageView(TextureCacheRuntime& runtime, const VideoCommon::ImageViewInfo& info,
                      ImageId image_id_, Image& image, const SlotVector<Image>&)
     : VideoCommon::ImageViewBase{info, image.info, image_id_, image.gpu_addr},
-      views{runtime.null_image_views} {
+      views{runtime.null_image_views}
+{
     const Device& device = runtime.device;
     if (True(image.flags & ImageFlagBits::Converted)) {
         const bool is_srgb = IsPixelFormatSRGB(info.format);
@@ -1202,22 +1254,29 @@ ImageView::ImageView(TextureCacheRuntime& runtime, const VideoCommon::ImageViewI
 ImageView::ImageView(TextureCacheRuntime&, const VideoCommon::ImageInfo& info,
                      const VideoCommon::ImageViewInfo& view_info, GPUVAddr gpu_addr_)
     : VideoCommon::ImageViewBase{info, view_info, gpu_addr_},
-      buffer_size{VideoCommon::CalculateGuestSizeInBytes(info)} {}
+      buffer_size{VideoCommon::CalculateGuestSizeInBytes(info)}
+{
+}
 
 ImageView::ImageView(TextureCacheRuntime&, const VideoCommon::ImageInfo& info,
                      const VideoCommon::ImageViewInfo& view_info)
-    : VideoCommon::ImageViewBase{info, view_info, 0} {}
+    : VideoCommon::ImageViewBase{info, view_info, 0}
+{
+}
 
 ImageView::ImageView(TextureCacheRuntime& runtime, const VideoCommon::NullImageViewParams& params)
-    : VideoCommon::ImageViewBase{params}, views{runtime.null_image_views} {}
+    : VideoCommon::ImageViewBase{params}, views{runtime.null_image_views}
+{
+}
 
 ImageView::~ImageView() = default;
 
-GLuint ImageView::StorageView(Shader::TextureType texture_type, Shader::ImageFormat image_format) {
+GLuint ImageView::StorageView(Shader::TextureType texture_type, Shader::ImageFormat image_format)
+{
     if (image_format == Shader::ImageFormat::Typeless)
         return Handle(texture_type);
-    const bool is_signed = image_format == Shader::ImageFormat::R8_SINT
-        || image_format == Shader::ImageFormat::R16_SINT;
+    const bool is_signed = image_format == Shader::ImageFormat::R8_SINT ||
+                           image_format == Shader::ImageFormat::R16_SINT;
     if (!storage_views)
         storage_views = {OpenGL::ImageView::StorageViews{}};
     auto& type_views{is_signed ? storage_views->signeds : storage_views->unsigneds};
@@ -1227,11 +1286,13 @@ GLuint ImageView::StorageView(Shader::TextureType texture_type, Shader::ImageFor
     return view;
 }
 
-void ImageView::SetupView(Shader::TextureType view_type) {
+void ImageView::SetupView(Shader::TextureType view_type)
+{
     views[static_cast<size_t>(view_type)] = MakeView(view_type, internal_format);
 }
 
-GLuint ImageView::MakeView(Shader::TextureType view_type, GLenum view_format) {
+GLuint ImageView::MakeView(Shader::TextureType view_type, GLenum view_format)
+{
     VideoCommon::SubresourceRange view_range;
     switch (view_type) {
     case Shader::TextureType::Color1D:
@@ -1269,7 +1330,8 @@ GLuint ImageView::MakeView(Shader::TextureType view_type, GLenum view_format) {
     return view.handle;
 }
 
-Sampler::Sampler(TextureCacheRuntime& runtime, const TSCEntry& config) {
+Sampler::Sampler(TextureCacheRuntime& runtime, const TSCEntry& config)
+{
     const GLenum compare_mode = config.depth_compare_enabled ? GL_COMPARE_REF_TO_TEXTURE : GL_NONE;
     const GLenum compare_func = MaxwellToGL::DepthCompareFunc(config.depth_compare_func);
     const GLenum mag = MaxwellToGL::TextureFilterMode(config.mag_filter, TextureMipmapFilter::None);
@@ -1325,7 +1387,8 @@ Sampler::Sampler(TextureCacheRuntime& runtime, const TSCEntry& config) {
 }
 
 Framebuffer::Framebuffer(TextureCacheRuntime& runtime, std::span<ImageView*, NUM_RT> color_buffers,
-                         ImageView* depth_buffer, const VideoCommon::RenderTargets& key) {
+                         ImageView* depth_buffer, const VideoCommon::RenderTargets& key)
+{
     framebuffer.Create();
     GLuint handle = framebuffer.handle;
 
@@ -1389,11 +1452,13 @@ Framebuffer::Framebuffer(TextureCacheRuntime& runtime, std::span<ImageView*, NUM
 
 Framebuffer::~Framebuffer() = default;
 
-FormatConversionPass::FormatConversionPass(UtilShaders& util_shaders_)
-    : util_shaders{util_shaders_} {}
+FormatConversionPass::FormatConversionPass(UtilShaders& util_shaders_) : util_shaders{util_shaders_}
+{
+}
 
 void FormatConversionPass::ConvertImage(Image& dst_image, Image& src_image,
-                                        std::span<const VideoCommon::ImageCopy> copies) {
+                                        std::span<const VideoCommon::ImageCopy> copies)
+{
     const GLenum dst_target = ImageTarget(dst_image.info);
     const GLenum src_target = ImageTarget(src_image.info);
     const u32 img_bpp = BytesPerBlock(src_image.info.format);

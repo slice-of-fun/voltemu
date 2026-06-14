@@ -7,6 +7,7 @@
 #pragma once
 
 #include <string>
+
 #include "common/logging.h"
 
 namespace Network::VerifyUser {

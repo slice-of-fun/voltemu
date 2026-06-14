@@ -55,19 +55,22 @@ union Encoding {
     BitField<53, 4, u64> encoding;
 };
 
-void CheckAlignment(IR::Reg reg, size_t alignment) {
+void CheckAlignment(IR::Reg reg, size_t alignment)
+{
     if (!IR::IsAligned(reg, alignment)) {
         throw NotImplementedException("Unaligned source register {}", reg);
     }
 }
 
-IR::Value MakeOffset(TranslatorVisitor& v, IR::Reg reg) {
+IR::Value MakeOffset(TranslatorVisitor& v, IR::Reg reg)
+{
     const IR::U32 value{v.X(reg)};
     return v.ir.CompositeConstruct(v.ir.BitFieldExtract(value, v.ir.Imm32(0), v.ir.Imm32(4), true),
                                    v.ir.BitFieldExtract(value, v.ir.Imm32(4), v.ir.Imm32(4), true));
 }
 
-IR::Value Sample(TranslatorVisitor& v, u64 insn) {
+IR::Value Sample(TranslatorVisitor& v, u64 insn)
+{
     const Encoding tlds{insn};
     const IR::U32 handle{v.ir.Imm32(static_cast<u32>(tlds.cbuf_offset * 4))};
     const IR::Reg reg_a{tlds.src_reg_a};
@@ -140,7 +143,8 @@ IR::Value Sample(TranslatorVisitor& v, u64 insn) {
     return v.ir.ImageFetch(handle, coords, offsets, lod, multisample, info);
 }
 
-unsigned Swizzle(u64 insn) {
+unsigned Swizzle(u64 insn)
+{
     const Encoding tlds{insn};
     const size_t encoding{tlds.swizzle};
     if (tlds.dest_reg_b == IR::Reg::RZ) {
@@ -156,11 +160,13 @@ unsigned Swizzle(u64 insn) {
     }
 }
 
-IR::F32 Extract(TranslatorVisitor& v, const IR::Value& sample, unsigned component) {
+IR::F32 Extract(TranslatorVisitor& v, const IR::Value& sample, unsigned component)
+{
     return IR::F32{v.ir.CompositeExtract(sample, component)};
 }
 
-IR::Reg RegStoreComponent32(u64 insn, unsigned index) {
+IR::Reg RegStoreComponent32(u64 insn, unsigned index)
+{
     const Encoding tlds{insn};
     switch (index) {
     case 0:
@@ -177,7 +183,8 @@ IR::Reg RegStoreComponent32(u64 insn, unsigned index) {
     throw LogicError("Invalid store index {}", index);
 }
 
-void Store32(TranslatorVisitor& v, u64 insn, const IR::Value& sample) {
+void Store32(TranslatorVisitor& v, u64 insn, const IR::Value& sample)
+{
     const unsigned swizzle{Swizzle(insn)};
     unsigned store_index{0};
     for (unsigned component = 0; component < 4; ++component) {
@@ -190,11 +197,13 @@ void Store32(TranslatorVisitor& v, u64 insn, const IR::Value& sample) {
     }
 }
 
-IR::U32 Pack(TranslatorVisitor& v, const IR::F32& lhs, const IR::F32& rhs) {
+IR::U32 Pack(TranslatorVisitor& v, const IR::F32& lhs, const IR::F32& rhs)
+{
     return v.ir.PackHalf2x16(v.ir.CompositeConstruct(lhs, rhs));
 }
 
-void Store16(TranslatorVisitor& v, u64 insn, const IR::Value& sample) {
+void Store16(TranslatorVisitor& v, u64 insn, const IR::Value& sample)
+{
     const unsigned swizzle{Swizzle(insn)};
     unsigned store_index{0};
     std::array<IR::F32, 4> swizzled;
@@ -230,7 +239,8 @@ void Store16(TranslatorVisitor& v, u64 insn, const IR::Value& sample) {
 }
 } // Anonymous namespace
 
-void TranslatorVisitor::TLDS(u64 insn) {
+void TranslatorVisitor::TLDS(u64 insn)
+{
     const IR::Value sample{Sample(*this, insn)};
     if (Encoding{insn}.precision == Precision::F32) {
         Store32(*this, insn, sample);

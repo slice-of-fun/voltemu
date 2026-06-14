@@ -1,15 +1,17 @@
 // SPDX-FileCopyrightText: Copyright 2020 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "yuzu/configuration/configure_vibration.h"
+
 #include "common/settings.h"
 #include "hid_core/frontend/emulated_controller.h"
 #include "hid_core/hid_core.h"
 #include "hid_core/hid_types.h"
 #include "ui_configure_vibration.h"
-#include "yuzu/configuration/configure_vibration.h"
 
 ConfigureVibration::ConfigureVibration(QWidget* parent, Core::HID::HIDCore& hid_core_)
-    : QDialog(parent), ui(std::make_unique<Ui::ConfigureVibration>()), hid_core{hid_core_} {
+    : QDialog(parent), ui(std::make_unique<Ui::ConfigureVibration>()), hid_core{hid_core_}
+{
     ui->setupUi(this);
 
     vibration_groupboxes = {
@@ -48,7 +50,8 @@ ConfigureVibration::ConfigureVibration(QWidget* parent, Core::HID::HIDCore& hid_
     RetranslateUI();
 }
 
-ConfigureVibration::~ConfigureVibration() {
+ConfigureVibration::~ConfigureVibration()
+{
     StopVibrations();
 
     for (std::size_t i = 0; i < NUM_PLAYERS; ++i) {
@@ -57,7 +60,8 @@ ConfigureVibration::~ConfigureVibration() {
     }
 };
 
-void ConfigureVibration::ApplyConfiguration() {
+void ConfigureVibration::ApplyConfiguration()
+{
     auto& players = Settings::values.players.GetValue();
 
     for (std::size_t i = 0; i < NUM_PLAYERS; ++i) {
@@ -69,7 +73,8 @@ void ConfigureVibration::ApplyConfiguration() {
         ui->checkBoxAccurateVibration->isChecked());
 }
 
-void ConfigureVibration::changeEvent(QEvent* event) {
+void ConfigureVibration::changeEvent(QEvent* event)
+{
     if (event->type() == QEvent::LanguageChange) {
         RetranslateUI();
     }
@@ -77,12 +82,14 @@ void ConfigureVibration::changeEvent(QEvent* event) {
     QDialog::changeEvent(event);
 }
 
-void ConfigureVibration::RetranslateUI() {
+void ConfigureVibration::RetranslateUI()
+{
     ui->retranslateUi(this);
 }
 
 void ConfigureVibration::VibrateController(Core::HID::ControllerTriggerType type,
-                                           std::size_t player_index) {
+                                           std::size_t player_index)
+{
     if (type != Core::HID::ControllerTriggerType::Button) {
         return;
     }
@@ -124,7 +131,8 @@ void ConfigureVibration::VibrateController(Core::HID::ControllerTriggerType type
     player.vibration_strength = old_vibration_strength;
 }
 
-void ConfigureVibration::StopVibrations() {
+void ConfigureVibration::StopVibrations()
+{
     for (std::size_t i = 0; i < NUM_PLAYERS; ++i) {
         auto controller = hid_core.GetEmulatedControllerByIndex(i);
         controller->SetVibration(Core::HID::DeviceIndex::Left, Core::HID::DEFAULT_VIBRATION_VALUE);

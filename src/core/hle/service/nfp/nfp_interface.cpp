@@ -4,6 +4,8 @@
 // SPDX-FileCopyrightText: Copyright 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/nfp/nfp_interface.h"
+
 #include "common/logging.h"
 #include "core/core.h"
 #include "core/hle/kernel/k_event.h"
@@ -11,7 +13,6 @@
 #include "core/hle/service/nfc/common/device.h"
 #include "core/hle/service/nfc/common/device_manager.h"
 #include "core/hle/service/nfc/nfc_types.h"
-#include "core/hle/service/nfp/nfp_interface.h"
 #include "core/hle/service/nfp/nfp_result.h"
 #include "core/hle/service/nfp/nfp_types.h"
 #include "hid_core/hid_types.h"
@@ -19,27 +20,34 @@
 namespace Service::NFP {
 
 Interface::Interface(Core::System& system_, const char* name)
-    : NfcInterface{system_, name, NFC::BackendType::Nfp} {}
+    : NfcInterface{system_, name, NFC::BackendType::Nfp}
+{
+}
 
 Interface::~Interface() = default;
 
-void Interface::InitializeSystem(HLERequestContext& ctx) {
+void Interface::InitializeSystem(HLERequestContext& ctx)
+{
     Initialize(ctx);
 }
 
-void Interface::InitializeDebug(HLERequestContext& ctx) {
+void Interface::InitializeDebug(HLERequestContext& ctx)
+{
     Initialize(ctx);
 }
 
-void Interface::FinalizeSystem(HLERequestContext& ctx) {
+void Interface::FinalizeSystem(HLERequestContext& ctx)
+{
     Finalize(ctx);
 }
 
-void Interface::FinalizeDebug(HLERequestContext& ctx) {
+void Interface::FinalizeDebug(HLERequestContext& ctx)
+{
     Finalize(ctx);
 }
 
-void Interface::Mount(HLERequestContext& ctx) {
+void Interface::Mount(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     const auto device_handle{rp.Pop<u64>()};
     const auto model_type{rp.PopEnum<ModelType>()};
@@ -54,7 +62,8 @@ void Interface::Mount(HLERequestContext& ctx) {
     rb.Push(result);
 }
 
-void Interface::Unmount(HLERequestContext& ctx) {
+void Interface::Unmount(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     const auto device_handle{rp.Pop<u64>()};
     LOG_INFO(Service_NFP, "called, device_handle={}", device_handle);
@@ -66,7 +75,8 @@ void Interface::Unmount(HLERequestContext& ctx) {
     rb.Push(result);
 }
 
-void Interface::OpenApplicationArea(HLERequestContext& ctx) {
+void Interface::OpenApplicationArea(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     const auto device_handle{rp.Pop<u64>()};
     const auto access_id{rp.Pop<u32>()};
@@ -79,7 +89,8 @@ void Interface::OpenApplicationArea(HLERequestContext& ctx) {
     rb.Push(result);
 }
 
-void Interface::GetApplicationArea(HLERequestContext& ctx) {
+void Interface::GetApplicationArea(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     const auto device_handle{rp.Pop<u64>()};
     const auto data_size = ctx.GetWriteBufferSize();
@@ -101,7 +112,8 @@ void Interface::GetApplicationArea(HLERequestContext& ctx) {
     rb.Push(static_cast<u32>(data_size));
 }
 
-void Interface::SetApplicationArea(HLERequestContext& ctx) {
+void Interface::SetApplicationArea(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     const auto device_handle{rp.Pop<u64>()};
     const auto data{ctx.ReadBuffer()};
@@ -114,7 +126,8 @@ void Interface::SetApplicationArea(HLERequestContext& ctx) {
     rb.Push(result);
 }
 
-void Interface::Flush(HLERequestContext& ctx) {
+void Interface::Flush(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     const auto device_handle{rp.Pop<u64>()};
     LOG_INFO(Service_NFP, "called, device_handle={}", device_handle);
@@ -126,7 +139,8 @@ void Interface::Flush(HLERequestContext& ctx) {
     rb.Push(result);
 }
 
-void Interface::Restore(HLERequestContext& ctx) {
+void Interface::Restore(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     const auto device_handle{rp.Pop<u64>()};
     LOG_INFO(Service_NFP, "called, device_handle={}", device_handle);
@@ -138,7 +152,8 @@ void Interface::Restore(HLERequestContext& ctx) {
     rb.Push(result);
 }
 
-void Interface::CreateApplicationArea(HLERequestContext& ctx) {
+void Interface::CreateApplicationArea(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     const auto device_handle{rp.Pop<u64>()};
     const auto access_id{rp.Pop<u32>()};
@@ -153,7 +168,8 @@ void Interface::CreateApplicationArea(HLERequestContext& ctx) {
     rb.Push(result);
 }
 
-void Interface::GetRegisterInfo(HLERequestContext& ctx) {
+void Interface::GetRegisterInfo(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     const auto device_handle{rp.Pop<u64>()};
     LOG_INFO(Service_NFP, "called, device_handle={}", device_handle);
@@ -170,7 +186,8 @@ void Interface::GetRegisterInfo(HLERequestContext& ctx) {
     rb.Push(result);
 }
 
-void Interface::GetCommonInfo(HLERequestContext& ctx) {
+void Interface::GetCommonInfo(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     const auto device_handle{rp.Pop<u64>()};
     LOG_INFO(Service_NFP, "called, device_handle={}", device_handle);
@@ -187,7 +204,8 @@ void Interface::GetCommonInfo(HLERequestContext& ctx) {
     rb.Push(result);
 }
 
-void Interface::GetModelInfo(HLERequestContext& ctx) {
+void Interface::GetModelInfo(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     const auto device_handle{rp.Pop<u64>()};
     LOG_INFO(Service_NFP, "called, device_handle={}", device_handle);
@@ -204,7 +222,8 @@ void Interface::GetModelInfo(HLERequestContext& ctx) {
     rb.Push(result);
 }
 
-void Interface::GetApplicationAreaSize(HLERequestContext& ctx) {
+void Interface::GetApplicationAreaSize(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     const auto device_handle{rp.Pop<u64>()};
     LOG_DEBUG(Service_NFP, "called, device_handle={}", device_handle);
@@ -214,7 +233,8 @@ void Interface::GetApplicationAreaSize(HLERequestContext& ctx) {
     rb.Push(GetManager()->GetApplicationAreaSize());
 }
 
-void Interface::RecreateApplicationArea(HLERequestContext& ctx) {
+void Interface::RecreateApplicationArea(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     const auto device_handle{rp.Pop<u64>()};
     const auto access_id{rp.Pop<u32>()};
@@ -229,7 +249,8 @@ void Interface::RecreateApplicationArea(HLERequestContext& ctx) {
     rb.Push(result);
 }
 
-void Interface::Format(HLERequestContext& ctx) {
+void Interface::Format(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     const auto device_handle{rp.Pop<u64>()};
     LOG_INFO(Service_NFP, "called, device_handle={}", device_handle);
@@ -241,7 +262,8 @@ void Interface::Format(HLERequestContext& ctx) {
     rb.Push(result);
 }
 
-void Interface::GetAdminInfo(HLERequestContext& ctx) {
+void Interface::GetAdminInfo(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     const auto device_handle{rp.Pop<u64>()};
     LOG_INFO(Service_NFP, "called, device_handle={}", device_handle);
@@ -258,7 +280,8 @@ void Interface::GetAdminInfo(HLERequestContext& ctx) {
     rb.Push(result);
 }
 
-void Interface::GetRegisterInfoPrivate(HLERequestContext& ctx) {
+void Interface::GetRegisterInfoPrivate(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     const auto device_handle{rp.Pop<u64>()};
     LOG_INFO(Service_NFP, "called, device_handle={}", device_handle);
@@ -275,7 +298,8 @@ void Interface::GetRegisterInfoPrivate(HLERequestContext& ctx) {
     rb.Push(result);
 }
 
-void Interface::SetRegisterInfoPrivate(HLERequestContext& ctx) {
+void Interface::SetRegisterInfoPrivate(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     const auto device_handle{rp.Pop<u64>()};
     const auto register_info_buffer{ctx.ReadBuffer()};
@@ -291,7 +315,8 @@ void Interface::SetRegisterInfoPrivate(HLERequestContext& ctx) {
     rb.Push(result);
 }
 
-void Interface::DeleteRegisterInfo(HLERequestContext& ctx) {
+void Interface::DeleteRegisterInfo(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     const auto device_handle{rp.Pop<u64>()};
     LOG_INFO(Service_NFP, "called, device_handle={}", device_handle);
@@ -303,7 +328,8 @@ void Interface::DeleteRegisterInfo(HLERequestContext& ctx) {
     rb.Push(result);
 }
 
-void Interface::DeleteApplicationArea(HLERequestContext& ctx) {
+void Interface::DeleteApplicationArea(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     const auto device_handle{rp.Pop<u64>()};
     LOG_INFO(Service_NFP, "called, device_handle={}", device_handle);
@@ -315,7 +341,8 @@ void Interface::DeleteApplicationArea(HLERequestContext& ctx) {
     rb.Push(result);
 }
 
-void Interface::ExistsApplicationArea(HLERequestContext& ctx) {
+void Interface::ExistsApplicationArea(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     const auto device_handle{rp.Pop<u64>()};
     LOG_INFO(Service_NFP, "called, device_handle={}", device_handle);
@@ -335,7 +362,8 @@ void Interface::ExistsApplicationArea(HLERequestContext& ctx) {
     rb.Push(has_application_area);
 }
 
-void Interface::GetAll(HLERequestContext& ctx) {
+void Interface::GetAll(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     const auto device_handle{rp.Pop<u64>()};
     LOG_INFO(Service_NFP, "called, device_handle={}", device_handle);
@@ -352,7 +380,8 @@ void Interface::GetAll(HLERequestContext& ctx) {
     rb.Push(result);
 }
 
-void Interface::SetAll(HLERequestContext& ctx) {
+void Interface::SetAll(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     const auto device_handle{rp.Pop<u64>()};
     const auto nfp_data_buffer{ctx.ReadBuffer()};
@@ -368,7 +397,8 @@ void Interface::SetAll(HLERequestContext& ctx) {
     rb.Push(result);
 }
 
-void Interface::FlushDebug(HLERequestContext& ctx) {
+void Interface::FlushDebug(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     const auto device_handle{rp.Pop<u64>()};
     LOG_INFO(Service_NFP, "called, device_handle={}", device_handle);
@@ -380,7 +410,8 @@ void Interface::FlushDebug(HLERequestContext& ctx) {
     rb.Push(result);
 }
 
-void Interface::BreakTag(HLERequestContext& ctx) {
+void Interface::BreakTag(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     const auto device_handle{rp.Pop<u64>()};
     const auto break_type{rp.PopEnum<BreakType>()};
@@ -394,7 +425,8 @@ void Interface::BreakTag(HLERequestContext& ctx) {
     rb.Push(result);
 }
 
-void Interface::ReadBackupData(HLERequestContext& ctx) {
+void Interface::ReadBackupData(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     const auto device_handle{rp.Pop<u64>()};
     LOG_INFO(Service_NFP, "called, device_handle={}", device_handle);
@@ -411,7 +443,8 @@ void Interface::ReadBackupData(HLERequestContext& ctx) {
     rb.Push(result);
 }
 
-void Interface::WriteBackupData(HLERequestContext& ctx) {
+void Interface::WriteBackupData(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     const auto device_handle{rp.Pop<u64>()};
     const auto backup_data_buffer{ctx.ReadBuffer()};
@@ -424,7 +457,8 @@ void Interface::WriteBackupData(HLERequestContext& ctx) {
     rb.Push(result);
 }
 
-void Interface::WriteNtf(HLERequestContext& ctx) {
+void Interface::WriteNtf(HLERequestContext& ctx)
+{
     IPC::RequestParser rp{ctx};
     const auto device_handle{rp.Pop<u64>()};
     const auto write_type{rp.PopEnum<WriteType>()};

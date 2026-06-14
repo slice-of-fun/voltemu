@@ -1,18 +1,21 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "audio_core/renderer/voice/voice_info.h"
+
 #include "audio_core/renderer/memory/pool_mapper.h"
 #include "audio_core/renderer/voice/voice_context.h"
-#include "audio_core/renderer/voice/voice_info.h"
 #include "audio_core/renderer/voice/voice_state.h"
 
 namespace AudioCore::Renderer {
 
-VoiceInfo::VoiceInfo() {
+VoiceInfo::VoiceInfo()
+{
     Initialize();
 }
 
-void VoiceInfo::Initialize() {
+void VoiceInfo::Initialize()
+{
     in_use = false;
     is_new = false;
     id = 0;
@@ -43,13 +46,15 @@ void VoiceInfo::Initialize() {
     }
 }
 
-bool VoiceInfo::ShouldUpdateParameters(const InParameter& params) const {
+bool VoiceInfo::ShouldUpdateParameters(const InParameter& params) const
+{
     return data_address.GetCpuAddr() != params.src_data_address ||
            data_address.GetSize() != params.src_data_size || data_unmapped;
 }
 
 void VoiceInfo::UpdateParameters(BehaviorInfo::ErrorInfo& error_info, const InParameter& params,
-                                 const PoolMapper& pool_mapper, const BehaviorInfo& behavior) {
+                                 const PoolMapper& pool_mapper, const BehaviorInfo& behavior)
+{
     in_use = params.in_use;
     id = params.id;
     node_id = params.node_id;
@@ -102,7 +107,8 @@ void VoiceInfo::UpdateParameters(BehaviorInfo::ErrorInfo& error_info, const InPa
     }
 }
 
-void VoiceInfo::UpdatePlayState(const PlayState state) {
+void VoiceInfo::UpdatePlayState(const PlayState state)
+{
     last_play_state = current_play_state;
 
     switch (state) {
@@ -123,7 +129,8 @@ void VoiceInfo::UpdatePlayState(const PlayState state) {
     }
 }
 
-void VoiceInfo::UpdateSrcQuality(const SrcQuality quality) {
+void VoiceInfo::UpdateSrcQuality(const SrcQuality quality)
+{
     switch (quality) {
     case SrcQuality::Medium:
         src_quality = quality;
@@ -143,7 +150,8 @@ void VoiceInfo::UpdateSrcQuality(const SrcQuality quality) {
 void VoiceInfo::UpdateWaveBuffers(std::span<std::array<BehaviorInfo::ErrorInfo, 2>> error_infos,
                                   [[maybe_unused]] u32 error_count, const InParameter& params,
                                   std::span<VoiceState*> voice_states,
-                                  const PoolMapper& pool_mapper, const BehaviorInfo& behavior) {
+                                  const PoolMapper& pool_mapper, const BehaviorInfo& behavior)
+{
     if (params.is_new) {
         for (size_t i = 0; i < wavebuffers.size(); i++) {
             wavebuffers[i].Initialize();
@@ -165,7 +173,8 @@ void VoiceInfo::UpdateWaveBuffer(std::span<BehaviorInfo::ErrorInfo> error_info,
                                  WaveBuffer& wave_buffer,
                                  const WaveBufferInternal& wave_buffer_internal,
                                  const SampleFormat sample_format_, const bool valid,
-                                 const PoolMapper& pool_mapper, const BehaviorInfo& behavior) {
+                                 const PoolMapper& pool_mapper, const BehaviorInfo& behavior)
+{
     if (!valid && wave_buffer.sent_to_DSP && wave_buffer.buffer_address.GetCpuAddr() != 0) {
         pool_mapper.ForceUnmapPointer(wave_buffer.buffer_address);
         wave_buffer.buffer_address.Setup(0, 0);
@@ -257,12 +266,14 @@ void VoiceInfo::UpdateWaveBuffer(std::span<BehaviorInfo::ErrorInfo> error_info,
     }
 }
 
-bool VoiceInfo::ShouldUpdateWaveBuffer(const WaveBufferInternal& wave_buffer_internal) const {
+bool VoiceInfo::ShouldUpdateWaveBuffer(const WaveBufferInternal& wave_buffer_internal) const
+{
     return !wave_buffer_internal.sent_to_DSP || buffer_unmapped;
 }
 
 void VoiceInfo::WriteOutStatus(OutStatus& out_status, const InParameter& params,
-                               std::span<VoiceState*> voice_states) {
+                               std::span<VoiceState*> voice_states)
+{
     if (params.is_new) {
         is_new = true;
     }
@@ -278,16 +289,19 @@ void VoiceInfo::WriteOutStatus(OutStatus& out_status, const InParameter& params,
     }
 }
 
-bool VoiceInfo::ShouldSkip() const {
+bool VoiceInfo::ShouldSkip() const
+{
     return !in_use || wave_buffer_count == 0 || data_unmapped || buffer_unmapped || voice_dropped;
 }
 
-bool VoiceInfo::HasAnyConnection() const {
+bool VoiceInfo::HasAnyConnection() const
+{
     return mix_id != UnusedMixId || splitter_id != UnusedSplitterId;
 }
 
 void VoiceInfo::FlushWaveBuffers(const u32 flush_count, std::span<VoiceState*> voice_states,
-                                 const s8 channel_count_) {
+                                 const s8 channel_count_)
+{
     auto wave_index{wave_buffer_index};
 
     for (size_t i = 0; i < flush_count; i++) {
@@ -307,7 +321,8 @@ void VoiceInfo::FlushWaveBuffers(const u32 flush_count, std::span<VoiceState*> v
     }
 }
 
-bool VoiceInfo::UpdateParametersForCommandGeneration(std::span<VoiceState*> voice_states) {
+bool VoiceInfo::UpdateParametersForCommandGeneration(std::span<VoiceState*> voice_states)
+{
     if (flush_buffer_count > 0) {
         FlushWaveBuffers(flush_buffer_count, voice_states, channel_count);
         flush_buffer_count = 0;
@@ -379,7 +394,8 @@ bool VoiceInfo::UpdateParametersForCommandGeneration(std::span<VoiceState*> voic
     return was_playing;
 }
 
-bool VoiceInfo::UpdateForCommandGeneration(VoiceContext& voice_context) {
+bool VoiceInfo::UpdateForCommandGeneration(VoiceContext& voice_context)
+{
     std::array<VoiceState*, MaxChannels> voice_states{};
 
     if (is_new) {
@@ -395,7 +411,8 @@ bool VoiceInfo::UpdateForCommandGeneration(VoiceContext& voice_context) {
     return UpdateParametersForCommandGeneration(voice_states);
 }
 
-void VoiceInfo::ResetResources(VoiceContext& voice_context) const {
+void VoiceInfo::ResetResources(VoiceContext& voice_context) const
+{
     for (s8 channel = 0; channel < channel_count; channel++) {
         auto& state{voice_context.GetDspSharedState(channel_resource_ids[channel])};
         state = {};

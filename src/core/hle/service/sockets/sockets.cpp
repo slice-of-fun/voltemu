@@ -1,15 +1,17 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/service/sockets/sockets.h"
+
 #include "core/hle/service/server_manager.h"
 #include "core/hle/service/sockets/bsd.h"
 #include "core/hle/service/sockets/nsd.h"
 #include "core/hle/service/sockets/sfdnsres.h"
-#include "core/hle/service/sockets/sockets.h"
 
 namespace Service::Sockets {
 
-void LoopProcess(Core::System& system) {
+void LoopProcess(Core::System& system)
+{
     auto server_manager = std::make_unique<ServerManager>(system);
 
     server_manager->RegisterNamedService("bsd:s", std::make_shared<BSD>(system, "bsd:s"));

@@ -6,9 +6,10 @@
 
 #pragma once
 
+#include <ankerl/unordered_dense.h>
+
 #include <memory>
 #include <mutex>
-#include <ankerl/unordered_dense.h>
 
 #include "common/common_types.h"
 #include "core/hle/service/nvnflinger/binder.h"

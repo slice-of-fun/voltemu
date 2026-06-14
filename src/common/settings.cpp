@@ -10,24 +10,25 @@
 #include <exception>
 #include <stdexcept>
 #endif
+#include <fmt/core.h>
+
 #include <compare>
 #include <cstddef>
+#include <deque>
 #include <filesystem>
 #include <functional>
 #include <string_view>
 #include <type_traits>
-#include <deque>
-#include <fmt/core.h>
 
-#include "common/settings_enums.h"
 #include "common/assert.h"
 #include "common/fs/fs_util.h"
 #include "common/fs/path_util.h"
 #include "common/logging.h"
 #include "common/settings.h"
+#include "common/settings_enums.h"
 #include "common/time_zone.h"
 
-#if defined(__linux__ ) && defined(ARCHITECTURE_arm64)
+#if defined(__linux__) && defined(ARCHITECTURE_arm64)
 #include <unistd.h>
 #endif
 
@@ -35,7 +36,7 @@ namespace Settings {
 
 // Clang 14 and earlier have errors when explicitly instantiating these classes
 #ifndef CANNOT_EXPLICITLY_INSTANTIATE
-#define SETTING(TYPE, RANGED) template class Setting<TYPE, RANGED>
+#define SETTING(TYPE, RANGED)    template class Setting<TYPE, RANGED>
 #define SWITCHABLE(TYPE, RANGED) template class SwitchableSetting<TYPE, RANGED>
 
 SETTING(AppletMode, false);
@@ -83,7 +84,8 @@ SWITCHABLE(ConfirmStop, true);
 
 Values values;
 
-std::string GetTimeZoneString(TimeZone time_zone) {
+std::string GetTimeZoneString(TimeZone time_zone)
+{
     const auto time_zone_index = static_cast<std::size_t>(time_zone);
     ASSERT(time_zone_index < Common::TimeZone::GetTimeZoneStrings().size());
 
@@ -114,22 +116,22 @@ std::string GetTimeZoneString(TimeZone time_zone) {
     return location_name;
 }
 
-void LogSettings() {
+void LogSettings()
+{
     std::deque<std::string> settings_list;
     for (auto& [category, settings] : values.linkage.by_category) {
         for (const auto& setting : settings) {
             // Hide the token secret, for security reasons.
             if (setting->Id() != values.eden_token.Id()) {
                 auto const is_default = setting->ToString() == setting->DefaultToString();
-                auto const name = fmt::format(
-                    "{:c}{:c} {}.{}",
-                    is_default ? '-' : 'M',
-                    setting->UsingGlobal() ? '-' : 'C', TranslateCategory(category),
-                    setting->GetLabel());
+                auto const name = fmt::format("{:c}{:c} {}.{}", is_default ? '-' : 'M',
+                                              setting->UsingGlobal() ? '-' : 'C',
+                                              TranslateCategory(category), setting->GetLabel());
                 if (is_default)
                     settings_list.push_back(fmt::format("{}: {}\n", name, setting->Canonicalize()));
                 else
-                    settings_list.push_front(fmt::format("{}: {}\n", name, setting->Canonicalize()));
+                    settings_list.push_front(
+                        fmt::format("{}: {}\n", name, setting->Canonicalize()));
             }
         }
     }
@@ -138,8 +140,9 @@ void LogSettings() {
     for (auto const& e : settings_list)
         settings_str += e;
     LOG_INFO(Config, "Eden Configuration:\n{}", settings_str);
-#define LOG_PATH(NAME) \
-    LOG_INFO(Config, #NAME ": {}", Common::FS::PathToUTF8String(Common::FS::GetVoltPath(Common::FS::VoltPath::NAME)))
+#define LOG_PATH(NAME)                                                                             \
+    LOG_INFO(Config, #NAME ": {}",                                                                 \
+             Common::FS::PathToUTF8String(Common::FS::GetVoltPath(Common::FS::VoltPath::NAME)))
     LOG_PATH(CacheDir);
     LOG_PATH(ConfigDir);
     LOG_PATH(LoadDir);
@@ -149,35 +152,43 @@ void LogSettings() {
 #undef LOG_PATH
 }
 
-bool getDebugKnobAt(u8 i) {
+bool getDebugKnobAt(u8 i)
+{
     return (values.debug_knobs.GetValue() & (1 << (i & 0xF))) != 0;
 }
 
-void UpdateGPUAccuracy() {
+void UpdateGPUAccuracy()
+{
     values.current_gpu_accuracy = values.gpu_accuracy.GetValue();
 }
 
-bool IsGPULevelLow() {
+bool IsGPULevelLow()
+{
     return values.current_gpu_accuracy == GpuAccuracy::Low;
 }
 
-bool IsGPULevelMedium() {
+bool IsGPULevelMedium()
+{
     return values.current_gpu_accuracy == GpuAccuracy::Medium;
 }
 
-bool IsGPULevelHigh() {
+bool IsGPULevelHigh()
+{
     return values.current_gpu_accuracy == GpuAccuracy::High;
 }
 
-bool IsDMALevelDefault() {
+bool IsDMALevelDefault()
+{
     return values.dma_accuracy.GetValue() == DmaAccuracy::Default;
 }
 
-bool IsDMALevelSafe() {
+bool IsDMALevelSafe()
+{
     return values.dma_accuracy.GetValue() == DmaAccuracy::Safe;
 }
 
-bool IsFastmemEnabled() {
+bool IsFastmemEnabled()
+{
     if (values.cpu_accuracy.GetValue() == Settings::CpuAccuracy::Debugging)
         return bool(values.cpuopt_fastmem);
     else if (values.cpu_accuracy.GetValue() == CpuAccuracy::Unsafe)
@@ -186,7 +197,8 @@ bool IsFastmemEnabled() {
     // Only 4kb systems support host MMU right now
     // TODO: Support this
     return getpagesize() == 4096;
-#elif !defined(__APPLE__) && !defined(__ANDROID__) && !defined(_WIN32) && !defined(__linux__) && !defined(__FreeBSD__)
+#elif !defined(__APPLE__) && !defined(__ANDROID__) && !defined(_WIN32) && !defined(__linux__) &&   \
+    !defined(__FreeBSD__)
     return false;
 #else
     return true;
@@ -195,7 +207,8 @@ bool IsFastmemEnabled() {
 
 static bool is_nce_enabled = false;
 
-void SetNceEnabled(bool is_39bit) {
+void SetNceEnabled(bool is_39bit)
+{
     const bool is_nce_selected = values.cpu_backend.GetValue() == CpuBackend::Nce;
     if (is_nce_selected && !IsFastmemEnabled()) {
         LOG_WARNING(Common, "Fastmem is required to natively execute code in a performant manner, "
@@ -209,22 +222,26 @@ void SetNceEnabled(bool is_39bit) {
     is_nce_enabled = IsFastmemEnabled() && is_nce_selected && is_39bit;
 }
 
-bool IsNceEnabled() {
+bool IsNceEnabled()
+{
     return is_nce_enabled;
 }
 
-bool IsDockedMode() {
+bool IsDockedMode()
+{
     return values.use_docked_mode.GetValue() == Settings::ConsoleMode::Docked;
 }
 
-float Volume() {
+float Volume()
+{
     if (values.audio_muted) {
         return 0.0f;
     }
     return values.volume.GetValue() / static_cast<f32>(values.volume.GetDefault());
 }
 
-const char* TranslateCategory(Category category) {
+const char* TranslateCategory(Category category)
+{
     switch (category) {
     case Category::Android:
         return "Android";
@@ -291,7 +308,8 @@ const char* TranslateCategory(Category category) {
     return "Miscellaneous";
 }
 
-void TranslateResolutionInfo(ResolutionSetup setup, ResolutionScalingInfo& info) {
+void TranslateResolutionInfo(ResolutionSetup setup, ResolutionScalingInfo& info)
+{
     info.downscale = false;
     switch (setup) {
     case ResolutionSetup::Res1_4X:
@@ -357,13 +375,15 @@ void TranslateResolutionInfo(ResolutionSetup setup, ResolutionScalingInfo& info)
     info.active = info.up_scale != 1 || info.down_shift != 0;
 }
 
-void UpdateRescalingInfo() {
+void UpdateRescalingInfo()
+{
     const auto setup = values.resolution_setup.GetValue();
     auto& info = values.resolution_info;
     TranslateResolutionInfo(setup, info);
 }
 
-void RestoreGlobalState(bool is_powered_on) {
+void RestoreGlobalState(bool is_powered_on)
+{
     // If a game is running, DO NOT restore the global settings state
     if (is_powered_on) {
         return;
@@ -379,15 +399,18 @@ void RestoreGlobalState(bool is_powered_on) {
 
 static bool configuring_global = true;
 
-bool IsConfiguringGlobal() {
+bool IsConfiguringGlobal()
+{
     return configuring_global;
 }
 
-void SetConfiguringGlobal(bool is_global) {
+void SetConfiguringGlobal(bool is_global)
+{
     configuring_global = is_global;
 }
 
-u16 SpeedLimit() {
+u16 SpeedLimit()
+{
     switch (SpeedMode(values.current_speed_mode)) {
     case SpeedMode::Standard:
         return values.speed_limit.GetValue();
@@ -402,7 +425,8 @@ u16 SpeedLimit() {
     return 100;
 }
 
-void SetSpeedMode(const SpeedMode& mode) {
+void SetSpeedMode(const SpeedMode& mode)
+{
     values.current_speed_mode.SetValue(mode);
 
     switch (mode) {
@@ -416,26 +440,30 @@ void SetSpeedMode(const SpeedMode& mode) {
     }
 }
 
-void ToggleStandardMode() {
+void ToggleStandardMode()
+{
     values.use_speed_limit.SetValue(!values.use_speed_limit.GetValue());
     SetSpeedMode(SpeedMode::Standard);
 }
 
-void ToggleTurboMode() {
+void ToggleTurboMode()
+{
     if (values.current_speed_mode.GetValue() != SpeedMode::Turbo)
         SetSpeedMode(SpeedMode::Turbo);
     else
         SetSpeedMode(SpeedMode::Standard);
 }
 
-void ToggleSlowMode() {
+void ToggleSlowMode()
+{
     if (values.current_speed_mode.GetValue() != SpeedMode::Slow)
         SetSpeedMode(SpeedMode::Slow);
     else
         SetSpeedMode(SpeedMode::Standard);
 }
 
-bool IsOpenGL() {
+bool IsOpenGL()
+{
     const auto backend = Settings::values.renderer_backend.GetValue();
     switch (backend) {
     case RendererBackend::OpenGL_GLSL:

@@ -22,19 +22,23 @@ constexpr s64 CompressionBlockAlignment = 0x10;
 
 namespace CompressionTypeUtility {
 
-constexpr bool IsBlockAlignmentRequired(CompressionType type) {
+constexpr bool IsBlockAlignmentRequired(CompressionType type)
+{
     return type != CompressionType::None && type != CompressionType::Zeros;
 }
 
-constexpr bool IsDataStorageAccessRequired(CompressionType type) {
+constexpr bool IsDataStorageAccessRequired(CompressionType type)
+{
     return type != CompressionType::Zeros;
 }
 
-constexpr bool IsRandomAccessible(CompressionType type) {
+constexpr bool IsRandomAccessible(CompressionType type)
+{
     return type == CompressionType::None;
 }
 
-constexpr bool IsUnknownType(CompressionType type) {
+constexpr bool IsUnknownType(CompressionType type)
+{
     return type >= CompressionType::Unknown;
 }
 

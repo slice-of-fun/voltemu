@@ -24,7 +24,8 @@ public:
 
     s64 GetTick() const;
 
-    void RegisterAbsoluteTask(KTimerTask* task, s64 task_time) {
+    void RegisterAbsoluteTask(KTimerTask* task, s64 task_time)
+    {
         KScopedDisableDispatch dd{m_kernel};
         KScopedSpinLock lk{this->GetLock()};
 

@@ -4,6 +4,8 @@
 // SPDX-FileCopyrightText: Copyright 2020 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "core/hle/kernel/k_memory_manager.h"
+
 #include <algorithm>
 
 #include "common/alignment.h"
@@ -12,7 +14,6 @@
 #include "core/core.h"
 #include "core/device_memory.h"
 #include "core/hle/kernel/initial_process.h"
-#include "core/hle/kernel/k_memory_manager.h"
 #include "core/hle/kernel/k_page_group.h"
 #include "core/hle/kernel/k_page_table.h"
 #include "core/hle/kernel/kernel.h"
@@ -22,7 +23,8 @@ namespace Kernel {
 
 namespace {
 
-constexpr KMemoryManager::Pool GetPoolFromMemoryRegionType(u32 type) {
+constexpr KMemoryManager::Pool GetPoolFromMemoryRegionType(u32 type)
+{
     if ((type | KMemoryRegionType_DramApplicationPool) == type) {
         return KMemoryManager::Pool::Application;
     } else if ((type | KMemoryRegionType_DramAppletPool) == type) {
@@ -45,9 +47,12 @@ KMemoryManager::KMemoryManager(Core::System& system)
           KLightLock{system.Kernel()},
           KLightLock{system.Kernel()},
           KLightLock{system.Kernel()},
-      } {}
+      }
+{
+}
 
-void KMemoryManager::Initialize(KVirtualAddress management_region, size_t management_region_size) {
+void KMemoryManager::Initialize(KVirtualAddress management_region, size_t management_region_size)
+{
 
     // Clear the management region to zero.
     const KVirtualAddress management_region_end = management_region + management_region_size;
@@ -171,7 +176,8 @@ void KMemoryManager::Initialize(KVirtualAddress management_region, size_t manage
     }
 }
 
-Result KMemoryManager::InitializeOptimizedMemory(u64 process_id, Pool pool) {
+Result KMemoryManager::InitializeOptimizedMemory(u64 process_id, Pool pool)
+{
     const u32 pool_index = static_cast<u32>(pool);
 
     // Lock the pool.
@@ -193,7 +199,8 @@ Result KMemoryManager::InitializeOptimizedMemory(u64 process_id, Pool pool) {
     R_SUCCEED();
 }
 
-void KMemoryManager::FinalizeOptimizedMemory(u64 process_id, Pool pool) {
+void KMemoryManager::FinalizeOptimizedMemory(u64 process_id, Pool pool)
+{
     const u32 pool_index = static_cast<u32>(pool);
 
     // Lock the pool.
@@ -206,7 +213,8 @@ void KMemoryManager::FinalizeOptimizedMemory(u64 process_id, Pool pool) {
 }
 
 KPhysicalAddress KMemoryManager::AllocateAndOpenContinuous(size_t num_pages, size_t align_pages,
-                                                           u32 option) {
+                                                           u32 option)
+{
     // Early return if we're allocating no pages.
     if (num_pages == 0) {
         return 0;
@@ -247,13 +255,15 @@ KPhysicalAddress KMemoryManager::AllocateAndOpenContinuous(size_t num_pages, siz
 }
 
 Result KMemoryManager::AllocatePageGroupImpl(KPageGroup* out, size_t num_pages, Pool pool,
-                                             Direction dir, bool unoptimized, bool random) {
+                                             Direction dir, bool unoptimized, bool random)
+{
     // Choose a heap based on our page size request.
     const s32 heap_index = KPageHeap::GetBlockIndex(num_pages);
     R_UNLESS(0 <= heap_index, ResultOutOfMemory);
 
     // Ensure that we don't leave anything un-freed.
-    ON_RESULT_FAILURE {
+    ON_RESULT_FAILURE
+    {
         for (const auto& it : *out) {
             auto& manager = this->GetManager(it.GetAddress());
             const size_t node_num_pages = std::min<u64>(
@@ -276,7 +286,8 @@ Result KMemoryManager::AllocatePageGroupImpl(KPageGroup* out, size_t num_pages, 
                 }
 
                 // Ensure we don't leak the block if we fail.
-                ON_RESULT_FAILURE_2 {
+                ON_RESULT_FAILURE_2
+                {
                     cur_manager->Free(allocated_block, pages_per_alloc);
                 };
 
@@ -301,7 +312,8 @@ Result KMemoryManager::AllocatePageGroupImpl(KPageGroup* out, size_t num_pages, 
     R_SUCCEED();
 }
 
-Result KMemoryManager::AllocateAndOpen(KPageGroup* out, size_t num_pages, u32 option) {
+Result KMemoryManager::AllocateAndOpen(KPageGroup* out, size_t num_pages, u32 option)
+{
     ASSERT(out != nullptr);
     ASSERT(out->GetNumPages() == 0);
 
@@ -339,7 +351,8 @@ Result KMemoryManager::AllocateAndOpen(KPageGroup* out, size_t num_pages, u32 op
 }
 
 Result KMemoryManager::AllocateForProcess(KPageGroup* out, size_t num_pages, u32 option,
-                                          u64 process_id, u8 fill_pattern) {
+                                          u64 process_id, u8 fill_pattern)
+{
     ASSERT(out != nullptr);
     ASSERT(out->GetNumPages() == 0);
 
@@ -435,7 +448,8 @@ Result KMemoryManager::AllocateForProcess(KPageGroup* out, size_t num_pages, u32
 
 size_t KMemoryManager::Impl::Initialize(KPhysicalAddress address, size_t size,
                                         KVirtualAddress management, KVirtualAddress management_end,
-                                        Pool p) {
+                                        Pool p)
+{
     // Calculate management sizes.
     const size_t ref_count_size = (size / PageSize) * sizeof(u16);
     const size_t optimize_map_size = CalculateOptimizedProcessOverheadSize(size);
@@ -459,7 +473,8 @@ size_t KMemoryManager::Impl::Initialize(KPhysicalAddress address, size_t size,
     return total_management_size;
 }
 
-void KMemoryManager::Impl::InitializeOptimizedMemory(KernelCore& kernel) {
+void KMemoryManager::Impl::InitializeOptimizedMemory(KernelCore& kernel)
+{
     auto optimize_pa = KPageTable::GetHeapPhysicalAddress(kernel, m_management_region);
     auto* optimize_map = kernel.System().DeviceMemory().GetPointer<u64>(optimize_pa);
 
@@ -467,7 +482,8 @@ void KMemoryManager::Impl::InitializeOptimizedMemory(KernelCore& kernel) {
 }
 
 void KMemoryManager::Impl::TrackUnoptimizedAllocation(KernelCore& kernel, KPhysicalAddress block,
-                                                      size_t num_pages) {
+                                                      size_t num_pages)
+{
     auto optimize_pa = KPageTable::GetHeapPhysicalAddress(kernel, m_management_region);
     auto* optimize_map = kernel.System().DeviceMemory().GetPointer<u64>(optimize_pa);
 
@@ -486,7 +502,8 @@ void KMemoryManager::Impl::TrackUnoptimizedAllocation(KernelCore& kernel, KPhysi
 }
 
 void KMemoryManager::Impl::TrackOptimizedAllocation(KernelCore& kernel, KPhysicalAddress block,
-                                                    size_t num_pages) {
+                                                    size_t num_pages)
+{
     auto optimize_pa = KPageTable::GetHeapPhysicalAddress(kernel, m_management_region);
     auto* optimize_map = kernel.System().DeviceMemory().GetPointer<u64>(optimize_pa);
 
@@ -505,7 +522,8 @@ void KMemoryManager::Impl::TrackOptimizedAllocation(KernelCore& kernel, KPhysica
 }
 
 bool KMemoryManager::Impl::ProcessOptimizedAllocation(KernelCore& kernel, KPhysicalAddress block,
-                                                      size_t num_pages, u8 fill_pattern) {
+                                                      size_t num_pages, u8 fill_pattern)
+{
     auto& device_memory = kernel.System().DeviceMemory();
     auto optimize_pa = KPageTable::GetHeapPhysicalAddress(kernel, m_management_region);
     auto* optimize_map = device_memory.GetPointer<u64>(optimize_pa);
@@ -537,7 +555,8 @@ bool KMemoryManager::Impl::ProcessOptimizedAllocation(KernelCore& kernel, KPhysi
     return any_new;
 }
 
-size_t KMemoryManager::Impl::CalculateManagementOverheadSize(size_t region_size) {
+size_t KMemoryManager::Impl::CalculateManagementOverheadSize(size_t region_size)
+{
     const size_t ref_count_size = (region_size / PageSize) * sizeof(u16);
     const size_t optimize_map_size =
         (Common::AlignUp((region_size / PageSize), Common::BitSize<u64>()) /

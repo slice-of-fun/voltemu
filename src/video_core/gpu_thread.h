@@ -41,7 +41,9 @@ namespace VideoCommon::GPUThread {
 /// Command to signal to the GPU thread that a command list is ready for processing
 struct SubmitListCommand final {
     explicit SubmitListCommand(s32 channel_, Tegra::CommandList&& entries_)
-        : channel{channel_}, entries{std::move(entries_)} {}
+        : channel{channel_}, entries{std::move(entries_)}
+    {
+    }
 
     s32 channel;
     Tegra::CommandList entries;
@@ -66,7 +68,9 @@ struct InvalidateRegionCommand final {
 /// Command to signal to the GPU thread to flush and invalidate a region
 struct FlushAndInvalidateRegionCommand final {
     explicit constexpr FlushAndInvalidateRegionCommand(DAddr addr_, u64 size_)
-        : addr{addr_}, size{size_} {}
+        : addr{addr_}, size{size_}
+    {
+    }
 
     DAddr addr;
     u64 size;
@@ -83,7 +87,9 @@ struct CommandDataContainer {
     CommandDataContainer() = default;
 
     explicit CommandDataContainer(CommandData&& data_, u64 next_fence_, bool block_)
-        : data{std::move(data_)}, fence{next_fence_}, block(block_) {}
+        : data{std::move(data_)}, fence{next_fence_}, block(block_)
+    {
+    }
 
     CommandData data;
     u64 fence{};

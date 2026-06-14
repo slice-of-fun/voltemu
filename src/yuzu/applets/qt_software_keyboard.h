@@ -5,13 +5,12 @@
 
 #pragma once
 
+#include <QDialog>
+#include <QValidator>
 #include <array>
 #include <atomic>
 #include <memory>
 #include <thread>
-
-#include <QDialog>
-#include <QValidator>
 
 #include "core/frontend/applets/software_keyboard.h"
 
@@ -149,16 +148,14 @@ private:
      *
      * @tparam HIDButton The list of buttons that can be converted into keyboard input.
      */
-    template <Core::HID::NpadButton... T>
-    void HandleButtonPressedOnce();
+    template<Core::HID::NpadButton... T> void HandleButtonPressedOnce();
 
     /**
      * Handles button holds and converts them into keyboard input.
      *
      * @tparam HIDButton The list of buttons that can be converted into keyboard input.
      */
-    template <Core::HID::NpadButton... T>
-    void HandleButtonHold();
+    template<Core::HID::NpadButton... T> void HandleButtonHold();
 
     /**
      * Translates a button press to focus or click a keyboard button.
@@ -229,9 +226,7 @@ public:
     explicit QtSoftwareKeyboard(MainWindow& parent);
     ~QtSoftwareKeyboard() override;
 
-    void Close() const override {
-        ExitKeyboard();
-    }
+    void Close() const override { ExitKeyboard(); }
 
     void InitializeKeyboard(bool is_inline,
                             Core::Frontend::KeyboardInitializeParameters initialize_parameters,
@@ -243,8 +238,8 @@ public:
     void ShowTextCheckDialog(Service::AM::Frontend::SwkbdTextCheckResult text_check_result,
                              std::u16string text_check_message) const override;
 
-    void ShowInlineKeyboard(
-        Core::Frontend::InlineAppearParameters appear_parameters) const override;
+    void
+    ShowInlineKeyboard(Core::Frontend::InlineAppearParameters appear_parameters) const override;
 
     void HideInlineKeyboard() const override;
 
@@ -258,12 +253,12 @@ signals:
 
     void MainWindowShowNormalKeyboard() const;
 
-    void MainWindowShowTextCheckDialog(
-        Service::AM::Frontend::SwkbdTextCheckResult text_check_result,
-        std::u16string text_check_message) const;
+    void
+    MainWindowShowTextCheckDialog(Service::AM::Frontend::SwkbdTextCheckResult text_check_result,
+                                  std::u16string text_check_message) const;
 
-    void MainWindowShowInlineKeyboard(
-        Core::Frontend::InlineAppearParameters appear_parameters) const;
+    void
+    MainWindowShowInlineKeyboard(Core::Frontend::InlineAppearParameters appear_parameters) const;
 
     void MainWindowHideInlineKeyboard() const;
 

@@ -25,8 +25,8 @@ public:
     [[nodiscard]] bool LoadNRO(std::span<const u8> data);
     void MapProcessMemory(VAddr dest_address, std::size_t size);
 
-    template <typename T, typename... Ts>
-    u64 CallFunction(VAddr func, T argument, Ts... rest) {
+    template<typename T, typename... Ts> u64 CallFunction(VAddr func, T argument, Ts... rest)
+    {
         static_assert(std::is_trivially_copyable_v<T>);
         static_assert(!std::is_floating_point_v<T>);
         PushArgument(&argument, sizeof(argument));
@@ -41,14 +41,11 @@ public:
     u64 CallFunction(VAddr func);
     VAddr GetHelper(const std::string& name);
 
-    template <typename T>
-    VAddr AddHeap(T argument) {
-        return AddHeap(&argument, sizeof(argument));
-    }
+    template<typename T> VAddr AddHeap(T argument) { return AddHeap(&argument, sizeof(argument)); }
     VAddr AddHeap(const void* data, size_t size);
 
-    template <typename T>
-    T GetHeap(VAddr location) {
+    template<typename T> T GetHeap(VAddr location)
+    {
         static_assert(std::is_trivially_copyable_v<T>);
         T result;
         GetHeap(location, &result, sizeof(result));

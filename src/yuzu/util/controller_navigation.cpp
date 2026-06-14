@@ -1,12 +1,14 @@
 // SPDX-FileCopyrightText: Copyright 2021 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "yuzu/util/controller_navigation.h"
+
 #include "common/settings_input.h"
 #include "hid_core/frontend/emulated_controller.h"
 #include "hid_core/hid_core.h"
-#include "yuzu/util/controller_navigation.h"
 
-ControllerNavigation::ControllerNavigation(Core::HID::HIDCore& hid_core, QWidget* parent) {
+ControllerNavigation::ControllerNavigation(Core::HID::HIDCore& hid_core, QWidget* parent)
+{
     player1_controller = hid_core.GetEmulatedController(Core::HID::NpadIdType::Player1);
     handheld_controller = hid_core.GetEmulatedController(Core::HID::NpadIdType::Handheld);
     Core::HID::ControllerUpdateCallback engine_callback{
@@ -18,11 +20,13 @@ ControllerNavigation::ControllerNavigation(Core::HID::HIDCore& hid_core, QWidget
     is_controller_set = true;
 }
 
-ControllerNavigation::~ControllerNavigation() {
+ControllerNavigation::~ControllerNavigation()
+{
     UnloadController();
 }
 
-void ControllerNavigation::UnloadController() {
+void ControllerNavigation::UnloadController()
+{
     if (is_controller_set) {
         player1_controller->DeleteCallback(player1_callback_key);
         handheld_controller->DeleteCallback(handheld_callback_key);
@@ -30,14 +34,15 @@ void ControllerNavigation::UnloadController() {
     }
 }
 
-void ControllerNavigation::TriggerButton(Settings::NativeButton::Values native_button,
-                                         Qt::Key key) {
+void ControllerNavigation::TriggerButton(Settings::NativeButton::Values native_button, Qt::Key key)
+{
     if (button_values[native_button].value && !button_values[native_button].locked) {
         emit TriggerKeyboardEvent(key);
     }
 }
 
-void ControllerNavigation::ControllerUpdateEvent(Core::HID::ControllerTriggerType type) {
+void ControllerNavigation::ControllerUpdateEvent(Core::HID::ControllerTriggerType type)
+{
     std::scoped_lock lock{mutex};
     if (!Settings::values.controller_navigation) {
         return;
@@ -53,7 +58,8 @@ void ControllerNavigation::ControllerUpdateEvent(Core::HID::ControllerTriggerTyp
     }
 }
 
-void ControllerNavigation::ControllerUpdateButton() {
+void ControllerNavigation::ControllerUpdateButton()
+{
     const auto controller_type = player1_controller->GetNpadStyleIndex();
     const auto& player1_buttons = player1_controller->GetButtonsValues();
     const auto& handheld_buttons = handheld_controller->GetButtonsValues();
@@ -90,7 +96,8 @@ void ControllerNavigation::ControllerUpdateButton() {
     }
 }
 
-void ControllerNavigation::ControllerUpdateStick() {
+void ControllerNavigation::ControllerUpdateStick()
+{
     const auto controller_type = player1_controller->GetNpadStyleIndex();
     const auto& player1_sticks = player1_controller->GetSticksValues();
     const auto& handheld_sticks = player1_controller->GetSticksValues();

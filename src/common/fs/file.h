@@ -27,15 +27,17 @@ enum class SeekOrigin {
  * @param path Filesystem path
  * @param open_mode File stream open mode
  */
-template <typename FileStream>
+template<typename FileStream>
 void OpenFileStream(FileStream& file_stream, const std::filesystem::path& path,
-                    std::ios_base::openmode open_mode) {
+                    std::ios_base::openmode open_mode)
+{
     file_stream.open(path, open_mode);
 }
 
 #ifdef _WIN32
-template <typename FileStream, typename Path>
-void OpenFileStream(FileStream& file_stream, const Path& path, std::ios_base::openmode open_mode) {
+template<typename FileStream, typename Path>
+void OpenFileStream(FileStream& file_stream, const Path& path, std::ios_base::openmode open_mode)
+{
     if constexpr (IsChar<typename Path::value_type>) {
         file_stream.open(std::filesystem::path{ToU8String(path)}, open_mode);
     } else {
@@ -56,8 +58,9 @@ void OpenFileStream(FileStream& file_stream, const Path& path, std::ios_base::op
 [[nodiscard]] std::string ReadStringFromFile(const std::filesystem::path& path, FileType type);
 
 #ifdef _WIN32
-template <typename Path>
-[[nodiscard]] std::string ReadStringFromFile(const Path& path, FileType type) {
+template<typename Path>
+[[nodiscard]] std::string ReadStringFromFile(const Path& path, FileType type)
+{
     if constexpr (IsChar<typename Path::value_type>) {
         return ReadStringFromFile(ToU8String(path), type);
     } else {
@@ -81,8 +84,9 @@ template <typename Path>
                                        std::string_view string);
 
 #ifdef _WIN32
-template <typename Path>
-[[nodiscard]] size_t WriteStringToFile(const Path& path, FileType type, std::string_view string) {
+template<typename Path>
+[[nodiscard]] size_t WriteStringToFile(const Path& path, FileType type, std::string_view string)
+{
     if constexpr (IsChar<typename Path::value_type>) {
         return WriteStringToFile(ToU8String(path), type, string);
     } else {
@@ -105,8 +109,9 @@ template <typename Path>
                                         std::string_view string);
 
 #ifdef _WIN32
-template <typename Path>
-[[nodiscard]] size_t AppendStringToFile(const Path& path, FileType type, std::string_view string) {
+template<typename Path>
+[[nodiscard]] size_t AppendStringToFile(const Path& path, FileType type, std::string_view string)
+{
     if constexpr (IsChar<typename Path::value_type>) {
         return AppendStringToFile(ToU8String(path), type, string);
     } else {
@@ -183,18 +188,18 @@ public:
               FileType type = FileType::BinaryFile,
               FileShareFlag flag = FileShareFlag::ShareReadOnly);
 
-// #ifdef _WIN32
-//     template <typename Path>
-//     void Open(const Path& path, FileAccessMode mode, FileType type = FileType::BinaryFile,
-//               FileShareFlag flag = FileShareFlag::ShareReadOnly) {
-//         using ValueType = typename Path::value_type;
-//         if constexpr (IsChar<ValueType>) {
-//             Open(ToU8String(path), mode, type, flag);
-//         } else {
-//             Open(std::filesystem::path{path}, mode, type, flag);
-//         }
-//     }
-// #endif
+    // #ifdef _WIN32
+    //     template <typename Path>
+    //     void Open(const Path& path, FileAccessMode mode, FileType type = FileType::BinaryFile,
+    //               FileShareFlag flag = FileShareFlag::ShareReadOnly) {
+    //         using ValueType = typename Path::value_type;
+    //         if constexpr (IsChar<ValueType>) {
+    //             Open(ToU8String(path), mode, type, flag);
+    //         } else {
+    //             Open(std::filesystem::path{path}, mode, type, flag);
+    //         }
+    //     }
+    // #endif
 
     /// Closes the file if it is opened.
     void Close();
@@ -221,8 +226,8 @@ public:
      *
      * @returns Count of T::value_type data or objects successfully read.
      */
-    template <typename T>
-    [[nodiscard]] size_t Read(T& data) const {
+    template<typename T> [[nodiscard]] size_t Read(T& data) const
+    {
         if constexpr (IsContiguousContainer<T>) {
             using ContiguousType = typename T::value_type;
             static_assert(std::is_trivially_copyable_v<ContiguousType>,
@@ -247,8 +252,8 @@ public:
      *
      * @returns Count of T::value_type data or objects successfully written.
      */
-    template <typename T>
-    [[nodiscard]] size_t Write(const T& data) const {
+    template<typename T> [[nodiscard]] size_t Write(const T& data) const
+    {
         if constexpr (IsContiguousContainer<T>) {
             using ContiguousType = typename T::value_type;
             static_assert(std::is_trivially_copyable_v<ContiguousType>,
@@ -276,8 +281,8 @@ public:
      *
      * @returns Count of T data successfully read.
      */
-    template <typename T>
-    [[nodiscard]] size_t ReadSpan(std::span<T> data) const {
+    template<typename T> [[nodiscard]] size_t ReadSpan(std::span<T> data) const
+    {
         static_assert(std::is_trivially_copyable_v<T>, "Data type must be trivially copyable.");
 
         if (!IsOpen()) {
@@ -302,8 +307,8 @@ public:
      *
      * @returns Count of T data successfully written.
      */
-    template <typename T>
-    [[nodiscard]] size_t WriteSpan(std::span<const T> data) const {
+    template<typename T> [[nodiscard]] size_t WriteSpan(std::span<const T> data) const
+    {
         static_assert(std::is_trivially_copyable_v<T>, "Data type must be trivially copyable.");
 
         if (!IsOpen()) {
@@ -329,8 +334,8 @@ public:
      *
      * @returns True if the object is successfully read from the file, false otherwise.
      */
-    template <typename T>
-    [[nodiscard]] bool ReadObject(T& object) const {
+    template<typename T> [[nodiscard]] bool ReadObject(T& object) const
+    {
         static_assert(std::is_trivially_copyable_v<T>, "Data type must be trivially copyable.");
         static_assert(!std::is_pointer_v<T>, "T must not be a pointer to an object.");
 
@@ -356,8 +361,8 @@ public:
      *
      * @returns True if the object is successfully written to the file, false otherwise.
      */
-    template <typename T>
-    [[nodiscard]] bool WriteObject(const T& object) const {
+    template<typename T> [[nodiscard]] bool WriteObject(const T& object) const
+    {
         static_assert(std::is_trivially_copyable_v<T>, "Data type must be trivially copyable.");
         static_assert(!std::is_pointer_v<T>, "T must not be a pointer to an object.");
 

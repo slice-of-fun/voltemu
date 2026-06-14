@@ -6,12 +6,13 @@
 
 #pragma once
 
+#include <ankerl/unordered_dense.h>
+
 #include <array>
 #include <cstddef>
 #include <filesystem>
 #include <memory>
 #include <type_traits>
-#include <ankerl/unordered_dense.h>
 #include <vector>
 
 #include "common/common_types.h"
@@ -56,9 +57,7 @@ struct ComputePipelineCacheKey {
 
     bool operator==(const ComputePipelineCacheKey& rhs) const noexcept;
 
-    bool operator!=(const ComputePipelineCacheKey& rhs) const noexcept {
-        return !operator==(rhs);
-    }
+    bool operator!=(const ComputePipelineCacheKey& rhs) const noexcept { return !operator==(rhs); }
 };
 static_assert(std::has_unique_object_representations_v<ComputePipelineCacheKey>);
 static_assert(std::is_trivially_copyable_v<ComputePipelineCacheKey>);
@@ -68,11 +67,8 @@ static_assert(std::is_trivially_constructible_v<ComputePipelineCacheKey>);
 
 namespace std {
 
-template <>
-struct hash<Vulkan::ComputePipelineCacheKey> {
-    size_t operator()(const Vulkan::ComputePipelineCacheKey& k) const noexcept {
-        return k.Hash();
-    }
+template<> struct hash<Vulkan::ComputePipelineCacheKey> {
+    size_t operator()(const Vulkan::ComputePipelineCacheKey& k) const noexcept { return k.Hash(); }
 };
 
 } // namespace std
@@ -89,7 +85,8 @@ class Scheduler;
 using VideoCommon::ShaderInfo;
 
 struct ShaderPools {
-    void ReleaseContents() {
+    void ReleaseContents()
+    {
         flow_block.ReleaseContents();
         block.ReleaseContents();
         inst.ReleaseContents();
@@ -123,10 +120,10 @@ private:
 
     std::unique_ptr<GraphicsPipeline> CreateGraphicsPipeline();
 
-    std::unique_ptr<GraphicsPipeline> CreateGraphicsPipeline(
-        ShaderPools& pools, const GraphicsPipelineCacheKey& key,
-        std::span<Shader::Environment* const> envs, PipelineStatistics* statistics,
-        bool build_in_parallel);
+    std::unique_ptr<GraphicsPipeline>
+    CreateGraphicsPipeline(ShaderPools& pools, const GraphicsPipelineCacheKey& key,
+                           std::span<Shader::Environment* const> envs,
+                           PipelineStatistics* statistics, bool build_in_parallel);
 
     std::unique_ptr<ComputePipeline> CreateComputePipeline(const ComputePipelineCacheKey& key,
                                                            const ShaderInfo* shader);
@@ -157,8 +154,10 @@ private:
     GraphicsPipelineCacheKey graphics_key{};
     GraphicsPipeline* current_pipeline{};
 
-    ankerl::unordered_dense::map<ComputePipelineCacheKey, std::unique_ptr<ComputePipeline>> compute_cache;
-    ankerl::unordered_dense::map<GraphicsPipelineCacheKey, std::unique_ptr<GraphicsPipeline>> graphics_cache;
+    ankerl::unordered_dense::map<ComputePipelineCacheKey, std::unique_ptr<ComputePipeline>>
+        compute_cache;
+    ankerl::unordered_dense::map<GraphicsPipelineCacheKey, std::unique_ptr<GraphicsPipeline>>
+        graphics_cache;
 
     ShaderPools main_pools;
 

@@ -4,6 +4,8 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "hid_core/resources/npad/npad.h"
+
 #include <algorithm>
 #include <array>
 #include <cstring>
@@ -22,14 +24,14 @@
 #include "hid_core/hid_result.h"
 #include "hid_core/hid_util.h"
 #include "hid_core/resources/applet_resource.h"
-#include "hid_core/resources/npad/npad.h"
 #include "hid_core/resources/npad/npad_vibration.h"
 #include "hid_core/resources/shared_memory_format.h"
 
 namespace Service::HID {
 
 NPad::NPad(Core::HID::HIDCore& hid_core_, KernelHelpers::ServiceContext& service_context_)
-    : hid_core{hid_core_}, service_context{service_context_}, npad_resource{service_context} {
+    : hid_core{hid_core_}, service_context{service_context_}, npad_resource{service_context}
+{
     for (std::size_t aruid_index = 0; aruid_index < AruidIndexMax; ++aruid_index) {
         for (std::size_t i = 0; i < controller_data[aruid_index].size(); ++i) {
             auto& controller = controller_data[aruid_index][i];
@@ -48,7 +50,8 @@ NPad::NPad(Core::HID::HIDCore& hid_core_, KernelHelpers::ServiceContext& service
     }
 }
 
-NPad::~NPad() {
+NPad::~NPad()
+{
     for (std::size_t aruid_index = 0; aruid_index < AruidIndexMax; ++aruid_index) {
         for (std::size_t i = 0; i < controller_data[aruid_index].size(); ++i) {
             auto& controller = controller_data[aruid_index][i];
@@ -57,7 +60,8 @@ NPad::~NPad() {
     }
 }
 
-Result NPad::Activate() {
+Result NPad::Activate()
+{
     if (ref_counter == (std::numeric_limits<s32>::max)() - 1) {
         return ResultNpadResourceOverflow;
     }
@@ -72,7 +76,8 @@ Result NPad::Activate() {
     return ResultSuccess;
 }
 
-Result NPad::Activate(u64 aruid) {
+Result NPad::Activate(u64 aruid)
+{
     std::scoped_lock lock{mutex};
     std::scoped_lock shared_lock{*applet_resource_holder.shared_mutex};
 
@@ -111,19 +116,23 @@ Result NPad::Activate(u64 aruid) {
     return ResultSuccess;
 }
 
-Result NPad::ActivateNpadResource() {
+Result NPad::ActivateNpadResource()
+{
     return npad_resource.Activate();
 }
 
-Result NPad::ActivateNpadResource(u64 aruid) {
+Result NPad::ActivateNpadResource(u64 aruid)
+{
     return npad_resource.Activate(aruid);
 }
 
-void NPad::FreeAppletResourceId(u64 aruid) {
+void NPad::FreeAppletResourceId(u64 aruid)
+{
     return npad_resource.FreeAppletResourceId(aruid);
 }
 
-void NPad::ControllerUpdate(Core::HID::ControllerTriggerType type, std::size_t controller_idx) {
+void NPad::ControllerUpdate(Core::HID::ControllerTriggerType type, std::size_t controller_idx)
+{
     if (type == Core::HID::ControllerTriggerType::All) {
         ControllerUpdate(Core::HID::ControllerTriggerType::Connected, controller_idx);
         ControllerUpdate(Core::HID::ControllerTriggerType::Battery, controller_idx);
@@ -173,7 +182,8 @@ void NPad::ControllerUpdate(Core::HID::ControllerTriggerType type, std::size_t c
     }
 }
 
-void NPad::InitNewlyAddedController(u64 aruid, Core::HID::NpadIdType npad_id) {
+void NPad::InitNewlyAddedController(u64 aruid, Core::HID::NpadIdType npad_id)
+{
     auto& controller = GetControllerFromNpadIdType(aruid, npad_id);
     if (!npad_resource.IsControllerSupported(aruid, controller.device->GetNpadStyleIndex())) {
         return;
@@ -378,7 +388,8 @@ void NPad::InitNewlyAddedController(u64 aruid, Core::HID::NpadIdType npad_id) {
     abstracted_pads[NpadIdTypeToIndex(npad_id)].Update();
 }
 
-void NPad::WriteEmptyEntry(NpadInternalState* npad) {
+void NPad::WriteEmptyEntry(NpadInternalState* npad)
+{
     NPadGenericState dummy_pad_state{};
     NpadGcTriggerState dummy_gc_state{};
     dummy_pad_state.sampling_number = npad->fullkey_lifo.ReadCurrentEntry().sampling_number + 1;
@@ -399,7 +410,8 @@ void NPad::WriteEmptyEntry(NpadInternalState* npad) {
     npad->gc_trigger_lifo.WriteNextEntry(dummy_gc_state);
 }
 
-void NPad::RequestPadStateUpdate(u64 aruid, Core::HID::NpadIdType npad_id) {
+void NPad::RequestPadStateUpdate(u64 aruid, Core::HID::NpadIdType npad_id)
+{
     std::scoped_lock lock{*applet_resource_holder.shared_mutex};
     auto& controller = GetControllerFromNpadIdType(aruid, npad_id);
     const auto controller_type = controller.device->GetNpadStyleIndex();
@@ -468,7 +480,8 @@ void NPad::RequestPadStateUpdate(u64 aruid, Core::HID::NpadIdType npad_id) {
     }
 }
 
-void NPad::OnUpdate(const Core::Timing::CoreTiming& core_timing) {
+void NPad::OnUpdate(const Core::Timing::CoreTiming& core_timing)
+{
     if (ref_counter == 0) {
         return;
     }
@@ -627,7 +640,8 @@ void NPad::OnUpdate(const Core::Timing::CoreTiming& core_timing) {
     }
 }
 
-Result NPad::SetSupportedNpadStyleSet(u64 aruid, Core::HID::NpadStyleSet supported_style_set) {
+Result NPad::SetSupportedNpadStyleSet(u64 aruid, Core::HID::NpadStyleSet supported_style_set)
+{
     std::scoped_lock lock{mutex};
     hid_core.SetSupportedStyleTag({supported_style_set});
     const Result result = npad_resource.SetSupportedNpadStyleSet(aruid, supported_style_set);
@@ -638,7 +652,8 @@ Result NPad::SetSupportedNpadStyleSet(u64 aruid, Core::HID::NpadStyleSet support
 }
 
 Result NPad::GetSupportedNpadStyleSet(u64 aruid,
-                                      Core::HID::NpadStyleSet& out_supported_style_set) const {
+                                      Core::HID::NpadStyleSet& out_supported_style_set) const
+{
     std::scoped_lock lock{mutex};
     const Result result = npad_resource.GetSupportedNpadStyleSet(out_supported_style_set, aruid);
 
@@ -650,8 +665,9 @@ Result NPad::GetSupportedNpadStyleSet(u64 aruid,
     return result;
 }
 
-Result NPad::GetMaskedSupportedNpadStyleSet(
-    u64 aruid, Core::HID::NpadStyleSet& out_supported_style_set) const {
+Result NPad::GetMaskedSupportedNpadStyleSet(u64 aruid,
+                                            Core::HID::NpadStyleSet& out_supported_style_set) const
+{
     std::scoped_lock lock{mutex};
     const Result result =
         npad_resource.GetMaskedSupportedNpadStyleSet(out_supported_style_set, aruid);
@@ -665,7 +681,8 @@ Result NPad::GetMaskedSupportedNpadStyleSet(
 }
 
 Result NPad::SetSupportedNpadIdType(u64 aruid,
-                                    std::span<const Core::HID::NpadIdType> supported_npad_list) {
+                                    std::span<const Core::HID::NpadIdType> supported_npad_list)
+{
     std::scoped_lock lock{mutex};
     if (supported_npad_list.size() > MaxSupportedNpadIdTypes) {
         return ResultInvalidArraySize;
@@ -680,17 +697,20 @@ Result NPad::SetSupportedNpadIdType(u64 aruid,
     return result;
 }
 
-Result NPad::SetNpadJoyHoldType(u64 aruid, NpadJoyHoldType hold_type) {
+Result NPad::SetNpadJoyHoldType(u64 aruid, NpadJoyHoldType hold_type)
+{
     std::scoped_lock lock{mutex};
     return npad_resource.SetNpadJoyHoldType(aruid, hold_type);
 }
 
-Result NPad::GetNpadJoyHoldType(u64 aruid, NpadJoyHoldType& out_hold_type) const {
+Result NPad::GetNpadJoyHoldType(u64 aruid, NpadJoyHoldType& out_hold_type) const
+{
     std::scoped_lock lock{mutex};
     return npad_resource.GetNpadJoyHoldType(out_hold_type, aruid);
 }
 
-Result NPad::SetNpadHandheldActivationMode(u64 aruid, NpadHandheldActivationMode mode) {
+Result NPad::SetNpadHandheldActivationMode(u64 aruid, NpadHandheldActivationMode mode)
+{
     std::scoped_lock lock{mutex};
     Result result = npad_resource.SetNpadHandheldActivationMode(aruid, mode);
     if (result.IsSuccess()) {
@@ -699,13 +719,15 @@ Result NPad::SetNpadHandheldActivationMode(u64 aruid, NpadHandheldActivationMode
     return result;
 }
 
-Result NPad::GetNpadHandheldActivationMode(u64 aruid, NpadHandheldActivationMode& out_mode) const {
+Result NPad::GetNpadHandheldActivationMode(u64 aruid, NpadHandheldActivationMode& out_mode) const
+{
     std::scoped_lock lock{mutex};
     return npad_resource.GetNpadHandheldActivationMode(out_mode, aruid);
 }
 
 bool NPad::SetNpadMode(u64 aruid, Core::HID::NpadIdType& new_npad_id, Core::HID::NpadIdType npad_id,
-                       NpadJoyDeviceType npad_device_type, NpadJoyAssignmentMode assignment_mode) {
+                       NpadJoyDeviceType npad_device_type, NpadJoyAssignmentMode assignment_mode)
+{
     if (!IsNpadIdValid(npad_id)) {
         LOG_ERROR(Service_HID, "Invalid NpadIdType npad_id:{}", npad_id);
         return false;
@@ -780,18 +802,21 @@ bool NPad::SetNpadMode(u64 aruid, Core::HID::NpadIdType& new_npad_id, Core::HID:
 }
 
 Result NPad::AcquireNpadStyleSetUpdateEventHandle(u64 aruid, Kernel::KReadableEvent** out_event,
-                                                  Core::HID::NpadIdType npad_id) {
+                                                  Core::HID::NpadIdType npad_id)
+{
     std::scoped_lock lock{mutex};
     return npad_resource.AcquireNpadStyleSetUpdateEventHandle(aruid, out_event, npad_id);
 }
 
 void NPad::AddNewControllerAt(u64 aruid, Core::HID::NpadStyleIndex controller,
-                              Core::HID::NpadIdType npad_id) {
+                              Core::HID::NpadIdType npad_id)
+{
     UpdateControllerAt(aruid, controller, npad_id, true);
 }
 
 void NPad::UpdateControllerAt(u64 aruid, Core::HID::NpadStyleIndex type,
-                              Core::HID::NpadIdType npad_id, bool connected) {
+                              Core::HID::NpadIdType npad_id, bool connected)
+{
     auto& controller = GetControllerFromNpadIdType(aruid, npad_id);
     if (!connected) {
         DisconnectNpad(aruid, npad_id);
@@ -802,7 +827,8 @@ void NPad::UpdateControllerAt(u64 aruid, Core::HID::NpadStyleIndex type,
     InitNewlyAddedController(aruid, npad_id);
 }
 
-Result NPad::DisconnectNpad(u64 aruid, Core::HID::NpadIdType npad_id) {
+Result NPad::DisconnectNpad(u64 aruid, Core::HID::NpadIdType npad_id)
+{
     if (!IsNpadIdValid(npad_id)) {
         LOG_ERROR(Service_HID, "Invalid NpadIdType npad_id:{}", npad_id);
         return ResultInvalidNpadId;
@@ -852,7 +878,8 @@ Result NPad::DisconnectNpad(u64 aruid, Core::HID::NpadIdType npad_id) {
 
 Result NPad::IsFirmwareUpdateAvailableForSixAxisSensor(
     u64 aruid, const Core::HID::SixAxisSensorHandle& sixaxis_handle,
-    bool& is_firmware_available) const {
+    bool& is_firmware_available) const
+{
     const auto is_valid = IsSixaxisHandleValid(sixaxis_handle);
     if (is_valid.IsError()) {
         LOG_ERROR(Service_HID, "Invalid handle, error_code={}", is_valid.raw);
@@ -864,8 +891,10 @@ Result NPad::IsFirmwareUpdateAvailableForSixAxisSensor(
     return ResultSuccess;
 }
 
-Result NPad::ResetIsSixAxisSensorDeviceNewlyAssigned(
-    u64 aruid, const Core::HID::SixAxisSensorHandle& sixaxis_handle) {
+Result
+NPad::ResetIsSixAxisSensorDeviceNewlyAssigned(u64 aruid,
+                                              const Core::HID::SixAxisSensorHandle& sixaxis_handle)
+{
     const auto is_valid = IsSixaxisHandleValid(sixaxis_handle);
     if (is_valid.IsError()) {
         LOG_ERROR(Service_HID, "Invalid handle, error_code={}", is_valid.raw);
@@ -879,7 +908,8 @@ Result NPad::ResetIsSixAxisSensorDeviceNewlyAssigned(
 }
 
 Result NPad::MergeSingleJoyAsDualJoy(u64 aruid, Core::HID::NpadIdType npad_id_1,
-                                     Core::HID::NpadIdType npad_id_2) {
+                                     Core::HID::NpadIdType npad_id_2)
+{
     if (!IsNpadIdValid(npad_id_1) || !IsNpadIdValid(npad_id_2)) {
         LOG_ERROR(Service_HID, "Invalid NpadIdType npad_id_1:{}, npad_id_2:{}", npad_id_1,
                   npad_id_2);
@@ -941,7 +971,8 @@ Result NPad::MergeSingleJoyAsDualJoy(u64 aruid, Core::HID::NpadIdType npad_id_1,
     return ResultSuccess;
 }
 
-Result NPad::StartLrAssignmentMode(u64 aruid) {
+Result NPad::StartLrAssignmentMode(u64 aruid)
+{
     std::scoped_lock lock{mutex};
     bool is_enabled{};
     Result result = npad_resource.GetLrAssignmentMode(is_enabled, aruid);
@@ -951,7 +982,8 @@ Result NPad::StartLrAssignmentMode(u64 aruid) {
     return result;
 }
 
-Result NPad::StopLrAssignmentMode(u64 aruid) {
+Result NPad::StopLrAssignmentMode(u64 aruid)
+{
     std::scoped_lock lock{mutex};
     bool is_enabled{};
     Result result = npad_resource.GetLrAssignmentMode(is_enabled, aruid);
@@ -962,7 +994,8 @@ Result NPad::StopLrAssignmentMode(u64 aruid) {
 }
 
 Result NPad::SwapNpadAssignment(u64 aruid, Core::HID::NpadIdType npad_id_1,
-                                Core::HID::NpadIdType npad_id_2) {
+                                Core::HID::NpadIdType npad_id_2)
+{
     if (!IsNpadIdValid(npad_id_1) || !IsNpadIdValid(npad_id_2)) {
         LOG_ERROR(Service_HID, "Invalid NpadIdType npad_id_1:{}, npad_id_2:{}", npad_id_1,
                   npad_id_2);
@@ -994,23 +1027,27 @@ Result NPad::SwapNpadAssignment(u64 aruid, Core::HID::NpadIdType npad_id_1,
 }
 
 Result NPad::IsUnintendedHomeButtonInputProtectionEnabled(bool& out_is_enabled, u64 aruid,
-                                                          Core::HID::NpadIdType npad_id) const {
+                                                          Core::HID::NpadIdType npad_id) const
+{
     std::scoped_lock lock{mutex};
     return npad_resource.GetHomeProtectionEnabled(out_is_enabled, aruid, npad_id);
 }
 
 Result NPad::EnableUnintendedHomeButtonInputProtection(u64 aruid, Core::HID::NpadIdType npad_id,
-                                                       bool is_enabled) {
+                                                       bool is_enabled)
+{
     std::scoped_lock lock{mutex};
     return npad_resource.SetHomeProtectionEnabled(aruid, npad_id, is_enabled);
 }
 
-void NPad::SetNpadAnalogStickUseCenterClamp(u64 aruid, bool is_enabled) {
+void NPad::SetNpadAnalogStickUseCenterClamp(u64 aruid, bool is_enabled)
+{
     std::scoped_lock lock{mutex};
     npad_resource.SetNpadAnalogStickUseCenterClamp(aruid, is_enabled);
 }
 
-void NPad::ClearAllConnectedControllers() {
+void NPad::ClearAllConnectedControllers()
+{
     for (std::size_t aruid_index = 0; aruid_index < AruidIndexMax; aruid_index++) {
         for (auto& controller : controller_data[aruid_index]) {
             if (controller.device->IsConnected() &&
@@ -1022,7 +1059,8 @@ void NPad::ClearAllConnectedControllers() {
     }
 }
 
-void NPad::DisconnectAllConnectedControllers() {
+void NPad::DisconnectAllConnectedControllers()
+{
     for (std::size_t aruid_index = 0; aruid_index < AruidIndexMax; aruid_index++) {
         for (auto& controller : controller_data[aruid_index]) {
             controller.device->Disconnect();
@@ -1030,7 +1068,8 @@ void NPad::DisconnectAllConnectedControllers() {
     }
 }
 
-void NPad::ConnectAllDisconnectedControllers() {
+void NPad::ConnectAllDisconnectedControllers()
+{
     for (std::size_t aruid_index = 0; aruid_index < AruidIndexMax; aruid_index++) {
         for (auto& controller : controller_data[aruid_index]) {
             if (controller.device->GetNpadStyleIndex() != Core::HID::NpadStyleIndex::None &&
@@ -1041,7 +1080,8 @@ void NPad::ConnectAllDisconnectedControllers() {
     }
 }
 
-void NPad::ClearAllControllers() {
+void NPad::ClearAllControllers()
+{
     for (std::size_t aruid_index = 0; aruid_index < AruidIndexMax; aruid_index++) {
         for (auto& controller : controller_data[aruid_index]) {
             controller.device->Disconnect();
@@ -1050,11 +1090,13 @@ void NPad::ClearAllControllers() {
     }
 }
 
-Core::HID::NpadButton NPad::GetAndResetPressState() {
+Core::HID::NpadButton NPad::GetAndResetPressState()
+{
     return static_cast<Core::HID::NpadButton>(press_state.exchange(0));
 }
 
-Result NPad::ApplyNpadSystemCommonPolicy(u64 aruid) {
+Result NPad::ApplyNpadSystemCommonPolicy(u64 aruid)
+{
     std::scoped_lock lock{mutex};
     const Result result = npad_resource.ApplyNpadSystemCommonPolicy(aruid, false);
     if (result.IsSuccess()) {
@@ -1063,7 +1105,8 @@ Result NPad::ApplyNpadSystemCommonPolicy(u64 aruid) {
     return result;
 }
 
-Result NPad::ApplyNpadSystemCommonPolicyFull(u64 aruid) {
+Result NPad::ApplyNpadSystemCommonPolicyFull(u64 aruid)
+{
     std::scoped_lock lock{mutex};
     const Result result = npad_resource.ApplyNpadSystemCommonPolicy(aruid, true);
     if (result.IsSuccess()) {
@@ -1072,7 +1115,8 @@ Result NPad::ApplyNpadSystemCommonPolicyFull(u64 aruid) {
     return result;
 }
 
-Result NPad::ClearNpadSystemCommonPolicy(u64 aruid) {
+Result NPad::ClearNpadSystemCommonPolicy(u64 aruid)
+{
     std::scoped_lock lock{mutex};
     const Result result = npad_resource.ClearNpadSystemCommonPolicy(aruid);
     if (result.IsSuccess()) {
@@ -1081,19 +1125,23 @@ Result NPad::ClearNpadSystemCommonPolicy(u64 aruid) {
     return result;
 }
 
-void NPad::SetRevision(u64 aruid, NpadRevision revision) {
+void NPad::SetRevision(u64 aruid, NpadRevision revision)
+{
     npad_resource.SetNpadRevision(aruid, revision);
 }
 
-NpadRevision NPad::GetRevision(u64 aruid) {
+NpadRevision NPad::GetRevision(u64 aruid)
+{
     return npad_resource.GetNpadRevision(aruid);
 }
 
-Result NPad::RegisterAppletResourceUserId(u64 aruid) {
+Result NPad::RegisterAppletResourceUserId(u64 aruid)
+{
     return npad_resource.RegisterAppletResourceUserId(aruid);
 }
 
-void NPad::UnregisterAppletResourceUserId(u64 aruid) {
+void NPad::UnregisterAppletResourceUserId(u64 aruid)
+{
     // TODO: Remove this once abstract pad is emulated properly
     const auto aruid_index = npad_resource.GetIndexFromAruid(aruid);
     for (auto& controller : controller_data[aruid_index]) {
@@ -1109,7 +1157,8 @@ void NPad::SetNpadExternals(std::shared_ptr<AppletResource> resource,
                             std::recursive_mutex* shared_mutex,
                             std::shared_ptr<HandheldConfig> handheld_config,
                             Kernel::KEvent* input_event, std::mutex* input_mutex,
-                            std::shared_ptr<Service::Set::ISystemSettingsServer> settings) {
+                            std::shared_ptr<Service::Set::ISystemSettingsServer> settings)
+{
     applet_resource_holder.applet_resource = resource;
     applet_resource_holder.shared_mutex = shared_mutex;
     applet_resource_holder.shared_npad_resource = &npad_resource;
@@ -1125,20 +1174,23 @@ void NPad::SetNpadExternals(std::shared_ptr<AppletResource> resource,
     }
 }
 
-NPad::NpadControllerData& NPad::GetControllerFromHandle(
-    u64 aruid, const Core::HID::SixAxisSensorHandle& device_handle) {
+NPad::NpadControllerData&
+NPad::GetControllerFromHandle(u64 aruid, const Core::HID::SixAxisSensorHandle& device_handle)
+{
     const auto npad_id = static_cast<Core::HID::NpadIdType>(device_handle.npad_id);
     return GetControllerFromNpadIdType(aruid, npad_id);
 }
 
-const NPad::NpadControllerData& NPad::GetControllerFromHandle(
-    u64 aruid, const Core::HID::SixAxisSensorHandle& device_handle) const {
+const NPad::NpadControllerData&
+NPad::GetControllerFromHandle(u64 aruid, const Core::HID::SixAxisSensorHandle& device_handle) const
+{
     const auto npad_id = static_cast<Core::HID::NpadIdType>(device_handle.npad_id);
     return GetControllerFromNpadIdType(aruid, npad_id);
 }
 
 NPad::NpadControllerData& NPad::GetControllerFromNpadIdType(u64 aruid,
-                                                            Core::HID::NpadIdType npad_id) {
+                                                            Core::HID::NpadIdType npad_id)
+{
     if (!IsNpadIdValid(npad_id)) {
         LOG_ERROR(Service_HID, "Invalid NpadIdType npad_id:{}", npad_id);
         npad_id = Core::HID::NpadIdType::Player1;
@@ -1152,8 +1204,9 @@ NPad::NpadControllerData& NPad::GetControllerFromNpadIdType(u64 aruid,
     return controller_data[aruid_index][npad_index];
 }
 
-const NPad::NpadControllerData& NPad::GetControllerFromNpadIdType(
-    u64 aruid, Core::HID::NpadIdType npad_id) const {
+const NPad::NpadControllerData&
+NPad::GetControllerFromNpadIdType(u64 aruid, Core::HID::NpadIdType npad_id) const
+{
     if (!IsNpadIdValid(npad_id)) {
         LOG_ERROR(Service_HID, "Invalid NpadIdType npad_id:{}", npad_id);
         npad_id = Core::HID::NpadIdType::Player1;
@@ -1167,8 +1220,9 @@ const NPad::NpadControllerData& NPad::GetControllerFromNpadIdType(
     return controller_data[aruid_index][npad_index];
 }
 
-Core::HID::SixAxisSensorProperties& NPad::GetSixaxisProperties(
-    u64 aruid, const Core::HID::SixAxisSensorHandle& sixaxis_handle) {
+Core::HID::SixAxisSensorProperties&
+NPad::GetSixaxisProperties(u64 aruid, const Core::HID::SixAxisSensorHandle& sixaxis_handle)
+{
     auto& controller = GetControllerFromHandle(aruid, sixaxis_handle);
     switch (sixaxis_handle.npad_type) {
     case Core::HID::NpadStyleIndex::Fullkey:
@@ -1190,8 +1244,9 @@ Core::HID::SixAxisSensorProperties& NPad::GetSixaxisProperties(
     }
 }
 
-const Core::HID::SixAxisSensorProperties& NPad::GetSixaxisProperties(
-    u64 aruid, const Core::HID::SixAxisSensorHandle& sixaxis_handle) const {
+const Core::HID::SixAxisSensorProperties&
+NPad::GetSixaxisProperties(u64 aruid, const Core::HID::SixAxisSensorHandle& sixaxis_handle) const
+{
     const auto& controller = GetControllerFromHandle(aruid, sixaxis_handle);
     switch (sixaxis_handle.npad_type) {
     case Core::HID::NpadStyleIndex::Fullkey:
@@ -1213,7 +1268,8 @@ const Core::HID::SixAxisSensorProperties& NPad::GetSixaxisProperties(
     }
 }
 
-AppletDetailedUiType NPad::GetAppletDetailedUiType(Core::HID::NpadIdType npad_id) {
+AppletDetailedUiType NPad::GetAppletDetailedUiType(Core::HID::NpadIdType npad_id)
+{
     const auto aruid = applet_resource_holder.applet_resource->GetActiveAruid();
     const auto* shared_memory = GetControllerFromNpadIdType(aruid, npad_id).shared_memory;
     return {
@@ -1223,23 +1279,27 @@ AppletDetailedUiType NPad::GetAppletDetailedUiType(Core::HID::NpadIdType npad_id
 }
 
 Result NPad::SetNpadCaptureButtonAssignment(u64 aruid, Core::HID::NpadStyleSet npad_style_set,
-                                            Core::HID::NpadButton button_assignment) {
+                                            Core::HID::NpadButton button_assignment)
+{
     std::scoped_lock lock{mutex};
     return npad_resource.SetNpadCaptureButtonAssignment(aruid, npad_style_set, button_assignment);
 }
 
-Result NPad::ClearNpadCaptureButtonAssignment(u64 aruid) {
+Result NPad::ClearNpadCaptureButtonAssignment(u64 aruid)
+{
     std::scoped_lock lock{mutex};
     return npad_resource.ClearNpadCaptureButtonAssignment(aruid);
 }
 
 std::size_t NPad::GetNpadCaptureButtonAssignment(std::span<Core::HID::NpadButton> out_list,
-                                                 u64 aruid) const {
+                                                 u64 aruid) const
+{
     std::scoped_lock lock{mutex};
     return npad_resource.GetNpadCaptureButtonAssignment(out_list, aruid);
 }
 
-Result NPad::SetNpadSystemExtStateEnabled(u64 aruid, bool is_enabled) {
+Result NPad::SetNpadSystemExtStateEnabled(u64 aruid, bool is_enabled)
+{
     std::scoped_lock lock{mutex};
     const auto result = npad_resource.SetNpadSystemExtStateEnabled(aruid, is_enabled);
 
@@ -1251,7 +1311,8 @@ Result NPad::SetNpadSystemExtStateEnabled(u64 aruid, bool is_enabled) {
     return result;
 }
 
-Result NPad::AssigningSingleOnSlSrPress(u64 aruid, bool is_enabled) {
+Result NPad::AssigningSingleOnSlSrPress(u64 aruid, bool is_enabled)
+{
     std::scoped_lock lock{mutex};
     bool is_currently_enabled{};
     Result result = npad_resource.IsAssigningSingleOnSlSrPressEnabled(is_currently_enabled, aruid);
@@ -1261,17 +1322,20 @@ Result NPad::AssigningSingleOnSlSrPress(u64 aruid, bool is_enabled) {
     return result;
 }
 
-Result NPad::GetLastActiveNpad(Core::HID::NpadIdType& out_npad_id) const {
+Result NPad::GetLastActiveNpad(Core::HID::NpadIdType& out_npad_id) const
+{
     std::scoped_lock lock{mutex};
     out_npad_id = hid_core.GetLastActiveController();
     return ResultSuccess;
 }
 
-NpadVibration* NPad::GetVibrationHandler() {
+NpadVibration* NPad::GetVibrationHandler()
+{
     return &vibration_handler;
 }
 
-std::vector<NpadVibrationBase*> NPad::GetAllVibrationDevices() {
+std::vector<NpadVibrationBase*> NPad::GetAllVibrationDevices()
+{
     std::vector<NpadVibrationBase*> vibration_devices;
 
     for (auto& abstract_pad : abstracted_pads) {
@@ -1297,7 +1361,8 @@ std::vector<NpadVibrationBase*> NPad::GetAllVibrationDevices() {
     return vibration_devices;
 }
 
-NpadVibrationBase* NPad::GetVibrationDevice(const Core::HID::VibrationDeviceHandle& handle) {
+NpadVibrationBase* NPad::GetVibrationDevice(const Core::HID::VibrationDeviceHandle& handle)
+{
     if (IsVibrationHandleValid(handle).IsError()) {
         return nullptr;
     }
@@ -1313,8 +1378,8 @@ NpadVibrationBase* NPad::GetVibrationDevice(const Core::HID::VibrationDeviceHand
     return abstracted_pads[npad_index].GetVibrationDevice(handle.device_index);
 }
 
-NpadN64VibrationDevice* NPad::GetN64VibrationDevice(
-    const Core::HID::VibrationDeviceHandle& handle) {
+NpadN64VibrationDevice* NPad::GetN64VibrationDevice(const Core::HID::VibrationDeviceHandle& handle)
+{
     if (IsVibrationHandleValid(handle).IsError()) {
         return nullptr;
     }
@@ -1327,7 +1392,8 @@ NpadN64VibrationDevice* NPad::GetN64VibrationDevice(
     return abstracted_pads[npad_index].GetN64VibrationDevice();
 }
 
-NpadVibrationDevice* NPad::GetNSVibrationDevice(const Core::HID::VibrationDeviceHandle& handle) {
+NpadVibrationDevice* NPad::GetNSVibrationDevice(const Core::HID::VibrationDeviceHandle& handle)
+{
     if (IsVibrationHandleValid(handle).IsError()) {
         return nullptr;
     }
@@ -1342,7 +1408,8 @@ NpadVibrationDevice* NPad::GetNSVibrationDevice(const Core::HID::VibrationDevice
     return abstracted_pads[npad_index].GetVibrationDevice(handle.device_index);
 }
 
-NpadGcVibrationDevice* NPad::GetGcVibrationDevice(const Core::HID::VibrationDeviceHandle& handle) {
+NpadGcVibrationDevice* NPad::GetGcVibrationDevice(const Core::HID::VibrationDeviceHandle& handle)
+{
     if (IsVibrationHandleValid(handle).IsError()) {
         return nullptr;
     }
@@ -1355,12 +1422,14 @@ NpadGcVibrationDevice* NPad::GetGcVibrationDevice(const Core::HID::VibrationDevi
     return abstracted_pads[npad_index].GetGCVibrationDevice();
 }
 
-void NPad::UpdateHandheldAbstractState() {
+void NPad::UpdateHandheldAbstractState()
+{
     std::scoped_lock lock{mutex};
     abstracted_pads[NpadIdTypeToIndex(Core::HID::NpadIdType::Handheld)].Update();
 }
 
-void NPad::EnableAppletToGetInput(u64 aruid) {
+void NPad::EnableAppletToGetInput(u64 aruid)
+{
     std::scoped_lock lock{mutex};
     std::scoped_lock shared_lock{*applet_resource_holder.shared_mutex};
 

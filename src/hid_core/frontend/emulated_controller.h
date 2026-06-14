@@ -6,15 +6,15 @@
 
 #pragma once
 
+#include <ankerl/unordered_dense.h>
+
 #include <array>
+#include <atomic>
 #include <functional>
 #include <memory>
 #include <mutex>
 #include <shared_mutex>
 #include <vector>
-#include <atomic>
-
-#include <ankerl/unordered_dense.h>
 
 #include "common/common_types.h"
 #include "common/input.h"

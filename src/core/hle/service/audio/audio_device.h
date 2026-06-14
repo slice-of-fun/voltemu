@@ -27,13 +27,15 @@ public:
     ~IAudioDevice() override;
 
 private:
-    Result ListAudioDeviceName(
-        OutArray<AudioDevice::AudioDeviceName, BufferAttr_HipcMapAlias> out_names,
-        Out<s32> out_count);
-    Result SetAudioDeviceOutputVolume(
-        InArray<AudioDevice::AudioDeviceName, BufferAttr_HipcMapAlias> name, f32 volume);
-    Result GetAudioDeviceOutputVolume(
-        Out<f32> out_volume, InArray<AudioDevice::AudioDeviceName, BufferAttr_HipcMapAlias> name);
+    Result
+    ListAudioDeviceName(OutArray<AudioDevice::AudioDeviceName, BufferAttr_HipcMapAlias> out_names,
+                        Out<s32> out_count);
+    Result
+    SetAudioDeviceOutputVolume(InArray<AudioDevice::AudioDeviceName, BufferAttr_HipcMapAlias> name,
+                               f32 volume);
+    Result
+    GetAudioDeviceOutputVolume(Out<f32> out_volume,
+                               InArray<AudioDevice::AudioDeviceName, BufferAttr_HipcMapAlias> name);
     Result GetActiveAudioDeviceName(
         OutArray<AudioDevice::AudioDeviceName, BufferAttr_HipcMapAlias> out_name);
     Result ListAudioDeviceNameAuto(

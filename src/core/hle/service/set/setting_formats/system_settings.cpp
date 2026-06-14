@@ -4,12 +4,14 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include "common/settings.h"
 #include "core/hle/service/set/setting_formats/system_settings.h"
+
+#include "common/settings.h"
 
 namespace Service::Set {
 
-SystemSettings DefaultSystemSettings() {
+SystemSettings DefaultSystemSettings()
+{
     SystemSettings settings{};
 
     settings.version = 0x140000;

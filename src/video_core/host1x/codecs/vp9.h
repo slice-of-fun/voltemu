@@ -13,8 +13,8 @@
 #include "common/common_types.h"
 #include "common/scratch_buffer.h"
 #include "common/stream.h"
-#include "video_core/host1x/codecs/decoder.h"
 #include "video_core/host1x/codec_types.h"
+#include "video_core/host1x/codecs/decoder.h"
 #include "video_core/host1x/nvdec_common.h"
 
 namespace Tegra {
@@ -51,13 +51,9 @@ public:
     /// Signal the end of the bitstream
     void End();
 
-    [[nodiscard]] std::vector<u8>& GetBuffer() {
-        return base_stream.GetBuffer();
-    }
+    [[nodiscard]] std::vector<u8>& GetBuffer() { return base_stream.GetBuffer(); }
 
-    [[nodiscard]] const std::vector<u8>& GetBuffer() const {
-        return base_stream.GetBuffer();
-    }
+    [[nodiscard]] const std::vector<u8>& GetBuffer() const { return base_stream.GetBuffer(); }
 
 private:
     u8 PeekByte();
@@ -130,27 +126,19 @@ public:
     std::tuple<u64, u64> GetProgressiveOffsets() override;
     std::tuple<u64, u64, u64, u64> GetInterlacedOffsets() override;
 
-    bool IsInterlaced() override {
-        return false;
-    }
+    bool IsInterlaced() override { return false; }
 
-    std::string_view GetCurrentCodecName() const override {
-        return "VP9";
-    }
+    std::string_view GetCurrentCodecName() const override { return "VP9"; }
 
 private:
     /// Returns true if the most recent frame was a hidden frame.
-    [[nodiscard]] bool WasFrameHidden() const {
-        return !current_frame_info.show_frame;
-    }
+    [[nodiscard]] bool WasFrameHidden() const { return !current_frame_info.show_frame; }
 
     /// Returns a const span to the composed frame data.
-    [[nodiscard]] std::span<const u8> GetFrameBytes() const {
-        return frame_scratch;
-    }
+    [[nodiscard]] std::span<const u8> GetFrameBytes() const { return frame_scratch; }
 
     /// Generates compressed header probability updates in the bitstream writer
-    template <typename T, std::size_t N>
+    template<typename T, std::size_t N>
     void WriteProbabilityUpdate(VpxRangeEncoder& writer, const std::array<T, N>& new_prob,
                                 const std::array<T, N>& old_prob);
 
@@ -173,7 +161,7 @@ private:
                                     const std::array<u8, 1728>& old_prob);
 
     /// Write probabilities for 4-byte aligned structures
-    template <typename T, std::size_t N>
+    template<typename T, std::size_t N>
     void WriteProbabilityUpdateAligned4(VpxRangeEncoder& writer, const std::array<T, N>& new_prob,
                                         const std::array<T, N>& old_prob);
 

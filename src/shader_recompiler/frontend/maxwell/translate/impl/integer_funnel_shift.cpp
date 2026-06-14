@@ -15,7 +15,8 @@ enum class MaxShift : u64 {
 };
 
 IR::U64 PackedShift(IR::IREmitter& ir, const IR::U64& packed_int, const IR::U32& safe_shift,
-                    bool right_shift, bool is_signed) {
+                    bool right_shift, bool is_signed)
+{
     if (!right_shift) {
         return ir.ShiftLeftLogical(packed_int, safe_shift);
     }
@@ -26,7 +27,8 @@ IR::U64 PackedShift(IR::IREmitter& ir, const IR::U64& packed_int, const IR::U32&
 }
 
 void SHF(TranslatorVisitor& v, u64 insn, const IR::U32& shift, const IR::U32& high_bits,
-         bool right_shift) {
+         bool right_shift)
+{
     union {
         u64 insn;
         BitField<0, 8, IR::Reg> dest_reg;
@@ -62,19 +64,23 @@ void SHF(TranslatorVisitor& v, u64 insn, const IR::U32& shift, const IR::U32& hi
 }
 } // Anonymous namespace
 
-void TranslatorVisitor::SHF_l_reg(u64 insn) {
+void TranslatorVisitor::SHF_l_reg(u64 insn)
+{
     SHF(*this, insn, GetReg20(insn), GetReg39(insn), false);
 }
 
-void TranslatorVisitor::SHF_l_imm(u64 insn) {
+void TranslatorVisitor::SHF_l_imm(u64 insn)
+{
     SHF(*this, insn, GetImm20(insn), GetReg39(insn), false);
 }
 
-void TranslatorVisitor::SHF_r_reg(u64 insn) {
+void TranslatorVisitor::SHF_r_reg(u64 insn)
+{
     SHF(*this, insn, GetReg20(insn), GetReg39(insn), true);
 }
 
-void TranslatorVisitor::SHF_r_imm(u64 insn) {
+void TranslatorVisitor::SHF_r_imm(u64 insn)
+{
     SHF(*this, insn, GetImm20(insn), GetReg39(insn), true);
 }
 

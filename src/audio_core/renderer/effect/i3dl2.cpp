@@ -6,7 +6,8 @@
 namespace AudioCore::Renderer {
 
 void I3dl2ReverbInfo::Update(BehaviorInfo::ErrorInfo& error_info,
-                             const InParameterVersion1& in_params, const PoolMapper& pool_mapper) {
+                             const InParameterVersion1& in_params, const PoolMapper& pool_mapper)
+{
     auto in_specific{reinterpret_cast<const ParameterVersion1*>(in_params.specific.data())};
     auto params{reinterpret_cast<ParameterVersion1*>(parameter.data())};
 
@@ -39,7 +40,8 @@ void I3dl2ReverbInfo::Update(BehaviorInfo::ErrorInfo& error_info,
 }
 
 void I3dl2ReverbInfo::Update(BehaviorInfo::ErrorInfo& error_info,
-                             const InParameterVersion2& in_params, const PoolMapper& pool_mapper) {
+                             const InParameterVersion2& in_params, const PoolMapper& pool_mapper)
+{
     auto in_specific{reinterpret_cast<const ParameterVersion1*>(in_params.specific.data())};
     auto params{reinterpret_cast<ParameterVersion1*>(parameter.data())};
 
@@ -71,7 +73,8 @@ void I3dl2ReverbInfo::Update(BehaviorInfo::ErrorInfo& error_info,
     error_info.address = CpuAddr(0);
 }
 
-void I3dl2ReverbInfo::UpdateForCommandGeneration() {
+void I3dl2ReverbInfo::UpdateForCommandGeneration()
+{
     if (enabled) {
         usage_state = UsageState::Enabled;
     } else {
@@ -82,12 +85,16 @@ void I3dl2ReverbInfo::UpdateForCommandGeneration() {
     params->state = ParameterState::Updated;
 }
 
-void I3dl2ReverbInfo::InitializeResultState(EffectResultState& result_state) {}
+void I3dl2ReverbInfo::InitializeResultState(EffectResultState& result_state)
+{
+}
 
-void I3dl2ReverbInfo::UpdateResultState(EffectResultState& cpu_state,
-                                        EffectResultState& dsp_state) {}
+void I3dl2ReverbInfo::UpdateResultState(EffectResultState& cpu_state, EffectResultState& dsp_state)
+{
+}
 
-CpuAddr I3dl2ReverbInfo::GetWorkbuffer(s32 index) {
+CpuAddr I3dl2ReverbInfo::GetWorkbuffer(s32 index)
+{
     return GetSingleBuffer(index);
 }
 

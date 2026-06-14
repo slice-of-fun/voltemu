@@ -42,12 +42,14 @@ private:
     struct AppKey {
         Common::UUID user_id;
         u64 application_id{};
-        friend constexpr bool operator==(const AppKey& a, const AppKey& b) {
+        friend constexpr bool operator==(const AppKey& a, const AppKey& b)
+        {
             return a.user_id == b.user_id && a.application_id == b.application_id;
         }
     };
     struct AppKeyHash {
-        size_t operator()(const AppKey& k) const noexcept {
+        size_t operator()(const AppKey& k) const noexcept
+        {
             // Combine UUID hash and application_id
             size_t h1 = std::hash<Common::UUID>{}(k.user_id);
             size_t h2 = std::hash<u64>{}(k.application_id);

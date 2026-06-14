@@ -7,22 +7,26 @@
 
 namespace Kernel::Svc {
 
-void CallSecureMonitor(Core::System& system, lp64::SecureMonitorArguments* args) {
+void CallSecureMonitor(Core::System& system, lp64::SecureMonitorArguments* args)
+{
     UNIMPLEMENTED();
 }
 
-void CallSecureMonitor64(Core::System& system, lp64::SecureMonitorArguments* args) {
+void CallSecureMonitor64(Core::System& system, lp64::SecureMonitorArguments* args)
+{
     CallSecureMonitor(system, args);
 }
 
-void CallSecureMonitor64From32(Core::System& system, ilp32::SecureMonitorArguments* args) {
+void CallSecureMonitor64From32(Core::System& system, ilp32::SecureMonitorArguments* args)
+{
     // CallSecureMonitor64From32 is not supported.
     UNIMPLEMENTED_MSG("CallSecureMonitor64From32");
 }
 
 // Custom ABI for CallSecureMonitor.
 
-void SvcWrap_CallSecureMonitor64(Core::System& system, std::span<uint64_t, 8> args) {
+void SvcWrap_CallSecureMonitor64(Core::System& system, std::span<uint64_t, 8> args)
+{
     lp64::SecureMonitorArguments smc_args{};
     for (int i = 0; i < 8; i++) {
         smc_args.r[i] = args[i];
@@ -35,7 +39,8 @@ void SvcWrap_CallSecureMonitor64(Core::System& system, std::span<uint64_t, 8> ar
     }
 }
 
-void SvcWrap_CallSecureMonitor64From32(Core::System& system, std::span<uint64_t, 8> args) {
+void SvcWrap_CallSecureMonitor64From32(Core::System& system, std::span<uint64_t, 8> args)
+{
     ilp32::SecureMonitorArguments smc_args{};
     for (int i = 0; i < 8; i++) {
         smc_args.r[i] = static_cast<u32>(args[i]);

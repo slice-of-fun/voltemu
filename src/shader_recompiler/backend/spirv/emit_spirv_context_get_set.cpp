@@ -13,8 +13,9 @@
 
 namespace Shader::Backend::SPIRV {
 namespace {
-template <typename... Args>
-Id AttrPointer(EmitContext& ctx, Id pointer_type, Id vertex, Id base, Args&&... args) {
+template<typename... Args>
+Id AttrPointer(EmitContext& ctx, Id pointer_type, Id vertex, Id base, Args&&... args)
+{
     switch (ctx.stage) {
     case Stage::TessellationControl:
     case Stage::TessellationEval:
@@ -25,8 +26,9 @@ Id AttrPointer(EmitContext& ctx, Id pointer_type, Id vertex, Id base, Args&&... 
     }
 }
 
-template <typename... Args>
-Id OutputAccessChain(EmitContext& ctx, Id result_type, Id base, Args&&... args) {
+template<typename... Args>
+Id OutputAccessChain(EmitContext& ctx, Id result_type, Id base, Args&&... args)
+{
     if (ctx.stage == Stage::TessellationControl) {
         const Id invocation_id{ctx.OpLoad(ctx.U32[1], ctx.invocation_id)};
         return ctx.OpAccessChain(result_type, base, invocation_id, std::forward<Args>(args)...);
@@ -43,7 +45,8 @@ struct OutAttr {
     Id type{};
 };
 
-std::optional<OutAttr> OutputAttrPointer(EmitContext& ctx, IR::Attribute attr) {
+std::optional<OutAttr> OutputAttrPointer(EmitContext& ctx, IR::Attribute attr)
+{
     if (IR::IsGeneric(attr)) {
         const u32 index{IR::GenericAttributeIndex(attr)};
         const u32 element{IR::GenericAttributeElement(attr)};
@@ -114,7 +117,8 @@ std::optional<OutAttr> OutputAttrPointer(EmitContext& ctx, IR::Attribute attr) {
 }
 
 Id GetCbuf(EmitContext& ctx, Id result_type, Id UniformDefinitions::*member_ptr, u32 element_size,
-           const IR::Value& binding, const IR::Value& offset, const Id indirect_func) {
+           const IR::Value& binding, const IR::Value& offset, const Id indirect_func)
+{
     Id buffer_offset;
     const Id uniform_type{ctx.uniform_types.*member_ptr};
     if (offset.IsImmediate()) {
@@ -145,17 +149,20 @@ Id GetCbuf(EmitContext& ctx, Id result_type, Id UniformDefinitions::*member_ptr,
     return ctx.OpSelect(result_type, cond, val, zero);
 }
 
-Id GetCbufU32(EmitContext& ctx, const IR::Value& binding, const IR::Value& offset) {
+Id GetCbufU32(EmitContext& ctx, const IR::Value& binding, const IR::Value& offset)
+{
     return GetCbuf(ctx, ctx.U32[1], &UniformDefinitions::U32, sizeof(u32), binding, offset,
                    ctx.load_const_func_u32);
 }
 
-Id GetCbufU32x4(EmitContext& ctx, const IR::Value& binding, const IR::Value& offset) {
+Id GetCbufU32x4(EmitContext& ctx, const IR::Value& binding, const IR::Value& offset)
+{
     return GetCbuf(ctx, ctx.U32[4], &UniformDefinitions::U32x4, sizeof(u32[4]), binding, offset,
                    ctx.load_const_func_u32x4);
 }
 
-Id GetCbufElement(EmitContext& ctx, Id vector, const IR::Value& offset, u32 index_offset) {
+Id GetCbufElement(EmitContext& ctx, Id vector, const IR::Value& offset, u32 index_offset)
+{
     if (offset.IsImmediate()) {
         const u32 element{(offset.U32() / 4) % 4 + index_offset};
         return ctx.OpCompositeExtract(ctx.U32[1], vector, element);
@@ -169,39 +176,48 @@ Id GetCbufElement(EmitContext& ctx, Id vector, const IR::Value& offset, u32 inde
 }
 } // Anonymous namespace
 
-void EmitGetRegister(EmitContext&) {
+void EmitGetRegister(EmitContext&)
+{
     throw LogicError("Unreachable instruction");
 }
 
-void EmitSetRegister(EmitContext&) {
+void EmitSetRegister(EmitContext&)
+{
     throw LogicError("Unreachable instruction");
 }
 
-void EmitGetPred(EmitContext&) {
+void EmitGetPred(EmitContext&)
+{
     throw LogicError("Unreachable instruction");
 }
 
-void EmitSetPred(EmitContext&) {
+void EmitSetPred(EmitContext&)
+{
     throw LogicError("Unreachable instruction");
 }
 
-void EmitSetGotoVariable(EmitContext&) {
+void EmitSetGotoVariable(EmitContext&)
+{
     throw LogicError("Unreachable instruction");
 }
 
-void EmitGetGotoVariable(EmitContext&) {
+void EmitGetGotoVariable(EmitContext&)
+{
     throw LogicError("Unreachable instruction");
 }
 
-void EmitSetIndirectBranchVariable(EmitContext&) {
+void EmitSetIndirectBranchVariable(EmitContext&)
+{
     throw LogicError("Unreachable instruction");
 }
 
-void EmitGetIndirectBranchVariable(EmitContext&) {
+void EmitGetIndirectBranchVariable(EmitContext&)
+{
     throw LogicError("Unreachable instruction");
 }
 
-Id EmitGetCbufU8(EmitContext& ctx, const IR::Value& binding, const IR::Value& offset) {
+Id EmitGetCbufU8(EmitContext& ctx, const IR::Value& binding, const IR::Value& offset)
+{
     if (ctx.profile.support_descriptor_aliasing && ctx.profile.support_int8) {
         const Id load{GetCbuf(ctx, ctx.U8, &UniformDefinitions::U8, sizeof(u8), binding, offset,
                               ctx.load_const_func_u8)};
@@ -218,7 +234,8 @@ Id EmitGetCbufU8(EmitContext& ctx, const IR::Value& binding, const IR::Value& of
     return ctx.OpBitFieldUExtract(ctx.U32[1], element, bit_offset, ctx.Const(8u));
 }
 
-Id EmitGetCbufS8(EmitContext& ctx, const IR::Value& binding, const IR::Value& offset) {
+Id EmitGetCbufS8(EmitContext& ctx, const IR::Value& binding, const IR::Value& offset)
+{
     if (ctx.profile.support_descriptor_aliasing && ctx.profile.support_int8) {
         const Id load{GetCbuf(ctx, ctx.S8, &UniformDefinitions::S8, sizeof(s8), binding, offset,
                               ctx.load_const_func_u8)};
@@ -235,7 +252,8 @@ Id EmitGetCbufS8(EmitContext& ctx, const IR::Value& binding, const IR::Value& of
     return ctx.OpBitFieldSExtract(ctx.U32[1], element, bit_offset, ctx.Const(8u));
 }
 
-Id EmitGetCbufU16(EmitContext& ctx, const IR::Value& binding, const IR::Value& offset) {
+Id EmitGetCbufU16(EmitContext& ctx, const IR::Value& binding, const IR::Value& offset)
+{
     if (ctx.profile.support_descriptor_aliasing && ctx.profile.support_int16) {
         const Id load{GetCbuf(ctx, ctx.U16, &UniformDefinitions::U16, sizeof(u16), binding, offset,
                               ctx.load_const_func_u16)};
@@ -252,7 +270,8 @@ Id EmitGetCbufU16(EmitContext& ctx, const IR::Value& binding, const IR::Value& o
     return ctx.OpBitFieldUExtract(ctx.U32[1], element, bit_offset, ctx.Const(16u));
 }
 
-Id EmitGetCbufS16(EmitContext& ctx, const IR::Value& binding, const IR::Value& offset) {
+Id EmitGetCbufS16(EmitContext& ctx, const IR::Value& binding, const IR::Value& offset)
+{
     if (ctx.profile.support_descriptor_aliasing && ctx.profile.support_int16) {
         const Id load{GetCbuf(ctx, ctx.S16, &UniformDefinitions::S16, sizeof(s16), binding, offset,
                               ctx.load_const_func_u16)};
@@ -269,7 +288,8 @@ Id EmitGetCbufS16(EmitContext& ctx, const IR::Value& binding, const IR::Value& o
     return ctx.OpBitFieldSExtract(ctx.U32[1], element, bit_offset, ctx.Const(16u));
 }
 
-Id EmitGetCbufU32(EmitContext& ctx, const IR::Value& binding, const IR::Value& offset) {
+Id EmitGetCbufU32(EmitContext& ctx, const IR::Value& binding, const IR::Value& offset)
+{
     if (ctx.profile.support_descriptor_aliasing) {
         return GetCbufU32(ctx, binding, offset);
     } else {
@@ -278,7 +298,8 @@ Id EmitGetCbufU32(EmitContext& ctx, const IR::Value& binding, const IR::Value& o
     }
 }
 
-Id EmitGetCbufF32(EmitContext& ctx, const IR::Value& binding, const IR::Value& offset) {
+Id EmitGetCbufF32(EmitContext& ctx, const IR::Value& binding, const IR::Value& offset)
+{
     if (ctx.profile.support_descriptor_aliasing) {
         return GetCbuf(ctx, ctx.F32[1], &UniformDefinitions::F32, sizeof(f32), binding, offset,
                        ctx.load_const_func_f32);
@@ -288,7 +309,8 @@ Id EmitGetCbufF32(EmitContext& ctx, const IR::Value& binding, const IR::Value& o
     }
 }
 
-Id EmitGetCbufU32x2(EmitContext& ctx, const IR::Value& binding, const IR::Value& offset) {
+Id EmitGetCbufU32x2(EmitContext& ctx, const IR::Value& binding, const IR::Value& offset)
+{
     if (ctx.profile.support_descriptor_aliasing) {
         return GetCbuf(ctx, ctx.U32[2], &UniformDefinitions::U32x2, sizeof(u32[2]), binding, offset,
                        ctx.load_const_func_u32x2);
@@ -299,7 +321,8 @@ Id EmitGetCbufU32x2(EmitContext& ctx, const IR::Value& binding, const IR::Value&
     }
 }
 
-Id EmitGetAttribute(EmitContext& ctx, IR::Attribute attr, Id vertex) {
+Id EmitGetAttribute(EmitContext& ctx, IR::Attribute attr, Id vertex)
+{
     const u32 element{static_cast<u32>(attr) % 4};
     if (IR::IsGeneric(attr)) {
         const u32 index{IR::GenericAttributeIndex(attr)};
@@ -380,7 +403,8 @@ Id EmitGetAttribute(EmitContext& ctx, IR::Attribute attr, Id vertex) {
     }
 }
 
-Id EmitGetAttributeU32(EmitContext& ctx, IR::Attribute attr, Id) {
+Id EmitGetAttributeU32(EmitContext& ctx, IR::Attribute attr, Id)
+{
     switch (attr) {
     case IR::Attribute::PrimitiveId:
         return ctx.OpLoad(ctx.U32[1], ctx.primitive_id);
@@ -409,7 +433,8 @@ Id EmitGetAttributeU32(EmitContext& ctx, IR::Attribute attr, Id) {
     }
 }
 
-void EmitSetAttribute(EmitContext& ctx, IR::Attribute attr, Id value, [[maybe_unused]] Id vertex) {
+void EmitSetAttribute(EmitContext& ctx, IR::Attribute attr, Id value, [[maybe_unused]] Id vertex)
+{
     const std::optional<OutAttr> output{OutputAttrPointer(ctx, attr)};
     if (!output) {
         return;
@@ -422,13 +447,14 @@ void EmitSetAttribute(EmitContext& ctx, IR::Attribute attr, Id value, [[maybe_un
     static constexpr IR::Attribute cd7 = IR::Attribute::ClipDistance7;
 
     if (attr >= cd0 && attr <= cd7) {
-        const u32 idx = (u32) attr - (u32) cd0;
+        const u32 idx = (u32)attr - (u32)cd0;
         clip_distance_written.set(idx);
     }
     ctx.OpStore(output->pointer, value);
 }
 
-Id EmitGetAttributeIndexed(EmitContext& ctx, Id offset, Id vertex) {
+Id EmitGetAttributeIndexed(EmitContext& ctx, Id offset, Id vertex)
+{
     switch (ctx.stage) {
     case Stage::TessellationControl:
     case Stage::TessellationEval:
@@ -439,11 +465,13 @@ Id EmitGetAttributeIndexed(EmitContext& ctx, Id offset, Id vertex) {
     }
 }
 
-void EmitSetAttributeIndexed(EmitContext& ctx, Id offset, Id value, [[maybe_unused]] Id vertex) {
+void EmitSetAttributeIndexed(EmitContext& ctx, Id offset, Id value, [[maybe_unused]] Id vertex)
+{
     ctx.OpFunctionCall(ctx.void_id, ctx.indexed_store_func, offset, value);
 }
 
-Id EmitGetPatch(EmitContext& ctx, IR::Patch patch) {
+Id EmitGetPatch(EmitContext& ctx, IR::Patch patch)
+{
     if (!IR::IsGeneric(patch)) {
         throw NotImplementedException("Non-generic patch load");
     }
@@ -454,7 +482,8 @@ Id EmitGetPatch(EmitContext& ctx, IR::Patch patch) {
     return ctx.OpLoad(ctx.F32[1], pointer);
 }
 
-void EmitSetPatch(EmitContext& ctx, IR::Patch patch, Id value) {
+void EmitSetPatch(EmitContext& ctx, IR::Patch patch, Id value)
+{
     const Id pointer{[&] {
         if (IR::IsGeneric(patch)) {
             const u32 index{IR::GenericPatchIndex(patch)};
@@ -482,7 +511,8 @@ void EmitSetPatch(EmitContext& ctx, IR::Patch patch, Id value) {
     ctx.OpStore(pointer, value);
 }
 
-void EmitSetFragColor(EmitContext& ctx, u32 index, u32 component, Id value) {
+void EmitSetFragColor(EmitContext& ctx, u32 index, u32 component, Id value)
+{
     const Id component_id{ctx.Const(component)};
     const AttributeType type{ctx.runtime_info.color_output_types[index]};
     if (type == AttributeType::Float) {
@@ -502,12 +532,14 @@ void EmitSetFragColor(EmitContext& ctx, u32 index, u32 component, Id value) {
     }
 }
 
-void EmitSetSampleMask(EmitContext& ctx, Id value) {
+void EmitSetSampleMask(EmitContext& ctx, Id value)
+{
     const Id pointer{ctx.OpAccessChain(ctx.output_u32, ctx.sample_mask, ctx.u32_zero_value)};
     ctx.OpStore(pointer, value);
 }
 
-void EmitSetFragDepth(EmitContext& ctx, Id value) {
+void EmitSetFragDepth(EmitContext& ctx, Id value)
+{
     if (!ctx.runtime_info.convert_depth_mode || ctx.profile.support_native_ndc) {
         ctx.OpStore(ctx.frag_depth, value);
         return;
@@ -517,86 +549,107 @@ void EmitSetFragDepth(EmitContext& ctx, Id value) {
     ctx.OpStore(ctx.frag_depth, new_depth);
 }
 
-void EmitGetZFlag(EmitContext&) {
+void EmitGetZFlag(EmitContext&)
+{
     throw NotImplementedException("SPIR-V Instruction");
 }
 
-void EmitGetSFlag(EmitContext&) {
+void EmitGetSFlag(EmitContext&)
+{
     throw NotImplementedException("SPIR-V Instruction");
 }
 
-void EmitGetCFlag(EmitContext&) {
+void EmitGetCFlag(EmitContext&)
+{
     throw NotImplementedException("SPIR-V Instruction");
 }
 
-void EmitGetOFlag(EmitContext&) {
+void EmitGetOFlag(EmitContext&)
+{
     throw NotImplementedException("SPIR-V Instruction");
 }
 
-void EmitSetZFlag(EmitContext&) {
+void EmitSetZFlag(EmitContext&)
+{
     throw NotImplementedException("SPIR-V Instruction");
 }
 
-void EmitSetSFlag(EmitContext&) {
+void EmitSetSFlag(EmitContext&)
+{
     throw NotImplementedException("SPIR-V Instruction");
 }
 
-void EmitSetCFlag(EmitContext&) {
+void EmitSetCFlag(EmitContext&)
+{
     throw NotImplementedException("SPIR-V Instruction");
 }
 
-void EmitSetOFlag(EmitContext&) {
+void EmitSetOFlag(EmitContext&)
+{
     throw NotImplementedException("SPIR-V Instruction");
 }
 
-Id EmitWorkgroupId(EmitContext& ctx) {
+Id EmitWorkgroupId(EmitContext& ctx)
+{
     return ctx.OpLoad(ctx.U32[3], ctx.workgroup_id);
 }
 
-Id EmitLocalInvocationId(EmitContext& ctx) {
+Id EmitLocalInvocationId(EmitContext& ctx)
+{
     return ctx.OpLoad(ctx.U32[3], ctx.local_invocation_id);
 }
 
-Id EmitInvocationId(EmitContext& ctx) {
+Id EmitInvocationId(EmitContext& ctx)
+{
     return ctx.OpLoad(ctx.U32[1], ctx.invocation_id);
 }
 
-Id EmitInvocationInfo(EmitContext& ctx) {
+Id EmitInvocationInfo(EmitContext& ctx)
+{
     switch (ctx.stage) {
     case Stage::TessellationControl:
     case Stage::TessellationEval:
-        return ctx.OpShiftLeftLogical(ctx.U32[1], ctx.OpLoad(ctx.U32[1], ctx.patch_vertices_in), ctx.Const(16u));
+        return ctx.OpShiftLeftLogical(ctx.U32[1], ctx.OpLoad(ctx.U32[1], ctx.patch_vertices_in),
+                                      ctx.Const(16u));
     case Stage::Geometry:
-        return ctx.OpShiftLeftLogical(ctx.U32[1], ctx.Const(InputTopologyVertices::vertices(ctx.runtime_info.input_topology)), ctx.Const(16u));
+        return ctx.OpShiftLeftLogical(
+            ctx.U32[1], ctx.Const(InputTopologyVertices::vertices(ctx.runtime_info.input_topology)),
+            ctx.Const(16u));
     default:
         LOG_WARNING(Shader, "(STUBBED) called");
         return ctx.Const(0x00ff0000u);
     }
 }
 
-Id EmitSampleId(EmitContext& ctx) {
+Id EmitSampleId(EmitContext& ctx)
+{
     return ctx.OpLoad(ctx.U32[1], ctx.sample_id);
 }
 
-Id EmitIsHelperInvocation(EmitContext& ctx) {
+Id EmitIsHelperInvocation(EmitContext& ctx)
+{
     return ctx.OpLoad(ctx.U1, ctx.is_helper_invocation);
 }
 
-Id EmitSR_WScaleFactorXY(EmitContext& ctx) {
+Id EmitSR_WScaleFactorXY(EmitContext& ctx)
+{
     LOG_WARNING(Shader, "(STUBBED) called");
     return ctx.Const(0x00ff0000u);
 }
 
-Id EmitSR_WScaleFactorZ(EmitContext& ctx) {
+Id EmitSR_WScaleFactorZ(EmitContext& ctx)
+{
     LOG_WARNING(Shader, "(STUBBED) called");
     return ctx.Const(0x00ff0000u);
 }
 
-Id EmitYDirection(EmitContext& ctx) {
+Id EmitYDirection(EmitContext& ctx)
+{
     return ctx.Const(ctx.runtime_info.y_negate ? -1.0f : 1.0f);
 }
 
-Id EmitResolutionDownFactor(EmitContext& ctx) {
+Id EmitResolutionDownFactor(EmitContext& ctx)
+{
     if (ctx.profile.unified_descriptor_binding) {
         const Id pointer_type{ctx.TypePointer(spv::StorageClass::PushConstant, ctx.F32[1])};
         const Id index{ctx.Const(ctx.rescaling_downfactor_member_index)};
@@ -608,7 +661,8 @@ Id EmitResolutionDownFactor(EmitContext& ctx) {
     }
 }
 
-Id EmitRenderArea(EmitContext& ctx) {
+Id EmitRenderArea(EmitContext& ctx)
+{
     if (ctx.profile.unified_descriptor_binding) {
         const Id pointer_type{ctx.TypePointer(spv::StorageClass::PushConstant, ctx.F32[4])};
         const Id index{ctx.Const(ctx.render_are_member_index)};
@@ -619,12 +673,14 @@ Id EmitRenderArea(EmitContext& ctx) {
     }
 }
 
-Id EmitLoadLocal(EmitContext& ctx, Id word_offset) {
+Id EmitLoadLocal(EmitContext& ctx, Id word_offset)
+{
     const Id pointer{ctx.OpAccessChain(ctx.private_u32, ctx.local_memory, word_offset)};
     return ctx.OpLoad(ctx.U32[1], pointer);
 }
 
-void EmitWriteLocal(EmitContext& ctx, Id word_offset, Id value) {
+void EmitWriteLocal(EmitContext& ctx, Id word_offset, Id value)
+{
     const Id pointer{ctx.OpAccessChain(ctx.private_u32, ctx.local_memory, word_offset)};
     ctx.OpStore(pointer, value);
 }

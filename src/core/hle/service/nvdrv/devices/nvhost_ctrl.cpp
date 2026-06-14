@@ -5,11 +5,14 @@
 // SPDX-FileCopyrightText: 2021 Skyline Team and Contributors
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+#include "core/hle/service/nvdrv/devices/nvhost_ctrl.h"
+
+#include <fmt/ranges.h>
+
 #include <bit>
 #include <cstdlib>
 #include <cstring>
 
-#include <fmt/ranges.h>
 #include "common/assert.h"
 #include "common/logging.h"
 #include "common/scope_exit.h"
@@ -18,7 +21,6 @@
 #include "core/hle/service/nvdrv/core/container.h"
 #include "core/hle/service/nvdrv/core/syncpoint_manager.h"
 #include "core/hle/service/nvdrv/devices/ioctl_serialization.h"
-#include "core/hle/service/nvdrv/devices/nvhost_ctrl.h"
 #include "video_core/gpu.h"
 #include "video_core/host1x/host1x.h"
 
@@ -27,9 +29,12 @@ namespace Service::Nvidia::Devices {
 nvhost_ctrl::nvhost_ctrl(Core::System& system_, EventInterface& events_interface_,
                          NvCore::Container& core_)
     : nvdevice{system_}, events_interface{events_interface_}, core{core_},
-      syncpoint_manager{core_.GetSyncpointManager()} {}
+      syncpoint_manager{core_.GetSyncpointManager()}
+{
+}
 
-nvhost_ctrl::~nvhost_ctrl() {
+nvhost_ctrl::~nvhost_ctrl()
+{
     for (auto& event : events) {
         if (!event.registered) {
             continue;
@@ -39,7 +44,8 @@ nvhost_ctrl::~nvhost_ctrl() {
 }
 
 NvResult nvhost_ctrl::Ioctl1(DeviceFD fd, Ioctl command, std::span<const u8> input,
-                             std::span<u8> output) {
+                             std::span<u8> output)
+{
     switch (command.group) {
     case 0x0:
         switch (command.cmd) {
@@ -68,34 +74,43 @@ NvResult nvhost_ctrl::Ioctl1(DeviceFD fd, Ioctl command, std::span<const u8> inp
 }
 
 NvResult nvhost_ctrl::Ioctl2(DeviceFD fd, Ioctl command, std::span<const u8> input,
-                             std::span<const u8> inline_input, std::span<u8> output) {
+                             std::span<const u8> inline_input, std::span<u8> output)
+{
     UNIMPLEMENTED_MSG("Unimplemented ioctl={:08X}", command.raw);
     return NvResult::NotImplemented;
 }
 
 NvResult nvhost_ctrl::Ioctl3(DeviceFD fd, Ioctl command, std::span<const u8> input,
-                             std::span<u8> output, std::span<u8> inline_outpu) {
+                             std::span<u8> output, std::span<u8> inline_outpu)
+{
     UNIMPLEMENTED_MSG("Unimplemented ioctl={:08X}", command.raw);
     return NvResult::NotImplemented;
 }
 
-void nvhost_ctrl::OnOpen(NvCore::SessionId session_id, DeviceFD fd) {}
+void nvhost_ctrl::OnOpen(NvCore::SessionId session_id, DeviceFD fd)
+{
+}
 
-void nvhost_ctrl::OnClose(DeviceFD fd) {}
+void nvhost_ctrl::OnClose(DeviceFD fd)
+{
+}
 
-NvResult nvhost_ctrl::NvOsGetConfigU32(IocGetConfigParams& params) {
+NvResult nvhost_ctrl::NvOsGetConfigU32(IocGetConfigParams& params)
+{
     LOG_TRACE(Service_NVDRV, "called, setting={}!{}", params.domain_str.data(),
               params.param_str.data());
     return NvResult::ConfigVarNotFound; // Returns error on production mode
 }
 
-NvResult nvhost_ctrl::IocCtrlEventWait(IocCtrlEventWaitParams& params, bool is_allocation) {
+NvResult nvhost_ctrl::IocCtrlEventWait(IocCtrlEventWaitParams& params, bool is_allocation)
+{
     LOG_DEBUG(Service_NVDRV, "syncpt_id={}, threshold={}, timeout={}, is_allocation={}",
               params.fence.id, params.fence.value, params.timeout, is_allocation);
 
     bool must_unmark_fail = !is_allocation;
     const u32 event_id = params.value.raw;
-    SCOPE_EXIT {
+    SCOPE_EXIT
+    {
         if (must_unmark_fail) {
             events[event_id].fails = 0;
         }
@@ -210,7 +225,8 @@ NvResult nvhost_ctrl::IocCtrlEventWait(IocCtrlEventWaitParams& params, bool is_a
     return NvResult::Timeout;
 }
 
-NvResult nvhost_ctrl::FreeEvent(u32 slot) {
+NvResult nvhost_ctrl::FreeEvent(u32 slot)
+{
     if (slot >= MaxNvEvents) {
         return NvResult::BadParameter;
     }
@@ -229,7 +245,8 @@ NvResult nvhost_ctrl::FreeEvent(u32 slot) {
     return NvResult::Success;
 }
 
-NvResult nvhost_ctrl::IocCtrlEventRegister(IocCtrlEventRegisterParams& params) {
+NvResult nvhost_ctrl::IocCtrlEventRegister(IocCtrlEventRegisterParams& params)
+{
     const u32 event_id = params.user_event_id;
     LOG_DEBUG(Service_NVDRV, " called, user_event_id: {:X}", event_id);
     if (event_id >= MaxNvEvents) {
@@ -248,7 +265,8 @@ NvResult nvhost_ctrl::IocCtrlEventRegister(IocCtrlEventRegisterParams& params) {
     return NvResult::Success;
 }
 
-NvResult nvhost_ctrl::IocCtrlEventUnregister(IocCtrlEventUnregisterParams& params) {
+NvResult nvhost_ctrl::IocCtrlEventUnregister(IocCtrlEventUnregisterParams& params)
+{
     const u32 event_id = params.user_event_id & 0x00FF;
     LOG_DEBUG(Service_NVDRV, " called, user_event_id: {:X}", event_id);
 
@@ -256,7 +274,8 @@ NvResult nvhost_ctrl::IocCtrlEventUnregister(IocCtrlEventUnregisterParams& param
     return FreeEvent(event_id);
 }
 
-NvResult nvhost_ctrl::IocCtrlEventUnregisterBatch(IocCtrlEventUnregisterBatchParams& params) {
+NvResult nvhost_ctrl::IocCtrlEventUnregisterBatch(IocCtrlEventUnregisterBatchParams& params)
+{
     u64 event_mask = params.user_events;
     LOG_DEBUG(Service_NVDRV, " called, event_mask: {:X}", event_mask);
 
@@ -272,7 +291,8 @@ NvResult nvhost_ctrl::IocCtrlEventUnregisterBatch(IocCtrlEventUnregisterBatchPar
     return NvResult::Success;
 }
 
-NvResult nvhost_ctrl::IocCtrlClearEventWait(IocCtrlEventClearParams& params) {
+NvResult nvhost_ctrl::IocCtrlClearEventWait(IocCtrlEventClearParams& params)
+{
     u32 event_id = params.event_id.slot;
     LOG_DEBUG(Service_NVDRV, "called, event_id: {:X}", event_id);
 
@@ -297,7 +317,8 @@ NvResult nvhost_ctrl::IocCtrlClearEventWait(IocCtrlEventClearParams& params) {
     return NvResult::Success;
 }
 
-Kernel::KEvent* nvhost_ctrl::QueryEvent(u32 event_id) {
+Kernel::KEvent* nvhost_ctrl::QueryEvent(u32 event_id)
+{
     const auto desired_event = SyncpointEventValue{.raw = event_id};
 
     const bool allocated = desired_event.event_allocated.Value() != 0;
@@ -323,11 +344,13 @@ Kernel::KEvent* nvhost_ctrl::QueryEvent(u32 event_id) {
     return nullptr;
 }
 
-std::unique_lock<std::mutex> nvhost_ctrl::NvEventsLock() {
+std::unique_lock<std::mutex> nvhost_ctrl::NvEventsLock()
+{
     return std::unique_lock<std::mutex>(events_mutex);
 }
 
-void nvhost_ctrl::CreateNvEvent(u32 event_id) {
+void nvhost_ctrl::CreateNvEvent(u32 event_id)
+{
     auto& event = events[event_id];
     ASSERT(!event.kevent);
     ASSERT(!event.registered);
@@ -341,7 +364,8 @@ void nvhost_ctrl::CreateNvEvent(u32 event_id) {
     event.assigned_syncpt = 0;
 }
 
-void nvhost_ctrl::FreeNvEvent(u32 event_id) {
+void nvhost_ctrl::FreeNvEvent(u32 event_id)
+{
     auto& event = events[event_id];
     ASSERT(event.kevent);
     ASSERT(event.registered);
@@ -354,7 +378,8 @@ void nvhost_ctrl::FreeNvEvent(u32 event_id) {
     events_mask &= mask;
 }
 
-u32 nvhost_ctrl::FindFreeNvEvent(u32 syncpoint_id) {
+u32 nvhost_ctrl::FindFreeNvEvent(u32 syncpoint_id)
+{
     u32 slot{MaxNvEvents};
     u32 free_slot{MaxNvEvents};
     for (u32 i = 0; i < MaxNvEvents; i++) {

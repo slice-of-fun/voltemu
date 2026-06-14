@@ -3,12 +3,6 @@
 
 #include "yuzu/configuration/configure_ui.h"
 
-#include <array>
-#include <cstdlib>
-#include <set>
-#include <string>
-#include <utility>
-
 #include <QCheckBox>
 #include <QComboBox>
 #include <QCoreApplication>
@@ -17,6 +11,11 @@
 #include <QString>
 #include <QToolButton>
 #include <QVariant>
+#include <array>
+#include <cstdlib>
+#include <set>
+#include <string>
+#include <utility>
 
 #include "common/common_types.h"
 #include "common/fs/path_util.h"
@@ -24,10 +23,9 @@
 #include "common/settings_enums.h"
 #include "core/core.h"
 #include "core/frontend/framebuffer_layout.h"
-#include "ui_configure_ui.h"
-
 #include "qt_common/config/uisettings.h"
 #include "qt_common/qt_compat.h"
+#include "ui_configure_ui.h"
 
 namespace {
 
@@ -48,22 +46,26 @@ constexpr std::array row_text_names{
 };
 // clang-format on
 
-QString GetTranslatedFolderIconSize(size_t index) {
+QString GetTranslatedFolderIconSize(size_t index)
+{
     return QCoreApplication::translate("ConfigureUI", default_folder_icon_sizes[index].second);
 }
 
-QString GetTranslatedRowTextName(size_t index) {
+QString GetTranslatedRowTextName(size_t index)
+{
     return QCoreApplication::translate("ConfigureUI", row_text_names[index]);
 }
 } // Anonymous namespace
 
-static float GetUpFactor(Settings::ResolutionSetup res_setup) {
+static float GetUpFactor(Settings::ResolutionSetup res_setup)
+{
     Settings::ResolutionScalingInfo info{};
     Settings::TranslateResolutionInfo(res_setup, info);
     return info.up_factor;
 }
 
-static void PopulateResolutionComboBox(QComboBox* screenshot_height, QWidget* parent) {
+static void PopulateResolutionComboBox(QComboBox* screenshot_height, QWidget* parent)
+{
     screenshot_height->clear();
 
     const auto& enumeration =
@@ -83,14 +85,16 @@ static void PopulateResolutionComboBox(QComboBox* screenshot_height, QWidget* pa
     }
 }
 
-static u32 ScreenshotDimensionToInt(const QString& height) {
+static u32 ScreenshotDimensionToInt(const QString& height)
+{
     return std::strtoul(height.toUtf8(), nullptr, 0);
 }
 
 ConfigureUi::ConfigureUi(Core::System& system_, QWidget* parent)
     : QWidget(parent), ui{std::make_unique<Ui::ConfigureUi>()},
       ratio{Settings::values.aspect_ratio.GetValue()},
-      resolution_setting{Settings::values.resolution_setup.GetValue()}, system{system_} {
+      resolution_setting{Settings::values.resolution_setup.GetValue()}, system{system_}
+{
     ui->setupUi(this);
 
     InitializeLanguageComboBox();
@@ -149,7 +153,8 @@ ConfigureUi::ConfigureUi(Core::System& system_, QWidget* parent)
 
 ConfigureUi::~ConfigureUi() = default;
 
-void ConfigureUi::ApplyConfiguration() {
+void ConfigureUi::ApplyConfiguration()
+{
     UISettings::values.theme =
         ui->theme_combobox->itemData(ui->theme_combobox->currentIndex()).toString().toStdString();
     UISettings::values.show_add_ons = ui->show_add_ons->isChecked();
@@ -172,11 +177,13 @@ void ConfigureUi::ApplyConfiguration() {
     system.ApplySettings();
 }
 
-void ConfigureUi::RequestGameListUpdate() {
+void ConfigureUi::RequestGameListUpdate()
+{
     UISettings::values.is_game_list_reload_pending.exchange(true);
 }
 
-void ConfigureUi::SetConfiguration() {
+void ConfigureUi::SetConfiguration()
+{
     ui->theme_combobox->setCurrentIndex(
         ui->theme_combobox->findData(QString::fromStdString(UISettings::values.theme)));
     ui->language_combobox->setCurrentIndex(ui->language_combobox->findData(
@@ -202,7 +209,8 @@ void ConfigureUi::SetConfiguration() {
     }
 }
 
-void ConfigureUi::changeEvent(QEvent* event) {
+void ConfigureUi::changeEvent(QEvent* event)
+{
     if (event->type() == QEvent::LanguageChange) {
         RetranslateUI();
     }
@@ -210,7 +218,8 @@ void ConfigureUi::changeEvent(QEvent* event) {
     QWidget::changeEvent(event);
 }
 
-void ConfigureUi::RetranslateUI() {
+void ConfigureUi::RetranslateUI()
+{
     ui->retranslateUi(this);
 
     for (int i = 0; i < ui->folder_icon_size_combobox->count(); i++) {
@@ -226,7 +235,8 @@ void ConfigureUi::RetranslateUI() {
     }
 }
 
-void ConfigureUi::InitializeLanguageComboBox() {
+void ConfigureUi::InitializeLanguageComboBox()
+{
     ui->language_combobox->addItem(tr("<System>"), QString{});
     ui->language_combobox->addItem(tr("English"), QStringLiteral("en"));
     QDirIterator it(QStringLiteral(":/languages"), QDirIterator::NoIteratorFlags);
@@ -246,19 +256,22 @@ void ConfigureUi::InitializeLanguageComboBox() {
             &ConfigureUi::OnLanguageChanged);
 }
 
-void ConfigureUi::InitializeIconSizeComboBox() {
+void ConfigureUi::InitializeIconSizeComboBox()
+{
     for (size_t i = 0; i < default_folder_icon_sizes.size(); i++) {
         const auto size = default_folder_icon_sizes[i].first;
         ui->folder_icon_size_combobox->addItem(GetTranslatedFolderIconSize(i), size);
     }
 }
 
-void ConfigureUi::InitializeRowComboBoxes() {
+void ConfigureUi::InitializeRowComboBoxes()
+{
     UpdateFirstRowComboBox(true);
     UpdateSecondRowComboBox(true);
 }
 
-void ConfigureUi::UpdateFirstRowComboBox(bool init) {
+void ConfigureUi::UpdateFirstRowComboBox(bool init)
+{
     const int currentIndex =
         init ? UISettings::values.row_1_text_id.GetValue()
              : ui->row_1_text_combobox->findData(ui->row_1_text_combobox->currentData());
@@ -277,7 +290,8 @@ void ConfigureUi::UpdateFirstRowComboBox(bool init) {
         ui->row_1_text_combobox->findData(ui->row_2_text_combobox->currentData()));
 }
 
-void ConfigureUi::UpdateSecondRowComboBox(bool init) {
+void ConfigureUi::UpdateSecondRowComboBox(bool init)
+{
     const int currentIndex =
         init ? UISettings::values.row_2_text_id.GetValue()
              : ui->row_2_text_combobox->findData(ui->row_2_text_combobox->currentData());
@@ -295,14 +309,16 @@ void ConfigureUi::UpdateSecondRowComboBox(bool init) {
         ui->row_2_text_combobox->findData(ui->row_1_text_combobox->currentData()));
 }
 
-void ConfigureUi::OnLanguageChanged(int index) {
+void ConfigureUi::OnLanguageChanged(int index)
+{
     if (index == -1)
         return;
 
     emit LanguageChanged(ui->language_combobox->itemData(index).toString());
 }
 
-void ConfigureUi::UpdateWidthText() {
+void ConfigureUi::UpdateWidthText()
+{
     const u32 height = ScreenshotDimensionToInt(ui->screenshot_height->currentText());
     const u32 width = UISettings::CalculateWidth(height, ratio);
     if (height == 0) {
@@ -322,7 +338,8 @@ void ConfigureUi::UpdateWidthText() {
 }
 
 void ConfigureUi::UpdateScreenshotInfo(Settings::AspectRatio ratio_,
-                                       Settings::ResolutionSetup resolution_setting_) {
+                                       Settings::ResolutionSetup resolution_setting_)
+{
     ratio = ratio_;
     resolution_setting = resolution_setting_;
     UpdateWidthText();

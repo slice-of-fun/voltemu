@@ -32,8 +32,8 @@ class IOFile;
 [[nodiscard]] bool NewFile(const std::filesystem::path& path, u64 size = 0);
 
 #ifdef _WIN32
-template <typename Path>
-[[nodiscard]] bool NewFile(const Path& path, u64 size = 0) {
+template<typename Path> [[nodiscard]] bool NewFile(const Path& path, u64 size = 0)
+{
     if constexpr (IsChar<typename Path::value_type>) {
         return NewFile(ToU8String(path), size);
     } else {
@@ -57,8 +57,8 @@ template <typename Path>
 bool RemoveFile(const std::filesystem::path& path);
 
 #ifdef _WIN32
-template <typename Path>
-bool RemoveFile(const Path& path) {
+template<typename Path> bool RemoveFile(const Path& path)
+{
     if constexpr (IsChar<typename Path::value_type>) {
         return RemoveFile(ToU8String(path));
     } else {
@@ -86,8 +86,9 @@ bool RemoveFile(const Path& path) {
                               const std::filesystem::path& new_path);
 
 #ifdef _WIN32
-template <typename Path1, typename Path2>
-[[nodiscard]] bool RenameFile(const Path1& old_path, const Path2& new_path) {
+template<typename Path1, typename Path2>
+[[nodiscard]] bool RenameFile(const Path1& old_path, const Path2& new_path)
+{
     using ValueType1 = typename Path1::value_type;
     using ValueType2 = typename Path2::value_type;
     if constexpr (IsChar<ValueType1> && IsChar<ValueType2>) {
@@ -125,10 +126,11 @@ template <typename Path1, typename Path2>
                                                FileShareFlag flag = FileShareFlag::ShareReadOnly);
 
 #ifdef _WIN32
-template <typename Path>
+template<typename Path>
 [[nodiscard]] std::shared_ptr<IOFile> FileOpen(const Path& path, FileAccessMode mode,
                                                FileType type = FileType::BinaryFile,
-                                               FileShareFlag flag = FileShareFlag::ShareReadOnly) {
+                                               FileShareFlag flag = FileShareFlag::ShareReadOnly)
+{
     if constexpr (IsChar<typename Path::value_type>) {
         return FileOpen(ToU8String(path), mode, type, flag);
     } else {
@@ -157,8 +159,8 @@ template <typename Path>
 [[nodiscard]] bool CreateDir(const std::filesystem::path& path);
 
 #ifdef _WIN32
-template <typename Path>
-[[nodiscard]] bool CreateDir(const Path& path) {
+template<typename Path> [[nodiscard]] bool CreateDir(const Path& path)
+{
     if constexpr (IsChar<typename Path::value_type>) {
         return CreateDir(ToU8String(path));
     } else {
@@ -185,8 +187,8 @@ template <typename Path>
 [[nodiscard]] bool CreateDirs(const std::filesystem::path& path);
 
 #ifdef _WIN32
-template <typename Path>
-[[nodiscard]] bool CreateDirs(const Path& path) {
+template<typename Path> [[nodiscard]] bool CreateDirs(const Path& path)
+{
     if constexpr (IsChar<typename Path::value_type>) {
         return CreateDirs(ToU8String(path));
     } else {
@@ -206,8 +208,8 @@ template <typename Path>
 [[nodiscard]] bool CreateParentDir(const std::filesystem::path& path);
 
 #ifdef _WIN32
-template <typename Path>
-[[nodiscard]] bool CreateParentDir(const Path& path) {
+template<typename Path> [[nodiscard]] bool CreateParentDir(const Path& path)
+{
     if constexpr (IsChar<typename Path::value_type>) {
         return CreateParentDir(ToU8String(path));
     } else {
@@ -227,8 +229,8 @@ template <typename Path>
 [[nodiscard]] bool CreateParentDirs(const std::filesystem::path& path);
 
 #ifdef _WIN32
-template <typename Path>
-[[nodiscard]] bool CreateParentDirs(const Path& path) {
+template<typename Path> [[nodiscard]] bool CreateParentDirs(const Path& path)
+{
     if constexpr (IsChar<typename Path::value_type>) {
         return CreateParentDirs(ToU8String(path));
     } else {
@@ -253,8 +255,8 @@ template <typename Path>
 bool RemoveDir(const std::filesystem::path& path);
 
 #ifdef _WIN32
-template <typename Path>
-bool RemoveDir(const Path& path) {
+template<typename Path> bool RemoveDir(const Path& path)
+{
     if constexpr (IsChar<typename Path::value_type>) {
         return RemoveDir(ToU8String(path));
     } else {
@@ -278,8 +280,8 @@ bool RemoveDir(const Path& path) {
 bool RemoveDirRecursively(const std::filesystem::path& path);
 
 #ifdef _WIN32
-template <typename Path>
-bool RemoveDirRecursively(const Path& path) {
+template<typename Path> bool RemoveDirRecursively(const Path& path)
+{
     if constexpr (IsChar<typename Path::value_type>) {
         return RemoveDirRecursively(ToU8String(path));
     } else {
@@ -303,8 +305,8 @@ bool RemoveDirRecursively(const Path& path) {
 bool RemoveDirContentsRecursively(const std::filesystem::path& path);
 
 #ifdef _WIN32
-template <typename Path>
-bool RemoveDirContentsRecursively(const Path& path) {
+template<typename Path> bool RemoveDirContentsRecursively(const Path& path)
+{
     if constexpr (IsChar<typename Path::value_type>) {
         return RemoveDirContentsRecursively(ToU8String(path));
     } else {
@@ -332,8 +334,9 @@ bool RemoveDirContentsRecursively(const Path& path) {
                              const std::filesystem::path& new_path);
 
 #ifdef _WIN32
-template <typename Path1, typename Path2>
-[[nodiscard]] bool RenameDir(const Path1& old_path, const Path2& new_path) {
+template<typename Path1, typename Path2>
+[[nodiscard]] bool RenameDir(const Path1& old_path, const Path2& new_path)
+{
     using ValueType1 = typename Path1::value_type;
     using ValueType2 = typename Path2::value_type;
     if constexpr (IsChar<ValueType1> && IsChar<ValueType2>) {
@@ -368,9 +371,10 @@ void IterateDirEntries(const std::filesystem::path& path, const DirEntryCallable
                        DirEntryFilter filter = DirEntryFilter::All);
 
 #ifdef _WIN32
-template <typename Path>
+template<typename Path>
 void IterateDirEntries(const Path& path, const DirEntryCallable& callback,
-                       DirEntryFilter filter = DirEntryFilter::All) {
+                       DirEntryFilter filter = DirEntryFilter::All)
+{
     if constexpr (IsChar<typename Path::value_type>) {
         IterateDirEntries(ToU8String(path), callback, filter);
     } else {
@@ -400,9 +404,10 @@ void IterateDirEntriesRecursively(const std::filesystem::path& path,
                                   DirEntryFilter filter = DirEntryFilter::All);
 
 #ifdef _WIN32
-template <typename Path>
+template<typename Path>
 void IterateDirEntriesRecursively(const Path& path, const DirEntryCallable& callback,
-                                  DirEntryFilter filter = DirEntryFilter::All) {
+                                  DirEntryFilter filter = DirEntryFilter::All)
+{
     if constexpr (IsChar<typename Path::value_type>) {
         IterateDirEntriesRecursively(ToU8String(path), callback, filter);
     } else {
@@ -423,8 +428,8 @@ void IterateDirEntriesRecursively(const Path& path, const DirEntryCallable& call
 [[nodiscard]] bool Exists(const std::filesystem::path& path);
 
 #ifdef _WIN32
-template <typename Path>
-[[nodiscard]] bool Exists(const Path& path) {
+template<typename Path> [[nodiscard]] bool Exists(const Path& path)
+{
     if constexpr (IsChar<typename Path::value_type>) {
         return Exists(ToU8String(path));
     } else {
@@ -445,8 +450,8 @@ template <typename Path>
 [[nodiscard]] bool IsFile(const std::filesystem::path& path);
 
 #ifdef _WIN32
-template <typename Path>
-[[nodiscard]] bool IsFile(const Path& path) {
+template<typename Path> [[nodiscard]] bool IsFile(const Path& path)
+{
     if constexpr (IsChar<typename Path::value_type>) {
         return IsFile(ToU8String(path));
     } else {
@@ -465,8 +470,8 @@ template <typename Path>
 [[nodiscard]] bool IsDir(const std::filesystem::path& path);
 
 #ifdef _WIN32
-template <typename Path>
-[[nodiscard]] bool IsDir(const Path& path) {
+template<typename Path> [[nodiscard]] bool IsDir(const Path& path)
+{
     if constexpr (IsChar<typename Path::value_type>) {
         return IsDir(ToU8String(path));
     } else {
@@ -490,8 +495,8 @@ template <typename Path>
 [[nodiscard]] bool SetCurrentDir(const std::filesystem::path& path);
 
 #ifdef _WIN32
-template <typename Path>
-[[nodiscard]] bool SetCurrentDir(const Path& path) {
+template<typename Path> [[nodiscard]] bool SetCurrentDir(const Path& path)
+{
     if constexpr (IsChar<typename Path::value_type>) {
         return SetCurrentDir(ToU8String(path));
     } else {
@@ -510,8 +515,8 @@ template <typename Path>
 [[nodiscard]] std::filesystem::file_type GetEntryType(const std::filesystem::path& path);
 
 #ifdef _WIN32
-template <typename Path>
-[[nodiscard]] std::filesystem::file_type GetEntryType(const Path& path) {
+template<typename Path> [[nodiscard]] std::filesystem::file_type GetEntryType(const Path& path)
+{
     if constexpr (IsChar<typename Path::value_type>) {
         return GetEntryType(ToU8String(path));
     } else {
@@ -530,8 +535,8 @@ template <typename Path>
 [[nodiscard]] u64 GetSize(const std::filesystem::path& path);
 
 #ifdef _WIN32
-template <typename Path>
-[[nodiscard]] u64 GetSize(const Path& path) {
+template<typename Path> [[nodiscard]] u64 GetSize(const Path& path)
+{
     if constexpr (IsChar<typename Path::value_type>) {
         return GetSize(ToU8String(path));
     } else {
@@ -550,8 +555,8 @@ template <typename Path>
 [[nodiscard]] u64 GetFreeSpaceSize(const std::filesystem::path& path);
 
 #ifdef _WIN32
-template <typename Path>
-[[nodiscard]] u64 GetFreeSpaceSize(const Path& path) {
+template<typename Path> [[nodiscard]] u64 GetFreeSpaceSize(const Path& path)
+{
     if constexpr (IsChar<typename Path::value_type>) {
         return GetFreeSpaceSize(ToU8String(path));
     } else {
@@ -570,8 +575,8 @@ template <typename Path>
 [[nodiscard]] u64 GetTotalSpaceSize(const std::filesystem::path& path);
 
 #ifdef _WIN32
-template <typename Path>
-[[nodiscard]] u64 GetTotalSpaceSize(const Path& path) {
+template<typename Path> [[nodiscard]] u64 GetTotalSpaceSize(const Path& path)
+{
     if constexpr (IsChar<typename Path::value_type>) {
         return GetTotalSpaceSize(ToU8String(path));
     } else {

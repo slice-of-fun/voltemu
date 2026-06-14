@@ -4,6 +4,10 @@
 // SPDX-FileCopyrightText: Copyright 2019 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "yuzu/loading_screen.h"
+
+#include <ankerl/unordered_dense.h>
+
 #include <QBuffer>
 #include <QByteArray>
 #include <QGraphicsOpacityEffect>
@@ -13,12 +17,11 @@
 #include <QPixmap>
 #include <QPropertyAnimation>
 #include <QStyleOption>
-#include <ankerl/unordered_dense.h>
+
 #include "core/frontend/framebuffer_layout.h"
 #include "core/loader/loader.h"
 #include "ui_loading_screen.h"
 #include "video_core/rasterizer_interface.h"
-#include "yuzu/loading_screen.h"
 
 // Mingw seems to not have QMovie at all. If QMovie is missing then use a single frame instead of an
 // showing the full animation
@@ -55,7 +58,8 @@ QProgressBar::chunk {
 
 LoadingScreen::LoadingScreen(QWidget* parent)
     : QWidget(parent), ui(std::make_unique<Ui::LoadingScreen>()),
-      previous_stage(VideoCore::LoadCallbackStage::Complete) {
+      previous_stage(VideoCore::LoadCallbackStage::Complete)
+{
     ui->setupUi(this);
     setMinimumSize(Layout::MinimumSize::Width, Layout::MinimumSize::Height);
 
@@ -96,7 +100,8 @@ LoadingScreen::LoadingScreen(QWidget* parent)
 
 LoadingScreen::~LoadingScreen() = default;
 
-void LoadingScreen::Prepare(Loader::AppLoader& loader) {
+void LoadingScreen::Prepare(Loader::AppLoader& loader)
+{
     std::vector<u8> buffer;
     if (loader.ReadBanner(buffer) == Loader::ResultStatus::Success) {
 #ifdef YUZU_QT_MOVIE_MISSING
@@ -124,12 +129,14 @@ void LoadingScreen::Prepare(Loader::AppLoader& loader) {
     OnLoadProgress(VideoCore::LoadCallbackStage::Prepare, 0, 0);
 }
 
-void LoadingScreen::OnLoadComplete() {
+void LoadingScreen::OnLoadComplete()
+{
     fadeout_animation->start(QPropertyAnimation::KeepWhenStopped);
 }
 
 void LoadingScreen::OnLoadProgress(VideoCore::LoadCallbackStage stage, std::size_t value,
-                                   std::size_t total) {
+                                   std::size_t total)
+{
     using namespace std::chrono;
     const auto now = steady_clock::now();
     // reset the timer if the stage changes
@@ -188,7 +195,8 @@ void LoadingScreen::OnLoadProgress(VideoCore::LoadCallbackStage stage, std::size
     previous_time = now;
 }
 
-void LoadingScreen::paintEvent(QPaintEvent* event) {
+void LoadingScreen::paintEvent(QPaintEvent* event)
+{
     QStyleOption opt;
     opt.initFrom(this);
     QPainter p(this);
@@ -196,7 +204,8 @@ void LoadingScreen::paintEvent(QPaintEvent* event) {
     QWidget::paintEvent(event);
 }
 
-void LoadingScreen::Clear() {
+void LoadingScreen::Clear()
+{
 #ifndef YUZU_QT_MOVIE_MISSING
     animation.reset();
     backing_buf.reset();

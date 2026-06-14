@@ -12,6 +12,7 @@
 #include <mutex>
 #include <optional>
 #include <thread>
+
 #include "hid_core/frontend/emulated_controller.h"
 
 namespace Core {

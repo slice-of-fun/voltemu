@@ -4,6 +4,8 @@
 // SPDX-FileCopyrightText: Copyright 2019 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "video_core/gpu_thread.h"
+
 #include "common/assert.h"
 #include "common/scope_exit.h"
 #include "common/settings.h"
@@ -13,18 +15,22 @@
 #include "video_core/control/scheduler.h"
 #include "video_core/dma_pusher.h"
 #include "video_core/gpu.h"
-#include "video_core/gpu_thread.h"
 #include "video_core/host1x/host1x.h"
 #include "video_core/renderer_base.h"
 
 namespace VideoCommon::GPUThread {
 
 ThreadManager::ThreadManager(Core::System& system_, bool is_async_)
-    : system{system_}, is_async{is_async_} {}
+    : system{system_}, is_async{is_async_}
+{
+}
 
 ThreadManager::~ThreadManager() = default;
 
-void ThreadManager::StartThread(VideoCore::RendererBase& renderer, Core::Frontend::GraphicsContext& context, Tegra::Control::Scheduler& scheduler) {
+void ThreadManager::StartThread(VideoCore::RendererBase& renderer,
+                                Core::Frontend::GraphicsContext& context,
+                                Tegra::Control::Scheduler& scheduler)
+{
     rasterizer = renderer.ReadRasterizer();
     thread = std::jthread([&](std::stop_token stop_token) {
         Common::SetCurrentThreadName("GPU");
@@ -51,8 +57,8 @@ void ThreadManager::StartThread(VideoCore::RendererBase& renderer, Core::Fronten
             }
             state.signaled_fence.store(next.fence);
             if (next.block) {
-                // We have to lock the write_lock to ensure that the condition_variable wait not get a
-                // race between the check and the lock itself.
+                // We have to lock the write_lock to ensure that the condition_variable wait not get
+                // a race between the check and the lock itself.
                 std::scoped_lock lk{state.write_lock};
                 state.cv.notify_all();
             }
@@ -60,11 +66,13 @@ void ThreadManager::StartThread(VideoCore::RendererBase& renderer, Core::Fronten
     });
 }
 
-void ThreadManager::SubmitList(s32 channel, Tegra::CommandList&& entries) {
+void ThreadManager::SubmitList(s32 channel, Tegra::CommandList&& entries)
+{
     PushCommand(SubmitListCommand(channel, std::move(entries)));
 }
 
-void ThreadManager::FlushRegion(DAddr addr, u64 size) {
+void ThreadManager::FlushRegion(DAddr addr, u64 size)
+{
     if (!is_async) {
         // Always flush with synchronous GPU mode
         PushCommand(FlushRegionCommand(addr, size));
@@ -72,15 +80,18 @@ void ThreadManager::FlushRegion(DAddr addr, u64 size) {
     return;
 }
 
-void ThreadManager::TickGPU() {
+void ThreadManager::TickGPU()
+{
     PushCommand(GPUTickCommand());
 }
 
-void ThreadManager::InvalidateRegion(DAddr addr, u64 size) {
+void ThreadManager::InvalidateRegion(DAddr addr, u64 size)
+{
     rasterizer->OnCacheInvalidation(addr, size);
 }
 
-void ThreadManager::FlushAndInvalidateRegion(DAddr addr, u64 size) {
+void ThreadManager::FlushAndInvalidateRegion(DAddr addr, u64 size)
+{
     if (Settings::IsGPULevelHigh()) {
         if (!is_async) {
             PushCommand(FlushRegionCommand(addr, size));
@@ -94,7 +105,8 @@ void ThreadManager::FlushAndInvalidateRegion(DAddr addr, u64 size) {
     rasterizer->OnCacheInvalidation(addr, size);
 }
 
-u64 ThreadManager::PushCommand(CommandData&& command_data, bool block) {
+u64 ThreadManager::PushCommand(CommandData&& command_data, bool block)
+{
     if (!is_async) {
         // In synchronous GPU mode, block the caller until the command has executed
         block = true;

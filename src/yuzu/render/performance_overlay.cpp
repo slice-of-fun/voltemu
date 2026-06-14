@@ -1,11 +1,7 @@
 // SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#include "core/perf_stats.h"
 #include "performance_overlay.h"
-#include "ui_performance_overlay.h"
-
-#include "main_window.h"
 
 #include <QChart>
 #include <QChartView>
@@ -15,9 +11,14 @@
 #include <QPainter>
 #include <QValueAxis>
 
+#include "core/perf_stats.h"
+#include "main_window.h"
+#include "ui_performance_overlay.h"
+
 // TODO(crueter): Reset samples when user changes turbo, slow, etc.
 PerformanceOverlay::PerformanceOverlay(MainWindow* parent)
-    : QWidget(parent), m_mainWindow{parent}, ui(new Ui::PerformanceOverlay) {
+    : QWidget(parent), m_mainWindow{parent}, ui(new Ui::PerformanceOverlay)
+{
     ui->setupUi(this);
 
     setAttribute(Qt::WA_TranslucentBackground);
@@ -84,17 +85,20 @@ PerformanceOverlay::PerformanceOverlay(MainWindow* parent)
     connect(m_mainWindow, &MainWindow::statsUpdated, this, &PerformanceOverlay::updateStats);
 }
 
-PerformanceOverlay::~PerformanceOverlay() {
+PerformanceOverlay::~PerformanceOverlay()
+{
     delete ui;
 }
 
-void PerformanceOverlay::resetPosition(const QPoint& _) {
+void PerformanceOverlay::resetPosition(const QPoint& _)
+{
     auto pos = m_mainWindow->pos();
     move(pos.x() + m_offset.x(), pos.y() + m_offset.y());
 }
 
 void PerformanceOverlay::updateStats(const Core::PerfStatsResults& results,
-                                     const VideoCore::ShaderNotify& shaders) {
+                                     const VideoCore::ShaderNotify& shaders)
+{
     auto fps = results.average_game_fps;
     if (!std::isnan(fps)) {
         // don't sample measurements < 3 fps because they are probably outliers or freezes
@@ -176,7 +180,8 @@ void PerformanceOverlay::updateStats(const Core::PerfStatsResults& results,
     }
 }
 
-void PerformanceOverlay::paintEvent(QPaintEvent* event) {
+void PerformanceOverlay::paintEvent(QPaintEvent* event)
+{
     QPainter painter(this);
 
     painter.setRenderHint(QPainter::Antialiasing);
@@ -187,13 +192,15 @@ void PerformanceOverlay::paintEvent(QPaintEvent* event) {
     painter.drawRoundedRect(rect(), 10.0, 10.0);
 }
 
-void PerformanceOverlay::mousePressEvent(QMouseEvent* event) {
+void PerformanceOverlay::mousePressEvent(QMouseEvent* event)
+{
     if (event->button() == Qt::LeftButton) {
         m_drag_start_pos = event->pos();
     }
 }
 
-void PerformanceOverlay::mouseMoveEvent(QMouseEvent* event) {
+void PerformanceOverlay::mouseMoveEvent(QMouseEvent* event)
+{
     // drag
     if (event->buttons() & Qt::LeftButton) {
         QPoint new_global_pos = event->globalPosition().toPoint() - m_drag_start_pos;
@@ -202,6 +209,7 @@ void PerformanceOverlay::mouseMoveEvent(QMouseEvent* event) {
     }
 }
 
-void PerformanceOverlay::closeEvent(QCloseEvent* event) {
+void PerformanceOverlay::closeEvent(QCloseEvent* event)
+{
     emit closed();
 }

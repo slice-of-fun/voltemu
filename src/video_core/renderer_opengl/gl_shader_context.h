@@ -10,7 +10,8 @@
 
 namespace OpenGL::ShaderContext {
 struct ShaderPools {
-    void ReleaseContents() {
+    void ReleaseContents()
+    {
         flow_block.ReleaseContents();
         block.ReleaseContents();
         inst.ReleaseContents();
@@ -23,7 +24,9 @@ struct ShaderPools {
 
 struct Context {
     explicit Context(Core::Frontend::EmuWindow& emu_window)
-        : gl_context{emu_window.CreateSharedContext()}, scoped{*gl_context} {}
+        : gl_context{emu_window.CreateSharedContext()}, scoped{*gl_context}
+    {
+    }
 
     std::unique_ptr<Core::Frontend::GraphicsContext> gl_context;
     Core::Frontend::GraphicsContext::Scoped scoped;

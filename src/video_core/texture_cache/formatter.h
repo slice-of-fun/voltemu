@@ -6,22 +6,25 @@
 
 #pragma once
 
-#include <string>
-
 #include <fmt/ranges.h>
+
+#include <string>
 
 #include "video_core/surface.h"
 #include "video_core/texture_cache/types.h"
 
-template <>
+template<>
 struct fmt::formatter<VideoCore::Surface::PixelFormat> : fmt::formatter<fmt::string_view> {
-    template <typename FormatContext>
-    auto format(VideoCore::Surface::PixelFormat format, FormatContext& ctx) const {
+    template<typename FormatContext>
+    auto format(VideoCore::Surface::PixelFormat format, FormatContext& ctx) const
+    {
         using VideoCore::Surface::PixelFormat;
         const string_view name = [format] {
             switch (format) {
-#define PIXEL_FORMAT_ELEM(NAME, ...) case PixelFormat::NAME: return #NAME;
-    PIXEL_FORMAT_LIST
+#define PIXEL_FORMAT_ELEM(NAME, ...)                                                               \
+    case PixelFormat::NAME:                                                                        \
+        return #NAME;
+                PIXEL_FORMAT_LIST
 #undef PIXEL_FORMAT_ELEM
             case PixelFormat::MaxDepthStencilFormat:
             case PixelFormat::Invalid:
@@ -33,10 +36,10 @@ struct fmt::formatter<VideoCore::Surface::PixelFormat> : fmt::formatter<fmt::str
     }
 };
 
-template <>
-struct fmt::formatter<VideoCommon::ImageType> : fmt::formatter<fmt::string_view> {
-    template <typename FormatContext>
-    auto format(VideoCommon::ImageType type, FormatContext& ctx) const {
+template<> struct fmt::formatter<VideoCommon::ImageType> : fmt::formatter<fmt::string_view> {
+    template<typename FormatContext>
+    auto format(VideoCommon::ImageType type, FormatContext& ctx) const
+    {
         const string_view name = [type] {
             using VideoCommon::ImageType;
             switch (type) {
@@ -57,14 +60,12 @@ struct fmt::formatter<VideoCommon::ImageType> : fmt::formatter<fmt::string_view>
     }
 };
 
-template <>
-struct fmt::formatter<VideoCommon::Extent3D> {
-    constexpr auto parse(fmt::format_parse_context& ctx) {
-        return ctx.begin();
-    }
+template<> struct fmt::formatter<VideoCommon::Extent3D> {
+    constexpr auto parse(fmt::format_parse_context& ctx) { return ctx.begin(); }
 
-    template <typename FormatContext>
-    auto format(const VideoCommon::Extent3D& extent, FormatContext& ctx) const {
+    template<typename FormatContext>
+    auto format(const VideoCommon::Extent3D& extent, FormatContext& ctx) const
+    {
         return fmt::format_to(ctx.out(), "{{{}, {}, {}}}", extent.width, extent.height,
                               extent.depth);
     }

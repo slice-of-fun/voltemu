@@ -6,15 +6,17 @@
 
 #pragma once
 
-#include <array>
-#include <atomic>
-#include <vector>
+#include <qdir.h>
+
 #include <QByteArray>
 #include <QMetaType>
 #include <QString>
 #include <QStringList>
 #include <QVector>
-#include <qdir.h>
+#include <array>
+#include <atomic>
+#include <vector>
+
 #include "common/common_types.h"
 #include "common/settings.h"
 #include "common/settings_enums.h"
@@ -78,12 +80,8 @@ struct GameDir {
     std::string path;
     bool deep_scan = false;
     bool expanded = false;
-    bool operator==(const GameDir& rhs) const {
-        return path == rhs.path;
-    }
-    bool operator!=(const GameDir& rhs) const {
-        return !operator==(rhs);
-    }
+    bool operator==(const GameDir& rhs) const { return path == rhs.path; }
+    bool operator!=(const GameDir& rhs) const { return !operator==(rhs); }
 };
 
 struct Values {
@@ -208,10 +206,12 @@ struct Values {
     // Game List
     Setting<bool> show_add_ons{linkage, true, "show_add_ons", Category::UiGameList};
     Setting<u32, true> game_icon_size{linkage, 64, 8, 512, "game_icon_size", Category::UiGameList};
-    Setting<u32, true> folder_icon_size{linkage, 48, 8, 512, "folder_icon_size", Category::UiGameList};
+    Setting<u32, true> folder_icon_size{
+        linkage, 48, 8, 512, "folder_icon_size", Category::UiGameList};
     Setting<u8> row_1_text_id{linkage, 3, "row_1_text_id", Category::UiGameList};
     Setting<u8> row_2_text_id{linkage, 2, "row_2_text_id", Category::UiGameList};
-    Setting<Settings::GameListMode> game_list_mode{linkage, Settings::GameListMode::TreeView, "game_list_mode", Category::UiGameList};
+    Setting<Settings::GameListMode> game_list_mode{linkage, Settings::GameListMode::TreeView,
+                                                   "game_list_mode", Category::UiGameList};
     Setting<bool> show_game_name{linkage, true, "show_game_name", Category::UiGameList};
 
     std::atomic_bool is_game_list_reload_pending{false};

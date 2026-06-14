@@ -23,7 +23,8 @@ struct RomMetadata {
 
 ankerl::unordered_dense::map<std::string, RomMetadata> m_rom_metadata_cache;
 
-RomMetadata CacheRomMetadata(const std::string& path) {
+RomMetadata CacheRomMetadata(const std::string& path)
+{
     const auto file =
         Core::GetGameFileFromPath(EmulationSession::GetInstance().System().GetFilesystem(), path);
     auto loader = Loader::GetLoader(EmulationSession::GetInstance().System(), file, 0, 0);
@@ -64,7 +65,8 @@ RomMetadata CacheRomMetadata(const std::string& path) {
     return entry;
 }
 
-RomMetadata GetRomMetadata(const std::string& path, bool reload = false) {
+RomMetadata GetRomMetadata(const std::string& path, bool reload = false)
+{
     if (reload) {
         return CacheRomMetadata(path);
     }
@@ -79,7 +81,8 @@ RomMetadata GetRomMetadata(const std::string& path, bool reload = false) {
 extern "C" {
 
 jboolean Java_org_yuzu_yuzu_1emu_utils_GameMetadata_getIsValid(JNIEnv* env, jobject obj,
-                                                               jstring jpath) {
+                                                               jstring jpath)
+{
     const auto file = EmulationSession::GetInstance().System().GetFilesystem()->OpenFile(
         Common::Android::GetJString(env, jpath), FileSys::OpenMode::Read);
     if (!file) {
@@ -109,32 +112,36 @@ jboolean Java_org_yuzu_yuzu_1emu_utils_GameMetadata_getIsValid(JNIEnv* env, jobj
     return true;
 }
 
-jstring Java_org_yuzu_yuzu_1emu_utils_GameMetadata_getTitle(JNIEnv* env, jobject obj,
-                                                            jstring jpath) {
+jstring Java_org_yuzu_yuzu_1emu_utils_GameMetadata_getTitle(JNIEnv* env, jobject obj, jstring jpath)
+{
     return Common::Android::ToJString(
         env, GetRomMetadata(Common::Android::GetJString(env, jpath)).title);
 }
 
 jstring Java_org_yuzu_yuzu_1emu_utils_GameMetadata_getProgramId(JNIEnv* env, jobject obj,
-                                                                jstring jpath) {
+                                                                jstring jpath)
+{
     return Common::Android::ToJString(
         env, std::to_string(GetRomMetadata(Common::Android::GetJString(env, jpath)).programId));
 }
 
 jstring Java_org_yuzu_yuzu_1emu_utils_GameMetadata_getDeveloper(JNIEnv* env, jobject obj,
-                                                                jstring jpath) {
+                                                                jstring jpath)
+{
     return Common::Android::ToJString(
         env, GetRomMetadata(Common::Android::GetJString(env, jpath)).developer);
 }
 
 jstring Java_org_yuzu_yuzu_1emu_utils_GameMetadata_getVersion(JNIEnv* env, jobject obj,
-                                                              jstring jpath, jboolean jreload) {
+                                                              jstring jpath, jboolean jreload)
+{
     return Common::Android::ToJString(
         env, GetRomMetadata(Common::Android::GetJString(env, jpath), jreload).version);
 }
 
 jbyteArray Java_org_yuzu_yuzu_1emu_utils_GameMetadata_getIcon(JNIEnv* env, jobject obj,
-                                                              jstring jpath) {
+                                                              jstring jpath)
+{
     auto icon_data = GetRomMetadata(Common::Android::GetJString(env, jpath)).icon;
     jbyteArray icon = env->NewByteArray(static_cast<jsize>(icon_data.size()));
     env->SetByteArrayRegion(icon, 0, env->GetArrayLength(icon),
@@ -143,12 +150,14 @@ jbyteArray Java_org_yuzu_yuzu_1emu_utils_GameMetadata_getIcon(JNIEnv* env, jobje
 }
 
 jboolean Java_org_yuzu_yuzu_1emu_utils_GameMetadata_getIsHomebrew(JNIEnv* env, jobject obj,
-                                                                  jstring jpath) {
+                                                                  jstring jpath)
+{
     return static_cast<jboolean>(
         GetRomMetadata(Common::Android::GetJString(env, jpath)).isHomebrew);
 }
 
-void Java_org_yuzu_yuzu_1emu_utils_GameMetadata_resetMetadata(JNIEnv* env, jobject obj) {
+void Java_org_yuzu_yuzu_1emu_utils_GameMetadata_resetMetadata(JNIEnv* env, jobject obj)
+{
     m_rom_metadata_cache.clear();
 }
 
