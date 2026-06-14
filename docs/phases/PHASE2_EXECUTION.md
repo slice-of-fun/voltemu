@@ -6,7 +6,7 @@ The goal is to improve maintainability, readability, and architectural quality w
 
 ## Progress Overview
 
-- [ ] Step 1: Code Quality & Formatting
+- [x] Step 1: Code Quality & Formatting
 - [ ] Step 2: Dead Code Removal
 - [ ] Step 3: Module Boundaries & Dependencies
 - [ ] Step 4: Documentation & Testing
@@ -29,13 +29,24 @@ The goal is to improve maintainability, readability, and architectural quality w
 > verified intact (7451 → 7451). Result is idempotent (`--dry-run --Werror` passes).
 
 ### 1.2 Naming Conventions
-- [ ] Ensure all file names use `snake_case`.
-- [ ] Ensure all class/struct names use `PascalCase`.
-- [ ] Standardize constants to `UPPER_SNAKE_CASE`.
+- [x] Ensure all file names use `snake_case`.
+- [x] Ensure all class/struct names use `PascalCase`.
+- [x] Standardize constants to `UPPER_SNAKE_CASE`.
+
+> Audited in `docs/phases/PHASE2_NAMING_AUDIT.md`. All source filenames already
+> `snake_case` (0 violations). Lowercase nvidia device classes (`nvhost_*`, `nvmap`,
+> etc.) are kept intentionally — they mirror real hardware/driver node names
+> (documented exception per ROADMAP 2.2).
 
 ### 1.3 Modern C++ Idioms
 - [ ] Replace raw `#define` constants with `constexpr`.
-- [ ] Replace `typedef` with `using` in core headers.
+- [x] Replace `typedef` with `using` in core headers.
+
+> `typedef` → `using`: 5 converted (`refactor: replace typedef with using`); the
+> OpenSSL-mirroring `EVP_MAC_CTX` typedef is intentionally retained.
+> `#define` → `constexpr`: **none applicable** — every candidate is platform-
+> conditional, third-party-library config, or vendored data (SMAA, `U128_ZERO_INIT`).
+> See audit doc for the full categorization.
 
 ---
 
