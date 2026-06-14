@@ -7,7 +7,7 @@
 
 #include "common/fs/path_util.h"
 
-typedef struct Emulator {
+struct Emulator {
     const char* m_name;
 
     Common::FS::EmuPath e_user_dir;
@@ -32,7 +32,7 @@ typedef struct Emulator {
     const QString name() const { return QObject::tr(m_name); }
 
     const QString lower_name() const { return name().toLower(); }
-} Emulator;
+};
 
 #define STRUCT_EMU(name, enumName)                                                                 \
     Emulator                                                                                       \

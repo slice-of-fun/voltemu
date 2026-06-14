@@ -52,7 +52,7 @@ enum StandardButton {
 Q_ENUM_NS(StandardButton)
 
 #if QT_VERSION < QT_VERSION_CHECK(7, 0, 0)
-typedef StandardButton Button;
+using Button = StandardButton;
 #endif
 Q_DECLARE_FLAGS(StandardButtons, StandardButton)
 Q_FLAG_NS(StandardButtons)

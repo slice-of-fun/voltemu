@@ -29,7 +29,7 @@ extern std::unique_ptr<EmuThread> emu_thread;
 
 extern const QStringList supported_file_extensions;
 
-typedef std::function<bool(std::size_t, std::size_t)> QtProgressCallback;
+using QtProgressCallback = std::function<bool(std::size_t, std::size_t)>;
 
 Core::Frontend::WindowSystemType GetWindowSystemType();
 
