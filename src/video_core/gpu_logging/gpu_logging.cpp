@@ -46,7 +46,7 @@ void GPULogger::Initialize(LogLevel level, DriverType driver) {
 
     // Create log directory
     using namespace Common::FS;
-    const auto& log_dir = GetEdenPath(EdenPath::LogDir);
+    const auto& log_dir = GetVoltPath(VoltPath::LogDir);
     [[maybe_unused]] const bool log_dir_created = CreateDir(log_dir);
 
     // Create GPU crashes directory
@@ -300,7 +300,7 @@ void GPULogger::LogShaderCompilation(const std::string& shader_name,
     // Dump SPIR-V binary if enabled and we have data
     if (dump_shaders && !spirv_code.empty()) {
         using namespace Common::FS;
-        const auto& log_dir = GetEdenPath(EdenPath::LogDir);
+        const auto& log_dir = GetVoltPath(VoltPath::LogDir);
         const auto shaders_dir = log_dir / "shaders";
 
         // Create directory on first dump
@@ -573,7 +573,7 @@ GPUStateSnapshot GPULogger::GetCurrentSnapshot() {
 
 void GPULogger::DumpStateToFile(const std::string& crash_reason) {
     using namespace Common::FS;
-    const auto& log_dir = GetEdenPath(EdenPath::LogDir);
+    const auto& log_dir = GetVoltPath(VoltPath::LogDir);
     const auto crashes_dir = log_dir / "gpu_crashes";
     [[maybe_unused]] const bool crashes_dir_created = CreateDir(crashes_dir);
 

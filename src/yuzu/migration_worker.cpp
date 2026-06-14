@@ -25,10 +25,10 @@ void MigrationWorker::process() {
     const fs::path legacy_cache_dir = selected_emu.get_cache_dir();
 
     // TODO(crueter): Make these constexpr since they're defaulted
-    fs::path eden_dir = Common::FS::GetEdenPath(Common::FS::EdenPath::EdenDir);
-    fs::path config_dir = Common::FS::GetEdenPath(Common::FS::EdenPath::ConfigDir);
-    fs::path cache_dir = Common::FS::GetEdenPath(Common::FS::EdenPath::CacheDir);
-    fs::path shader_dir = Common::FS::GetEdenPath(Common::FS::EdenPath::ShaderDir);
+    fs::path eden_dir = Common::FS::GetVoltPath(Common::FS::VoltPath::VoltDir);
+    fs::path config_dir = Common::FS::GetVoltPath(Common::FS::VoltPath::ConfigDir);
+    fs::path cache_dir = Common::FS::GetVoltPath(Common::FS::VoltPath::CacheDir);
+    fs::path shader_dir = Common::FS::GetVoltPath(Common::FS::VoltPath::ShaderDir);
 
     eden_dir.make_preferred();
     config_dir.make_preferred();

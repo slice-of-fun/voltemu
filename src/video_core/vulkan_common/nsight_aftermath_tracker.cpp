@@ -50,7 +50,7 @@ NsightAftermathTracker::NsightAftermathTracker() {
         LOG_ERROR(Render_Vulkan, "Failed to load Nsight Aftermath function pointers");
         return;
     }
-    dump_dir = Common::FS::GetEdenPath(Common::FS::EdenPath::LogDir) / "gpucrash";
+    dump_dir = Common::FS::GetVoltPath(Common::FS::VoltPath::LogDir) / "gpucrash";
 
     Common::FS::RemoveDirRecursively(dump_dir);
     if (!Common::FS::CreateDir(dump_dir)) {

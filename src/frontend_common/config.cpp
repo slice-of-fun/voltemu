@@ -28,7 +28,7 @@ Config::Config(const ConfigType config_type)
     : type(config_type), global{config_type == ConfigType::GlobalConfig} {}
 
 void Config::Initialize(const std::string& config_name) {
-    const std::filesystem::path fs_config_loc = FS::GetEdenPath(FS::EdenPath::ConfigDir);
+    const std::filesystem::path fs_config_loc = FS::GetVoltPath(FS::VoltPath::ConfigDir);
     const auto config_file = fmt::format("{}.ini", config_name);
 
     switch (type) {
@@ -54,7 +54,7 @@ void Config::Initialize(const std::string& config_name) {
 
 void Config::Initialize(const std::optional<std::string> config_path) {
     const std::filesystem::path default_sdl_config_path =
-        FS::GetEdenPath(FS::EdenPath::ConfigDir) / "sdl2-config.ini";
+        FS::GetVoltPath(FS::VoltPath::ConfigDir) / "sdl2-config.ini";
     config_loc = config_path.value_or(FS::PathToUTF8String(default_sdl_config_path));
     void(FS::CreateParentDir(config_loc));
     SetUpIni();
@@ -274,21 +274,21 @@ void Config::ReadDataStorageValues() {
 
     using namespace Common::FS;
 
-    const auto setPath = [this](const EdenPath& path, const char* setting) {
-        SetEdenPath(path, ReadStringSetting(std::string(setting)));
+    const auto setPath = [this](const VoltPath& path, const char* setting) {
+        SetVoltPath(path, ReadStringSetting(std::string(setting)));
     };
 
-    setPath(EdenPath::NANDDir, "nand_directory");
-    setPath(EdenPath::SDMCDir, "sdmc_directory");
-    setPath(EdenPath::LoadDir, "load_directory");
-    setPath(EdenPath::DumpDir, "dump_directory");
-    setPath(EdenPath::TASDir, "tas_directory");
+    setPath(VoltPath::NANDDir, "nand_directory");
+    setPath(VoltPath::SDMCDir, "sdmc_directory");
+    setPath(VoltPath::LoadDir, "load_directory");
+    setPath(VoltPath::DumpDir, "dump_directory");
+    setPath(VoltPath::TASDir, "tas_directory");
 
     const auto save_dir_setting = ReadStringSetting(std::string("save_directory"));
     if (save_dir_setting.empty()) {
-        SetEdenPath(EdenPath::SaveDir, GetEdenPathString(EdenPath::NANDDir));
+        SetVoltPath(VoltPath::SaveDir, GetVoltPathString(VoltPath::NANDDir));
     } else {
-        SetEdenPath(EdenPath::SaveDir, save_dir_setting);
+        SetVoltPath(VoltPath::SaveDir, save_dir_setting);
     }
 
     ReadCategory(Settings::Category::DataStorage);
@@ -373,7 +373,7 @@ void Config::ReadScreenshotValues() {
     BeginGroup(Settings::TranslateCategory(Settings::Category::Screenshots));
 
     ReadCategory(Settings::Category::Screenshots);
-    FS::SetEdenPath(FS::EdenPath::ScreenshotsDir,
+    FS::SetVoltPath(FS::VoltPath::ScreenshotsDir,
                     ReadStringSetting(std::string("screenshot_path")));
 
     EndGroup();
@@ -571,19 +571,19 @@ void Config::SaveDataStorageValues() {
 
     using namespace Common::FS;
 
-    const auto writePath = [this](const char* setting, const EdenPath& path) {
-        WriteStringSetting(std::string(setting), FS::GetEdenPathString(path),
-                           std::make_optional(FS::GetEdenPathString(path)));
+    const auto writePath = [this](const char* setting, const VoltPath& path) {
+        WriteStringSetting(std::string(setting), FS::GetVoltPathString(path),
+                           std::make_optional(FS::GetVoltPathString(path)));
     };
 
-    writePath("nand_directory", EdenPath::NANDDir);
-    writePath("sdmc_directory", EdenPath::SDMCDir);
-    writePath("load_directory", EdenPath::LoadDir);
-    writePath("dump_directory", EdenPath::DumpDir);
-    writePath("tas_directory", EdenPath::TASDir);
+    writePath("nand_directory", VoltPath::NANDDir);
+    writePath("sdmc_directory", VoltPath::SDMCDir);
+    writePath("load_directory", VoltPath::LoadDir);
+    writePath("dump_directory", VoltPath::DumpDir);
+    writePath("tas_directory", VoltPath::TASDir);
 
-    const auto save_path = FS::GetEdenPathString(EdenPath::SaveDir);
-    const auto nand_path = FS::GetEdenPathString(EdenPath::NANDDir);
+    const auto save_path = FS::GetVoltPathString(VoltPath::SaveDir);
+    const auto nand_path = FS::GetVoltPathString(VoltPath::NANDDir);
     if (save_path == nand_path) {
         WriteStringSetting(std::string("save_directory"), std::string(""),
                            std::make_optional(std::string("")));
@@ -673,7 +673,7 @@ void Config::SaveScreenshotValues() {
     BeginGroup(Settings::TranslateCategory(Settings::Category::Screenshots));
 
     WriteStringSetting(std::string("screenshot_path"),
-                       FS::GetEdenPathString(FS::EdenPath::ScreenshotsDir));
+                       FS::GetVoltPathString(FS::VoltPath::ScreenshotsDir));
     WriteCategory(Settings::Category::Screenshots);
 
     EndGroup();

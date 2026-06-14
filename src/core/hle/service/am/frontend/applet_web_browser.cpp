@@ -158,7 +158,7 @@ void ExtractSharedFonts(Core::System& system) {
         "FontNintendoExtended2.ttf",
     };
 
-    const auto fonts_dir = Common::FS::GetEdenPath(Common::FS::EdenPath::CacheDir) / "fonts";
+    const auto fonts_dir = Common::FS::GetVoltPath(Common::FS::VoltPath::CacheDir) / "fonts";
 
     for (std::size_t i = 0; i < NS::SHARED_FONTS.size(); ++i) {
         const auto font_file_path = fonts_dir / DECRYPTED_SHARED_FONTS[i];
@@ -529,7 +529,7 @@ void WebBrowser::InitializeOffline() {
         "system_data",
     };
 
-    offline_cache_dir = Common::FS::GetEdenPath(Common::FS::EdenPath::CacheDir) /
+    offline_cache_dir = Common::FS::GetVoltPath(Common::FS::VoltPath::CacheDir) /
                         fmt::format("offline_web_applet_{}/{:016X}",
                                     RESOURCE_TYPES[static_cast<u32>(document_kind) - 1], title_id);
 

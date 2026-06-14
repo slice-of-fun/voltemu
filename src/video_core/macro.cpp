@@ -1329,7 +1329,7 @@ Macro::Opcode MacroJITx64Impl::GetOpCode() const {
 #endif
 
 static void Dump(u64 hash, std::span<const u32> code, bool decompiled = false) {
-    const auto base_dir{Common::FS::GetEdenPath(Common::FS::EdenPath::DumpDir)};
+    const auto base_dir{Common::FS::GetVoltPath(Common::FS::VoltPath::DumpDir)};
     const auto macro_dir{base_dir / "macros"};
     if (!Common::FS::CreateDir(base_dir) || !Common::FS::CreateDir(macro_dir)) {
         LOG_ERROR(Common_Filesystem, "Failed to create macro dump directories");

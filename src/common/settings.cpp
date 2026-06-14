@@ -139,7 +139,7 @@ void LogSettings() {
         settings_str += e;
     LOG_INFO(Config, "Eden Configuration:\n{}", settings_str);
 #define LOG_PATH(NAME) \
-    LOG_INFO(Config, #NAME ": {}", Common::FS::PathToUTF8String(Common::FS::GetEdenPath(Common::FS::EdenPath::NAME)))
+    LOG_INFO(Config, #NAME ": {}", Common::FS::PathToUTF8String(Common::FS::GetVoltPath(Common::FS::VoltPath::NAME)))
     LOG_PATH(CacheDir);
     LOG_PATH(ConfigDir);
     LOG_PATH(LoadDir);
