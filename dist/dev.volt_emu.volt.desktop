@@ -7,13 +7,13 @@
 [Desktop Entry]
 Version=1.0
 Type=Application
-Name=Eden
+Name=Volt Emulator
 GenericName=Switch Emulator
-Comment=Multiplatform FOSS Switch 1 emulator written in C++, derived from Yuzu and Sudachi
-Icon=dev.eden_emu.eden
-TryExec=eden
-Exec=eden %f
+Comment=High-performance Nintendo Switch emulator
+Icon=dev.volt_emu.volt
+TryExec=volt
+Exec=volt %f
 Categories=Game;Emulator;Qt;
 MimeType=application/x-nx-nro;application/x-nx-nso;application/x-nx-nsp;application/x-nx-xci;
 Keywords=Nintendo;Switch;
-StartupWMClass=eden
+StartupWMClass=volt

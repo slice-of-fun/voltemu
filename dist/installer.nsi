@@ -20,9 +20,9 @@
 Unicode true
 ManifestDPIAware true
 
-!define PRODUCT_NAME "Eden"
+!define PRODUCT_NAME "Volt Emulator"
 !define PRODUCT_PUBLISHER "Utopia LLC"
-!define PRODUCT_WEB_SITE "https://git.eden-emu.dev"
+!define PRODUCT_WEB_SITE "https://github.com/pushkarverse/volt-emu"
 !define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\${PRODUCT_NAME}.exe"
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
 
@@ -40,7 +40,7 @@ ShowUnInstDetails show
 !include "nsDialogs.nsh"
 
 ; MUI Settings
-!define MUI_ICON "eden.ico"
+!define MUI_ICON "volt.ico"
 !define MUI_UNICON "${NSISDIR}\Contrib\Graphics\Icons\modern-uninstall.ico"
 
 ; License page

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+SPDX-FileCopyrightText: 2025 Eden Emulator Project
+SPDX-License-Identifier: GPL-3.0-or-later
+-->
+
+<!--
+SPDX-FileCopyrightText: 2021 yuzu Emulator Project
+SPDX-License-Identifier: CC0-1.0
+-->
+
+<component type="desktop-application">
+  <id>dev.volt_emu.volt</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <name>Volt Emulator</name>
+  <summary>Nintendo Switch emulator</summary>
+  <description>
+    <p>Multiplatform FOSS Switch 1 emulator written in C++, derived from Eden, Sudachi and Yuzu</p>
+  </description>
+  <categories>
+    <category>Game</category>
+    <category>Emulator</category>
+  </categories>
+  <keywords>
+    <keyword>switch</keyword>
+    <keyword>emulator</keyword>
+  </keywords>
+  <url type="homepage">https://github.com/pushkarverse/volt-emu</url>
+  <url type="bugtracker">https://github.com/pushkarverse/volt-emu/issues</url>
+  <url type="faq">https://github.com/pushkarverse/volt-emudocs</url>
+  <url type="help">https://github.com/pushkarverse/volt-emudocs</url>
+  <url type="donation">https://github.com/pushkarverse/volt-emudonations</url>
+  <url type="translate">https://github.com/pushkarverse/volt-emu</url>
+  <url type="contact">https://github.com/pushkarverse/volt-emu</url>
+  <url type="vcs-browser">https://github.com/pushkarverse/volt-emu</url>
+  <url type="contribute">https://github.com/pushkarverse/volt-emu/eden-emu/eden</url>
+  <launchable type="desktop-id">dev.volt_emu.volt.desktop</launchable>
+  <provides>
+    <binary>volt</binary>
+    <binary>volt-cli</binary>
+  </provides>
+  <supports>
+    <control>pointing</control>
+    <control>keyboard</control>
+    <control>gamepad</control>
+  </supports>
+  <requires>
+    <memory>8192</memory>
+  </requires>
+  <recommends>
+    <memory>16384</memory>
+  </recommends>
+  <project_license>GPL-3.0-or-later</project_license>
+  <developer_name>Volt Emulator Team</developer_name>
+  <content_rating type="oars-1.0"/>
+</component>
