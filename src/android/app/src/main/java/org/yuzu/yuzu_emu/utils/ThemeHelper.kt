@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-package org.yuzu.yuzu_emu.utils
+package dev.volt_emu.volt.utils
 
 import android.content.SharedPreferences
 import android.content.res.Configuration
@@ -13,13 +13,13 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import kotlin.math.roundToInt
-import org.yuzu.yuzu_emu.R
-import org.yuzu.yuzu_emu.features.settings.model.BooleanSetting
-import org.yuzu.yuzu_emu.features.settings.model.IntSetting
-import org.yuzu.yuzu_emu.ui.main.ThemeProvider
+import dev.volt_emu.volt.R
+import dev.volt_emu.volt.features.settings.model.BooleanSetting
+import dev.volt_emu.volt.features.settings.model.IntSetting
+import dev.volt_emu.volt.ui.main.ThemeProvider
 import androidx.preference.PreferenceManager
-import org.yuzu.yuzu_emu.YuzuApplication
-import org.yuzu.yuzu_emu.features.settings.model.Settings
+import dev.volt_emu.volt.YuzuApplication
+import dev.volt_emu.volt.features.settings.model.Settings
 
 object ThemeHelper {
     const val SYSTEM_BAR_ALPHA = 0.9f

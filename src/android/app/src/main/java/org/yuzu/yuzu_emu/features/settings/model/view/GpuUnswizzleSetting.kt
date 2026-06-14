@@ -1,13 +1,13 @@
 // SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-package org.yuzu.yuzu_emu.features.settings.model.view
+package dev.volt_emu.volt.features.settings.model.view
 
 import androidx.annotation.ArrayRes
 import androidx.annotation.StringRes
-import org.yuzu.yuzu_emu.features.settings.model.AbstractSetting
-import org.yuzu.yuzu_emu.features.settings.model.BooleanSetting
-import org.yuzu.yuzu_emu.features.settings.model.IntSetting
+import dev.volt_emu.volt.features.settings.model.AbstractSetting
+import dev.volt_emu.volt.features.settings.model.BooleanSetting
+import dev.volt_emu.volt.features.settings.model.IntSetting
 
 class GpuUnswizzleSetting(
     @StringRes titleId: Int = 0,

@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-package org.yuzu.yuzu_emu.dialogs
+package dev.volt_emu.volt.dialogs
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -24,20 +24,20 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputLayout
-import org.yuzu.yuzu_emu.R
-import org.yuzu.yuzu_emu.YuzuApplication
-import org.yuzu.yuzu_emu.databinding.DialogMultiplayerConnectBinding
-import org.yuzu.yuzu_emu.databinding.DialogMultiplayerLobbyBinding
-import org.yuzu.yuzu_emu.databinding.DialogMultiplayerRoomBinding
-import org.yuzu.yuzu_emu.databinding.ItemBanListBinding
-import org.yuzu.yuzu_emu.databinding.ItemButtonNetplayBinding
-import org.yuzu.yuzu_emu.databinding.ItemTextNetplayBinding
-import org.yuzu.yuzu_emu.features.settings.model.StringSetting
-import org.yuzu.yuzu_emu.network.NetDataValidators
-import org.yuzu.yuzu_emu.network.NetPlayManager
-import org.yuzu.yuzu_emu.utils.CompatUtils
-import org.yuzu.yuzu_emu.utils.FullscreenHelper
-import org.yuzu.yuzu_emu.utils.GameHelper
+import dev.volt_emu.volt.R
+import dev.volt_emu.volt.YuzuApplication
+import dev.volt_emu.volt.databinding.DialogMultiplayerConnectBinding
+import dev.volt_emu.volt.databinding.DialogMultiplayerLobbyBinding
+import dev.volt_emu.volt.databinding.DialogMultiplayerRoomBinding
+import dev.volt_emu.volt.databinding.ItemBanListBinding
+import dev.volt_emu.volt.databinding.ItemButtonNetplayBinding
+import dev.volt_emu.volt.databinding.ItemTextNetplayBinding
+import dev.volt_emu.volt.features.settings.model.StringSetting
+import dev.volt_emu.volt.network.NetDataValidators
+import dev.volt_emu.volt.network.NetPlayManager
+import dev.volt_emu.volt.utils.CompatUtils
+import dev.volt_emu.volt.utils.FullscreenHelper
+import dev.volt_emu.volt.utils.GameHelper
 
 class NetPlayDialog(context: Context) : BottomSheetDialog(context) {
     private lateinit var adapter: NetPlayAdapter

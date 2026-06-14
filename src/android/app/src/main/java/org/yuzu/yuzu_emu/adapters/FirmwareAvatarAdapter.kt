@@ -1,13 +1,13 @@
 // SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-package org.yuzu.yuzu_emu.adapters
+package dev.volt_emu.volt.adapters
 
 import android.graphics.Bitmap
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import org.yuzu.yuzu_emu.databinding.ItemFirmwareAvatarBinding
+import dev.volt_emu.volt.databinding.ItemFirmwareAvatarBinding
 
 class FirmwareAvatarAdapter(
     private val avatars: List<Bitmap>,

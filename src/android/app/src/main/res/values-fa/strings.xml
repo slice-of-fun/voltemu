@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
 
     <string name="app_disclaimer">این نرم‌افزار برای اجرای بازی‌های کنسول نینتندو سوییچ است. هیچ بازی یا کلیدی داخل برنامه گنجانده نشده است.&lt;br /&gt;&lt;br /&gt;قبل از شروع، لطفاً فایل <![CDATA[ prod.keys ]]> خود را در حافظه دستگاه خود پیدا کنید.&lt;br /&gt; &lt;br /&gt;<![CDATA[بیشتر بدانید]]></string>
@@ -254,7 +254,7 @@
     <string name="home_settings">تنظیمات</string>
     <string name="empty_gamelist">هیچ فایلی پیدا نشد یا هنوز پوشه بازی‌ها انتخاب نشده است.</string>
     <string name="manage_game_folders">مدیریت پوشه‌های بازی</string>
-    <string name="select_games_folder_description">به Eden اجازه می دهد تا لیست باز‌ی‌ها را پر کند</string>
+    <string name="select_games_folder_description">به Volt Emulator اجازه می دهد تا لیست باز‌ی‌ها را پر کند</string>
     <string name="add_games_warning">از انتخاب پوشه بازی رد می‌شوید؟</string>
     <string name="add_games_warning_description">اگر پوشه‌ای انتخاب نشده باشد، بازی‌ها در لیست بازی‌ها نمایش داده نمی‌شوند.</string>
     <string name="home_search_games">جستجو در بازی‌ها</string>
@@ -286,7 +286,7 @@
     <string name="open_user_folder">باز کردن پوشه Eden</string>
     <string name="open_user_folder_description">مدیریت فایل‌های داخلی Eden</string>
     <string name="no_file_manager">هیچ برنامه مدیریت فایلی پیدا نشد</string>
-    <string name="notification_no_directory_link">پوشه Eden باز نشد</string>
+    <string name="notification_no_directory_link">پوشه Volt Emulator باز نشد</string>
     <string name="notification_no_directory_link_description">لطفاً پوشه کاربری را با استفاده از پنل کناری برنامه مدیریت فایل به صورت دستی پیدا کنید.</string>
     <string name="manage_save_data">مدیریت ذخیره داده‌ها</string>
     <string name="manage_save_data_description">ذخیره داده یافت شد. لطفاً یکی از گزینه‌های زیر را انتخاب کنید.</string>
@@ -303,7 +303,7 @@
     <string name="firmware_installed_failure">نصب ثابت‌افزار ناموفق بود</string>
     <string name="firmware_installed_failure_description">مطمئن شوید که فایل‌های nca ثابت‌افزار در ریشه فایل فشرده هستند و دوباره امتحان کنید.</string>
     <string name="share_log">اشتراک گزارش اشکال زدایی</string>
-    <string name="share_log_description">فایل گزارش Eden را برای رفع اشکال به اشتراک بگذارید</string>
+    <string name="share_log_description">فایل گزارش Volt Emulator را برای رفع اشکال به اشتراک بگذارید</string>
     <string name="share_log_missing">هیچ فایل گزارشی یافت نشد</string>
     <string name="install_game_content">نصب محتوای بازی</string>
     <string name="install_game_content_description">آپدیت های بازی یا DLC را نصب کنید</string>
@@ -368,8 +368,8 @@
     <string name="copied_to_clipboard">در کلیپ‌بورد کپی شد</string>
     <string name="about_app_description">یک شبیه‌ساز سوئیچ منبع باز</string>
     <string name="contributors">مشارکت کنندگان</string>
-    <string name="contributors_description">Made with \u2764 from the Eden team</string>
-    <string name="licenses_description">پروژه‌هایی که Eden را برای اندروید ممکن می‌سازند</string>
+    <string name="contributors_description">Made with \u2764 from the Volt Emulator team</string>
+    <string name="licenses_description">پروژه‌هایی که Volt Emulator را برای اندروید ممکن می‌سازند</string>
     <string name="build">ساخت</string>
     <string name="user_data">داده کاربر</string>
     <string name="user_data_description">همه داده‌های برنامه را وارد/صادر کنید.\n\nهنگام وارد کردن داده‌های کاربر، همه داده‌های کاربر موجود حذف خواهند شد!</string>

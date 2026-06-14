@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-package org.yuzu.yuzu_emu.features.settings.model.view
+package dev.volt_emu.volt.features.settings.model.view
 
 import androidx.annotation.StringRes
 

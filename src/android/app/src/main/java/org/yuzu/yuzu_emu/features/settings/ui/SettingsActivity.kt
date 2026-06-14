@@ -4,10 +4,10 @@
 // SPDX-FileCopyrightText: 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-package org.yuzu.yuzu_emu.features.settings.ui
+package dev.volt_emu.volt.features.settings.ui
 
 import android.content.Context
-import org.yuzu.yuzu_emu.YuzuApplication
+import dev.volt_emu.volt.YuzuApplication
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup.MarginLayoutParams
@@ -21,15 +21,15 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.navArgs
 import com.google.android.material.color.MaterialColors
-import org.yuzu.yuzu_emu.NativeLibrary
+import dev.volt_emu.volt.NativeLibrary
 import java.io.IOException
-import org.yuzu.yuzu_emu.R
-import org.yuzu.yuzu_emu.databinding.ActivitySettingsBinding
-import org.yuzu.yuzu_emu.features.input.NativeInput
-import org.yuzu.yuzu_emu.features.settings.utils.SettingsFile
-import org.yuzu.yuzu_emu.fragments.ResetSettingsDialogFragment
-import org.yuzu.yuzu_emu.utils.*
-import org.yuzu.yuzu_emu.utils.collect
+import dev.volt_emu.volt.R
+import dev.volt_emu.volt.databinding.ActivitySettingsBinding
+import dev.volt_emu.volt.features.input.NativeInput
+import dev.volt_emu.volt.features.settings.utils.SettingsFile
+import dev.volt_emu.volt.fragments.ResetSettingsDialogFragment
+import dev.volt_emu.volt.utils.*
+import dev.volt_emu.volt.utils.collect
 
 class SettingsActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySettingsBinding

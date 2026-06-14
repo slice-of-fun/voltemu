@@ -1,11 +1,11 @@
 // SPDX-FileCopyrightText: Copyright 2025 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-package org.yuzu.yuzu_emu.overlay.model
+package dev.volt_emu.volt.overlay.model
 
 import androidx.annotation.IntegerRes
-import org.yuzu.yuzu_emu.R
-import org.yuzu.yuzu_emu.YuzuApplication
+import dev.volt_emu.volt.R
+import dev.volt_emu.volt.YuzuApplication
 
 enum class OverlayControl(
     val id: String,

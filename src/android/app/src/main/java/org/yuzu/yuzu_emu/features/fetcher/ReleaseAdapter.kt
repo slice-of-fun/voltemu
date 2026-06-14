@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: Copyright 2025 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-package org.yuzu.yuzu_emu.features.fetcher
+package dev.volt_emu.volt.features.fetcher
 
 import android.animation.LayoutTransition
 import android.content.res.ColorStateList
@@ -15,9 +15,9 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.FragmentActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.button.MaterialButton
-import org.yuzu.yuzu_emu.R
-import org.yuzu.yuzu_emu.databinding.ItemReleaseBinding
-import org.yuzu.yuzu_emu.fragments.DriverFetcherFragment.Release
+import dev.volt_emu.volt.R
+import dev.volt_emu.volt.databinding.ItemReleaseBinding
+import dev.volt_emu.volt.fragments.DriverFetcherFragment.Release
 import androidx.core.net.toUri
 import androidx.transition.ChangeBounds
 import androidx.transition.Fade
@@ -33,10 +33,10 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.commonmark.parser.Parser
 import org.commonmark.renderer.html.HtmlRenderer
-import org.yuzu.yuzu_emu.databinding.DialogProgressBinding
-import org.yuzu.yuzu_emu.model.DriverViewModel
-import org.yuzu.yuzu_emu.utils.FileUtil
-import org.yuzu.yuzu_emu.utils.GpuDriverHelper
+import dev.volt_emu.volt.databinding.DialogProgressBinding
+import dev.volt_emu.volt.model.DriverViewModel
+import dev.volt_emu.volt.utils.FileUtil
+import dev.volt_emu.volt.utils.GpuDriverHelper
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException

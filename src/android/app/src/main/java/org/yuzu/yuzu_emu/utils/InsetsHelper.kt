@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-package org.yuzu.yuzu_emu.utils
+package dev.volt_emu.volt.utils
 
 import android.annotation.SuppressLint
 import android.content.Context

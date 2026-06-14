@@ -1,16 +1,16 @@
 // SPDX-FileCopyrightText: 2024 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-package org.yuzu.yuzu_emu.features.settings.ui
+package dev.volt_emu.volt.features.settings.ui
 
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import org.yuzu.yuzu_emu.YuzuApplication
-import org.yuzu.yuzu_emu.adapters.AbstractListAdapter
-import org.yuzu.yuzu_emu.databinding.ListItemInputProfileBinding
-import org.yuzu.yuzu_emu.viewholder.AbstractViewHolder
-import org.yuzu.yuzu_emu.R
+import dev.volt_emu.volt.YuzuApplication
+import dev.volt_emu.volt.adapters.AbstractListAdapter
+import dev.volt_emu.volt.databinding.ListItemInputProfileBinding
+import dev.volt_emu.volt.viewholder.AbstractViewHolder
+import dev.volt_emu.volt.R
 
 class InputProfileAdapter(options: List<ProfileItem>) :
     AbstractListAdapter<ProfileItem, AbstractViewHolder<ProfileItem>>(options) {

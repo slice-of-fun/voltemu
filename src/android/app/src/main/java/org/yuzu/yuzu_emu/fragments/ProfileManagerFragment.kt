@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-package org.yuzu.yuzu_emu.fragments
+package dev.volt_emu.volt.fragments
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -16,14 +16,14 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.transition.MaterialSharedAxis
-import org.yuzu.yuzu_emu.NativeLibrary
-import org.yuzu.yuzu_emu.R
-import org.yuzu.yuzu_emu.adapters.ProfileAdapter
-import org.yuzu.yuzu_emu.databinding.FragmentProfileManagerBinding
-import org.yuzu.yuzu_emu.model.HomeViewModel
-import org.yuzu.yuzu_emu.model.UserProfile
-import org.yuzu.yuzu_emu.utils.NativeConfig
-import org.yuzu.yuzu_emu.utils.ViewUtils.updateMargins
+import dev.volt_emu.volt.NativeLibrary
+import dev.volt_emu.volt.R
+import dev.volt_emu.volt.adapters.ProfileAdapter
+import dev.volt_emu.volt.databinding.FragmentProfileManagerBinding
+import dev.volt_emu.volt.model.HomeViewModel
+import dev.volt_emu.volt.model.UserProfile
+import dev.volt_emu.volt.utils.NativeConfig
+import dev.volt_emu.volt.utils.ViewUtils.updateMargins
 
 class ProfileManagerFragment : Fragment() {
     private var _binding: FragmentProfileManagerBinding? = null

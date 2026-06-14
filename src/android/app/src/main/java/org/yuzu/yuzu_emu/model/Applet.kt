@@ -1,11 +1,11 @@
 // SPDX-FileCopyrightText: 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-package org.yuzu.yuzu_emu.model
+package dev.volt_emu.volt.model
 
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
-import org.yuzu.yuzu_emu.R
+import dev.volt_emu.volt.R
 
 data class Applet(
     @StringRes val titleId: Int,

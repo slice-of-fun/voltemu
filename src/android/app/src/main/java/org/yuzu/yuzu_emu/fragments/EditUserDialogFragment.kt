@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-package org.yuzu.yuzu_emu.fragments
+package dev.volt_emu.volt.fragments
 
 import android.app.Activity
 import android.content.Intent
@@ -31,13 +31,13 @@ import com.google.android.material.transition.MaterialSharedAxis
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.yuzu.yuzu_emu.NativeLibrary
-import org.yuzu.yuzu_emu.R
-import org.yuzu.yuzu_emu.adapters.FirmwareAvatarAdapter
-import org.yuzu.yuzu_emu.databinding.FragmentEditUserDialogBinding
-import org.yuzu.yuzu_emu.model.HomeViewModel
-import org.yuzu.yuzu_emu.model.ProfileUtils
-import org.yuzu.yuzu_emu.model.UserProfile
+import dev.volt_emu.volt.NativeLibrary
+import dev.volt_emu.volt.R
+import dev.volt_emu.volt.adapters.FirmwareAvatarAdapter
+import dev.volt_emu.volt.databinding.FragmentEditUserDialogBinding
+import dev.volt_emu.volt.model.HomeViewModel
+import dev.volt_emu.volt.model.ProfileUtils
+import dev.volt_emu.volt.model.UserProfile
 import java.io.File
 import java.io.FileOutputStream
 import androidx.core.graphics.scale

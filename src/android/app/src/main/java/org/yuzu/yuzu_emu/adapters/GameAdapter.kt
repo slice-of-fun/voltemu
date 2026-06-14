@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: Copyright 2025 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-package org.yuzu.yuzu_emu.adapters
+package dev.volt_emu.volt.adapters
 
 import android.content.DialogInterface
 import android.text.Html
@@ -21,24 +21,24 @@ import androidx.viewbinding.ViewBinding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.yuzu.yuzu_emu.HomeNavigationDirections
-import org.yuzu.yuzu_emu.R
-import org.yuzu.yuzu_emu.YuzuApplication
-import org.yuzu.yuzu_emu.databinding.CardGameListBinding
-import org.yuzu.yuzu_emu.databinding.CardGameGridBinding
-import org.yuzu.yuzu_emu.databinding.CardGameCarouselBinding
-import org.yuzu.yuzu_emu.model.Game
-import org.yuzu.yuzu_emu.model.GamesViewModel
-import org.yuzu.yuzu_emu.utils.GameIconUtils
-import org.yuzu.yuzu_emu.utils.ViewUtils.marquee
-import org.yuzu.yuzu_emu.viewholder.AbstractViewHolder
+import dev.volt_emu.volt.HomeNavigationDirections
+import dev.volt_emu.volt.R
+import dev.volt_emu.volt.YuzuApplication
+import dev.volt_emu.volt.databinding.CardGameListBinding
+import dev.volt_emu.volt.databinding.CardGameGridBinding
+import dev.volt_emu.volt.databinding.CardGameCarouselBinding
+import dev.volt_emu.volt.model.Game
+import dev.volt_emu.volt.model.GamesViewModel
+import dev.volt_emu.volt.utils.GameIconUtils
+import dev.volt_emu.volt.utils.ViewUtils.marquee
+import dev.volt_emu.volt.viewholder.AbstractViewHolder
 import androidx.core.net.toUri
 import androidx.core.content.edit
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import org.yuzu.yuzu_emu.NativeLibrary
-import org.yuzu.yuzu_emu.databinding.CardGameGridCompactBinding
-import org.yuzu.yuzu_emu.features.settings.model.BooleanSetting
-import org.yuzu.yuzu_emu.features.settings.model.Settings
+import dev.volt_emu.volt.NativeLibrary
+import dev.volt_emu.volt.databinding.CardGameGridCompactBinding
+import dev.volt_emu.volt.features.settings.model.BooleanSetting
+import dev.volt_emu.volt.features.settings.model.Settings
 
 class GameAdapter(private val activity: AppCompatActivity) :
     AbstractDiffAdapter<Game, GameAdapter.GameViewHolder>(exact = false) {

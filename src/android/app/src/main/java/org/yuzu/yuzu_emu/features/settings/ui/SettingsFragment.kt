@@ -4,7 +4,7 @@
 // SPDX-FileCopyrightText: 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-package org.yuzu.yuzu_emu.features.settings.ui
+package dev.volt_emu.volt.features.settings.ui
 
 import android.annotation.SuppressLint
 import android.content.Intent
@@ -27,15 +27,15 @@ import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.transition.MaterialSharedAxis
-import org.yuzu.yuzu_emu.R
-import org.yuzu.yuzu_emu.databinding.FragmentSettingsBinding
-import org.yuzu.yuzu_emu.features.input.NativeInput
-import org.yuzu.yuzu_emu.features.settings.model.Settings
-import org.yuzu.yuzu_emu.features.settings.model.view.PathSetting
-import org.yuzu.yuzu_emu.fragments.MessageDialogFragment
-import org.yuzu.yuzu_emu.utils.PathUtil
-import org.yuzu.yuzu_emu.utils.ViewUtils.updateMargins
-import org.yuzu.yuzu_emu.utils.*
+import dev.volt_emu.volt.R
+import dev.volt_emu.volt.databinding.FragmentSettingsBinding
+import dev.volt_emu.volt.features.input.NativeInput
+import dev.volt_emu.volt.features.settings.model.Settings
+import dev.volt_emu.volt.features.settings.model.view.PathSetting
+import dev.volt_emu.volt.fragments.MessageDialogFragment
+import dev.volt_emu.volt.utils.PathUtil
+import dev.volt_emu.volt.utils.ViewUtils.updateMargins
+import dev.volt_emu.volt.utils.*
 import java.io.File
 import androidx.core.net.toUri
 

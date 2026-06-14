@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: MPL-2.0
 // Copyright © 2023 Skyline Team and Contributors (https://github.com/skyline-emu/)
 
-package org.yuzu.yuzu_emu.features
+package dev.volt_emu.volt.features
 
 import android.database.Cursor
 import android.database.MatrixCursor
@@ -14,10 +14,10 @@ import android.provider.DocumentsContract
 import android.provider.DocumentsProvider
 import android.webkit.MimeTypeMap
 import java.io.*
-import org.yuzu.yuzu_emu.BuildConfig
-import org.yuzu.yuzu_emu.R
-import org.yuzu.yuzu_emu.YuzuApplication
-import org.yuzu.yuzu_emu.getPublicFilesDir
+import dev.volt_emu.volt.BuildConfig
+import dev.volt_emu.volt.R
+import dev.volt_emu.volt.YuzuApplication
+import dev.volt_emu.volt.getPublicFilesDir
 
 class DocumentProvider : DocumentsProvider() {
     private val baseDirectory: File

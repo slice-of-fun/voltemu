@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: Copyright 2025 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-package org.yuzu.yuzu_emu.ui
+package dev.volt_emu.volt.ui
 
 import android.content.Context
 import android.graphics.Rect
@@ -11,10 +11,10 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
 import kotlin.math.abs
-import org.yuzu.yuzu_emu.R
-import org.yuzu.yuzu_emu.adapters.GameAdapter
+import dev.volt_emu.volt.R
+import dev.volt_emu.volt.adapters.GameAdapter
 import androidx.core.view.doOnNextLayout
-import org.yuzu.yuzu_emu.YuzuApplication
+import dev.volt_emu.volt.YuzuApplication
 import androidx.preference.PreferenceManager
 import androidx.core.view.WindowInsetsCompat
 /**

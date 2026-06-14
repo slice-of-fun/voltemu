@@ -1,11 +1,11 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
 
     <string name="app_disclaimer">Questo software esegue giochi per la console Nintendo Switch. Non sono inclusi titoli di giochi o chiavi.<br /><br /> Prima di iniziare, individua il file <![CDATA[<b>prod.keys</b>]]> nella memoria del tuo dispositivo.<br /><br /> <![CDATA[<a href=\"https://yuzu-mirror.github.io/help/quickstart\">Ulteriori informazioni</a>]]></string>
     <string name="notice_notification_channel_name">Avvisi ed errori</string>
     <string name="notice_notification_channel_description">Mostra le notifiche quando qualcosa va storto.</string>
     <string name="notification_permission_not_granted">Autorizzazione di notifica non concessa!</string>
-    <string name="app_notification_channel_description">Notifiche dell\'emulatore Eden Switch</string>
+    <string name="app_notification_channel_description">Notifiche dell\'emulatore Volt Emulator Switch</string>
     <string name="app_notification_running">Eden è in esecuzione</string>
     <string name="seconds">secondi</string>
 
@@ -206,7 +206,7 @@
     <string name="home_settings">Impostazioni</string>
     <string name="empty_gamelist">Non sono stati trovati file o non è stata ancora selezionata alcuna directory di gioco.</string>
     <string name="manage_game_folders">Gestisci le cartelle dei giochi</string>
-    <string name="select_games_folder_description">Consente a Eden di popolare l\'elenco dei giochi</string>
+    <string name="select_games_folder_description">Consente a Volt Emulator di popolare l\'elenco dei giochi</string>
     <string name="add_games_warning">Saltare la selezione della cartella dei giochi?</string>
     <string name="add_games_warning_description">I giochi non saranno mostrati nella lista dei giochi se una cartella non è selezionata.</string>
     <string name="add_games_warning_help">https://yuzu-mirror.github.io/help/quickstart/#dumping-games</string>
@@ -261,7 +261,7 @@
     <string name="firmware_installed_failure_description">Accertati che i file .nca del firmware siano contenuti direttamente nella radice dello .zip e riprova.</string>
     <string name="firmware_uninstalled_failure">Disinstallazione del firmware fallita</string>
     <string name="share_log">Condividi log di debug</string>
-    <string name="share_log_description">Condividi i log di Eden per ricevere supporto</string>
+    <string name="share_log_description">Condividi i log di Volt Emulator per ricevere supporto</string>
     <string name="share_log_missing">Nessun file di log trovato</string>
     <string name="install_game_content">Installa contenuti di gioco</string>
     <string name="install_game_content_description">Installa aggiornamenti o DLC</string>
@@ -336,13 +336,13 @@
     <string name="copied_to_clipboard">Copiato negli appunti</string>
     <string name="about_app_description">Un emulatore della Switch open-source.</string>
     <string name="contributors">Collaboratori</string>
-    <string name="licenses_description">Progetti che rendono Eden per Android possibile</string>
+    <string name="licenses_description">Progetti che rendono Volt Emulator per Android possibile</string>
     <string name="build">Compilazione</string>
     <string name="user_data">Dati Utente</string>
     <string name="user_data_description">Importa/Esporta tutti i dati dell\'app.\n\nQuando si importano nuovi dati utente, tutti quelli esistenti verranno cancellati!\n\nImportare dati da Citron può causare problemi. È raccomandato importare manualmente tutti i dati utili.</string>
     <string name="exporting_user_data">Esportazione dei Dati Utente...</string>
     <string name="importing_user_data">Importazione dei Dati Utente...</string>
-    <string name="invalid_yuzu_backup">Backup di Eden Invalido</string>
+    <string name="invalid_yuzu_backup">Backup di Volt Emulator Invalido</string>
     <string name="user_data_export_success">Dati Utente esportati con successo</string>
     <string name="user_data_import_success">Dati Utente importati con successo.</string>
     <string name="user_data_export_cancelled">Esportazione annullata</string>

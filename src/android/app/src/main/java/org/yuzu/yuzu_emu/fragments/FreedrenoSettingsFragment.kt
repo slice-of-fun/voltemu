@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-package org.yuzu.yuzu_emu.fragments
+package dev.volt_emu.volt.fragments
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -15,14 +15,14 @@ import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.transition.MaterialSharedAxis
-import org.yuzu.yuzu_emu.R
-import org.yuzu.yuzu_emu.adapters.FreedrenoPresetAdapter
-import org.yuzu.yuzu_emu.adapters.FreedrenoVariableAdapter
-import org.yuzu.yuzu_emu.databinding.FragmentFreedrenoSettingsBinding
-import org.yuzu.yuzu_emu.model.Game
-import org.yuzu.yuzu_emu.utils.NativeFreedrenoConfig
-import org.yuzu.yuzu_emu.utils.FreedrenoPresets
-import org.yuzu.yuzu_emu.utils.ViewUtils.updateMargins
+import dev.volt_emu.volt.R
+import dev.volt_emu.volt.adapters.FreedrenoPresetAdapter
+import dev.volt_emu.volt.adapters.FreedrenoVariableAdapter
+import dev.volt_emu.volt.databinding.FragmentFreedrenoSettingsBinding
+import dev.volt_emu.volt.model.Game
+import dev.volt_emu.volt.utils.NativeFreedrenoConfig
+import dev.volt_emu.volt.utils.FreedrenoPresets
+import dev.volt_emu.volt.utils.ViewUtils.updateMargins
 
 
 class FreedrenoSettingsFragment : Fragment() {
@@ -166,7 +166,7 @@ class FreedrenoSettingsFragment : Fragment() {
         }
     }
 
-    private fun applyPreset(preset: org.yuzu.yuzu_emu.utils.FreedrenoPreset) {
+    private fun applyPreset(preset: dev.volt_emu.volt.utils.FreedrenoPreset) {
         // Clear all first for consistency
         NativeFreedrenoConfig.clearAllFreedrenoEnv()
 

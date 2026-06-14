@@ -1,11 +1,11 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
 
     <string name="app_disclaimer">Este software arrancará juegos para la consola Nintendo Switch. No se incluyen títulos ni claves de juego.<br /><br />Antes de continuar, por favor localiza tu archivo <![CDATA[prod.keys ]]> en el almacenamiento de tu dispositivo. <br /><br /><![CDATA[<a href=\"https://yuzu-mirror.github.io/help/quickstart\">Aprender más</a>]]>&lt;b&gt;</string>
     <string name="notice_notification_channel_name">Avisos y errores</string>
     <string name="notice_notification_channel_description">Mostrar notificaciones cuando algo vaya mal.</string>
     <string name="notification_permission_not_granted">¡Permiso de notificación no concedido!</string>
-    <string name="app_notification_channel_description">Notificaciones del emulador Eden Switch</string>
+    <string name="app_notification_channel_description">Notificaciones del emulador Volt Emulator Switch</string>
     <string name="app_notification_running">Eden se está ejecutando</string>
     <string name="seconds">Segundos</string>
 
@@ -201,7 +201,7 @@
 
     <!-- Setup strings -->
     <string name="welcome">¡Bienvenido!</string>
-    <string name="welcome_description">Aprende cómo configurar <b>Eden</b> y salta a la emulación.</string>
+    <string name="welcome_description">Aprende cómo configurar <b>Volt Emulator</b> y salta a la emulación.</string>
     <string name="get_started">Empezar</string>
     <string name="keys">Claves</string>
     <string name="keys_description">Selecciona tu archivo <b>prod.keys</b> utilizando el botón de abajo.</string>
@@ -239,7 +239,7 @@
     <string name="home_settings">Ajustes</string>
     <string name="empty_gamelist">No se encontraron archivos o aún no se ha seleccionado ningún directorio de juego.</string>
     <string name="manage_game_folders">Gestionar carpetas de juegos</string>
-    <string name="select_games_folder_description">Permite que Eden complete la lista de juegos.</string>
+    <string name="select_games_folder_description">Permite que Volt Emulator complete la lista de juegos.</string>
     <string name="add_games_warning">¿Omitir la selección de la carpeta de juegos?</string>
     <string name="add_games_warning_description">Los juegos no se mostrarán en la lista de juegos si no se selecciona una carpeta.</string>
     <string name="add_games_warning_help">https://yuzu-mirror.github.io/help/quickstart/#dumping-games</string>
@@ -317,10 +317,10 @@
     <string name="firmware_installed_failure_description">Asegúrese de que los archivos nca del firmware estén en la raíz del zip e inténtelo de nuevo.</string>
     <string name="firmware_uninstalled_failure">Error al desinstalar el firmware</string>
     <string name="share_log">Compartir registros de depuración</string>
-    <string name="share_log_description">Comparta el archivo de registro de Eden para depurar problemas</string>
+    <string name="share_log_description">Comparta el archivo de registro de Volt Emulator para depurar problemas</string>
     <string name="share_log_missing">No se encontró ningún archivo de registro</string>
     <string name="share_gpu_log">Compartir registros de la GPU</string>
-    <string name="share_gpu_log_description">Comparte el archivo de registros de la GPU de Eden para depurar problemas gráficos</string>
+    <string name="share_gpu_log_description">Comparte el archivo de registros de la GPU de Volt Emulator para depurar problemas gráficos</string>
     <string name="share_gpu_log_missing">No se encontró ningún archivo de registro de la GPU</string>
     <string name="install_game_content">Instalar contenido del juego</string>
     <string name="install_game_content_description">Instalar actualizaciones o contenidos descargables</string>
@@ -397,14 +397,14 @@
     <string name="copied_to_clipboard">Copiado al portapapeles</string>
     <string name="about_app_description">Un emulador de Switch de código abierto</string>
     <string name="contributors">Colaboradores</string>
-    <string name="contributors_description">Gente que hizo posible Eden para Android</string>
-    <string name="licenses_description">Proyectos que hacen que Eden para Android sea posible</string>
+    <string name="contributors_description">Gente que hizo posible Volt Emulator para Android</string>
+    <string name="licenses_description">Proyectos que hacen que Volt Emulator para Android sea posible</string>
     <string name="build">Compilación</string>
     <string name="user_data">Datos de usuario</string>
     <string name="user_data_description">Importar/exportar todos los datos de la app.\n\nCuando se importa datos de usuario, todos los datos de usuario existentes serán eliminados!\n\nImportando datos de Citron puede causar problemas. Es recomendado manualmente importar todos los datos necesarios.</string>
     <string name="exporting_user_data">Exportando datos de usuario...</string>
     <string name="importing_user_data">Importando datos de usuario...</string>
-    <string name="invalid_yuzu_backup">Copia de seguridad de Eden inválida</string>
+    <string name="invalid_yuzu_backup">Copia de seguridad de Volt Emulator inválida</string>
     <string name="user_data_export_success">Datos de usuario exportados con éxito</string>
     <string name="user_data_import_success">Datos de usuario importados con éxito</string>
     <string name="user_data_export_cancelled">Exportación cancelada</string>
@@ -1088,7 +1088,7 @@
     <string name="app_language_system">Igual al del sistema</string>
     <!-- Static Themes -->
     <string name="static_theme_color">Color del tema</string>
-    <string name="eden_theme">Eden</string>
+    <string name="eden_theme">Volt Emulator</string>
     <string name="violet">Violeta</string>
     <string name="blue">Azul</string>
     <string name="cyan">Cian</string>

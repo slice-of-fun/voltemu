@@ -1,11 +1,11 @@
 // SPDX-FileCopyrightText: Copyright 2025 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-package org.yuzu.yuzu_emu.network
+package dev.volt_emu.volt.network
 
 import android.content.Context
-import org.yuzu.yuzu_emu.R
-import org.yuzu.yuzu_emu.features.settings.model.StringSetting
+import dev.volt_emu.volt.R
+import dev.volt_emu.volt.features.settings.model.StringSetting
 import java.net.InetAddress
 
 object NetDataValidators {

@@ -4,20 +4,20 @@
 // SPDX-FileCopyrightText: 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-package org.yuzu.yuzu_emu.adapters
+package dev.volt_emu.volt.adapters
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.LifecycleOwner
-import org.yuzu.yuzu_emu.databinding.CardHomeOptionBinding
-import org.yuzu.yuzu_emu.fragments.MessageDialogFragment
-import org.yuzu.yuzu_emu.model.HomeSetting
-import org.yuzu.yuzu_emu.utils.ViewUtils.marquee
-import org.yuzu.yuzu_emu.utils.ViewUtils.setVisible
-import org.yuzu.yuzu_emu.utils.collect
-import org.yuzu.yuzu_emu.viewholder.AbstractViewHolder
+import dev.volt_emu.volt.databinding.CardHomeOptionBinding
+import dev.volt_emu.volt.fragments.MessageDialogFragment
+import dev.volt_emu.volt.model.HomeSetting
+import dev.volt_emu.volt.utils.ViewUtils.marquee
+import dev.volt_emu.volt.utils.ViewUtils.setVisible
+import dev.volt_emu.volt.utils.collect
+import dev.volt_emu.volt.viewholder.AbstractViewHolder
 
 class HomeSettingAdapter(
     private val activity: AppCompatActivity,

@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-package org.yuzu.yuzu_emu.utils
+package dev.volt_emu.volt.utils
 
 import android.app.Activity
 import android.app.Application
@@ -11,9 +11,9 @@ import android.view.KeyEvent
 import android.view.View
 import android.view.Window
 import androidx.activity.ComponentActivity
-import org.yuzu.yuzu_emu.NativeLibrary
-import org.yuzu.yuzu_emu.R
-import org.yuzu.yuzu_emu.features.settings.model.BooleanSetting
+import dev.volt_emu.volt.NativeLibrary
+import dev.volt_emu.volt.R
+import dev.volt_emu.volt.features.settings.model.BooleanSetting
 import java.util.concurrent.atomic.AtomicBoolean
 
 object ControllerNavigationGlobalHook {
@@ -106,7 +106,7 @@ object ControllerNavigationGlobalHook {
         }
 
         private fun shouldBypassInGameplay(): Boolean {
-            if (activity.javaClass.name != "org.yuzu.yuzu_emu.activities.EmulationActivity") {
+            if (activity.javaClass.name != "dev.volt_emu.volt.activities.EmulationActivity") {
                 return false
             }
             if (!NativeLibrary.isRunning()) {

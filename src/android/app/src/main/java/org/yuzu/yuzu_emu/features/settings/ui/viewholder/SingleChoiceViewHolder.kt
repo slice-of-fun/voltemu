@@ -1,16 +1,16 @@
 // SPDX-FileCopyrightText: 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-package org.yuzu.yuzu_emu.features.settings.ui.viewholder
+package dev.volt_emu.volt.features.settings.ui.viewholder
 
 import android.view.View
-import org.yuzu.yuzu_emu.databinding.ListItemSettingBinding
-import org.yuzu.yuzu_emu.features.settings.model.view.IntSingleChoiceSetting
-import org.yuzu.yuzu_emu.features.settings.model.view.SettingsItem
-import org.yuzu.yuzu_emu.features.settings.model.view.SingleChoiceSetting
-import org.yuzu.yuzu_emu.features.settings.model.view.StringSingleChoiceSetting
-import org.yuzu.yuzu_emu.features.settings.ui.SettingsAdapter
-import org.yuzu.yuzu_emu.utils.ViewUtils.setVisible
+import dev.volt_emu.volt.databinding.ListItemSettingBinding
+import dev.volt_emu.volt.features.settings.model.view.IntSingleChoiceSetting
+import dev.volt_emu.volt.features.settings.model.view.SettingsItem
+import dev.volt_emu.volt.features.settings.model.view.SingleChoiceSetting
+import dev.volt_emu.volt.features.settings.model.view.StringSingleChoiceSetting
+import dev.volt_emu.volt.features.settings.ui.SettingsAdapter
+import dev.volt_emu.volt.utils.ViewUtils.setVisible
 
 class SingleChoiceViewHolder(val binding: ListItemSettingBinding, adapter: SettingsAdapter) :
     SettingViewHolder(binding.root, adapter) {

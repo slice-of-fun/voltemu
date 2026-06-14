@@ -29,11 +29,11 @@ plugins {
  */
 val autoVersion = (((System.currentTimeMillis() / 1000) - 1451606400) / 10).toInt()
 
-val edenDir = project(":Eden").projectDir
+val voltDir = project(":Volt").projectDir
 
 @Suppress("UnstableApiUsage")
 android {
-    namespace = "org.yuzu.yuzu_emu"
+    namespace = "dev.volt_emu.volt"
 
     compileSdkVersion = "android-36"
     ndkVersion = "28.2.13676358"
@@ -64,7 +64,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "dev.eden.eden_emulator"
+        applicationId = "dev.volt_emu.volt"
         minSdk = 24
         targetSdk = 36
         versionName = getGitVersion()
@@ -73,7 +73,7 @@ android {
         externalNativeBuild {
             cmake {
                 val extraCMakeArgs =
-                    (project.findProperty("YUZU_ANDROID_ARGS") as String?)?.split("\\s+".toRegex())
+                    (project.findProperty("VOLT_ANDROID_ARGS") as String?)?.split("\\s+".toRegex())
                         ?: emptyList()
 
                 arguments.addAll(
@@ -81,12 +81,12 @@ android {
                         "-DENABLE_QT=0", // Don't use QT
                         "-DENABLE_WEB_SERVICE=1", // Enable web service
                         "-DANDROID_ARM_NEON=true", // cryptopp requires Neon to work
-                        "-DYUZU_USE_CPM=ON",
+                        "-DVOLT_USE_CPM=ON",
                         "-DCPMUTIL_FORCE_BUNDLED=ON",
-                        "-DYUZU_USE_BUNDLED_FFMPEG=ON",
+                        "-DVOLT_USE_BUNDLED_FFMPEG=ON",
                         "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON",
                         "-DBUILD_TESTING=OFF",
-                        "-DYUZU_TESTS=OFF",
+                        "-DVOLT_TESTS=OFF",
                         "-DDYNARMIC_TESTS=OFF",
                         *extraCMakeArgs.toTypedArray()
                     )
@@ -189,8 +189,8 @@ android {
             dimension = "version"
             isDefault = true
 
-            manifestPlaceholders += mapOf("appNameBase" to "Eden")
-            resValue("string", "app_name_suffixed", "Eden")
+            manifestPlaceholders += mapOf("appNameBase" to "Volt Emulator")
+            resValue("string", "app_name_suffixed", "Volt Emulator")
 
             ndk {
                 abiFilters += listOf("arm64-v8a")
@@ -199,8 +199,8 @@ android {
 
         create("genshinSpoof") {
             dimension = "version"
-            manifestPlaceholders += mapOf("appNameBase" to "Eden Optimized")
-            resValue("string", "app_name_suffixed", "Eden Optimized")
+            manifestPlaceholders += mapOf("appNameBase" to "Volt Optimized")
+            resValue("string", "app_name_suffixed", "Volt Optimized")
             applicationId = "com.miHoYo.Yuanshen"
 
             externalNativeBuild {
@@ -216,13 +216,13 @@ android {
 
         create("legacy") {
             dimension = "version"
-            manifestPlaceholders += mapOf("appNameBase" to "Eden Legacy")
-            resValue("string", "app_name_suffixed", "Eden Legacy")
-            applicationId = "dev.legacy.eden_emulator"
+            manifestPlaceholders += mapOf("appNameBase" to "Volt Legacy")
+            resValue("string", "app_name_suffixed", "Volt Legacy")
+            applicationId = "dev.volt_emu.volt.legacy"
 
             externalNativeBuild {
                 cmake {
-                    arguments.add("-DYUZU_LEGACY=ON")
+                    arguments.add("-DVOLT_LEGACY=ON")
                 }
             }
 
@@ -239,8 +239,8 @@ android {
 
         create("chromeOS") {
             dimension = "version"
-            manifestPlaceholders += mapOf("appNameBase" to "Eden ChromeOS")
-            resValue("string", "app_name_suffixed", "Eden ChromeOS")
+            manifestPlaceholders += mapOf("appNameBase" to "Volt ChromeOS")
+            resValue("string", "app_name_suffixed", "Volt ChromeOS")
 
             ndk {
                 abiFilters += listOf("x86_64")
@@ -257,27 +257,27 @@ android {
     externalNativeBuild {
         cmake {
             version = "3.31.6"
-            path = file("${edenDir}/CMakeLists.txt")
+            path = file("${voltDir}/CMakeLists.txt")
         }
     }
 
     productFlavors.all {
-        val currentName = manifestPlaceholders["appNameBase"] as? String ?: "Eden"
+        val currentName = manifestPlaceholders["appNameBase"] as? String ?: "Volt Emulator"
         val suffix = if (isNightly) " Nightly" else ""
 
         // apply nightly suffix I/A
         resValue("string", "app_name_suffixed", "$currentName$suffix")
-        resValue("string", "app_name", "Eden$suffix")
+        resValue("string", "app_name", "Volt Emulator$suffix")
     }
 }
 
 idea {
     module {
         // Inclusion to exclude build/ dir from non-Android
-        excludeDirs.add(file("${edenDir}/build"))
+        excludeDirs.add(file("${voltDir}/build"))
 
         // also exclude CPM cache from automatic indexing
-        excludeDirs.add(file("${edenDir}/.cache"))
+        excludeDirs.add(file("${voltDir}/.cache"))
     }
 }
 
@@ -380,7 +380,7 @@ fun getGitVersion(): String {
 }
 
 afterEvaluate {
-    val artifactsDir = layout.projectDirectory.dir("${edenDir}/artifacts")
+    val artifactsDir = layout.projectDirectory.dir("${voltDir}/artifacts")
     val outputsDir = layout.buildDirectory.dir("outputs").get()
 
     android.applicationVariants.forEach { variant ->

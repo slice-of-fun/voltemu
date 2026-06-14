@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: Copyright 2025 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-package org.yuzu.yuzu_emu.fragments
+package dev.volt_emu.volt.fragments
 
 import android.Manifest
 import android.content.Intent
@@ -26,26 +26,26 @@ import androidx.navigation.findNavController
 import androidx.preference.PreferenceManager
 import androidx.viewpager2.widget.ViewPager2.OnPageChangeCallback
 import com.google.android.material.transition.MaterialFadeThrough
-import org.yuzu.yuzu_emu.NativeLibrary
+import dev.volt_emu.volt.NativeLibrary
 import java.io.File
-import org.yuzu.yuzu_emu.R
-import org.yuzu.yuzu_emu.YuzuApplication
-import org.yuzu.yuzu_emu.adapters.SetupAdapter
-import org.yuzu.yuzu_emu.databinding.FragmentSetupBinding
-import org.yuzu.yuzu_emu.features.settings.model.Settings
-import org.yuzu.yuzu_emu.model.ButtonState
-import org.yuzu.yuzu_emu.model.GamesViewModel
-import org.yuzu.yuzu_emu.model.HomeViewModel
-import org.yuzu.yuzu_emu.model.PageButton
-import org.yuzu.yuzu_emu.model.SetupCallback
-import org.yuzu.yuzu_emu.model.SetupPage
-import org.yuzu.yuzu_emu.model.PageState
-import org.yuzu.yuzu_emu.ui.main.MainActivity
-import org.yuzu.yuzu_emu.utils.DirectoryInitialization
-import org.yuzu.yuzu_emu.utils.NativeConfig
-import org.yuzu.yuzu_emu.utils.ViewUtils
-import org.yuzu.yuzu_emu.utils.ViewUtils.setVisible
-import org.yuzu.yuzu_emu.utils.collect
+import dev.volt_emu.volt.R
+import dev.volt_emu.volt.YuzuApplication
+import dev.volt_emu.volt.adapters.SetupAdapter
+import dev.volt_emu.volt.databinding.FragmentSetupBinding
+import dev.volt_emu.volt.features.settings.model.Settings
+import dev.volt_emu.volt.model.ButtonState
+import dev.volt_emu.volt.model.GamesViewModel
+import dev.volt_emu.volt.model.HomeViewModel
+import dev.volt_emu.volt.model.PageButton
+import dev.volt_emu.volt.model.SetupCallback
+import dev.volt_emu.volt.model.SetupPage
+import dev.volt_emu.volt.model.PageState
+import dev.volt_emu.volt.ui.main.MainActivity
+import dev.volt_emu.volt.utils.DirectoryInitialization
+import dev.volt_emu.volt.utils.NativeConfig
+import dev.volt_emu.volt.utils.ViewUtils
+import dev.volt_emu.volt.utils.ViewUtils.setVisible
+import dev.volt_emu.volt.utils.collect
 
 class SetupFragment : Fragment() {
     private var _binding: FragmentSetupBinding? = null

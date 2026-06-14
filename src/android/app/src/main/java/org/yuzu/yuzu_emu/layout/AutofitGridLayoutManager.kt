@@ -1,13 +1,13 @@
 // SPDX-FileCopyrightText: 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-package org.yuzu.yuzu_emu.layout
+package dev.volt_emu.volt.layout
 
 import android.content.Context
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.Recycler
-import org.yuzu.yuzu_emu.R
+import dev.volt_emu.volt.R
 
 /**
  *  Cut down version of the solution provided here

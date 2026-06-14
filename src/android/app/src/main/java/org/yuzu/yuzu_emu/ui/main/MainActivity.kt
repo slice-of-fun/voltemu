@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-package org.yuzu.yuzu_emu.ui.main
+package dev.volt_emu.volt.ui.main
 
 import android.content.Intent
 import android.content.Context
@@ -26,31 +26,31 @@ import androidx.preference.PreferenceManager
 import com.google.android.material.color.MaterialColors
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import java.io.File
-import org.yuzu.yuzu_emu.NativeLibrary
-import org.yuzu.yuzu_emu.R
-import org.yuzu.yuzu_emu.databinding.ActivityMainBinding
-import org.yuzu.yuzu_emu.dialogs.NetPlayDialog
-import org.yuzu.yuzu_emu.features.settings.model.Settings
-import org.yuzu.yuzu_emu.fragments.AddGameFolderDialogFragment
-import org.yuzu.yuzu_emu.fragments.MessageDialogFragment
-import org.yuzu.yuzu_emu.model.AddonViewModel
-import org.yuzu.yuzu_emu.model.DriverViewModel
-import org.yuzu.yuzu_emu.model.GamesViewModel
-import org.yuzu.yuzu_emu.model.HomeViewModel
+import dev.volt_emu.volt.NativeLibrary
+import dev.volt_emu.volt.R
+import dev.volt_emu.volt.databinding.ActivityMainBinding
+import dev.volt_emu.volt.dialogs.NetPlayDialog
+import dev.volt_emu.volt.features.settings.model.Settings
+import dev.volt_emu.volt.fragments.AddGameFolderDialogFragment
+import dev.volt_emu.volt.fragments.MessageDialogFragment
+import dev.volt_emu.volt.model.AddonViewModel
+import dev.volt_emu.volt.model.DriverViewModel
+import dev.volt_emu.volt.model.GamesViewModel
+import dev.volt_emu.volt.model.HomeViewModel
 import android.os.Build
-import org.yuzu.yuzu_emu.model.TaskViewModel
-import org.yuzu.yuzu_emu.utils.*
-import org.yuzu.yuzu_emu.utils.ViewUtils.setVisible
+import dev.volt_emu.volt.model.TaskViewModel
+import dev.volt_emu.volt.utils.*
+import dev.volt_emu.volt.utils.ViewUtils.setVisible
 import androidx.core.content.edit
-import org.yuzu.yuzu_emu.activities.EmulationActivity
+import dev.volt_emu.volt.activities.EmulationActivity
 import kotlin.text.compareTo
 import androidx.core.net.toUri
 import com.google.android.material.progressindicator.LinearProgressIndicator
 import com.google.android.material.textview.MaterialTextView
-import org.yuzu.yuzu_emu.features.settings.model.BooleanSetting
-import org.yuzu.yuzu_emu.YuzuApplication
-import org.yuzu.yuzu_emu.updater.APKDownloader
-import org.yuzu.yuzu_emu.updater.APKInstaller
+import dev.volt_emu.volt.features.settings.model.BooleanSetting
+import dev.volt_emu.volt.YuzuApplication
+import dev.volt_emu.volt.updater.APKDownloader
+import dev.volt_emu.volt.updater.APKInstaller
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -434,7 +434,7 @@ class MainActivity : AppCompatActivity(), ThemeProvider {
 
         val uriString = result.toString()
         val folder = gamesViewModel.folders.value.firstOrNull {
-            it.uriString == uriString && it.type == org.yuzu.yuzu_emu.model.DirectoryType.EXTERNAL_CONTENT
+            it.uriString == uriString && it.type == dev.volt_emu.volt.model.DirectoryType.EXTERNAL_CONTENT
         }
         if (folder != null) {
             Toast.makeText(
@@ -445,7 +445,7 @@ class MainActivity : AppCompatActivity(), ThemeProvider {
             return
         }
 
-        val externalContentDir = org.yuzu.yuzu_emu.model.GameDir(uriString, false, org.yuzu.yuzu_emu.model.DirectoryType.EXTERNAL_CONTENT)
+        val externalContentDir = dev.volt_emu.volt.model.GameDir(uriString, false, dev.volt_emu.volt.model.DirectoryType.EXTERNAL_CONTENT)
         gamesViewModel.addFolder(externalContentDir, savedFromGameFragment = false)
     }
 

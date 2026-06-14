@@ -1,13 +1,13 @@
 // SPDX-FileCopyrightText: 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-package org.yuzu.yuzu_emu.utils
+package dev.volt_emu.volt.utils
 
 import android.net.Uri
 import androidx.documentfile.provider.DocumentFile
 import java.io.File
 import java.util.*
-import org.yuzu.yuzu_emu.model.MinimalDocumentFile
+import dev.volt_emu.volt.model.MinimalDocumentFile
 
 class DocumentsTree {
     private var root: DocumentsNode? = null

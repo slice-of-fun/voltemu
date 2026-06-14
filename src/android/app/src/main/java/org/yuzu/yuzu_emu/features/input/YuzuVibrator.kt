@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2024 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-package org.yuzu.yuzu_emu.features.input
+package dev.volt_emu.volt.features.input
 
 import android.content.Context
 import android.os.Build
@@ -12,7 +12,7 @@ import android.os.VibratorManager
 import android.view.InputDevice
 import androidx.annotation.Keep
 import androidx.annotation.RequiresApi
-import org.yuzu.yuzu_emu.YuzuApplication
+import dev.volt_emu.volt.YuzuApplication
 
 @Keep
 @Suppress("DEPRECATION")

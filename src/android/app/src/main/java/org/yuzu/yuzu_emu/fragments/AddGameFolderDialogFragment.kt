@@ -4,7 +4,7 @@
 // SPDX-FileCopyrightText: 2025 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-package org.yuzu.yuzu_emu.fragments
+package dev.volt_emu.volt.fragments
 
 import android.app.Dialog
 import android.content.DialogInterface
@@ -13,11 +13,11 @@ import android.os.Bundle
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.activityViewModels
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import org.yuzu.yuzu_emu.R
-import org.yuzu.yuzu_emu.databinding.DialogAddFolderBinding
-import org.yuzu.yuzu_emu.model.GameDir
-import org.yuzu.yuzu_emu.model.GamesViewModel
-import org.yuzu.yuzu_emu.model.HomeViewModel
+import dev.volt_emu.volt.R
+import dev.volt_emu.volt.databinding.DialogAddFolderBinding
+import dev.volt_emu.volt.model.GameDir
+import dev.volt_emu.volt.model.GamesViewModel
+import dev.volt_emu.volt.model.HomeViewModel
 
 class AddGameFolderDialogFragment : DialogFragment() {
     private val homeViewModel: HomeViewModel by activityViewModels()

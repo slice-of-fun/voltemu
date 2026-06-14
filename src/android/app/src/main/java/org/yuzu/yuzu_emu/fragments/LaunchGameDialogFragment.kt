@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-package org.yuzu.yuzu_emu.fragments
+package dev.volt_emu.volt.fragments
 
 import android.app.Dialog
 import android.content.DialogInterface
@@ -9,10 +9,10 @@ import android.os.Bundle
 import androidx.fragment.app.DialogFragment
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import org.yuzu.yuzu_emu.HomeNavigationDirections
-import org.yuzu.yuzu_emu.R
-import org.yuzu.yuzu_emu.model.Game
-import org.yuzu.yuzu_emu.utils.SerializableHelper.parcelable
+import dev.volt_emu.volt.HomeNavigationDirections
+import dev.volt_emu.volt.R
+import dev.volt_emu.volt.model.Game
+import dev.volt_emu.volt.utils.SerializableHelper.parcelable
 
 class LaunchGameDialogFragment : DialogFragment() {
     private var selectedItem = 1

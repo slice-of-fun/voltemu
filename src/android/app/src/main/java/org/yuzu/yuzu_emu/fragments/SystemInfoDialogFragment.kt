@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: Copyright 2025 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-package org.yuzu.yuzu_emu.fragments
+package dev.volt_emu.volt.fragments
 
 import android.app.ActivityManager
 import android.app.Dialog
@@ -10,9 +10,9 @@ import android.os.Build
 import android.os.Bundle
 import androidx.fragment.app.DialogFragment
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import org.yuzu.yuzu_emu.NativeLibrary
-import org.yuzu.yuzu_emu.R
-import org.yuzu.yuzu_emu.databinding.DialogSystemInfoBinding
+import dev.volt_emu.volt.NativeLibrary
+import dev.volt_emu.volt.R
+import dev.volt_emu.volt.databinding.DialogSystemInfoBinding
 
 class SystemInfoDialogFragment : DialogFragment() {
     private var _binding: DialogSystemInfoBinding? = null

@@ -5,7 +5,7 @@
 // Licensed under GPLv2 or any later version
 // Refer to the license.txt file included.
 
-package org.yuzu.yuzu_emu.utils
+package dev.volt_emu.volt.utils
 
 import android.app.PendingIntent
 import android.app.Service
@@ -13,8 +13,8 @@ import android.content.Intent
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import org.yuzu.yuzu_emu.R
-import org.yuzu.yuzu_emu.activities.EmulationActivity
+import dev.volt_emu.volt.R
+import dev.volt_emu.volt.activities.EmulationActivity
 
 /**
  * A service that shows a permanent notification in the background to avoid the app getting

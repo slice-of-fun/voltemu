@@ -4,23 +4,23 @@
 // SPDX-FileCopyrightText: 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-package org.yuzu.yuzu_emu.utils
+package dev.volt_emu.volt.utils
 
 import android.content.Context
 import android.widget.Toast
 import androidx.fragment.app.FragmentActivity
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import org.yuzu.yuzu_emu.R
-import org.yuzu.yuzu_emu.model.DriverViewModel
-import org.yuzu.yuzu_emu.model.Game
+import dev.volt_emu.volt.R
+import dev.volt_emu.volt.model.DriverViewModel
+import dev.volt_emu.volt.model.Game
 import java.io.File
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 import android.net.Uri
-import org.yuzu.yuzu_emu.features.settings.utils.SettingsFile
+import dev.volt_emu.volt.features.settings.utils.SettingsFile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.yuzu.yuzu_emu.databinding.DialogProgressBinding
+import dev.volt_emu.volt.databinding.DialogProgressBinding
 import android.view.LayoutInflater
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch

@@ -4,12 +4,12 @@
 // SPDX-FileCopyrightText: 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-package org.yuzu.yuzu_emu.utils
+package dev.volt_emu.volt.utils
 
-import org.yuzu.yuzu_emu.model.GameDir
-import org.yuzu.yuzu_emu.overlay.model.OverlayControlData
+import dev.volt_emu.volt.model.GameDir
+import dev.volt_emu.volt.overlay.model.OverlayControlData
 
-import org.yuzu.yuzu_emu.features.input.model.PlayerInput
+import dev.volt_emu.volt.features.input.model.PlayerInput
 
 object NativeConfig {
     /**

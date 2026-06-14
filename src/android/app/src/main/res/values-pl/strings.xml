@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
 
     <string name="app_disclaimer">To oprogramowanie uruchamia gry na konsoli Nintendo Switch. Żadne tytuły gier ani klucze nie są dołączone.<br /><br />Zanim zaczniesz, zlokalizuj plik <![CDATA[<b> prod.keys </b>]]> na swoim urządzeniu.<br /><br /><![CDATA[<a href=\"https://yuzu-mirror.github.io/help/quickstart\">Więcej informacji</a>]]></string>
@@ -230,7 +230,7 @@
     <string name="home_settings">Ustawienia</string>
     <string name="empty_gamelist">Nie znaleziono plików, lub nie wybrano jeszcze katalogu zawierającego gry.</string>
     <string name="manage_game_folders">Zarządzaj folderami gier</string>
-    <string name="select_games_folder_description">Pozwala Eden wygenerować listę gier</string>
+    <string name="select_games_folder_description">Pozwala Volt Emulator wygenerować listę gier</string>
     <string name="add_games_warning">Pominąć wybór folderu z grami?</string>
     <string name="add_games_warning_description">Aby pokazać listę gier wybierz katalog zawierający gry.</string>
     <string name="add_games_warning_help">https://yuzu-mirror.github.io/help/quickstart/#dumping-games</string>
@@ -385,7 +385,7 @@
     <string name="copied_to_clipboard">Skopiowano do schowka</string>
     <string name="about_app_description">Otwarto-źródłowy emulator konsoli Switch</string>
     <string name="contributors">Współtwórcy</string>
-    <string name="licenses_description">Projekty dzięki którym Eden mógł zostać stworzony</string>
+    <string name="licenses_description">Projekty dzięki którym Volt Emulator mógł zostać stworzony</string>
     <string name="build">Wersja</string>
     <string name="user_data">Dane użytkownika</string>
     <string name="user_data_description">Importuj/eksportuj wszystkie dane aplikacji.\n\nPodczas importu danych użytkownika wszystkie istniejące dane użytkownika zostaną usunięte!\n\nImport danych z Citron może powodować problemy. Zaleca się ręczny import wszystkich potrzebnych danych.</string>

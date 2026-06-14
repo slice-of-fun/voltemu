@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: Copyright 2025 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-package org.yuzu.yuzu_emu.model
+package dev.volt_emu.volt.model
 
 import android.net.Uri
 import androidx.lifecycle.ViewModel

@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-package org.yuzu.yuzu_emu.dialogs
+package dev.volt_emu.volt.dialogs
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -26,13 +26,13 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
 import info.debatty.java.stringsimilarity.Jaccard
 import info.debatty.java.stringsimilarity.JaroWinkler
-import org.yuzu.yuzu_emu.R
-import org.yuzu.yuzu_emu.databinding.DialogLobbyBrowserBinding
-import org.yuzu.yuzu_emu.databinding.ItemLobbyRoomBinding
-import org.yuzu.yuzu_emu.features.settings.model.StringSetting
-import org.yuzu.yuzu_emu.network.NetPlayManager
-import org.yuzu.yuzu_emu.utils.CompatUtils
-import org.yuzu.yuzu_emu.utils.FullscreenHelper
+import dev.volt_emu.volt.R
+import dev.volt_emu.volt.databinding.DialogLobbyBrowserBinding
+import dev.volt_emu.volt.databinding.ItemLobbyRoomBinding
+import dev.volt_emu.volt.features.settings.model.StringSetting
+import dev.volt_emu.volt.network.NetPlayManager
+import dev.volt_emu.volt.utils.CompatUtils
+import dev.volt_emu.volt.utils.FullscreenHelper
 import java.util.Locale
 
 class LobbyBrowser(context: Context) : BottomSheetDialog(context) {

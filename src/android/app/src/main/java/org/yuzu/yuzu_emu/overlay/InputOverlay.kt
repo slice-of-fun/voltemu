@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-package org.yuzu.yuzu_emu.overlay
+package dev.volt_emu.volt.overlay
 
 import android.app.Activity
 import android.content.Context
@@ -33,18 +33,18 @@ import androidx.core.content.ContextCompat
 import androidx.window.layout.WindowMetricsCalculator
 import kotlin.math.max
 import kotlin.math.min
-import org.yuzu.yuzu_emu.NativeLibrary
-import org.yuzu.yuzu_emu.features.input.NativeInput
-import org.yuzu.yuzu_emu.R
-import org.yuzu.yuzu_emu.features.input.model.NativeAnalog
-import org.yuzu.yuzu_emu.features.input.model.NativeButton
-import org.yuzu.yuzu_emu.features.input.model.NpadStyleIndex
-import org.yuzu.yuzu_emu.features.settings.model.BooleanSetting
-import org.yuzu.yuzu_emu.features.settings.model.IntSetting
-import org.yuzu.yuzu_emu.overlay.model.OverlayControl
-import org.yuzu.yuzu_emu.overlay.model.OverlayControlData
-import org.yuzu.yuzu_emu.overlay.model.OverlayLayout
-import org.yuzu.yuzu_emu.utils.NativeConfig
+import dev.volt_emu.volt.NativeLibrary
+import dev.volt_emu.volt.features.input.NativeInput
+import dev.volt_emu.volt.R
+import dev.volt_emu.volt.features.input.model.NativeAnalog
+import dev.volt_emu.volt.features.input.model.NativeButton
+import dev.volt_emu.volt.features.input.model.NpadStyleIndex
+import dev.volt_emu.volt.features.settings.model.BooleanSetting
+import dev.volt_emu.volt.features.settings.model.IntSetting
+import dev.volt_emu.volt.overlay.model.OverlayControl
+import dev.volt_emu.volt.overlay.model.OverlayControlData
+import dev.volt_emu.volt.overlay.model.OverlayLayout
+import dev.volt_emu.volt.utils.NativeConfig
 
 /**
  * Draws the interactive input overlay on top of the

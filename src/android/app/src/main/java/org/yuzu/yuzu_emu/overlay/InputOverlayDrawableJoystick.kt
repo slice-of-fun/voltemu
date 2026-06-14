@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: Copyright 2025 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-package org.yuzu.yuzu_emu.overlay
+package dev.volt_emu.volt.overlay
 
 import android.content.res.Resources
 import android.graphics.Bitmap
@@ -13,11 +13,11 @@ import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.math.sqrt
-import org.yuzu.yuzu_emu.features.input.NativeInput.ButtonState
-import org.yuzu.yuzu_emu.features.input.model.NativeAnalog
-import org.yuzu.yuzu_emu.features.input.model.NativeButton
-import org.yuzu.yuzu_emu.features.settings.model.BooleanSetting
-import org.yuzu.yuzu_emu.features.settings.model.IntSetting
+import dev.volt_emu.volt.features.input.NativeInput.ButtonState
+import dev.volt_emu.volt.features.input.model.NativeAnalog
+import dev.volt_emu.volt.features.input.model.NativeButton
+import dev.volt_emu.volt.features.settings.model.BooleanSetting
+import dev.volt_emu.volt.features.settings.model.IntSetting
 
 /**
  * Custom [BitmapDrawable] that is capable

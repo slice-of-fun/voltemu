@@ -4,7 +4,7 @@
 // SPDX-FileCopyrightText: 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-package org.yuzu.yuzu_emu.adapters
+package dev.volt_emu.volt.adapters
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -13,14 +13,14 @@ import androidx.core.os.bundleOf
 import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.navigation.findNavController
-import org.yuzu.yuzu_emu.NativeLibrary
-import org.yuzu.yuzu_emu.R
-import org.yuzu.yuzu_emu.YuzuApplication
-import org.yuzu.yuzu_emu.databinding.CardSimpleOutlinedBinding
-import org.yuzu.yuzu_emu.model.Applet
-import org.yuzu.yuzu_emu.model.AppletInfo
-import org.yuzu.yuzu_emu.model.Game
-import org.yuzu.yuzu_emu.viewholder.AbstractViewHolder
+import dev.volt_emu.volt.NativeLibrary
+import dev.volt_emu.volt.R
+import dev.volt_emu.volt.YuzuApplication
+import dev.volt_emu.volt.databinding.CardSimpleOutlinedBinding
+import dev.volt_emu.volt.model.Applet
+import dev.volt_emu.volt.model.AppletInfo
+import dev.volt_emu.volt.model.Game
+import dev.volt_emu.volt.viewholder.AbstractViewHolder
 
 class AppletAdapter(val activity: FragmentActivity, applets: List<Applet>) :
     AbstractListAdapter<Applet, AppletAdapter.AppletViewHolder>(applets) {

@@ -4,7 +4,7 @@
 // SPDX-FileCopyrightText: 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-package org.yuzu.yuzu_emu
+package dev.volt_emu.volt
 
 import android.content.DialogInterface
 import android.net.Uri
@@ -17,16 +17,16 @@ import androidx.annotation.Keep
 import androidx.core.net.toUri
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import java.lang.ref.WeakReference
-import org.yuzu.yuzu_emu.activities.EmulationActivity
-import org.yuzu.yuzu_emu.fragments.CoreErrorDialogFragment
-import org.yuzu.yuzu_emu.utils.DocumentsTree
-import org.yuzu.yuzu_emu.utils.FileUtil
-import org.yuzu.yuzu_emu.utils.Log
-import org.yuzu.yuzu_emu.model.InstallResult
-import org.yuzu.yuzu_emu.model.Patch
-import org.yuzu.yuzu_emu.model.GameVerificationResult
-import org.yuzu.yuzu_emu.network.NetPlayManager
-import org.yuzu.yuzu_emu.applets.web.WebBrowser
+import dev.volt_emu.volt.activities.EmulationActivity
+import dev.volt_emu.volt.fragments.CoreErrorDialogFragment
+import dev.volt_emu.volt.utils.DocumentsTree
+import dev.volt_emu.volt.utils.FileUtil
+import dev.volt_emu.volt.utils.Log
+import dev.volt_emu.volt.model.InstallResult
+import dev.volt_emu.volt.model.Patch
+import dev.volt_emu.volt.model.GameVerificationResult
+import dev.volt_emu.volt.network.NetPlayManager
+import dev.volt_emu.volt.applets.web.WebBrowser
 
 /**
  * Class which contains methods that interact

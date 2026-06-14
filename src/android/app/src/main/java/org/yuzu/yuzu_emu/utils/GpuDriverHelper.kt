@@ -4,7 +4,7 @@
 // SPDX-FileCopyrightText: 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-package org.yuzu.yuzu_emu.utils
+package dev.volt_emu.volt.utils
 
 import android.graphics.SurfaceTexture
 import android.net.Uri
@@ -12,9 +12,9 @@ import android.os.Build
 import android.view.Surface
 import java.io.File
 import java.io.IOException
-import org.yuzu.yuzu_emu.NativeLibrary
-import org.yuzu.yuzu_emu.YuzuApplication
-import org.yuzu.yuzu_emu.features.settings.model.StringSetting
+import dev.volt_emu.volt.NativeLibrary
+import dev.volt_emu.volt.YuzuApplication
+import dev.volt_emu.volt.features.settings.model.StringSetting
 import java.io.FileNotFoundException
 import java.util.zip.ZipException
 import java.util.zip.ZipFile

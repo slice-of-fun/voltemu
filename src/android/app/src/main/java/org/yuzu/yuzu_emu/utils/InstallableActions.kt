@@ -1,23 +1,23 @@
 // SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-package org.yuzu.yuzu_emu.utils
+package dev.volt_emu.volt.utils
 
 import android.content.Intent
 import android.net.Uri
 import android.widget.Toast
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.FragmentManager
-import org.yuzu.yuzu_emu.NativeLibrary
-import org.yuzu.yuzu_emu.R
-import org.yuzu.yuzu_emu.fragments.MessageDialogFragment
-import org.yuzu.yuzu_emu.fragments.ProgressDialogFragment
-import org.yuzu.yuzu_emu.model.AddonViewModel
-import org.yuzu.yuzu_emu.model.DriverViewModel
-import org.yuzu.yuzu_emu.model.GamesViewModel
-import org.yuzu.yuzu_emu.model.HomeViewModel
-import org.yuzu.yuzu_emu.model.InstallResult
-import org.yuzu.yuzu_emu.model.TaskState
+import dev.volt_emu.volt.NativeLibrary
+import dev.volt_emu.volt.R
+import dev.volt_emu.volt.fragments.MessageDialogFragment
+import dev.volt_emu.volt.fragments.ProgressDialogFragment
+import dev.volt_emu.volt.model.AddonViewModel
+import dev.volt_emu.volt.model.DriverViewModel
+import dev.volt_emu.volt.model.GamesViewModel
+import dev.volt_emu.volt.model.HomeViewModel
+import dev.volt_emu.volt.model.InstallResult
+import dev.volt_emu.volt.model.TaskState
 import java.io.BufferedInputStream
 import java.io.BufferedOutputStream
 import java.io.File

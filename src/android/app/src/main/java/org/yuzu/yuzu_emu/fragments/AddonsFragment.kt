@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-package org.yuzu.yuzu_emu.fragments
+package dev.volt_emu.volt.fragments
 
 import android.content.Intent
 import android.os.Bundle
@@ -18,16 +18,16 @@ import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.transition.MaterialSharedAxis
-import org.yuzu.yuzu_emu.R
-import org.yuzu.yuzu_emu.adapters.AddonAdapter
-import org.yuzu.yuzu_emu.databinding.FragmentAddonsBinding
-import org.yuzu.yuzu_emu.model.AddonViewModel
-import org.yuzu.yuzu_emu.model.HomeViewModel
-import org.yuzu.yuzu_emu.utils.AddonUtil
-import org.yuzu.yuzu_emu.utils.FileUtil.copyFilesTo
-import org.yuzu.yuzu_emu.utils.InstallableActions
-import org.yuzu.yuzu_emu.utils.ViewUtils.updateMargins
-import org.yuzu.yuzu_emu.utils.collect
+import dev.volt_emu.volt.R
+import dev.volt_emu.volt.adapters.AddonAdapter
+import dev.volt_emu.volt.databinding.FragmentAddonsBinding
+import dev.volt_emu.volt.model.AddonViewModel
+import dev.volt_emu.volt.model.HomeViewModel
+import dev.volt_emu.volt.utils.AddonUtil
+import dev.volt_emu.volt.utils.FileUtil.copyFilesTo
+import dev.volt_emu.volt.utils.InstallableActions
+import dev.volt_emu.volt.utils.ViewUtils.updateMargins
+import dev.volt_emu.volt.utils.collect
 import java.io.File
 
 class AddonsFragment : Fragment() {

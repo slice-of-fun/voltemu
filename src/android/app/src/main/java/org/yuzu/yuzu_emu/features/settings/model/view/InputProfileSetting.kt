@@ -1,11 +1,11 @@
 // SPDX-FileCopyrightText: 2024 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-package org.yuzu.yuzu_emu.features.settings.model.view
+package dev.volt_emu.volt.features.settings.model.view
 
-import org.yuzu.yuzu_emu.R
-import org.yuzu.yuzu_emu.features.input.NativeInput
-import org.yuzu.yuzu_emu.utils.NativeConfig
+import dev.volt_emu.volt.R
+import dev.volt_emu.volt.features.input.NativeInput
+import dev.volt_emu.volt.utils.NativeConfig
 
 class InputProfileSetting(private val playerIndex: Int) :
     SettingsItem(emptySetting, R.string.profile, "", 0, "") {

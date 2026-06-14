@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-package org.yuzu.yuzu_emu.fragments
+package dev.volt_emu.volt.fragments
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -15,12 +15,12 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.transition.MaterialSharedAxis
-import org.yuzu.yuzu_emu.R
-import org.yuzu.yuzu_emu.adapters.LicenseAdapter
-import org.yuzu.yuzu_emu.databinding.FragmentLicensesBinding
-import org.yuzu.yuzu_emu.model.HomeViewModel
-import org.yuzu.yuzu_emu.model.License
-import org.yuzu.yuzu_emu.utils.ViewUtils.updateMargins
+import dev.volt_emu.volt.R
+import dev.volt_emu.volt.adapters.LicenseAdapter
+import dev.volt_emu.volt.databinding.FragmentLicensesBinding
+import dev.volt_emu.volt.model.HomeViewModel
+import dev.volt_emu.volt.model.License
+import dev.volt_emu.volt.utils.ViewUtils.updateMargins
 
 class LicensesFragment : Fragment() {
     private var _binding: FragmentLicensesBinding? = null

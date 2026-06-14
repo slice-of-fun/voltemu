@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-package org.yuzu.yuzu_emu.fragments
+package dev.volt_emu.volt.fragments
 
 import android.content.Intent
 import android.net.Uri
@@ -19,15 +19,15 @@ import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.GridLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.transition.MaterialSharedAxis
-import org.yuzu.yuzu_emu.R
-import org.yuzu.yuzu_emu.adapters.FolderAdapter
-import org.yuzu.yuzu_emu.databinding.FragmentFoldersBinding
-import org.yuzu.yuzu_emu.model.DirectoryType
-import org.yuzu.yuzu_emu.model.GameDir
-import org.yuzu.yuzu_emu.model.GamesViewModel
-import org.yuzu.yuzu_emu.model.HomeViewModel
-import org.yuzu.yuzu_emu.utils.ViewUtils.updateMargins
-import org.yuzu.yuzu_emu.utils.collect
+import dev.volt_emu.volt.R
+import dev.volt_emu.volt.adapters.FolderAdapter
+import dev.volt_emu.volt.databinding.FragmentFoldersBinding
+import dev.volt_emu.volt.model.DirectoryType
+import dev.volt_emu.volt.model.GameDir
+import dev.volt_emu.volt.model.GamesViewModel
+import dev.volt_emu.volt.model.HomeViewModel
+import dev.volt_emu.volt.utils.ViewUtils.updateMargins
+import dev.volt_emu.volt.utils.collect
 
 class GameFoldersFragment : Fragment() {
     private var _binding: FragmentFoldersBinding? = null

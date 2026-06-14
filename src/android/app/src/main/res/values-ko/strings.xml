@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
 
     <string name="notice_notification_channel_name">알림 및 오류</string>
@@ -231,7 +231,7 @@
     <string name="firmware_installed_failure">펌웨어 설치 실패</string>
     <string name="firmware_installed_failure_description">펌웨어 NCA 파일이 ZIP 파일의 루트 디렉토리에 위치한지 확인하고 다시 시도하세요.</string>
     <string name="share_log">디버그 로그 공유</string>
-    <string name="share_log_description">문제 해결을 위한 Eden 로그 파일 공유</string>
+    <string name="share_log_description">문제 해결을 위한 Volt Emulator 로그 파일 공유</string>
     <string name="share_log_missing">로그 파일을 찾을 수 없습니다.</string>
     <string name="install_game_content">게임 콘텐츠 설치</string>
     <string name="install_game_content_description">게임 업데이트 또는 DLC 설치</string>
@@ -303,7 +303,7 @@
     <string name="user_data">유저 데이터</string>
     <string name="exporting_user_data">유저 데이터 내보내는 중...</string>
     <string name="importing_user_data">유저 데이터 가져오는 중...</string>
-    <string name="invalid_yuzu_backup">올바르지 않은 Eden 백업 파일</string>
+    <string name="invalid_yuzu_backup">올바르지 않은 Volt Emulator 백업 파일</string>
     <string name="user_data_export_success">유저 데이터를 내보냈습니다.</string>
     <string name="user_data_import_success">유저 데이터를 가져왔습니다.</string>
     <string name="user_data_export_cancelled">내보내기 취소됨</string>

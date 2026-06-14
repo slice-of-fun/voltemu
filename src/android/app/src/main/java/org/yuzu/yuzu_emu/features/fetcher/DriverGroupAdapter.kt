@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: Copyright 2025 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-package org.yuzu.yuzu_emu.features.fetcher
+package dev.volt_emu.volt.features.fetcher
 
 import android.annotation.SuppressLint
 import android.view.LayoutInflater
@@ -9,8 +9,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import org.yuzu.yuzu_emu.databinding.ItemDriverGroupBinding
-import org.yuzu.yuzu_emu.fragments.DriverFetcherFragment.DriverGroup
+import dev.volt_emu.volt.databinding.ItemDriverGroupBinding
+import dev.volt_emu.volt.fragments.DriverFetcherFragment.DriverGroup
 import androidx.core.view.isVisible
 import androidx.fragment.app.FragmentActivity
 import androidx.transition.ChangeBounds
@@ -22,7 +22,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.yuzu.yuzu_emu.model.DriverViewModel
+import dev.volt_emu.volt.model.DriverViewModel
 
 class DriverGroupAdapter(
     private val activity: FragmentActivity,

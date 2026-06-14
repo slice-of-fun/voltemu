@@ -4,8 +4,8 @@
 // SPDX-FileCopyrightText: 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-package org.yuzu.yuzu_emu.utils
-import org.yuzu.yuzu_emu.NativeLibrary
+package dev.volt_emu.volt.utils
+import dev.volt_emu.volt.NativeLibrary
 
 import android.os.Build
 

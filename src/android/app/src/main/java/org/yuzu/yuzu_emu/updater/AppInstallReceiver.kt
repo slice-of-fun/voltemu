@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: Copyright 2025 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-package org.yuzu.yuzu_emu.updater
+package dev.volt_emu.volt.updater
 
 import android.content.BroadcastReceiver
 import android.content.Context

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
 
     <string name="notice_notification_channel_name">Merknader og feil</string>
@@ -178,7 +178,7 @@
     <string name="home_search">Søk</string>
     <string name="home_settings">Innstillinger</string>
     <string name="empty_gamelist">Ingen filer ble funnet eller ingen spillkatalog er valgt ennå.</string>
-    <string name="select_games_folder_description">Gjør det mulig for Eden å fylle ut spillelisten.</string>
+    <string name="select_games_folder_description">Gjør det mulig for Volt Emulator å fylle ut spillelisten.</string>
     <string name="add_games_warning">Hoppe over valg av spillmappe?</string>
     <string name="add_games_warning_description">Spill vises ikke i Spill-listen hvis en mappe ikke er valgt.</string>
     <string name="home_search_games">Søk i spill|</string>
@@ -290,7 +290,7 @@
     <string name="copied_to_clipboard">Kopiert til utklippstavlen</string>
     <string name="about_app_description">En Switch-emulator med åpen kildekode</string>
     <string name="contributors">Bidragsytere</string>
-    <string name="licenses_description">Prosjekter som gjør Eden for Android mulig</string>
+    <string name="licenses_description">Prosjekter som gjør Volt Emulator for Android mulig</string>
     <string name="build">Bygg</string>
     <!-- General settings strings -->
     <string name="frame_limit_enable">Begrense hastigheten</string>

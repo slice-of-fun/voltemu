@@ -1,10 +1,10 @@
 // SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-package org.yuzu.yuzu_emu.features.settings.model
+package dev.volt_emu.volt.features.settings.model
 
-import org.yuzu.yuzu_emu.R
-import org.yuzu.yuzu_emu.YuzuApplication
+import dev.volt_emu.volt.R
+import dev.volt_emu.volt.YuzuApplication
 
 object Settings {
     enum class MenuTag(val titleId: Int = 0) {
@@ -35,7 +35,7 @@ object Settings {
         YuzuApplication.appContext.getString(R.string.preferences_player, player)
 
     fun getDebugKnobAt(index: Int): Boolean {
-        return org.yuzu.yuzu_emu.NativeLibrary.getDebugKnobAt(index)
+        return dev.volt_emu.volt.NativeLibrary.getDebugKnobAt(index)
     }
 
     const val PREF_FIRST_APP_LAUNCH = "FirstApplicationLaunch"

@@ -1,9 +1,9 @@
 // SPDX-FileCopyrightText: Copyright 2025 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-package org.yuzu.yuzu_emu.ui
+package dev.volt_emu.volt.ui
 
-import org.yuzu.yuzu_emu.R
+import dev.volt_emu.volt.R
 import android.content.Context
 import android.util.AttributeSet
 import android.view.MotionEvent

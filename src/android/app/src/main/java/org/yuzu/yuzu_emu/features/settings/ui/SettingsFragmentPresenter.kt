@@ -1,38 +1,38 @@
 // SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-package org.yuzu.yuzu_emu.features.settings.ui
+package dev.volt_emu.volt.features.settings.ui
 
 import android.annotation.SuppressLint
 import android.os.Build
 import android.widget.Toast
-import org.yuzu.yuzu_emu.NativeLibrary
-import org.yuzu.yuzu_emu.R
-import org.yuzu.yuzu_emu.YuzuApplication
-import org.yuzu.yuzu_emu.activities.EmulationActivity
-import org.yuzu.yuzu_emu.features.input.NativeInput
-import org.yuzu.yuzu_emu.features.input.model.AnalogDirection
-import org.yuzu.yuzu_emu.features.input.model.NativeAnalog
-import org.yuzu.yuzu_emu.features.input.model.NativeButton
-import org.yuzu.yuzu_emu.features.input.model.NpadStyleIndex
-import org.yuzu.yuzu_emu.features.settings.model.AbstractBooleanSetting
-import org.yuzu.yuzu_emu.features.settings.model.AbstractIntSetting
-import org.yuzu.yuzu_emu.features.settings.model.BooleanSetting
-import org.yuzu.yuzu_emu.features.settings.model.ByteSetting
-import org.yuzu.yuzu_emu.features.settings.model.IntSetting
-import org.yuzu.yuzu_emu.features.settings.model.LongSetting
-import org.yuzu.yuzu_emu.features.settings.model.Settings
-import org.yuzu.yuzu_emu.features.settings.model.Settings.MenuTag
-import org.yuzu.yuzu_emu.features.settings.model.ShortSetting
-import org.yuzu.yuzu_emu.features.settings.model.StringSetting
-import org.yuzu.yuzu_emu.features.settings.model.view.*
-import org.yuzu.yuzu_emu.utils.InputHandler
-import org.yuzu.yuzu_emu.utils.NativeConfig
-import org.yuzu.yuzu_emu.utils.DirectoryInitialization
-import org.yuzu.yuzu_emu.utils.FullscreenHelper
+import dev.volt_emu.volt.NativeLibrary
+import dev.volt_emu.volt.R
+import dev.volt_emu.volt.YuzuApplication
+import dev.volt_emu.volt.activities.EmulationActivity
+import dev.volt_emu.volt.features.input.NativeInput
+import dev.volt_emu.volt.features.input.model.AnalogDirection
+import dev.volt_emu.volt.features.input.model.NativeAnalog
+import dev.volt_emu.volt.features.input.model.NativeButton
+import dev.volt_emu.volt.features.input.model.NpadStyleIndex
+import dev.volt_emu.volt.features.settings.model.AbstractBooleanSetting
+import dev.volt_emu.volt.features.settings.model.AbstractIntSetting
+import dev.volt_emu.volt.features.settings.model.BooleanSetting
+import dev.volt_emu.volt.features.settings.model.ByteSetting
+import dev.volt_emu.volt.features.settings.model.IntSetting
+import dev.volt_emu.volt.features.settings.model.LongSetting
+import dev.volt_emu.volt.features.settings.model.Settings
+import dev.volt_emu.volt.features.settings.model.Settings.MenuTag
+import dev.volt_emu.volt.features.settings.model.ShortSetting
+import dev.volt_emu.volt.features.settings.model.StringSetting
+import dev.volt_emu.volt.features.settings.model.view.*
+import dev.volt_emu.volt.utils.InputHandler
+import dev.volt_emu.volt.utils.NativeConfig
+import dev.volt_emu.volt.utils.DirectoryInitialization
+import dev.volt_emu.volt.utils.FullscreenHelper
 import androidx.core.content.edit
 import androidx.fragment.app.FragmentActivity
-import org.yuzu.yuzu_emu.fragments.MessageDialogFragment
+import dev.volt_emu.volt.fragments.MessageDialogFragment
 
 class SettingsFragmentPresenter(
     private val settingsViewModel: SettingsViewModel,

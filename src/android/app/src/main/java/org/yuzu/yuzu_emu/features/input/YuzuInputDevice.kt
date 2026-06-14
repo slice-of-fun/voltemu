@@ -1,13 +1,13 @@
 // SPDX-FileCopyrightText: 2024 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-package org.yuzu.yuzu_emu.features.input
+package dev.volt_emu.volt.features.input
 
 import android.view.InputDevice
 import androidx.annotation.Keep
-import org.yuzu.yuzu_emu.YuzuApplication
-import org.yuzu.yuzu_emu.R
-import org.yuzu.yuzu_emu.utils.InputHandler.getGUID
+import dev.volt_emu.volt.YuzuApplication
+import dev.volt_emu.volt.R
+import dev.volt_emu.volt.utils.InputHandler.getGUID
 
 @Keep
 interface YuzuInputDevice {

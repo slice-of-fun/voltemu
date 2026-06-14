@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-package org.yuzu.yuzu_emu.utils
+package dev.volt_emu.volt.utils
 
 import android.app.Activity
 import android.content.Context
@@ -11,7 +11,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.preference.PreferenceManager
-import org.yuzu.yuzu_emu.features.settings.model.Settings
+import dev.volt_emu.volt.features.settings.model.Settings
 
 object FullscreenHelper {
     fun isFullscreenEnabled(context: Context): Boolean {

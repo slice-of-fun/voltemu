@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-package org.yuzu.yuzu_emu.fragments
+package dev.volt_emu.volt.fragments
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -18,22 +18,22 @@ import androidx.recyclerview.widget.GridLayoutManager
 import com.google.android.material.transition.MaterialSharedAxis
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.yuzu.yuzu_emu.NativeLibrary
-import org.yuzu.yuzu_emu.R
-import org.yuzu.yuzu_emu.YuzuApplication
-import org.yuzu.yuzu_emu.adapters.InstallableAdapter
-import org.yuzu.yuzu_emu.databinding.FragmentInstallablesBinding
-import org.yuzu.yuzu_emu.model.AddonViewModel
-import org.yuzu.yuzu_emu.model.DriverViewModel
-import org.yuzu.yuzu_emu.model.GamesViewModel
-import org.yuzu.yuzu_emu.model.HomeViewModel
-import org.yuzu.yuzu_emu.model.Installable
-import org.yuzu.yuzu_emu.model.TaskState
-import org.yuzu.yuzu_emu.utils.FileUtil
-import org.yuzu.yuzu_emu.utils.InstallableActions
-import org.yuzu.yuzu_emu.utils.NativeConfig
-import org.yuzu.yuzu_emu.utils.ViewUtils.updateMargins
-import org.yuzu.yuzu_emu.utils.collect
+import dev.volt_emu.volt.NativeLibrary
+import dev.volt_emu.volt.R
+import dev.volt_emu.volt.YuzuApplication
+import dev.volt_emu.volt.adapters.InstallableAdapter
+import dev.volt_emu.volt.databinding.FragmentInstallablesBinding
+import dev.volt_emu.volt.model.AddonViewModel
+import dev.volt_emu.volt.model.DriverViewModel
+import dev.volt_emu.volt.model.GamesViewModel
+import dev.volt_emu.volt.model.HomeViewModel
+import dev.volt_emu.volt.model.Installable
+import dev.volt_emu.volt.model.TaskState
+import dev.volt_emu.volt.utils.FileUtil
+import dev.volt_emu.volt.utils.InstallableActions
+import dev.volt_emu.volt.utils.NativeConfig
+import dev.volt_emu.volt.utils.ViewUtils.updateMargins
+import dev.volt_emu.volt.utils.collect
 import java.io.BufferedOutputStream
 import java.io.File
 import java.math.BigInteger

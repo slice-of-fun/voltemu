@@ -4,9 +4,9 @@
 // SPDX-FileCopyrightText: 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-package org.yuzu.yuzu_emu.features.settings.model
+package dev.volt_emu.volt.features.settings.model
 
-import org.yuzu.yuzu_emu.utils.NativeConfig
+import dev.volt_emu.volt.utils.NativeConfig
 
 enum class ShortSetting(override val key: String) : AbstractShortSetting {
     RENDERER_SPEED_LIMIT("speed_limit"),

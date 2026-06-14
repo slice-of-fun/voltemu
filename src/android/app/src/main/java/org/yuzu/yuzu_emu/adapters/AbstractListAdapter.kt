@@ -1,11 +1,11 @@
 // SPDX-FileCopyrightText: 2024 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-package org.yuzu.yuzu_emu.adapters
+package dev.volt_emu.volt.adapters
 
 import android.annotation.SuppressLint
 import androidx.recyclerview.widget.RecyclerView
-import org.yuzu.yuzu_emu.viewholder.AbstractViewHolder
+import dev.volt_emu.volt.viewholder.AbstractViewHolder
 
 /**
  * Generic list class meant to take care of basic lists

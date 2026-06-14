@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-package org.yuzu.yuzu_emu.features.settings.ui
+package dev.volt_emu.volt.features.settings.ui
 
 import android.content.Context
 import android.icu.util.Calendar
@@ -20,19 +20,19 @@ import androidx.recyclerview.widget.ListAdapter
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.timepicker.MaterialTimePicker
 import com.google.android.material.timepicker.TimeFormat
-import org.yuzu.yuzu_emu.R
-import org.yuzu.yuzu_emu.SettingsNavigationDirections
-import org.yuzu.yuzu_emu.databinding.ListItemSettingBinding
-import org.yuzu.yuzu_emu.databinding.ListItemSettingInputBinding
-import org.yuzu.yuzu_emu.databinding.ListItemSettingSwitchBinding
-import org.yuzu.yuzu_emu.databinding.ListItemSettingsHeaderBinding
-import org.yuzu.yuzu_emu.features.input.NativeInput
-import org.yuzu.yuzu_emu.features.input.model.AnalogDirection
-import org.yuzu.yuzu_emu.features.settings.model.AbstractIntSetting
-import org.yuzu.yuzu_emu.features.settings.model.Settings
-import org.yuzu.yuzu_emu.features.settings.model.view.*
-import org.yuzu.yuzu_emu.features.settings.ui.viewholder.*
-import org.yuzu.yuzu_emu.utils.ParamPackage
+import dev.volt_emu.volt.R
+import dev.volt_emu.volt.SettingsNavigationDirections
+import dev.volt_emu.volt.databinding.ListItemSettingBinding
+import dev.volt_emu.volt.databinding.ListItemSettingInputBinding
+import dev.volt_emu.volt.databinding.ListItemSettingSwitchBinding
+import dev.volt_emu.volt.databinding.ListItemSettingsHeaderBinding
+import dev.volt_emu.volt.features.input.NativeInput
+import dev.volt_emu.volt.features.input.model.AnalogDirection
+import dev.volt_emu.volt.features.settings.model.AbstractIntSetting
+import dev.volt_emu.volt.features.settings.model.Settings
+import dev.volt_emu.volt.features.settings.model.view.*
+import dev.volt_emu.volt.features.settings.ui.viewholder.*
+import dev.volt_emu.volt.utils.ParamPackage
 
 class SettingsAdapter(
     private val fragment: Fragment,

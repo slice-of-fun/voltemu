@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: Copyright 2025 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-package org.yuzu.yuzu_emu.overlay
+package dev.volt_emu.volt.overlay
 
 import android.app.Dialog
 import android.content.Context
@@ -11,8 +11,8 @@ import android.view.WindowManager
 import android.widget.TextView
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.slider.Slider
-import org.yuzu.yuzu_emu.R
-import org.yuzu.yuzu_emu.overlay.model.OverlayControlData
+import dev.volt_emu.volt.R
+import dev.volt_emu.volt.overlay.model.OverlayControlData
 
 class OverlayScaleDialog(
     context: Context,

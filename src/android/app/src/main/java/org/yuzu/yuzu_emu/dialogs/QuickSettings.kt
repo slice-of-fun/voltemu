@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-package org.yuzu.yuzu_emu.dialogs
+package dev.volt_emu.volt.dialogs
 
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -12,15 +12,15 @@ import android.widget.TextView
 import androidx.drawerlayout.widget.DrawerLayout
 import com.google.android.material.color.MaterialColors
 import com.google.android.material.materialswitch.MaterialSwitch
-import org.yuzu.yuzu_emu.R
-import org.yuzu.yuzu_emu.YuzuApplication
-import org.yuzu.yuzu_emu.features.settings.model.BooleanSetting
-import org.yuzu.yuzu_emu.features.settings.model.IntSetting
-import org.yuzu.yuzu_emu.fragments.EmulationFragment
-import org.yuzu.yuzu_emu.utils.NativeConfig
-import org.yuzu.yuzu_emu.features.settings.model.AbstractSetting
-import org.yuzu.yuzu_emu.features.settings.model.AbstractShortSetting
-import org.yuzu.yuzu_emu.features.settings.model.AbstractIntSetting
+import dev.volt_emu.volt.R
+import dev.volt_emu.volt.YuzuApplication
+import dev.volt_emu.volt.features.settings.model.BooleanSetting
+import dev.volt_emu.volt.features.settings.model.IntSetting
+import dev.volt_emu.volt.fragments.EmulationFragment
+import dev.volt_emu.volt.utils.NativeConfig
+import dev.volt_emu.volt.features.settings.model.AbstractSetting
+import dev.volt_emu.volt.features.settings.model.AbstractShortSetting
+import dev.volt_emu.volt.features.settings.model.AbstractIntSetting
 
 class QuickSettings(val emulationFragment: EmulationFragment) {
     private fun saveSettings() {

@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-package org.yuzu.yuzu_emu.features.settings.ui
+package dev.volt_emu.volt.features.settings.ui
 
 import android.app.Dialog
 import android.content.DialogInterface
@@ -11,9 +11,9 @@ import android.widget.ArrayAdapter
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.activityViewModels
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import org.yuzu.yuzu_emu.R
-import org.yuzu.yuzu_emu.databinding.DialogGpuUnswizzleBinding
-import org.yuzu.yuzu_emu.features.settings.model.view.GpuUnswizzleSetting
+import dev.volt_emu.volt.R
+import dev.volt_emu.volt.databinding.DialogGpuUnswizzleBinding
+import dev.volt_emu.volt.features.settings.model.view.GpuUnswizzleSetting
 
 class GpuUnswizzleDialogFragment : DialogFragment() {
     private var position = 0

@@ -1,15 +1,15 @@
 // SPDX-FileCopyrightText: 2024 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-package org.yuzu.yuzu_emu.features.input
+package dev.volt_emu.volt.features.input
 
-import org.yuzu.yuzu_emu.features.input.model.NativeButton
-import org.yuzu.yuzu_emu.features.input.model.NativeAnalog
-import org.yuzu.yuzu_emu.features.input.model.InputType
-import org.yuzu.yuzu_emu.features.input.model.ButtonName
-import org.yuzu.yuzu_emu.features.input.model.NpadStyleIndex
-import org.yuzu.yuzu_emu.utils.NativeConfig
-import org.yuzu.yuzu_emu.utils.ParamPackage
+import dev.volt_emu.volt.features.input.model.NativeButton
+import dev.volt_emu.volt.features.input.model.NativeAnalog
+import dev.volt_emu.volt.features.input.model.InputType
+import dev.volt_emu.volt.features.input.model.ButtonName
+import dev.volt_emu.volt.features.input.model.NpadStyleIndex
+import dev.volt_emu.volt.utils.NativeConfig
+import dev.volt_emu.volt.utils.ParamPackage
 import android.view.InputDevice
 
 object NativeInput {

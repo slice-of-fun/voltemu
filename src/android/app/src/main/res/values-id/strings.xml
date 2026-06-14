@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
 
     <string name="app_disclaimer">Perangkat lunak ini akan menjalankan permainan dari konsol Nintendo Switch. Permainan maupun keys tidak disediakan.<br /><br />Sebelum memulai, tolong temukan berkas <![CDATA[<b> prod.keys </b>]]> didalam tempat penyimpanan mu.<br /><br /><![CDATA[<a href=\"https://yuzu-mirror.github.io/help/quickstart\">Pelajari lebih lanjut</a>]]></string>
@@ -204,7 +204,7 @@
     <string name="home_settings">Pengaturan</string>
     <string name="empty_gamelist">Tidak ada file yang ditemukan atau belum ada direktori game yang dipilih.</string>
     <string name="manage_game_folders">Kelola folder game</string>
-    <string name="select_games_folder_description">Izinkan Eden mengisi daftar game</string>
+    <string name="select_games_folder_description">Izinkan Volt Emulator mengisi daftar game</string>
     <string name="add_games_warning">Lewati pemilihan folder game?</string>
     <string name="add_games_warning_description">Game tidak akan muncul di list jika tidak ada folder yang dipilih.</string>
     <string name="add_games_warning_help">https://yuzu-mirror.github.io/help/quickstart/#dumping-games</string>
@@ -258,7 +258,7 @@
     <string name="firmware_installed_failure_description">Pastikan file nca firmware terdapat pada folder utama dari file .zip dan coba lagi.</string>
     <string name="firmware_uninstalled_failure">Instalasi Firmware gagal</string>
     <string name="share_log">Bagikan log debug</string>
-    <string name="share_log_description">Bagikan file log Eden untuk mendebug isu</string>
+    <string name="share_log_description">Bagikan file log Volt Emulator untuk mendebug isu</string>
     <string name="share_log_missing">Tidak ada log file yang ditemukan</string>
     <string name="install_game_content">Instal konten game.</string>
     <string name="install_game_content_description">Instal pembaruan game atau DLC</string>
@@ -329,13 +329,13 @@
     <string name="copied_to_clipboard">Salin ke papan klip</string>
     <string name="about_app_description">Emulator Switch Open-Source</string>
     <string name="contributors">Kontributor</string>
-    <string name="licenses_description">Proyek yang memungkinkan Eden untuk Android</string>
+    <string name="licenses_description">Proyek yang memungkinkan Volt Emulator untuk Android</string>
     <string name="build">Versi</string>
     <string name="user_data">Data pengguna</string>
     <string name="user_data_description">Impor/Ekspor semua data aplikasi\n\nketika mengimpor data user, semua data user yang tersedia akan dihapus!\n\nMengimpor data dari Citron dapat menyebabkan masalah. Direkomendasikan untuk melakukan impor manual semua data yang dibutuhkan.</string>
     <string name="exporting_user_data">Mengekspor data pengguna</string>
     <string name="importing_user_data">Mengimpor data pengguna</string>
-    <string name="invalid_yuzu_backup">cadangan Eden tidak valid</string>
+    <string name="invalid_yuzu_backup">cadangan Volt Emulator tidak valid</string>
     <string name="user_data_export_success">berhasil mengekspor data pengguna</string>
     <string name="user_data_import_success">Berhasil mengimpor data pengguna</string>
     <string name="user_data_export_cancelled">Ekspor Dibatalkan</string>

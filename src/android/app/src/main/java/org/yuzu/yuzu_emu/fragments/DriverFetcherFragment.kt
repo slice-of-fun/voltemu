@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-package org.yuzu.yuzu_emu.fragments
+package dev.volt_emu.volt.fragments
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment
@@ -24,13 +24,13 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import org.yuzu.yuzu_emu.R
-import org.yuzu.yuzu_emu.databinding.FragmentDriverFetcherBinding
-import org.yuzu.yuzu_emu.features.fetcher.DriverGroupAdapter
-import org.yuzu.yuzu_emu.model.DriverViewModel
-import org.yuzu.yuzu_emu.model.HomeViewModel
-import org.yuzu.yuzu_emu.utils.GpuDriverHelper
-import org.yuzu.yuzu_emu.utils.ViewUtils.updateMargins
+import dev.volt_emu.volt.R
+import dev.volt_emu.volt.databinding.FragmentDriverFetcherBinding
+import dev.volt_emu.volt.features.fetcher.DriverGroupAdapter
+import dev.volt_emu.volt.model.DriverViewModel
+import dev.volt_emu.volt.model.HomeViewModel
+import dev.volt_emu.volt.utils.GpuDriverHelper
+import dev.volt_emu.volt.utils.ViewUtils.updateMargins
 import java.io.IOException
 import java.net.URL
 import java.time.Instant

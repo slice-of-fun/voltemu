@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2024 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-package org.yuzu.yuzu_emu.model
+package dev.volt_emu.volt.model
 
 enum class GameVerificationResult(val int: Int) {
     Success(0),

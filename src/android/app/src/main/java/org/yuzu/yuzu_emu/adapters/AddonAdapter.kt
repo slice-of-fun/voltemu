@@ -4,15 +4,15 @@
 // SPDX-FileCopyrightText: 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-package org.yuzu.yuzu_emu.adapters
+package dev.volt_emu.volt.adapters
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import org.yuzu.yuzu_emu.databinding.ListItemAddonBinding
-import org.yuzu.yuzu_emu.model.Patch
-import org.yuzu.yuzu_emu.model.PatchType
-import org.yuzu.yuzu_emu.model.AddonViewModel
-import org.yuzu.yuzu_emu.viewholder.AbstractViewHolder
+import dev.volt_emu.volt.databinding.ListItemAddonBinding
+import dev.volt_emu.volt.model.Patch
+import dev.volt_emu.volt.model.PatchType
+import dev.volt_emu.volt.model.AddonViewModel
+import dev.volt_emu.volt.viewholder.AbstractViewHolder
 
 class AddonAdapter(val addonViewModel: AddonViewModel) :
     AbstractDiffAdapter<Patch, AddonAdapter.AddonViewHolder>() {

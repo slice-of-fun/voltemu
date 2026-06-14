@@ -1,15 +1,15 @@
 // SPDX-FileCopyrightText: 2024 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-package org.yuzu.yuzu_emu.features.settings.model.view
+package dev.volt_emu.volt.features.settings.model.view
 
 import androidx.annotation.StringRes
-import org.yuzu.yuzu_emu.R
-import org.yuzu.yuzu_emu.YuzuApplication
-import org.yuzu.yuzu_emu.features.input.NativeInput
-import org.yuzu.yuzu_emu.features.input.model.ButtonName
-import org.yuzu.yuzu_emu.features.input.model.InputType
-import org.yuzu.yuzu_emu.utils.ParamPackage
+import dev.volt_emu.volt.R
+import dev.volt_emu.volt.YuzuApplication
+import dev.volt_emu.volt.features.input.NativeInput
+import dev.volt_emu.volt.features.input.model.ButtonName
+import dev.volt_emu.volt.features.input.model.InputType
+import dev.volt_emu.volt.utils.ParamPackage
 
 sealed class InputSetting(
     @StringRes titleId: Int,

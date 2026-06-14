@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-package org.yuzu.yuzu_emu.fragments
+package dev.volt_emu.volt.fragments
 
 import android.content.Intent
 import android.content.pm.ShortcutInfo
@@ -27,33 +27,33 @@ import com.google.android.material.transition.MaterialSharedAxis
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.yuzu.yuzu_emu.HomeNavigationDirections
-import org.yuzu.yuzu_emu.NativeLibrary
-import org.yuzu.yuzu_emu.R
-import org.yuzu.yuzu_emu.YuzuApplication
-import org.yuzu.yuzu_emu.adapters.GamePropertiesAdapter
-import org.yuzu.yuzu_emu.databinding.FragmentGamePropertiesBinding
-import org.yuzu.yuzu_emu.features.DocumentProvider
-import org.yuzu.yuzu_emu.features.settings.model.Settings
-import org.yuzu.yuzu_emu.features.settings.ui.SettingsSubscreen
-import org.yuzu.yuzu_emu.model.AddonViewModel
-import org.yuzu.yuzu_emu.model.DriverViewModel
-import org.yuzu.yuzu_emu.model.GameProperty
-import org.yuzu.yuzu_emu.model.GamesViewModel
-import org.yuzu.yuzu_emu.model.HomeViewModel
-import org.yuzu.yuzu_emu.model.InstallableProperty
-import org.yuzu.yuzu_emu.model.SubMenuPropertySecondaryAction
-import org.yuzu.yuzu_emu.model.SubmenuProperty
-import org.yuzu.yuzu_emu.model.TaskState
-import org.yuzu.yuzu_emu.utils.DirectoryInitialization
-import org.yuzu.yuzu_emu.utils.FileUtil
-import org.yuzu.yuzu_emu.utils.GameHelper
-import org.yuzu.yuzu_emu.utils.GameIconUtils
-import org.yuzu.yuzu_emu.utils.GpuDriverHelper
-import org.yuzu.yuzu_emu.utils.MemoryUtil
-import org.yuzu.yuzu_emu.utils.ViewUtils.marquee
-import org.yuzu.yuzu_emu.utils.ViewUtils.updateMargins
-import org.yuzu.yuzu_emu.utils.collect
+import dev.volt_emu.volt.HomeNavigationDirections
+import dev.volt_emu.volt.NativeLibrary
+import dev.volt_emu.volt.R
+import dev.volt_emu.volt.YuzuApplication
+import dev.volt_emu.volt.adapters.GamePropertiesAdapter
+import dev.volt_emu.volt.databinding.FragmentGamePropertiesBinding
+import dev.volt_emu.volt.features.DocumentProvider
+import dev.volt_emu.volt.features.settings.model.Settings
+import dev.volt_emu.volt.features.settings.ui.SettingsSubscreen
+import dev.volt_emu.volt.model.AddonViewModel
+import dev.volt_emu.volt.model.DriverViewModel
+import dev.volt_emu.volt.model.GameProperty
+import dev.volt_emu.volt.model.GamesViewModel
+import dev.volt_emu.volt.model.HomeViewModel
+import dev.volt_emu.volt.model.InstallableProperty
+import dev.volt_emu.volt.model.SubMenuPropertySecondaryAction
+import dev.volt_emu.volt.model.SubmenuProperty
+import dev.volt_emu.volt.model.TaskState
+import dev.volt_emu.volt.utils.DirectoryInitialization
+import dev.volt_emu.volt.utils.FileUtil
+import dev.volt_emu.volt.utils.GameHelper
+import dev.volt_emu.volt.utils.GameIconUtils
+import dev.volt_emu.volt.utils.GpuDriverHelper
+import dev.volt_emu.volt.utils.MemoryUtil
+import dev.volt_emu.volt.utils.ViewUtils.marquee
+import dev.volt_emu.volt.utils.ViewUtils.updateMargins
+import dev.volt_emu.volt.utils.collect
 import java.io.BufferedOutputStream
 import java.io.File
 

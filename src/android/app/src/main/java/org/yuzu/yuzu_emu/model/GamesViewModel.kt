@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-package org.yuzu.yuzu_emu.model
+package dev.volt_emu.volt.model
 
 import android.net.Uri
 import android.widget.Toast
@@ -17,11 +17,11 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
-import org.yuzu.yuzu_emu.NativeLibrary
-import org.yuzu.yuzu_emu.R
-import org.yuzu.yuzu_emu.YuzuApplication
-import org.yuzu.yuzu_emu.utils.GameHelper
-import org.yuzu.yuzu_emu.utils.NativeConfig
+import dev.volt_emu.volt.NativeLibrary
+import dev.volt_emu.volt.R
+import dev.volt_emu.volt.YuzuApplication
+import dev.volt_emu.volt.utils.GameHelper
+import dev.volt_emu.volt.utils.NativeConfig
 import java.util.concurrent.atomic.AtomicBoolean
 
 class GamesViewModel : ViewModel() {
@@ -151,7 +151,7 @@ class GamesViewModel : ViewModel() {
                     DirectoryType.GAME -> {
                         NativeConfig.addGameDir(gameDir)
                         val isFirstTimeSetup = PreferenceManager.getDefaultSharedPreferences(YuzuApplication.appContext)
-                            .getBoolean(org.yuzu.yuzu_emu.features.settings.model.Settings.PREF_FIRST_APP_LAUNCH, true)
+                            .getBoolean(dev.volt_emu.volt.features.settings.model.Settings.PREF_FIRST_APP_LAUNCH, true)
                         getGameDirsAndExternalContent(!isFirstTimeSetup)
                     }
                     DirectoryType.EXTERNAL_CONTENT -> {

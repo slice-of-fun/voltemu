@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-package org.yuzu.yuzu_emu.fragments
+package dev.volt_emu.volt.fragments
 
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -20,14 +20,14 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.transition.MaterialSharedAxis
-import org.yuzu.yuzu_emu.NativeLibrary
-import org.yuzu.yuzu_emu.R
-import org.yuzu.yuzu_emu.databinding.FragmentGameInfoBinding
-import org.yuzu.yuzu_emu.model.GameVerificationResult
-import org.yuzu.yuzu_emu.model.HomeViewModel
-import org.yuzu.yuzu_emu.utils.GameMetadata
-import org.yuzu.yuzu_emu.utils.ViewUtils.setVisible
-import org.yuzu.yuzu_emu.utils.ViewUtils.updateMargins
+import dev.volt_emu.volt.NativeLibrary
+import dev.volt_emu.volt.R
+import dev.volt_emu.volt.databinding.FragmentGameInfoBinding
+import dev.volt_emu.volt.model.GameVerificationResult
+import dev.volt_emu.volt.model.HomeViewModel
+import dev.volt_emu.volt.utils.GameMetadata
+import dev.volt_emu.volt.utils.ViewUtils.setVisible
+import dev.volt_emu.volt.utils.ViewUtils.updateMargins
 
 class GameInfoFragment : Fragment() {
     private var _binding: FragmentGameInfoBinding? = null

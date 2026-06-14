@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-package org.yuzu.yuzu_emu.fragments
+package dev.volt_emu.volt.fragments
 
 import android.app.Dialog
 import android.content.Intent
@@ -13,9 +13,9 @@ import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import org.yuzu.yuzu_emu.R
-import org.yuzu.yuzu_emu.model.MessageDialogViewModel
-import org.yuzu.yuzu_emu.utils.Log
+import dev.volt_emu.volt.R
+import dev.volt_emu.volt.model.MessageDialogViewModel
+import dev.volt_emu.volt.utils.Log
 
 class MessageDialogFragment : DialogFragment() {
     private val messageDialogViewModel: MessageDialogViewModel by activityViewModels()

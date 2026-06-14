@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-package org.yuzu.yuzu_emu.adapters
+package dev.volt_emu.volt.adapters
 
 import android.graphics.BitmapFactory
 import android.view.LayoutInflater
@@ -10,11 +10,11 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
-import org.yuzu.yuzu_emu.R
-import org.yuzu.yuzu_emu.databinding.ListItemProfileBinding
-import org.yuzu.yuzu_emu.model.UserProfile
+import dev.volt_emu.volt.R
+import dev.volt_emu.volt.databinding.ListItemProfileBinding
+import dev.volt_emu.volt.model.UserProfile
 import java.io.File
-import org.yuzu.yuzu_emu.NativeLibrary
+import dev.volt_emu.volt.NativeLibrary
 
 class ProfileAdapter(
     private val onProfileClick: (UserProfile) -> Unit,

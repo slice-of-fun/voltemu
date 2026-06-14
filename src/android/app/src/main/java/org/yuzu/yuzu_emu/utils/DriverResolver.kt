@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: Copyright 2025 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-package org.yuzu.yuzu_emu.utils
+package dev.volt_emu.volt.utils
 
 import android.content.Context
 import android.net.Uri
@@ -11,7 +11,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import org.yuzu.yuzu_emu.fragments.DriverFetcherFragment
+import dev.volt_emu.volt.fragments.DriverFetcherFragment
 import java.io.File
 import java.io.IOException
 import java.util.concurrent.TimeUnit

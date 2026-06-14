@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-package org.yuzu.yuzu_emu.model
+package dev.volt_emu.volt.model
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -14,16 +14,16 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.yuzu.yuzu_emu.R
-import org.yuzu.yuzu_emu.YuzuApplication
-import org.yuzu.yuzu_emu.features.settings.model.BooleanSetting
-import org.yuzu.yuzu_emu.features.settings.model.StringSetting
-import org.yuzu.yuzu_emu.features.settings.utils.SettingsFile
-import org.yuzu.yuzu_emu.model.Driver.Companion.toDriver
-import org.yuzu.yuzu_emu.utils.GpuDriverHelper
-import org.yuzu.yuzu_emu.NativeLibrary
-import org.yuzu.yuzu_emu.utils.GpuDriverMetadata
-import org.yuzu.yuzu_emu.utils.NativeConfig
+import dev.volt_emu.volt.R
+import dev.volt_emu.volt.YuzuApplication
+import dev.volt_emu.volt.features.settings.model.BooleanSetting
+import dev.volt_emu.volt.features.settings.model.StringSetting
+import dev.volt_emu.volt.features.settings.utils.SettingsFile
+import dev.volt_emu.volt.model.Driver.Companion.toDriver
+import dev.volt_emu.volt.utils.GpuDriverHelper
+import dev.volt_emu.volt.NativeLibrary
+import dev.volt_emu.volt.utils.GpuDriverMetadata
+import dev.volt_emu.volt.utils.NativeConfig
 import java.io.File
 
 class DriverViewModel : ViewModel() {

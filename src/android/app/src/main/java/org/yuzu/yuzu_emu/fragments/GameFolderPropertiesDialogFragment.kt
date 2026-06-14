@@ -4,7 +4,7 @@
 // SPDX-FileCopyrightText: 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-package org.yuzu.yuzu_emu.fragments
+package dev.volt_emu.volt.fragments
 
 import android.app.Dialog
 import android.content.DialogInterface
@@ -13,13 +13,13 @@ import android.view.View
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.activityViewModels
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import org.yuzu.yuzu_emu.R
-import org.yuzu.yuzu_emu.databinding.DialogFolderPropertiesBinding
-import org.yuzu.yuzu_emu.model.DirectoryType
-import org.yuzu.yuzu_emu.model.GameDir
-import org.yuzu.yuzu_emu.model.GamesViewModel
-import org.yuzu.yuzu_emu.utils.NativeConfig
-import org.yuzu.yuzu_emu.utils.SerializableHelper.parcelable
+import dev.volt_emu.volt.R
+import dev.volt_emu.volt.databinding.DialogFolderPropertiesBinding
+import dev.volt_emu.volt.model.DirectoryType
+import dev.volt_emu.volt.model.GameDir
+import dev.volt_emu.volt.model.GamesViewModel
+import dev.volt_emu.volt.utils.NativeConfig
+import dev.volt_emu.volt.utils.SerializableHelper.parcelable
 
 class GameFolderPropertiesDialogFragment : DialogFragment() {
     private val gamesViewModel: GamesViewModel by activityViewModels()

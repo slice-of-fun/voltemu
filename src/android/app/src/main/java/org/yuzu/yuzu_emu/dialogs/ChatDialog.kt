@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-package org.yuzu.yuzu_emu.dialogs
+package dev.volt_emu.volt.dialogs
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -15,13 +15,13 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
-import org.yuzu.yuzu_emu.R
-import org.yuzu.yuzu_emu.databinding.DialogChatBinding
-import org.yuzu.yuzu_emu.databinding.ItemChatMessageBinding
-import org.yuzu.yuzu_emu.features.settings.model.StringSetting
-import org.yuzu.yuzu_emu.network.NetPlayManager
-import org.yuzu.yuzu_emu.utils.CompatUtils
-import org.yuzu.yuzu_emu.utils.FullscreenHelper
+import dev.volt_emu.volt.R
+import dev.volt_emu.volt.databinding.DialogChatBinding
+import dev.volt_emu.volt.databinding.ItemChatMessageBinding
+import dev.volt_emu.volt.features.settings.model.StringSetting
+import dev.volt_emu.volt.network.NetPlayManager
+import dev.volt_emu.volt.utils.CompatUtils
+import dev.volt_emu.volt.utils.FullscreenHelper
 import java.text.SimpleDateFormat
 import java.util.*
 

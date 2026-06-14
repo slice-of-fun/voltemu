@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-package org.yuzu.yuzu_emu.fragments
+package dev.volt_emu.volt.fragments
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -14,13 +14,13 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.GridLayoutManager
 import com.google.android.material.transition.MaterialSharedAxis
-import org.yuzu.yuzu_emu.R
-import org.yuzu.yuzu_emu.adapters.AppletAdapter
-import org.yuzu.yuzu_emu.databinding.FragmentAppletLauncherBinding
-import org.yuzu.yuzu_emu.model.Applet
-import org.yuzu.yuzu_emu.model.AppletInfo
-import org.yuzu.yuzu_emu.model.HomeViewModel
-import org.yuzu.yuzu_emu.utils.ViewUtils.updateMargins
+import dev.volt_emu.volt.R
+import dev.volt_emu.volt.adapters.AppletAdapter
+import dev.volt_emu.volt.databinding.FragmentAppletLauncherBinding
+import dev.volt_emu.volt.model.Applet
+import dev.volt_emu.volt.model.AppletInfo
+import dev.volt_emu.volt.model.HomeViewModel
+import dev.volt_emu.volt.utils.ViewUtils.updateMargins
 
 class AppletLauncherFragment : Fragment() {
     private var _binding: FragmentAppletLauncherBinding? = null

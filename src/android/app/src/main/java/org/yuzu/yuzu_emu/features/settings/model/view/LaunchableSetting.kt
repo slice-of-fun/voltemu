@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: Copyright 2025 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-package org.yuzu.yuzu_emu.features.settings.model.view
+package dev.volt_emu.volt.features.settings.model.view
 
 import android.content.Intent
 import androidx.annotation.StringRes

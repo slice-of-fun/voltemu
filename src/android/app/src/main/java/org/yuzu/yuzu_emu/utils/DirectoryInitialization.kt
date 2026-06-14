@@ -1,19 +1,19 @@
 // SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-package org.yuzu.yuzu_emu.utils
+package dev.volt_emu.volt.utils
 
 import androidx.preference.PreferenceManager
 import java.io.IOException
-import org.yuzu.yuzu_emu.NativeLibrary
-import org.yuzu.yuzu_emu.YuzuApplication
-import org.yuzu.yuzu_emu.features.settings.model.BooleanSetting
-import org.yuzu.yuzu_emu.features.settings.model.IntSetting
-import org.yuzu.yuzu_emu.features.settings.model.Settings
-import org.yuzu.yuzu_emu.overlay.model.OverlayControlData
-import org.yuzu.yuzu_emu.overlay.model.OverlayControl
-import org.yuzu.yuzu_emu.overlay.model.OverlayLayout
-import org.yuzu.yuzu_emu.utils.PreferenceUtil.migratePreference
+import dev.volt_emu.volt.NativeLibrary
+import dev.volt_emu.volt.YuzuApplication
+import dev.volt_emu.volt.features.settings.model.BooleanSetting
+import dev.volt_emu.volt.features.settings.model.IntSetting
+import dev.volt_emu.volt.features.settings.model.Settings
+import dev.volt_emu.volt.overlay.model.OverlayControlData
+import dev.volt_emu.volt.overlay.model.OverlayControl
+import dev.volt_emu.volt.overlay.model.OverlayLayout
+import dev.volt_emu.volt.utils.PreferenceUtil.migratePreference
 
 object DirectoryInitialization {
     private var userPath: String? = null

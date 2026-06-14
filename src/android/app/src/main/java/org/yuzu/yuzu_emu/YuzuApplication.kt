@@ -4,13 +4,13 @@
 // SPDX-FileCopyrightText: 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-package org.yuzu.yuzu_emu
+package dev.volt_emu.volt
 
 import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
-import org.yuzu.yuzu_emu.features.input.NativeInput
+import dev.volt_emu.volt.features.input.NativeInput
 import java.io.File
 import java.io.FileOutputStream
 import java.security.KeyStore
@@ -18,13 +18,13 @@ import javax.net.ssl.TrustManagerFactory
 import javax.net.ssl.X509TrustManager
 import android.content.res.Configuration
 import android.os.LocaleList
-import org.yuzu.yuzu_emu.features.settings.model.IntSetting
-import org.yuzu.yuzu_emu.utils.DirectoryInitialization
-import org.yuzu.yuzu_emu.utils.DocumentsTree
-import org.yuzu.yuzu_emu.utils.GpuDriverHelper
-import org.yuzu.yuzu_emu.utils.Log
-import org.yuzu.yuzu_emu.utils.PowerStateUpdater
-import org.yuzu.yuzu_emu.utils.ControllerNavigationGlobalHook
+import dev.volt_emu.volt.features.settings.model.IntSetting
+import dev.volt_emu.volt.utils.DirectoryInitialization
+import dev.volt_emu.volt.utils.DocumentsTree
+import dev.volt_emu.volt.utils.GpuDriverHelper
+import dev.volt_emu.volt.utils.Log
+import dev.volt_emu.volt.utils.PowerStateUpdater
+import dev.volt_emu.volt.utils.ControllerNavigationGlobalHook
 import java.util.Locale
 
 fun Context.getPublicFilesDir(): File = getExternalFilesDir(null) ?: filesDir

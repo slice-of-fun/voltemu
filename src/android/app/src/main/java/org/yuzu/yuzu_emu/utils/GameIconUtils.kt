@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-package org.yuzu.yuzu_emu.utils
+package dev.volt_emu.volt.utils
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -21,9 +21,9 @@ import coil.key.Keyer
 import coil.memory.MemoryCache
 import coil.request.ImageRequest
 import coil.request.Options
-import org.yuzu.yuzu_emu.R
-import org.yuzu.yuzu_emu.YuzuApplication
-import org.yuzu.yuzu_emu.model.Game
+import dev.volt_emu.volt.R
+import dev.volt_emu.volt.YuzuApplication
+import dev.volt_emu.volt.model.Game
 
 class GameIconFetcher(
     private val game: Game,

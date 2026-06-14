@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-package org.yuzu.yuzu_emu.fragments
+package dev.volt_emu.volt.fragments
 
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -21,13 +21,13 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.findNavController
 import com.google.android.material.transition.MaterialSharedAxis
-import org.yuzu.yuzu_emu.HomeNavigationDirections
-import org.yuzu.yuzu_emu.R
-import org.yuzu.yuzu_emu.databinding.FragmentAboutBinding
-import org.yuzu.yuzu_emu.features.settings.ui.SettingsSubscreen
-import org.yuzu.yuzu_emu.model.HomeViewModel
-import org.yuzu.yuzu_emu.utils.ViewUtils.updateMargins
-import org.yuzu.yuzu_emu.NativeLibrary
+import dev.volt_emu.volt.HomeNavigationDirections
+import dev.volt_emu.volt.R
+import dev.volt_emu.volt.databinding.FragmentAboutBinding
+import dev.volt_emu.volt.features.settings.ui.SettingsSubscreen
+import dev.volt_emu.volt.model.HomeViewModel
+import dev.volt_emu.volt.utils.ViewUtils.updateMargins
+import dev.volt_emu.volt.NativeLibrary
 
 class AboutFragment : Fragment() {
     private var _binding: FragmentAboutBinding? = null

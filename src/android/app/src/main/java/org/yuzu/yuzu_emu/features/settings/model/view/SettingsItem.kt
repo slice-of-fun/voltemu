@@ -4,24 +4,24 @@
 // SPDX-FileCopyrightText: 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-package org.yuzu.yuzu_emu.features.settings.model.view
+package dev.volt_emu.volt.features.settings.model.view
 
 import androidx.annotation.StringRes
-import org.yuzu.yuzu_emu.NativeLibrary
-import org.yuzu.yuzu_emu.R
-import org.yuzu.yuzu_emu.YuzuApplication
-import org.yuzu.yuzu_emu.features.input.NativeInput
-import org.yuzu.yuzu_emu.features.input.model.NpadStyleIndex
-import org.yuzu.yuzu_emu.features.settings.model.AbstractBooleanSetting
-import org.yuzu.yuzu_emu.features.settings.model.AbstractSetting
-import org.yuzu.yuzu_emu.features.settings.model.BooleanSetting
-import org.yuzu.yuzu_emu.features.settings.model.ByteSetting
-import org.yuzu.yuzu_emu.features.settings.model.IntSetting
-import org.yuzu.yuzu_emu.features.settings.model.LongSetting
-import org.yuzu.yuzu_emu.features.settings.model.ShortSetting
-import org.yuzu.yuzu_emu.features.settings.model.StringSetting
-import org.yuzu.yuzu_emu.network.NetDataValidators
-import org.yuzu.yuzu_emu.utils.NativeConfig
+import dev.volt_emu.volt.NativeLibrary
+import dev.volt_emu.volt.R
+import dev.volt_emu.volt.YuzuApplication
+import dev.volt_emu.volt.features.input.NativeInput
+import dev.volt_emu.volt.features.input.model.NpadStyleIndex
+import dev.volt_emu.volt.features.settings.model.AbstractBooleanSetting
+import dev.volt_emu.volt.features.settings.model.AbstractSetting
+import dev.volt_emu.volt.features.settings.model.BooleanSetting
+import dev.volt_emu.volt.features.settings.model.ByteSetting
+import dev.volt_emu.volt.features.settings.model.IntSetting
+import dev.volt_emu.volt.features.settings.model.LongSetting
+import dev.volt_emu.volt.features.settings.model.ShortSetting
+import dev.volt_emu.volt.features.settings.model.StringSetting
+import dev.volt_emu.volt.network.NetDataValidators
+import dev.volt_emu.volt.utils.NativeConfig
 
 /**
  * ViewModel abstraction for an Item in the RecyclerView powering SettingsFragments.

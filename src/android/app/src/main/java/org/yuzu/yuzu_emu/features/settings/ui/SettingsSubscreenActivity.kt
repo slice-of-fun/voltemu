@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-package org.yuzu.yuzu_emu.features.settings.ui
+package dev.volt_emu.volt.features.settings.ui
 
 import android.content.Context
 import android.os.Bundle
@@ -16,13 +16,13 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.navArgs
 import com.google.android.material.color.MaterialColors
-import org.yuzu.yuzu_emu.R
-import org.yuzu.yuzu_emu.YuzuApplication
-import org.yuzu.yuzu_emu.databinding.ActivitySettingsBinding
-import org.yuzu.yuzu_emu.utils.DirectoryInitialization
-import org.yuzu.yuzu_emu.utils.FullscreenHelper
-import org.yuzu.yuzu_emu.utils.InsetsHelper
-import org.yuzu.yuzu_emu.utils.ThemeHelper
+import dev.volt_emu.volt.R
+import dev.volt_emu.volt.YuzuApplication
+import dev.volt_emu.volt.databinding.ActivitySettingsBinding
+import dev.volt_emu.volt.utils.DirectoryInitialization
+import dev.volt_emu.volt.utils.FullscreenHelper
+import dev.volt_emu.volt.utils.InsetsHelper
+import dev.volt_emu.volt.utils.ThemeHelper
 
 enum class SettingsSubscreen {
     PROFILE_MANAGER,

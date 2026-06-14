@@ -4,7 +4,7 @@
 // SPDX-FileCopyrightText: 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-package org.yuzu.yuzu_emu.utils
+package dev.volt_emu.volt.utils
 
 import android.database.Cursor
 import android.net.Uri
@@ -17,10 +17,10 @@ import java.io.InputStream
 import java.net.URLDecoder
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
-import org.yuzu.yuzu_emu.YuzuApplication
-import org.yuzu.yuzu_emu.features.DocumentProvider
-import org.yuzu.yuzu_emu.model.MinimalDocumentFile
-import org.yuzu.yuzu_emu.model.TaskState
+import dev.volt_emu.volt.YuzuApplication
+import dev.volt_emu.volt.features.DocumentProvider
+import dev.volt_emu.volt.model.MinimalDocumentFile
+import dev.volt_emu.volt.model.TaskState
 import java.io.BufferedOutputStream
 import java.io.OutputStream
 import java.lang.NullPointerException

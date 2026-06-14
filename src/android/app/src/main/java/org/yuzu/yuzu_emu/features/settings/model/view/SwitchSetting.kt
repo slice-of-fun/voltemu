@@ -1,12 +1,12 @@
 // SPDX-FileCopyrightText: 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-package org.yuzu.yuzu_emu.features.settings.model.view
+package dev.volt_emu.volt.features.settings.model.view
 
 import androidx.annotation.StringRes
-import org.yuzu.yuzu_emu.features.settings.model.AbstractBooleanSetting
-import org.yuzu.yuzu_emu.features.settings.model.AbstractIntSetting
-import org.yuzu.yuzu_emu.features.settings.model.AbstractSetting
+import dev.volt_emu.volt.features.settings.model.AbstractBooleanSetting
+import dev.volt_emu.volt.features.settings.model.AbstractIntSetting
+import dev.volt_emu.volt.features.settings.model.AbstractSetting
 
 class SwitchSetting(
     setting: AbstractSetting,

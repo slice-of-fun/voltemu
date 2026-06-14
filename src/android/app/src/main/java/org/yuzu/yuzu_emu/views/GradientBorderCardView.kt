@@ -4,14 +4,14 @@
 // SPDX-FileCopyrightText: 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-package org.yuzu.yuzu_emu.views
+package dev.volt_emu.volt.views
 
 import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
 import com.google.android.material.card.MaterialCardView
-import org.yuzu.yuzu_emu.R
-import org.yuzu.yuzu_emu.features.settings.model.IntSetting
+import dev.volt_emu.volt.R
+import dev.volt_emu.volt.features.settings.model.IntSetting
 
 class GradientBorderCardView @JvmOverloads constructor(
     context: Context,

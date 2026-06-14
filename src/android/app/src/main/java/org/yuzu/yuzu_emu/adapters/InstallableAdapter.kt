@@ -1,14 +1,14 @@
 // SPDX-FileCopyrightText: 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-package org.yuzu.yuzu_emu.adapters
+package dev.volt_emu.volt.adapters
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import org.yuzu.yuzu_emu.databinding.CardInstallableBinding
-import org.yuzu.yuzu_emu.model.Installable
-import org.yuzu.yuzu_emu.utils.ViewUtils.setVisible
-import org.yuzu.yuzu_emu.viewholder.AbstractViewHolder
+import dev.volt_emu.volt.databinding.CardInstallableBinding
+import dev.volt_emu.volt.model.Installable
+import dev.volt_emu.volt.utils.ViewUtils.setVisible
+import dev.volt_emu.volt.viewholder.AbstractViewHolder
 
 class InstallableAdapter(installables: List<Installable>) :
     AbstractListAdapter<Installable, InstallableAdapter.InstallableViewHolder>(installables) {

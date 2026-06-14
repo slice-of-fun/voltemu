@@ -4,7 +4,7 @@
 // SPDX-FileCopyrightText: 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-package org.yuzu.yuzu_emu.utils
+package dev.volt_emu.volt.utils
 
 import android.content.SharedPreferences
 import android.net.Uri
@@ -13,11 +13,11 @@ import androidx.preference.PreferenceManager
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.io.File
-import org.yuzu.yuzu_emu.NativeLibrary
-import org.yuzu.yuzu_emu.YuzuApplication
-import org.yuzu.yuzu_emu.model.Game
-import org.yuzu.yuzu_emu.model.GameDir
-import org.yuzu.yuzu_emu.model.MinimalDocumentFile
+import dev.volt_emu.volt.NativeLibrary
+import dev.volt_emu.volt.YuzuApplication
+import dev.volt_emu.volt.model.Game
+import dev.volt_emu.volt.model.GameDir
+import dev.volt_emu.volt.model.MinimalDocumentFile
 import androidx.core.content.edit
 import androidx.core.net.toUri
 

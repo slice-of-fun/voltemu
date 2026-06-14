@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-package org.yuzu.yuzu_emu.fragments
+package dev.volt_emu.volt.fragments
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -19,23 +19,23 @@ import androidx.navigation.fragment.navArgs
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.GridLayoutManager
 import com.google.android.material.transition.MaterialSharedAxis
-import org.yuzu.yuzu_emu.HomeNavigationDirections
+import dev.volt_emu.volt.HomeNavigationDirections
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.yuzu.yuzu_emu.R
-import org.yuzu.yuzu_emu.adapters.DriverAdapter
-import org.yuzu.yuzu_emu.databinding.FragmentDriverManagerBinding
-import org.yuzu.yuzu_emu.features.settings.model.Settings
-import org.yuzu.yuzu_emu.features.settings.model.StringSetting
-import org.yuzu.yuzu_emu.features.settings.ui.SettingsSubscreen
-import org.yuzu.yuzu_emu.model.DriverViewModel
-import org.yuzu.yuzu_emu.model.HomeViewModel
-import org.yuzu.yuzu_emu.utils.FileUtil
-import org.yuzu.yuzu_emu.utils.GpuDriverHelper
-import org.yuzu.yuzu_emu.utils.NativeConfig
-import org.yuzu.yuzu_emu.utils.ViewUtils.updateMargins
-import org.yuzu.yuzu_emu.utils.collect
+import dev.volt_emu.volt.R
+import dev.volt_emu.volt.adapters.DriverAdapter
+import dev.volt_emu.volt.databinding.FragmentDriverManagerBinding
+import dev.volt_emu.volt.features.settings.model.Settings
+import dev.volt_emu.volt.features.settings.model.StringSetting
+import dev.volt_emu.volt.features.settings.ui.SettingsSubscreen
+import dev.volt_emu.volt.model.DriverViewModel
+import dev.volt_emu.volt.model.HomeViewModel
+import dev.volt_emu.volt.utils.FileUtil
+import dev.volt_emu.volt.utils.GpuDriverHelper
+import dev.volt_emu.volt.utils.NativeConfig
+import dev.volt_emu.volt.utils.ViewUtils.updateMargins
+import dev.volt_emu.volt.utils.collect
 import java.io.File
 import java.io.IOException
 

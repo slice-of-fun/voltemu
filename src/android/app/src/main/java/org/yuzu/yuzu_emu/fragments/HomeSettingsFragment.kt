@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-package org.yuzu.yuzu_emu.fragments
+package dev.volt_emu.volt.fragments
 
 import android.Manifest
 import android.content.ActivityNotFoundException
@@ -27,24 +27,24 @@ import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import com.google.android.material.transition.MaterialSharedAxis
-import org.yuzu.yuzu_emu.HomeNavigationDirections
-import org.yuzu.yuzu_emu.NativeLibrary
-import org.yuzu.yuzu_emu.R
-import org.yuzu.yuzu_emu.YuzuApplication
-import org.yuzu.yuzu_emu.adapters.HomeSettingAdapter
-import org.yuzu.yuzu_emu.databinding.FragmentHomeSettingsBinding
-import org.yuzu.yuzu_emu.features.DocumentProvider
-import org.yuzu.yuzu_emu.features.fetcher.SpacingItemDecoration
-import org.yuzu.yuzu_emu.features.settings.model.Settings
-import org.yuzu.yuzu_emu.features.settings.ui.SettingsSubscreen
-import org.yuzu.yuzu_emu.model.DriverViewModel
-import org.yuzu.yuzu_emu.model.HomeSetting
-import org.yuzu.yuzu_emu.model.HomeViewModel
-import org.yuzu.yuzu_emu.ui.main.MainActivity
-import org.yuzu.yuzu_emu.utils.FileUtil
-import org.yuzu.yuzu_emu.utils.GpuDriverHelper
-import org.yuzu.yuzu_emu.utils.Log
-import org.yuzu.yuzu_emu.utils.ViewUtils.updateMargins
+import dev.volt_emu.volt.HomeNavigationDirections
+import dev.volt_emu.volt.NativeLibrary
+import dev.volt_emu.volt.R
+import dev.volt_emu.volt.YuzuApplication
+import dev.volt_emu.volt.adapters.HomeSettingAdapter
+import dev.volt_emu.volt.databinding.FragmentHomeSettingsBinding
+import dev.volt_emu.volt.features.DocumentProvider
+import dev.volt_emu.volt.features.fetcher.SpacingItemDecoration
+import dev.volt_emu.volt.features.settings.model.Settings
+import dev.volt_emu.volt.features.settings.ui.SettingsSubscreen
+import dev.volt_emu.volt.model.DriverViewModel
+import dev.volt_emu.volt.model.HomeSetting
+import dev.volt_emu.volt.model.HomeViewModel
+import dev.volt_emu.volt.ui.main.MainActivity
+import dev.volt_emu.volt.utils.FileUtil
+import dev.volt_emu.volt.utils.GpuDriverHelper
+import dev.volt_emu.volt.utils.Log
+import dev.volt_emu.volt.utils.ViewUtils.updateMargins
 
 class HomeSettingsFragment : Fragment() {
     private var _binding: FragmentHomeSettingsBinding? = null

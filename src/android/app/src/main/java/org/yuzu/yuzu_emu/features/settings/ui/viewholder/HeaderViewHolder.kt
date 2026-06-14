@@ -1,12 +1,12 @@
 // SPDX-FileCopyrightText: 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-package org.yuzu.yuzu_emu.features.settings.ui.viewholder
+package dev.volt_emu.volt.features.settings.ui.viewholder
 
 import android.view.View
-import org.yuzu.yuzu_emu.databinding.ListItemSettingsHeaderBinding
-import org.yuzu.yuzu_emu.features.settings.model.view.SettingsItem
-import org.yuzu.yuzu_emu.features.settings.ui.SettingsAdapter
+import dev.volt_emu.volt.databinding.ListItemSettingsHeaderBinding
+import dev.volt_emu.volt.features.settings.model.view.SettingsItem
+import dev.volt_emu.volt.features.settings.ui.SettingsAdapter
 
 class HeaderViewHolder(val binding: ListItemSettingsHeaderBinding, adapter: SettingsAdapter) :
     SettingViewHolder(binding.root, adapter) {

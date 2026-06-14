@@ -4,14 +4,14 @@
 // SPDX-FileCopyrightText: 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-package org.yuzu.yuzu_emu.utils
+package dev.volt_emu.volt.utils
 
 import android.view.InputDevice
 import android.view.KeyEvent
 import android.view.MotionEvent
-import org.yuzu.yuzu_emu.features.input.NativeInput
-import org.yuzu.yuzu_emu.features.input.YuzuInputOverlayDevice
-import org.yuzu.yuzu_emu.features.input.YuzuPhysicalDevice
+import dev.volt_emu.volt.features.input.NativeInput
+import dev.volt_emu.volt.features.input.YuzuInputOverlayDevice
+import dev.volt_emu.volt.features.input.YuzuPhysicalDevice
 
 object InputHandler {
     var androidControllers = mapOf<Int, YuzuPhysicalDevice>()

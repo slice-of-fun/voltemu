@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
 
     <string name="app_disclaimer">Цей застосунок запускає ігри для ігрової консолі Nintendo Switch. Він не містить ігор чи ключів.<br /><br />Перш ніж почати, укажіть розташування файлу <![CDATA[<b> prod.keys </b>]]> у пам’яті вашого пристрою.<br /><br /><![CDATA[<a href=\"https://yuzu-mirror.github.io/help/quickstart\">Дізнатися більше</a>]]></string>
@@ -239,7 +239,7 @@
     <string name="home_settings">Налаштування</string>
     <string name="empty_gamelist">Не знайдено файлів або ще не вибрано теку з іграми.</string>
     <string name="manage_game_folders">Керування ігровими теками</string>
-    <string name="select_games_folder_description">Дозволяє Eden заповнити список ігор</string>
+    <string name="select_games_folder_description">Дозволяє Volt Emulator заповнити список ігор</string>
     <string name="add_games_warning">Пропустити вибір теки з іграми?</string>
     <string name="add_games_warning_description">Ігри не відображатимуться у списку Ігри, якщо теку не вибрано.</string>
     <string name="add_games_warning_help">https://yuzu-mirror.github.io/help/quickstart/#dumping-games</string>
@@ -399,8 +399,8 @@
     <string name="copied_to_clipboard">Скопійовано в буфер обміну</string>
     <string name="about_app_description">Емулятор Switch із відкритим вихідним кодом</string>
     <string name="contributors">Автори проєкту</string>
-    <string name="contributors_description">Люди, які зробили Eden на Android можливим</string>
-    <string name="licenses_description">Проєкти, які зробили запуск Eden на Android можливим</string>
+    <string name="contributors_description">Люди, які зробили Volt Emulator на Android можливим</string>
+    <string name="licenses_description">Проєкти, які зробили запуск Volt Emulator на Android можливим</string>
     <string name="build">Збірка</string>
     <string name="user_data">Дані користувача</string>
     <string name="user_data_description">Імпортувати/експортувати всі дані програми.\n\nПри імпорті даних користувача всі наявні користувацькі дані буде видалено!\n\nЗавантаження даних із Citron може викликати проблеми. Рекомендується імпортувати всі необхідні дані звідти вручну.</string>
@@ -1090,7 +1090,7 @@
     <string name="app_language_system">Як у системі</string>
     <!-- Static Themes -->
     <string name="static_theme_color">Колір теми</string>
-    <string name="eden_theme">Eden</string>
+    <string name="eden_theme">Volt Emulator</string>
     <string name="violet">Фіолетовий</string>
     <string name="blue">Синій</string>
     <string name="cyan">Блакитний</string>

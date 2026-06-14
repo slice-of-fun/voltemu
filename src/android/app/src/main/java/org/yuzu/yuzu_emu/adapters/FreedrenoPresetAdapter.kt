@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: Copyright 2025 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-package org.yuzu.yuzu_emu.adapters
+package dev.volt_emu.volt.adapters
 
 import android.content.Context
 import android.view.LayoutInflater
@@ -9,8 +9,8 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import org.yuzu.yuzu_emu.utils.FreedrenoPreset
-import org.yuzu.yuzu_emu.databinding.ListItemFreedrenoPresetBinding
+import dev.volt_emu.volt.utils.FreedrenoPreset
+import dev.volt_emu.volt.databinding.ListItemFreedrenoPresetBinding
 
 /**
  * Adapter for displaying Freedreno preset configurations in a horizontal list.

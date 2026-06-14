@@ -4,7 +4,7 @@
 // SPDX-FileCopyrightText: 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-package org.yuzu.yuzu_emu.adapters
+package dev.volt_emu.volt.adapters
 
 import android.text.Html
 import android.view.LayoutInflater
@@ -12,15 +12,15 @@ import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.res.ResourcesCompat
 import com.google.android.material.button.MaterialButton
-import org.yuzu.yuzu_emu.databinding.PageSetupBinding
-import org.yuzu.yuzu_emu.model.PageState
-import org.yuzu.yuzu_emu.model.SetupCallback
-import org.yuzu.yuzu_emu.model.SetupPage
-import org.yuzu.yuzu_emu.utils.ViewUtils
-import org.yuzu.yuzu_emu.viewholder.AbstractViewHolder
+import dev.volt_emu.volt.databinding.PageSetupBinding
+import dev.volt_emu.volt.model.PageState
+import dev.volt_emu.volt.model.SetupCallback
+import dev.volt_emu.volt.model.SetupPage
+import dev.volt_emu.volt.utils.ViewUtils
+import dev.volt_emu.volt.viewholder.AbstractViewHolder
 import android.content.res.ColorStateList
-import org.yuzu.yuzu_emu.R
-import org.yuzu.yuzu_emu.model.ButtonState
+import dev.volt_emu.volt.R
+import dev.volt_emu.volt.model.ButtonState
 
 class SetupAdapter(val activity: AppCompatActivity, pages: List<SetupPage>) :
     AbstractListAdapter<SetupPage, SetupAdapter.SetupPageViewHolder>(pages) {

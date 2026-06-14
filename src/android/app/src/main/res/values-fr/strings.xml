@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
 
     <string name="app_disclaimer">Ce logiciel permet de jouer à des jeux de la console Nintendo Switch. Aucun titre ni clé de jeu n\'est inclus.<br /><br />Avant de commencer, veuillez localiser votre fichier <![CDATA[<b> prod.keys </b>]]> sur le stockage de votre appareil.<br /><br /><![CDATA[<a href=\"https://yuzu-mirror.github.io/help/quickstart\">En savoir plus</a>]]></string>
@@ -237,7 +237,7 @@
     <string name="home_settings">Paramètres</string>
     <string name="empty_gamelist">Aucun fichier n\'a été trouvé ou aucun répertoire de jeu n\'a encore été sélectionné.</string>
     <string name="manage_game_folders">Gérer les dossiers de jeux</string>
-    <string name="select_games_folder_description">Permet à Eden de remplir la liste des jeux</string>
+    <string name="select_games_folder_description">Permet à Volt Emulator de remplir la liste des jeux</string>
     <string name="add_games_warning">Ne pas sélectionner le dossier des jeux ?</string>
     <string name="add_games_warning_description">Les jeux ne seront pas affichés dans la liste des jeux si aucun dossier n\'est sélectionné.</string>
     <string name="add_games_warning_help">https://yuzu-mirror.github.io/help/quickstart/#dumping-games</string>
@@ -315,10 +315,10 @@
     <string name="firmware_installed_failure_description">Assurez-vous que les fichiers NCA du firmware se trouvent à la racine du fichier ZIP, puis réessayez.</string>
     <string name="firmware_uninstalled_failure">Désinstallation du firmware échoué</string>
     <string name="share_log">Partager les logs de débogage</string>
-    <string name="share_log_description">Partagez le fichier de log de Eden pour déboguer les problèmes.</string>
+    <string name="share_log_description">Partagez le fichier de log de Volt Emulator pour déboguer les problèmes.</string>
     <string name="share_log_missing">Aucun fichier de log trouvé</string>
     <string name="share_gpu_log">Partager les logs du GPU</string>
-    <string name="share_gpu_log_description">Partage les logs du GPU générés par Eden afin de déboguer les problèmes graphiques.</string>
+    <string name="share_gpu_log_description">Partage les logs du GPU générés par Volt Emulator afin de déboguer les problèmes graphiques.</string>
     <string name="share_gpu_log_missing">Aucun fichier de log du GPU trouvé,</string>
     <string name="install_game_content">Installer le contenu du jeu</string>
     <string name="install_game_content_description">Installer une mise à jour ou un DLC</string>
@@ -395,14 +395,14 @@
     <string name="copied_to_clipboard">Copié dans le presse-papier</string>
     <string name="about_app_description">Un émulateur Switch open source</string>
     <string name="contributors">Contributeurs</string>
-    <string name="contributors_description">Les gens qui ont rendu possible Eden pour Android</string>
-    <string name="licenses_description">Des projets qui rendent possible Eden pour Android</string>
+    <string name="contributors_description">Les gens qui ont rendu possible Volt Emulator pour Android</string>
+    <string name="licenses_description">Des projets qui rendent possible Volt Emulator pour Android</string>
     <string name="build">Build</string>
     <string name="user_data">Données utilisateur</string>
     <string name="user_data_description">Importer/exporter toutes les données de l\'application\n\nLors de l\'importation des données utilisateur, toutes les données déjà existantes seront supprimé !\n\nImporter les données depuis Citron peut poser des problèmes. Il est recommandé de faire l\'importation manuellement de toutes les données nécessaire.</string>
     <string name="exporting_user_data">Exportation des données utilisateur...</string>
     <string name="importing_user_data">Importation des données utilisateur...</string>
-    <string name="invalid_yuzu_backup">Backup Eden invalide</string>
+    <string name="invalid_yuzu_backup">Backup Volt Emulator invalide</string>
     <string name="user_data_export_success">Les données utilisateur ont été exportés avec succès</string>
     <string name="user_data_import_success">Les données utilisateur ont été importées avec succès</string>
     <string name="user_data_export_cancelled">Exportation annulée</string>
@@ -1039,7 +1039,7 @@
     <string name="app_language_system">Suivre le système</string>
     <!-- Static Themes -->
     <string name="static_theme_color">Couleur du thème</string>
-    <string name="eden_theme">Eden</string>
+    <string name="eden_theme">Volt Emulator</string>
     <string name="violet">Violet (Par défaut)</string>
     <string name="blue">Bleu</string>
     <string name="cyan">Cyan</string>

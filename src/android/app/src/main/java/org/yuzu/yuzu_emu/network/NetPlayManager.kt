@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: Copyright 2025 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-package org.yuzu.yuzu_emu.network
+package dev.volt_emu.volt.network
 
 import android.app.Activity
 import android.content.Context
@@ -12,9 +12,9 @@ import android.os.Handler
 import android.os.Looper
 import android.widget.Toast
 import androidx.preference.PreferenceManager
-import org.yuzu.yuzu_emu.R
-import org.yuzu.yuzu_emu.YuzuApplication
-import org.yuzu.yuzu_emu.dialogs.ChatMessage
+import dev.volt_emu.volt.R
+import dev.volt_emu.volt.YuzuApplication
+import dev.volt_emu.volt.dialogs.ChatMessage
 import java.net.Inet4Address
 import androidx.core.content.edit
 

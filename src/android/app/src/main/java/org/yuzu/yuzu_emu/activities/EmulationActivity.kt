@@ -4,7 +4,7 @@
 // SPDX-FileCopyrightText: 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-package org.yuzu.yuzu_emu.activities
+package dev.volt_emu.volt.activities
 
 import android.annotation.SuppressLint
 import android.app.Activity
@@ -28,8 +28,8 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import androidx.navigation.NavOptions
-import org.yuzu.yuzu_emu.fragments.EmulationFragment
-import org.yuzu.yuzu_emu.utils.CustomSettingsHandler
+import dev.volt_emu.volt.fragments.EmulationFragment
+import dev.volt_emu.volt.utils.CustomSettingsHandler
 import android.util.Rational
 import android.view.InputDevice
 import android.view.KeyEvent
@@ -45,28 +45,28 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.navigation.fragment.NavHostFragment
 import androidx.preference.PreferenceManager
-import org.yuzu.yuzu_emu.NativeLibrary
-import org.yuzu.yuzu_emu.R
-import org.yuzu.yuzu_emu.YuzuApplication
-import org.yuzu.yuzu_emu.databinding.ActivityEmulationBinding
-import org.yuzu.yuzu_emu.dialogs.NetPlayDialog
-import org.yuzu.yuzu_emu.features.input.NativeInput
-import org.yuzu.yuzu_emu.features.settings.model.BooleanSetting
-import org.yuzu.yuzu_emu.features.settings.model.IntSetting
-import org.yuzu.yuzu_emu.features.settings.model.Settings
-import org.yuzu.yuzu_emu.model.EmulationViewModel
-import org.yuzu.yuzu_emu.model.Game
-import org.yuzu.yuzu_emu.network.NetPlayManager
-import org.yuzu.yuzu_emu.utils.InputHandler
-import org.yuzu.yuzu_emu.utils.Log
-import org.yuzu.yuzu_emu.utils.MemoryUtil
-import org.yuzu.yuzu_emu.utils.NativeConfig
-import org.yuzu.yuzu_emu.utils.NfcReader
-import org.yuzu.yuzu_emu.utils.ParamPackage
-import org.yuzu.yuzu_emu.utils.ThemeHelper
+import dev.volt_emu.volt.NativeLibrary
+import dev.volt_emu.volt.R
+import dev.volt_emu.volt.YuzuApplication
+import dev.volt_emu.volt.databinding.ActivityEmulationBinding
+import dev.volt_emu.volt.dialogs.NetPlayDialog
+import dev.volt_emu.volt.features.input.NativeInput
+import dev.volt_emu.volt.features.settings.model.BooleanSetting
+import dev.volt_emu.volt.features.settings.model.IntSetting
+import dev.volt_emu.volt.features.settings.model.Settings
+import dev.volt_emu.volt.model.EmulationViewModel
+import dev.volt_emu.volt.model.Game
+import dev.volt_emu.volt.network.NetPlayManager
+import dev.volt_emu.volt.utils.InputHandler
+import dev.volt_emu.volt.utils.Log
+import dev.volt_emu.volt.utils.MemoryUtil
+import dev.volt_emu.volt.utils.NativeConfig
+import dev.volt_emu.volt.utils.NfcReader
+import dev.volt_emu.volt.utils.ParamPackage
+import dev.volt_emu.volt.utils.ThemeHelper
 import java.text.NumberFormat
 import kotlin.math.roundToInt
-import org.yuzu.yuzu_emu.utils.ForegroundService
+import dev.volt_emu.volt.utils.ForegroundService
 import androidx.core.os.BundleCompat
 
 class EmulationActivity : AppCompatActivity(), SensorEventListener, InputManager.InputDeviceListener {
@@ -456,7 +456,7 @@ class EmulationActivity : AppCompatActivity(), SensorEventListener, InputManager
         val navHostFragment =
             supportFragmentManager.findFragmentById(R.id.fragment_container) as? NavHostFragment
         val emulationFragment =
-            navHostFragment?.childFragmentManager?.fragments?.firstOrNull() as? org.yuzu.yuzu_emu.fragments.EmulationFragment
+            navHostFragment?.childFragmentManager?.fragments?.firstOrNull() as? dev.volt_emu.volt.fragments.EmulationFragment
         emulationFragment?.onControllerInputDetected()
     }
 
@@ -487,7 +487,7 @@ class EmulationActivity : AppCompatActivity(), SensorEventListener, InputManager
         val navHostFragment =
             supportFragmentManager.findFragmentById(R.id.fragment_container) as? NavHostFragment
         val emulationFragment =
-            navHostFragment?.childFragmentManager?.fragments?.firstOrNull() as? org.yuzu.yuzu_emu.fragments.EmulationFragment
+            navHostFragment?.childFragmentManager?.fragments?.firstOrNull() as? dev.volt_emu.volt.fragments.EmulationFragment
         emulationFragment?.onPhysicalControllerStateChanged(InputHandler.androidControllers.isNotEmpty())
     }
 
@@ -728,7 +728,7 @@ class EmulationActivity : AppCompatActivity(), SensorEventListener, InputManager
 
     override fun dispatchTouchEvent(event: MotionEvent): Boolean {
         val navHostFragment = supportFragmentManager.findFragmentById(R.id.fragment_container) as? NavHostFragment
-        val emulationFragment = navHostFragment?.childFragmentManager?.fragments?.firstOrNull() as? org.yuzu.yuzu_emu.fragments.EmulationFragment
+        val emulationFragment = navHostFragment?.childFragmentManager?.fragments?.firstOrNull() as? dev.volt_emu.volt.fragments.EmulationFragment
 
         emulationFragment?.let { fragment ->
             when (event.action) {

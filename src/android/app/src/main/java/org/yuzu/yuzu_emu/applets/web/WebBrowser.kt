@@ -1,13 +1,13 @@
 // SPDX-FileCopyrightText: Copyright 2025 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-package org.yuzu.yuzu_emu.applets.web
+package dev.volt_emu.volt.applets.web
 
 import android.content.Intent
 import android.net.Uri
 import androidx.annotation.Keep
-import org.yuzu.yuzu_emu.NativeLibrary
-import org.yuzu.yuzu_emu.utils.Log
+import dev.volt_emu.volt.NativeLibrary
+import dev.volt_emu.volt.utils.Log
 
 /**
     Should run WebBrowser as a new intent.

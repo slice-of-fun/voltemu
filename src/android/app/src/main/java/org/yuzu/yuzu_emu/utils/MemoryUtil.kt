@@ -1,13 +1,13 @@
 // SPDX-FileCopyrightText: 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-package org.yuzu.yuzu_emu.utils
+package dev.volt_emu.volt.utils
 
 import android.app.ActivityManager
 import android.content.Context
 import android.os.Build
-import org.yuzu.yuzu_emu.R
-import org.yuzu.yuzu_emu.YuzuApplication
+import dev.volt_emu.volt.R
+import dev.volt_emu.volt.YuzuApplication
 import java.util.Locale
 import kotlin.math.ceil
 
