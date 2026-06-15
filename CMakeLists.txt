@@ -11,6 +11,7 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/externals/cmake-modul
 set(CPM_SOURCE_CACHE ${CMAKE_SOURCE_DIR}/.cache/cpm)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_SCAN_FOR_MODULES 0)
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /MAP /MAPINFO:EXPORTS")
 
 include(DetectPlatform)
 include(DetectArchitecture)
@@ -194,8 +195,9 @@ if(MSVC)
         $<$<COMPILE_LANGUAGE:C,CXX>:$<$<CONFIG:Release>:/${libflag}>>
         $<$<COMPILE_LANGUAGE:C,CXX>:$<$<CONFIG:RelWithDebInfo>:/${libflag}>>
         $<$<COMPILE_LANGUAGE:C,CXX>:$<$<CONFIG:MinSizeRel>:/${libflag}>>
-        # Disable hardware floating-point exceptions to prevent STATUS_FLOAT_INVALID_OPERATION (0xc0000095) crashes
-        $<$<COMPILE_LANGUAGE:C,CXX>:/fp:except->)
+        $<$<COMPILE_LANGUAGE:C,CXX>:/fp:except->
+        $<$<COMPILE_LANGUAGE:C,CXX>:/FS>
+        $<$<COMPILE_LANGUAGE:C,CXX>:/wd5287>)
 endif()
 
 # TODO(crueter): Cleanup, each dep that has a bundled option should allow to choose between bundled, external, system
@@ -466,6 +468,7 @@ if (NOT VOLT_STATIC_ROOM)
     endif()
 
     # Opus
+    set(OPUS_PACKAGE_VERSION "1.3")
     AddJsonPackage(opus)
 
     if (Opus_ADDED)
@@ -656,6 +659,8 @@ if (ENABLE_QT)
 
     # QuaZip
     AddJsonPackage(quazip)
+
+    set(CMAKE_CXX_STANDARD 20)
 endif()
 
 if (NOT VOLT_STATIC_ROOM AND NOT (VOLT_USE_BUNDLED_FFMPEG OR VOLT_USE_EXTERNAL_FFMPEG))
