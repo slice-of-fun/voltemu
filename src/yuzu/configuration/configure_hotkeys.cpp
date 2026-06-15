@@ -14,6 +14,7 @@
 #include "frontend_common/config.h"
 #include "hid_core/frontend/emulated_controller.h"
 #include "hid_core/hid_core.h"
+#include "hid_core/hid_types.h"
 #include "qt_common/config/uisettings.h"
 #include "ui_configure_hotkeys.h"
 #include "yuzu/hotkeys.h"
@@ -216,8 +217,8 @@ void ConfigureHotkeys::SetPollingResult(const bool cancel)
 }
 
 QString ConfigureHotkeys::GetButtonCombinationName(Core::HID::NpadButton button,
-                                                   const bool home = false,
-                                                   const bool capture = false) const
+                                                   bool home,
+                                                   bool capture) const
 {
     Core::HID::NpadButtonState state{button};
     QString button_combination;

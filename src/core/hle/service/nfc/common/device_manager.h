@@ -19,6 +19,11 @@ namespace Service::Set {
 class ISystemSettingsServer;
 }
 
+namespace Kernel {
+class KEvent;
+class KReadableEvent;
+}
+
 namespace Service::NFC {
 class NfcDevice;
 

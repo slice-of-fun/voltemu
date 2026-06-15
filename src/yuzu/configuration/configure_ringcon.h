@@ -7,6 +7,9 @@
 #include <functional>
 #include <memory>
 
+#include "common/param_package.h"
+#include "input_common/main.h"
+
 namespace InputCommon {
 class InputSubsystem;
 } // namespace InputCommon
@@ -14,6 +17,7 @@ class InputSubsystem;
 namespace Core::HID {
 class HIDCore;
 class EmulatedController;
+enum class ControllerTriggerType;
 } // namespace Core::HID
 
 namespace Ui {

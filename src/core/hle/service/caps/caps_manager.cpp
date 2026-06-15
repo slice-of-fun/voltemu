@@ -194,9 +194,7 @@ Result AlbumManager::LoadAlbumScreenShotImage(LoadAlbumScreenShotImageOutput& ou
                 .orientation = AlbumImageOrientation::None,
                 .unknown_1{},
                 .unknown_2{},
-                .pad163{},
             },
-        .pad179{},
     };
 
     std::filesystem::path path;
@@ -232,9 +230,7 @@ AlbumManager::LoadAlbumScreenShotThumbnail(LoadAlbumScreenShotImageOutput& out_i
                 .orientation = AlbumImageOrientation::None,
                 .unknown_1{},
                 .unknown_2{},
-                .pad163{},
             },
-        .pad179{},
     };
 
     std::filesystem::path path;

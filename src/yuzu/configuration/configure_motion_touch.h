@@ -5,6 +5,9 @@
 
 #include <QDialog>
 #include <memory>
+#include <vector>
+
+#include "common/settings.h"
 
 class QLabel;
 class QPushButton;

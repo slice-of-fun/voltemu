@@ -344,7 +344,7 @@ void ConfigureRingController::ControllerUpdate(Core::HID::ControllerTriggerType 
     }
 
     const auto value = emulated_controller->GetRingSensorValues();
-    const auto tex_value = QString::fromStdString(fmt::format("{:.3f}", value.raw_value));
+    const auto tex_value = QString::fromStdString(fmt::format("{:.3f}", static_cast<double>(value.raw_value)));
     ui->ring_controller_sensor_value->setText(tex_value);
 }
 
@@ -359,8 +359,8 @@ void ConfigureRingController::HandleClick(
 
     input_subsystem->BeginMapping(type);
 
-    QWidget::grabMouse();
-    QWidget::grabKeyboard();
+    this->grabMouse();
+    this->grabKeyboard();
 
     timeout_timer->start(2500); // Cancel after 2.5 seconds
     poll_timer->start(25);      // Check for new inputs every 25ms
@@ -372,8 +372,8 @@ void ConfigureRingController::SetPollingResult(const Common::ParamPackage& param
     poll_timer->stop();
     input_subsystem->StopMapping();
 
-    QWidget::releaseMouse();
-    QWidget::releaseKeyboard();
+    this->releaseMouse();
+    this->releaseKeyboard();
 
     if (!abort) {
         (*input_setter)(params);

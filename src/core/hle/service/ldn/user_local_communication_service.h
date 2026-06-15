@@ -16,6 +16,11 @@ namespace Core {
 class System;
 }
 
+namespace Kernel {
+class KEvent;
+class KReadableEvent;
+}
+
 namespace Service::LDN {
 
 class IUserLocalCommunicationService final

@@ -18,7 +18,7 @@
 #include "input_common/drivers/mouse.h"
 #include "input_common/drivers/touch_screen.h"
 #include "input_common/main.h"
-#include "yuzu_cmd/yuzu_icon.h"
+#include "volt_cmd/volt_icon.h"
 
 EmuWindow_SDL3::EmuWindow_SDL3(InputCommon::InputSubsystem* input_subsystem_, Core::System& system_)
     : input_subsystem{input_subsystem_}, system{system_}
@@ -260,12 +260,12 @@ void EmuWindow_SDL3::WaitEvent()
 // Credits to Samantas5855 and others for this function.
 void EmuWindow_SDL3::SetWindowIcon()
 {
-    SDL_IOStream* const yuzu_icon_stream = SDL_IOFromConstMem((void*)yuzu_icon, yuzu_icon_size);
-    if (yuzu_icon_stream == nullptr) {
+    SDL_IOStream* const volt_icon_stream = SDL_IOFromConstMem((void*)volt_icon, volt_icon_size);
+    if (volt_icon_stream == nullptr) {
         LOG_WARNING(Frontend, "Failed to create Volt Emulator icon stream.");
         return;
     }
-    SDL_Surface* const window_icon = SDL_LoadBMP_IO(yuzu_icon_stream, true);
+    SDL_Surface* const window_icon = SDL_LoadBMP_IO(volt_icon_stream, true);
     if (window_icon == nullptr) {
         LOG_WARNING(Frontend, "Failed to read BMP from stream.");
         return;

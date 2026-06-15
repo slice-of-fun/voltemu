@@ -6,9 +6,7 @@
 #include "common/param_package.h"
 #include "common/threadsafe_queue.h"
 
-namespace InputCommon::Polling {
-enum class InputType;
-}
+#include "input_common/main.h"
 
 namespace InputCommon {
 class InputEngine;

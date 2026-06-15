@@ -12,9 +12,7 @@
 #include "common/threadsafe_queue.h"
 #include "input_common/helpers/joycon_protocol/joycon_types.h"
 
-namespace Common::Input {
-enum class DriverResult;
-}
+#include "common/input.h"
 
 namespace InputCommon::Joycon {
 class CalibrationProtocol;

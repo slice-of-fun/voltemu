@@ -84,7 +84,6 @@ void IScreenShotApplicationService::CaptureAndSaveScreenshot(AlbumReportOption r
         .orientation = Capture::AlbumImageOrientation::None,
         .unknown_1{},
         .unknown_2{},
-        .pad163{},
     };
 
     renderer.RequestScreenshot(

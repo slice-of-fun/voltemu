@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "core/hle/service/caps/caps_manager.h"
 #include "core/hle/service/caps/caps_types.h"
 #include "core/hle/service/cmif_types.h"
 #include "core/hle/service/service.h"
@@ -12,6 +13,8 @@ class System;
 }
 
 namespace Service::Capture {
+
+class AlbumManager;
 
 class IScreenShotService final : public ServiceFramework<IScreenShotService> {
 public:

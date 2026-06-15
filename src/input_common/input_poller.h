@@ -3,6 +3,9 @@
 
 #pragma once
 
+#include <memory>
+#include "common/input.h"
+
 namespace Input {
 class InputDevice;
 

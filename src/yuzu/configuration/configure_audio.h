@@ -11,6 +11,7 @@
 #include "yuzu/configuration/configuration_shared.h"
 
 class QComboBox;
+class QPushButton;
 
 namespace Core {
 class System;

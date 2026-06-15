@@ -11,10 +11,11 @@ namespace Common {
 class ParamPackage;
 }
 
+#include "hid_core/hid_types.h"
+
 namespace Core::HID {
 class HIDCore;
 class EmulatedController;
-enum class NpadButton : u64;
 } // namespace Core::HID
 
 namespace Ui {

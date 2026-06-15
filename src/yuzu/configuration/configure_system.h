@@ -8,12 +8,14 @@
 #include <memory>
 #include <vector>
 
+#include "common/common_types.h"
 #include "yuzu/configuration/configuration_shared.h"
 
 class QCheckBox;
 class QLineEdit;
 class QComboBox;
 class QDateTimeEdit;
+class QSpinBox;
 namespace Core {
 class System;
 }

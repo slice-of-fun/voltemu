@@ -15,6 +15,10 @@
 #include "common/common_types.h"
 #include "input_common/helpers/joycon_protocol/joycon_types.h"
 
+namespace Common::Input {
+enum class DriverResult;
+}
+
 namespace InputCommon::Joycon {
 
 /// Joycon driver functions that handle low level communication
@@ -59,9 +63,8 @@ public:
      */
     Common::Input::DriverResult SendRawData(std::span<const u8> buffer);
 
-    template<typename Output>
-    requires std::is_trivially_copyable_v<Output> Common::Input::DriverResult
-    SendData(const Output& output)
+    template<typename Output, typename = std::enable_if_t<std::is_trivially_copyable_v<Output>>>
+    Common::Input::DriverResult SendData(const Output& output)
     {
         std::array<u8, sizeof(Output)> buffer;
         std::memcpy(buffer.data(), &output, sizeof(Output));
@@ -117,9 +120,8 @@ public:
      * @param Initial address location
      * @returns output object containing the response
      */
-    template<typename Output>
-    requires std::is_trivially_copyable_v<Output> Common::Input::DriverResult
-    ReadSPI(SpiAddress addr, Output& output)
+    template<typename Output, typename = std::enable_if_t<std::is_trivially_copyable_v<Output>>>
+    Common::Input::DriverResult ReadSPI(SpiAddress addr, Output& output)
     {
         std::array<u8, sizeof(Output)> buffer;
         output = {};

@@ -6,6 +6,10 @@
 #include <QWidget>
 #include <memory>
 
+namespace Core {
+class System;
+}
+
 namespace Ui {
 class ConfigureNetwork;
 }

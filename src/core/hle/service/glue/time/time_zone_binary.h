@@ -7,7 +7,7 @@
 #include <string>
 #include <string_view>
 #include <vector>
-
+#include "core/file_sys/vfs/vfs_types.h"
 #include "core/hle/service/psc/time/common.h"
 
 namespace Core {

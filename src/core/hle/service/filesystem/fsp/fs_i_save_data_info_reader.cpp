@@ -103,16 +103,14 @@ void ISaveDataInfoReader::FindNormalSaves(FileSys::SaveDataSpaceId space,
             if (save_id_numeric != 0) {
                 // System Save Data
                 info.emplace_back(SaveDataInfo{
-                    0,
-                    space,
-                    FileSys::SaveDataType::System,
-                    {},
-                    user_id_numeric,
-                    save_id_numeric,
-                    0,
-                    user_id->GetSize(),
-                    {},
-                    {},
+                    .save_id_unknown = 0,
+                    .space = space,
+                    .type = FileSys::SaveDataType::System,
+                    .user_id = user_id_numeric,
+                    .save_id = save_id_numeric,
+                    .title_id = 0,
+                    .save_image_size = user_id->GetSize(),
+                    .index = 0,
                 });
 
                 continue;
@@ -122,16 +120,14 @@ void ISaveDataInfoReader::FindNormalSaves(FileSys::SaveDataSpaceId space,
                 const auto device = std::all_of(user_id_numeric.begin(), user_id_numeric.end(),
                                                 [](u8 val) { return val == 0; });
                 info.emplace_back(SaveDataInfo{
-                    0,
-                    space,
-                    device ? FileSys::SaveDataType::Device : FileSys::SaveDataType::Account,
-                    {},
-                    user_id_numeric,
-                    save_id_numeric,
-                    stoull_be(title_id->GetName()),
-                    title_id->GetSize(),
-                    {},
-                    {},
+                    .save_id_unknown = 0,
+                    .space = space,
+                    .type = device ? FileSys::SaveDataType::Device : FileSys::SaveDataType::Account,
+                    .user_id = user_id_numeric,
+                    .save_id = save_id_numeric,
+                    .title_id = stoull_be(title_id->GetName()),
+                    .save_image_size = title_id->GetSize(),
+                    .index = 0,
                 });
             }
         }
@@ -152,16 +148,14 @@ void ISaveDataInfoReader::FindTemporaryStorageSaves(FileSys::SaveDataSpaceId spa
                 std::reverse(user_id_numeric.begin(), user_id_numeric.end());
 
                 info.emplace_back(SaveDataInfo{
-                    0,
-                    space,
-                    FileSys::SaveDataType::Temporary,
-                    {},
-                    user_id_numeric,
-                    stoull_be(type->GetName()),
-                    stoull_be(title_id->GetName()),
-                    title_id->GetSize(),
-                    {},
-                    {},
+                    .save_id_unknown = 0,
+                    .space = space,
+                    .type = FileSys::SaveDataType::Temporary,
+                    .user_id = user_id_numeric,
+                    .save_id = stoull_be(type->GetName()),
+                    .title_id = stoull_be(title_id->GetName()),
+                    .save_image_size = title_id->GetSize(),
+                    .index = 0,
                 });
             }
         }
