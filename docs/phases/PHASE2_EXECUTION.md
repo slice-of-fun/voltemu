@@ -105,11 +105,16 @@ The goal is to improve maintainability, readability, and architectural quality w
 **Objective:** Ensure all systems are well documented and have foundational test coverage.
 
 ### 4.1 Subsystem Documentation
-- [ ] Write `README.md` for `src/core/`.
-- [ ] Write `README.md` for `src/video_core/`.
-- [ ] Write `README.md` for `src/audio_core/`.
-- [ ] Write `README.md` for `src/input_common/`.
+- [x] Write `README.md` for `src/core/`.
+- [x] Write `README.md` for `src/video_core/`.
+- [x] Write `README.md` for `src/audio_core/`.
+- [x] Write `README.md` for `src/input_common/`.
 - [ ] Add Doxygen blocks to all major public headers.
+
+> Subsystem READMEs written from a per-subsystem architecture audit (not generic
+> boilerplate): each documents the top-level owning class, a directory map, the
+> primary data/command flow, and "where to start" pointers. Doxygen pass on public
+> headers remains outstanding.
 
 ### 4.2 Unit Tests
 - [ ] Audit existing `tests/` coverage.
