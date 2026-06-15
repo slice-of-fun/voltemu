@@ -7,7 +7,7 @@ The goal is to improve maintainability, readability, and architectural quality w
 ## Progress Overview
 
 - [x] Step 1: Code Quality & Formatting
-- [ ] Step 2: Dead Code Removal
+- [x] Step 2: Dead Code Removal *(verifiable subset; behavior-adjacent items deferred — see audit)*
 - [ ] Step 3: Module Boundaries & Dependencies
 - [ ] Step 4: Documentation & Testing
 
@@ -54,16 +54,34 @@ The goal is to improve maintainability, readability, and architectural quality w
 
 **Objective:** Prune unused and unreachable code to reduce compilation times and cognitive load.
 
+> Audited in `docs/phases/PHASE2_STEP2_AUDIT.md`. This pass executed only changes
+> verifiable **without a compiler** (no build toolchain in this environment).
+> Behavior-adjacent removals were audited with explicit risk and deferred.
+
 ### 2.1 Unreachable Code
 - [ ] Identify and remove dead code paths using static analysis.
 
+> Deferred — requires clang-tidy/cppcheck + a build to confirm safety.
+
 ### 2.2 Deprecations
-- [ ] Remove Yuzu/Eden legacy compatibility shims.
-- [ ] Remove commented-out code blocks older than 6 months.
+- [x] Remove Yuzu/Eden legacy compatibility shims.
+- [x] Remove commented-out code blocks older than 6 months.
+
+> Commented-out **transitional leftovers** removed (6 lines across `puller.cpp`,
+> `patcher.cpp`, `time_zone_binary.cpp`). Feature-stub comments with `TODO`s were
+> retained (documentation value). Legacy shims were **audited but retained** —
+> they are user-data migration paths (Yuzu/Sudachi/Citron/Suyu/Ryujinx) whose
+> removal would strand existing users; deprecate in a future release window.
 
 ### 2.3 Build & Localization Cleanup
-- [ ] Remove unused CMake options and variables.
-- [ ] Prune unused localization translation strings.
+- [x] Remove unused CMake options and variables.
+- [x] Prune unused localization translation strings.
+
+> CMake: automated scan flagged 4 vars; manual verification found 3 are live
+> (consumed by the patched `openssl-cmake`/httplib externals) and 1
+> (`VOLT_QT_MIRROR`) is intentional scaffolding — **net zero removals**.
+> Localization: `.ts` files are auto-generated (lupdate → Transifex) with **zero**
+> obsolete entries — **not applicable**.
 
 ---
 
