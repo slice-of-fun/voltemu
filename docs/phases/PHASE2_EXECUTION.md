@@ -8,8 +8,8 @@ The goal is to improve maintainability, readability, and architectural quality w
 
 - [x] Step 1: Code Quality & Formatting
 - [x] Step 2: Dead Code Removal *(verifiable subset; behavior-adjacent items deferred — see audit)*
-- [ ] Step 3: Module Boundaries & Dependencies
-- [ ] Step 4: Documentation & Testing
+- [ ] Step 3: Module Boundaries & Dependencies *(audited; build-sensitive edits deferred — see audit)*
+- [ ] Step 4: Documentation & Testing *(4.1 done; 4.2 tests written, build-dependent items deferred)*
 
 ---
 
@@ -89,14 +89,32 @@ The goal is to improve maintainability, readability, and architectural quality w
 
 **Objective:** Clean up architectural coupling between core components.
 
+> Audited in `docs/phases/PHASE2_STEP3_AUDIT.md`. This is an **audit-only** pass:
+> every candidate (include removal, cycle untangling, pimpl adoption) is
+> build-sensitive and was recorded with evidence rather than applied — consistent
+> with Step 2.1. **Net no-build edits: none.**
+
 ### 3.1 Include Reductions
 - [ ] Audit and remove unnecessary `#include` directives.
 - [ ] Resolve circular dependencies.
 - [ ] Move implementation details from headers (`.h`) to source files (`.cpp`).
 
+> Cross-subsystem coupling mapped: `core ↔ video_core` is the only true cycle
+> (58/37 includes, structural). `audio_core → core` is heavy but largely
+> one-way (76/20). `input_common` and `video_core ↔ audio_core` are already
+> cleanly isolated (0/0). One concrete unused-include candidate found —
+> `video_core/gpu.h:11` pulls `common/bit_field.h` with no `BitField` usage
+> (grep-verified) — but removal is deferred (transitive-consumer / IWYU risk
+> needs a build).
+
 ### 3.2 Public API Boundaries
 - [ ] Define strict public APIs for `core`, `video_core`, and `audio_core`.
 - [ ] Introduce interface headers where appropriate.
+
+> The four facades (`System`, `GPU`, `AudioCore`, `InputSubsystem`) already serve
+> as public entry points (documented in the Step 4.1 READMEs). Three use pimpl;
+> `audio_core.h` is the lone exception (exposes concrete `unique_ptr` members) and
+> is the clearest boundary-tightening candidate — deferred as a real refactor.
 
 ---
 
