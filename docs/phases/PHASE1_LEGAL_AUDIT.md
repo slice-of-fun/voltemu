@@ -168,9 +168,17 @@ this repo):** faq/help → `…/volt-emu/tree/dev/docs`; contribute →
 (homepage, bugtracker, translate, contact, vcs-browser) were already valid and
 left unchanged. A repo-wide sweep confirms no other glue artifacts remain.
 
----
-
-## Disposition
+### D6 — Incomplete rebrand: stale `eden.exe` in Windows installer ⚠️
+`dist/installer.nsi` still referenced `eden.exe` (8×) and `eden-cli.exe` (1×)
+even though the build produces `volt.exe` (CMake `OUTPUT_NAME "volt"`, CI
+`build.yml:48`) and `volt-cmd.exe` (target `volt-cmd`). The platform-rebrand
+commit `0ad45e6ce0` updated `PRODUCT_NAME` but missed the executable references,
+so the Start-Menu/Desktop shortcuts, "run after install", file-association
+handler, registry App-Path/DisplayIcon, and uninstall cleanup all pointed at a
+binary that is never installed — broken on every install. (ROADMAP Step 4.5.)
+**Remediation:** `eden.exe`→`volt.exe` (8×), `eden-cli.exe`→`volt-cmd.exe` (1×).
+The line-1 SPDX copyright (`Eden Emulator Project`) is a legal attribution and
+was **left untouched**.
 
 | Item | Origin | Risk | Action |
 |------|--------|------|--------|
@@ -180,6 +188,7 @@ left unchanged. A repo-wide sweep confirms no other glue artifacts remain.
 | D3 (truncated id ×2 + generator) | upstream | invalid SPDX id | ✅ **Repaired** — `or-late`→`or-later` in both files + `svc_generator.py` |
 | D4 (1 falsified holder, Eden-origin) | Volt rebrand `0ad45e6ce0` | legal/attribution | ✅ **Repaired** — holder restored `volt`→`Eden` |
 | D5 (4 mangled URLs, collateral) | Volt rebrand `0ad45e6ce0` | content/UX | ✅ **Repaired** — point at existing repo content |
+| D6 (9 stale `eden.exe` installer refs) | Volt rebrand `0ad45e6ce0` (incomplete) | broken installer | ✅ **Repaired** — `volt.exe`/`volt-cmd.exe` |
 
 All three repairs are **no-build-safe** (comment/header lines only) and are
 exact, git-verified restorations rather than new edits — they *restore* rather

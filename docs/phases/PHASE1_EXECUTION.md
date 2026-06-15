@@ -96,8 +96,8 @@ This document is the authoritative task list for Phase 1. Every item must be com
 | 4.2 | Update `.rc` file: company name | ⬜ | "Volt Emulator Team" |
 | 4.3 | Update `.rc` file: description | ⬜ | Project description |
 | 4.4 | Update `.rc` file: executable name | ⬜ | `volt.exe` |
-| 4.5 | Update NSIS/WiX installer: all branding | ⬜ | Name, icon, exe name |
-| 4.6 | Update installer output filename | ⬜ | `Volt-Emulator-Setup-vX.X.X.exe` |
+| 4.5 | Update NSIS/WiX installer: all branding | ✅ | `installer.nsi`: `PRODUCT_NAME "Volt Emulator"` + all 9 exe refs fixed `eden.exe`→`volt.exe`/`volt-cmd.exe` (legal audit D6). Icon path verify deferred to build |
+| 4.6 | Update installer output filename | ✅ | `OutFile` derives from `${PRODUCT_NAME}` → `Volt Emulator-Windows-…-installer.exe` |
 
 #### Linux
 | # | Task | Status | Notes |
