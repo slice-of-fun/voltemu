@@ -26,11 +26,7 @@ if (NIGHTLY_BUILD)
     add_compile_definitions(NIGHTLY_BUILD)
 endif()
 
-# Legacy (android only)
-if (VOLT_LEGACY)
-    message(WARNING "Making legacy build. Performance may suffer.")
-    add_compile_definitions(VOLT_LEGACY)
-endif()
+
 
 # Genshin Spoof (android only)
 if (GENSHIN_SPOOF)

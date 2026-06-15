@@ -204,10 +204,7 @@ void QtConfig::ReadPathValues()
     BeginGroup(Settings::TranslateCategory(Settings::Category::Paths));
 
     UISettings::values.roms_path = ReadStringSetting(std::string("romsPath"));
-    UISettings::values.game_dir_deprecated =
-        ReadStringSetting(std::string("gameListRootDir"), std::string("."));
-    UISettings::values.game_dir_deprecated_deepscan =
-        ReadBooleanSetting(std::string("gameListDeepScan"), std::make_optional(false));
+
 
     const int gamedirs_size = BeginArray(std::string("gamedirs"));
     for (int i = 0; i < gamedirs_size; ++i) {
@@ -232,11 +229,7 @@ void QtConfig::ReadPathValues()
         UISettings::values.game_dirs.append(game_dir);
         game_dir.path = std::string("SysNAND");
         UISettings::values.game_dirs.append(game_dir);
-        if (UISettings::values.game_dir_deprecated != std::string(".")) {
-            game_dir.path = UISettings::values.game_dir_deprecated;
-            game_dir.deep_scan = UISettings::values.game_dir_deprecated_deepscan;
-            UISettings::values.game_dirs.append(game_dir);
-        }
+
     }
     UISettings::values.recent_files =
         QString::fromStdString(ReadStringSetting(std::string("recentFiles")))

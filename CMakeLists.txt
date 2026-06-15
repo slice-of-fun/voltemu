@@ -237,7 +237,7 @@ cmake_dependent_option(VOLT_INSTALL_UDEV_RULES "Install udev rules for gyro acce
 
 option(VOLT_DOWNLOAD_ANDROID_VVL "Download validation layer binary for android" ON)
 
-option(VOLT_LEGACY "Apply patches that improve compatibility with older GPUs (e.g. Snapdragon 865) at the cost of performance" OFF)
+
 
 option(NIGHTLY_BUILD "Use Nightly qualifiers in the update checker and build metadata" OFF)
 
