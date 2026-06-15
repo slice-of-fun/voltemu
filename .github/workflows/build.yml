@@ -75,7 +75,7 @@ jobs:
             clang cmake ninja-build \
             libgl1-mesa-dev libglu1-mesa-dev \
             libasound2-dev libpulse-dev libudev-dev \
-            libdrm-dev glslang-tools \
+            libdrm-dev \
             nasm
 
       - name: Install Qt
@@ -84,6 +84,9 @@ jobs:
           version: '6.7.3'
           cache: 'true'
           modules: 'qtmultimedia qtwebengine qtcharts'
+
+      - name: Install Vulkan SDK
+        uses: ammaraskar/setup-vulkan-sdk@v1.2.0
 
       - name: Configure CMake
         run: |
