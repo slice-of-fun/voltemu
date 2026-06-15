@@ -1,4 +1,4 @@
-{
+﻿{
     "openssl-ci": {
         "ci": true,
         "package": "OpenSSL",
@@ -115,8 +115,8 @@
         "bundled": true
     },
     "llvm-mingw": {
-        "repo": "eden-emu/llvm-mingw",
-        "git_host": "git.eden-emu.dev",
+        "repo": "volt-emu/llvm-mingw",
+        "git_host": "git.volt-emu.dev",
         "tag": "%VERSION%",
         "version": "20250828",
         "artifact": "clang-rt-builtins.tar.zst",

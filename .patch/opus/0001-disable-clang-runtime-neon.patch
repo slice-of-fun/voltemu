@@ -1,5 +1,5 @@
-From cc15da16e533b2a801934eab2dfeaf3c3949a1dc Mon Sep 17 00:00:00 2001
-From: crueter <crueter@eden-emu.dev>
+﻿From cc15da16e533b2a801934eab2dfeaf3c3949a1dc Mon Sep 17 00:00:00 2001
+From: crueter <crueter@volt-emu.dev>
 Date: Mon, 8 Sep 2025 12:28:55 -0400
 Subject: [PATCH] [cmake] disable NEON runtime check on clang-cl
 

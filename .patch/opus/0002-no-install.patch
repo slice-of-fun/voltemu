@@ -1,10 +1,10 @@
-From bf455b67b4eaa446ffae5d25410b141b7b1b1082 Mon Sep 17 00:00:00 2001
-From: crueter <crueter@eden-emu.dev>
+﻿From bf455b67b4eaa446ffae5d25410b141b7b1b1082 Mon Sep 17 00:00:00 2001
+From: crueter <crueter@volt-emu.dev>
 Date: Mon, 8 Sep 2025 12:08:20 -0400
 Subject: [PATCH] [cmake] `OPUS_INSTALL` option; only default install if root
  project
 
-Signed-off-by: crueter <crueter@eden-emu.dev>
+Signed-off-by: crueter <crueter@volt-emu.dev>
 ---
  CMakeLists.txt | 112 ++++++++++++++++++++++++++++---------------------
  1 file changed, 64 insertions(+), 48 deletions(-)

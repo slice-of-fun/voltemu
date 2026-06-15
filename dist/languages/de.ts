@@ -1,15 +1,15 @@
-<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="de" sourcelanguage="en_US">
+﻿<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="de" sourcelanguage="en_US">
 <context>
     <name>AboutDialog</name>
     <message>
         <location filename="../../src/yuzu/aboutdialog.ui" line="14"/>
-        <source>About Eden</source>
-        <translation>Über Eden</translation>
+        <source>About Volt</source>
+        <translation>Über Volt</translation>
     </message>
     <message>
         <location filename="../../src/yuzu/aboutdialog.ui" line="72"/>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:28pt;&quot;&gt;Eden&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:28pt;&quot;&gt;Eden&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:28pt;&quot;&gt;Volt&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:28pt;&quot;&gt;Volt&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location filename="../../src/yuzu/aboutdialog.ui" line="85"/>
@@ -25,7 +25,7 @@ hr { height: 1px; border-width: 0; }
 li.unchecked::marker { content: &quot;\2610&quot;; }
 li.checked::marker { content: &quot;\2612&quot;; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Noto Sans'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:12pt;&quot;&gt;Eden is an experimental open-source emulator for the Nintendo Switch licensed under GPLv3.0+ which is based on the yuzu emulator which ended development back in March 2024. &lt;br /&gt;&lt;br /&gt;This software should not be used to play games you have not legally obtained.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:12pt;&quot;&gt;Volt is an experimental open-source emulator for the Nintendo Switch licensed under GPLv3.0+ which is based on the yuzu emulator which ended development back in March 2024. &lt;br /&gt;&lt;br /&gt;This software should not be used to play games you have not legally obtained.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;!DOCTYPE HTML PUBLIC „-//W3C//DTD HTML 4.0//EN“ „http://www.w3.org/TR/REC-html40/strict.dtd“&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
@@ -33,17 +33,17 @@ hr { height: 1px; border-width: 0; }
 li.unchecked::marker { content: „\2610“; }
 li.checked::marker { content: „\2612“; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:‚Noto Sans‘; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:‚MS Shell Dlg 2‘; font-size:12pt;&quot;&gt;Eden ist ein experimenteller, quelloffener Emulator für die Nintendo Switch, der unter der GPLv3.0+ lizenziert ist und auf dem Emulator yuzu basiert, dessen Entwicklung im März 2024 eingestellt wurde. &lt;br /&gt;&lt;br /&gt;Diese Software sollte nicht zum Spielen von Spielen verwendet werden, die du nicht legal erworben hast.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:‚MS Shell Dlg 2‘; font-size:12pt;&quot;&gt;Volt ist ein experimenteller, quelloffener Emulator für die Nintendo Switch, der unter der GPLv3.0+ lizenziert ist und auf dem Emulator yuzu basiert, dessen Entwicklung im März 2024 eingestellt wurde. &lt;br /&gt;&lt;br /&gt;Diese Software sollte nicht zum Spielen von Spielen verwendet werden, die du nicht legal erworben hast.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location filename="../../src/yuzu/aboutdialog.ui" line="131"/>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;a href=&quot;https://eden-emulator.github.io/&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#039be5;&quot;&gt;Website&lt;/span&gt;&lt;/a&gt; | &lt;a href=&quot;https://git.eden-emu.dev&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#039be5;&quot;&gt;Source Code&lt;/span&gt;&lt;/a&gt; | &lt;a href=&quot;https://git.eden-emu.dev/eden-emu/eden/activity/contributors&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#039be5;&quot;&gt;Contributors&lt;/span&gt;&lt;/a&gt; | &lt;a href=&quot;https://discord.gg/HstXbPch7X&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#039be5;&quot;&gt;Discord&lt;/span&gt;&lt;/a&gt; | &lt;a href=&quot;https://stt.gg/qKgFEAbH&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#039be5;&quot;&gt;Stoat&lt;/span&gt;&lt;/a&gt; | &lt;a href=&quot;https://nitter.poast.org/edenemuofficial&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#039be5;&quot;&gt;Twitter&lt;/span&gt;&lt;/a&gt; | &lt;a href=&quot;https://git.eden-emu.dev/eden-emu/eden/src/branch/master/LICENSE.txt&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#039be5;&quot;&gt;License&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;a href=&quot;https://eden-emulator.github.io/&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#039be5;&quot;&gt;Webseite&lt;/span&gt;&lt;/a&gt; | &lt;a href=&quot;https://git.eden-emu.dev&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#039be5;&quot;&gt;Quell-Code&lt;/span&gt;&lt;/a&gt; | &lt;a href=&quot;https://git.eden-emu.dev/eden-emu/eden/activity/contributors&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#039be5;&quot;&gt;Mitwirkende&lt;/span&gt;&lt;/a&gt; | &lt;a href=&quot;https://discord.gg/HstXbPch7X&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#039be5;&quot;&gt;Discord&lt;/span&gt;&lt;/a&gt; | &lt;a href=&quot;https://stt.gg/qKgFEAbH&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#039be5;&quot;&gt;Hermelin&lt;/span&gt;&lt;/a&gt; | &lt;a href=&quot;https://nitter.poast.org/edenemuofficial&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#039be5;&quot;&gt;Twitter&lt;/span&gt;&lt;/a&gt; | &lt;a href=&quot;https://git.eden-emu.dev/eden-emu/eden/src/branch/master/LICENSE.txt&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#039be5;&quot;&gt;Lizenz&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;a href=&quot;https://volt-emulator.github.io/&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#039be5;&quot;&gt;Website&lt;/span&gt;&lt;/a&gt; | &lt;a href=&quot;https://git.volt-emu.dev&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#039be5;&quot;&gt;Source Code&lt;/span&gt;&lt;/a&gt; | &lt;a href=&quot;https://git.volt-emu.dev/volt-emu/volt/activity/contributors&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#039be5;&quot;&gt;Contributors&lt;/span&gt;&lt;/a&gt; | &lt;a href=&quot;https://discord.gg/HstXbPch7X&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#039be5;&quot;&gt;Discord&lt;/span&gt;&lt;/a&gt; | &lt;a href=&quot;https://stt.gg/qKgFEAbH&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#039be5;&quot;&gt;Stoat&lt;/span&gt;&lt;/a&gt; | &lt;a href=&quot;https://nitter.poast.org/voltemuofficial&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#039be5;&quot;&gt;Twitter&lt;/span&gt;&lt;/a&gt; | &lt;a href=&quot;https://git.volt-emu.dev/volt-emu/volt/src/branch/master/LICENSE.txt&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#039be5;&quot;&gt;License&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;a href=&quot;https://volt-emulator.github.io/&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#039be5;&quot;&gt;Webseite&lt;/span&gt;&lt;/a&gt; | &lt;a href=&quot;https://git.volt-emu.dev&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#039be5;&quot;&gt;Quell-Code&lt;/span&gt;&lt;/a&gt; | &lt;a href=&quot;https://git.volt-emu.dev/volt-emu/volt/activity/contributors&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#039be5;&quot;&gt;Mitwirkende&lt;/span&gt;&lt;/a&gt; | &lt;a href=&quot;https://discord.gg/HstXbPch7X&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#039be5;&quot;&gt;Discord&lt;/span&gt;&lt;/a&gt; | &lt;a href=&quot;https://stt.gg/qKgFEAbH&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#039be5;&quot;&gt;Hermelin&lt;/span&gt;&lt;/a&gt; | &lt;a href=&quot;https://nitter.poast.org/voltemuofficial&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#039be5;&quot;&gt;Twitter&lt;/span&gt;&lt;/a&gt; | &lt;a href=&quot;https://git.volt-emu.dev/volt-emu/volt/src/branch/master/LICENSE.txt&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#039be5;&quot;&gt;Lizenz&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location filename="../../src/yuzu/aboutdialog.ui" line="147"/>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:7pt;&quot;&gt;&amp;quot;Nintendo Switch&amp;quot; is a trademark of Nintendo. Eden is not affiliated with Nintendo in any way.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:7pt;&quot;&gt;„Nintendo Switch“ ist eine Marke von Nintendo. Eden steht in keinerlei Verbindung zu Nintendo.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:7pt;&quot;&gt;&amp;quot;Nintendo Switch&amp;quot; is a trademark of Nintendo. Volt is not affiliated with Nintendo in any way.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:7pt;&quot;&gt;„Nintendo Switch“ ist eine Marke von Nintendo. Volt steht in keinerlei Verbindung zu Nintendo.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
 </context>
 <context>
@@ -237,8 +237,8 @@ Dies würde deren Forum-Benutzernamen und deren IP-Adresse sperren.</translation
     </message>
     <message>
         <location filename="../../src/yuzu/compatdb.ui" line="36"/>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Should you choose to submit a test case to the &lt;/span&gt;&lt;a href=&quot;https://eden-emulator.github.io/game/&quot;&gt;&lt;span style=&quot; font-size:10pt; text-decoration: underline; color:#0000ff;&quot;&gt;eden Compatibility List&lt;/span&gt;&lt;/a&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;, The following information will be collected and displayed on the site:&lt;/span&gt;&lt;/p&gt;&lt;ul style=&quot;margin-top: 0px; margin-bottom: 0px; margin-left: 0px; margin-right: 0px; -qt-list-indent: 1;&quot;&gt;&lt;li style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Hardware Information (CPU / GPU / Operating System)&lt;/li&gt;&lt;li style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Which version of eden you are running&lt;/li&gt;&lt;li style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;The connected eden account&lt;/li&gt;&lt;/ul&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Solltest du dich dazu entscheiden, einen Testfall an die &lt;/span&gt;&lt;a href=&quot;https://eden-emulator.github.io/game/&quot;&gt;&lt;span style=&quot; font-size:10pt; text-decoration: underline; color:#0000ff;&quot;&gt;eden-Kompatibilitätsliste&lt;/span&gt;&lt;/a&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt; zu übermitteln, werden die folgenden Informationen erfasst und auf der Webseite angezeigt:&lt;/span&gt;&lt;/p&gt;&lt;ul style=&quot;margin-top: 0px; margin-bottom: 0px; margin-left: 0px; margin-right: 0px; -qt-list-indent: 1;&quot;&gt;&lt;li style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Hardware-Informationen (CPU / GPU / Betriebssystem)&lt;/li&gt;&lt;li style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Welche Version von eden du ausführst&lt;/li&gt;&lt;li style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Das verknüpfte eden-Konto&lt;/li&gt;&lt;/ul&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Should you choose to submit a test case to the &lt;/span&gt;&lt;a href=&quot;https://volt-emulator.github.io/game/&quot;&gt;&lt;span style=&quot; font-size:10pt; text-decoration: underline; color:#0000ff;&quot;&gt;volt Compatibility List&lt;/span&gt;&lt;/a&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;, The following information will be collected and displayed on the site:&lt;/span&gt;&lt;/p&gt;&lt;ul style=&quot;margin-top: 0px; margin-bottom: 0px; margin-left: 0px; margin-right: 0px; -qt-list-indent: 1;&quot;&gt;&lt;li style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Hardware Information (CPU / GPU / Operating System)&lt;/li&gt;&lt;li style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Which version of volt you are running&lt;/li&gt;&lt;li style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;The connected volt account&lt;/li&gt;&lt;/ul&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Solltest du dich dazu entscheiden, einen Testfall an die &lt;/span&gt;&lt;a href=&quot;https://volt-emulator.github.io/game/&quot;&gt;&lt;span style=&quot; font-size:10pt; text-decoration: underline; color:#0000ff;&quot;&gt;volt-Kompatibilitätsliste&lt;/span&gt;&lt;/a&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt; zu übermitteln, werden die folgenden Informationen erfasst und auf der Webseite angezeigt:&lt;/span&gt;&lt;/p&gt;&lt;ul style=&quot;margin-top: 0px; margin-bottom: 0px; margin-left: 0px; margin-right: 0px; -qt-list-indent: 1;&quot;&gt;&lt;li style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Hardware-Informationen (CPU / GPU / Betriebssystem)&lt;/li&gt;&lt;li style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Welche Version von volt du ausführst&lt;/li&gt;&lt;li style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Das verknüpfte volt-Konto&lt;/li&gt;&lt;/ul&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location filename="../../src/yuzu/compatdb.ui" line="77"/>
@@ -942,7 +942,7 @@ Bei Spielen mit Unreal Engine 4 sind die Auswirkungen oft am deutlichsten spürb
         <source>Controls the quality of texture rendering at oblique angles.
 Safe to set at 16x on most GPUs.</source>
         <translation>Steuert die Qualität der Texturwiedergabe bei schrägen Blickwinkeln.
-Bei den meisten Grafikkarten kann dieser Wert bedenkenlos auf 16x eingestellt werden.</translation>
+Bei den meisten Grafikkarten kann dieser Wert bvoltkenlos auf 16x eingestellt werden.</translation>
     </message>
     <message>
         <location filename="../../src/qt_common/config/shared_translation.cpp" line="225"/>
@@ -2519,13 +2519,13 @@ Wenn ein Programm versucht, das Controller-Applet zu öffnen, wird es sofort ges
             &lt;div&gt;Enables miscellaneous IR optimizations.&lt;/div&gt;
            </source>
         <translation>
-            &lt;div&gt;Aktiviert verschiedene IR-Optimierungen.&lt;/div&gt;
+            &lt;div&gt;Aktiviert verschivolte IR-Optimierungen.&lt;/div&gt;
            </translation>
     </message>
     <message>
         <location filename="../../src/yuzu/configuration/configure_cpu_debug.ui" line="120"/>
         <source>Enable miscellaneous optimizations</source>
-        <translation>Verschiedene Optimierungen aktivieren</translation>
+        <translation>Verschivolte Optimierungen aktivieren</translation>
     </message>
     <message>
         <location filename="../../src/yuzu/configuration/configure_cpu_debug.ui" line="127"/>
@@ -2891,8 +2891,8 @@ Wenn ein Programm versucht, das Controller-Applet zu öffnen, wird es sofort ges
     </message>
     <message>
         <location filename="../../src/yuzu/configuration/configure_debug.ui" line="668"/>
-        <source>**This will be reset automatically when Eden closes.</source>
-        <translation>**Dies wird automatisch zurückgesetzt, wenn Eden geschlossen wird.</translation>
+        <source>**This will be reset automatically when Volt closes.</source>
+        <translation>**Dies wird automatisch zurückgesetzt, wenn Volt geschlossen wird.</translation>
     </message>
 </context>
 <context>
@@ -2936,8 +2936,8 @@ Wenn ein Programm versucht, das Controller-Applet zu öffnen, wird es sofort ges
     <name>ConfigureDialog</name>
     <message>
         <location filename="../../src/yuzu/configuration/configure.ui" line="20"/>
-        <source>Eden Configuration</source>
-        <translation>Eden-Konfiguration</translation>
+        <source>Volt Configuration</source>
+        <translation>Volt-Konfiguration</translation>
     </message>
     <message>
         <location filename="../../src/yuzu/configuration/configure.ui" line="67"/>
@@ -3300,8 +3300,8 @@ Möchtest du die alten Speicherdaten löschen?</translation>
     </message>
     <message>
         <location filename="../../src/yuzu/configuration/configure_general.cpp" line="101"/>
-        <source>Eden</source>
-        <translation>Eden</translation>
+        <source>Volt</source>
+        <translation>Volt</translation>
     </message>
     <message>
         <location filename="../../src/yuzu/configuration/configure_general.cpp" line="102"/>
@@ -3856,8 +3856,8 @@ Möchtest du die alten Speicherdaten löschen?</translation>
         <location filename="../../src/yuzu/configuration/configure_input_advanced.ui" line="2659"/>
         <location filename="../../src/yuzu/configuration/configure_input_advanced.ui" line="2701"/>
         <location filename="../../src/yuzu/configuration/configure_input_advanced.ui" line="2717"/>
-        <source>Requires restarting Eden</source>
-        <translation>Erfordert einen Neustart von Eden</translation>
+        <source>Requires restarting Volt</source>
+        <translation>Erfordert einen Neustart von Volt</translation>
     </message>
     <message>
         <location filename="../../src/yuzu/configuration/configure_input_advanced.ui" line="2668"/>
@@ -4564,8 +4564,8 @@ Um die Achsen umzukehren, bewege den Joystick zuerst vertikal und dann horizonta
         <location filename="../../src/yuzu/configuration/configure_motion_touch.cpp" line="181"/>
         <location filename="../../src/yuzu/configuration/configure_motion_touch.cpp" line="187"/>
         <location filename="../../src/yuzu/configuration/configure_motion_touch.cpp" line="281"/>
-        <source>Eden</source>
-        <translation>Eden</translation>
+        <source>Volt</source>
+        <translation>Volt</translation>
     </message>
     <message>
         <location filename="../../src/yuzu/configuration/configure_motion_touch.cpp" line="167"/>
@@ -5441,8 +5441,8 @@ Ziehe die Punkte, um ihre Position zu ändern, oder doppelklicke auf Tabellenzel
     </message>
     <message>
         <location filename="../../src/yuzu/configuration/configure_touchscreen_advanced.ui" line="26"/>
-        <source>Warning: The settings in this page affect the inner workings of Eden&apos;s emulated touchscreen. Changing them may result in undesirable behavior, such as the touchscreen partially or not working. You should only use this page if you know what you are doing.</source>
-        <translation>Warnung: Die Einstellungen auf dieser Seite beeinflussen die interne Funktionsweise des emulierten Berührungsbildschirms von Eden. Änderungen daran können zu unerwünschtem Verhalten führen – beispielsweise dazu, dass der Berührungsbildschirm nur teilweise oder gar nicht mehr funktioniert. Du solltest diese Seite nur verwenden, wenn du genau weist, was du tust.</translation>
+        <source>Warning: The settings in this page affect the inner workings of Volt&apos;s emulated touchscreen. Changing them may result in undesirable behavior, such as the touchscreen partially or not working. You should only use this page if you know what you are doing.</source>
+        <translation>Warnung: Die Einstellungen auf dieser Seite beeinflussen die interne Funktionsweise des emulierten Berührungsbildschirms von Volt. Änderungen daran können zu unerwünschtem Verhalten führen – beispielsweise dazu, dass der Berührungsbildschirm nur teilweise oder gar nicht mehr funktioniert. Du solltest diese Seite nur verwenden, wenn du genau weist, was du tust.</translation>
     </message>
     <message>
         <location filename="../../src/yuzu/configuration/configure_touchscreen_advanced.ui" line="52"/>
@@ -5737,8 +5737,8 @@ Ziehe die Punkte, um ihre Position zu ändern, oder doppelklicke auf Tabellenzel
     </message>
     <message>
         <location filename="../../src/yuzu/configuration/configure_web.ui" line="25"/>
-        <source>Eden Web Service</source>
-        <translation>Eden-Web-Dienst</translation>
+        <source>Volt Web Service</source>
+        <translation>Volt-Web-Dienst</translation>
     </message>
     <message>
         <location filename="../../src/yuzu/configuration/configure_web.ui" line="33"/>
@@ -5883,18 +5883,18 @@ Ziehe die Punkte, um ihre Position zu ändern, oder doppelklicke auf Tabellenzel
     <name>DepsDialog</name>
     <message>
         <location filename="../../src/yuzu/deps_dialog.ui" line="14"/>
-        <source>Eden Dependencies</source>
-        <translation>Edens Abhängigkeiten</translation>
+        <source>Volt Dependencies</source>
+        <translation>Volts Abhängigkeiten</translation>
     </message>
     <message>
         <location filename="../../src/yuzu/deps_dialog.ui" line="72"/>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:28pt;&quot;&gt;Eden Dependencies&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:28pt;&quot;&gt;Eden Abhängigkeiten&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:28pt;&quot;&gt;Volt Dependencies&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:28pt;&quot;&gt;Volt Abhängigkeiten&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location filename="../../src/yuzu/deps_dialog.ui" line="85"/>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The projects that make Eden possible&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Die Projekte die Eden möglich machen&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The projects that make Volt possible&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Die Projekte die Volt möglich machen&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location filename="../../src/yuzu/deps_dialog.cpp" line="22"/>
@@ -6012,8 +6012,8 @@ Ziehe die Punkte, um ihre Position zu ändern, oder doppelklicke auf Tabellenzel
     </message>
     <message>
         <location filename="../../src/yuzu/multiplayer/message.cpp" line="32"/>
-        <source>Creating a room failed. Please retry. Restarting Eden might be necessary.</source>
-        <translation>Erstellen eines Raumes ist fehlgeschlagen. Bitte versuche es erneut. Eden neuzustarten ist vielleicht nötig.</translation>
+        <source>Creating a room failed. Please retry. Restarting Volt might be necessary.</source>
+        <translation>Erstellen eines Raumes ist fehlgeschlagen. Bitte versuche es erneut. Volt neuzustarten ist vielleicht nötig.</translation>
     </message>
     <message>
         <location filename="../../src/yuzu/multiplayer/message.cpp" line="34"/>
@@ -6022,8 +6022,8 @@ Ziehe die Punkte, um ihre Position zu ändern, oder doppelklicke auf Tabellenzel
     </message>
     <message>
         <location filename="../../src/yuzu/multiplayer/message.cpp" line="37"/>
-        <source>Version mismatch! Please update to the latest version of Eden. If the problem persists, contact the room host and ask them to update the server.</source>
-        <translation>Versionskonflikt! Bitte aktualisiere auf die neueste Version von Eden. Sollte das Problem weiterhin bestehen, wende dich bitte an den Raumhost und bitte ihn, den Server zu aktualisieren.</translation>
+        <source>Version mismatch! Please update to the latest version of Volt. If the problem persists, contact the room host and ask them to update the server.</source>
+        <translation>Versionskonflikt! Bitte aktualisiere auf die neueste Version von Volt. Sollte das Problem weiterhin bestehen, wende dich bitte an den Raumhost und bitte ihn, den Server zu aktualisieren.</translation>
     </message>
     <message>
         <location filename="../../src/yuzu/multiplayer/message.cpp" line="39"/>
@@ -6090,8 +6090,8 @@ Bitte gehe zu „Konfigurieren“ -&gt; „System“ -&gt; „Netzwerk“ und tr
     </message>
     <message>
         <location filename="../../src/yuzu/bootmanager.cpp" line="863"/>
-        <source>Eden has not been compiled with OpenGL support.</source>
-        <translation>Eden wurde nicht mit OpenGL-Unterstützung kompiliert.</translation>
+        <source>Volt has not been compiled with OpenGL support.</source>
+        <translation>Volt wurde nicht mit OpenGL-Unterstützung kompiliert.</translation>
     </message>
     <message>
         <location filename="../../src/yuzu/bootmanager.cpp" line="887"/>
@@ -6504,9 +6504,9 @@ Bitte gehe zu „Konfigurieren“ -&gt; „System“ -&gt; „Netzwerk“ und tr
     </message>
     <message>
         <location filename="../../src/yuzu/multiplayer/host_room.cpp" line="187"/>
-        <source>Failed to announce the room to the public lobby. In order to host a room publicly, you must have a valid Eden account configured in Emulation -&gt; Configure -&gt; Web. If you do not want to publish a room in the public lobby, then select Unlisted instead.
+        <source>Failed to announce the room to the public lobby. In order to host a room publicly, you must have a valid Volt account configured in Emulation -&gt; Configure -&gt; Web. If you do not want to publish a room in the public lobby, then select Unlisted instead.
 Debug Message: </source>
-        <translation>Der Raum konnte nicht in der öffentlichen Lobby angekündigt werden. Um einen Raum öffentlich zu hosten, muss in „Emulation -&gt; Konfigurieren -&gt; Web“ ein gültiges Eden-Konto eingerichtet sein. Wenn du einen Raum nicht in der öffentlichen Lobby veröffentlichen möchtest, wähle stattdessen „Nicht gelistet“.
+        <translation>Der Raum konnte nicht in der öffentlichen Lobby angekündigt werden. Um einen Raum öffentlich zu hosten, muss in „Emulation -&gt; Konfigurieren -&gt; Web“ ein gültiges Volt-Konto eingerichtet sein. Wenn du einen Raum nicht in der öffentlichen Lobby veröffentlichen möchtest, wähle stattdessen „Nicht gelistet“.
 Fehlerbehebungs-Meldung: </translation>
     </message>
 </context>
@@ -6606,8 +6606,8 @@ Fehlerbehebungs-Meldung: </translation>
     </message>
     <message>
         <location filename="../../src/qt_common/config/uisettings.cpp" line="45"/>
-        <source>Exit Eden</source>
-        <translation>Eden verlassen</translation>
+        <source>Exit Volt</source>
+        <translation>Volt verlassen</translation>
     </message>
     <message>
         <location filename="../../src/qt_common/config/uisettings.cpp" line="46"/>
@@ -6888,8 +6888,8 @@ Fehlerbehebungs-Meldung: </translation>
     </message>
     <message>
         <location filename="../../src/yuzu/main.ui" line="62"/>
-        <source>Open &amp;Eden Folders</source>
-        <translation>Öffnen &amp;Eden-Ordner</translation>
+        <source>Open &amp;Volt Folders</source>
+        <translation>Öffnen &amp;Volt-Ordner</translation>
     </message>
     <message>
         <location filename="../../src/yuzu/main.ui" line="85"/>
@@ -7029,8 +7029,8 @@ Fehlerbehebungs-Meldung: </translation>
     </message>
     <message>
         <location filename="../../src/yuzu/main.ui" line="294"/>
-        <source>&amp;About Eden</source>
-        <translation>&amp;Über Eden</translation>
+        <source>&amp;About Volt</source>
+        <translation>&amp;Über Volt</translation>
     </message>
     <message>
         <location filename="../../src/yuzu/main.ui" line="302"/>
@@ -7251,8 +7251,8 @@ Fehlerbehebungs-Meldung: </translation>
     </message>
     <message>
         <location filename="../../src/yuzu/main.ui" line="573"/>
-        <source>&amp;Eden Dependencies</source>
-        <translation>&amp;Eden-Abhängigkeiten</translation>
+        <source>&amp;Volt Dependencies</source>
+        <translation>&amp;Volt-Abhängigkeiten</translation>
     </message>
     <message>
         <location filename="../../src/yuzu/main.ui" line="578"/>
@@ -7402,8 +7402,8 @@ Fehlerbehebungs-Meldung: </translation>
     </message>
     <message>
         <location filename="../../src/yuzu/main_window.cpp" line="1826"/>
-        <source>You are using the deconstructed ROM directory format for this game, which is an outdated format that has been superseded by others such as NCA, NAX, XCI, or NSP. Deconstructed ROM directories lack icons, metadata, and update support.&lt;br&gt;For an explanation of the various Switch formats Eden supports, out our user handbook. This message will not be shown again.</source>
-        <translation>Du verwendest für dieses Spiel das dekontruierte ROM-Verzeichnisformat - ein veraltetes Format, das durch andere Formate wie NCA, NAX, XCI oder NSP abgelöst wurde. Dekonstruierten ROM-Verzeichnissen fehlen Symbole, Metadaten und die Unterstützung für Aktualisierungen. &lt;br&gt;Eine Erläuterung der verschiedenen Switch-Formate, die Eden unterstützt, findest du in unserem Benutzerhandbuch. Diese Meldung wird nicht erneut angezeigt.</translation>
+        <source>You are using the deconstructed ROM directory format for this game, which is an outdated format that has been superseded by others such as NCA, NAX, XCI, or NSP. Deconstructed ROM directories lack icons, metadata, and update support.&lt;br&gt;For an explanation of the various Switch formats Volt supports, out our user handbook. This message will not be shown again.</source>
+        <translation>Du verwendest für dieses Spiel das dekontruierte ROM-Verzeichnisformat - ein veraltetes Format, das durch andere Formate wie NCA, NAX, XCI oder NSP abgelöst wurde. Dekonstruierten ROM-Verzeichnissen fehlen Symbole, Metadaten und die Unterstützung für Aktualisierungen. &lt;br&gt;Eine Erläuterung der verschivolten Switch-Formate, die Volt unterstützt, findest du in unserem Benutzerhandbuch. Diese Meldung wird nicht erneut angezeigt.</translation>
     </message>
     <message>
         <location filename="../../src/yuzu/main_window.cpp" line="1837"/>
@@ -7423,8 +7423,8 @@ Fehlerbehebungs-Meldung: </translation>
     </message>
     <message>
         <location filename="../../src/yuzu/main_window.cpp" line="1843"/>
-        <source>Eden has encountered an error while running the video core. This is usually caused by outdated GPU drivers, including integrated ones. Please see the log for more details. For more information on accessing the log, please see the following page: &lt;a href=&apos;https://yuzu-mirror.github.io/help/reference/log-files/&apos;&gt;How to Upload the Log File&lt;/a&gt;. </source>
-        <translation>Bei der Ausführung des Videokerns ist bei Eden ein Fehler aufgetreten. Dies wird in der Regel durch veraltete GPU-Treiber verursacht, einschließlich integrierter Treiber. Weitere Details findest du im Protokoll. Informationen zum Abrufen des Protokolls findest du auf der folgenden Seite: &lt;a href=&apos;https://yuzu-mirror.github.io/help/reference/log-files/&apos;&gt;So lädst du die Protokolldatei hoch&lt;/a&gt;. </translation>
+        <source>Volt has encountered an error while running the video core. This is usually caused by outdated GPU drivers, including integrated ones. Please see the log for more details. For more information on accessing the log, please see the following page: &lt;a href=&apos;https://yuzu-mirror.github.io/help/reference/log-files/&apos;&gt;How to Upload the Log File&lt;/a&gt;. </source>
+        <translation>Bei der Ausführung des Videokerns ist bei Volt ein Fehler aufgetreten. Dies wird in der Regel durch veraltete GPU-Treiber verursacht, einschließlich integrierter Treiber. Weitere Details findest du im Protokoll. Informationen zum Abrufen des Protokolls findest du auf der folgenden Seite: &lt;a href=&apos;https://yuzu-mirror.github.io/help/reference/log-files/&apos;&gt;So lädst du die Protokolldatei hoch&lt;/a&gt;. </translation>
     </message>
     <message>
         <location filename="../../src/yuzu/main_window.cpp" line="1858"/>
@@ -8045,8 +8045,8 @@ Möchtest du dies für zukünftige Starts erzwingen?</translation>
     </message>
     <message>
         <location filename="../../src/yuzu/main_window.cpp" line="4306"/>
-        <source>Restart Eden to apply the X11 backend.</source>
-        <translation>Starte Eden neu, um das X11-Backend zu aktivieren.</translation>
+        <source>Restart Volt to apply the X11 backend.</source>
+        <translation>Starte Volt neu, um das X11-Backend zu aktivieren.</translation>
     </message>
     <message>
         <location filename="../../src/yuzu/main_window.cpp" line="4344"/>
@@ -8075,15 +8075,15 @@ Möchtest du dies für zukünftige Starts erzwingen?</translation>
     </message>
     <message>
         <location filename="../../src/yuzu/main_window.cpp" line="4425"/>
-        <source>Are you sure you want to close Eden?</source>
-        <translation>Möchtest du Eden wirklich schließen?</translation>
+        <source>Are you sure you want to close Volt?</source>
+        <translation>Möchtest du Volt wirklich schließen?</translation>
     </message>
     <message>
         <location filename="../../src/yuzu/main_window.cpp" line="4426"/>
         <location filename="../../src/yuzu/main_window.cpp" line="4514"/>
         <location filename="../../src/yuzu/main_window.cpp" line="4526"/>
-        <source>Eden</source>
-        <translation>Eden</translation>
+        <source>Volt</source>
+        <translation>Volt</translation>
     </message>
     <message>
         <location filename="../../src/yuzu/main_window.cpp" line="4515"/>
@@ -8092,10 +8092,10 @@ Möchtest du dies für zukünftige Starts erzwingen?</translation>
     </message>
     <message>
         <location filename="../../src/yuzu/main_window.cpp" line="4523"/>
-        <source>The currently running application has requested Eden to not exit.
+        <source>The currently running application has requested Volt to not exit.
 
 Would you like to bypass this and exit anyway?</source>
-        <translation>Die derzeit ausgeführte Anwendung hat Eden angewiesen, nicht beendet zu werden.
+        <translation>Die derzeit ausgeführte Anwendung hat Volt angewiesen, nicht beendet zu werden.
 
 Möchtest du diese Anweisung ignorieren und das Programm trotzdem beenden?</translation>
     </message>
@@ -8439,8 +8439,8 @@ Proceed anyway?</source>
     </message>
     <message>
         <location filename="../../src/yuzu/configuration/system/new_user_dialog.ui" line="60"/>
-        <source>Eden</source>
-        <translation>Eden</translation>
+        <source>Volt</source>
+        <translation>Volt</translation>
     </message>
     <message>
         <location filename="../../src/yuzu/configuration/system/new_user_dialog.ui" line="70"/>
@@ -9400,8 +9400,8 @@ p, li { white-space: pre-wrap; }
     </message>
     <message>
         <location filename="../../src/qt_common/util/content.cpp" line="329"/>
-        <source>UNEXPECTED BAD THINGS MAY HAPPEN IF YOU DON&apos;T READ THIS!&lt;br&gt;Eden has detected the following save directories with no attached profile:&lt;br&gt;%1&lt;br&gt;&lt;br&gt;The following profiles are valid:&lt;br&gt;%2&lt;br&gt;&lt;br&gt;Click &quot;OK&quot; to open your save folder and fix up your profiles.&lt;br&gt;Hint: copy the contents of the largest or last-modified folder elsewhere, delete all orphaned profiles, and move your copied contents to the good profile.&lt;br&gt;&lt;br&gt;Still confused? See the &lt;a href=&apos;https://git.eden-emu.dev/eden-emu/eden/src/branch/master/docs/user/Orphaned.md&apos;&gt;help page&lt;/a&gt;.&lt;br&gt;</source>
-        <translation>UNERWARTETE PROBLEME KÖNNTEN AUFTRETEN, WENN DU DIES NICHT LIEST!&lt;br&gt;Eden hat die folgenden Speicherverzeichnisse ohne zugeordnetes Profil erkannt:&lt;br&gt;%1&lt;br&gt;&lt;br&gt;Die folgenden Profile sind gültig:&lt;br&gt;%2&lt;br&gt;&lt;br&gt;Klicke auf „OK“, um deinen Speicherordner zu öffnen und deine Profile zu korrigieren.&lt;br&gt;Tipp: Kopiere den Inhalt des größten oder zuletzt geänderten Ordners an einen anderen Ort, lösche alle verwaisten Profile und verschiebe die kopierten Inhalte in das intakte Profil.&lt;br&gt;&lt;br&gt;Immer noch unsicher? Lies auf der &lt;a href=&apos;https://git.eden-emu.dev/eden-emu/eden/src/branch/master/docs/user/Orphaned.md&apos;&gt;Hilfeseite&lt;/a&gt; nach.&lt;br&gt;</translation>
+        <source>UNEXPECTED BAD THINGS MAY HAPPEN IF YOU DON&apos;T READ THIS!&lt;br&gt;Volt has detected the following save directories with no attached profile:&lt;br&gt;%1&lt;br&gt;&lt;br&gt;The following profiles are valid:&lt;br&gt;%2&lt;br&gt;&lt;br&gt;Click &quot;OK&quot; to open your save folder and fix up your profiles.&lt;br&gt;Hint: copy the contents of the largest or last-modified folder elsewhere, delete all orphaned profiles, and move your copied contents to the good profile.&lt;br&gt;&lt;br&gt;Still confused? See the &lt;a href=&apos;https://git.volt-emu.dev/volt-emu/volt/src/branch/master/docs/user/Orphaned.md&apos;&gt;help page&lt;/a&gt;.&lt;br&gt;</source>
+        <translation>UNERWARTETE PROBLEME KÖNNTEN AUFTRETEN, WENN DU DIES NICHT LIEST!&lt;br&gt;Volt hat die folgenden Speicherverzeichnisse ohne zugeordnetes Profil erkannt:&lt;br&gt;%1&lt;br&gt;&lt;br&gt;Die folgenden Profile sind gültig:&lt;br&gt;%2&lt;br&gt;&lt;br&gt;Klicke auf „OK“, um deinen Speicherordner zu öffnen und deine Profile zu korrigieren.&lt;br&gt;Tipp: Kopiere den Inhalt des größten oder zuletzt geänderten Ordners an einen anderen Ort, lösche alle verwaisten Profile und verschiebe die kopierten Inhalte in das intakte Profil.&lt;br&gt;&lt;br&gt;Immer noch unsicher? Lies auf der &lt;a href=&apos;https://git.volt-emu.dev/volt-emu/volt/src/branch/master/docs/user/Orphaned.md&apos;&gt;Hilfeseite&lt;/a&gt; nach.&lt;br&gt;</translation>
     </message>
     <message>
         <location filename="../../src/qt_common/util/content.cpp" line="348"/>
@@ -9549,8 +9549,8 @@ Führe diesen Vorgang nur durch, wenn du dir zu 100 % sicher bist, dass du diese
     </message>
     <message>
         <location filename="../../src/qt_common/util/content.cpp" line="502"/>
-        <source>Install decryption keys and restart Eden before attempting to install firmware.</source>
-        <translation>Installiere die Entschlüsselungsschlüssel und starte Eden neu, bevor du versuchst, die Firmware zu installieren.</translation>
+        <source>Install decryption keys and restart Volt before attempting to install firmware.</source>
+        <translation>Installiere die Entschlüsselungsschlüssel und starte Volt neu, bevor du versuchst, die Firmware zu installieren.</translation>
     </message>
     <message>
         <location filename="../../src/qt_common/util/content.cpp" line="514"/>
@@ -9975,7 +9975,7 @@ Die meisten Mods sind RomFS-Mods, während Patches (.pchtxt) in der Regel ExeFS-
     <message>
         <location filename="../../src/qt_common/qt_string_lookup.h" line="72"/>
         <source>Contains Vulkan and OpenGL pipeline caches. Generally safe to remove.</source>
-        <translation>Enthält Vulkan- und OpenGL-Rohrleitungs-Caches. Kann in der Regel bedenkenlos entfernt werden.</translation>
+        <translation>Enthält Vulkan- und OpenGL-Rohrleitungs-Caches. Kann in der Regel bvoltkenlos entfernt werden.</translation>
     </message>
     <message>
         <location filename="../../src/qt_common/qt_string_lookup.h" line="73"/>
@@ -10039,8 +10039,8 @@ Die meisten Mods sind RomFS-Mods, während Patches (.pchtxt) in der Regel ExeFS-
     </message>
     <message>
         <location filename="../../src/qt_common/qt_string_lookup.h" line="96"/>
-        <source>Firmware installation cancelled, firmware may be in a bad state or corrupted. Restart Eden or re-install firmware.</source>
-        <translation>Die Firmware-Installation wurde abgebrochen. Die Firmware ist möglicherweise fehlerhaft oder beschädigt. Starte Eden neu oder installiere die Firmware erneut.</translation>
+        <source>Firmware installation cancelled, firmware may be in a bad state or corrupted. Restart Volt or re-install firmware.</source>
+        <translation>Die Firmware-Installation wurde abgebrochen. Die Firmware ist möglicherweise fehlerhaft oder beschädigt. Starte Volt neu oder installiere die Firmware erneut.</translation>
     </message>
     <message>
         <location filename="../../src/qt_common/qt_string_lookup.h" line="101"/>
@@ -10054,15 +10054,15 @@ Die meisten Mods sind RomFS-Mods, während Patches (.pchtxt) in der Regel ExeFS-
     </message>
     <message>
         <location filename="../../src/qt_common/qt_string_lookup.h" line="110"/>
-        <source>Eden has detected user data for the following emulators:</source>
-        <translation>Eden hat Benutzerdaten für die folgenden Emulatoren erkannt:</translation>
+        <source>Volt has detected user data for the following emulators:</source>
+        <translation>Volt hat Benutzerdaten für die folgenden Emulatoren erkannt:</translation>
     </message>
     <message>
         <location filename="../../src/qt_common/qt_string_lookup.h" line="112"/>
-        <source>Would you like to migrate your data for use in Eden?
+        <source>Would you like to migrate your data for use in Volt?
 Select the corresponding button to migrate data from that emulator.
 This may take a while.</source>
-        <translation>Möchtest du deine Daten für die Verwendung in Eden migrieren?
+        <translation>Möchtest du deine Daten für die Verwendung in Volt migrieren?
 Klicke auf die entsprechende Schaltfläche, um Daten aus diesem Emulator zu migrieren.
 Dies kann eine Weile dauern.</translation>
     </message>
@@ -10089,9 +10089,9 @@ Dies wird auf Geräten mit begrenztem Speicherplatz empfohlen.</translation>
     </message>
     <message>
         <location filename="../../src/qt_common/qt_string_lookup.h" line="124"/>
-        <source>Creates a filesystem link between the old directory and Eden directory.
+        <source>Creates a filesystem link between the old directory and Volt directory.
 This is recommended if you want to share data between emulators.</source>
-        <translation>Erstellt eine Dateisystemverknüpfung zwischen dem alten Verzeichnis und dem Eden-Verzeichnis.
+        <translation>Erstellt eine Dateisystemverknüpfung zwischen dem alten Verzeichnis und dem Volt-Verzeichnis.
 Dies wird empfohlen, wenn du Daten zwischen Emulatoren austauschen möchtest.</translation>
     </message>
     <message>
@@ -10550,17 +10550,17 @@ p, li { white-space: pre-wrap; }
     </message>
     <message>
         <location filename="../../src/yuzu/ryujinx_dialog.ui" line="26"/>
-        <source>Linking save data to Ryujinx lets both Ryujinx and Eden reference the same save files for your games.
+        <source>Linking save data to Ryujinx lets both Ryujinx and Volt reference the same save files for your games.
 
-By selecting &quot;From Eden&quot;, previous save data stored in Ryujinx will be deleted, and vice versa for &quot;From Ryujinx&quot;.</source>
-        <translation>Wenn du deine Speicherdaten mit Ryujinx verknüpfst, können sowohl Ryujinx als auch Eden auf dieselben Speicherdateien für deine Spiele zugreifen.
+By selecting &quot;From Volt&quot;, previous save data stored in Ryujinx will be deleted, and vice versa for &quot;From Ryujinx&quot;.</source>
+        <translation>Wenn du deine Speicherdaten mit Ryujinx verknüpfst, können sowohl Ryujinx als auch Volt auf dieselben Speicherdateien für deine Spiele zugreifen.
 
-Wenn du „Von Eden“ auswählst, werden die zuvor in Ryujinx gespeicherten Daten gelöscht, und umgekehrt, wenn du „Von Ryujinx“ wählst.</translation>
+Wenn du „Von Volt“ auswählst, werden die zuvor in Ryujinx gespeicherten Daten gelöscht, und umgekehrt, wenn du „Von Ryujinx“ wählst.</translation>
     </message>
     <message>
         <location filename="../../src/yuzu/ryujinx_dialog.ui" line="40"/>
-        <source>From Eden</source>
-        <translation>Von Eden</translation>
+        <source>From Volt</source>
+        <translation>Von Volt</translation>
     </message>
     <message>
         <location filename="../../src/yuzu/ryujinx_dialog.ui" line="47"/>

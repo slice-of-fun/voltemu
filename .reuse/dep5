@@ -1,4 +1,4 @@
-Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+﻿Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Comment: It is best to use this file to record copyright information about
          generated, binary and third party files
 
@@ -12,11 +12,11 @@ Files: dist/english_plurals/*
 Copyright: yuzu Emulator Project
 License: GPL-2.0-or-later
 
-Files: dist/qt_themes/default/icons/256x256/eden.png
+Files: dist/qt_themes/default/icons/256x256/volt.png
        dist/yuzu.bmp
-       dist/eden.icns
-       dist/eden.ico
-       dist/dev.eden_emu.eden.svg
+       dist/volt.icns
+       dist/volt.ico
+       dist/dev.volt_emu.volt.svg
 Copyright: 2025 Eden Emulator Project
 License: GPL-3.0-or-later
 

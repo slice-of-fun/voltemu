@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: Copyright 2026 crueter
+﻿# SPDX-FileCopyrightText: Copyright 2026 crueter
 # SPDX-License-Identifier: LGPL-3.0-or-later
 
 set(CPM_SOURCE_CACHE "${PROJECT_SOURCE_DIR}/.cache/cpm" CACHE STRING "" FORCE)
@@ -332,14 +332,14 @@ function(AddPackage)
     # TODO(crueter): git clone?
 
     #[[
-        URL configurations, descending order of precedence:
+        URL configurations, descending order of precvoltce:
         - URL [+ GIT_URL] -> bare URL fetch
         - REPO + TAG + ARTIFACT -> github release artifact
         - REPO + TAG -> github release archive
         - REPO + SHA -> github commit archive
         - REPO + BRANCH -> github branch
 
-        Hash configurations, descending order of precedence:
+        Hash configurations, descending order of precvoltce:
         - HASH -> bare sha512sum
         - HASH_SUFFIX -> hash grabbed from the URL + this suffix
         - HASH_URL -> hash grabbed from a URL
@@ -516,13 +516,13 @@ function(AddPackage)
         endif()
     endif()
 
-    macro(set_precedence local force)
+    macro(set_precvoltce local force)
         set(CPM_USE_LOCAL_PACKAGES ${local})
         set(CPM_LOCAL_PACKAGES_ONLY ${force})
     endmacro()
 
     #[[
-        Precedence:
+        Precvoltce:
         - package_FORCE_SYSTEM
         - package_FORCE_BUNDLED
         - CPMUTIL_FORCE_SYSTEM
@@ -531,15 +531,15 @@ function(AddPackage)
         - default to allow local
     ]]
     if(PKG_ARGS_FORCE_BUNDLED_PACKAGE)
-        set_precedence(OFF OFF)
+        set_precvoltce(OFF OFF)
     elseif(${PKG_ARGS_NAME}_FORCE_SYSTEM)
-        set_precedence(ON ON)
+        set_precvoltce(ON ON)
     elseif(${PKG_ARGS_NAME}_FORCE_BUNDLED)
-        set_precedence(OFF OFF)
+        set_precvoltce(OFF OFF)
     elseif(CPMUTIL_FORCE_SYSTEM)
-        set_precedence(ON ON)
+        set_precvoltce(ON ON)
     elseif(CPMUTIL_FORCE_BUNDLED)
-        set_precedence(OFF OFF)
+        set_precvoltce(OFF OFF)
     elseif(DEFINED PKG_ARGS_BUNDLED_PACKAGE AND
         NOT PKG_ARGS_BUNDLED_PACKAGE STREQUAL "unset")
         if(PKG_ARGS_BUNDLED_PACKAGE)
@@ -548,9 +548,9 @@ function(AddPackage)
             set(local ON)
         endif()
 
-        set_precedence(${local} OFF)
+        set_precvoltce(${local} OFF)
     else()
-        set_precedence(ON OFF)
+        set_precvoltce(ON OFF)
     endif()
 
     if(DEFINED PKG_ARGS_VERSION)

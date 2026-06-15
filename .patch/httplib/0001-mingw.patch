@@ -1,11 +1,11 @@
-From 436fc1978c78edd085d99b33275b24be0ac96aa0 Mon Sep 17 00:00:00 2001
-From: crueter <crueter@eden-emu.dev>
+﻿From 436fc1978c78edd085d99b33275b24be0ac96aa0 Mon Sep 17 00:00:00 2001
+From: crueter <crueter@volt-emu.dev>
 Date: Sun, 1 Feb 2026 16:21:10 -0500
 Subject: [PATCH] Fix build on MinGW
 
 MinGW doesn't define GetAddrInfoExCancel.
 
-Signed-off-by: crueter <crueter@eden-emu.dev>
+Signed-off-by: crueter <crueter@volt-emu.dev>
 ---
  httplib.h | 18 ++++++++++++++++--
  1 file changed, 16 insertions(+), 2 deletions(-)

@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
+﻿# SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 # SPDX-FileCopyrightText: 2019 yuzu Emulator Project
@@ -44,12 +44,12 @@ if (NIGHTLY_BUILD)
     set(BUILD_AUTO_UPDATE_WEBSITE "https://github.com/pushkarverse/volt-emu")
     set(BUILD_AUTO_UPDATE_API "api.github.com/repos/pushkarverse/volt-emu")
     set(BUILD_AUTO_UPDATE_REPO "pushkarverse/volt-emu")
-    set(REPO_NAME "Eden Nightly")
+    set(REPO_NAME "Volt Nightly")
 else()
     set(BUILD_AUTO_UPDATE_WEBSITE "https://github.com/pushkarverse/volt-emu")
     set(BUILD_AUTO_UPDATE_API "api.github.com/repos/pushkarverse/volt-emu")
     set(BUILD_AUTO_UPDATE_REPO "pushkarverse/volt-emu")
-    set(REPO_NAME "Eden")
+    set(REPO_NAME "Volt")
 endif()
 
 set(BUILD_ID ${GIT_REFSPEC})

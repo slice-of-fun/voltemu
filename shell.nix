@@ -1,4 +1,4 @@
-#!/usr/bin/nix-shell
+﻿#!/usr/bin/nix-shell
 # SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 # SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -16,10 +16,10 @@ pkgs.mkShellNoCC {
     spirv-tools spirv-headers vulkan-loader unzip
     glslang python3 httplib cpp-jwt ffmpeg-headless
     libusb1 cubeb
-    # eden
+    # volt
     qt6.qtbase qt6.qtmultimedia qt6.qtwayland qt6.qttools
     qt6.qtwebengine qt6.qt5compat
-    # eden-cli
+    # volt-cli
     SDL3
     # optional components
     discord-rpc gamemode

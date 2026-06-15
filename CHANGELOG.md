@@ -1,4 +1,4 @@
-# Changelog
+﻿# Changelog
 
 All notable changes to Volt Emulator are documented here.
 
@@ -15,20 +15,20 @@ Volt Emulator uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Audit tooling for verifying complete rebrand coverage
 
 ### Changed
-- Project name: Eden → Volt Emulator
-- Application name: Eden → Volt Emulator
-- Short name: Eden → Volt
-- Organization: Eden Emulator Team → Volt Emulator Team
-- Android package ID: `dev.eden_emu.eden` → `dev.volt_emu.volt`
-- Executable name: `eden` → `volt`
-- App ID: `dev.eden_emu.eden` → `dev.volt_emu.volt`
-- CMake project: `eden` → `volt`
-- CMake variable prefix: `EDEN_` → `VOLT_`
+- Project name: Volt → Volt Emulator
+- Application name: Volt → Volt Emulator
+- Short name: Volt → Volt
+- Organization: Volt Emulator Team → Volt Emulator Team
+- Android package ID: `dev.volt_emu.volt` → `dev.volt_emu.volt`
+- Executable name: `volt` → `volt`
+- App ID: `dev.volt_emu.volt` → `dev.volt_emu.volt`
+- CMake project: `volt` → `volt`
+- CMake variable prefix: `VOLT_` → `VOLT_`
 
 ### Preserved
 - All upstream license headers (GPL-3.0-or-later)
 - All upstream copyright notices
-- Full attribution to Eden, Sudachi, and Yuzu
+- Full attribution to Volt, Sudachi, and Yuzu
 
 ---
 
@@ -47,8 +47,8 @@ Volt Emulator versioning begins at `0.1.0` for the initial Phase 1 release.
 
 ## Upstream Reference
 
-For changes inherited from Eden prior to this fork point, see the Eden project changelog at:  
-https://git.eden-emu.dev/eden-emu/eden
+For changes inherited from Volt prior to this fork point, see the Volt project changelog at:  
+https://git.volt-emu.dev/volt-emu/volt
 
 For deeper upstream history:
 - Sudachi changelog

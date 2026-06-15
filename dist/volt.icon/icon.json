@@ -1,4 +1,4 @@
-{
+﻿{
   "fill" : {
     "automatic-gradient" : "srgb:0.00000,0.00000,0.00000,1.00000"
   },
@@ -7,8 +7,8 @@
       "layers" : [
         {
           "fill" : "none",
-          "image-name" : "dev.eden_emu.eden.svg",
-          "name" : "dev.eden_emu.eden",
+          "image-name" : "dev.volt_emu.volt.svg",
+          "name" : "dev.volt_emu.volt",
           "position" : {
             "scale" : 1.8,
             "translation-in-points" : [

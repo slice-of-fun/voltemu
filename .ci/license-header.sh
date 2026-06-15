@@ -1,4 +1,4 @@
-#!/bin/sh -e
+﻿#!/bin/sh -e
 
 # SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 # SPDX-License-Identifier: GPL-3.0-or-later
@@ -8,7 +8,7 @@ EXCLUDE_FILES="CPM.cmake CPMUtil.cmake GetSCMRev.cmake renderdoc_app.h tools/cpm
 
 # license header constants, please change when needed :))))
 YEAR=$(date "+%Y")
-HOLDER="Eden Emulator Project"
+HOLDER="Volt Emulator Project"
 LICENSE="GPL-3.0-or-later"
 
 usage() {

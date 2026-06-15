@@ -1,5 +1,5 @@
-From 4a3cc92a7abad403529ed1cb4255ca63d9252de4 Mon Sep 17 00:00:00 2001
-From: crueter <crueter@eden-emu.dev>
+﻿From 4a3cc92a7abad403529ed1cb4255ca63d9252de4 Mon Sep 17 00:00:00 2001
+From: crueter <crueter@volt-emu.dev>
 Date: Sat, 30 May 2026 21:48:42 -0400
 Subject: [PATCH 2/2] use cmake compiler flags
 
