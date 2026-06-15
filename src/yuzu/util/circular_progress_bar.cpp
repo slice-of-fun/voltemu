@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#include "util/circular_progress_bar.h"
+#include "yuzu/util/circular_progress_bar.h"
 
 #include <QPaintEvent>
 #include <QPainter>

@@ -63,7 +63,6 @@ jobs:
           sudo apt-get install -y \
             clang cmake ninja-build \
             libgl1-mesa-dev libglu1-mesa-dev \
-            libsdl3-dev libqt6-dev \
             libasound2-dev libpulse-dev \
             nasm
 
@@ -75,6 +74,8 @@ jobs:
             -DCMAKE_C_COMPILER=clang \
             -DCMAKE_CXX_COMPILER=clang++ \
             -DENABLE_QT=ON \
+            -DVOLT_USE_BUNDLED_QT=ON \
+            -DVOLT_USE_BUNDLED_SDL3=ON \
             -DVOLT_USE_CPM=ON \
             -DCPMUTIL_FORCE_BUNDLED=ON
 

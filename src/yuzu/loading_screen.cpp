@@ -22,7 +22,7 @@
 #include "core/loader/loader.h"
 #include "ui_loading_screen.h"
 #include "video_core/rasterizer_interface.h"
-#include "util/circular_progress_bar.h"
+#include "yuzu/util/circular_progress_bar.h"
 
 // Mingw seems to not have QMovie at all. If QMovie is missing then use a single frame instead of an
 // showing the full animation
