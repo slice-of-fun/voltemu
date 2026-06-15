@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include "common/common_types.h"
+
 namespace Common::Input {
 struct CallbackStatus;
 enum class BatteryLevel : u32;
@@ -13,6 +15,9 @@ struct MotionStatus;
 struct StickStatus;
 struct TouchStatus;
 struct TriggerStatus;
+struct CameraStatus;
+struct NfcStatus;
+struct BodyColorStatus;
 }; // namespace Common::Input
 
 namespace Core::HID {

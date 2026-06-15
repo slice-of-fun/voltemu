@@ -13,6 +13,10 @@
 #include "core/hle/service/nvdrv/nvdata.h"
 #include "core/hle/service/nvnflinger/ui/fence.h"
 
+namespace Core {
+class System;
+} // namespace Core
+
 namespace Kernel {
 class KPageGroup;
 class KReadableEvent;

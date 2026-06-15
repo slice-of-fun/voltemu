@@ -13,6 +13,8 @@ namespace Core {
 class System;
 }
 
+#include "hid_core/frontend/emulated_controller.h"
+
 namespace Core::HID {
 class EmulatedController;
 } // namespace Core::HID

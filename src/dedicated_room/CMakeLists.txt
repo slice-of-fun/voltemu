@@ -5,9 +5,9 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
 
 add_library(volt-room STATIC EXCLUDE_FROM_ALL
-    volt_room.cpp
-    volt_room.h
-    volt_room.rc)
+    yuzu_room.cpp
+    yuzu_room.h
+    yuzu_room.rc)
 
 target_link_libraries(volt-room PRIVATE common network)
 if (ENABLE_WEB_SERVICE)

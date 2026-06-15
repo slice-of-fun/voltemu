@@ -1,4 +1,4 @@
-﻿// SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
+// SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 // SPDX-FileCopyrightText: Copyright 2017 Citra Emulator Project
@@ -17,8 +17,8 @@
 
 #ifdef _WIN32
 // windows.h needs to be included before shellapi.h
-#include <shellapi.h>
 #include <windows.h>
+#include <shellapi.h>
 #endif
 
 #include <openssl/evp.h>

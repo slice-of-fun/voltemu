@@ -362,6 +362,10 @@ public:
             {12, nullptr, "IsEmpty"},
             {13, nullptr, "IsFull"},
             {14, nullptr, "GetAttribute"},
+            #ifdef _WIN32
+#undef LoadImage
+#undef DeleteFile
+#endif
             {15, nullptr, "LoadImage"},
             {16, nullptr, "AddOrUpdateImage"},
             {17, nullptr, "DeleteImages"},

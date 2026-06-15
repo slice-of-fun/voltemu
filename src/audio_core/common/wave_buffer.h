@@ -8,19 +8,19 @@
 namespace AudioCore {
 
 struct WaveBufferVersion1 {
-    CpuAddr buffer;
+    VAddr buffer;
     u64 buffer_size;
     u32 start_offset;
     u32 end_offset;
     bool loop;
     bool stream_ended;
-    CpuAddr context;
+    VAddr context;
     u64 context_size;
 };
 
 struct WaveBufferVersion2 {
-    CpuAddr buffer;
-    CpuAddr context;
+    VAddr buffer;
+    VAddr context;
     u64 buffer_size;
     u64 context_size;
     u32 start_offset;

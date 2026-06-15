@@ -4,6 +4,7 @@
 #pragma once
 
 #include "common/common_types.h"
+#include "hid_core/hid_types.h"
 #include "hid_core/irsensor/irs_types.h"
 #include "hid_core/irsensor/processor_base.h"
 #include "hid_core/resources/irs_ring_lifo.h"
@@ -11,6 +12,8 @@
 namespace Core {
 class System;
 }
+
+#include "hid_core/frontend/emulated_controller.h"
 
 namespace Core::HID {
 class EmulatedController;

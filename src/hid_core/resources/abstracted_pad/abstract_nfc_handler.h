@@ -9,6 +9,7 @@
 
 namespace Kernel {
 class KReadableEvent;
+class KEvent;
 }
 
 enum class NpadNfcState : u32 {

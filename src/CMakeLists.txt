@@ -240,7 +240,7 @@ if (VOLT_ROOM)
 endif()
 
 if (VOLT_ROOM_STANDALONE)
-    add_subdirectory(volt_room_standalone)
+    add_subdirectory(yuzu_room_standalone)
     set_target_properties(volt-room PROPERTIES OUTPUT_NAME "volt-room")
 endif()
 
@@ -261,13 +261,13 @@ if (VOLT_TESTS)
 endif()
 
 if (VOLT_CMD)
-    add_subdirectory(volt_cmd)
+    add_subdirectory(yuzu_cmd)
     set_target_properties(volt-cmd PROPERTIES OUTPUT_NAME "volt-cli")
 endif()
 
 if (ENABLE_QT)
     add_subdirectory(qt_common)
-    add_subdirectory(volt)
+    add_subdirectory(yuzu)
 endif()
 
 if (ENABLE_WEB_SERVICE)

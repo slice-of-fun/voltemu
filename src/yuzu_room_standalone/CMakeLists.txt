@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-add_executable(volt_room_standalone volt_room_standalone.cpp)
+add_executable(volt_room_standalone yuzu_room_standalone.cpp)
 
 set_target_properties(volt_room_standalone PROPERTIES OUTPUT_NAME "volt-room")
 

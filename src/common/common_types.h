@@ -51,6 +51,7 @@ using VAddr = u64;    ///< Represents a pointer in the userspace virtual address
 using DAddr = u64;    ///< Represents a pointer in the device specific virtual address space.
 using PAddr = u64;    ///< Represents a pointer in the ARM11 physical address space.
 using GPUVAddr = u64; ///< Represents a pointer in the GPU virtual address space.
+using CpuAddr = u64;  ///< Represents a pointer in the CPU virtual address space.
 
 using u128 = std::array<std::uint64_t, 2>;
 static_assert(sizeof(u128) == 16, "u128 must be 128 bits wide");

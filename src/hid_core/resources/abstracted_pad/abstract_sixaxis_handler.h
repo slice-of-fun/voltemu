@@ -13,6 +13,7 @@ struct AppletResourceHolder;
 class NpadAbstractedPadHolder;
 class NpadAbstractPropertiesHandler;
 struct NpadSixAxisSensorLifo;
+struct NpadSharedMemoryEntry;
 
 /// Handles Npad request from HID interfaces
 class NpadAbstractSixAxisHandler final {

@@ -15,6 +15,7 @@
 
 #include "common/bounded_threadsafe_queue.h"
 #include "common/polyfill_thread.h"
+#include "video_core/dma_pusher.h"
 #include "video_core/framebuffer_config.h"
 
 namespace Tegra {
