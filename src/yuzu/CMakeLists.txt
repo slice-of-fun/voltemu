@@ -1,4 +1,4 @@
-﻿# SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
+# SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 set(CMAKE_AUTOMOC ON)
@@ -201,6 +201,8 @@ add_executable(volt
     startup_checks.h
     set_play_time_dialog.cpp
     set_play_time_dialog.h
+    util/circular_progress_bar.cpp
+    util/circular_progress_bar.h
     util/clickable_label.cpp
     util/clickable_label.h
     util/controller_navigation.cpp

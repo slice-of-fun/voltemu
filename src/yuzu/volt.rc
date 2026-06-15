@@ -20,3 +20,4 @@ IDI_ICON1               ICON                    "../../dist/volt.ico"
 //
 
 0                       RT_MANIFEST             "../../dist/volt.manifest"
+

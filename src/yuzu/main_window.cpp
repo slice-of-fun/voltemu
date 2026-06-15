@@ -4939,6 +4939,10 @@ void MainWindow::UpdateUITheme()
 
         qApp->setStyleSheet(base_qss + custom_qss);
         setStyleSheet(base_qss + custom_qss);
+
+        if (loading_screen) {
+            loading_screen->SetThemeColor(accent_color);
+        }
     } else {
         LOG_ERROR(Frontend, "Unable to set style \"{}\", stylesheet file not found",
                   UISettings::values.theme);

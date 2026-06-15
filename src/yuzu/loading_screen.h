@@ -34,6 +34,7 @@ class QByteArray;
 class QGraphicsOpacityEffect;
 class QMovie;
 class QPropertyAnimation;
+class CircularProgressBar;
 
 class LoadingScreen : public QWidget {
     Q_OBJECT
@@ -61,6 +62,8 @@ public:
     // See https://wiki.qt.io/How_to_Change_the_Background_Color_of_QWidget
     void paintEvent(QPaintEvent* event) override;
 
+    void SetThemeColor(const QString& color);
+
 signals:
     void LoadProgress(VideoCore::LoadCallbackStage stage, std::size_t value, std::size_t total);
     /// Signals that this widget is completely hidden now and should be replaced with the other
@@ -74,6 +77,7 @@ private:
     std::unique_ptr<QByteArray> backing_mem;
 #endif
     std::unique_ptr<Ui::LoadingScreen> ui;
+    CircularProgressBar* circular_progress = nullptr;
     std::size_t previous_total = 0;
     VideoCore::LoadCallbackStage previous_stage;
 

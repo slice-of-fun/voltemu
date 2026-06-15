@@ -21,6 +21,7 @@
 #include "core/frontend/framebuffer_layout.h"
 #include "core/loader/loader.h"
 #include "ui_loading_screen.h"
+#include "yuzu/util/circular_progress_bar.h"
 #include "video_core/rasterizer_interface.h"
 
 // Mingw seems to not have QMovie at all. If QMovie is missing then use a single frame instead of an
@@ -62,6 +63,9 @@ LoadingScreen::LoadingScreen(QWidget* parent)
 {
     ui->setupUi(this);
     setMinimumSize(Layout::MinimumSize::Width, Layout::MinimumSize::Height);
+
+    circular_progress = new CircularProgressBar(this);
+    ui->verticalLayout->addWidget(circular_progress, 0, Qt::AlignHCenter | Qt::AlignVCenter);
 
     // Create a fade out effect to hide this loading screen widget.
     // When fading opacity, it will fade to the parent widgets background color, which is why we
@@ -141,12 +145,10 @@ void LoadingScreen::OnLoadProgress(VideoCore::LoadCallbackStage stage, std::size
     const auto now = steady_clock::now();
     // reset the timer if the stage changes
     if (stage != previous_stage) {
-        ui->progress_bar->setStyleSheet(QString::fromUtf8(progressbar_style[stage]));
-        // Hide the progress bar during the prepare stage
         if (stage == VideoCore::LoadCallbackStage::Prepare) {
-            ui->progress_bar->hide();
+            circular_progress->hide();
         } else {
-            ui->progress_bar->show();
+            circular_progress->show();
         }
         previous_stage = stage;
         // reset back to fast shader compiling since the stage changed
@@ -154,12 +156,13 @@ void LoadingScreen::OnLoadProgress(VideoCore::LoadCallbackStage stage, std::size
     }
     // update the max of the progress bar if the number of shaders change
     if (total != previous_total) {
-        ui->progress_bar->setMaximum(static_cast<int>(total));
+        circular_progress->SetMaximum(static_cast<int>(total));
         previous_total = total;
     }
     // Reset the progress bar ranges if compilation is done
     if (stage == VideoCore::LoadCallbackStage::Complete) {
-        ui->progress_bar->setRange(0, 0);
+        circular_progress->SetMaximum(0);
+        circular_progress->SetValue(0);
     }
 
     QString estimate;
@@ -186,13 +189,19 @@ void LoadingScreen::OnLoadProgress(VideoCore::LoadCallbackStage stage, std::size
 
     // update labels and progress bar
     if (stage == VideoCore::LoadCallbackStage::Build) {
-        ui->stage->setText(stage_translations[stage].arg(value).arg(total));
+        circular_progress->SetStageText(stage_translations[stage].arg(value).arg(total));
     } else {
-        ui->stage->setText(stage_translations[stage]);
+        circular_progress->SetStageText(stage_translations[stage]);
     }
-    ui->value->setText(estimate);
-    ui->progress_bar->setValue(static_cast<int>(value));
+    circular_progress->SetEstimateText(estimate);
+    circular_progress->SetValue(static_cast<int>(value));
     previous_time = now;
+}
+
+void LoadingScreen::SetThemeColor(const QString& color) {
+    if (circular_progress) {
+        circular_progress->SetColor(QColor(color));
+    }
 }
 
 void LoadingScreen::paintEvent(QPaintEvent* event)
