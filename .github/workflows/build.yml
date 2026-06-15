@@ -140,6 +140,12 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
+      - name: Install glslangValidator
+        run: |
+          wget -qO glslang.zip https://github.com/KhronosGroup/glslang/releases/download/master-tot/glslang-master-linux-Release.zip
+          unzip -q glslang.zip -d glslang
+          sudo cp glslang/bin/glslangValidator /usr/local/bin/
+
       - name: Build debug APK
         working-directory: src/android
         run: ./gradlew assembleMainlineRelWithDebInfo
