@@ -74,7 +74,6 @@ bool Patcher::PatchText(std::span<const u8> program_image, const Kernel::CodeSet
     // The first word of the patch section is always a branch to the first instruction of the
     // module.
     if (use_split) {
-        // curr_patch->m_branch_to_module_relocations.push_back({0, 0});
         curr_patch->m_branch_to_module_relocations_pre.push_back({0, 0});
     } else {
         curr_patch->m_branch_to_module_relocations.push_back({0, 0});

@@ -74,8 +74,6 @@ void Puller::ProcessFenceActionMethod()
 {
     switch (regs.fence_action.op) {
     case Puller::FenceOperation::Acquire:
-        // UNIMPLEMENTED_MSG("Channel Scheduling pending.");
-        // WaitFence(regs.fence_action.syncpoint_id, regs.fence_value);
         rasterizer->ReleaseFences();
         break;
     case Puller::FenceOperation::Increment:
