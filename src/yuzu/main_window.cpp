@@ -67,7 +67,9 @@
 #include <QGuiApplication>
 #include <QInputDialog>
 #include <QMimeData>
+#include <QPainter>
 #include <QPalette>
+#include <QPixmap>
 #include <QProgressDialog>
 #include <QScreen>
 #include <QShortcut>
@@ -4152,9 +4154,8 @@ void MainWindow::UpdateWindowTitle(std::string_view title_name, std::string_view
                                    std::string_view gpu_vendor)
 {
     static const std::string build_id = std::string{Common::g_build_id};
-    static const std::string yuzu_title =
-        fmt::format("{} | {}", std::string{Common::g_build_name},
-                    std::string{Common::g_build_version});
+    static const std::string yuzu_title = fmt::format("{} | {}", std::string{Common::g_build_name},
+                                                      std::string{Common::g_build_version});
 
     const auto override_title =
         fmt::format(fmt::runtime(std::string(Common::g_title_bar_format_idle)), build_id);
@@ -4770,66 +4771,170 @@ void MainWindow::UpdateUITheme()
     if (f.open(QFile::ReadOnly | QFile::Text)) {
         QTextStream ts(&f);
         QString base_qss = ts.readAll();
-        
-        QString accent_color = QString::fromStdString(UISettings::values.accent_color);
-        QString accent_style = accent_color;
 
-        if (UISettings::values.use_gradient_accent.GetValue()) {
-            QString accent_color_2 = QString::fromStdString(UISettings::values.accent_color_2);
-            accent_style = QStringLiteral("qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 %1, stop:1 %2)").arg(accent_color).arg(accent_color_2);
+        const auto& theme_str = UISettings::values.theme;
+        bool is_dark =
+            (theme_str == "qdarkstyle" || theme_str == "qdarkstyle_midnight_blue" ||
+             theme_str == "colorful_dark" || theme_str == "colorful_midnight_blue" ||
+             theme_str.empty()); // Empty falls back to default which we set to qdarkstyle
+        QString theme_name = QString::fromStdString(UISettings::values.color_theme_name);
+        QString accent_color = QStringLiteral("#000000"); // Default to Black
+        QString surface_color;
+
+        if (theme_name == QStringLiteral("Monet Blue"))
+            accent_color = QStringLiteral("#8AB4F8");
+        if (theme_name == QStringLiteral("Monet Red"))
+            accent_color = QStringLiteral("#F28B82");
+        if (theme_name == QStringLiteral("Monet Green"))
+            accent_color = QStringLiteral("#81C995");
+        if (theme_name == QStringLiteral("Monet Purple"))
+            accent_color = QStringLiteral("#C58AF9");
+        if (theme_name == QStringLiteral("Monet Yellow"))
+            accent_color = QStringLiteral("#FDE293");
+        if (theme_name == QStringLiteral("Monet Orange"))
+            accent_color = QStringLiteral("#FCAD70");
+
+        if (surface_color.isEmpty()) {
+            surface_color = is_dark ? QStringLiteral("#1E232D") : QStringLiteral("#E8F0FE");
+        }
+        QString base_text_color = is_dark ? QStringLiteral("#FFFFFF") : QStringLiteral("#000000");
+
+        QColor color(accent_color);
+        double luminance = (color.red() * 0.299 + color.green() * 0.587 + color.blue() * 0.114);
+        QString text_on_accent =
+            luminance > 160 ? QStringLiteral("#000000") : QStringLiteral("#ffffff");
+
+        // Ensure black buttons in dark mode have visible borders/text, though text is already white
+        if (theme_name == QStringLiteral("Black") && is_dark) {
+            accent_color =
+                QStringLiteral("#111111"); // slightly lighter than pure black so it's not invisible
         }
 
-        QString custom_qss = QStringLiteral(
-            "QTreeView::item:selected, QListView::item:selected, QTableView::item:selected { background: %1; color: #ffffff; }"
-            "QMenu::item:selected { background: %1; color: #ffffff; }"
-            "QProgressBar::chunk { background: %1; }"
-            "QSlider::handle { background: %1; }"
-            "QTabBar::tab:selected { border-bottom: 2px solid %2; color: %2; }"
-            "QPushButton:checked, QPushButton:pressed { background: %1; color: #ffffff; }"
-            "QGroupBox::title { color: %2; }"
-        ).arg(accent_style, accent_color);
+        QColor acc(accent_color);
+        QString hover_color =
+            QStringLiteral("rgba(%1, %2, %3, 80)").arg(acc.red()).arg(acc.green()).arg(acc.blue());
+
+        QPixmap cb_px(14, 14);
+        cb_px.fill(Qt::transparent);
+        {
+            QPainter painter(&cb_px);
+            painter.setRenderHint(QPainter::Antialiasing);
+            painter.setBrush(QColor(accent_color));
+            painter.setPen(Qt::NoPen);
+            painter.drawRoundedRect(QRect(0, 0, 14, 14), 2.5, 2.5);
+            QPen check_pen(Qt::white, 2.2f, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
+            painter.setPen(check_pen);
+            painter.setBrush(Qt::NoBrush);
+            painter.drawLine(QPoint(2, 7), QPoint(5, 10));
+            painter.drawLine(QPoint(5, 10), QPoint(12, 3));
+        }
+        QString cb_path = QDir::temp().filePath(QStringLiteral("volt_cb_checked.png"));
+        cb_px.save(cb_path);
+        cb_path.replace(QLatin1Char('\\'), QLatin1Char('/'));
+
+        QString custom_qss =
+            QStringLiteral(
+                "QWidget { selection-background-color: %1; selection-color: %3; }"
+                "QTreeView::item:selected, QListView::item:selected, QTableView::item:selected { "
+                "background: %1; color: %3; }"
+                "QTreeView::item:hover, QListView::item:hover, QTableView::item:hover { "
+                "background: %5; }"
+                "QMenu::item:selected { background: %1; color: %3; }"
+                "QProgressBar::chunk { background: %1; }"
+                "QSlider::handle { background: %1; }"
+                "QMenu::item:disabled { color: #666666; }"
+                "QPushButton:checked { background: %1; color: %3; border: none; }"
+                "QTabBar::tab { color: %4; }"
+                "QTabBar::tab:selected { border-bottom: 2px solid %1; color: %1; }"
+                "QPushButton, QToolButton, QLabel, QCheckBox, QRadioButton { color: %4; }"
+                "QMainWindow, QDialog, QAbstractScrollArea, QMenuBar, QMenu { background-color: "
+                "%2; color: %4; }"
+                "QGroupBox { background-color: %2; color: %4; margin-top: 14px; }"
+                "QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; "
+                "padding: 0 4px; color: %4; }"
+                "QToolTip { background-color: %2; color: %4; border: 1px solid #555555; padding: "
+                "2px; border-radius: 4px; }"
+                "QComboBox, QComboBox QAbstractItemView, QLineEdit, QSpinBox, QDoubleSpinBox, "
+                "QTextEdit, QTimeEdit, QDateEdit "
+                "{ background-color: %2; color: %4; }"
+                "QCheckBox::indicator, QRadioButton::indicator { width: 14px; height: 14px; }"
+                "QCheckBox::indicator:unchecked { border: 2px solid #666666; border-radius: 3px; "
+                "background-color: transparent; }"
+                "QCheckBox::indicator:checked { border: 2px solid %1; border-radius: 3px; "
+                "background-color: %1; image: url(%6); }"
+                "QCheckBox::indicator:unchecked:hover { border: 2px solid %1; }"
+                "QRadioButton::indicator:unchecked { border: 2px solid #666666; border-radius: "
+                "7px; background-color: transparent; }"
+                "QRadioButton::indicator:checked { border: 2px solid %1; border-radius: 7px; "
+                "background-color: %1; }")
+                .arg(accent_color, surface_color, text_on_accent, base_text_color, hover_color, cb_path);
 
         if (UISettings::values.enable_modern_ui.GetValue()) {
+            custom_qss +=
+                QStringLiteral(
+                    "QMainWindow, QDialog, QAbstractScrollArea, QMenuBar, QMenu { "
+                    "background-color: %1; color: %2; }"
+                    "QLabel, QCheckBox, QRadioButton, QPushButton, QToolButton { color: %2; }"
+                    "QMenuBar::item:selected { background: %3; color: %4; }")
+                    .arg(surface_color, base_text_color, accent_color, text_on_accent);
+
             custom_qss += QStringLiteral(
                 /* Scrollbars */
-                "QScrollBar:vertical { border: none; background: transparent; width: 10px; margin: 0px; }"
-                "QScrollBar::handle:vertical { background: rgba(128, 128, 128, 0.5); min-height: 20px; border-radius: 5px; margin: 2px; }"
+                "QScrollBar:vertical { border: none; background: transparent; width: 10px; margin: "
+                "0px; }"
+                "QScrollBar::handle:vertical { background: rgba(128, 128, 128, 0.5); min-height: "
+                "20px; border-radius: 4px; margin: 2px; }"
                 "QScrollBar::handle:vertical:hover { background: rgba(128, 128, 128, 0.8); }"
-                "QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical { height: 0px; border: none; }"
+                "QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical { height: 0px; "
+                "border: none; }"
                 "QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical { background: none; }"
-                
-                "QScrollBar:horizontal { border: none; background: transparent; height: 10px; margin: 0px; }"
-                "QScrollBar::handle:horizontal { background: rgba(128, 128, 128, 0.5); min-width: 20px; border-radius: 5px; margin: 2px; }"
+
+                "QScrollBar:horizontal { border: none; background: transparent; height: 10px; "
+                "margin: 0px; }"
+                "QScrollBar::handle:horizontal { background: rgba(128, 128, 128, 0.5); min-width: "
+                "20px; border-radius: 4px; margin: 2px; }"
                 "QScrollBar::handle:horizontal:hover { background: rgba(128, 128, 128, 0.8); }"
-                "QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal { width: 0px; border: none; }"
-                "QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal { background: none; }"
+                "QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal { width: 0px; "
+                "border: none; }"
+                "QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal { background: "
+                "none; }"
 
                 /* Lists and Tables */
-                "QTreeView, QListView, QTableView { border-radius: 8px; padding: 4px; margin: 4px; background-color: rgba(0, 0, 0, 0.1); border: 1px solid rgba(128, 128, 128, 0.2); outline: 0; }"
-                "QTreeView::item, QListView::item { padding: 8px; margin: 2px; border-radius: 6px; }"
-                "QHeaderView::section { border: none; border-bottom: 2px solid rgba(128, 128, 128, 0.2); padding: 8px; background-color: transparent; font-weight: bold; }"
-                
+                "QTreeView, QListView, QTableView { border-radius: 4px; padding: 0px; margin: 0px; "
+                "border: 1px solid rgba(128, 128, 128, 0.2); outline: 0; }"
+                "QTreeView::item, QListView::item { padding: 4px; margin: 0px; border-radius: 4px; "
+                "}"
+                "QHeaderView::section { border: none; border-bottom: 1px solid rgba(128, 128, 128, "
+                "0.2); padding: 4px; background-color: transparent; font-weight: bold; }"
+
                 /* Tabs */
-                "QTabWidget::pane { border: 1px solid rgba(128, 128, 128, 0.2); border-radius: 8px; top: -1px; background: rgba(0, 0, 0, 0.05); }"
-                "QTabBar::tab { background: transparent; padding: 8px 16px; margin: 4px; border-radius: 6px; }"
+                "QTabWidget::pane { border: 1px solid rgba(128, 128, 128, 0.2); border-radius: "
+                "4px; top: -1px; background: transparent; }"
+                "QTabBar::tab { background: transparent; padding: 4px 8px; margin: 1px; "
+                "border-radius: 4px; }"
                 "QTabBar::tab:selected { background: rgba(128, 128, 128, 0.3); font-weight: bold; }"
                 "QTabBar::tab:hover:!selected { background: rgba(128, 128, 128, 0.1); }"
 
                 /* Group Boxes */
-                "QGroupBox { border: 1px solid rgba(128, 128, 128, 0.3); border-radius: 8px; margin-top: 16px; padding-top: 16px; }"
-                "QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; left: 12px; padding: 0 4px; font-weight: bold; }"
+                "QGroupBox { border: 1px solid rgba(128, 128, 128, 0.3); border-radius: 4px; "
+                "margin-top: 14px; padding-top: 4px; }"
+                "QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; "
+                "left: 10px; padding: 0 4px; font-weight: bold; }"
 
                 /* Inputs and Buttons */
-                "QPushButton { border-radius: 6px; padding: 6px 16px; font-weight: bold; border: 1px solid rgba(128, 128, 128, 0.3); background: rgba(128, 128, 128, 0.1); }"
+                "QPushButton { border-radius: 4px; padding: 4px 10px; font-weight: bold; border: "
+                "1px solid rgba(128, 128, 128, 0.3); }"
                 "QPushButton:hover { background: rgba(128, 128, 128, 0.2); }"
-                "QComboBox { border-radius: 6px; padding: 6px 12px; border: 1px solid rgba(128, 128, 128, 0.3); background: rgba(128, 128, 128, 0.1); }"
-                "QLineEdit, QSpinBox, QDoubleSpinBox { border-radius: 6px; padding: 6px; border: 1px solid rgba(128, 128, 128, 0.3); background: rgba(0, 0, 0, 0.1); }"
-                
+                "QComboBox { border-radius: 4px; padding: 2px 6px; border: 1px solid rgba(128, "
+                "128, 128, 0.3); }"
+                "QLineEdit, QSpinBox, QDoubleSpinBox { border-radius: 4px; padding: 2px 4px; "
+                "border: 1px solid rgba(128, 128, 128, 0.3); }"
+
                 /* Menus */
-                "QMenuBar { padding: 4px; }"
-                "QMenu { border-radius: 8px; padding: 4px; border: 1px solid rgba(128, 128, 128, 0.2); }"
-                "QMenu::item { padding: 6px 24px; border-radius: 6px; }"
-            );
+                "QMenuBar { padding: 2px; }"
+                "QMenu { border-radius: 4px; padding: 2px; border: 1px solid rgba(128, 128, 128, "
+                "0.2); }"
+                "QMenu::item { padding: 4px 16px; border-radius: 4px; }");
         }
 
         qApp->setStyleSheet(base_qss + custom_qss);

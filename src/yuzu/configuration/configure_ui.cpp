@@ -103,31 +103,13 @@ ConfigureUi::ConfigureUi(Core::System& system_, QWidget* parent)
     ui->theme_combobox->addItem(QStringLiteral("Light Mode"), QStringLiteral("default"));
     ui->theme_combobox->addItem(QStringLiteral("Dark Mode"), QStringLiteral("qdarkstyle"));
 
-    current_accent_color = QString::fromStdString(UISettings::values.accent_color);
-    current_accent_color_2 = QString::fromStdString(UISettings::values.accent_color_2);
-    
-    ui->accent_color_button->setStyleSheet(QStringLiteral("background-color: %1;").arg(current_accent_color));
-    ui->accent_color_button_2->setStyleSheet(QStringLiteral("background-color: %1;").arg(current_accent_color_2));
-
-    connect(ui->accent_color_button, &QPushButton::clicked, this, [this]() {
-        QColor color = QColorDialog::getColor(QColor(current_accent_color), this, tr("Select Color 1"));
-        if (color.isValid()) {
-            current_accent_color = color.name();
-            ui->accent_color_button->setStyleSheet(QStringLiteral("background-color: %1;").arg(current_accent_color));
-        }
-    });
-
-    connect(ui->accent_color_button_2, &QPushButton::clicked, this, [this]() {
-        QColor color = QColorDialog::getColor(QColor(current_accent_color_2), this, tr("Select Color 2"));
-        if (color.isValid()) {
-            current_accent_color_2 = color.name();
-            ui->accent_color_button_2->setStyleSheet(QStringLiteral("background-color: %1;").arg(current_accent_color_2));
-        }
-    });
-    
-    connect(ui->color_mode_combobox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, [this](int index) {
-        ui->accent_color_button_2->setVisible(index == 1);
-    });
+    ui->color_theme_combobox->addItem(QStringLiteral("Black"));
+    ui->color_theme_combobox->addItem(QStringLiteral("Monet Blue"));
+    ui->color_theme_combobox->addItem(QStringLiteral("Monet Red"));
+    ui->color_theme_combobox->addItem(QStringLiteral("Monet Green"));
+    ui->color_theme_combobox->addItem(QStringLiteral("Monet Purple"));
+    ui->color_theme_combobox->addItem(QStringLiteral("Monet Yellow"));
+    ui->color_theme_combobox->addItem(QStringLiteral("Monet Orange"));
 
     InitializeIconSizeComboBox();
     InitializeRowComboBoxes();
@@ -182,9 +164,7 @@ void ConfigureUi::ApplyConfiguration()
 {
     UISettings::values.theme =
         ui->theme_combobox->itemData(ui->theme_combobox->currentIndex()).toString().toStdString();
-    UISettings::values.accent_color = current_accent_color.toStdString();
-    UISettings::values.accent_color_2 = current_accent_color_2.toStdString();
-    UISettings::values.use_gradient_accent = (ui->color_mode_combobox->currentIndex() == 1);
+    UISettings::values.color_theme_name = ui->color_theme_combobox->currentText().toStdString();
     UISettings::values.enable_modern_ui = ui->enable_modern_ui->isChecked();
     UISettings::values.show_add_ons = ui->show_add_ons->isChecked();
     UISettings::values.show_compat = ui->show_compat->isChecked();
@@ -216,14 +196,7 @@ void ConfigureUi::SetConfiguration()
     int theme_idx = ui->theme_combobox->findData(QString::fromStdString(UISettings::values.theme));
     ui->theme_combobox->setCurrentIndex(theme_idx != -1 ? theme_idx : 1); // Default to Dark if not found
     
-    current_accent_color = QString::fromStdString(UISettings::values.accent_color);
-    current_accent_color_2 = QString::fromStdString(UISettings::values.accent_color_2);
-    ui->accent_color_button->setStyleSheet(QStringLiteral("background-color: %1;").arg(current_accent_color));
-    ui->accent_color_button_2->setStyleSheet(QStringLiteral("background-color: %1;").arg(current_accent_color_2));
-    
-    bool is_gradient = UISettings::values.use_gradient_accent.GetValue();
-    ui->color_mode_combobox->setCurrentIndex(is_gradient ? 1 : 0);
-    ui->accent_color_button_2->setVisible(is_gradient);
+    ui->color_theme_combobox->setCurrentText(QString::fromStdString(UISettings::values.color_theme_name));
     
     ui->enable_modern_ui->setChecked(UISettings::values.enable_modern_ui.GetValue());
     ui->language_combobox->setCurrentIndex(ui->language_combobox->findData(

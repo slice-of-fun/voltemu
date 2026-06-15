@@ -166,12 +166,12 @@
            <widget class="QPushButton" name="buttonProfilesSave">
             <property name="maximumSize">
              <size>
-              <width>68</width>
-              <height>16777215</height>
+              <width>120</width>
+                        <height>16777215</height>
              </size>
             </property>
             <property name="styleSheet">
-             <string notr="true">min-width: 68px;</string>
+             <string notr="true">min-width: 85px;</string>
             </property>
             <property name="text">
              <string>Save</string>
@@ -182,12 +182,12 @@
            <widget class="QPushButton" name="buttonProfilesNew">
             <property name="maximumSize">
              <size>
-              <width>68</width>
-              <height>16777215</height>
+              <width>120</width>
+                        <height>16777215</height>
              </size>
             </property>
             <property name="styleSheet">
-             <string notr="true">min-width: 68px;</string>
+             <string notr="true">min-width: 85px;</string>
             </property>
             <property name="text">
              <string>New</string>
@@ -198,12 +198,12 @@
            <widget class="QPushButton" name="buttonProfilesDelete">
             <property name="maximumSize">
              <size>
-              <width>68</width>
-              <height>16777215</height>
+              <width>120</width>
+                        <height>16777215</height>
              </size>
             </property>
             <property name="styleSheet">
-             <string notr="true">min-width: 68px;</string>
+             <string notr="true">min-width: 85px;</string>
             </property>
             <property name="text">
              <string>Delete</string>
@@ -345,12 +345,12 @@
                       </property>
                       <property name="maximumSize">
                        <size>
-                        <width>68</width>
+                        <width>120</width>
                         <height>16777215</height>
                        </size>
                       </property>
                       <property name="styleSheet">
-                       <string notr="true">min-width: 68px;</string>
+                       <string notr="true">min-width: 85px;</string>
                       </property>
                       <property name="text">
                        <string>Down</string>
@@ -394,12 +394,12 @@
                       </property>
                       <property name="maximumSize">
                        <size>
-                        <width>68</width>
+                        <width>120</width>
                         <height>16777215</height>
                        </size>
                       </property>
                       <property name="styleSheet">
-                       <string notr="true">min-width: 68px;</string>
+                       <string notr="true">min-width: 85px;</string>
                       </property>
                       <property name="text">
                        <string>Right</string>
@@ -443,12 +443,12 @@
                       </property>
                       <property name="maximumSize">
                        <size>
-                        <width>68</width>
+                        <width>120</width>
                         <height>16777215</height>
                        </size>
                       </property>
                       <property name="styleSheet">
-                       <string notr="true">min-width: 68px;</string>
+                       <string notr="true">min-width: 85px;</string>
                       </property>
                       <property name="text">
                        <string>Left</string>
@@ -495,12 +495,12 @@
                       </property>
                       <property name="maximumSize">
                        <size>
-                        <width>68</width>
+                        <width>120</width>
                         <height>16777215</height>
                        </size>
                       </property>
                       <property name="styleSheet">
-                       <string notr="true">min-width: 68px;</string>
+                       <string notr="true">min-width: 85px;</string>
                       </property>
                       <property name="text">
                        <string>Up</string>
@@ -552,12 +552,12 @@
                      </property>
                      <property name="maximumSize">
                       <size>
-                       <width>68</width>
-                       <height>16777215</height>
+                       <width>120</width>
+                        <height>16777215</height>
                       </size>
                      </property>
                      <property name="styleSheet">
-                      <string notr="true">min-width: 68px;</string>
+                      <string notr="true">min-width: 85px;</string>
                      </property>
                      <property name="text">
                       <string>Pressed</string>
@@ -601,12 +601,12 @@
                      </property>
                      <property name="maximumSize">
                       <size>
-                       <width>68</width>
-                       <height>16777215</height>
+                       <width>120</width>
+                        <height>16777215</height>
                       </size>
                      </property>
                      <property name="styleSheet">
-                      <string notr="true">min-width: 68px;</string>
+                      <string notr="true">min-width: 85px;</string>
                      </property>
                      <property name="text">
                       <string>Modifier</string>
@@ -641,14 +641,14 @@
                     <widget class="QSpinBox" name="spinboxLStickRange">
                      <property name="minimumSize">
                       <size>
-                       <width>68</width>
-                       <height>21</height>
+                       <width>85</width>
+                        <height>21</height>
                       </size>
                      </property>
                      <property name="maximumSize">
                       <size>
-                       <width>68</width>
-                       <height>16777215</height>
+                       <width>120</width>
+                        <height>16777215</height>
                       </size>
                      </property>
                      <property name="suffix">
@@ -828,12 +828,12 @@
                       </property>
                       <property name="maximumSize">
                        <size>
-                        <width>68</width>
+                        <width>120</width>
                         <height>16777215</height>
                        </size>
                       </property>
                       <property name="styleSheet">
-                       <string notr="true">min-width: 68px;</string>
+                       <string notr="true">min-width: 85px;</string>
                       </property>
                       <property name="text">
                        <string>Down</string>
@@ -877,12 +877,12 @@
                       </property>
                       <property name="maximumSize">
                        <size>
-                        <width>68</width>
+                        <width>120</width>
                         <height>16777215</height>
                        </size>
                       </property>
                       <property name="styleSheet">
-                       <string notr="true">min-width: 68px;</string>
+                       <string notr="true">min-width: 85px;</string>
                       </property>
                       <property name="text">
                        <string>Left</string>
@@ -926,12 +926,12 @@
                       </property>
                       <property name="maximumSize">
                        <size>
-                        <width>68</width>
+                        <width>120</width>
                         <height>16777215</height>
                        </size>
                       </property>
                       <property name="styleSheet">
-                       <string notr="true">min-width: 68px;</string>
+                       <string notr="true">min-width: 85px;</string>
                       </property>
                       <property name="text">
                        <string>Right</string>
@@ -975,12 +975,12 @@
                       </property>
                       <property name="maximumSize">
                        <size>
-                        <width>68</width>
+                        <width>120</width>
                         <height>16777215</height>
                        </size>
                       </property>
                       <property name="styleSheet">
-                       <string notr="true">min-width: 68px;</string>
+                       <string notr="true">min-width: 85px;</string>
                       </property>
                       <property name="text">
                        <string>Up</string>
@@ -1087,12 +1087,12 @@
                      </property>
                      <property name="maximumSize">
                       <size>
-                       <width>68</width>
-                       <height>16777215</height>
+                       <width>120</width>
+                        <height>16777215</height>
                       </size>
                      </property>
                      <property name="styleSheet">
-                      <string notr="true">min-width: 68px;</string>
+                      <string notr="true">min-width: 85px;</string>
                      </property>
                      <property name="text">
                       <string>SR</string>
@@ -1136,12 +1136,12 @@
                      </property>
                      <property name="maximumSize">
                       <size>
-                       <width>68</width>
-                       <height>16777215</height>
+                       <width>120</width>
+                        <height>16777215</height>
                       </size>
                      </property>
                      <property name="styleSheet">
-                      <string notr="true">min-width: 68px;</string>
+                      <string notr="true">min-width: 85px;</string>
                      </property>
                      <property name="text">
                       <string>SL</string>
@@ -1246,12 +1246,12 @@
                      </property>
                      <property name="maximumSize">
                       <size>
-                       <width>68</width>
-                       <height>16777215</height>
+                       <width>120</width>
+                        <height>16777215</height>
                       </size>
                      </property>
                      <property name="styleSheet">
-                      <string notr="true">min-width: 68px;</string>
+                      <string notr="true">min-width: 85px;</string>
                      </property>
                      <property name="text">
                       <string>ZL</string>
@@ -1311,12 +1311,12 @@
                      </property>
                      <property name="maximumSize">
                       <size>
-                       <width>68</width>
-                       <height>16777215</height>
+                       <width>120</width>
+                        <height>16777215</height>
                       </size>
                      </property>
                      <property name="styleSheet">
-                      <string notr="true">min-width: 68px;</string>
+                      <string notr="true">min-width: 85px;</string>
                      </property>
                      <property name="text">
                       <string>L</string>
@@ -1397,12 +1397,12 @@
                   </property>
                   <property name="maximumSize">
                    <size>
-                    <width>68</width>
-                    <height>16777215</height>
+                    <width>120</width>
+                        <height>16777215</height>
                    </size>
                   </property>
                   <property name="styleSheet">
-                   <string notr="true">min-width: 68px;</string>
+                   <string notr="true">min-width: 85px;</string>
                   </property>
                   <property name="text">
                    <string>Minus</string>
@@ -1446,12 +1446,12 @@
                   </property>
                   <property name="maximumSize">
                    <size>
-                    <width>68</width>
-                    <height>16777215</height>
+                    <width>120</width>
+                        <height>16777215</height>
                    </size>
                   </property>
                   <property name="styleSheet">
-                   <string notr="true">min-width: 68px;</string>
+                   <string notr="true">min-width: 85px;</string>
                   </property>
                   <property name="text">
                    <string>Plus</string>
@@ -1553,12 +1553,12 @@
                      </property>
                      <property name="maximumSize">
                       <size>
-                       <width>68</width>
-                       <height>16777215</height>
+                       <width>120</width>
+                        <height>16777215</height>
                       </size>
                      </property>
                      <property name="styleSheet">
-                      <string notr="true">min-width: 68px;</string>
+                      <string notr="true">min-width: 85px;</string>
                      </property>
                      <property name="text">
                       <string>ZR</string>
@@ -1618,12 +1618,12 @@
                      </property>
                      <property name="maximumSize">
                       <size>
-                       <width>68</width>
-                       <height>16777215</height>
+                       <width>120</width>
+                        <height>16777215</height>
                       </size>
                      </property>
                      <property name="styleSheet">
-                      <string notr="true">min-width: 68px;</string>
+                      <string notr="true">min-width: 85px;</string>
                      </property>
                      <property name="text">
                       <string>R</string>
@@ -1722,12 +1722,12 @@
                      </property>
                      <property name="maximumSize">
                       <size>
-                       <width>68</width>
-                       <height>16777215</height>
+                       <width>120</width>
+                        <height>16777215</height>
                       </size>
                      </property>
                      <property name="styleSheet">
-                      <string notr="true">min-width: 68px;</string>
+                      <string notr="true">min-width: 85px;</string>
                      </property>
                      <property name="text">
                       <string>SR</string>
@@ -1771,12 +1771,12 @@
                      </property>
                      <property name="maximumSize">
                       <size>
-                       <width>68</width>
-                       <height>16777215</height>
+                       <width>120</width>
+                        <height>16777215</height>
                       </size>
                      </property>
                      <property name="styleSheet">
-                      <string notr="true">min-width: 68px;</string>
+                      <string notr="true">min-width: 85px;</string>
                      </property>
                      <property name="text">
                       <string>SL</string>
@@ -1878,12 +1878,12 @@
                   </property>
                   <property name="maximumSize">
                    <size>
-                    <width>68</width>
-                    <height>16777215</height>
+                    <width>120</width>
+                        <height>16777215</height>
                    </size>
                   </property>
                   <property name="styleSheet">
-                   <string notr="true">min-width: 68px;</string>
+                   <string notr="true">min-width: 85px;</string>
                   </property>
                   <property name="text">
                    <string>Left</string>
@@ -1927,12 +1927,12 @@
                   </property>
                   <property name="maximumSize">
                    <size>
-                    <width>68</width>
-                    <height>16777215</height>
+                    <width>120</width>
+                        <height>16777215</height>
                    </size>
                   </property>
                   <property name="styleSheet">
-                   <string notr="true">min-width: 68px;</string>
+                   <string notr="true">min-width: 85px;</string>
                   </property>
                   <property name="text">
                    <string>Right</string>
@@ -1976,12 +1976,12 @@
                   </property>
                   <property name="maximumSize">
                    <size>
-                    <width>68</width>
-                    <height>16777215</height>
+                    <width>120</width>
+                        <height>16777215</height>
                    </size>
                   </property>
                   <property name="styleSheet">
-                   <string notr="true">min-width: 68px;</string>
+                   <string notr="true">min-width: 85px;</string>
                   </property>
                   <property name="text">
                    <string>Capture</string>
@@ -2025,12 +2025,12 @@
                   </property>
                   <property name="maximumSize">
                    <size>
-                    <width>68</width>
-                    <height>16777215</height>
+                    <width>120</width>
+                        <height>16777215</height>
                    </size>
                   </property>
                   <property name="styleSheet">
-                   <string notr="true">min-width: 68px;</string>
+                   <string notr="true">min-width: 85px;</string>
                   </property>
                   <property name="text">
                    <string>Home</string>
@@ -2148,12 +2148,12 @@
                       </property>
                       <property name="maximumSize">
                        <size>
-                        <width>68</width>
+                        <width>120</width>
                         <height>16777215</height>
                        </size>
                       </property>
                       <property name="styleSheet">
-                       <string notr="true">min-width: 68px;</string>
+                       <string notr="true">min-width: 85px;</string>
                       </property>
                       <property name="text">
                        <string>X</string>
@@ -2197,12 +2197,12 @@
                       </property>
                       <property name="maximumSize">
                        <size>
-                        <width>68</width>
+                        <width>120</width>
                         <height>16777215</height>
                        </size>
                       </property>
                       <property name="styleSheet">
-                       <string notr="true">min-width: 68px;</string>
+                       <string notr="true">min-width: 85px;</string>
                       </property>
                       <property name="text">
                        <string>B</string>
@@ -2246,12 +2246,12 @@
                       </property>
                       <property name="maximumSize">
                        <size>
-                        <width>68</width>
+                        <width>120</width>
                         <height>16777215</height>
                        </size>
                       </property>
                       <property name="styleSheet">
-                       <string notr="true">min-width: 68px;</string>
+                       <string notr="true">min-width: 85px;</string>
                       </property>
                       <property name="text">
                        <string>A</string>
@@ -2295,12 +2295,12 @@
                       </property>
                       <property name="maximumSize">
                        <size>
-                        <width>68</width>
+                        <width>120</width>
                         <height>16777215</height>
                        </size>
                       </property>
                       <property name="styleSheet">
-                       <string notr="true">min-width: 68px;</string>
+                       <string notr="true">min-width: 85px;</string>
                       </property>
                       <property name="text">
                        <string>Y</string>
@@ -2404,12 +2404,12 @@
                       </property>
                       <property name="maximumSize">
                        <size>
-                        <width>68</width>
+                        <width>120</width>
                         <height>16777215</height>
                        </size>
                       </property>
                       <property name="styleSheet">
-                       <string notr="true">min-width: 68px;</string>
+                       <string notr="true">min-width: 85px;</string>
                       </property>
                       <property name="text">
                        <string>Right</string>
@@ -2453,12 +2453,12 @@
                       </property>
                       <property name="maximumSize">
                        <size>
-                        <width>68</width>
+                        <width>120</width>
                         <height>16777215</height>
                        </size>
                       </property>
                       <property name="styleSheet">
-                       <string notr="true">min-width: 68px;</string>
+                       <string notr="true">min-width: 85px;</string>
                       </property>
                       <property name="text">
                        <string>Down</string>
@@ -2502,12 +2502,12 @@
                       </property>
                       <property name="maximumSize">
                        <size>
-                        <width>68</width>
+                        <width>120</width>
                         <height>16777215</height>
                        </size>
                       </property>
                       <property name="styleSheet">
-                       <string notr="true">min-width: 68px;</string>
+                       <string notr="true">min-width: 85px;</string>
                       </property>
                       <property name="text">
                        <string>Left</string>
@@ -2551,12 +2551,12 @@
                       </property>
                       <property name="maximumSize">
                        <size>
-                        <width>68</width>
+                        <width>120</width>
                         <height>16777215</height>
                        </size>
                       </property>
                       <property name="styleSheet">
-                       <string notr="true">min-width: 68px;</string>
+                       <string notr="true">min-width: 85px;</string>
                       </property>
                       <property name="text">
                        <string>Up</string>
@@ -2629,12 +2629,12 @@
                      </property>
                      <property name="maximumSize">
                       <size>
-                       <width>68</width>
-                       <height>16777215</height>
+                       <width>120</width>
+                        <height>16777215</height>
                       </size>
                      </property>
                      <property name="styleSheet">
-                      <string notr="true">min-width: 68px;</string>
+                      <string notr="true">min-width: 85px;</string>
                      </property>
                      <property name="text">
                       <string>Pressed</string>
@@ -2678,12 +2678,12 @@
                      </property>
                      <property name="maximumSize">
                       <size>
-                       <width>68</width>
-                       <height>16777215</height>
+                       <width>120</width>
+                        <height>16777215</height>
                       </size>
                      </property>
                      <property name="styleSheet">
-                      <string notr="true">min-width: 68px;</string>
+                      <string notr="true">min-width: 85px;</string>
                      </property>
                      <property name="text">
                       <string>Modifier</string>
@@ -2718,14 +2718,14 @@
                     <widget class="QSpinBox" name="spinboxRStickRange">
                      <property name="minimumSize">
                       <size>
-                       <width>68</width>
-                       <height>21</height>
+                       <width>85</width>
+                        <height>21</height>
                       </size>
                      </property>
                      <property name="maximumSize">
                       <size>
-                       <width>68</width>
-                       <height>16777215</height>
+                       <width>120</width>
+                        <height>16777215</height>
                       </size>
                      </property>
                      <property name="suffix">

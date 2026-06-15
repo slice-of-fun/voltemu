@@ -70,7 +70,8 @@ const std::array<Shortcut, 33> default_hotkeys{{
 // clang-format on
 
 const Themes themes{{
-    {"Default", "default"},
+    {"Default (Dark)", "qdarkstyle"},
+    {"Light", "default"},
     {"Default Colorful", "colorful"},
     {"Dark", "qdarkstyle"},
     {"Dark Colorful", "colorful_dark"},
@@ -85,7 +86,7 @@ bool IsDarkTheme()
            theme == std::string("colorful_dark") || theme == std::string("colorful_midnight_blue");
 }
 
-Values values = {};
+Values values = { .color_theme_name = "Black" };
 
 u32 CalculateWidth(u32 height, Settings::AspectRatio ratio)
 {

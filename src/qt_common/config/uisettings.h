@@ -58,6 +58,7 @@ struct Shortcut {
 
 enum class Theme {
     Default,
+    Light,
     DefaultColorful,
     Dark,
     DarkColorful,
@@ -73,7 +74,7 @@ static constexpr Theme default_theme{
 #endif
 };
 
-using Themes = std::array<std::pair<const char*, const char*>, 6>;
+using Themes = std::array<std::pair<const char*, const char*>, 7>;
 extern const Themes themes;
 
 struct GameDir {
@@ -173,9 +174,8 @@ struct Values {
 
     Setting<bool> enable_modern_ui{linkage, true, "enable_modern_ui", Category::UiGeneral};
     std::string theme;
-    std::string accent_color;
-    std::string accent_color_2;
-    Setting<bool> use_gradient_accent{linkage, false, "use_gradient_accent", Category::UiGeneral};
+    // dynamic color theme settings
+    std::string color_theme_name;
 
     // Shortcut name <Shortcut, context>
     std::vector<Shortcut> shortcuts;

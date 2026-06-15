@@ -64,41 +64,16 @@
          </layout>
         </item>
         <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_accent">
+         <layout class="QHBoxLayout" name="horizontalLayout_color_theme">
           <item>
-           <widget class="QLabel" name="accent_color_label">
+           <widget class="QLabel" name="color_theme_label">
             <property name="text">
-             <string>Accent Color:</string>
+             <string>Color Theme:</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QComboBox" name="color_mode_combobox">
-            <item>
-             <property name="text">
-              <string>Single Color</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Gradient</string>
-             </property>
-            </item>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="accent_color_button">
-            <property name="text">
-             <string>Color 1</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="accent_color_button_2">
-            <property name="text">
-             <string>Color 2</string>
-            </property>
-           </widget>
+           <widget class="QComboBox" name="color_theme_combobox"/>
           </item>
          </layout>
         </item>

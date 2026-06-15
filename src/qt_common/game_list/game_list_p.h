@@ -9,6 +9,7 @@
 #include <QCoreApplication>
 #include <QFileInfo>
 #include <QObject>
+#include <QPainter>
 #include <QRegularExpression>
 #include <QStandardItem>
 #include <QString>
@@ -362,10 +363,29 @@ public:
 
         const int icon_size = UISettings::values.folder_icon_size.GetValue();
 
-        setData(QIcon::fromTheme(QStringLiteral("list-add"))
-                    .pixmap(icon_size)
-                    .scaled(icon_size, icon_size, Qt::IgnoreAspectRatio, Qt::SmoothTransformation),
-                Qt::DecorationRole);
+        QPixmap pixmap(icon_size, icon_size);
+        pixmap.fill(Qt::transparent);
+        QPainter painter(&pixmap);
+        painter.setRenderHint(QPainter::Antialiasing);
+
+        QString theme_name = QString::fromStdString(UISettings::values.color_theme_name);
+        QString accent_color = QStringLiteral("#000000"); // Default to Black
+        if (theme_name == QStringLiteral("Monet Blue")) accent_color = QStringLiteral("#8AB4F8");
+        if (theme_name == QStringLiteral("Monet Red")) accent_color = QStringLiteral("#F28B82");
+        if (theme_name == QStringLiteral("Monet Green")) accent_color = QStringLiteral("#81C995");
+        if (theme_name == QStringLiteral("Monet Purple")) accent_color = QStringLiteral("#C58AF9");
+        if (theme_name == QStringLiteral("Monet Yellow")) accent_color = QStringLiteral("#FDE293");
+        if (theme_name == QStringLiteral("Monet Orange")) accent_color = QStringLiteral("#FCAD70");
+
+        int stroke_width = std::max(2, icon_size / 8);
+        painter.setPen(QPen(QColor(accent_color), stroke_width, Qt::SolidLine, Qt::RoundCap));
+        int pad = icon_size / 4;
+
+        painter.drawLine(icon_size / 2, pad, icon_size / 2, icon_size - pad);
+        painter.drawLine(pad, icon_size / 2, icon_size - pad, icon_size / 2);
+        painter.end();
+
+        setData(pixmap, Qt::DecorationRole);
         setData(QObject::tr("Add New Game Directory"), Qt::DisplayRole);
     }
 
