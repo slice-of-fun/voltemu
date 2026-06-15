@@ -269,7 +269,7 @@ QAbstractItemView {
     alternate-background-color: #2c2f32;
     color: #eff0f1;
     border: 1px solid #3A3939;
-    border-radius: 2px;
+    border-radius: 6px;
 }
 
 QAbstractItemView:disabled,
@@ -296,7 +296,7 @@ QLineEdit {
     background-color: #232629;
     padding: 5px;
     border: 1px solid #54575B;
-    border-radius: 2px;
+    border-radius: 6px;
     color: #eff0f1;
 }
 
@@ -306,7 +306,7 @@ QAbstractItemView QLineEdit {
 
 QGroupBox {
     border: 1px solid #54575B;
-    border-radius: 2px;
+    border-radius: 6px;
     margin-top: 20px;
     padding-top: 2px;
 }
@@ -320,7 +320,7 @@ QGroupBox::title {
 }
 
 QAbstractScrollArea {
-    border-radius: 2px;
+    border-radius: 6px;
     border: 1px solid #54575B;
     background-color: transparent;
 }
@@ -329,14 +329,14 @@ QScrollBar:horizontal {
     height: 15px;
     margin: 3px 15px 3px 15px;
     border: 1px transparent #2A2929;
-    border-radius: 4px;
+    border-radius: 8px;
     background-color: #2A2929;
 }
 
 QScrollBar::handle:horizontal {
     background-color: #605F5F;
     min-width: 5px;
-    border-radius: 4px;
+    border-radius: 8px;
 }
 
 QScrollBar::add-line:horizontal {
@@ -390,13 +390,13 @@ QScrollBar:vertical {
     width: 15px;
     margin: 15px 3px 15px 3px;
     border: 1px transparent #2A2929;
-    border-radius: 4px;
+    border-radius: 8px;
 }
 
 QScrollBar::handle:vertical {
     background-color: #605F5F;
     min-height: 5px;
-    border-radius: 4px;
+    border-radius: 8px;
 }
 
 QScrollBar::sub-line:vertical {
@@ -454,7 +454,7 @@ QTextEdit {
 QPlainTextEdit {
     background-color: #232629;
     color: #eff0f1;
-    border-radius: 2px;
+    border-radius: 6px;
     border: 1px solid #54575B;
 }
 
@@ -488,12 +488,12 @@ QMainWindow::separator:hover {
 }
 
 QFrame {
-    border-radius: 2px;
+    border-radius: 6px;
     border: 1px solid #76797C;
 }
 
 QFrame[frameShape="0"] {
-    border-radius: 2px;
+    border-radius: 6px;
     border: 1px transparent #76797C;
 }
 
@@ -530,7 +530,7 @@ QToolButton#qt_toolbar_ext_button {
 QPushButton {
     color: #eff0f1;
     border: 1px solid #54575B;
-    border-radius: 2px;
+    border-radius: 6px;
     padding: 5px 0px 5px 0px;
     outline: none;
     min-width: 100px;
@@ -558,7 +558,7 @@ QPushButton:pressed {
 QComboBox {
     selection-background-color: #3daee9;
     border: 1px solid #54575B;
-    border-radius: 2px;
+    border-radius: 6px;
     padding: 0px 4px 0px 4px;
     min-width: 60px;
     min-height: 23px;
@@ -587,7 +587,7 @@ QComboBox:on {
 
 QComboBox QAbstractItemView {
     background-color: #232629;
-    border-radius: 2px;
+    border-radius: 6px;
     border: 1px solid #76797C;
     selection-background-color: #18465d;
 }
@@ -618,7 +618,7 @@ QAbstractSpinBox {
     border: 1px solid #54575B;
     background-color: #232629;
     color: #eff0f1;
-    border-radius: 2px;
+    border-radius: 6px;
     min-width: 52px;
     min-height: 23px;
 }
@@ -924,7 +924,7 @@ QSlider::groove:horizontal {
     height: 4px;
     background: #565a5e;
     margin: 0px;
-    border-radius: 2px;
+    border-radius: 6px;
 }
 
 QSlider::handle:horizontal {
@@ -956,7 +956,7 @@ QSlider::handle:vertical {
 QToolButton {
     background-color: #232629;
     border: 1px solid #54575B;
-    border-radius: 2px;
+    border-radius: 6px;
     margin: 3px;
     padding: 5px;
 }
@@ -1169,7 +1169,7 @@ QProgressBar::chunk {
 QDateEdit {
     selection-background-color: #3daee9;
     border: 1px solid #3375A3;
-    border-radius: 2px;
+    border-radius: 6px;
     padding: 1px;
     min-width: 75px;
 }
@@ -1182,7 +1182,7 @@ QDateEdit:on {
 
 QDateEdit QAbstractItemView {
     background-color: #232629;
-    border-radius: 2px;
+    border-radius: 6px;
     border: 1px solid #3375A3;
     selection-background-color: #3daee9;
 }
@@ -1251,11 +1251,11 @@ QPushButton#RendererStatusBarButton:hover {
 }
 
 QPushButton#RendererStatusBarButton:checked {
-    color: #e85c00;
+    color: #00E5FF;
 }
 
 QPushButton#RendererStatusBarButton:!checked {
-    color: #00ccdd;
+    color: #FFD700;
 }
 
 QPushButton#RefreshButton {
@@ -1285,7 +1285,7 @@ QPushButton#GPUStatusBarButton:hover {
 }
 
 QPushButton#GPUStatusBarButton:checked {
-    color: #ff8040;
+    color: #00B3CC;
 }
 
 QPushButton#GPUStatusBarButton:!checked {
@@ -1538,7 +1538,7 @@ QCheckBox#checkboxPlayer6Connected::indicator:checked,
 QCheckBox#checkboxPlayer7Connected::indicator:checked,
 QCheckBox#checkboxPlayer8Connected::indicator:checked,
 QGroupBox#groupConnectedController::indicator:checked {
-    border-radius: 2px;
+    border-radius: 6px;
     border: 1px solid #929192;
     background: #39ff14;
     image: none;
@@ -1569,7 +1569,7 @@ QCheckBox#checkboxPlayer6Connected::indicator:unchecked,
 QCheckBox#checkboxPlayer7Connected::indicator:unchecked,
 QCheckBox#checkboxPlayer8Connected::indicator:unchecked,
 QGroupBox#groupConnectedController::indicator:unchecked {
-    border-radius: 2px;
+    border-radius: 6px;
     border: 1px solid #929192;
     background: transparent;
     image: none;

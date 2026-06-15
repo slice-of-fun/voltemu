@@ -37,7 +37,7 @@ QPushButton#RendererStatusBarButton:hover {
 }
 
 QPushButton#RendererStatusBarButton:checked {
-    color: #e85c00;
+    color: #00E5FF;
 }
 
 QPushButton#RendererStatusBarButton:!checked {
@@ -108,7 +108,7 @@ https://doc.qt.io/qt-5/stylesheet-examples.html#customizing-qgroupbox
 --------------------------------------------------------------------------- */
 QGroupBox {
   border: 1px solid #32414B;
-  border-radius: 4px;
+  border-radius: 8px;
   margin-top: 20px;
   padding: 2px;
 }
@@ -348,7 +348,7 @@ QCheckBox#checkboxPlayer6Connected::indicator:checked,
 QCheckBox#checkboxPlayer7Connected::indicator:checked,
 QCheckBox#checkboxPlayer8Connected::indicator:checked,
 QGroupBox#groupConnectedController::indicator:checked {
-    border-radius: 2px;
+    border-radius: 6px;
     border: 1px solid #929192;
     background: #39ff14;
     image: none;
@@ -379,7 +379,7 @@ QCheckBox#checkboxPlayer6Connected::indicator:unchecked,
 QCheckBox#checkboxPlayer7Connected::indicator:unchecked,
 QCheckBox#checkboxPlayer8Connected::indicator:unchecked,
 QGroupBox#groupConnectedController::indicator:unchecked {
-    border-radius: 2px;
+    border-radius: 6px;
     border: 1px solid #929192;
     background: transparent;
     image: none;
@@ -441,7 +441,7 @@ QStackedWidget#stackedDialog QTextBrowser QScrollBar::vertical {
     width: 15px;
     margin: 15px 3px 15px 3px;
     border: 1px transparent;
-    border-radius: 4px;
+    border-radius: 8px;
 }
 
 QStackedWidget#stackedDialog QTextBrowser QScrollBar::horizoncal {
@@ -449,12 +449,12 @@ QStackedWidget#stackedDialog QTextBrowser QScrollBar::horizoncal {
     height: 15px;
     margin: 3px 15px 3px 15px;
     border: 1px transparent;
-    border-radius: 4px;
+    border-radius: 8px;
 }
 
 QStackedWidget#stackedDialog QTextBrowser QScrollBar::handle {
     background: #fff;
-    border-radius: 4px;
+    border-radius: 8px;
     min-height: 5px;
     min-width: 5px;
 }
