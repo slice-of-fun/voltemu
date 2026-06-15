@@ -223,61 +223,61 @@
 
     <!-- Volt Theme Colors -->
 
-    <!-- Synthwave/Vaporwave Primary Colors -->
-    <color name="volt_primary">#FF0080</color> <!-- Neon magenta -->
-    <color name="volt_primary_variant">#E6006B</color> <!-- Darker magenta -->
-    <color name="volt_secondary">#60D1F6</color> <!-- Electric cyan -->
-    <color name="volt_secondary_variant">#00E6E6</color> <!-- Darker cyan -->
+    <!-- Pixel Material You Primary Colors -->
+    <color name="volt_primary">#0B57D0</color> <!-- Pixel blue -->
+    <color name="volt_primary_variant">#D3E3FD</color> <!-- Pixel light blue container -->
+    <color name="volt_secondary">#4F6071</color> <!-- Pixel secondary gray-blue -->
+    <color name="volt_secondary_variant">#D3E4F6</color> <!-- Pixel secondary light container -->
 
-    <!-- Background Colors - White -->
-    <color name="volt_background">#FFFFFF</color> <!-- Pure black background -->
-    <color name="volt_surface">#FFFFFF</color> <!-- Card surface -->
-    <color name="volt_surface_variant">#D3D3D3</color> <!-- Elevated surface -->
+    <!-- Background Colors -->
+    <color name="volt_background">#FDFBFF</color> <!-- Slightly off-white background -->
+    <color name="volt_surface">#FDFBFF</color> <!-- Default surface -->
+    <color name="volt_surface_variant">#E1E2E8</color> <!-- Variant surface -->
 
-    <!-- Text Colors - High contrast for readability -->
-    <color name="volt_on_background">#000000</color> <!-- Pure black text -->
-    <color name="volt_on_surface">#000000</color> <!-- Pure black text -->
-    <color name="volt_on_primary">#FFFFFF</color> <!-- White on neon -->
-    <color name="volt_on_secondary">#C0C0C0</color> <!-- Milky White on cyan -->
+    <!-- Text Colors -->
+    <color name="volt_on_background">#1A1C1E</color> <!-- Dark text -->
+    <color name="volt_on_surface">#1A1C1E</color> <!-- Dark text -->
+    <color name="volt_on_primary">#FFFFFF</color> <!-- White on primary -->
+    <color name="volt_on_secondary">#FFFFFF</color> <!-- White on secondary -->
 
-    <!-- Synthwave Accent Colors -->
-    <color name="volt_accent_purple">#9D00FF</color> <!-- Electric purple -->
-    <color name="volt_accent_blue">#0080FF</color> <!-- Electric blue -->
-    <color name="volt_accent_orange">#FF8000</color> <!-- Neon orange -->
+    <!-- Accent Colors -->
+    <color name="volt_accent_purple">#6B5778</color> <!-- Pixel tertiary -->
+    <color name="volt_accent_blue">#0B57D0</color> <!-- Pixel blue -->
+    <color name="volt_accent_orange">#805600</color> <!-- Pixel orange/brownish -->
 
-    <!-- Neon Glow Effects -->
-    <color name="volt_glow_pink">#80FF0080</color> <!-- Magenta glow -->
-    <color name="volt_glow_cyan">#8060D1F6</color> <!-- Cyan glow -->
-    <color name="volt_glow_orange">#80FF8000</color> <!-- Orange glow -->
+    <!-- Glow Effects (repurposed for shadow/elevation if needed) -->
+    <color name="volt_glow_pink">#800B57D0</color>
+    <color name="volt_glow_cyan">#804F6071</color>
+    <color name="volt_glow_orange">#806B5778</color>
 
-    <!-- Neon Border Colors -->
-    <color name="volt_border">#7c757f</color> <!-- Subtle border -->
-    <color name="volt_border_light">#948b98</color> <!-- Lighter border -->
-    <color name="volt_border_gradient_start">#FF0080</color> <!-- Neon magenta -->
-    <color name="volt_border_gradient_end">#60D1F6</color> <!-- Electric cyan -->
+    <!-- Border Colors -->
+    <color name="volt_border">#74777F</color>
+    <color name="volt_border_light">#E0E2EC</color>
+    <color name="volt_border_gradient_start">#0B57D0</color>
+    <color name="volt_border_gradient_end">#4F6071</color>
 
-    <!-- Synthwave Status Colors -->
-    <color name="volt_error">#FF0040</color> <!-- Neon red -->
-    <color name="volt_success">#00FF80</color> <!-- Neon green -->
-    <color name="volt_warning">#FFFF00</color> <!-- Neon yellow -->
-    <color name="volt_info">#0080FF</color> <!-- Electric blue -->
+    <!-- Status Colors -->
+    <color name="volt_error">#BA1A1A</color>
+    <color name="volt_success">#146C2E</color>
+    <color name="volt_warning">#805600</color>
+    <color name="volt_info">#0061A4</color>
 
     <!-- Overlay Colors -->
-    <color name="volt_overlay">#CCFFFFFF</color>
+    <color name="volt_overlay">#33000000</color>
 
-    <!-- Neon Button Colors -->
-    <color name="volt_button_primary_bg">#FF0080</color> <!-- Neon magenta -->
-    <color name="volt_button_secondary_bg">#00000000</color> <!-- Transparent -->
-    <color name="volt_button_secondary_border">#60D1F6</color> <!-- Electric cyan -->
+    <!-- Button Colors -->
+    <color name="volt_button_primary_bg">#0B57D0</color>
+    <color name="volt_button_secondary_bg">#00000000</color>
+    <color name="volt_button_secondary_border">#4F6071</color>
 
-    <!-- Synthwave Card Colors -->
-    <color name="volt_card_background">#F0F0F0</color> <!-- Almost white -->
-    <color name="volt_card_background_elevated">#D8D8D8</color> <!-- Elevated white -->
+    <!-- Card Colors -->
+    <color name="volt_card_background">#F3F4F9</color>
+    <color name="volt_card_background_elevated">#ECEEF4</color>
 
     <!-- Transparent versions for gradients -->
     <color name="volt_transparent">#00000000</color>
-    <color name="volt_primary_transparent">#05FF0080</color>
-    <color name="volt_secondary_transparent">#0500FFFF</color>
+    <color name="volt_primary_transparent">#050B57D0</color>
+    <color name="volt_secondary_transparent">#054F6071</color>
 
     <!-- Common Colors Across All Themes -->
     <color name="yuzu_outlineVariant">#C6C5D0</color>
