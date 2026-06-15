@@ -1,6 +1,6 @@
-# Orphaned Profiles
+﻿# Orphaned Profiles
 
-A bug present in earlier versions of Eden and Yuzu caused some profiles to be read from the incorrect location if your NAND directory was set to anything other than the default. This bug was fixed in Eden v0.0.4-rc1, but it can be destructive if you're not careful.
+A bug present in earlier versions of Volt and Yuzu caused some profiles to be read from the incorrect location if your NAND directory was set to anything other than the default. This bug was fixed in Volt v0.0.4-rc1, but it can be destructive if you're not careful.
 
 ## What are they?
 

@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
+﻿// SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 // SPDX-FileCopyrightText: 2023 yuzu Emulator Project
@@ -27,7 +27,7 @@ class GradientBorderCardView @JvmOverloads constructor(
     private val borderPath = Path()
     private val borderRect = RectF()
     private var showGradientBorder = false
-    private var isEdenTheme = false
+    private var isVoltTheme = false
 
     init {
         setWillNotDraw(false)
@@ -44,7 +44,7 @@ class GradientBorderCardView @JvmOverloads constructor(
 
     private fun updateThemeState() {
         val themeIndex = IntSetting.STATIC_THEME_COLOR.getInt(false)
-        isEdenTheme = themeIndex == 0
+        isVoltTheme = themeIndex == 0
         invalidate()
     }
 
@@ -52,15 +52,15 @@ class GradientBorderCardView @JvmOverloads constructor(
         super.onSizeChanged(w, h, oldw, oldh)
 
         // Update border style based on theme
-        if (isEdenTheme) {
-            // Gradient for Eden theme
+        if (isVoltTheme) {
+            // Gradient for Volt theme
             borderPaint.shader = LinearGradient(
                 0f,
                 0f,
                 w.toFloat(),
                 h.toFloat(),
-                context.getColor(R.color.eden_border_gradient_start),
-                context.getColor(R.color.eden_border_gradient_end),
+                context.getColor(R.color.volt_border_gradient_start),
+                context.getColor(R.color.volt_border_gradient_end),
                 Shader.TileMode.CLAMP
             )
         } else {

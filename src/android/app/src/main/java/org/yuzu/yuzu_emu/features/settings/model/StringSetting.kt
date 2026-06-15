@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright 2025 Eden Emulator Project
+﻿// SPDX-FileCopyrightText: Copyright 2025 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 // SPDX-FileCopyrightText: 2023 yuzu Emulator Project
@@ -12,8 +12,8 @@ enum class StringSetting(override val key: String) : AbstractStringSetting {
     DRIVER_PATH("driver_path"),
     DEVICE_NAME("device_name"),
 
-    WEB_TOKEN("eden_token"),
-    WEB_USERNAME("eden_username")
+    WEB_TOKEN("volt_token"),
+    WEB_USERNAME("volt_username")
     ;
 
     override fun getString(needsGlobal: Boolean): String = NativeConfig.getString(key, needsGlobal)

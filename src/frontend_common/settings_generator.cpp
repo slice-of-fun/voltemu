@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
+﻿// SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "settings_generator.h"
@@ -16,7 +16,7 @@ void GenerateSettings()
 {
     auto gen = Common::Random::GetMT19937();
     // Web Token
-    if (Settings::values.eden_token.GetValue().empty()) {
+    if (Settings::values.volt_token.GetValue().empty()) {
         static constexpr const size_t token_length = 48;
         static constexpr const frozen::string token_set = "abcdefghijklmnopqrstuvwxyz";
         static std::uniform_int_distribution<int> token_dist(0, token_set.size() - 1);
@@ -25,7 +25,7 @@ void GenerateSettings()
             size_t idx = token_dist(gen);
             result += token_set[idx];
         }
-        Settings::values.eden_token.SetValue(result);
+        Settings::values.volt_token.SetValue(result);
     }
 
     // Randomly generated number because, well, we fill the rest automagically ;)

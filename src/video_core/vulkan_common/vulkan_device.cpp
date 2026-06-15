@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
+﻿// SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
@@ -617,7 +617,7 @@ Device::Device(VkInstance instance_, vk::PhysicalDevice physical_, VkSurfaceKHR 
             sampler_heap_budget = derived_budget;
             LOG_WARNING(Render_Vulkan,
                         "Qualcomm driver reports max {} samplers; reserving {} (25%) and "
-                        "allowing Eden to use {} (75%) to avoid heap exhaustion",
+                        "allowing Volt to use {} (75%) to avoid heap exhaustion",
                         sampler_limit, reserved, sampler_heap_budget);
         }
     }

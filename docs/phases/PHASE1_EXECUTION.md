@@ -1,4 +1,4 @@
-# Phase 1 — Rebranding & Foundation: Execution Plan
+﻿# Phase 1 — Rebranding & Foundation: Execution Plan
 
 This document is the authoritative task list for Phase 1. Every item must be completed and verified before Phase 1 is considered done.
 
@@ -18,7 +18,7 @@ This document is the authoritative task list for Phase 1. Every item must be com
 
 | # | Task | Status | Notes |
 |---|------|--------|-------|
-| 0.1 | Clone Eden repository | ⬜ | `git clone https://git.eden-emu.dev/eden-emu/eden.git volt-emulator` |
+| 0.1 | Clone Volt repository | ⬜ | `git clone https://git.volt-emu.dev/volt-emu/volt.git volt-emulator` |
 | 0.2 | Initialize submodules | ⬜ | `git submodule update --init --recursive` |
 | 0.3 | Create `volt-emu` GitHub organization | ⬜ | |
 | 0.4 | Push to new remote | ⬜ | `git remote set-url origin https://github.com/volt-emu/volt.git` |
@@ -55,9 +55,9 @@ This document is the authoritative task list for Phase 1. Every item must be com
 
 | # | Task | Status | Notes |
 |---|------|--------|-------|
-| 2.1 | Rename CMake project: `eden` → `volt` | ✅ | `CMakeLists.txt:6` `project(volt)` (audit-confirmed) |
-| 2.2 | Rename all `EDEN_` variables to `VOLT_` | ✅ | 0 `EDEN_` vars remain in non-vendored cmake (audit-confirmed) |
-| 2.3 | Rename CMake targets: `eden-*` → `volt-*` | ⚠️ | Main target is `volt` (`src/yuzu/CMakeLists.txt:17,244`); **leftover `eden` target at `:366`** in APPLE+Xcode block — latent configure error, see rebrand audit |
+| 2.1 | Rename CMake project: `volt` → `volt` | ✅ | `CMakeLists.txt:6` `project(volt)` (audit-confirmed) |
+| 2.2 | Rename all `VOLT_` variables to `VOLT_` | ✅ | 0 `VOLT_` vars remain in non-vendored cmake (audit-confirmed) |
+| 2.3 | Rename CMake targets: `volt-*` → `volt-*` | ⚠️ | Main target is `volt` (`src/yuzu/CMakeLists.txt:17,244`); **leftover `volt` target at `:366`** in APPLE+Xcode block — latent configure error, see rebrand audit |
 | 2.4 | Update version variables | ⬜ | `VOLT_VERSION_MAJOR/MINOR/PATCH` — not yet located in audit |
 | 2.5 | Update vcpkg manifest name | N/A | No root `vcpkg.json` in tree (audit-confirmed) |
 | 2.6 | Verify build compiles successfully | ⬜ | Windows + Linux |
@@ -69,19 +69,19 @@ This document is the authoritative task list for Phase 1. Every item must be com
 
 > **Audited (no-build):** see `docs/phases/PHASE1_REBRAND_AUDIT.md` for the full
 > 52-reference inventory grouped by migration risk. Tier A (org/app name, desktop
-> id, `EDEN_DIR`, macOS UTType ids) must NOT be blind-replaced — they relocate
+> id, `VOLT_DIR`, macOS UTType ids) must NOT be blind-replaced — they relocate
 > user config / break OS associations and need a migration plan. Tier B (cosmetic
 > UI strings) is safe to rename but wants a build + `lupdate` pass.
 
 | # | Task | Status | Notes |
 |---|------|--------|-------|
-| 3.1 | Window title: "Eden" → "Volt Emulator" | ⬜ | `aboutdialog.ui`, `configure.ui:20`, `deps_dialog.ui:14` (audit Tier B) |
-| 3.2 | About dialog: all Eden references | ⬜ | `aboutdialog.ui:14,72,105,147` — keep upstream attribution |
-| 3.3 | Log output prefixes: "[eden]" → "[volt]" | ⬜ | `main_window.cpp:1937` "Eden starting…" |
-| 3.4 | Error messages: "Eden" → "Volt Emulator" | ⬜ | `main_window.cpp:1881`; 9× `tr("Eden")` msgbox titles (audit Tier B) |
-| 3.5 | Crash reporter: "Eden" → "Volt Emulator" | ⬜ | Also `eden_gpu.log` filenames (`gpu_logging.cpp:61,64`) |
-| 3.6 | `namespace Eden` → `namespace Volt` | ⬜ | Forward-compat only; use with care |
-| 3.7 | String literal audit: remaining "Eden" in `.cpp`/`.h` | ✅ | Inventoried in rebrand audit (Tier A/B/C) |
+| 3.1 | Window title: "Volt" → "Volt Emulator" | ⬜ | `aboutdialog.ui`, `configure.ui:20`, `deps_dialog.ui:14` (audit Tier B) |
+| 3.2 | About dialog: all Volt references | ⬜ | `aboutdialog.ui:14,72,105,147` — keep upstream attribution |
+| 3.3 | Log output prefixes: "[volt]" → "[volt]" | ⬜ | `main_window.cpp:1937` "Volt starting…" |
+| 3.4 | Error messages: "Volt" → "Volt Emulator" | ⬜ | `main_window.cpp:1881`; 9× `tr("Volt")` msgbox titles (audit Tier B) |
+| 3.5 | Crash reporter: "Volt" → "Volt Emulator" | ⬜ | Also `volt_gpu.log` filenames (`gpu_logging.cpp:61,64`) |
+| 3.6 | `namespace Volt` → `namespace Volt` | ⬜ | Forward-compat only; use with care |
+| 3.7 | String literal audit: remaining "Volt" in `.cpp`/`.h` | ✅ | Inventoried in rebrand audit (Tier A/B/C) |
 | 3.8 | Verify no license lines were touched | ⬜ | Run audit script, compare counts |
 | 3.9 | Commit step | ⬜ | `rebrand(src): update user-facing strings` |
 
@@ -96,7 +96,7 @@ This document is the authoritative task list for Phase 1. Every item must be com
 | 4.2 | Update `.rc` file: company name | ⬜ | "Volt Emulator Team" |
 | 4.3 | Update `.rc` file: description | ⬜ | Project description |
 | 4.4 | Update `.rc` file: executable name | ⬜ | `volt.exe` |
-| 4.5 | Update NSIS/WiX installer: all branding | ✅ | `installer.nsi`: `PRODUCT_NAME "Volt Emulator"` + all 9 exe refs fixed `eden.exe`→`volt.exe`/`volt-cmd.exe` (legal audit D6). Icon path verify deferred to build |
+| 4.5 | Update NSIS/WiX installer: all branding | ✅ | `installer.nsi`: `PRODUCT_NAME "Volt Emulator"` + all 9 exe refs fixed `volt.exe`→`volt.exe`/`volt-cmd.exe` (legal audit D6). Icon path verify deferred to build |
 | 4.6 | Update installer output filename | ✅ | `OutFile` derives from `${PRODUCT_NAME}` → `Volt Emulator-Windows-…-installer.exe` |
 
 #### Linux
@@ -119,7 +119,7 @@ This document is the authoritative task list for Phase 1. Every item must be com
 |---|------|--------|-------|
 | 5.1 | Update `applicationId`: `dev.volt_emu.volt` | ⬜ | `build.gradle` |
 | 5.2 | Update app label: "Volt Emulator" | ⬜ | `strings.xml` |
-| 5.3 | Rename Java/Kotlin package directories | ⬜ | `dev/eden_emu/` → `dev/volt_emu/` |
+| 5.3 | Rename Java/Kotlin package directories | ⬜ | `dev/volt_emu/` → `dev/volt_emu/` |
 | 5.4 | Update package declarations in all `.kt` / `.java` files | ⬜ | Match new package |
 | 5.5 | Update `AndroidManifest.xml` package | ⬜ | |
 | 5.6 | Update all Gradle files | ⬜ | App ID, build variants |
@@ -165,7 +165,7 @@ This document is the authoritative task list for Phase 1. Every item must be com
 | 7.12 | docs/architecture/ARCHITECTURE.md | ✅ | Complete |
 | 7.13 | docs/standards/CODING_STANDARDS.md | ✅ | Complete |
 | 7.14 | docs/legal/THIRD_PARTY_LICENSES.md | ✅ | Complete |
-| 7.15 | Update Eden's original README → archive it | ✅ | Archived at `docs/upstream/EDEN_README.md` |
+| 7.15 | Update Volt's original README → archive it | ✅ | Archived at `docs/upstream/VOLT_README.md` |
 | 7.16 | Commit step | ⬜ | `docs: add Phase 1 documentation suite` |
 
 ---
@@ -177,7 +177,7 @@ This document is the authoritative task list for Phase 1. Every item must be com
 | 8.1 | Run `02_audit.sh` again — compare to baseline | ⬜ | License count must be unchanged |
 | 8.2 | Manually verify 10 random source files — license headers intact | ⬜ | Spot check |
 | 8.3 | Verify `ATTRIBUTION.md` is accurate | ⬜ | |
-| 8.4 | Verify Eden/Sudachi/Yuzu attribution blocks still exist in `about` dialog | ⬜ | |
+| 8.4 | Verify Volt/Sudachi/Yuzu attribution blocks still exist in `about` dialog | ⬜ | |
 | 8.5 | Run `grep -r "Copyright" src/ | wc -l` — compare to pre-rebrand count | ⬜ | Should be equal |
 | 8.6 | Generate third-party license report | ⬜ | `cmake --build build --target volt_licenses` (if target exists) |
 
@@ -205,11 +205,11 @@ This document is the authoritative task list for Phase 1. Every item must be com
 | 10.3 | Android APK builds successfully | ⬜ |
 | 10.4 | Window title shows "Volt Emulator" | ⬜ |
 | 10.5 | About dialog shows "Volt Emulator" | ⬜ |
-| 10.6 | About dialog still shows Eden/Sudachi/Yuzu attribution | ⬜ |
+| 10.6 | About dialog still shows Volt/Sudachi/Yuzu attribution | ⬜ |
 | 10.7 | Android app name shows "Volt Emulator" | ⬜ |
 | 10.8 | Android package is `dev.volt_emu.volt` | ⬜ |
 | 10.9 | Log output shows `[Volt]` prefix | ⬜ |
-| 10.10 | No user-visible "Eden" branding remaining | ⬜ |
+| 10.10 | No user-visible "Volt" branding remaining | ⬜ |
 | 10.11 | All SPDX headers intact (count matches pre-rebrand) | ⬜ |
 | 10.12 | All copyright notices intact | ⬜ |
 | 10.13 | Documentation baseline complete (all 7.x items ✅) | ✅ |
@@ -228,7 +228,7 @@ rebrand(scope): short description
 Detailed explanation if needed.
 
 Part of Volt Emulator Phase 1 rebranding.
-Upstream lineage preserved: Volt ← Eden ← Sudachi ← Yuzu
+Upstream lineage preserved: Volt ← Volt ← Sudachi ← Yuzu
 All license headers and copyright notices unchanged.
 ```
 

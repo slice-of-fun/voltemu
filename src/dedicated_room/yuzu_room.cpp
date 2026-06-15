@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
+﻿// SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 // SPDX-FileCopyrightText: Copyright 2017 Citra Emulator Project
@@ -75,7 +75,7 @@ static void PrintHelp(const char* argv0)
 
 static void PrintVersion()
 {
-    LOG_INFO(Network, "Eden dedicated room {} {} Libnetwork: {}", Common::g_scm_branch,
+    LOG_INFO(Network, "Volt dedicated room {} {} Libnetwork: {}", Common::g_scm_branch,
              Common::g_scm_desc, Network::network_version);
 }
 
@@ -201,7 +201,7 @@ void LaunchRoom(int argc, char** argv, bool called_by_option)
     std::string token;
     std::string web_api_url;
     std::string ban_list_file;
-    std::string log_file = "eden-room.log";
+    std::string log_file = "volt-room.log";
     std::string bind_address;
     u64 preferred_game_id = 0;
     u32 port = Network::DefaultRoomPort;
@@ -337,14 +337,14 @@ void LaunchRoom(int argc, char** argv, bool called_by_option)
             LOG_INFO(Network, "Hosting a public room");
             Settings::values.web_api_url = web_api_url;
             PadToken(token);
-            Settings::values.eden_username = UsernameFromDisplayToken(token);
-            username = Settings::values.eden_username.GetValue();
-            Settings::values.eden_token = TokenFromDisplayToken(token);
+            Settings::values.volt_username = UsernameFromDisplayToken(token);
+            username = Settings::values.volt_username.GetValue();
+            Settings::values.volt_token = TokenFromDisplayToken(token);
         } else {
             LOG_INFO(Network, "Hosting a public room");
             Settings::values.web_api_url = web_api_url;
-            Settings::values.eden_username = username;
-            Settings::values.eden_token = token;
+            Settings::values.volt_username = username;
+            Settings::values.volt_token = token;
         }
     }
 
@@ -361,7 +361,7 @@ void LaunchRoom(int argc, char** argv, bool called_by_option)
             std::make_unique<WebService::VerifyUserJWT>(Settings::values.web_api_url.GetValue());
 #else
         LOG_INFO(Network,
-                 "Eden Web Services is not available with this build: validation is disabled.");
+                 "Volt Web Services is not available with this build: validation is disabled.");
         verify_backend = std::make_unique<Network::VerifyUser::NullBackend>();
 #endif
     } else {

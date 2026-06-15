@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>NewUserDialog</class>
  <widget class="QDialog" name="NewUserDialog">
@@ -57,7 +57,7 @@
      <item row="0" column="1" colspan="2">
       <widget class="QLineEdit" name="username">
        <property name="text">
-        <string>Eden</string>
+        <string>Volt</string>
        </property>
       </widget>
      </item>

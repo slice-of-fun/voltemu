@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
+﻿// SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "qt_common.h"
@@ -223,7 +223,7 @@ void Init(QWidget* root)
     provider = std::make_unique<FileSys::ManualContentProvider>();
 
     // initialization stuff
-    Common::FS::CreateEdenPaths();
+    Common::FS::CreateVoltPaths();
 
     system->Initialize();
 
@@ -286,7 +286,7 @@ void Init(QWidget* root)
     RemoveCachedContents();
 }
 
-std::filesystem::path GetEdenCommand()
+std::filesystem::path GetVoltCommand()
 {
     std::filesystem::path command;
 

@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
+﻿// SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 // SPDX-FileCopyrightText: Copyright 2017 Citra Emulator Project
@@ -25,8 +25,8 @@ AnnounceMultiplayerSession::AnnounceMultiplayerSession()
 {
 #ifdef ENABLE_WEB_SERVICE
     backend = std::make_unique<WebService::RoomJson>(Settings::values.web_api_url.GetValue(),
-                                                     Settings::values.eden_username.GetValue(),
-                                                     Settings::values.eden_token.GetValue());
+                                                     Settings::values.volt_username.GetValue(),
+                                                     Settings::values.volt_token.GetValue());
 #else
     backend = std::make_unique<AnnounceMultiplayerRoom::NullBackend>();
 #endif
@@ -153,13 +153,13 @@ AnnounceMultiplayerRoom::RoomList AnnounceMultiplayerSession::GetRoomList()
     return backend->GetRoomList();
 }
 
-void AnnounceMultiplayerSession::UpdateCredentials()
+void AnnounceMultiplayerSession::UpdateCrvolttials()
 {
-    ASSERT_MSG(!IsRunning(), "Credentials can only be updated when session is not running");
+    ASSERT_MSG(!IsRunning(), "Crvolttials can only be updated when session is not running");
 #ifdef ENABLE_WEB_SERVICE
     backend = std::make_unique<WebService::RoomJson>(Settings::values.web_api_url.GetValue(),
-                                                     Settings::values.eden_username.GetValue(),
-                                                     Settings::values.eden_token.GetValue());
+                                                     Settings::values.volt_username.GetValue(),
+                                                     Settings::values.volt_token.GetValue());
 #else
     backend = std::make_unique<AnnounceMultiplayerRoom::NullBackend>();
 #endif

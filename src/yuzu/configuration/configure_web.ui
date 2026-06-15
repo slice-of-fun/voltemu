@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>ConfigureWeb</class>
  <widget class="QWidget" name="ConfigureWeb">
@@ -22,7 +22,7 @@
      <item>
       <widget class="QGroupBox" name="groupBoxWebConfig">
        <property name="title">
-        <string>Eden Web Service</string>
+        <string>Volt Web Service</string>
        </property>
        <layout class="QVBoxLayout" name="verticalLayoutYuzuWebService">
         <item>

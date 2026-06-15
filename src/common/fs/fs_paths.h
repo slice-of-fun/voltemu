@@ -1,14 +1,8 @@
-// SPDX-FileCopyrightText: Copyright 2025 Eden Emulator Project
-// SPDX-License-Identifier: GPL-3.0-or-later
-
-// SPDX-FileCopyrightText: Copyright 2021 yuzu Emulator Project
-// SPDX-License-Identifier: GPL-2.0-or-later
-
-#pragma once
+﻿#pragma once
 
 // yuzu data directories
 
-#define EDEN_DIR     "eden"
+#define VOLT_DIR     "volt"
 #define PORTABLE_DIR "user"
 
 // Sub-directories contained within a yuzu data directory
@@ -36,4 +30,4 @@
 #define RYUJINX_DIR "Ryujinx"
 
 // yuzu-specific files
-#define LOG_FILE "eden_log.txt"
+#define LOG_FILE "volt_log.txt"

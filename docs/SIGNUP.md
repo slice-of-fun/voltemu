@@ -1,4 +1,4 @@
-# Signup
+﻿# Signup
 
 To prevent spam and reduce bandwidth usage, registration is closed, and will likely remain this way.
 
@@ -17,16 +17,16 @@ First of all, you MUST have a valid reason to sign up for our Git. Valid reasons
 
 The following are not valid reasons to sign up:
 
-- I want to contribute to Eden.
+- I want to contribute to Volt.
   * Be at least somewhat specific! We always welcome contributors and developers, but generic "I want to contribute" messages don't give us enough information.
-- I want to support Eden.
-  * If you wish to support us through development, be more specific; otherwise, to support us, check out our [donations page](https://eden-emu.dev/donations).
+- I want to support Volt.
+  * If you wish to support us through development, be more specific; otherwise, to support us, check out our [donations page](https://volt-emu.dev/donations).
 - I want to report issues.
-  * Most of our issue tracking is handled on [GitHub](https://github.com/eden-emulator/Issue-Reports) for the time being. This is subject to change.
-- I want to play/use Eden.
-  * To download and use Eden, see our [Releases page](https://github.com/eden-emulator/Releases/releases)!
+  * Most of our issue tracking is handled on [GitHub](https://github.com/volt-emulator/Issue-Reports) for the time being. This is subject to change.
+- I want to play/use Volt.
+  * To download and use Volt, see our [Releases page](https://github.com/volt-emulator/Releases/releases)!
 - I want to see the source code.
-  * To see Eden's source code, go [here](https://git.eden-emu.dev/eden-emu/eden).
+  * To see Volt's source code, go [here](https://git.volt-emu.dev/volt-emu/volt).
 
 ## Other Information
 
@@ -35,7 +35,7 @@ Requests that appear suspicious, automated, OR blank will generally be automatic
 You MUST use the following format:
 
 ```
-Subject: [Eden Git] Registration Request
+Subject: [Volt Git] Registration Request
 Username: <Your Desired Username>
 Email: <Your Desired Email>
 I wish to sign up because... <your reason here>
@@ -48,23 +48,23 @@ Email notifications are disabled for the time being, so you don't have to use a 
 In general, PRs are the preferred method of tracking patches, as they allow us to go through our standard triage, CI, and testing process without having to deal with the minutiae of incremental patches. However, we also understand that many people prefer to use raw patches, and that's totally okay! While we currently don't have a mailing list, we do accept email patches. To do so:
 
 1. Make your changes on a clean copy of the master branch
-2. Commit your changes with a descriptive, well-formed message (see the [commit message docs](https://git.eden-emu.dev/eden-emu/eden/src/branch/master/docs/Development.md#pull-requests)), and a proper description thoroughly explaining your changes.
+2. Commit your changes with a descriptive, well-formed message (see the [commit message docs](https://git.volt-emu.dev/volt-emu/volt/src/branch/master/docs/Development.md#pull-requests)), and a proper description thoroughly explaining your changes.
   * Note that we don't need to know all the individual details about your code. A description explaining the motivation and general implementation of your changes is enough, alongside caveats and any potential blockers.
 3. Format your patch with `git format-patch -1 HEAD`.
-4. Email us with the subject `[Eden] [PATCH] <brief patch description...>`, with a brief description of your patch, and the previously-formatted patch file as an attachment.
+4. Email us with the subject `[Volt] [PATCH] <brief patch description...>`, with a brief description of your patch, and the previously-formatted patch file as an attachment.
   * If you don't include the first two bracketed parts, your email may be lost!
 
 The following emails are currently set up to receive and process patches:
 
-- [eden@eden-emu.dev](mailto:eden@eden-emu.dev]
-- [crueter@eden-emu.dev](mailto:eden@eden-emu.dev)
+- [volt@volt-emu.dev](mailto:volt@volt-emu.dev]
+- [crueter@volt-emu.dev](mailto:volt@volt-emu.dev)
 
 ## Instructions
 
 If you have read everything above and affirm that you will not abuse your access, click the summary below to get the email to send your request to.
 
 <details>
-<summary>I affirm that I have read ALL of the information above, and will not abuse my access to Eden, nor will I send unnecessary spam to the following email.</summary>
+<summary>I affirm that I have read ALL of the information above, and will not abuse my access to Volt, nor will I send unnecessary spam to the following email.</summary>
 
 Email [crueter@crueter.xyz](mailto:crueter@crueter.xyz) with the format above.
 

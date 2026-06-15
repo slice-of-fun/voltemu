@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
+﻿// SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 // SPDX-FileCopyrightText: 2018 Citra Emulator Project
@@ -172,27 +172,27 @@ void ConfigureMotionTouch::OnUDPAddServer()
     const int row = udp_server_list_model->rowCount();
 
     if (!ok) {
-        QMessageBox::warning(this, tr("Eden"), tr("Port number has invalid characters"));
+        QMessageBox::warning(this, tr("Volt"), tr("Port number has invalid characters"));
         return;
     }
     if (port_number < 0 || port_number > 65353) {
-        QMessageBox::warning(this, tr("Eden"), tr("Port has to be in range 0 and 65353"));
+        QMessageBox::warning(this, tr("Volt"), tr("Port has to be in range 0 and 65353"));
         return;
     }
     if (!re.match(server_text).hasMatch()) {
-        QMessageBox::warning(this, tr("Eden"), tr("IP address is not valid"));
+        QMessageBox::warning(this, tr("Volt"), tr("IP address is not valid"));
         return;
     }
     // Search for duplicates
     for (const auto& item : udp_server_list_model->stringList()) {
         if (item == server_string) {
-            QMessageBox::warning(this, tr("Eden"), tr("This UDP server already exists"));
+            QMessageBox::warning(this, tr("Volt"), tr("This UDP server already exists"));
             return;
         }
     }
     // Limit server count to 8
     if (row == 8) {
-        QMessageBox::warning(this, tr("Eden"), tr("Unable to add more than 8 servers"));
+        QMessageBox::warning(this, tr("Volt"), tr("Unable to add more than 8 servers"));
         return;
     }
 
@@ -293,7 +293,7 @@ void ConfigureMotionTouch::OnConfigureTouchFromButton()
 bool ConfigureMotionTouch::CanCloseDialog()
 {
     if (udp_test_in_progress) {
-        QMessageBox::warning(this, tr("Eden"),
+        QMessageBox::warning(this, tr("Volt"),
                              tr("UDP Test or calibration configuration is in progress.<br>Please "
                                 "wait for them to finish."));
         return false;

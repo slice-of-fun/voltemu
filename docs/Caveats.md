@@ -1,4 +1,4 @@
-# Caveats
+﻿# Caveats
 
 <!-- TOC -->
 - [Arch Linux](#arch-linux)
@@ -20,11 +20,11 @@
 
 ## Arch Linux
 
-Eden is also available as an [AUR package](https://aur.archlinux.org/packages/eden-git). If you are unable to build, either use that or compare your process to the PKGBUILD.
+Volt is also available as an [AUR package](https://aur.archlinux.org/packages/volt-git). If you are unable to build, either use that or compare your process to the PKGBUILD.
 
 ## Gentoo Linux
 
-[`games-emulation/eden`](https://gitweb.gentoo.org/repo/proj/guru.git/tree/games-emulation/eden) is available in the GURU. This repository also contains some additional dependencies, such as mcl, sirit, oaknut, etc.
+[`games-emulation/volt`](https://gitweb.gentoo.org/repo/proj/guru.git/tree/games-emulation/volt) is available in the GURU. This repository also contains some additional dependencies, such as mcl, sirit, oaknut, etc.
 
 If you're having issues with building, always consult that ebuild.
 
@@ -120,7 +120,7 @@ If clang has errors, try using `g++11`.
 
 ## FreeBSD
 
-Eden is not currently available as a port on FreeBSD, though it is in the works. For now, the recommended method of usage is to compile it yourself.
+Volt is not currently available as a port on FreeBSD, though it is in the works. For now, the recommended method of usage is to compile it yourself.
 
 The available OpenSSL port (3.0.17) is out-of-date, and using a bundled static library instead is recommended; to do so, add `-DYUZU_USE_BUNDLED_OPENSSL=ON` to your CMake configure command.
 
@@ -222,18 +222,18 @@ deps() {
             cp "$dllpath" "$dll"
 
             # also grab the dependencies of the dependent DLL; e.g.
-            # double-conversion is a dep of Qt6Core.dll but NOT eden.exe
+            # double-conversion is a dep of Qt6Core.dll but NOT volt.exe
             deps "$dllpath"
         fi
     done
 }
 
-# NB: must be done in a directory containing eden.exe
-deps eden.exe
+# NB: must be done in a directory containing volt.exe
+deps volt.exe
 
 # deploy Qt plugins and such
 windeployqt6 --no-compiler-runtime --no-opengl-sw --no-system-dxc-compiler \
-    --no-system-d3d-compiler eden.exe
+    --no-system-d3d-compiler volt.exe
 
 # grab deps for Qt plugins
 find ./*/ -name "*.dll" | while read -r dll; do deps "$dll"; done

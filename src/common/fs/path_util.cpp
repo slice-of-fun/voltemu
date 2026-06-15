@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
+﻿// SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 // SPDX-FileCopyrightText: Copyright 2021 yuzu Emulator Project
@@ -93,7 +93,7 @@ public:
         return legacy_paths.at(legacy_path);
     }
 
-    void CreateEdenPaths()
+    void CreateVoltPaths()
     {
         std::for_each(volt_paths.begin(), volt_paths.end(),
                       [](auto& path) { void(FS::CreateDirs(path.second)); });
@@ -116,16 +116,16 @@ public:
     /// On Android, the behaviour is to look for the current directory only.
     void Reinitialize(fs::path volt_path = {})
     {
-        fs::path eden_path_cache;
-        fs::path eden_path_config;
+        fs::path volt_path_cache;
+        fs::path volt_path_config;
 #ifdef _WIN32
         // User directory takes priority over global %AppData% directory
         volt_path = GetExeDirectory() / PORTABLE_DIR;
         if (!Exists(volt_path) || !IsDir(volt_path)) {
-            volt_path = GetAppDataRoamingDirectory() / EDEN_DIR;
+            volt_path = GetAppDataRoamingDirectory() / VOLT_DIR;
         }
-        eden_path_cache = volt_path / CACHE_DIR;
-        eden_path_config = volt_path / CONFIG_DIR;
+        volt_path_cache = volt_path / CACHE_DIR;
+        volt_path_config = volt_path / CONFIG_DIR;
 #define LEGACY_PATH(titleName, upperName)                                                          \
     GenerateLegacyPath(EmuPath::titleName##Dir, GetAppDataRoamingDirectory() / upperName##_DIR);   \
     GenerateLegacyPath(EmuPath::titleName##ConfigDir,                                              \
@@ -139,17 +139,17 @@ public:
 #undef LEGACY_PATH
 #elif __ANDROID__
         ASSERT(!volt_path.empty());
-        eden_path_cache = volt_path / CACHE_DIR;
-        eden_path_config = volt_path / CONFIG_DIR;
+        volt_path_cache = volt_path / CACHE_DIR;
+        volt_path_config = volt_path / CONFIG_DIR;
 #else
         volt_path = GetCurrentDir() / PORTABLE_DIR;
         if (!Exists(volt_path) || !IsDir(volt_path)) {
-            volt_path = GetDataDirectory("XDG_DATA_HOME") / EDEN_DIR;
-            eden_path_cache = GetDataDirectory("XDG_CACHE_HOME") / EDEN_DIR;
-            eden_path_config = GetDataDirectory("XDG_CONFIG_HOME") / EDEN_DIR;
+            volt_path = GetDataDirectory("XDG_DATA_HOME") / VOLT_DIR;
+            volt_path_cache = GetDataDirectory("XDG_CACHE_HOME") / VOLT_DIR;
+            volt_path_config = GetDataDirectory("XDG_CONFIG_HOME") / VOLT_DIR;
         } else {
-            eden_path_cache = volt_path / CACHE_DIR;
-            eden_path_config = volt_path / CONFIG_DIR;
+            volt_path_cache = volt_path / CACHE_DIR;
+            volt_path_config = volt_path / CONFIG_DIR;
         }
 #define LEGACY_PATH(titleName, upperName)                                                          \
     GenerateLegacyPath(EmuPath::titleName##Dir,                                                    \
@@ -166,8 +166,8 @@ public:
 #endif
         GenerateVoltPath(VoltPath::VoltDir, volt_path);
         GenerateVoltPath(VoltPath::AmiiboDir, volt_path / AMIIBO_DIR);
-        GenerateVoltPath(VoltPath::CacheDir, eden_path_cache);
-        GenerateVoltPath(VoltPath::ConfigDir, eden_path_config);
+        GenerateVoltPath(VoltPath::CacheDir, volt_path_cache);
+        GenerateVoltPath(VoltPath::ConfigDir, volt_path_config);
         GenerateVoltPath(VoltPath::CrashDumpsDir, volt_path / CRASH_DUMPS_DIR);
         GenerateVoltPath(VoltPath::DumpDir, volt_path / DUMP_DIR);
         GenerateVoltPath(VoltPath::KeysDir, volt_path / KEYS_DIR);
@@ -334,9 +334,9 @@ void SetVoltPath(VoltPath volt_path, const fs::path& new_path)
     }
 }
 
-void CreateEdenPaths()
+void CreateVoltPaths()
 {
-    PathManagerImpl::GetInstance().CreateEdenPaths();
+    PathManagerImpl::GetInstance().CreateVoltPaths();
 }
 
 #ifdef _WIN32

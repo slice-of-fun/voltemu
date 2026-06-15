@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
+﻿// SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "core/hle/service/bcat/news/builtin_news.h"
@@ -52,7 +52,7 @@ std::filesystem::path GetCachePath()
 std::filesystem::path GetDefaultLogoPath(bool large)
 {
     return Common::FS::GetVoltPath(Common::FS::VoltPath::CacheDir) / "news" /
-           (large ? "eden_logo_large.jpg" : "eden_logo_small.jpg");
+           (large ? "volt_logo_large.jpg" : "volt_logo_small.jpg");
 }
 
 std::filesystem::path GetNewsImagePath(std::string_view news_id, bool large)
@@ -90,9 +90,9 @@ std::vector<u8> TryLoadFromDisk(const std::filesystem::path& path)
 // TODO(crueter): Migrate to use Common::Net
 std::vector<u8> DownloadImage(const std::string& url_path, const std::filesystem::path& cache_path)
 {
-    LOG_DEBUG(Service_BCAT, "Downloading image: https://eden-emu.dev{}", url_path);
+    LOG_DEBUG(Service_BCAT, "Downloading image: https://volt-emu.dev{}", url_path);
     try {
-        httplib::Client cli("https://eden-emu.dev");
+        httplib::Client cli("https://volt-emu.dev");
         cli.set_follow_location(true);
         cli.set_connection_timeout(std::chrono::seconds(2));
         cli.set_read_timeout(std::chrono::seconds(2));
@@ -120,7 +120,7 @@ std::vector<u8> DownloadImage(const std::string& url_path, const std::filesystem
 std::vector<u8> LoadDefaultLogo(bool large)
 {
     const auto path = GetDefaultLogoPath(large);
-    const std::string url = large ? "/news/eden_logo_large.jpg" : "/news/eden_logo_small.jpg";
+    const std::string url = large ? "/news/volt_logo_large.jpg" : "/news/volt_logo_small.jpg";
 
     auto data = TryLoadFromDisk(path);
     if (!data.empty())
@@ -330,7 +330,7 @@ void ImportReleases(const std::vector<Common::Net::Release>& releases)
         const u64 pickup_limit = published + 600000000;
         const u32 priority = rel.prerelease ? 1500 : 2500;
 
-        std::string author = "Eden";
+        std::string author = "Volt";
 
         auto payload = BuildMsgpack(title, FormatBody(body, title), title, published, pickup_limit,
                                     priority, {"en"}, author, {}, html_url, news_id);
@@ -368,7 +368,7 @@ std::vector<u8> BuildMsgpack(std::string_view title, std::string_view body,
 {
     MsgPack::Writer w;
 
-    const u32 news_id = override_id.value_or(HashToNewsId(title.empty() ? "eden" : title));
+    const u32 news_id = override_id.value_or(HashToNewsId(title.empty() ? "volt" : title));
     const std::string news_id_str = fmt::format("{}", news_id);
 
     const auto img_small = GetNewsImage(news_id_str, false);
@@ -408,7 +408,7 @@ std::vector<u8> BuildMsgpack(std::string_view title, std::string_view body,
     w.WriteKey("display_type");
     w.WriteString("NORMAL");
     w.WriteKey("topic_id");
-    w.WriteString("eden");
+    w.WriteString("volt");
 
     w.WriteKey("no_photography"); // still show image
     w.WriteUInt(0);
@@ -429,7 +429,7 @@ std::vector<u8> BuildMsgpack(std::string_view title, std::string_view body,
 
     // Topic name = who wrote it
     w.WriteKey("topic_name");
-    w.WriteString("Eden");
+    w.WriteString("Volt");
 
     w.WriteKey("list_image");
     w.WriteBinary(img_small);
@@ -441,7 +441,7 @@ std::vector<u8> BuildMsgpack(std::string_view title, std::string_view body,
     w.WriteString("");
 
     w.WriteKey("allow_domains");
-    w.WriteString("^https?://git.eden-emu.dev(/|$)");
+    w.WriteString("^https?://git.volt-emu.dev(/|$)");
 
     // More link
     w.WriteKey("more");

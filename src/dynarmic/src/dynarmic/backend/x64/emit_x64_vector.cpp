@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
+﻿// SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 /* This file is part of the dynarmic project.
@@ -536,7 +536,7 @@ template<typename T> constexpr T VShift(T x, T y) {
         if (shift_amount >= bit_size)
             return 0;
         // Parentheses necessary, as MSVC doesn't appear to consider cast parentheses
-        // as a grouping in terms of precedence, causing warning C4554 to fire. See:
+        // as a grouping in terms of precvoltce, causing warning C4554 to fire. See:
         // https://developercommunity.visualstudio.com/content/problem/144783/msvc-2017-does-not-understand-that-static-cast-cou.html
         if (shift_amount <= -bit_size)
             return x >> (T(bit_size - 1));

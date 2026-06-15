@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
+﻿// SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 // SPDX-FileCopyrightText: Copyright 2023 yuzu Emulator Project
@@ -43,11 +43,11 @@ static void OneTimeInit()
     // might be a privacy concern?  Who knows, though.
 
     const SECURITY_STATUS ret =
-        AcquireCredentialsHandle(nullptr, const_cast<LPTSTR>(UNISP_NAME), SECPKG_CRED_OUTBOUND,
+        AcquireCrvolttialsHandle(nullptr, const_cast<LPTSTR>(UNISP_NAME), SECPKG_CRED_OUTBOUND,
                                  nullptr, &schannel_cred, nullptr, nullptr, &cred_handle, nullptr);
     if (ret != SEC_E_OK) {
         // SECURITY_STATUS codes are a type of HRESULT and can be used with NativeErrorToString.
-        LOG_ERROR(Service_SSL, "AcquireCredentialsHandle failed: {}",
+        LOG_ERROR(Service_SSL, "AcquireCrvolttialsHandle failed: {}",
                   Common::NativeErrorToString(ret));
         return;
     }

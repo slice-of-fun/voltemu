@@ -1,4 +1,4 @@
-# Phase 2 — Codebase Cleanup Execution
+﻿# Phase 2 — Codebase Cleanup Execution
 
 This document tracks the execution of **Phase 2: Codebase Cleanup** as defined in the project `ROADMAP.md`. 
 
@@ -64,7 +64,7 @@ The goal is to improve maintainability, readability, and architectural quality w
 > Deferred — requires clang-tidy/cppcheck + a build to confirm safety.
 
 ### 2.2 Deprecations
-- [x] Remove Yuzu/Eden legacy compatibility shims.
+- [x] Remove Yuzu/Volt legacy compatibility shims.
 - [x] Remove commented-out code blocks older than 6 months.
 
 > Commented-out **transitional leftovers** removed (6 lines across `puller.cpp`,

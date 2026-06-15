@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
+﻿// SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "mod.h"
@@ -88,7 +88,7 @@ QStringList GetModFolders(const QString& root, const QString& fallbackName)
             }
 
             // now make a temp directory...
-            const auto mod_dir = fs::temp_directory_path() / "eden" / "mod" / name.toStdString();
+            const auto mod_dir = fs::temp_directory_path() / "volt" / "mod" / name.toStdString();
             const auto tmp = mod_dir / to_make;
             std::error_code ec;
             fs::remove_all(mod_dir, ec);
@@ -124,7 +124,7 @@ QStringList GetModFolders(const QString& root, const QString& fallbackName)
 const QString ExtractMod(const QString& path)
 {
     namespace fs = std::filesystem;
-    fs::path tmp{fs::temp_directory_path() / "eden" / "unzip_mod"};
+    fs::path tmp{fs::temp_directory_path() / "volt" / "unzip_mod"};
     std::error_code ec;
     fs::remove_all(tmp, ec);
     if (!fs::create_directories(tmp, ec)) {

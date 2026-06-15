@@ -1,4 +1,4 @@
-# Volt Emulator — Setup Guide
+﻿# Volt Emulator — Setup Guide
 
 This guide walks you through setting up Volt Emulator from scratch, from installation to launching your first game.
 
@@ -246,7 +246,7 @@ To backup your saves:
 
 ### Import Saves
 
-Volt Emulator is compatible with save data format from Eden and Yuzu (same NAND structure). You can copy save directories between emulators.
+Volt Emulator is compatible with save data format from Volt and Yuzu (same NAND structure). You can copy save directories between emulators.
 
 ---
 

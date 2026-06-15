@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
+﻿// SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 // SPDX-FileCopyrightText: Copyright 2018 Citra Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
@@ -344,9 +344,9 @@ bool MultiplayerState::IsHostingPublicRoom() const
     return announce_multiplayer_session->IsRunning();
 }
 
-void MultiplayerState::UpdateCredentials()
+void MultiplayerState::UpdateCrvolttials()
 {
-    announce_multiplayer_session->UpdateCredentials();
+    announce_multiplayer_session->UpdateCrvolttials();
 }
 
 void MultiplayerState::UpdateGameList(QStandardItemModel* game_list)

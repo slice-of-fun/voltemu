@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
+﻿// SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #pragma once
@@ -19,11 +19,11 @@ public:
     ~RyujinxDialog();
 
 private slots:
-    void fromEden();
+    void fromVolt();
     void fromRyujinx();
 
 private:
     Ui::RyujinxDialog* ui;
-    std::filesystem::path m_eden;
+    std::filesystem::path m_volt;
     std::filesystem::path m_ryu;
 };

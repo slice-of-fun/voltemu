@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
+﻿// SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 // SPDX-FileCopyrightText: Copyright 2017 Citra Emulator Project
@@ -68,14 +68,14 @@ Lobby::Lobby(QWidget* parent, QStandardItemModel* list,
         QString::fromStdString(UISettings::values.multiplayer_nickname.GetValue()));
 
     // Try find the best nickname by default
-    if (ui->nickname->text().isEmpty() || ui->nickname->text() == QStringLiteral("Eden")) {
-        if (!Settings::values.eden_username.GetValue().empty()) {
+    if (ui->nickname->text().isEmpty() || ui->nickname->text() == QStringLiteral("Volt")) {
+        if (!Settings::values.volt_username.GetValue().empty()) {
             ui->nickname->setText(
-                QString::fromStdString(Settings::values.eden_username.GetValue()));
+                QString::fromStdString(Settings::values.volt_username.GetValue()));
         } else if (!GetProfileUsername().empty()) {
             ui->nickname->setText(QString::fromStdString(GetProfileUsername()));
         } else {
-            ui->nickname->setText(QStringLiteral("Eden"));
+            ui->nickname->setText(QStringLiteral("Volt"));
         }
     }
 
@@ -196,11 +196,11 @@ void Lobby::OnJoinRoom(const QModelIndex& source)
     QFuture<void> f = QtConcurrent::run([nickname, ip, port, password, verify_uid] {
         std::string token;
 #ifdef ENABLE_WEB_SERVICE
-        if (!Settings::values.eden_username.GetValue().empty() &&
-            !Settings::values.eden_token.GetValue().empty()) {
+        if (!Settings::values.volt_username.GetValue().empty() &&
+            !Settings::values.volt_token.GetValue().empty()) {
             WebService::Client client(Settings::values.web_api_url.GetValue(),
-                                      Settings::values.eden_username.GetValue(),
-                                      Settings::values.eden_token.GetValue());
+                                      Settings::values.volt_username.GetValue(),
+                                      Settings::values.volt_token.GetValue());
             token = client.GetExternalJWT(verify_uid).returned_data;
             if (token.empty()) {
                 LOG_ERROR(WebService, "Could not get external JWT, verification may fail");

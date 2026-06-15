@@ -56,7 +56,7 @@
     <string name="show_soc_model">הצג דגם SoC</string>
     <string name="show_fw_version">הצג גרסת קושחה</string>
 
-    <!-- Eden\'s Veil -->
+    <!-- Volt\'s Veil -->
     <string name="buffer_reorder_disable">השבת סידור מחדש של חוצץ</string>
     <string name="buffer_reorder_disable_description">כאשר מסומן, מבטל את סידור מחדש של העלאות זיכרון ממופה המאפשר לשייך העלאות עם ציורים ספציפיים. עלול להפחית ביצועים במקרים מסוימים.</string>
 
@@ -161,7 +161,7 @@
 
     <!-- Setup strings -->
     <string name="welcome">ברוכים הבאים!</string>
-    <string name="welcome_description">למד איך להפעיל &lt;b>Eden&lt;/b> וקפוץ ישר לאמולציה.</string>
+    <string name="welcome_description">למד איך להפעיל &lt;b>Volt&lt;/b> וקפוץ ישר לאמולציה.</string>
     <string name="get_started">כדי להתחיל</string>
     <string name="keys">מפתחות</string>
     <string name="keys_description">בחר את קובץ ה &lt;b>prod.keys&lt;/b> שלך עם הכפתור למטה.</string>
@@ -218,9 +218,9 @@
     <string name="search_recently_played">שוחק לאחרונה</string>
     <string name="search_recently_added">הוסף לאחרונה</string>
     <string name="open_user_folder">פתח את תיקיית Volt Emulator </string>
-    <string name="open_user_folder_description">נה ל את הקבצים הפנימיין של Eden</string>
+    <string name="open_user_folder_description">נה ל את הקבצים הפנימיין של Volt</string>
     <string name="no_file_manager">לא נמצא מנהל קבצים</string>
-    <string name="notification_no_directory_link">לא יכול לפתוח את ספריית Eden</string>
+    <string name="notification_no_directory_link">לא יכול לפתוח את ספריית Volt</string>
     <string name="notification_no_directory_link_description">בבקשה מקם את תיקיית המשתמש בפנל הצידי של מנהל הקבצים באופן ידני.</string>
     <string name="manage_save_data">נהל  מידע שמור</string>
     <string name="manage_save_data_description">מידע שמור לא נמצא. בבקשה בחר/י אופציה מלמטה</string>
@@ -251,7 +251,7 @@
     <string name="install_game_content_success_install">%1$d הותקן בהצלחה</string>
     <string name="install_game_content_success_overwrite">%1$d נדרס/נכתב מעל בהצלחה</string>
     <string name="custom_driver_not_supported">דרייברים מותאמים אישית לא נתמכים</string>
-    <string name="manage_yuzu_data">נהל את המידע של Eden</string>
+    <string name="manage_yuzu_data">נהל את המידע של Volt</string>
     <string name="manage_yuzu_data_description">יבא/יצא firmware, keys, מידע של משתמש ועוד!</string>
     <string name="game_folders">תיקיית משחקים</string>
     <string name="deep_scan">סריקה עמוקה</string>

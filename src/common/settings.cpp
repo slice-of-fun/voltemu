@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
+﻿// SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 // SPDX-FileCopyrightText: Copyright 2021 yuzu Emulator Project
@@ -122,7 +122,7 @@ void LogSettings()
     for (auto& [category, settings] : values.linkage.by_category) {
         for (const auto& setting : settings) {
             // Hide the token secret, for security reasons.
-            if (setting->Id() != values.eden_token.Id()) {
+            if (setting->Id() != values.volt_token.Id()) {
                 auto const is_default = setting->ToString() == setting->DefaultToString();
                 auto const name = fmt::format("{:c}{:c} {}.{}", is_default ? '-' : 'M',
                                               setting->UsingGlobal() ? '-' : 'C',
@@ -139,7 +139,7 @@ void LogSettings()
     std::string settings_str{};
     for (auto const& e : settings_list)
         settings_str += e;
-    LOG_INFO(Config, "Eden Configuration:\n{}", settings_str);
+    LOG_INFO(Config, "Volt Configuration:\n{}", settings_str);
 #define LOG_PATH(NAME)                                                                             \
     LOG_INFO(Config, #NAME ": {}",                                                                 \
              Common::FS::PathToUTF8String(Common::FS::GetVoltPath(Common::FS::VoltPath::NAME)))

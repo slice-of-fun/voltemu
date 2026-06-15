@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
+﻿// SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 // SPDX-FileCopyrightText: Copyright 2017 Citra Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
@@ -76,10 +76,10 @@ public:
     [[nodiscard]] bool IsRunning() const { return announce_multiplayer_thread.has_value(); }
 
     /**
-     * Recreates the backend, updating the credentials.
+     * Recreates the backend, updating the crvolttials.
      * This can only be used when the announce session is not running.
      */
-    void UpdateCredentials();
+    void UpdateCrvolttials();
 
 private:
     void UpdateBackendData(std::shared_ptr<Network::Room> room);

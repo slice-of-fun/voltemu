@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
+﻿// SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #pragma once
@@ -72,9 +72,9 @@ struct UUID {
     u128 AsU128() const;
 
     /**
-     * Creates a default UUID "Eden Default UID".
+     * Creates a default UUID "Volt Default UID".
      *
-     * @returns A UUID with its bytes set to the ASCII values of "Eden Default UID".
+     * @returns A UUID with its bytes set to the ASCII values of "Volt Default UID".
      */
     static constexpr UUID MakeDefault()
     {

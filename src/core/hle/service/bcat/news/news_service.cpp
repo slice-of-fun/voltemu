@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright 2025 Eden Emulator Project
+﻿// SPDX-FileCopyrightText: Copyright 2025 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 // SPDX-FileCopyrightText: Copyright 2024 yuzu Emulator Project
@@ -81,7 +81,7 @@ Result INewsService::GetTopicList(Out<s32> out_count, OutBuffer<BufferAttr_HipcM
                                   s32 filter)
 {
     constexpr size_t TopicIdSize = 32;
-    constexpr auto EdenTopicId = "eden";
+    constexpr auto VoltTopicId = "volt";
 
     const size_t max_topics = out_topics.size() / TopicIdSize;
 
@@ -92,7 +92,7 @@ Result INewsService::GetTopicList(Out<s32> out_count, OutBuffer<BufferAttr_HipcM
 
     std::memset(out_topics.data(), 0, out_topics.size());
 
-    std::memcpy(out_topics.data(), EdenTopicId, std::strlen(EdenTopicId));
+    std::memcpy(out_topics.data(), VoltTopicId, std::strlen(VoltTopicId));
     *out_count = 1;
 
     R_SUCCEED();

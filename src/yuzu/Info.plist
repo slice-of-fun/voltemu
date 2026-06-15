@@ -1,4 +1,4 @@
-<!--
+﻿<!--
 SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 SPDX-License-Identifier: GPL-3.0-or-later
 SPDX-FileCopyrightText: 2015 Pierre de La Morinerie <kemenaran@gmail.com>
@@ -17,9 +17,9 @@ SPDX-License-Identifier: GPL-2.0-or-later
     <key>CFBundleGetInfoString</key>
     <string></string>
     <key>CFBundleIconFile</key>
-    <string>eden.icns</string>
+    <string>volt.icns</string>
     <key>CFBundleIconName</key>
-    <string>eden_liquidglass</string>
+    <string>volt_liquidglass</string>
     <key>CFBundleIdentifier</key>
     <string>com.yuzu-emu.yuzu</string> <!-- May be required by 3rd party ext -->
     <key>CFBundleInfoDictionaryVersion</key>
@@ -27,7 +27,7 @@ SPDX-License-Identifier: GPL-2.0-or-later
     <key>CFBundleLongVersionString</key>
     <string></string>
     <key>CFBundleName</key>
-    <string>eden</string>
+    <string>volt</string>
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleShortVersionString</key>
@@ -91,7 +91,7 @@ SPDX-License-Identifier: GPL-2.0-or-later
             <string>public.xml</string>
             </array>
             <key>UTTypeIdentifier</key>
-            <string>com.eden-emu.xaml</string>
+            <string>com.volt-emu.xaml</string>
             <key>UTTypeTagSpecification</key>
             <dict>
             <key>public.filename-extension</key>
@@ -108,7 +108,7 @@ SPDX-License-Identifier: GPL-2.0-or-later
             <string>public.data</string>
             </array>
             <key>UTTypeIdentifier</key>
-            <string>com.eden-emu.nsp</string>
+            <string>com.volt-emu.nsp</string>
             <key>UTTypeTagSpecification</key>
             <dict>
             <key>public.filename-extension</key>
@@ -125,7 +125,7 @@ SPDX-License-Identifier: GPL-2.0-or-later
             <string>public.data</string>
             </array>
             <key>UTTypeIdentifier</key>
-            <string>com.eden-emu.xci</string>
+            <string>com.volt-emu.xci</string>
             <key>UTTypeTagSpecification</key>
             <dict>
             <key>public.filename-extension</key>
@@ -142,7 +142,7 @@ SPDX-License-Identifier: GPL-2.0-or-later
             <string>public.data</string>
             </array>
             <key>UTTypeIdentifier</key>
-            <string>com.eden-emu.nca</string>
+            <string>com.volt-emu.nca</string>
             <key>UTTypeTagSpecification</key>
             <dict>
             <key>public.filename-extension</key>
@@ -159,7 +159,7 @@ SPDX-License-Identifier: GPL-2.0-or-later
             <string>public.data</string>
             </array>
             <key>UTTypeIdentifier</key>
-            <string>com.eden-emu.nro</string>
+            <string>com.volt-emu.nro</string>
             <key>UTTypeTagSpecification</key>
             <dict>
             <key>public.filename-extension</key>
@@ -176,7 +176,7 @@ SPDX-License-Identifier: GPL-2.0-or-later
             <string>public.data</string>
             </array>
             <key>UTTypeIdentifier</key>
-            <string>com.eden-emu.nso</string>
+            <string>com.volt-emu.nso</string>
             <key>UTTypeTagSpecification</key>
             <dict>
             <key>public.filename-extension</key>

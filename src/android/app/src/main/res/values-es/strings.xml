@@ -6,7 +6,7 @@
     <string name="notice_notification_channel_description">Mostrar notificaciones cuando algo vaya mal.</string>
     <string name="notification_permission_not_granted">¡Permiso de notificación no concedido!</string>
     <string name="app_notification_channel_description">Notificaciones del emulador Volt Emulator Switch</string>
-    <string name="app_notification_running">Eden se está ejecutando</string>
+    <string name="app_notification_running">Volt se está ejecutando</string>
     <string name="seconds">Segundos</string>
 
     <!-- Spinbox strings -->
@@ -92,7 +92,7 @@
     <string name="show_soc_model">Mostrar modelo del SoC</string>
     <string name="show_fw_version">Mostrar versión del firmware</string>
 
-    <!-- Eden\'s Veil -->
+    <!-- Volt\'s Veil -->
     <string name="buffer_reorder_disable">Desactivar reordenamiento de búfer</string>
     <string name="buffer_reorder_disable_description">Cuando está marcado, desactiva el reordenamiento de las cargas de memoria mapeada, lo que permite asociar cargas con dibujos específicos. Puede reducir el rendimiento en algunos casos.</string>
 
@@ -295,11 +295,11 @@
     <string name="settings_description">Configurar los ajustes del emulador</string>
     <string name="search_recently_played">Jugado recientemente</string>
     <string name="search_recently_added">Añadido recientemente</string>
-    <string name="open_user_folder">Abrir la carpeta de Eden</string>
-    <string name="open_user_folder_description">Administrar los archivos internos de Eden</string>
+    <string name="open_user_folder">Abrir la carpeta de Volt</string>
+    <string name="open_user_folder_description">Administrar los archivos internos de Volt</string>
     <string name="app_settings_description">Modificar el comportamiento y la apariencia de la aplicación.</string>
     <string name="no_file_manager">Explorador de archivos no encontrado</string>
-    <string name="notification_no_directory_link">No se pudo abrir la carpeta Eden</string>
+    <string name="notification_no_directory_link">No se pudo abrir la carpeta Volt</string>
     <string name="notification_no_directory_link_description">Por favor, busque la carpeta user con el panel lateral del explorador de archivos de forma manual.</string>
     <string name="manage_save_data">Administrar datos de guardado</string>
     <string name="manage_save_data_description">Guardar los datos encontrados. Por favor, seleccione una opción de abajo.</string>
@@ -335,7 +335,7 @@
     <string name="install_game_content_help_link">https://yuzu-mirror.github.io/help/quickstart/#dumping-installed-updates</string>
     <string name="custom_driver_not_supported">Controladores personalizados no soportados</string>
     <string name="custom_driver_not_supported_description">La carga de controladores personalizados no está disponible para este dispositivo.\n¡Compruebe más adelante si se añadió el soporte a esta opción!</string>
-    <string name="manage_yuzu_data">Gestionar datos de Eden</string>
+    <string name="manage_yuzu_data">Gestionar datos de Volt</string>
     <string name="manage_yuzu_data_description">Importar/exportar el firmware, las claves, los datos de usuario, ¡y más!</string>
     <string name="game_folders">Carpetas de juegos</string>
     <string name="deep_scan">Escaneo recursivo </string>
@@ -357,7 +357,7 @@
     <string name="verify_installed_content_description">Comprueba todo el contenido instalado por si hubiese alguno corrupto</string>
 
     <string name="keys_missing">Faltan las claves de encriptación</string>
-    <string name="keys_missing_description">El firmware y los juegos no se pueden desencriptar</string>
+    <string name="keys_missing_description">El firmware y los juegos no se puvolt desencriptar</string>
     <string name="keys_missing_help">https://yuzu-mirror.github.io/help/quickstart/#dumping-decryption-keys</string>
 
     <string name="uninstall_firmware">Desinstalar firmware</string>
@@ -438,7 +438,7 @@
     <string name="fast_cpu_time">Overclock de la CPU</string>
     <string name="fast_cpu_time_description">Fuerza a la CPU emulada a ejecutarser a una velocidad de reloj más alta, lo cual reduce ciertos limitadores de fotogramas por segundo. Usa Boost (1700 MHz) para ejecutar a la velocidad de reloj nativa más alta de la Switch, o Fast (2000 MHz) para ejecutar a una velocidad doble de reloj.</string>
     <string name="custom_cpu_ticks">Ticks de CPU personalizados</string>
-    <string name="custom_cpu_ticks_description">Establezca un valor personalizado de los ciclos de la CPU. Los valores más altos pueden aumentar el rendimiento, pero también pueden hacer que el juego se congele. Se recomienda un rango de 77–21000.</string>
+    <string name="custom_cpu_ticks_description">Establezca un valor personalizado de los ciclos de la CPU. Los valores más altos puvolt aumentar el rendimiento, pero también puvolt hacer que el juego se congele. Se recomienda un rango de 77–21000.</string>
     <string name="cpu_ticks">Ciclos</string>
     <string name="memory_layout">Distribución de memoria</string>
     <string name="memory_layout_description">(EXPERIMENTAL) Cambie el diseño de la memoria emulada. Esta configuración no aumentará el rendimiento, pero puede ayudar con los juegos que utilizan altas resoluciones a través de mods. No lo use en teléfonos con 8 GB de RAM o menos. Solo funciona en el backend Dynarmic (JIT).</string>
@@ -514,7 +514,7 @@
     <string name="gpu_unswizzle_texture_size">Tamaño máximo de textura de desentrelazado de la GPU</string>
     <string name="gpu_unswizzle_texture_size_description">Establece el tamaño máximo (en MB) para el desentrelazado de texturas basada en GPU. Aunque la GPU es más rápida para texturas medianas y grandes, la CPU puede ser más eficiente para texturas muy pequeñas. Ajuste este valor para encontrar el equilibrio entre la aceleración de la GPU y la sobrecarga de la CPU.</string>
     <string name="gpu_unswizzle_stream_size">Tamaño del flujo de desentrelazado de la GPU</string>
-    <string name="gpu_unswizzle_stream_size_description">Establece el límite de datos por fotograma para desentrelazar texturas grandes. Los valores altos aceleran la carga de texturas, a coste de una mayor latencia por fotograma; los valores bajos reducen la carga de la GPU, pero pueden causar parpadeos visibles en las texturas.</string>
+    <string name="gpu_unswizzle_stream_size_description">Establece el límite de datos por fotograma para desentrelazar texturas grandes. Los valores altos aceleran la carga de texturas, a coste de una mayor latencia por fotograma; los valores bajos reducen la carga de la GPU, pero puvolt causar parpadeos visibles en las texturas.</string>
     <string name="gpu_unswizzle_chunk_size">Tamaño del trozo de desentrelazado de la GPU</string>
     <string name="gpu_unswizzle_chunk_size_description">Determina la cantidad de cortes de profundidad procesados ​​en un solo envío de texturas 3D. Aumentar este valor puede mejorar el rendimiento en una GPU de gama alta, pero puede causar tirones y problemas en los tiempos de respuesta en hardware más modesto.</string>
     <string name="gpu_unswizzle_default_button">Por defecto</string>
@@ -523,7 +523,7 @@
     <string name="extensions">Extensiones</string>
 
     <string name="dyna_state">Estado dinámico extendido</string>
-    <string name="dyna_state_description">Controla la cantidad de características que se pueden usar en ExtendedDynamicState (EDS). Un valor más alto permitirá reducir la cantidad de compilaciones de canalización basadas en el estado dinámico compatible con el controlador.</string>
+    <string name="dyna_state_description">Controla la cantidad de características que se puvolt usar en ExtendedDynamicState (EDS). Un valor más alto permitirá reducir la cantidad de compilaciones de canalización basadas en el estado dinámico compatible con el controlador.</string>
     <string name="disabled">Desactivado</string>
     <string name="vertex_input_dynamic_state">Estado dinámico de entrada de vértices</string>
     <string name="vertex_input_dynamic_state_description">La activación de esta función permite un manejo más flexible de la entrada de vértices, lo que podría reducir el tiempo de compilación de la canalización en vértices/búfer.</string>
@@ -561,7 +561,7 @@
     <!-- GPU Logging strings -->
     <string name="gpu_logging_header">Registros de la GPU</string>
     <string name="gpu_logging_enabled">Activar los registros de la GPU</string>
-    <string name="gpu_logging_enabled_description">Registra las operaciones de la GPU en eden_gpu.log para la depuración de los controladores de Adreno</string>
+    <string name="gpu_logging_enabled_description">Registra las operaciones de la GPU en volt_gpu.log para la depuración de los controladores de Adreno</string>
     <string name="gpu_log_level">Nivel de registros</string>
     <string name="gpu_log_level_description">Nivel de detalle de los registros de la GPU (más alto = más detalles, más sobrecarga)</string>
     <string name="gpu_log_vulkan_calls">Registros de llamadas del API de Vulkan</string>
@@ -794,7 +794,7 @@
     <string name="clear_shader_cache_warning_description">Experimentará más tirones mientras se regenera la caché de los sombreadores</string>
     <string name="cleared_shaders_successfully">Sombreadores limpiados con éxito</string>
     <string name="driver_shader_wipe_dialog_title">Sombreadores limpiados</string>
-    <string name="driver_shader_wipe_dialog_message">Eden ha limpiado automáticamente todos los sombreadores guardados para mantener la canalización de Vulkan válida. Esto es esencial al cambiar o actualizar los controladores de la GPU para prevenir errores y fallos gráficos. Es posible que experimente algunas interrupciones durante la reconstrucción de los sombreadores.</string>
+    <string name="driver_shader_wipe_dialog_message">Volt ha limpiado automáticamente todos los sombreadores guardados para mantener la canalización de Vulkan válida. Esto es esencial al cambiar o actualizar los controladores de la GPU para prevenir errores y fallos gráficos. Es posible que experimente algunas interrupciones durante la reconstrucción de los sombreadores.</string>
     <string name="addons_game">Complementos: %1$s</string>
     <string name="save_data">Datos de guardado</string>
     <string name="save_data_description">Gestiona los datos de guardado de este juego</string>
@@ -821,7 +821,7 @@
     <string name="verifying">Verificando...</string>
     <string name="verify_success">¡La verificación de integridad ha sido un éxito!</string>
     <string name="verify_failure">¡Verificación de integridad fallida!</string>
-    <string name="verify_failure_description">Los contenidos del archivo pueden estar corruptos</string>
+    <string name="verify_failure_description">Los contenidos del archivo puvolt estar corruptos</string>
     <string name="verify_no_result">No se pudo ejecutar la verificación de integridad</string>
     <string name="verify_no_result_description">No se ha podido comprobar la validez de los contenidos del archivo</string>
     <string name="verification_failed_for">La verificación falló en los siguientes archivos:\n%1$s</string>
@@ -848,7 +848,7 @@
     <string name="custom_settings_failed_message">Error al aplicar la configuración personalizada para %1$s: %2$s</string>
     <string name="launch_with_default_settings">Iniciar con configuración predeterminada</string>
     <string name="launch_cancelled">Inicio cancelado</string>
-    <string name="custom_settings_failure_reasons">No se pueden aplicar los ajustes solicitados. Esto puede deberse a controladores GPU faltantes o problemas de configuración.</string>
+    <string name="custom_settings_failure_reasons">No se puvolt aplicar los ajustes solicitados. Esto puede deberse a controladores GPU faltantes o problemas de configuración.</string>
     <string name="custom_settings_applied">Configuración personalizada aplicada</string>
     <string name="launching_game">Iniciando %1$s...</string>
     <string name="failed_to_initialize_game">Error al inicializar el juego</string>
@@ -1088,7 +1088,7 @@
     <string name="app_language_system">Igual al del sistema</string>
     <!-- Static Themes -->
     <string name="static_theme_color">Color del tema</string>
-    <string name="eden_theme">Volt Emulator</string>
+    <string name="volt_theme">Volt Emulator</string>
     <string name="violet">Violeta</string>
     <string name="blue">Azul</string>
     <string name="cyan">Cian</string>

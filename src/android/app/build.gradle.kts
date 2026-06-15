@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
+﻿// SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 // SPDX-FileCopyrightText: Copyright yuzu/Citra Emulator Project
@@ -182,7 +182,7 @@ android {
     }
 
     // appNameBase is used for the primary identifier
-    // this should be "Eden <flavorName>"
+    // this should be "Volt <flavorName>"
     flavorDimensions.add("version")
     productFlavors {
         create("mainline") {
@@ -314,7 +314,7 @@ ktlint {
 play {
     val keyPath = System.getenv("SERVICE_ACCOUNT_KEY_PATH")
     if (keyPath != null) {
-        serviceAccountCredentials.set(File(keyPath))
+        serviceAccountCrvolttials.set(File(keyPath))
     }
     track.set(System.getenv("STORE_TRACK") ?: "internal")
     releaseStatus.set(ReleaseStatus.COMPLETED)

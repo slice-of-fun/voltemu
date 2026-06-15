@@ -1,4 +1,4 @@
-# Phase 2 — Naming & Idiom Audit (Step 1.2 / 1.3)
+﻿# Phase 2 — Naming & Idiom Audit (Step 1.2 / 1.3)
 
 Read-only audit of naming conventions and modernization candidates across `src/`
 (excluding vendored `src/dynarmic/`). No code changed by this document — it scopes
@@ -100,7 +100,7 @@ renaming nvidia device classes.
 
 ## Cross-phase note (not Step 1 work)
 
-`src/common/fs/fs_paths.h` still defines `EDEN_DIR "eden"` (plus legacy `YUZU_DIR`,
+`src/common/fs/fs_paths.h` still defines `VOLT_DIR "volt"` (plus legacy `YUZU_DIR`,
 `SUDACHI_DIR`, `CITRON_DIR`, `SUYU_DIR`). The active app data dir is a **Phase 1
 rebranding** item (`VOLT_DIR`/`"volt"`), not a Phase 2 cleanup task — flagged here so
 it isn't lost, but it belongs to the Phase 1 string-rebrand workstream.

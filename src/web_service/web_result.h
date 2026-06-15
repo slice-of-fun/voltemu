@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
+﻿// SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #pragma once
@@ -12,7 +12,7 @@ struct WebResult {
     enum class Code : u32 {
         Success,
         InvalidURL,
-        CredentialsMissing,
+        CrvolttialsMissing,
         LibError,
         HttpError,
         WrongContent,

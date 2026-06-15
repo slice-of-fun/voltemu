@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>ConfigureDebug</class>
  <widget class="QScrollArea" name="ConfigureDebug">
@@ -665,7 +665,7 @@
        </font>
       </property>
       <property name="text">
-       <string>**This will be reset automatically when Eden closes.</string>
+       <string>**This will be reset automatically when Volt closes.</string>
       </property>
       <property name="indent">
        <number>20</number>

@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
+﻿// SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "migration_worker.h"
@@ -28,18 +28,18 @@ void MigrationWorker::process()
     const fs::path legacy_cache_dir = selected_emu.get_cache_dir();
 
     // TODO(crueter): Make these constexpr since they're defaulted
-    fs::path eden_dir = Common::FS::GetVoltPath(Common::FS::VoltPath::VoltDir);
+    fs::path volt_dir = Common::FS::GetVoltPath(Common::FS::VoltPath::VoltDir);
     fs::path config_dir = Common::FS::GetVoltPath(Common::FS::VoltPath::ConfigDir);
     fs::path cache_dir = Common::FS::GetVoltPath(Common::FS::VoltPath::CacheDir);
     fs::path shader_dir = Common::FS::GetVoltPath(Common::FS::VoltPath::ShaderDir);
 
-    eden_dir.make_preferred();
+    volt_dir.make_preferred();
     config_dir.make_preferred();
     cache_dir.make_preferred();
     shader_dir.make_preferred();
 
     try {
-        fs::remove_all(eden_dir);
+        fs::remove_all(volt_dir);
     } catch (fs::filesystem_error& _) {
         // ignore because linux does stupid crap sometimes
     }
@@ -50,7 +50,7 @@ void MigrationWorker::process()
 
         // Windows 11 has random permission nonsense to deal with.
         try {
-            Common::FS::CreateSymlink(legacy_user_dir, eden_dir);
+            Common::FS::CreateSymlink(legacy_user_dir, volt_dir);
         } catch (const fs::filesystem_error& e) {
             emit error(tr("Linking the old directory failed. You may need to re-run with "
                           "administrative privileges on Windows.\nOS gave error: %1")
@@ -72,14 +72,14 @@ void MigrationWorker::process()
 
         success_text.append(tr("\n\nNote that your configuration and data will be shared with %1.\n"
                                "If this is not desirable, delete the following files:\n%2\n%3\n%4")
-                                .arg(selected_emu.name(), QString::fromStdString(eden_dir.string()),
+                                .arg(selected_emu.name(), QString::fromStdString(volt_dir.string()),
                                      QString::fromStdString(config_dir.string()),
                                      QString::fromStdString(cache_dir.string())));
 
         break;
     case MigrationStrategy::Move:
         // Rename directories if deletion is requested (achieves the same result)
-        fs::rename(legacy_user_dir, eden_dir);
+        fs::rename(legacy_user_dir, volt_dir);
 
         // Windows doesn't need any more renames, because cache and config
         // are already children of the root directory
@@ -96,7 +96,7 @@ void MigrationWorker::process()
     case MigrationStrategy::Copy:
     default:
         // Default behavior: copy
-        fs::copy(legacy_user_dir, eden_dir, copy_options);
+        fs::copy(legacy_user_dir, volt_dir, copy_options);
 
         // Windows doesn't need any more copies, because cache and config
         // are already children of the root directory

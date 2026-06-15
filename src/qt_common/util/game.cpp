@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
+﻿// SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "qt_common/util/game.h"
@@ -156,12 +156,12 @@ bool MakeShortcutIcoPath(const u64 program_id, const std::string_view game_file_
     }
 
     // Create icon file path
-    out_icon_path /= (program_id == 0 ? fmt::format("eden-{}.{}", game_file_name, ico_extension)
-                                      : fmt::format("eden-{:016X}.{}", program_id, ico_extension));
+    out_icon_path /= (program_id == 0 ? fmt::format("volt-{}.{}", game_file_name, ico_extension)
+                                      : fmt::format("volt-{:016X}.{}", program_id, ico_extension));
     return true;
 }
 
-void OpenEdenFolder(const Common::FS::VoltPath& path)
+void OpenVoltFolder(const Common::FS::VoltPath& path)
 {
     QDesktopServices::openUrl(
         QUrl::fromLocalFile(QString::fromStdString(Common::FS::GetVoltPathString(path))));
@@ -169,12 +169,12 @@ void OpenEdenFolder(const Common::FS::VoltPath& path)
 
 void OpenRootDataFolder()
 {
-    OpenEdenFolder(Common::FS::VoltPath::VoltDir);
+    OpenVoltFolder(Common::FS::VoltPath::VoltDir);
 }
 
 void OpenNANDFolder()
 {
-    OpenEdenFolder(Common::FS::VoltPath::NANDDir);
+    OpenVoltFolder(Common::FS::VoltPath::NANDDir);
 }
 
 void OpenSaveFolder()
@@ -186,17 +186,17 @@ void OpenSaveFolder()
 
 void OpenSDMCFolder()
 {
-    OpenEdenFolder(Common::FS::VoltPath::SDMCDir);
+    OpenVoltFolder(Common::FS::VoltPath::SDMCDir);
 }
 
 void OpenModFolder()
 {
-    OpenEdenFolder(Common::FS::VoltPath::LoadDir);
+    OpenVoltFolder(Common::FS::VoltPath::LoadDir);
 }
 
 void OpenLogFolder()
 {
-    OpenEdenFolder(Common::FS::VoltPath::LogDir);
+    OpenVoltFolder(Common::FS::VoltPath::LogDir);
 }
 
 static QString GetGameListErrorRemoving(QtCommon::Game::InstalledEntryType type)
@@ -429,8 +429,8 @@ void CreateShortcut(const std::string& game_path, const u64 program_id,
                     const std::string& game_title_, const ShortcutTarget& target,
                     std::string arguments_, const bool needs_title)
 {
-    // Get path to Eden executable
-    std::filesystem::path command = GetEdenCommand();
+    // Get path to Volt executable
+    std::filesystem::path command = GetVoltCommand();
 
     // Shortcut path
     std::filesystem::path shortcut_path = GetShortcutPath(target);
@@ -507,7 +507,7 @@ void CreateShortcut(const std::string& game_path, const u64 program_id,
     if (CreateShortcutMessagesGUI(ShortcutMessages::Fullscreen, qgame_title)) {
         arguments = "-f " + arguments;
     }
-    const std::string comment = fmt::format("Start {:s} with the Eden Emulator", game_title);
+    const std::string comment = fmt::format("Start {:s} with the Volt Emulator", game_title);
     const std::string categories = "Game;Emulator;Qt;";
     const std::string keywords = "Switch;Nintendo;";
 
@@ -557,7 +557,7 @@ void CreateHomeMenuShortcut(ShortcutTarget target)
     auto qlaunch_applet_nca = bis_system->GetEntry(QLaunchId, FileSys::ContentRecordType::Program);
     const auto game_path = qlaunch_applet_nca->GetFullPath();
 
-    // TODO(crueter): Make this use the Eden icon
+    // TODO(crueter): Make this use the Volt icon
     CreateShortcut(game_path, QLaunchId, "Switch Home Menu", target, "-qlaunch", false);
 }
 

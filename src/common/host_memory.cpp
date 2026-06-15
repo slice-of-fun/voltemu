@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
+﻿// SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 // SPDX-FileCopyrightText: Copyright 2021 yuzu Emulator Project
@@ -537,7 +537,7 @@ public:
         fd = shm_open(SHM_ANON, O_RDWR, 0600);
 #elif defined(__APPLE__)
         // macOS doesn't have memfd_create, use anonymous temporary file
-        char template_path[] = "/tmp/eden_mem_XXXXXX";
+        char template_path[] = "/tmp/volt_mem_XXXXXX";
         fd = mkstemp(template_path);
         if (fd >= 0) {
             unlink(template_path);

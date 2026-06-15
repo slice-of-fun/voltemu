@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
+﻿// SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 // SPDX-FileCopyrightText: 2018 Citra Emulator Project
@@ -29,7 +29,7 @@ namespace DiscordRPC {
 DiscordImpl::DiscordImpl(Core::System& system_) : system{system_}
 {
     DiscordEventHandlers handlers{};
-    // The number is the client ID for Eden, it's used for images and the
+    // The number is the client ID for Volt, it's used for images and the
     // application name
     Discord_Initialize("1397286652128264252", &handlers, 1, nullptr);
 }
@@ -72,10 +72,10 @@ std::string DiscordImpl::GetGameString(const std::string& title)
     return icon_name;
 }
 
-static constexpr char DEFAULT_DISCORD_TEXT[] = "Eden is an emulator for the Nintendo Switch";
+static constexpr char DEFAULT_DISCORD_TEXT[] = "Volt is an emulator for the Nintendo Switch";
 static constexpr char DEFAULT_DISCORD_IMAGE[] =
-    "https://git.eden-emu.dev/eden-emu/eden/raw/branch/master/dist/qt_themes/default/icons/256x256/"
-    "eden.png";
+    "https://git.volt-emu.dev/volt-emu/volt/raw/branch/master/dist/qt_themes/default/icons/256x256/"
+    "volt.png";
 
 void DiscordImpl::UpdateGameStatus(bool use_default)
 {
@@ -104,7 +104,7 @@ void DiscordImpl::Update()
         // Used to format Icon URL for yuzu website game compatibility page
         std::string icon_name = GetGameString(game_title);
         game_url = fmt::format(
-            "https://raw.githubusercontent.com/eden-emulator/boxart/refs/heads/master/img/{}.png",
+            "https://raw.githubusercontent.com/volt-emulator/boxart/refs/heads/master/img/{}.png",
             icon_name);
 
         httplib::SSLClient client(game_url);

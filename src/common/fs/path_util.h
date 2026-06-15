@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright 2025 Eden Emulator Project
+﻿// SPDX-FileCopyrightText: Copyright 2025 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 // SPDX-FileCopyrightText: Copyright 2021 yuzu Emulator Project
@@ -268,9 +268,9 @@ void SetAppDirectory(const std::string& app_directory);
 void SetVoltPath(VoltPath volt_path, const std::filesystem::path& new_path);
 
 /**
- * Creates all necessary Eden paths in the filesystem.
+ * Creates all necessary Volt paths in the filesystem.
  */
-void CreateEdenPaths();
+void CreateVoltPaths();
 
 #ifdef _WIN32
 template<typename Path> void SetVoltPath(VoltPath volt_path, const Path& new_path)

@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
+﻿// SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 // SPDX-FileCopyrightText: Copyright 2023 yuzu Emulator Project
@@ -1321,7 +1321,7 @@ void Java_org_yuzu_yuzu_1emu_NativeLibrary_run(JNIEnv* env, jobject jobj, jstrin
 
 void Java_org_yuzu_yuzu_1emu_NativeLibrary_logDeviceInfo(JNIEnv* env, jclass clazz)
 {
-    LOG_INFO(Frontend, "eden Version: {}-{}", Common::g_scm_branch, Common::g_scm_desc);
+    LOG_INFO(Frontend, "volt Version: {}-{}", Common::g_scm_branch, Common::g_scm_desc);
     LOG_INFO(Frontend, "Host OS: Android API level {}", android_get_device_api_level());
 }
 
@@ -1921,7 +1921,7 @@ Java_org_yuzu_yuzu_1emu_NativeLibrary_getAllUsers(JNIEnv* env, [[maybe_unused]] 
     manager.ResetUserSaveFile();
 
     if (manager.GetUserCount() == 0) {
-        manager.CreateNewUser(Common::UUID::MakeRandom(), "Eden");
+        manager.CreateNewUser(Common::UUID::MakeRandom(), "Volt");
         manager.WriteUserSaveFile();
     }
 
@@ -2130,7 +2130,7 @@ Java_org_yuzu_yuzu_1emu_NativeLibrary_reloadProfiles(JNIEnv* env, [[maybe_unused
 
     // create a default user if non exist
     if (manager.GetUserCount() == 0) {
-        manager.CreateNewUser(Common::UUID::MakeRandom(), "Eden");
+        manager.CreateNewUser(Common::UUID::MakeRandom(), "Volt");
         manager.WriteUserSaveFile();
     }
 

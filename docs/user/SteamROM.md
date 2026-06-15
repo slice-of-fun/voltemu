@@ -1,16 +1,16 @@
-# User Handbook - Configuring Steam ROM Manager
+﻿# User Handbook - Configuring Steam ROM Manager
 
-## Importing Eden into Steam with Steam Rom Manager
+## Importing Volt into Steam with Steam Rom Manager
 
-Use this when you want to import the Eden AppImage into your Steam Library along with artwork using *Steam ROM Manager.*
+Use this when you want to import the Volt AppImage into your Steam Library along with artwork using *Steam ROM Manager.*
 
-**Click [Here](https://evilperson1337.notion.site/Importing-Eden-into-Steam-with-Steam-Rom-Manager-2b757c2edaf68054851bc287b6382cb5) for a version of this guide with images & visual elements.**
+**Click [Here](https://evilperson1337.notion.site/Importing-Volt-into-Steam-with-Steam-Rom-Manager-2b757c2edaf68054851bc287b6382cb5) for a version of this guide with images & visual elements.**
 
 ---
 
 #### Pre-Requisites
 
-- Eden set up and configured
+- Volt set up and configured
 - Internet Connection
 - Comfort Accessing and Navigating SteamOS Desktop Mode
 
@@ -47,20 +47,20 @@ Use this when you want to import the Eden AppImage into your Steam Library along
 
     ---
 
-#### Adding Eden into *Steam ROM Manager*
+#### Adding Volt into *Steam ROM Manager*
 
 #### EmuDeck Users
 
 EmuDeck will automatically create an *Emulators - Emulators* parser for ***Steam ROM Manager*** that uses shell scripts to launch them.  We will follow this convention.
 
 1. In the file explorer go to your **EmuDeck installation folder → tools → launchers**
-2. Right-Click some empty space and hit **Create New → Text File,** call this new file ***eden.sh*** instead of ***Text File.txt***
-3. Right-Click the ***eden.sh*** file you created and hit ***Open with Kate***.
+2. Right-Click some empty space and hit **Create New → Text File,** call this new file ***volt.sh*** instead of ***Text File.txt***
+3. Right-Click the ***volt.sh*** file you created and hit ***Open with Kate***.
 4. Paste the following code into the contents of the file, save and close the file.
     
     ```bash
     #!/bin/sh -e
-    emuName="eden" #parameterize me
+    emuName="volt" #parameterize me
     
     . "$HOME/.config/EmuDeck/backend/functions/all.sh"
     emulatorInit "$emuName"
@@ -79,10 +79,10 @@ EmuDeck will automatically create an *Emulators - Emulators* parser for ***Steam
     rm -rf "$savesPath/.gaming"
     ```
     
-5. Open a terminal in the directory containing the ***eden.sh*** file and run the following command to make it executable.
+5. Open a terminal in the directory containing the ***volt.sh*** file and run the following command to make it executable.
     
     ```bash
-    chmod u+x ./eden.sh
+    chmod u+x ./volt.sh
     ```
     
 6. Proceed to the Adding the Emulator section
@@ -95,7 +95,7 @@ We will need to create a new parser for the Emulators.  Unlike with the EmuDeck 
 
 <aside>
 
-***TIP***: In order to ensure that the matches occur correctly, it is recommended that you name the Eden Appimage as ***eden.AppImage***, rather than what it downloads as.
+***TIP***: In order to ensure that the matches occur correctly, it is recommended that you name the Volt Appimage as ***volt.AppImage***, rather than what it downloads as.
 
 </aside>
 
@@ -114,7 +114,7 @@ We will need to create a new parser for the Emulators.  Unlike with the EmuDeck 
         2. **Parser Title**: *Emulators - Emulators*
         3. **Steam Directory**: *${steamdirglobal}*
         4. **User Accounts**: *Global*
-        5. **ROMs Directory**: <path to directory containing eden AppImage>
+        5. **ROMs Directory**: <path to directory containing volt AppImage>
         6. **Steam Collections**: *Emulation* (OPTIONAL)
     2. Parser Specific Configuration
         1. **Search Glob**: *${title}@(.AppImage|.APPIMAGE|.appimage)*
@@ -128,7 +128,7 @@ We will need to create a new parser for the Emulators.  Unlike with the EmuDeck 
 
 ---
 
-#### Adding Eden to Steam
+#### Adding Volt to Steam
 
 Now that we have the parser or shell script created, we can actually add it to Steam.
 
@@ -143,8 +143,8 @@ Now that we have the parser or shell script created, we can actually add it to S
     
     If the emulator is not identified correctly, you may need to tell *Steam ROM Manager* what the game is manually.
     
-    1. Hover over the emulator card and click the magnifying glass icon.  Here it incorrectly identified *Eden* as a game by a similar name. **        
-    2. Search for *Eden Emulator* on the *Search SteamGridDB* section and scroll through the results, selecting the one you want.        
+    1. Hover over the emulator card and click the magnifying glass icon.  Here it incorrectly identified *Volt* as a game by a similar name. **        
+    2. Search for *Volt Emulator* on the *Search SteamGridDB* section and scroll through the results, selecting the one you want.        
     3. Ensure the *Name* and *Game ID*  update in the **Per-App Exceptions** and press **Save and close**.  The game should now update.
 
     ---
@@ -165,7 +165,7 @@ Now that we have the parser or shell script created, we can actually add it to S
 
 ## Importing Games into Steam with Steam Rom Manager
 
-Use this when you want to import your games inside Eden into Steam to launch with artwork from Steam Game Mode without needing to launch Eden first.
+Use this when you want to import your games inside Volt into Steam to launch with artwork from Steam Game Mode without needing to launch Volt first.
 
 **Click [Here](https://evilperson1337.notion.site/Importing-Games-into-Steam-with-Steam-Rom-Manager-2b757c2edaf680d7a491c92b138f1fcc) for a version of this guide with images & visual elements.**
 
@@ -174,7 +174,7 @@ Use this when you want to import your games inside Eden into Steam to launch wit
 #### Pre-Requisites
 
 - Steam Deck Set up and Configured
-- Eden set up and Configured
+- Volt set up and Configured
 - Internet Access
 
 ---
@@ -220,20 +220,20 @@ Use this when you want to import your games inside Eden into Steam to launch wit
     </aside>
     
 2. Switch off all Parsers by hitting the *Toggle Parsers* switch.
-3. Scroll down the list on the left-hand side and look for a parser called *Nintendo Switch - Eden* and switch it on.  This parser may not exist depending on how you installed *Steam ROM Manager* (EmuDeck creates it for you).  Follow these steps to create it if it is missing.
+3. Scroll down the list on the left-hand side and look for a parser called *Nintendo Switch - Volt* and switch it on.  This parser may not exist depending on how you installed *Steam ROM Manager* (EmuDeck creates it for you).  Follow these steps to create it if it is missing.
     
     ---
-    #### Creating the Eden Parser
+    #### Creating the Volt Parser
     
     1. Select Create Parser and in the *Community Presets* option look for **Nintendo Switch - Yuzu**.
-    2. Change the **Parser title** from *Nintendo Switch - Yuzu* to *Nintendo Switch - Eden.*
+    2. Change the **Parser title** from *Nintendo Switch - Yuzu* to *Nintendo Switch - Volt.*
     3. Hit the **Browse** option under the *ROMs directory* section.  Select the directory containing your Switch ROMs.
     4. Under *Steam collections*, you can add a Steam category name.  This just organizes the games under a common category in your Steam Library, this is optional but recommended.
-    5. Scroll down slightly to the **Executable Configuration → Executable**, select **Browse** and select the Eden AppImage.
+    5. Scroll down slightly to the **Executable Configuration → Executable**, select **Browse** and select the Volt AppImage.
     6. Leave everything else the same and hit **Save** to save the parser.
     ---
     
-4. Click the Eden parser to view the options on the right, select **Test** at the bottom of the screen to ensure that *Steam ROM Manager* detects your games correctly.
+4. Click the Volt parser to view the options on the right, select **Test** at the bottom of the screen to ensure that *Steam ROM Manager* detects your games correctly.
 1. *Steam ROM Manager* will start to scan the specified ROMs directory and match them to games.  Look over the results to ensure they are accurate.  If you do not see any entries - check your parsers ROMs directory field.
 1. When you are happy with the results, click the **Add Games** → **Parse** to start the actual Parsing.
 1. The program will now identify the games and pull artwork from [*SteamGridDB*](https://www.steamgriddb.com/).

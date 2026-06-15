@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright 2025 Eden Emulator Project
+﻿// SPDX-FileCopyrightText: Copyright 2025 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 // SPDX-FileCopyrightText: 2023 yuzu Emulator Project
@@ -27,7 +27,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.CoroutineScope
 
 object CustomSettingsHandler {
-    const val CUSTOM_CONFIG_ACTION = "dev.eden.eden_emulator.LAUNCH_WITH_CUSTOM_CONFIG"
+    const val CUSTOM_CONFIG_ACTION = "dev.volt.volt_emulator.LAUNCH_WITH_CUSTOM_CONFIG"
     const val EXTRA_TITLE_ID = "title_id"
     const val EXTRA_CUSTOM_SETTINGS = "custom_settings"
 

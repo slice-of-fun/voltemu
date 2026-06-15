@@ -1,4 +1,4 @@
-# Testing
+﻿# Testing
 
 When you're testing a pull request (PR) and encounter unexpected behavior, it's important to determine whether the issue was introduced by the PR or if it already exists in the base code. To do this, compare the behavior against the based master branch.
 
@@ -22,7 +22,7 @@ Here's some terminology you may want to familiarize yourself with:
 - Regression: A new bug/glitch caused by new code, i.e "Zelda broke in android after commit xyz".
 - Master: The "root" branch, this is where all merged code goes to, traditionally called `main`, `trunk` or just `master`, it contains all the code that eventually make it to stable releases.
 - `HEAD`: Latest commit in a given branch, `HEAD` of `master` is the latest commit on branch `master`.
-- `origin`: The default "remote", basically the URL from where git is located at, for most of the time that location is https://git.eden-emu.dev/eden-emu/eden.
+- `origin`: The default "remote", basically the URL from where git is located at, for most of the time that location is https://git.volt-emu.dev/volt-emu/volt.
 
 ## Testing checklist
 
@@ -33,7 +33,7 @@ For regressions/bugs from PRs or commits:
         - [ ] Occurs on previous stable release? (before this particular PR).
             - If it occurs on previous stable release:
                 - [ ] Occurs on previous-previous stable release?
-                    - And so on and so forth... some bugs come from way before Eden was even conceived.
+                    - And so on and so forth... some bugs come from way before Volt was even conceived.
             - Otherwise, try bisecting between the previous stable release AND the latest `HEAD` of master
                 - [ ] Occurs in given commit?
 - [ ] Occurs in PR?
@@ -95,5 +95,5 @@ The faulty commit then, is 6th of Jan. This is called bisection https://git-scm.
 
 - PR's marked with **WIP** do NOT need to be tested unless explicitly asked (check the git in case)
 - Sometimes license checks may fail, hover over the build icon to see if builds did succeed, as the CI will push builds even if license checks fail.
-- All open PRs can be viewed [here](https://git.eden-emu.dev/eden-emu/eden/pulls/).
+- All open PRs can be viewed [here](https://git.volt-emu.dev/volt-emu/volt/pulls/).
 - If site is down use one of the [mirrors](./user/ThirdParty.md#mirrors).

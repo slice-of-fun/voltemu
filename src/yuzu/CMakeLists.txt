@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
+﻿# SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 set(CMAKE_AUTOMOC ON)
@@ -361,17 +361,17 @@ if (APPLE)
     # Xcode will automatically generate the Assets.car and icns file for us.
     set(_dist "${CMAKE_SOURCE_DIR}/dist")
     if (CMAKE_GENERATOR MATCHES "Xcode")
-        set(_icons "${_dist}/eden.icon")
+        set(_icons "${_dist}/volt.icon")
 
-        set_target_properties(eden PROPERTIES
-            XCODE_ATTRIBUTE_ASSETCATALOG_COMPILER_APPICON_NAME eden
-            MACOSX_BUNDLE_ICON_FILE eden
+        set_target_properties(volt PROPERTIES
+            XCODE_ATTRIBUTE_ASSETCATALOG_COMPILER_APPICON_NAME volt
+            MACOSX_BUNDLE_ICON_FILE volt
             # Also force xcode to manage signing for us.
             XCODE_ATTRIBUTE_CODE_SIGNING_REQUIRED ON
             XCODE_ATTRIBUTE_CODE_SIGNING_ALLOWED ON)
     # Otherwise, we'll use our own.
     else()
-        set(_icons "${_dist}/eden.icns" "${_dist}/Assets.car")
+        set(_icons "${_dist}/volt.icns" "${_dist}/Assets.car")
     endif()
 
     set_source_files_properties(${_icons} PROPERTIES

@@ -10,8 +10,8 @@
     <string name="notification_permission_not_granted">Notification permission not granted!</string>
     <string name="app_notification_channel_name" translatable="false">Volt Emulator</string>
     <string name="app_notification_channel_id" translatable="false">Volt Emulator</string>
-    <string name="app_notification_channel_description">Eden Switch emulator notifications</string>
-    <string name="app_notification_running">Eden is Running</string>
+    <string name="app_notification_channel_description">Volt Switch emulator notifications</string>
+    <string name="app_notification_running">Volt is Running</string>
     <string name="seconds">Seconds</string>
 
     <!-- Spinbox strings -->
@@ -97,7 +97,7 @@
     <string name="show_soc_model">Show SoC Model</string>
     <string name="show_fw_version">Show Firmware Version</string>
 
-    <!-- Eden\'s Veil -->
+    <!-- Volt\'s Veil -->
     <string name="buffer_reorder_disable">Disable Buffer Reorder</string>
     <string name="buffer_reorder_disable_description">When checked, disables reordering of mapped memory uploads which allows to associate uploads with specific draws. May reduce performance in some cases.</string>
 
@@ -208,7 +208,7 @@
 
     <!-- Setup strings -->
     <string name="welcome">Welcome!</string>
-    <string name="welcome_description">Learn how to setup &lt;b>Eden&lt;/b> and jump into emulation.</string>
+    <string name="welcome_description">Learn how to setup &lt;b>Volt&lt;/b> and jump into emulation.</string>
     <string name="get_started">Get started</string>
     <string name="keys">Keys</string>
     <string name="keys_description">Select your &lt;b>prod.keys&lt;/b> file with the button below.</string>
@@ -303,7 +303,7 @@
     <string name="search_recently_played">Recently played</string>
     <string name="search_recently_added">Recently added</string>
     <string name="open_user_folder">Open Volt Emulator folder</string>
-    <string name="open_user_folder_description">Manage Eden\'s internal files</string>
+    <string name="open_user_folder_description">Manage Volt\'s internal files</string>
     <string name="app_settings_description">Modify the behavior and look of the app</string>
     <string name="no_file_manager">No file manager found</string>
     <string name="notification_no_directory_link">Could not open Volt Emulator directory</string>
@@ -324,10 +324,10 @@
     <string name="firmware_installed_failure_description">Make sure the firmware nca files are at the root of the zip and try again.</string>
     <string name="firmware_uninstalled_failure">Firmware uninstallation failed</string>
     <string name="share_log">Share debug logs</string>
-    <string name="share_log_description">Share Eden\'s log file to debug issues</string>
+    <string name="share_log_description">Share Volt\'s log file to debug issues</string>
     <string name="share_log_missing">No log file found</string>
     <string name="share_gpu_log">Share GPU logs</string>
-    <string name="share_gpu_log_description">Share Eden\'s GPU log file to debug graphics issues</string>
+    <string name="share_gpu_log_description">Share Volt\'s GPU log file to debug graphics issues</string>
     <string name="share_gpu_log_missing">No GPU log file found</string>
     <string name="install_game_content">Install game content</string>
     <string name="install_game_content_description">Install game updates or DLC</string>
@@ -403,7 +403,7 @@
     <string name="about_app_description">An open-source Switch emulator</string>
     <string name="contributors">Contributors</string>
     <string name="contributors_description">People who made Volt Emulator for Android possible</string>
-    <string name="contributors_link" translatable="false">https://git.eden-emu.dev/eden-emu/eden/activity/contributors</string>
+    <string name="contributors_link" translatable="false">https://git.volt-emu.dev/volt-emu/volt/activity/contributors</string>
     <string name="licenses_description">Projects that make Volt Emulator for Android possible</string>
     <string name="build">Build</string>
     <string name="user_data">User data</string>
@@ -417,9 +417,9 @@
     <string name="user_data_import_failed_description">Make sure the user data folders are at the root of the zip folder and contain a config file at config/config.ini and try again.</string>
     <string name="discord_link" translatable="false">https://discord.gg/HstXbPch7X</string>
     <string name="stoat_link" translatable="false">https://stt.gg/qKgFEAbH</string>
-    <string name="x_link" translatable="false">https://nitter.poast.org/edenemuofficial</string>
-    <string name="website_link" translatable="false">https://eden-emu.dev</string>
-    <string name="github_link" translatable="false">https://git.eden-emu.dev/eden-emu</string>
+    <string name="x_link" translatable="false">https://nitter.poast.org/voltemuofficial</string>
+    <string name="website_link" translatable="false">https://volt-emu.dev</string>
+    <string name="github_link" translatable="false">https://git.volt-emu.dev/volt-emu</string>
 
     <!-- General settings strings -->
     <string name="frame_limit_enable">Limit speed</string>
@@ -573,7 +573,7 @@
     <!-- GPU Logging strings -->
     <string name="gpu_logging_header">GPU Logging</string>
     <string name="gpu_logging_enabled">Enable GPU Logging</string>
-    <string name="gpu_logging_enabled_description">Log GPU operations to eden_gpu.log for debugging Adreno drivers</string>
+    <string name="gpu_logging_enabled_description">Log GPU operations to volt_gpu.log for debugging Adreno drivers</string>
     <string name="gpu_log_level">Log Level</string>
     <string name="gpu_log_level_description">Detail level for GPU logs (higher = more detail, more overhead)</string>
     <string name="gpu_log_vulkan_calls">Log Vulkan API Calls</string>
@@ -815,7 +815,7 @@
     <string name="clear_shader_cache_warning_description">You will experience more stuttering as the shader cache regenerates</string>
     <string name="cleared_shaders_successfully">Cleared shaders successfully</string>
     <string name="driver_shader_wipe_dialog_title">Shaders Cleared</string>
-    <string name="driver_shader_wipe_dialog_message">Eden has automatically cleared all shader caches to maintain Vulkan pipeline validation. This is required when switching GPU drivers to prevent crashes and graphical corruption. You may experience some stuttering as shaders rebuild.</string>
+    <string name="driver_shader_wipe_dialog_message">Volt has automatically cleared all shader caches to maintain Vulkan pipeline validation. This is required when switching GPU drivers to prevent crashes and graphical corruption. You may experience some stuttering as shaders rebuild.</string>
     <string name="addons_game">Addons: %1$s</string>
     <string name="save_data">Save data</string>
     <string name="save_data_description">Manage save data specific to this game</string>
@@ -1216,7 +1216,7 @@
 
     <!-- Static Themes -->
     <string name="static_theme_color">Theme Color</string>
-    <string name="eden_theme">Volt Emulator</string>
+    <string name="volt_theme">Volt Emulator</string>
     <string name="violet">Violet</string>
     <string name="blue">Blue</string>
     <string name="cyan">Cyan</string>

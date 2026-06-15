@@ -1,4 +1,4 @@
-# User Handbook - Controllers
+﻿# User Handbook - Controllers
 
 Most of the controls should work out of the box. If not, please use a joystick calibrator to ensure it's not an issue with your own controller, for example:
 
@@ -8,7 +8,7 @@ Most of the controls should work out of the box. If not, please use a joystick c
 
 In desktop mode ignore your pro controller/xbox contoller external controller and use **Steam Virtual Gamepad 0 as Player 1**. If you have multiple external controllers set **Player 2 to Steam Virtual Gamepad 1**. Steam app must not be closed on desktop mode.
 
-Here's the annoying part of it. When waking up the steam deck from sleep try not to touch any button on the Steamdeck and turn on your external controller. Then open the Eden.AppImage. If you're lucky you can get your external controller to be position 0 and also Steam Virtual Gamepad 0 in desktop mode. If not that is ok too unless you need to configure player 1 to have gyro. You might need to repeat this to get your external controller as Steam Virtual Gamepad 0 so you can config Player 1 having gyro. You might be able to config player 1 to have gyro with the Steamdeck itself. Or you can also config player 1, 2, 3, etc, to have gyro somehow. Make sure they are all using Virtual Gamepads though.
+Here's the annoying part of it. When waking up the steam deck from sleep try not to touch any button on the Steamdeck and turn on your external controller. Then open the Volt.AppImage. If you're lucky you can get your external controller to be position 0 and also Steam Virtual Gamepad 0 in desktop mode. If not that is ok too unless you need to configure player 1 to have gyro. You might need to repeat this to get your external controller as Steam Virtual Gamepad 0 so you can config Player 1 having gyro. You might be able to config player 1 to have gyro with the Steamdeck itself. Or you can also config player 1, 2, 3, etc, to have gyro somehow. Make sure they are all using Virtual Gamepads though.
 
 Turn off controller then go to gaming mode. Try not to touch any buttons on the physical Steamdeck. When in gaming mode turn on the external controller. If lucky it will be assigned as Steam Virtual Gamepad 0. If not just use steam Gamemode feature to rearrange controller positions order.
 
@@ -24,12 +24,12 @@ Use this guide for when you want to configure specific controller settings to be
 
 #### Pre-Requisites
 
-- Eden Set Up and Configured
+- Volt Set Up and Configured
 
 ---
 
 #### Steps
-1. Launch Eden and wait for it to load.
+1. Launch Volt and wait for it to load.
 2. Navigate to *Emulation > Configure…*
 3. Select **Controls** from the left-hand menu and configure your controller for the way you want it to be in game.
 4. Select **New** and enter a name for the profile in the box that appears. Press **OK** to save the profile settings.
@@ -45,7 +45,7 @@ Use this guide when you want to set up specific controller profiles for specific
 
 #### Pre-Requisites
 
-- Eden Emulator set up and fully configured
+- Volt Emulator set up and fully configured
 - Controller Profile Created
     - See [*Configuring Controller Profiles*](./ControllerProfiles.md) for instructions on how to do this if needed.
 

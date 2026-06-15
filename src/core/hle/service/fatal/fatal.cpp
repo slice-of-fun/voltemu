@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
+﻿// SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
@@ -76,7 +76,7 @@ static void GenerateErrorReport(Core::System& system, Result error_code, const F
 {
     const auto title_id = system.GetApplicationProcessProgramID();
     std::string crash_report = fmt::format(
-        "Eden {}-{} crash report\n"
+        "Volt {}-{} crash report\n"
         "Title ID:                        {:016x}\n"
         "Result:                          {:#X} ({:04}-{:04d})\n"
         "Set flags:                       0x{:16X}\n"

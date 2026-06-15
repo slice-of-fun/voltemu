@@ -1,4 +1,4 @@
-# User Handbook - Run on macOS
+﻿# User Handbook - Run on macOS
 
 Current macOS support is still experimental and very reliant on MoltenVK developments, plans have shifted to properly provide support for KosmicKrisp and similar new GPU endeavours, but macOS users still are bound to MoltenVK itself.
 
@@ -6,11 +6,11 @@ Users of macOS may wish to use [Asahi Linux](https://wiki.gentoo.org/wiki/Projec
 
 As of writing, neither macOS nor Asahi has support for NCE; additionally Asahi has extraneous paging bugs with fastmem.
 
-## Allowing Eden to Run on MacOS
+## Allowing Volt to Run on MacOS
 
-Use this guide when you need to allow Eden to run on a Mac system, but are being blocked by Apple Security policy.
+Use this guide when you need to allow Volt to run on a Mac system, but are being blocked by Apple Security policy.
 
-**Click [Here](https://evilperson1337.notion.site/Allowing-Eden-to-Run-on-MacOS-2b057c2edaf681fea63dc81027efeffd) for a version of this guide with images & visual elements.**
+**Click [Here](https://evilperson1337.notion.site/Allowing-Volt-to-Run-on-MacOS-2b057c2edaf681fea63dc81027efeffd) for a version of this guide with images & visual elements.**
 
 ---
 
@@ -32,6 +32,6 @@ Recent versions of MacOS (Catalina & newer) introduced the **Gatekeeper** securi
 2. Navigate to *Privacy & Security*.
 3. Scroll down and observe the following message under the **Security** settings.
 4. Select **Open Anyway** to tell your Mac that you trust the application.
-5. You will now get another window appearing to verify you want to open Eden.  Select **Open Anyway**.
-6. You will be prompted for your password to authorize the request.  Enter the credentials of an account that has permission to modify settings and press **OK**.
-7. Eden will now open and any subsequent launches of the program will not prompt this.
+5. You will now get another window appearing to verify you want to open Volt.  Select **Open Anyway**.
+6. You will be prompted for your password to authorize the request.  Enter the crvolttials of an account that has permission to modify settings and press **OK**.
+7. Volt will now open and any subsequent launches of the program will not prompt this.

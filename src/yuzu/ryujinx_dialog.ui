@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>RyujinxDialog</class>
  <widget class="QDialog" name="RyujinxDialog">
@@ -23,9 +23,9 @@
       </sizepolicy>
      </property>
      <property name="text">
-      <string>Linking save data to Ryujinx lets both Ryujinx and Eden reference the same save files for your games.
+      <string>Linking save data to Ryujinx lets both Ryujinx and Volt reference the same save files for your games.
 
-By selecting &quot;From Eden&quot;, previous save data stored in Ryujinx will be deleted, and vice versa for &quot;From Ryujinx&quot;.</string>
+By selecting &quot;From Volt&quot;, previous save data stored in Ryujinx will be deleted, and vice versa for &quot;From Ryujinx&quot;.</string>
      </property>
      <property name="wordWrap">
       <bool>true</bool>
@@ -35,9 +35,9 @@ By selecting &quot;From Eden&quot;, previous save data stored in Ryujinx will be
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <widget class="QPushButton" name="eden">
+      <widget class="QPushButton" name="volt">
        <property name="text">
-        <string>From Eden</string>
+        <string>From Volt</string>
        </property>
       </widget>
      </item>

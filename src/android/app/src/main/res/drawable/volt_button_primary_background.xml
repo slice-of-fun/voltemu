@@ -1,11 +1,11 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:state_pressed="true">
         <shape android:shape="rectangle">
             <gradient
                 android:angle="135"
-                android:startColor="@color/eden_primary_variant"
-                android:endColor="@color/eden_accent_purple"
+                android:startColor="@color/volt_primary_variant"
+                android:endColor="@color/volt_accent_purple"
                 android:type="linear" />
             <corners android:radius="12dp" />
         </shape>
@@ -14,8 +14,8 @@
         <shape android:shape="rectangle">
             <gradient
                 android:angle="135"
-                android:startColor="@color/eden_primary"
-                android:endColor="@color/eden_primary_variant"
+                android:startColor="@color/volt_primary"
+                android:endColor="@color/volt_primary_variant"
                 android:type="linear" />
             <corners android:radius="12dp" />
         </shape>

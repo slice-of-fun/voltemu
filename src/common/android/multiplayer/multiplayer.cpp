@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright 2025 Eden Emulator Project
+﻿// SPDX-FileCopyrightText: Copyright 2025 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "multiplayer.h"
@@ -211,8 +211,8 @@ NetPlayStatus AndroidMultiplayer::NetPlayCreateRoom(
     LOG_INFO(WebService, "Web Service enabled");
     if (isPublic) {
         WebService::Client client(Settings::values.web_api_url.GetValue(),
-                                  Settings::values.eden_username.GetValue(),
-                                  Settings::values.eden_token.GetValue());
+                                  Settings::values.volt_username.GetValue(),
+                                  Settings::values.volt_token.GetValue());
 
         token = client.GetExternalJWT(room->GetVerifyUID()).returned_data;
 

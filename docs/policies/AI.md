@@ -1,4 +1,4 @@
-# AI Policy
+﻿# AI Policy
 
 Use at your peril.
 
@@ -53,7 +53,7 @@ Well, everything else. But here are a few examples:
 
 ## Addendum: Commit Messages
 
-The patchset for pull request [#3422](https://git.eden-emu.dev/eden-emu/eden/pulls/3422) was fed into several LLMs to generate a commit message. All of them sucked, and not a single one caught on to what the commit actually did. For example:
+The patchset for pull request [#3422](https://git.volt-emu.dev/volt-emu/volt/pulls/3422) was fed into several LLMs to generate a commit message. All of them sucked, and not a single one caught on to what the commit actually did. For example:
 
 ```txt
 profile_manager: Refactor user deletion to use index instead of UUID

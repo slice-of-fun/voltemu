@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
+﻿// SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include <QApplication>
@@ -112,8 +112,8 @@ int main(int argc, char* argv[])
     Common::DetachedTasks detached_tasks;
 
     // Init settings params
-    QCoreApplication::setOrganizationName(QStringLiteral("eden"));
-    QCoreApplication::setApplicationName(QStringLiteral("eden"));
+    QCoreApplication::setOrganizationName(QStringLiteral("volt"));
+    QCoreApplication::setApplicationName(QStringLiteral("volt"));
 
     // Increases the maximum open file limit.
     // TODO: This should be common to all frontends.
@@ -155,7 +155,7 @@ int main(int argc, char* argv[])
 
     // Fix the Wayland appId. This needs to match the name of the .desktop file without the .desktop
     // suffix.
-    QGuiApplication::setDesktopFileName(QStringLiteral("dev.eden_emu.eden"));
+    QGuiApplication::setDesktopFileName(QStringLiteral("dev.volt_emu.volt"));
 #endif
 
     auto rounding_policy = GetHighDpiRoundingPolicy();

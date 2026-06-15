@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
+﻿# SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 # SPDX-FileCopyrightText: 2018 yuzu Emulator Project
@@ -47,7 +47,7 @@ if (MSVC)
 endif()
 target_link_libraries(volt-cmd PRIVATE ${PLATFORM_LIBRARIES} Threads::Threads)
 
-create_resource("../../dist/eden.bmp" "volt_cmd/volt_icon.h" "volt_icon")
+create_resource("../../dist/volt.bmp" "volt_cmd/volt_icon.h" "volt_icon")
 target_include_directories(volt-cmd PRIVATE ${RESOURCES_DIR})
 
 target_link_libraries(volt-cmd PRIVATE SDL3::SDL3)

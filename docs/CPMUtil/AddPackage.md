@@ -1,4 +1,4 @@
-# `AddPackage`
+﻿# `AddPackage`
 
 <!-- TOC -->
 - [Identification/Fetching](#identificationfetching)
@@ -23,7 +23,7 @@
 - `SHA`: Commit sha to fetch, if applicable.
 - `BRANCH`: Branch to fetch, if applicable.
 
-The following configurations are supported, in descending order of precedence:
+The following configurations are supported, in descending order of precvoltce:
 
 - `URL`: Bare URL download, useful for custom artifacts
   - If this is set, `GIT_URL` or `REPO` should be set to allow the dependency viewer to link to the project's Git repository.
@@ -50,7 +50,7 @@ Hashing is used for verifying downloads. It's highly recommended to use these.
 
 - `HASH_ALGO` (default `SHA512`): Hash algorithm to use
 
-Hashing strategies, descending order of precedence:
+Hashing strategies, descending order of precvoltce:
 
 - `HASH`: Bare hash verification, useful for static downloads e.g. commit archives
 - `HASH_SUFFIX`: Download the hash as `${DOWNLOAD_URL}.${HASH_SUFFIX}`
@@ -60,7 +60,7 @@ Hashing strategies, descending order of precedence:
 ## Other Options
 
 - `KEY`: Custom cache key to use (stored as `.cache/cpm/${packagename_lower}/${key}`)
-  - Default is based on, in descending order of precedence:
+  - Default is based on, in descending order of precvoltce:
     - First 4 characters of the sha
     - `GIT_VERSION`
     - Tag
@@ -86,7 +86,7 @@ For each added package, users may additionally force usage of the system/bundled
 
 ## System/Bundled Packages
 
-Descending order of precedence:
+Descending order of precvoltce:
 
 - If `${package}_FORCE_SYSTEM` is true, requires the package to be on the system
 - If `${package}_FORCE_BUNDLED` is true, forcefully uses the bundled package
@@ -97,7 +97,7 @@ Descending order of precedence:
 
 ## Identification
 
-All dependencies must be identifiable in some way for usage in the dependency viewer. Lists are provided in descending order of precedence.
+All dependencies must be identifiable in some way for usage in the dependency viewer. Lists are provided in descending order of precvoltce.
 
 URLs:
 

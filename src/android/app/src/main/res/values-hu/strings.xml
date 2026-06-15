@@ -52,7 +52,7 @@
     <string name="show_soc_model">SoC modell megjelenítése</string>
     <string name="show_fw_version">Firmver verzió megjelenítése</string>
 
-    <!-- Eden\'s Veil -->
+    <!-- Volt\'s Veil -->
     <string name="buffer_reorder_disable">Puffer újrarendezés letiltása</string>
     <string name="buffer_reorder_disable_description">Ha be van jelölve, letiltja a leképezett memória feltöltéseinek újrarendezését, lehetővé téve a feltöltések összerendelését konkrét rajzolásokkal. Bizonyos esetekben csökkentheti a teljesítményt.</string>
 
@@ -156,7 +156,7 @@
 
     <!-- Setup strings -->
     <string name="welcome">Üdvözöljük!</string>
-    <string name="welcome_description">Ismerkedj meg a &lt;b>Eden&lt;/b> beállításával és ugorj bele az emulációba.</string>
+    <string name="welcome_description">Ismerkedj meg a &lt;b>Volt&lt;/b> beállításával és ugorj bele az emulációba.</string>
     <string name="get_started">Vágjunk bele</string>
     <string name="keys">Kulcsok</string>
     <string name="keys_description">Válaszd ki a &lt;b>prod.keys&lt;/b> fájlodat az alábbi gombbal.</string>
@@ -210,8 +210,8 @@
     <string name="settings_description">Emulátorbeállítások konfigurálása</string>
     <string name="search_recently_played">Nemrég játszva</string>
     <string name="search_recently_added">Nemrég hozzáadva</string>
-    <string name="open_user_folder">Eden mappa megnyitása</string>
-    <string name="open_user_folder_description">Eden belső fájljainak kezelése</string>
+    <string name="open_user_folder">Volt mappa megnyitása</string>
+    <string name="open_user_folder_description">Volt belső fájljainak kezelése</string>
     <string name="no_file_manager">Nem található fájlkezelő</string>
     <string name="notification_no_directory_link">Nem sikerült megnyitni a Volt Emulator könyvtárat</string>
     <string name="notification_no_directory_link_description">Kérjük, manuálisan keresd meg a felhasználói mappát a fájlkezelő oldalsó paneljével.</string>
@@ -243,7 +243,7 @@
     <string name="install_game_content_success_install">%1$d sikeresen telepítve</string>
     <string name="install_game_content_success_overwrite">%1$d sikeresen felülírva</string>
     <string name="custom_driver_not_supported">Egyéni illesztőprogramok nem támogatottak</string>
-    <string name="manage_yuzu_data">Eden adatok kezelése</string>
+    <string name="manage_yuzu_data">Volt adatok kezelése</string>
     <string name="manage_yuzu_data_description">Firmware, kulcsok, felhasználói adatok és egyebek importálása/exportálása</string>
     <string name="game_folders">Játékmappák</string>
     <string name="deep_scan">Mély szkennelés</string>

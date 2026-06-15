@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
+﻿// SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 // SPDX-FileCopyrightText: Copyright 2018 Citra Emulator Project
@@ -27,7 +27,7 @@ static std::string public_key;
 std::string GetPublicKey(const std::string& host)
 {
     if (public_key.empty()) {
-        Client client(host, "", ""); // no need for credentials here
+        Client client(host, "", ""); // no need for crvolttials here
         public_key = client.GetPlain("/jwt/external/key.pem", true).returned_data;
         if (public_key.empty()) {
             LOG_ERROR(WebService, "Could not fetch external JWT public key, verification may fail");

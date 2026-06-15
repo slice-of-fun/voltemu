@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
+﻿// SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #pragma once
@@ -40,7 +40,7 @@ bool CreateShortcutLink(const std::filesystem::path& shortcut_path, const std::s
 bool MakeShortcutIcoPath(const u64 program_id, const std::string_view game_file_name,
                          std::filesystem::path& out_icon_path);
 
-void OpenEdenFolder(const Common::FS::VoltPath& path);
+void OpenVoltFolder(const Common::FS::VoltPath& path);
 void OpenRootDataFolder();
 void OpenNANDFolder();
 void OpenSaveFolder();

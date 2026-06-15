@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
+﻿// SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
@@ -57,7 +57,7 @@ ProfileManager::ProfileManager()
 
     // Create an user if none are present
     if (user_count == 0) {
-        CreateNewUser(UUID::MakeRandom(), "Eden");
+        CreateNewUser(UUID::MakeRandom(), "Volt");
         WriteUserSaveFile();
     }
 
@@ -433,14 +433,14 @@ void ProfileManager::ParseUserSaveFile()
 
     if (!save.IsOpen()) {
         LOG_WARNING(Service_ACC, "Failed to load profile data from save data... Generating new "
-                                 "user 'Eden' with random UUID.");
+                                 "user 'Volt' with random UUID.");
         return;
     }
 
     ProfileDataRaw data;
     if (!save.ReadObject(data)) {
         LOG_WARNING(Service_ACC, "profiles.dat is smaller than expected... Generating new user "
-                                 "'Eden' with random UUID.");
+                                 "'Volt' with random UUID.");
         return;
     }
 

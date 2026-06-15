@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
+﻿// SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "video_core/gpu_logging/gpu_logging.h"
@@ -58,10 +58,10 @@ void GPULogger::Initialize(LogLevel level, DriverType driver)
     [[maybe_unused]] const bool crashes_dir_created = CreateDir(crashes_dir);
 
     // Open GPU log file
-    const auto gpu_log_path = log_dir / "eden_gpu.log";
+    const auto gpu_log_path = log_dir / "volt_gpu.log";
 
     // Rotate old log
-    const auto old_log_path = log_dir / "eden_gpu.log.old.txt";
+    const auto old_log_path = log_dir / "volt_gpu.log.old.txt";
     RemoveFile(old_log_path);
     [[maybe_unused]] const bool log_renamed = RenameFile(gpu_log_path, old_log_path);
 
@@ -111,7 +111,7 @@ void GPULogger::Initialize(LogLevel level, DriverType driver)
     }
 
     const auto header =
-        fmt::format("=== Eden GPU Logging Started ===\n"
+        fmt::format("=== Volt GPU Logging Started ===\n"
                     "Timestamp: {}\n"
                     "Log Level: {}\n"
                     "Driver: {}\n"

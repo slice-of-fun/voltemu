@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
+﻿// SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 // SPDX-FileCopyrightText: Copyright 2019 yuzu Emulator Project
@@ -15,7 +15,7 @@
 // directly including some service header for the sole purpose of data.
 namespace Core::Constants {
 
-// ACC Service - An Eden Profile Picture JPEG used as user icon in absentia of real one.
+// ACC Service - An Volt Profile Picture JPEG used as user icon in absentia of real one.
 extern const std::array<u8, 5099> ACCOUNT_BACKUP_JPEG;
 
 } // namespace Core::Constants

@@ -6,7 +6,7 @@
     <string name="notice_notification_channel_description">عرض الإشعارات عند حدوث خطأ ما.</string>
     <string name="notification_permission_not_granted">لم يتم منح إذن الإشعار!</string>
     <string name="app_notification_channel_description">إشعارات محاكي Volt Emulator Switch</string>
-    <string name="app_notification_running">Eden قيد التشغيل</string>
+    <string name="app_notification_running">Volt قيد التشغيل</string>
     <string name="seconds">ثواني</string>
 
     <!-- Spinbox strings -->
@@ -92,7 +92,7 @@
     <string name="show_soc_model">عرض طراز الرقائق</string>
     <string name="show_fw_version">عرض إصدار الفيرموير</string>
 
-    <!-- Eden\'s Veil -->
+    <!-- Volt\'s Veil -->
     <string name="buffer_reorder_disable">تعطيل إعادة ترتيب المخزن المؤقت</string>
     <string name="buffer_reorder_disable_description">عند تحديده، يتم تعطيل إعادة ترتيب تحميلات الذاكرة المعينة، مما يسمح بربط التحميلات بعمليات سحب محددة. قد يؤدي ذلك إلى انخفاض الأداء في بعض الحالات.</string>
 
@@ -295,11 +295,11 @@
     <string name="settings_description">ضبط إعدادات المحاكي</string>
     <string name="search_recently_played">تم تشغيلها مؤخرًا</string>
     <string name="search_recently_added">أضيفت مؤخراً</string>
-    <string name="open_user_folder">فتح مجلد Eden</string>
-    <string name="open_user_folder_description">إدارة الملفات الداخلية لـ Eden</string>
+    <string name="open_user_folder">فتح مجلد Volt</string>
+    <string name="open_user_folder_description">إدارة الملفات الداخلية لـ Volt</string>
     <string name="app_settings_description">تعديل سلوك ومظهر التطبيق</string>
     <string name="no_file_manager">لم يتم العثور على مدير الملفات</string>
-    <string name="notification_no_directory_link">تعذر فتح مجلد Eden</string>
+    <string name="notification_no_directory_link">تعذر فتح مجلد Volt</string>
     <string name="notification_no_directory_link_description">يرجى تحديد موقع مجلد المستخدم يدويًا باستخدام اللوحة الجانبية لمدير الملفات.</string>
     <string name="manage_save_data">إدارة بيانات الحفظ</string>
     <string name="manage_save_data_description">تم العثور على بيانات محفوظة. يرجى تحديد أحد الخيارات أدناه.</string>
@@ -335,7 +335,7 @@
     <string name="install_game_content_help_link">https://yuzu-mirror.github.io/help/quickstart/#dumping-installed-updates</string>
     <string name="custom_driver_not_supported">برامج التشغيل المخصصة غير مدعومة</string>
     <string name="custom_driver_not_supported_description">لا يتم دعم تحميل برنامج التشغيل المخصص حاليًا لهذا الجهاز.\nتحقق من هذا الخيار مرة أخرى في المستقبل لمعرفة ما إذا تمت إضافة الدعم!</string>
-    <string name="manage_yuzu_data">إدارة بيانات Eden</string>
+    <string name="manage_yuzu_data">إدارة بيانات Volt</string>
     <string name="manage_yuzu_data_description">استيراد/تصدير فيرموير والمفاتيح وبيانات المستخدم والمزيد</string>
     <string name="game_folders">مجلدات اللعبة</string>
     <string name="deep_scan">فحص عميق</string>
@@ -567,7 +567,7 @@
     <!-- GPU Logging strings -->
     <string name="gpu_logging_header">تسجيل وحدة معالجة الرسومات</string>
     <string name="gpu_logging_enabled">تمكين تسجيل وحدة معالجة الرسومات</string>
-    <string name="gpu_logging_enabled_description">تسجيل عمليات وحدة معالجة الرسومات في ملف eden_gpu.log لتصحيح أخطاء برامج تشغيل Adreno</string>
+    <string name="gpu_logging_enabled_description">تسجيل عمليات وحدة معالجة الرسومات في ملف volt_gpu.log لتصحيح أخطاء برامج تشغيل Adreno</string>
     <string name="gpu_log_level">مستوى السجل</string>
     <string name="gpu_log_level_description">مستوى التفاصيل لسجلات وحدة معالجة الرسومات (كلما زاد المستوى، زادت التفاصيل وزادت التكاليف الإضافية)</string>
     <string name="gpu_log_vulkan_calls">تسجيل استدعاءات واجهة برمجة تطبيقات Vulkan</string>
@@ -1094,7 +1094,7 @@
     <string name="app_language_system">اتبع النظام</string>
     <!-- Static Themes -->
     <string name="static_theme_color">لون السمة</string>
-    <string name="eden_theme">إيدن</string>
+    <string name="volt_theme">إيدن</string>
     <string name="violet">بنفسجي</string>
     <string name="blue">أزرق</string>
     <string name="cyan">سماوي</string>

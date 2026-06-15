@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
+﻿// SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 // SPDX-FileCopyrightText: 2017 Citra Emulator Project
@@ -51,8 +51,8 @@ struct Client::Impl {
         }
 
         if (jwt.empty() && !allow_anonymous) {
-            LOG_ERROR(WebService, "Credentials must be provided for authenticated requests");
-            return WebResult{WebResult::Code::CredentialsMissing, "Credentials needed", ""};
+            LOG_ERROR(WebService, "Crvolttials must be provided for authenticated requests");
+            return WebResult{WebResult::Code::CrvolttialsMissing, "Crvolttials needed", ""};
         }
 
         auto result = GenericRequest(method, path, data, accept, jwt);

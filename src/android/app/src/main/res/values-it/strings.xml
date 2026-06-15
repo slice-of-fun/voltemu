@@ -6,7 +6,7 @@
     <string name="notice_notification_channel_description">Mostra le notifiche quando qualcosa va storto.</string>
     <string name="notification_permission_not_granted">Autorizzazione di notifica non concessa!</string>
     <string name="app_notification_channel_description">Notifiche dell\'emulatore Volt Emulator Switch</string>
-    <string name="app_notification_running">Eden è in esecuzione</string>
+    <string name="app_notification_running">Volt è in esecuzione</string>
     <string name="seconds">secondi</string>
 
     <!-- Spinbox strings -->
@@ -69,7 +69,7 @@
     <string name="show_soc_model">Mostra modello SoC</string>
     <string name="show_fw_version">Mostra versione firmware</string>
 
-    <!-- Eden\'s Veil -->
+    <!-- Volt\'s Veil -->
     <string name="buffer_reorder_disable">Disabilita riordino buffer</string>
     <string name="buffer_reorder_disable_description">Se selezionato, disabilita il riordino dei caricamenti di memoria mappata consentendo di associare i caricamenti a disegni specifici. Potrebbe ridurre le prestazioni in alcuni casi.</string>
 
@@ -174,7 +174,7 @@
 
     <!-- Setup strings -->
     <string name="welcome">Benvenuto!</string>
-    <string name="welcome_description">Scopri come configurare &lt;b>Eden&lt;/b> e passare all\'emulazione.</string>
+    <string name="welcome_description">Scopri come configurare &lt;b>Volt&lt;/b> e passare all\'emulazione.</string>
     <string name="get_started">Iniziare</string>
     <string name="keys">Chiavi</string>
     <string name="keys_description">Seleziona il tuo file &lt;b>prod.keys&lt;/b> con il pulsante in basso.</string>
@@ -239,11 +239,11 @@
     <string name="settings_description">Configura le impostazioni dell\'emulatore</string>
     <string name="search_recently_played">Giocati recentemente</string>
     <string name="search_recently_added">Aggiunti recentemente</string>
-    <string name="open_user_folder">Apri la cartella di Eden</string>
-    <string name="open_user_folder_description">Gestisci i file interni di Eden</string>
+    <string name="open_user_folder">Apri la cartella di Volt</string>
+    <string name="open_user_folder_description">Gestisci i file interni di Volt</string>
     <string name="app_settings_description">Modifica il comportamento e l\'aspetto dell\'app</string>
     <string name="no_file_manager">Nessun file manager trovato</string>
-    <string name="notification_no_directory_link">Impossibile aprire la cartella di Eden</string>
+    <string name="notification_no_directory_link">Impossibile aprire la cartella di Volt</string>
     <string name="notification_no_directory_link_description">Per favore individua la cartella dell\'utente manualmente con il pannello laterale del file manager.</string>
     <string name="manage_save_data">Gestisci i salvataggi</string>
     <string name="manage_save_data_description">Salvataggio non trovato. Seleziona un\'opzione di seguito.</string>
@@ -276,7 +276,7 @@
     <string name="install_game_content_help_link">https://yuzu-mirror.github.io/help/quickstart/#dumping-installed-updates</string>
     <string name="custom_driver_not_supported">I driver personalizzati non sono supportati.</string>
     <string name="custom_driver_not_supported_description">I driver personalizzati non sono attualmente supportati per questo dispositivo.\nRicontrolla in futuro se il supporto è stato aggiunto.</string>
-    <string name="manage_yuzu_data">Gestisci i dati di Eden</string>
+    <string name="manage_yuzu_data">Gestisci i dati di Volt</string>
     <string name="manage_yuzu_data_description">Importa/Esporta il firmware, le keys, i dati utente, e altro!</string>
     <string name="game_folders">Cartelle di gioco</string>
     <string name="deep_scan">Scansione Sotto-Cartelle</string>

@@ -1,8 +1,8 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <resources>
 
     <style name="Theme.Yuzu.Splash.Main" parent="Theme.SplashScreen">
-        <item name="windowSplashScreenBackground">@color/eden_background</item>
+        <item name="windowSplashScreenBackground">@color/volt_background</item>
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_yuzu_splash</item>
         <item name="postSplashScreenTheme">@style/Theme.Yuzu.Main</item>
     </style>
@@ -27,53 +27,53 @@
         <item name="popupMenuStyle">@style/YuzuPopupMenu</item>
     </style>
 
-    <style name="Theme.Eden.Main" parent="Theme.Material3.DayNight.NoActionBar">
+    <style name="Theme.Volt.Main" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Primary colors -->
-        <item name="colorPrimary">@color/eden_primary</item>
-        <item name="colorOnPrimary">@color/eden_on_primary</item>
-        <item name="colorPrimaryContainer">@color/eden_primary_variant</item>
-        <item name="colorOnPrimaryContainer">@color/eden_on_primary</item>
+        <item name="colorPrimary">@color/volt_primary</item>
+        <item name="colorOnPrimary">@color/volt_on_primary</item>
+        <item name="colorPrimaryContainer">@color/volt_primary_variant</item>
+        <item name="colorOnPrimaryContainer">@color/volt_on_primary</item>
         <!-- Secondary colors -->
-        <item name="colorSecondary">@color/eden_secondary</item>
-        <item name="colorOnSecondary">@color/eden_on_secondary</item>
-        <item name="colorSecondaryContainer">@color/eden_secondary_variant</item>
-        <item name="colorOnSecondaryContainer">@color/eden_on_secondary</item>
+        <item name="colorSecondary">@color/volt_secondary</item>
+        <item name="colorOnSecondary">@color/volt_on_secondary</item>
+        <item name="colorSecondaryContainer">@color/volt_secondary_variant</item>
+        <item name="colorOnSecondaryContainer">@color/volt_on_secondary</item>
         <!-- Tertiary colors -->
-        <item name="colorTertiary">@color/eden_accent_purple</item>
-        <item name="colorOnTertiary">@color/eden_on_primary</item>
-        <item name="colorTertiaryContainer">@color/eden_accent_blue</item>
-        <item name="colorOnTertiaryContainer">@color/eden_on_primary</item>
+        <item name="colorTertiary">@color/volt_accent_purple</item>
+        <item name="colorOnTertiary">@color/volt_on_primary</item>
+        <item name="colorTertiaryContainer">@color/volt_accent_blue</item>
+        <item name="colorOnTertiaryContainer">@color/volt_on_primary</item>
         <!-- Background and surface -->
-        <item name="android:colorBackground">@color/eden_background</item>
-        <item name="colorOnBackground">@color/eden_on_background</item>
-        <item name="colorSurface">@color/eden_surface</item>
-        <item name="colorOnSurface">@color/eden_on_surface</item>
-        <item name="colorSurfaceVariant">@color/eden_surface_variant</item>
-        <item name="colorOnSurfaceVariant">@color/eden_on_surface</item>
+        <item name="android:colorBackground">@color/volt_background</item>
+        <item name="colorOnBackground">@color/volt_on_background</item>
+        <item name="colorSurface">@color/volt_surface</item>
+        <item name="colorOnSurface">@color/volt_on_surface</item>
+        <item name="colorSurfaceVariant">@color/volt_surface_variant</item>
+        <item name="colorOnSurfaceVariant">@color/volt_on_surface</item>
         <!-- Outline and borders -->
-        <item name="colorOutline">@color/eden_border</item>
-        <item name="colorOutlineVariant">@color/eden_border_light</item>
+        <item name="colorOutline">@color/volt_border</item>
+        <item name="colorOutlineVariant">@color/volt_border_light</item>
         <!-- Error colors -->
-        <item name="colorError">@color/eden_error</item>
-        <item name="colorErrorContainer">@color/eden_error</item>
-        <item name="colorOnError">@color/eden_on_primary</item>
-        <item name="colorOnErrorContainer">@color/eden_on_primary</item>
+        <item name="colorError">@color/volt_error</item>
+        <item name="colorErrorContainer">@color/volt_error</item>
+        <item name="colorOnError">@color/volt_on_primary</item>
+        <item name="colorOnErrorContainer">@color/volt_on_primary</item>
         <!-- System UI -->
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
         <item name="android:windowLightStatusBar">false</item>
         <item name="android:windowLightNavigationBar">false</item>
         <!-- Other theme attributes -->
-        <item name="android:shadowColor">@color/eden_overlay</item>
-        <item name="sliderStyle">@style/EdenSlider</item>
+        <item name="android:shadowColor">@color/volt_overlay</item>
+        <item name="sliderStyle">@style/VoltSlider</item>
         <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
         <item name="android:enforceStatusBarContrast">false</item>
         <item name="android:enforceNavigationBarContrast">false</item>
         <!-- Material dialog theme -->
-        <item name="materialAlertDialogTheme">@style/EdenMaterialDialog</item>
+        <item name="materialAlertDialogTheme">@style/VoltMaterialDialog</item>
         <!-- Popup menu theme -->
-        <item name="popupMenuStyle">@style/EdenPopupMenu</item>
-        <item name="android:textColorPrimary">@color/eden_on_background</item>
+        <item name="popupMenuStyle">@style/VoltPopupMenu</item>
+        <item name="android:textColorPrimary">@color/volt_on_background</item>
         <item name="android:itemTextAppearance">@style/TextAppearance.Material3.BodyLarge</item>
     </style>
 

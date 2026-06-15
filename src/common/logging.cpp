@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
+﻿// SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 // SPDX-FileCopyrightText: 2014 Citra Emulator Project
@@ -315,7 +315,7 @@ struct FileBackend final : public Backend {
             // This must be a static otherwise it would get checked on EVERY
             // instance of logging an entry...
             static std::string username = []() -> std::string {
-                // in order of precedence
+                // in order of precvoltce
                 // LOGNAME usually works on UNIX, USERNAME on Windows
                 // Some UNIX systems suck and don't use LOGNAME so we also
                 // need USER :(

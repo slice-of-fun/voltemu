@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
+﻿// SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 package dev.volt_emu.volt.fragments
@@ -438,14 +438,14 @@ class HomeSettingsFragment : Fragment() {
             mainActivity,
             DocumentsContract.buildDocumentUri(
                 DocumentProvider.AUTHORITY,
-                "${DocumentProvider.ROOT_ID}/log/eden_log.txt"
+                "${DocumentProvider.ROOT_ID}/log/volt_log.txt"
             )
         )!!
         val oldLog = DocumentFile.fromSingleUri(
             mainActivity,
             DocumentsContract.buildDocumentUri(
                 DocumentProvider.AUTHORITY,
-                "${DocumentProvider.ROOT_ID}/log/eden_log.txt.old.txt"
+                "${DocumentProvider.ROOT_ID}/log/volt_log.txt.old.txt"
             )
         )!!
 
@@ -472,14 +472,14 @@ class HomeSettingsFragment : Fragment() {
             mainActivity,
             DocumentsContract.buildDocumentUri(
                 DocumentProvider.AUTHORITY,
-                "${DocumentProvider.ROOT_ID}/log/eden_gpu.log"
+                "${DocumentProvider.ROOT_ID}/log/volt_gpu.log"
             )
         )!!
         val oldLog = DocumentFile.fromSingleUri(
             mainActivity,
             DocumentsContract.buildDocumentUri(
                 DocumentProvider.AUTHORITY,
-                "${DocumentProvider.ROOT_ID}/log/eden_gpu.log.old.txt"
+                "${DocumentProvider.ROOT_ID}/log/volt_gpu.log.old.txt"
             )
         )!!
 

@@ -1,4 +1,4 @@
-#!/usr/bin/env perl
+﻿#!/usr/bin/env perl
 
 # SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 # SPDX-License-Identifier: GPL-3.0-or-later
@@ -12,10 +12,10 @@ use POSIX qw(strftime);
 my $input;
 my $sampling_hz = '997';
 my $sampling_time = '60';
-my $sampling_pid = `pgrep eden`;
+my $sampling_pid = `pgrep volt`;
 chomp($sampling_pid);
 
-my $sampling_program = 'eden';
+my $sampling_program = 'volt';
 my $sampling_type = 0;
 
 sub dtrace_ask_params {

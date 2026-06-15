@@ -1,14 +1,14 @@
-# Setting a Custom Date/Time in Eden
+﻿# Setting a Custom Date/Time in Volt
 
-Use this guide whenever you want to modify the Date or Time that Eden reports to games. This can be useful for modifying RNG elements, skipping wait times in games, etc.
+Use this guide whenever you want to modify the Date or Time that Volt reports to games. This can be useful for modifying RNG elements, skipping wait times in games, etc.
 
-**Click [Here](https://evilperson1337.notion.site/Setting-a-Custom-Date-Time-in-Eden-2b357c2edaf680acb8d4e63ccc126564) for a version of this guide with images & visual elements.**
+**Click [Here](https://evilperson1337.notion.site/Setting-a-Custom-Date-Time-in-Volt-2b357c2edaf680acb8d4e63ccc126564) for a version of this guide with images & visual elements.**
 
 ---
 
 ### Pre-Requisites
 
-- Eden set up and fully configured
+- Volt set up and fully configured
 
 ---
 

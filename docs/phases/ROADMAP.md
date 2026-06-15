@@ -1,6 +1,6 @@
-# Volt Emulator — Project Roadmap
+﻿# Volt Emulator — Project Roadmap
 
-This document defines the full development roadmap across all five phases. Each phase builds on the previous and moves Volt Emulator progressively from an Eden fork toward a fully independent emulator project.
+This document defines the full development roadmap across all five phases. Each phase builds on the previous and moves Volt Emulator progressively from an Volt fork toward a fully independent emulator project.
 
 ---
 
@@ -27,7 +27,7 @@ Phases are sequential but may overlap for isolated workstreams (e.g., documentat
 ### Deliverables
 
 #### 1.1 Repository Setup
-- [x] Fork Eden repository
+- [x] Fork Volt repository
 - [x] Initialize Volt Emulator repository
 - [x] Set up branch protection rules
 - [x] Configure CI/CD pipeline
@@ -35,7 +35,7 @@ Phases are sequential but may overlap for isolated workstreams (e.g., documentat
 - [ ] Configure issue and PR templates
 
 #### 1.2 Application Identity
-- [ ] Replace all user-facing "Eden" references with "Volt Emulator"
+- [ ] Replace all user-facing "Volt" references with "Volt Emulator"
 - [ ] Update window titles
 - [ ] Update about dialogs
 - [ ] Update log output prefixes
@@ -43,7 +43,7 @@ Phases are sequential but may overlap for isolated workstreams (e.g., documentat
 
 #### 1.3 Build System
 - [ ] Rename CMake project to `volt`
-- [ ] Rename CMake variables from `EDEN_` to `VOLT_`
+- [ ] Rename CMake variables from `VOLT_` to `VOLT_`
 - [ ] Rename CMake targets
 - [ ] Update version metadata (`VOLT_VERSION_MAJOR/MINOR/PATCH`)
 - [ ] Update vcpkg manifest name
@@ -92,7 +92,7 @@ Phases are sequential but may overlap for isolated workstreams (e.g., documentat
 
 **Exit Criteria for Phase 1:**
 - Application builds and runs as "Volt Emulator" on all platforms
-- No "Eden" branding visible to end users
+- No "Volt" branding visible to end users
 - All legal obligations verified intact
 - Documentation baseline complete
 

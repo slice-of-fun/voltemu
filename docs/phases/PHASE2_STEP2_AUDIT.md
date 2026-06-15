@@ -1,4 +1,4 @@
-# Phase 2 — Step 2 Dead Code Removal: Audit
+﻿# Phase 2 — Step 2 Dead Code Removal: Audit
 
 This document records the dead-code audit for **Phase 2, Step 2** and the
 rationale for what was removed vs. deliberately retained. The guiding rule for
@@ -59,7 +59,7 @@ mechanical cleanup pass.
 | Ryujinx save linking + KVDB parse | `src/common/fs/ryujinx_compat.*`, `src/qt_common/util/fs.*` | **MEDIUM** | Keep — breaks users with linked saves. |
 | QSettings backwards-compat escaping | `src/frontend_common/config.cpp` (~1086) | **LOW** | Keep — config deserialization safety. |
 
-> Cross-phase note: `src/common/fs/fs_paths.h` still defines `EDEN_DIR "eden"` and
+> Cross-phase note: `src/common/fs/fs_paths.h` still defines `VOLT_DIR "volt"` and
 > related fork-name macros. These belong to **Phase 1 rebranding**, not Phase 2,
 > and are tracked there.
 

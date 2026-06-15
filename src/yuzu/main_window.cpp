@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
+﻿// SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 // Qt on macOS doesn't define VMA shit
@@ -352,7 +352,7 @@ MainWindow::MainWindow(bool has_broken_vulkan)
 {
     QtCommon::Init(this);
 
-    Common::FS::CreateEdenPaths();
+    Common::FS::CreateVoltPaths();
     this->config = std::make_unique<QtConfig>();
 
     if (user_data_migrator.migrated) {
@@ -367,7 +367,7 @@ MainWindow::MainWindow(bool has_broken_vulkan)
             std::string str_path = Common::FS::GetVoltPathString(path);
             if (str_path.starts_with(user_data_migrator.selected_emu.get_user_dir())) {
                 boost::replace_all(
-                    str_path, user_data_migrator.selected_emu.lower_name().toStdString(), "eden");
+                    str_path, user_data_migrator.selected_emu.lower_name().toStdString(), "volt");
                 Common::FS::SetVoltPath(path, str_path);
             }
         }
@@ -1311,7 +1311,7 @@ void MainWindow::InitializeHotkeys()
 
     LinkActionShortcut(ui->action_Load_File, QStringLiteral("Load File"));
     LinkActionShortcut(ui->action_Load_Amiibo, QStringLiteral("Load/Remove Amiibo"));
-    LinkActionShortcut(ui->action_Exit, QStringLiteral("Exit Eden"));
+    LinkActionShortcut(ui->action_Exit, QStringLiteral("Exit Volt"));
     LinkActionShortcut(ui->action_Restart, QStringLiteral("Restart Emulation"));
     LinkActionShortcut(ui->action_Pause, QStringLiteral("Continue/Pause Emulation"));
     LinkActionShortcut(ui->action_Stop, QStringLiteral("Stop Emulation"));
@@ -1651,7 +1651,7 @@ void MainWindow::ConnectMenuEvents()
     connect_menu(ui->action_Firmware_From_ZIP, &MainWindow::OnInstallFirmwareFromZIP);
     connect_menu(ui->action_Install_Keys, &MainWindow::OnInstallDecryptionKeys);
     connect_menu(ui->action_About, &MainWindow::OnAbout);
-    connect_menu(ui->action_Eden_Dependencies, &MainWindow::OnEdenDependencies);
+    connect_menu(ui->action_Volt_Dependencies, &MainWindow::OnVoltDependencies);
     connect_menu(ui->action_Data_Manager, &MainWindow::OnDataDialog);
 }
 
@@ -1864,7 +1864,7 @@ bool MainWindow::LoadROM(const QString& filename, Service::AM::FrontendAppletPar
             tr("You are using the deconstructed ROM directory format for this game, which is an "
                "outdated format that has been superseded by others such as NCA, NAX, XCI, or "
                "NSP. Deconstructed ROM directories lack icons, metadata, and update "
-               "support.<br>For an explanation of the various Switch formats Eden supports, "
+               "support.<br>For an explanation of the various Switch formats Volt supports, "
                "out our user handbook. This message will not be shown again."));
     }
 
@@ -1878,7 +1878,7 @@ bool MainWindow::LoadROM(const QString& filename, Service::AM::FrontendAppletPar
         case Core::SystemResultStatus::ErrorVideoCore:
             QMessageBox::critical(
                 this, tr("An error occurred initializing the video core."),
-                tr("Eden has encountered an error while running the video core. "
+                tr("Volt has encountered an error while running the video core. "
                    "This is usually caused by outdated GPU drivers, including integrated ones. "
                    "Please see the log for more details. "
                    "For more information on accessing the log, please see the following page: "
@@ -1934,7 +1934,7 @@ bool MainWindow::SelectAndSetCurrentUser(const Core::Frontend::ProfileSelectPara
 void MainWindow::BootGame(const QString& filename, Service::AM::FrontendAppletParameters params,
                           StartGameType type)
 {
-    LOG_INFO(Frontend, "Eden starting...");
+    LOG_INFO(Frontend, "Volt starting...");
 
     if (params.program_id == 0 ||
         params.program_id > static_cast<u64>(Service::AM::AppletProgramId::MaxProgramId)) {
@@ -2786,15 +2786,15 @@ void MainWindow::OnLinkToRyujinx(const u64& program_id)
 
     const std::string hex_program = fmt::format("{:016X}", program_id);
 
-    const fs::path eden_dir = FrontendCommon::DataManager::GetDataDir(
+    const fs::path volt_dir = FrontendCommon::DataManager::GetDataDir(
                                   FrontendCommon::DataManager::DataDir::Saves, user_id) /
                               hex_program;
 
     // CheckUnlink basically just checks to see if one or both are linked, and prompts the user to
     // unlink if this is the case.
     // If it returns false, neither dir is linked so it's fine to continue
-    if (!QtCommon::FS::CheckUnlink(eden_dir, ryu_dir)) {
-        RyujinxDialog dialog(eden_dir, ryu_dir, this);
+    if (!QtCommon::FS::CheckUnlink(volt_dir, ryu_dir)) {
+        RyujinxDialog dialog(volt_dir, ryu_dir, this);
         if (dialog.exec() == QDialog::Accepted) {
             UISettings::values.ryujinx_link_paths.insert(
                 program_id,
@@ -3217,15 +3217,15 @@ void MainWindow::OnMenuReportCompatibility()
     //         return;
     //     }
 
-    //     if (!Settings::values.eden_token.GetValue().empty() &&
-    //         !Settings::values.eden_username.GetValue().empty()) {
+    //     if (!Settings::values.volt_token.GetValue().empty() &&
+    //         !Settings::values.volt_username.GetValue().empty()) {
     //     } else {
     //         QMessageBox::critical(
     //             this, tr("Missing yuzu Account"),
     //             tr("In order to submit a game compatibility test case, you must set up your web
     //             token "
     //                "and "
-    //                "username.<br><br/>To link your eden account, go to Emulation &gt;
+    //                "username.<br><br/>To link your volt account, go to Emulation &gt;
     //                Configuration "
     //                "&gt; "
     //                "Web."));
@@ -3249,7 +3249,7 @@ void MainWindow::OpenURL(const QUrl& url)
 
 void MainWindow::OnOpenModsPage()
 {
-    OpenURL(QUrl(QStringLiteral("https://github.com/eden-emulator/yuzu-mod-archive")));
+    OpenURL(QUrl(QStringLiteral("https://github.com/volt-emulator/yuzu-mod-archive")));
 }
 
 void MainWindow::OnOpenQuickstartGuide()
@@ -3549,7 +3549,7 @@ void MainWindow::OnConfigure()
 #endif
 
     if (!multiplayer_state->IsHostingPublicRoom()) {
-        multiplayer_state->UpdateCredentials();
+        multiplayer_state->UpdateCrvolttials();
     }
 
     emit UpdateThemedIcons();
@@ -3964,7 +3964,7 @@ void MainWindow::OnAbout()
     aboutDialog.exec();
 }
 
-void MainWindow::OnEdenDependencies()
+void MainWindow::OnVoltDependencies()
 {
     DepsDialog depsDialog(this);
     depsDialog.exec();
@@ -4461,7 +4461,7 @@ void MainWindow::OnCheckGraphicsBackend()
         UISettings::values.gui_force_x11.SetValue(true);
         GraphicsBackend::SetForceX11(true);
         QMessageBox::information(this, tr("Restart Required"),
-                                 tr("Restart Eden to apply the X11 backend."));
+                                 tr("Restart Volt to apply the X11 backend."));
     }
 }
 #endif
@@ -4585,8 +4585,8 @@ bool MainWindow::ConfirmClose()
         UISettings::values.confirm_before_stopping.GetValue() == ConfirmStop::Ask_Based_On_Game)
         return true;
 
-    const auto text = tr("Are you sure you want to close Eden?");
-    return question(this, tr("Eden"), text);
+    const auto text = tr("Are you sure you want to close Volt?");
+    return question(this, tr("Volt"), text);
 }
 
 void MainWindow::closeEvent(QCloseEvent* event)
@@ -4684,7 +4684,7 @@ bool MainWindow::ConfirmChangeGame()
 
     // Use custom question to link controller navigation
     return question(
-        this, tr("Eden"),
+        this, tr("Volt"),
         tr("Are you sure you want to stop the emulation? Any unsaved progress will be lost."),
         QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
 }
@@ -4694,10 +4694,10 @@ bool MainWindow::ConfirmForceLockedExit()
     if (QtCommon::emu_thread == nullptr)
         return true;
 
-    const auto text = tr("The currently running application has requested Eden to not exit.\n\n"
+    const auto text = tr("The currently running application has requested Volt to not exit.\n\n"
                          "Would you like to bypass this and exit anyway?");
 
-    return question(this, tr("Eden"), text);
+    return question(this, tr("Volt"), text);
 }
 
 void MainWindow::RequestGameExit()

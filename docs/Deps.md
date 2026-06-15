@@ -1,6 +1,6 @@
-# Dependencies
+﻿# Dependencies
 
-To build Eden, you MUST have a C++ compiler.
+To build Volt, you MUST have a C++ compiler.
 
 * On Linux, this is usually [GCC](https://gcc.gnu.org/) 11+ or [Clang](https://clang.llvm.org/) v14+
   * GCC 12 also requires Clang 14+
@@ -44,7 +44,7 @@ If you are on **Windows** and building with **MSVC** or **clang-cl**, you may go
 
 ## Externals
 
-The following are handled by Eden's externals:
+The following are handled by Volt's externals:
 
 * [FFmpeg](https://ffmpeg.org/) (should use `-DYUZU_USE_EXTERNAL_FFMPEG=ON`)
 * [SDL3](https://www.libsdl.org/download-2.0.php) 3.2.10+ (Use `-DYUZU_USE_BUNDLED_SDL2=ON` to reduce compile time)
@@ -72,11 +72,11 @@ Vulkan 1.3.274+ is also needed:
 Certain other dependencies will be fetched by CPM regardless. System packages *can* be used for these libraries, but many are either not packaged by most distributions OR have issues when used by the system:
 
 * [SimpleIni](https://github.com/brofield/simpleini)
-* [DiscordRPC](https://github.com/eden-emulator/discord-rpc)
+* [DiscordRPC](https://github.com/volt-emulator/discord-rpc)
 * [cubeb](https://github.com/mozilla/cubeb)
 * [libusb](https://github.com/libusb/libusb)
 * [VulkanMemoryAllocator](https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator)
-* [sirit](https://github.com/eden-emulator/sirit)
+* [sirit](https://github.com/volt-emulator/sirit)
 * [httplib](https://github.com/yhirose/cpp-httplib) - if `ENABLE_UPDATE_CHECKER` or `ENABLE_WEB_SERVICE` are on
   * This package is known to be broken on the AUR.
 * [cpp-jwt](https://github.com/arun11299/cpp-jwt) 1.4+ - if `ENABLE_WEB_SERVICE` is on
