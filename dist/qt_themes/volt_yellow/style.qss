@@ -1,3 +1,20 @@
+
+QMainWindow, QDialog {
+    background-color: #FFD700;
+    color: #000000;
+}
+QWidget {
+    background-color: #FFD700;
+    color: #000000;
+}
+QMenu {
+    background-color: #FFEA00;
+    color: #000000;
+}
+QMenuBar {
+    background-color: #FFD700;
+    color: #000000;
+}
 /*
 * SPDX-FileCopyrightText: 2018 yuzu Emulator Project
 * SPDX-License-Identifier: GPL-2.0-or-later
@@ -41,7 +58,7 @@ QPushButton#RendererStatusBarButton:hover {
 }
 
 QPushButton#RendererStatusBarButton:checked {
-    color: #00E5FF;
+    color: #FFD700;
 }
 
 QPushButton#RendererStatusBarButton:!checked {
@@ -73,11 +90,11 @@ QPushButton#GPUStatusBarButton:hover {
 }
 
 QPushButton#GPUStatusBarButton:checked {
-    color: #00B3CC;
+    color: #DAA520;
 }
 
 QPushButton#GPUStatusBarButton:!checked {
-    color: #40dd40;
+    color: #FFFF00;
 }
 
 QPushButton#DockingStatusBarButton {
@@ -291,7 +308,7 @@ QCheckBox#checkboxPlayer8Connected::indicator:checked,
 QGroupBox#groupConnectedController::indicator:checked {
     border-radius: 6px;
     border: 1px solid #929192;
-    background: #39ff14;
+    background: #FFEA00;
     image: none;
 }
 
@@ -459,7 +476,7 @@ QWidget#contentRichDialog QLabel#label_title_rich {
 }
 
 QDialog#OverlayDialog QPushButton {
-    color: rgba(49, 79, 239, 1);
+    color: rgba(255, 215, 0, 1);
     background: transparent;
     border: none;
     padding: 0px;
@@ -468,9 +485,9 @@ QDialog#OverlayDialog QPushButton {
 
 QDialog#OverlayDialog QPushButton:focus,
 QDialog#OverlayDialog QPushButton:hover {
-    color: rgba(49, 79, 239, 1);
+    color: rgba(255, 215, 0, 1);
     background: rgba(255, 255, 255, 1);
-    border: 5px solid rgba(148, 250, 202, 1);
+    border: 5px solid rgba(255, 234, 0, 1);
     border-radius: 6px;
     outline: none;
 }
@@ -478,7 +495,7 @@ QDialog#OverlayDialog QPushButton:hover {
 QDialog#OverlayDialog QPushButton:pressed {
     color: rgba(240, 240, 240, 1);
     background: rgba(150, 150, 150, 1);
-    border: 5px solid rgba(148, 250, 202, 1);
+    border: 5px solid rgba(255, 234, 0, 1);
     border-radius: 6px;
     outline: none;
 }
@@ -510,7 +527,7 @@ QDialog#QtSoftwareKeyboardDialog QPushButton#button_ok,
 QDialog#QtSoftwareKeyboardDialog QPushButton#button_ok_shift,
 QDialog#QtSoftwareKeyboardDialog QPushButton#button_ok_num {
     color: rgba(240, 240, 240, 1);
-    background: rgba(49, 79, 239, 1);
+    background: rgba(255, 215, 0, 1);
     border: 2px solid rgba(240, 240, 240, 1);
 }
 
@@ -543,7 +560,7 @@ QDialog#QtSoftwareKeyboardDialog QPushButton#button_ok_num:hover,
 QDialog#QtSoftwareKeyboardDialog QPushButton#button_backspace_num:hover {
     color: rgba(0, 0, 0, 1);
     background: rgba(255, 255, 255, 1);
-    border: 5px solid rgba(148, 250, 202, 1);
+    border: 5px solid rgba(255, 234, 0, 1);
     border-radius: 6px;
     outline: none;
 }
@@ -563,7 +580,7 @@ QDialog#QtSoftwareKeyboardDialog QPushButton#button_ok_num:pressed,
 QDialog#QtSoftwareKeyboardDialog QPushButton#button_backspace_num:pressed {
     color: rgba(240, 240, 240, 1);
     background: rgba(150, 150, 150, 1);
-    border: 5px solid rgba(148, 250, 202, 1);
+    border: 5px solid rgba(255, 234, 0, 1);
     border-radius: 6px;
 }
 

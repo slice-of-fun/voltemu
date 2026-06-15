@@ -56,4 +56,6 @@ private:
     Settings::AspectRatio ratio;
     Settings::ResolutionSetup resolution_setting;
     Core::System& system;
+    QString current_accent_color;
+    QString current_accent_color_2;
 };

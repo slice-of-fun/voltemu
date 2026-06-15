@@ -1,4 +1,4 @@
-﻿// SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
+// SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 // Qt on macOS doesn't define VMA shit
@@ -4769,8 +4769,71 @@ void MainWindow::UpdateUITheme()
     QFile f(theme_uri);
     if (f.open(QFile::ReadOnly | QFile::Text)) {
         QTextStream ts(&f);
-        qApp->setStyleSheet(ts.readAll());
-        setStyleSheet(ts.readAll());
+        QString base_qss = ts.readAll();
+        
+        QString accent_color = QString::fromStdString(UISettings::values.accent_color);
+        QString accent_style = accent_color;
+
+        if (UISettings::values.use_gradient_accent.GetValue()) {
+            QString accent_color_2 = QString::fromStdString(UISettings::values.accent_color_2);
+            accent_style = QStringLiteral("qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 %1, stop:1 %2)").arg(accent_color).arg(accent_color_2);
+        }
+
+        QString custom_qss = QStringLiteral(
+            "QTreeView::item:selected, QListView::item:selected, QTableView::item:selected { background: %1; color: #ffffff; }"
+            "QMenu::item:selected { background: %1; color: #ffffff; }"
+            "QProgressBar::chunk { background: %1; }"
+            "QSlider::handle { background: %1; }"
+            "QTabBar::tab:selected { border-bottom: 2px solid %2; color: %2; }"
+            "QPushButton:checked, QPushButton:pressed { background: %1; color: #ffffff; }"
+            "QGroupBox::title { color: %2; }"
+        ).arg(accent_style, accent_color);
+
+        if (UISettings::values.enable_modern_ui.GetValue()) {
+            custom_qss += QStringLiteral(
+                /* Scrollbars */
+                "QScrollBar:vertical { border: none; background: transparent; width: 10px; margin: 0px; }"
+                "QScrollBar::handle:vertical { background: rgba(128, 128, 128, 0.5); min-height: 20px; border-radius: 5px; margin: 2px; }"
+                "QScrollBar::handle:vertical:hover { background: rgba(128, 128, 128, 0.8); }"
+                "QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical { height: 0px; border: none; }"
+                "QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical { background: none; }"
+                
+                "QScrollBar:horizontal { border: none; background: transparent; height: 10px; margin: 0px; }"
+                "QScrollBar::handle:horizontal { background: rgba(128, 128, 128, 0.5); min-width: 20px; border-radius: 5px; margin: 2px; }"
+                "QScrollBar::handle:horizontal:hover { background: rgba(128, 128, 128, 0.8); }"
+                "QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal { width: 0px; border: none; }"
+                "QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal { background: none; }"
+
+                /* Lists and Tables */
+                "QTreeView, QListView, QTableView { border-radius: 8px; padding: 4px; margin: 4px; background-color: rgba(0, 0, 0, 0.1); border: 1px solid rgba(128, 128, 128, 0.2); outline: 0; }"
+                "QTreeView::item, QListView::item { padding: 8px; margin: 2px; border-radius: 6px; }"
+                "QHeaderView::section { border: none; border-bottom: 2px solid rgba(128, 128, 128, 0.2); padding: 8px; background-color: transparent; font-weight: bold; }"
+                
+                /* Tabs */
+                "QTabWidget::pane { border: 1px solid rgba(128, 128, 128, 0.2); border-radius: 8px; top: -1px; background: rgba(0, 0, 0, 0.05); }"
+                "QTabBar::tab { background: transparent; padding: 8px 16px; margin: 4px; border-radius: 6px; }"
+                "QTabBar::tab:selected { background: rgba(128, 128, 128, 0.3); font-weight: bold; }"
+                "QTabBar::tab:hover:!selected { background: rgba(128, 128, 128, 0.1); }"
+
+                /* Group Boxes */
+                "QGroupBox { border: 1px solid rgba(128, 128, 128, 0.3); border-radius: 8px; margin-top: 16px; padding-top: 16px; }"
+                "QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; left: 12px; padding: 0 4px; font-weight: bold; }"
+
+                /* Inputs and Buttons */
+                "QPushButton { border-radius: 6px; padding: 6px 16px; font-weight: bold; border: 1px solid rgba(128, 128, 128, 0.3); background: rgba(128, 128, 128, 0.1); }"
+                "QPushButton:hover { background: rgba(128, 128, 128, 0.2); }"
+                "QComboBox { border-radius: 6px; padding: 6px 12px; border: 1px solid rgba(128, 128, 128, 0.3); background: rgba(128, 128, 128, 0.1); }"
+                "QLineEdit, QSpinBox, QDoubleSpinBox { border-radius: 6px; padding: 6px; border: 1px solid rgba(128, 128, 128, 0.3); background: rgba(0, 0, 0, 0.1); }"
+                
+                /* Menus */
+                "QMenuBar { padding: 4px; }"
+                "QMenu { border-radius: 8px; padding: 4px; border: 1px solid rgba(128, 128, 128, 0.2); }"
+                "QMenu::item { padding: 6px 24px; border-radius: 6px; }"
+            );
+        }
+
+        qApp->setStyleSheet(base_qss + custom_qss);
+        setStyleSheet(base_qss + custom_qss);
     } else {
         LOG_ERROR(Frontend, "Unable to set style \"{}\", stylesheet file not found",
                   UISettings::values.theme);

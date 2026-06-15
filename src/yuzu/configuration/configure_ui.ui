@@ -63,6 +63,52 @@
           </item>
          </layout>
         </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_accent">
+          <item>
+           <widget class="QLabel" name="accent_color_label">
+            <property name="text">
+             <string>Accent Color:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QComboBox" name="color_mode_combobox">
+            <item>
+             <property name="text">
+              <string>Single Color</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Gradient</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="accent_color_button">
+            <property name="text">
+             <string>Color 1</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="accent_color_button_2">
+            <property name="text">
+             <string>Color 2</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="enable_modern_ui">
+          <property name="text">
+           <string>Enable Modern UI Design (Rounded Corners &amp; Spacing)</string>
+          </property>
+         </widget>
+        </item>
        </layout>
       </item>
      </layout>

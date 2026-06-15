@@ -284,6 +284,14 @@ void QtConfig::ReadUIValues()
         std::string("theme"),
         std::string(UISettings::themes[static_cast<size_t>(UISettings::default_theme)].second));
 
+    UISettings::values.accent_color = ReadStringSetting(
+        std::string("accent_color"),
+        std::string("#FFD700"));
+
+    UISettings::values.accent_color_2 = ReadStringSetting(
+        std::string("accent_color_2"),
+        std::string("#FF8C00")); // Default orange for gradient
+
     ReadUIGamelistValues();
     ReadUILayoutValues();
     ReadPathValues();
@@ -521,6 +529,14 @@ void QtConfig::SaveUIValues()
         std::string("theme"), UISettings::values.theme,
         std::make_optional(std::string(
             UISettings::themes[static_cast<size_t>(UISettings::default_theme)].second)));
+
+    WriteStringSetting(
+        std::string("accent_color"), UISettings::values.accent_color,
+        std::make_optional(std::string("#FFD700")));
+
+    WriteStringSetting(
+        std::string("accent_color_2"), UISettings::values.accent_color_2,
+        std::make_optional(std::string("#FF8C00")));
 
     SaveUIGamelistValues();
     SaveUILayoutValues();
