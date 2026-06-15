@@ -98,8 +98,20 @@ src/frontend_common/CMakeLists.txt                   2023
 src/android/app/src/main/jni/CMakeLists.txt          2023
 src/video_core/host_shaders/StringShaderHeader.cmake 2020  (line 1)
 ```
+A follow-up **repo-wide** sweep (beyond the initial `src/`-only scope) found the
+same regression in 6 more files under `CMakeModules/`, all git-confirmed
+originally `yuzu`:
+```
+CMakeModules/FindOpus.cmake          2022
+CMakeModules/Findgamemode.cmake      2023  (line 1)
+CMakeModules/Findlz4.cmake           2022
+CMakeModules/Findzstd.cmake          2022
+CMakeModules/GenerateSCMRev.cmake    2019
+CMakeModules/WindowsCopyFiles.cmake  2018
+```
 **Remediation (no-build, git-verified exact restoration):** revert holder
-`volt Emulator Project` → `yuzu Emulator Project` in each. Years unchanged.
+`volt Emulator Project` → `yuzu Emulator Project` in all 21 files. Years
+unchanged.
 
 ### D2 — Pre-existing upstream: merged / missing license line
 `src/common/CMakeLists.txt:4` — the copyright text and the
@@ -126,6 +138,17 @@ next regen.
 **Remediation:** `GPL-2.0-or-late` → `GPL-2.0-or-later` in both generated files
 **and** in `tools/svc_generator.py:473` (root cause).
 
+### D4 — Volt-introduced: falsified holder, Eden-origin (1 file) ⚠️ REGRESSION
+`dist/dev.volt_emu.volt.xml:4` — `2025 volt Emulator Project`. Unlike D1 (a
+`yuzu`→`volt` replacement from commit `4df3a6d7ea`), this came from a *separate*
+rebrand commit `0ad45e6ce0 rebrand(platform)` that replaced `eden`→`volt`. Git
+confirms the file's original holder (under its pre-rename name
+`dist/dev.eden_emu.eden.xml`) was `2025 Eden Emulator Project`. The sibling
+`dist/dev.volt_emu.volt.metainfo.xml` was checked and is **intact**
+(`2025 Eden Emulator Project`).
+**Remediation:** restore holder `volt Emulator Project` → `Eden Emulator Project`
+(Eden, not yuzu — this is a genuine Eden-era 2025 file).
+
 ---
 
 ## Disposition
@@ -133,9 +156,10 @@ next regen.
 | Item | Origin | Risk | Action |
 |------|--------|------|--------|
 | 1.1–1.5 baseline | — | — | ✅ recorded (this doc) |
-| D1 (15 falsified holders) | Volt rebrand | legal/attribution | ✅ **Repaired** — holder restored `volt`→`yuzu` |
+| D1 (21 falsified holders: 15 `src/` + 6 `CMakeModules/`) | Volt rebrand `4df3a6d7ea` | legal/attribution | ✅ **Repaired** — holder restored `volt`→`yuzu` |
 | D2 (merged license line) | upstream | REUSE validity | ✅ **Repaired** — split into two well-formed lines |
 | D3 (truncated id ×2 + generator) | upstream | invalid SPDX id | ✅ **Repaired** — `or-late`→`or-later` in both files + `svc_generator.py` |
+| D4 (1 falsified holder, Eden-origin) | Volt rebrand `0ad45e6ce0` | legal/attribution | ✅ **Repaired** — holder restored `volt`→`Eden` |
 
 All three repairs are **no-build-safe** (comment/header lines only) and are
 exact, git-verified restorations rather than new edits — they *restore* rather
