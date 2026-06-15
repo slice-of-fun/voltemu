@@ -28,13 +28,13 @@ SPDX-License-Identifier: CC0-1.0
   </keywords>
   <url type="homepage">https://github.com/pushkarverse/volt-emu</url>
   <url type="bugtracker">https://github.com/pushkarverse/volt-emu/issues</url>
-  <url type="faq">https://github.com/pushkarverse/volt-emudocs</url>
-  <url type="help">https://github.com/pushkarverse/volt-emudocs</url>
-  <url type="donation">https://github.com/pushkarverse/volt-emudonations</url>
+  <url type="faq">https://github.com/pushkarverse/volt-emu/tree/dev/docs</url>
+  <url type="help">https://github.com/pushkarverse/volt-emu/tree/dev/docs</url>
+  <url type="donation">https://github.com/pushkarverse/volt-emu</url>
   <url type="translate">https://github.com/pushkarverse/volt-emu</url>
   <url type="contact">https://github.com/pushkarverse/volt-emu</url>
   <url type="vcs-browser">https://github.com/pushkarverse/volt-emu</url>
-  <url type="contribute">https://github.com/pushkarverse/volt-emu/eden-emu/eden</url>
+  <url type="contribute">https://github.com/pushkarverse/volt-emu/blob/dev/CONTRIBUTING.md</url>
   <launchable type="desktop-id">dev.volt_emu.volt.desktop</launchable>
   <provides>
     <binary>volt</binary>
