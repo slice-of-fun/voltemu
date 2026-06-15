@@ -149,6 +149,25 @@ confirms the file's original holder (under its pre-rename name
 **Remediation:** restore holder `volt Emulator Project` → `Eden Emulator Project`
 (Eden, not yuzu — this is a genuine Eden-era 2025 file).
 
+### D5 — Volt-introduced: mangled URLs (collateral, not legal) ⚠️
+While verifying D4, a related defect surfaced in the **same file's content**: the
+rebrand find-replace in `0ad45e6ce0` rewrote `https://eden-emu.dev/` →
+`https://github.com/pushkarverse/volt-emu` **without the trailing slash**, gluing
+the following path segment onto the host:
+```
+faq/help   https://eden-emu.dev/docs       -> ...volt-emudocs        (broken)
+donation   https://eden-emu.dev/donations  -> ...volt-emudonations   (broken)
+contribute https://git.eden-emu.dev/eden-emu/eden -> ...volt-emu/eden-emu/eden (dangling)
+```
+in `dist/dev.volt_emu.volt.metainfo.xml` (AppStream metadata, user-visible in
+software stores). Unlike D1/D4 these have **no git-verifiable correct value** (the
+originals were Eden URLs that should become Volt URLs, but no Volt docs/donation
+pages exist). **Remediation (conservative, points only at content that exists in
+this repo):** faq/help → `…/volt-emu/tree/dev/docs`; contribute →
+`…/volt-emu/blob/dev/CONTRIBUTING.md`; donation → repo base. Other url entries
+(homepage, bugtracker, translate, contact, vcs-browser) were already valid and
+left unchanged. A repo-wide sweep confirms no other glue artifacts remain.
+
 ---
 
 ## Disposition
@@ -160,6 +179,7 @@ confirms the file's original holder (under its pre-rename name
 | D2 (merged license line) | upstream | REUSE validity | ✅ **Repaired** — split into two well-formed lines |
 | D3 (truncated id ×2 + generator) | upstream | invalid SPDX id | ✅ **Repaired** — `or-late`→`or-later` in both files + `svc_generator.py` |
 | D4 (1 falsified holder, Eden-origin) | Volt rebrand `0ad45e6ce0` | legal/attribution | ✅ **Repaired** — holder restored `volt`→`Eden` |
+| D5 (4 mangled URLs, collateral) | Volt rebrand `0ad45e6ce0` | content/UX | ✅ **Repaired** — point at existing repo content |
 
 All three repairs are **no-build-safe** (comment/header lines only) and are
 exact, git-verified restorations rather than new edits — they *restore* rather
