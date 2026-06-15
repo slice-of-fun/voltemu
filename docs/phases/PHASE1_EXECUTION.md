@@ -32,14 +32,22 @@ This document is the authoritative task list for Phase 1. Every item must be com
 ### Step 1 — Legal Audit (Before Any Changes)
 
 > **Critical:** Do this FIRST. You need a baseline before changing anything.
+>
+> **Baseline recorded (no-build):** see `docs/phases/PHASE1_LEGAL_AUDIT.md`.
+> Counts (excl. vendored `src/dynarmic/`): 4103 `SPDX-License-Identifier`,
+> 4169 `SPDX-FileCopyrightText`, 4201 `Copyright` lines, across 2619 source
+> files; 16 license texts in `LICENSES/`. **The audit also found 3 header-
+> corruption defects — including a Volt-introduced regression (D1: 15 copyright
+> holders falsified `yuzu`→`volt`).** Repairs are documented but NOT applied
+> (header edits await authorization).
 
 | # | Task | Status | Notes |
 |---|------|--------|-------|
-| 1.1 | Run `scripts/rebranding/02_audit.sh` on clean clone | ⬜ | Establish baseline |
-| 1.2 | Review all SPDX headers — document count | ⬜ | Must all survive rebrand |
-| 1.3 | Review all copyright notices — document count | ⬜ | Must all survive rebrand |
-| 1.4 | Review `LICENSES/` directory contents | ⬜ | Keep all files intact |
-| 1.5 | Document all upstream attribution blocks | ⬜ | Cross-check post-rebrand |
+| 1.1 | Run `scripts/rebranding/02_audit.sh` on clean clone | ⚠️ | Baseline established by direct inspection (script not run); see legal audit |
+| 1.2 | Review all SPDX headers — document count | ✅ | 4103 `SPDX-License-Identifier` lines; distinct ids inventoried (legal audit 1.1) |
+| 1.3 | Review all copyright notices — document count | ✅ | 4169 `SPDX-FileCopyrightText` / 4201 `Copyright` lines; holders inventoried; **D1 regression flagged** |
+| 1.4 | Review `LICENSES/` directory contents | ✅ | 16 texts intact; all observed ids map to a file (legal audit 1.4) |
+| 1.5 | Document all upstream attribution blocks | ✅ | Dual-header lineage intact except corrupted files (legal audit 1.5 + Defects) |
 
 ---
 
@@ -157,7 +165,7 @@ This document is the authoritative task list for Phase 1. Every item must be com
 | 7.12 | docs/architecture/ARCHITECTURE.md | ✅ | Complete |
 | 7.13 | docs/standards/CODING_STANDARDS.md | ✅ | Complete |
 | 7.14 | docs/legal/THIRD_PARTY_LICENSES.md | ✅ | Complete |
-| 7.15 | Update Eden's original README → archive it | ⬜ | Move to `docs/upstream/EDEN_README.md` |
+| 7.15 | Update Eden's original README → archive it | ✅ | Archived at `docs/upstream/EDEN_README.md` |
 | 7.16 | Commit step | ⬜ | `docs: add Phase 1 documentation suite` |
 
 ---
