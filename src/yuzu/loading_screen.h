@@ -6,12 +6,13 @@
 
 #pragma once
 
+#include <ankerl/unordered_dense.h>
+
 #include <QString>
 #include <QWidget>
 #include <QtGlobal>
 #include <chrono>
 #include <memory>
-#include <ankerl/unordered_dense.h>
 
 #if !QT_CONFIG(movie)
 #define YUZU_QT_MOVIE_MISSING 1

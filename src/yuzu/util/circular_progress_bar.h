@@ -3,9 +3,9 @@
 
 #pragma once
 
-#include <QWidget>
 #include <QColor>
 #include <QString>
+#include <QWidget>
 
 class CircularProgressBar : public QWidget {
     Q_OBJECT

@@ -21,8 +21,8 @@
 #include "core/frontend/framebuffer_layout.h"
 #include "core/loader/loader.h"
 #include "ui_loading_screen.h"
-#include "yuzu/util/circular_progress_bar.h"
 #include "video_core/rasterizer_interface.h"
+#include "util/circular_progress_bar.h"
 
 // Mingw seems to not have QMovie at all. If QMovie is missing then use a single frame instead of an
 // showing the full animation
@@ -198,7 +198,8 @@ void LoadingScreen::OnLoadProgress(VideoCore::LoadCallbackStage stage, std::size
     previous_time = now;
 }
 
-void LoadingScreen::SetThemeColor(const QString& color) {
+void LoadingScreen::SetThemeColor(const QString& color)
+{
     if (circular_progress) {
         circular_progress->SetColor(QColor(color));
     }

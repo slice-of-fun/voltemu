@@ -4867,7 +4867,8 @@ void MainWindow::UpdateUITheme()
                 "7px; background-color: transparent; }"
                 "QRadioButton::indicator:checked { border: 2px solid %1; border-radius: 7px; "
                 "background-color: %1; }")
-                .arg(accent_color, surface_color, text_on_accent, base_text_color, hover_color, cb_path);
+                .arg(accent_color, surface_color, text_on_accent, base_text_color, hover_color,
+                     cb_path);
 
         if (UISettings::values.enable_modern_ui.GetValue()) {
             custom_qss +=

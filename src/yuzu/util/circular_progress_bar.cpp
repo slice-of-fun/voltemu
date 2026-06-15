@@ -1,54 +1,61 @@
 // SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#include "yuzu/util/circular_progress_bar.h"
+#include "util/circular_progress_bar.h"
 
-#include <QPainter>
 #include <QPaintEvent>
+#include <QPainter>
 
-CircularProgressBar::CircularProgressBar(QWidget* parent) : QWidget(parent) {
+CircularProgressBar::CircularProgressBar(QWidget* parent) : QWidget(parent)
+{
     setMinimumSize(300, 300);
     color = QColor("#0ab9e6"); // Default fallback
 }
 
 CircularProgressBar::~CircularProgressBar() = default;
 
-void CircularProgressBar::SetValue(int val) {
+void CircularProgressBar::SetValue(int val)
+{
     if (value != val) {
         value = val;
         update();
     }
 }
 
-void CircularProgressBar::SetMaximum(int max) {
+void CircularProgressBar::SetMaximum(int max)
+{
     if (maximum != max) {
         maximum = max;
         update();
     }
 }
 
-void CircularProgressBar::SetColor(const QColor& c) {
+void CircularProgressBar::SetColor(const QColor& c)
+{
     if (color != c) {
         color = c;
         update();
     }
 }
 
-void CircularProgressBar::SetStageText(const QString& text) {
+void CircularProgressBar::SetStageText(const QString& text)
+{
     if (stage_text != text) {
         stage_text = text;
         update();
     }
 }
 
-void CircularProgressBar::SetEstimateText(const QString& text) {
+void CircularProgressBar::SetEstimateText(const QString& text)
+{
     if (estimate_text != text) {
         estimate_text = text;
         update();
     }
 }
 
-void CircularProgressBar::paintEvent(QPaintEvent* event) {
+void CircularProgressBar::paintEvent(QPaintEvent* event)
+{
     QPainter p(this);
     p.setRenderHint(QPainter::Antialiasing);
 
@@ -74,10 +81,10 @@ void CircularProgressBar::paintEvent(QPaintEvent* event) {
 
     // Draw text in the center
     p.setPen(Qt::white);
-    
+
     QFont stage_font(QStringLiteral("Arial"), 16, QFont::Bold);
     p.setFont(stage_font);
-    
+
     QRect text_rect = rect;
     // Shift slightly up for the main text
     text_rect.translate(0, -15);
@@ -86,11 +93,11 @@ void CircularProgressBar::paintEvent(QPaintEvent* event) {
     if (!estimate_text.isEmpty()) {
         QFont estimate_font(QStringLiteral("Arial"), 12, QFont::Normal);
         p.setFont(estimate_font);
-        
+
         QRect est_rect = rect;
         // Shift slightly down for the estimate text
         est_rect.translate(0, 15);
-        
+
         p.setPen(QColor(180, 180, 180)); // Slightly dimmed text for estimate
         p.drawText(est_rect, Qt::AlignCenter, estimate_text);
     }
