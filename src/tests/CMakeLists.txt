@@ -5,9 +5,12 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
 
 add_executable(tests
+    common/alignment.cpp
     common/bit_field.cpp
+    common/bit_util.cpp
     common/cityhash.cpp
     common/container_hash.cpp
+    common/div_ceil.cpp
     common/fibers.cpp
     common/host_memory.cpp
     common/param_package.cpp

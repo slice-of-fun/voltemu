@@ -118,9 +118,19 @@ The goal is to improve maintainability, readability, and architectural quality w
 > `audio_core.h`, `main.h`); member-level docs were already present.
 
 ### 4.2 Unit Tests
-- [ ] Audit existing `tests/` coverage.
-- [ ] Add unit tests for untested utilities in `src/common/`.
+- [x] Audit existing `tests/` coverage.
+- [x] Add unit tests for untested utilities in `src/common/`.
 - [ ] Set up code coverage reporting scripts.
+
+> Existing suite (Catch2, single `tests` target): 14 files covering bit_field,
+> cityhash, container_hash, fibers, host_memory, param_package, range_map,
+> ring_buffer, scratch_buffer, unique_function (common) plus core_timing,
+> network, memory_tracker, and calibration_configuration_job. Added coverage for
+> three previously-untested header-only utilities — `alignment.h`, `bit_util.h`,
+> `div_ceil.h` — using compile-time `STATIC_REQUIRE` assertions where the API is
+> `constexpr`. New files wired into `src/tests/CMakeLists.txt`. Building/running
+> the suite (and the coverage scripts) requires a compile environment and is
+> deferred to a build pass.
 
 ---
 
