@@ -10,6 +10,8 @@
 #include <string>
 #include <vector>
 
+#include <jni.h>
+
 namespace Core {
 class System;
 class AnnounceMultiplayerSession;
