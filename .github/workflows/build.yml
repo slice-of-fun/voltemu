@@ -86,7 +86,7 @@ jobs:
           modules: 'qtmultimedia qtwebengine qtcharts'
 
       - name: Install Vulkan SDK
-        uses: ammaraskar/setup-vulkan-sdk@v1.2.0
+        uses: humbletim/setup-vulkan-sdk@v1.2.1
 
       - name: Configure CMake
         run: |
