@@ -85,12 +85,11 @@ jobs:
           cache: 'true'
           modules: 'qtmultimedia qtwebengine qtcharts'
 
-      - name: Install Vulkan SDK
+      - name: Install glslangValidator
         run: |
-          wget -qO- https://packages.lunarg.com/lunarg-signing-key-pub.asc | sudo tee /etc/apt/trusted.gpg.d/lunarg.asc
-          sudo wget -qO /etc/apt/sources.list.d/lunarg-vulkan-jammy.list http://packages.lunarg.com/vulkan/lunarg-vulkan-jammy.list
-          sudo apt-get update -q
-          sudo apt-get install -y vulkan-sdk
+          wget -qO glslang.zip https://github.com/KhronosGroup/glslang/releases/download/master-tot/glslang-master-linux-Release.zip
+          unzip -q glslang.zip -d glslang
+          sudo cp glslang/bin/glslangValidator /usr/local/bin/
 
       - name: Configure CMake
         run: |
