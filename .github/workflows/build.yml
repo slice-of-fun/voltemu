@@ -1,4 +1,4 @@
-name: Build Volt Emulator
+name: Build Volt v0.1
 
 on:
   push:
