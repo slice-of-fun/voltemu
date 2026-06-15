@@ -21,4 +21,4 @@ jobjectArray ToJStringArray(JNIEnv* env, const std::vector<std::string>& strs);
 bool GetJBoolean(JNIEnv* env, jobject jboolean);
 jobject ToJBoolean(JNIEnv* env, bool value);
 
-}
+} // namespace Common::Android

@@ -4,6 +4,7 @@
 #pragma once
 
 #include <span>
+
 #include "common/common_types.h"
 
 namespace Tegra::Texture::ASTC {

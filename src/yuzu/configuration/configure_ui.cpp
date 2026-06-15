@@ -194,10 +194,12 @@ void ConfigureUi::RequestGameListUpdate()
 void ConfigureUi::SetConfiguration()
 {
     int theme_idx = ui->theme_combobox->findData(QString::fromStdString(UISettings::values.theme));
-    ui->theme_combobox->setCurrentIndex(theme_idx != -1 ? theme_idx : 1); // Default to Dark if not found
-    
-    ui->color_theme_combobox->setCurrentText(QString::fromStdString(UISettings::values.color_theme_name));
-    
+    ui->theme_combobox->setCurrentIndex(theme_idx != -1 ? theme_idx
+                                                        : 1); // Default to Dark if not found
+
+    ui->color_theme_combobox->setCurrentText(
+        QString::fromStdString(UISettings::values.color_theme_name));
+
     ui->enable_modern_ui->setChecked(UISettings::values.enable_modern_ui.GetValue());
     ui->language_combobox->setCurrentIndex(ui->language_combobox->findData(
         QString::fromStdString(UISettings::values.language.GetValue())));

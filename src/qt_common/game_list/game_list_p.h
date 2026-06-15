@@ -370,12 +370,18 @@ public:
 
         QString theme_name = QString::fromStdString(UISettings::values.color_theme_name);
         QString accent_color = QStringLiteral("#000000"); // Default to Black
-        if (theme_name == QStringLiteral("Monet Blue")) accent_color = QStringLiteral("#8AB4F8");
-        if (theme_name == QStringLiteral("Monet Red")) accent_color = QStringLiteral("#F28B82");
-        if (theme_name == QStringLiteral("Monet Green")) accent_color = QStringLiteral("#81C995");
-        if (theme_name == QStringLiteral("Monet Purple")) accent_color = QStringLiteral("#C58AF9");
-        if (theme_name == QStringLiteral("Monet Yellow")) accent_color = QStringLiteral("#FDE293");
-        if (theme_name == QStringLiteral("Monet Orange")) accent_color = QStringLiteral("#FCAD70");
+        if (theme_name == QStringLiteral("Monet Blue"))
+            accent_color = QStringLiteral("#8AB4F8");
+        if (theme_name == QStringLiteral("Monet Red"))
+            accent_color = QStringLiteral("#F28B82");
+        if (theme_name == QStringLiteral("Monet Green"))
+            accent_color = QStringLiteral("#81C995");
+        if (theme_name == QStringLiteral("Monet Purple"))
+            accent_color = QStringLiteral("#C58AF9");
+        if (theme_name == QStringLiteral("Monet Yellow"))
+            accent_color = QStringLiteral("#FDE293");
+        if (theme_name == QStringLiteral("Monet Orange"))
+            accent_color = QStringLiteral("#FCAD70");
 
         int stroke_width = std::max(2, icon_size / 8);
         painter.setPen(QPen(QColor(accent_color), stroke_width, Qt::SolidLine, Qt::RoundCap));

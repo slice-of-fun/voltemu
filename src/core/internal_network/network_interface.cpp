@@ -10,9 +10,9 @@
 #include <vector>
 
 #ifdef _WIN32
-#include <winsock2.h>
-#include <windows.h>
 #include <iphlpapi.h>
+#include <windows.h>
+#include <winsock2.h>
 #elif defined(__linux__) || defined(__ANDROID__)
 #include <ifaddrs.h>
 #include <net/if.h>

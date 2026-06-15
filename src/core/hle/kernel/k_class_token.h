@@ -3,8 +3,8 @@
 
 #pragma once
 
-#include "common/bit_util.h"
 #include "common/assert.h"
+#include "common/bit_util.h"
 #include "common/common_types.h"
 
 namespace Kernel {

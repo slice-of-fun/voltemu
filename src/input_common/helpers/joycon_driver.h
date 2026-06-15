@@ -9,10 +9,9 @@
 #include <span>
 #include <thread>
 
+#include "common/input.h"
 #include "common/threadsafe_queue.h"
 #include "input_common/helpers/joycon_protocol/joycon_types.h"
-
-#include "common/input.h"
 
 namespace InputCommon::Joycon {
 class CalibrationProtocol;

@@ -1,4 +1,5 @@
 #include "android_common.h"
+
 #include <jni.h>
 
 #include <string>
@@ -77,4 +78,4 @@ jobject ToJBoolean(JNIEnv* env, bool value)
     return env->NewObject(GetBooleanClass(), GetBooleanConstructor(), value);
 }
 
-}
+} // namespace Common::Android

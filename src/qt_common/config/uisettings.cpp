@@ -86,7 +86,7 @@ bool IsDarkTheme()
            theme == std::string("colorful_dark") || theme == std::string("colorful_midnight_blue");
 }
 
-Values values = { .color_theme_name = "Black" };
+Values values = {.color_theme_name = "Black"};
 
 u32 CalculateWidth(u32 height, Settings::AspectRatio ratio)
 {

@@ -205,7 +205,6 @@ void QtConfig::ReadPathValues()
 
     UISettings::values.roms_path = ReadStringSetting(std::string("romsPath"));
 
-
     const int gamedirs_size = BeginArray(std::string("gamedirs"));
     for (int i = 0; i < gamedirs_size; ++i) {
         SetArrayIndex(i);
@@ -229,7 +228,6 @@ void QtConfig::ReadPathValues()
         UISettings::values.game_dirs.append(game_dir);
         game_dir.path = std::string("SysNAND");
         UISettings::values.game_dirs.append(game_dir);
-
     }
     UISettings::values.recent_files =
         QString::fromStdString(ReadStringSetting(std::string("recentFiles")))
@@ -284,9 +282,9 @@ void QtConfig::ReadUIValues()
         std::string("theme"),
         std::string(UISettings::themes[static_cast<size_t>(UISettings::default_theme)].second));
 
-    UISettings::values.color_theme_name = ReadStringSetting(
-        std::string("color_theme_name"),
-        std::string("Monet Blue")); // Default Monet color
+    UISettings::values.color_theme_name =
+        ReadStringSetting(std::string("color_theme_name"),
+                          std::string("Monet Blue")); // Default Monet color
 
     ReadUIGamelistValues();
     ReadUILayoutValues();
@@ -526,9 +524,8 @@ void QtConfig::SaveUIValues()
         std::make_optional(std::string(
             UISettings::themes[static_cast<size_t>(UISettings::default_theme)].second)));
 
-    WriteStringSetting(
-        std::string("color_theme_name"), UISettings::values.color_theme_name,
-        std::make_optional(std::string("Monet Blue")));
+    WriteStringSetting(std::string("color_theme_name"), UISettings::values.color_theme_name,
+                       std::make_optional(std::string("Monet Blue")));
 
     SaveUIGamelistValues();
     SaveUILayoutValues();

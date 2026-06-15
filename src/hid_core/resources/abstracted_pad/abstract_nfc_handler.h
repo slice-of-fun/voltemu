@@ -10,7 +10,7 @@
 namespace Kernel {
 class KReadableEvent;
 class KEvent;
-}
+} // namespace Kernel
 
 enum class NpadNfcState : u32 {
     Unavailable,

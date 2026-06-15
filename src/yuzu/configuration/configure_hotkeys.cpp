@@ -216,8 +216,7 @@ void ConfigureHotkeys::SetPollingResult(const bool cancel)
     input_setter = std::nullopt;
 }
 
-QString ConfigureHotkeys::GetButtonCombinationName(Core::HID::NpadButton button,
-                                                   bool home,
+QString ConfigureHotkeys::GetButtonCombinationName(Core::HID::NpadButton button, bool home,
                                                    bool capture) const
 {
     Core::HID::NpadButtonState state{button};

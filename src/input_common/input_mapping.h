@@ -5,7 +5,6 @@
 
 #include "common/param_package.h"
 #include "common/threadsafe_queue.h"
-
 #include "input_common/main.h"
 
 namespace InputCommon {

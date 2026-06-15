@@ -19,7 +19,7 @@ class System;
 namespace Kernel {
 class KEvent;
 class KReadableEvent;
-}
+} // namespace Kernel
 
 namespace Service::LDN {
 

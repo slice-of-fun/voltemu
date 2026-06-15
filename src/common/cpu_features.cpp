@@ -254,8 +254,9 @@ WallClock::WallClock(bool invariant_, u64 rdtsc_frequency_) noexcept
       ns_rdtsc_factor{invariant_ ? GetFixedPoint64Factor(NsRatio::den, rdtsc_frequency_) : 0},
       us_rdtsc_factor{invariant_ ? GetFixedPoint64Factor(UsRatio::den, rdtsc_frequency_) : 0},
       ms_rdtsc_factor{invariant_ ? GetFixedPoint64Factor(MsRatio::den, rdtsc_frequency_) : 0},
-      rdtsc_ns_factor{1},
-      cntpct_rdtsc_factor{invariant_ ? GetFixedPoint64Factor(CNTFRQ, rdtsc_frequency_) : 0},
+      rdtsc_ns_factor{1}, cntpct_rdtsc_factor{invariant_
+                                                  ? GetFixedPoint64Factor(CNTFRQ, rdtsc_frequency_)
+                                                  : 0},
       gputick_rdtsc_factor{invariant_ ? GetFixedPoint64Factor(GPUTickFreq, rdtsc_frequency_) : 0},
       invariant{invariant_}
 {

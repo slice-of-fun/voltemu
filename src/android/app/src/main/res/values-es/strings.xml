@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
 
     <string name="app_disclaimer">Este software arrancará juegos para la consola Nintendo Switch. No se incluyen títulos ni claves de juego.<br /><br />Antes de continuar, por favor localiza tu archivo <![CDATA[prod.keys ]]> en el almacenamiento de tu dispositivo. <br /><br /><![CDATA[<a href=\"https://yuzu-mirror.github.io/help/quickstart\">Aprender más</a>]]>&lt;b&gt;</string>

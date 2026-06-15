@@ -344,7 +344,8 @@ void ConfigureRingController::ControllerUpdate(Core::HID::ControllerTriggerType 
     }
 
     const auto value = emulated_controller->GetRingSensorValues();
-    const auto tex_value = QString::fromStdString(fmt::format("{:.3f}", static_cast<double>(value.raw_value)));
+    const auto tex_value =
+        QString::fromStdString(fmt::format("{:.3f}", static_cast<double>(value.raw_value)));
     ui->ring_controller_sensor_value->setText(tex_value);
 }
 
