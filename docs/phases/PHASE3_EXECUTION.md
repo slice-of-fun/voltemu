@@ -4,6 +4,9 @@ This document tracks the execution of **Phase 3: Performance Improvements** as d
 
 The primary goal of this phase is to measurably improve emulation performance, reduce stuttering, and improve frame pacing across all platforms. Due to the high risk of breaking runtime behavior when adjusting JIT blocks and Vulkan pipelines without continuous profiling, steps are executed carefully and marked with constraints where applicable.
 
+> **Status:** ⏸️ Deferred
+> This phase has been formally deferred because the baseline "Eden Emulator" performance is already highly optimized. Since we currently lack a C++ compilation environment to safely verify runtime performance and stability, we are skipping directly to Phase 4 (UI Modernization).
+
 ---
 
 ## Progress Overview

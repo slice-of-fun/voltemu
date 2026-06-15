@@ -9,8 +9,8 @@ This document defines the full development roadmap across all five phases. Each 
 ```
 Phase 1  ──  Rebranding & Foundation       [✅ Complete]
 Phase 2  ──  Codebase Cleanup              [✅ Complete (Static Phase)]
-Phase 3  ──  Performance Improvements      [📋 Planned]
-Phase 4  ──  UI Modernization              [📋 Planned]
+Phase 3  ──  Performance Improvements      [⏸️ Deferred]
+Phase 4  ──  UI Modernization              [🔄 Active]
 Phase 5  ──  New Features                  [📋 Planned]
 ```
 
@@ -163,7 +163,7 @@ Phases are sequential but may overlap for isolated workstreams (e.g., documentat
 
 **Goal:** Measurably improve emulation performance, reduce stuttering, and improve frame pacing across all platforms.
 
-**Status:** 🔄 Active
+**Status:** ⏸️ Deferred (Baseline performance is already strong; deferred until a full compiler environment is available)
 
 ### Deliverables
 
@@ -229,7 +229,7 @@ Phases are sequential but may overlap for isolated workstreams (e.g., documentat
 
 **Goal:** Build a cleaner, more modern, and more capable user interface across all platforms.
 
-**Status:** 📋 Planned
+**Status:** 🔄 Active
 
 ### Deliverables
 
