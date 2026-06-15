@@ -1,11 +1,10 @@
-﻿// SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
+// SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 // SPDX-FileCopyrightText: Copyright yuzu/Citra Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 // import android.annotation.SuppressLint
-import com.android.build.gradle.api.ApplicationVariant
 import kotlin.collections.setOf
 import org.jlleitschuh.gradle.ktlint.reporter.ReporterType
 import com.github.triplet.gradle.androidpublisher.ReleaseStatus
@@ -299,13 +298,6 @@ ktlint {
     version.set("0.47.1")
     android.set(true)
     ignoreFailures.set(false)
-    disabledRules.set(
-        setOf(
-            "no-wildcard-imports",
-            "package-name",
-            "import-ordering"
-        )
-    )
     reporters {
         reporter(ReporterType.CHECKSTYLE)
     }
@@ -314,7 +306,7 @@ ktlint {
 play {
     val keyPath = System.getenv("SERVICE_ACCOUNT_KEY_PATH")
     if (keyPath != null) {
-        serviceAccountCrvolttials.set(File(keyPath))
+        serviceAccountCredentials.set(File(keyPath))
     }
     track.set(System.getenv("STORE_TRACK") ?: "internal")
     releaseStatus.set(ReleaseStatus.COMPLETED)
