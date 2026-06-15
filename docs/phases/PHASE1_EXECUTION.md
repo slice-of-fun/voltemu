@@ -47,11 +47,11 @@ This document is the authoritative task list for Phase 1. Every item must be com
 
 | # | Task | Status | Notes |
 |---|------|--------|-------|
-| 2.1 | Rename CMake project: `eden` → `volt` | ⬜ | Top-level `CMakeLists.txt` |
-| 2.2 | Rename all `EDEN_` variables to `VOLT_` | ⬜ | All CMakeLists.txt and .cmake |
-| 2.3 | Rename CMake targets: `eden-*` → `volt-*` | ⬜ | Verify all `target_link_libraries` |
-| 2.4 | Update version variables | ⬜ | `VOLT_VERSION_MAJOR/MINOR/PATCH` |
-| 2.5 | Update vcpkg manifest name | ⬜ | `vcpkg.json` → `"name": "volt"` |
+| 2.1 | Rename CMake project: `eden` → `volt` | ✅ | `CMakeLists.txt:6` `project(volt)` (audit-confirmed) |
+| 2.2 | Rename all `EDEN_` variables to `VOLT_` | ✅ | 0 `EDEN_` vars remain in non-vendored cmake (audit-confirmed) |
+| 2.3 | Rename CMake targets: `eden-*` → `volt-*` | ⚠️ | Main target is `volt` (`src/yuzu/CMakeLists.txt:17,244`); **leftover `eden` target at `:366`** in APPLE+Xcode block — latent configure error, see rebrand audit |
+| 2.4 | Update version variables | ⬜ | `VOLT_VERSION_MAJOR/MINOR/PATCH` — not yet located in audit |
+| 2.5 | Update vcpkg manifest name | N/A | No root `vcpkg.json` in tree (audit-confirmed) |
 | 2.6 | Verify build compiles successfully | ⬜ | Windows + Linux |
 | 2.7 | Commit step | ⬜ | `rebrand(cmake): rename project and variables` |
 
@@ -59,15 +59,21 @@ This document is the authoritative task list for Phase 1. Every item must be com
 
 ### Step 3 — Source Code — User-Facing Strings
 
+> **Audited (no-build):** see `docs/phases/PHASE1_REBRAND_AUDIT.md` for the full
+> 52-reference inventory grouped by migration risk. Tier A (org/app name, desktop
+> id, `EDEN_DIR`, macOS UTType ids) must NOT be blind-replaced — they relocate
+> user config / break OS associations and need a migration plan. Tier B (cosmetic
+> UI strings) is safe to rename but wants a build + `lupdate` pass.
+
 | # | Task | Status | Notes |
 |---|------|--------|-------|
-| 3.1 | Window title: "Eden" → "Volt Emulator" | ⬜ | Frontend main window |
-| 3.2 | About dialog: all Eden references | ⬜ | Keep upstream attribution |
-| 3.3 | Log output prefixes: "[eden]" → "[volt]" | ⬜ | Check logging config |
-| 3.4 | Error messages: "Eden" → "Volt Emulator" | ⬜ | User-visible errors only |
-| 3.5 | Crash reporter: "Eden" → "Volt Emulator" | ⬜ | If crash reporter exists |
+| 3.1 | Window title: "Eden" → "Volt Emulator" | ⬜ | `aboutdialog.ui`, `configure.ui:20`, `deps_dialog.ui:14` (audit Tier B) |
+| 3.2 | About dialog: all Eden references | ⬜ | `aboutdialog.ui:14,72,105,147` — keep upstream attribution |
+| 3.3 | Log output prefixes: "[eden]" → "[volt]" | ⬜ | `main_window.cpp:1937` "Eden starting…" |
+| 3.4 | Error messages: "Eden" → "Volt Emulator" | ⬜ | `main_window.cpp:1881`; 9× `tr("Eden")` msgbox titles (audit Tier B) |
+| 3.5 | Crash reporter: "Eden" → "Volt Emulator" | ⬜ | Also `eden_gpu.log` filenames (`gpu_logging.cpp:61,64`) |
 | 3.6 | `namespace Eden` → `namespace Volt` | ⬜ | Forward-compat only; use with care |
-| 3.7 | String literal audit: remaining "Eden" in `.cpp`/`.h` | ⬜ | Use audit script |
+| 3.7 | String literal audit: remaining "Eden" in `.cpp`/`.h` | ✅ | Inventoried in rebrand audit (Tier A/B/C) |
 | 3.8 | Verify no license lines were touched | ⬜ | Run audit script, compare counts |
 | 3.9 | Commit step | ⬜ | `rebrand(src): update user-facing strings` |
 
