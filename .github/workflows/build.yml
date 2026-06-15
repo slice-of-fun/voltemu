@@ -28,12 +28,21 @@ jobs:
         with:
           arch: x64
 
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.7.3'
+          arch: 'win64_msvc2019_64'
+          cache: 'true'
+          modules: 'qttools qtmultimedia qtwebengine qttranslations'
+
       - name: Configure CMake
         run: |
           cmake -S . -B build/windows `
             -G "Ninja" `
             -DCMAKE_BUILD_TYPE=Release `
             -DENABLE_QT=ON `
+            -DVOLT_USE_BUNDLED_QT=OFF `
             -DVOLT_USE_CPM=ON `
             -DCPMUTIL_FORCE_BUNDLED=ON
 
@@ -67,6 +76,13 @@ jobs:
             libasound2-dev libpulse-dev libudev-dev \
             nasm
 
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.7.3'
+          cache: 'true'
+          modules: 'qttools qtmultimedia qtwebengine qttranslations qtbase'
+
       - name: Configure CMake
         run: |
           cmake -S . -B build/linux \
@@ -75,7 +91,7 @@ jobs:
             -DCMAKE_C_COMPILER=clang \
             -DCMAKE_CXX_COMPILER=clang++ \
             -DENABLE_QT=ON \
-            -DVOLT_USE_BUNDLED_QT=ON \
+            -DVOLT_USE_BUNDLED_QT=OFF \
             -DVOLT_USE_BUNDLED_SDL3=ON \
             -DVOLT_USE_CPM=ON \
             -DCPMUTIL_FORCE_BUNDLED=ON
