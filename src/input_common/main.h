@@ -64,6 +64,15 @@ using ButtonMapping =
 using MotionMapping =
     ankerl::unordered_dense::map<Settings::NativeMotion::Values, Common::ParamPackage>;
 
+/**
+ * @brief Facade for all input device backends.
+ *
+ * InputSubsystem registers and owns the built-in input drivers (keyboard,
+ * mouse, touch screen, SDL controllers, TAS, camera, virtual gamepad/amiibo,
+ * Android) and exposes a uniform interface for enumerating devices, querying
+ * their analog/button/motion mappings, and driving the mapping (polling)
+ * workflow. All driver state lives behind a pimpl (InputSubsystem::Impl).
+ */
 class InputSubsystem {
 public:
     explicit InputSubsystem();

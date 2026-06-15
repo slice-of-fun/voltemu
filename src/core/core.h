@@ -141,6 +141,16 @@ enum class SystemResultStatus : u32 {
     ErrorLoader,         ///< The base for loader errors (too many to repeat)
 };
 
+/**
+ * @brief Top-level facade for an emulated Switch instance.
+ *
+ * System owns and wires together every major subsystem — the HLE kernel and
+ * services, the CPU manager, guest/device memory, the GPU and renderer, audio,
+ * HID, filesystem, and the application loader. All state lives behind a pimpl
+ * (System::Impl); this class exposes the lifecycle (Initialize → Load → Run →
+ * Pause → ShutdownMainProcess) and accessors that the frontend and subsystems
+ * use to reach one another.
+ */
 class System {
 public:
     using CurrentBuildProcessID = std::array<u8, 0x20>;

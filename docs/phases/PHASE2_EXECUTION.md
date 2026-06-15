@@ -109,12 +109,13 @@ The goal is to improve maintainability, readability, and architectural quality w
 - [x] Write `README.md` for `src/video_core/`.
 - [x] Write `README.md` for `src/audio_core/`.
 - [x] Write `README.md` for `src/input_common/`.
-- [ ] Add Doxygen blocks to all major public headers.
+- [x] Add Doxygen blocks to all major public headers.
 
 > Subsystem READMEs written from a per-subsystem architecture audit (not generic
 > boilerplate): each documents the top-level owning class, a directory map, the
-> primary data/command flow, and "where to start" pointers. Doxygen pass on public
-> headers remains outstanding.
+> primary data/command flow, and "where to start" pointers. Doxygen pass added
+> class-level `@brief` summaries to the four facade headers (`core.h`, `gpu.h`,
+> `audio_core.h`, `main.h`); member-level docs were already present.
 
 ### 4.2 Unit Tests
 - [ ] Audit existing `tests/` coverage.

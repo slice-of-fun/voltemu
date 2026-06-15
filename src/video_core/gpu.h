@@ -135,6 +135,16 @@ class Host1x;
 
 class MemoryManager;
 
+/**
+ * @brief Emulated Tegra X1 GPU orchestrator.
+ *
+ * GPU is the entry point for all graphics work. The guest submits command lists
+ * via PushGPUEntries; these flow through the DmaPusher into the Maxwell3D and
+ * KeplerCompute engines, which drive the bound renderer (Vulkan, OpenGL, or
+ * Null) through the rasterizer interface. It also owns the Host1x interface,
+ * channel management, fence/flush synchronization, and frame composition. All
+ * state is held behind a pimpl (GPU::Impl).
+ */
 class GPU final {
 public:
     explicit GPU(Core::System& system, bool is_async, bool use_nvdec);
