@@ -61,6 +61,7 @@ jobs:
         run: |
           sudo apt-get update -q
           sudo apt-get install -y \
+            build-essential libc++-dev libc++abi-dev \
             clang cmake ninja-build \
             libgl1-mesa-dev libglu1-mesa-dev \
             libasound2-dev libpulse-dev \
