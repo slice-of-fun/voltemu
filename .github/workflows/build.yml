@@ -36,6 +36,12 @@ jobs:
           cache: 'true'
           modules: 'qtmultimedia qtwebengine qtcharts'
 
+      - name: Install glslangValidator
+        run: |
+          Invoke-WebRequest -Uri https://github.com/KhronosGroup/glslang/releases/download/master-tot/glslang-master-windows-x64-Release.zip -OutFile glslang.zip
+          Expand-Archive glslang.zip -DestinationPath glslang
+          echo "$((Get-Location).Path)\glslang\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+
       - name: Configure CMake
         run: |
           cmake -S . -B build/windows `
