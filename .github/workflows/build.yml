@@ -75,7 +75,7 @@ jobs:
             clang cmake ninja-build \
             libgl1-mesa-dev libglu1-mesa-dev \
             libasound2-dev libpulse-dev libudev-dev \
-            libdrm-dev \
+            libdrm-dev glslang-tools \
             nasm
 
       - name: Install Qt
