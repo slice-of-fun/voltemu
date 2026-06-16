@@ -10,9 +10,11 @@
 #include <vector>
 
 #ifdef _WIN32
+// clang-format off
 #include <winsock2.h>
 #include <windows.h>
 #include <iphlpapi.h>
+// clang-format on
 #elif defined(__linux__) || defined(__ANDROID__)
 #include <ifaddrs.h>
 #include <net/if.h>

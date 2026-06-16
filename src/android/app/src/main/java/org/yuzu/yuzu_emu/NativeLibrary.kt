@@ -51,7 +51,7 @@ object NativeLibrary {
 
     init {
         try {
-            System.loadLibrary("yuzu-android")
+            System.loadLibrary("volt-android")
         } catch (ex: UnsatisfiedLinkError) {
             error("[NativeLibrary] $ex")
         }
