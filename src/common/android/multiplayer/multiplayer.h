@@ -4,13 +4,12 @@
 #pragma once
 
 #include <common/common_types.h>
+#include <jni.h>
 #include <network/announce_multiplayer_session.h>
 #include <network/network.h>
 
 #include <string>
 #include <vector>
-
-#include <jni.h>
 
 namespace Core {
 class System;
