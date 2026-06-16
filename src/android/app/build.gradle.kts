@@ -255,7 +255,7 @@ android {
 
     externalNativeBuild {
         cmake {
-            version = "3.31.6"
+            version = "4.3.3"
             path = file("${voltDir}/CMakeLists.txt")
         }
     }
