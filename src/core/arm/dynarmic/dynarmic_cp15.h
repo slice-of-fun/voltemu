@@ -4,9 +4,9 @@
 #pragma once
 
 #include <array>
-#include <dynarmic/interface/A32/coprocessor.h>
-
 #include <optional>
+
+#include <dynarmic/interface/A32/coprocessor.h>
 
 #include "common/common_types.h"
 
