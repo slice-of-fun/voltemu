@@ -511,14 +511,14 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved)
         return JNI_ERR;
 
     // Initialize Java classes
-    const jclass native_library_class = env->FindClass("org/yuzu/yuzu_emu/NativeLibrary");
+    const jclass native_library_class = env->FindClass("dev/volt_emu/volt/NativeLibrary");
     s_native_library_class = reinterpret_cast<jclass>(env->NewGlobalRef(native_library_class));
     s_disk_cache_progress_class = reinterpret_cast<jclass>(env->NewGlobalRef(
-        env->FindClass("org/yuzu/yuzu_emu/disk_shader_cache/DiskShaderCacheProgress")));
+        env->FindClass("dev/volt_emu/volt/disk_shader_cache/DiskShaderCacheProgress")));
     s_load_callback_stage_class = reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass(
-        "org/yuzu/yuzu_emu/disk_shader_cache/DiskShaderCacheProgress$LoadCallbackStage")));
+        "dev/volt_emu/volt/disk_shader_cache/DiskShaderCacheProgress$LoadCallbackStage")));
 
-    const jclass game_dir_class = env->FindClass("org/yuzu/yuzu_emu/model/GameDir");
+    const jclass game_dir_class = env->FindClass("dev/volt_emu/volt/model/GameDir");
     s_game_dir_class = reinterpret_cast<jclass>(env->NewGlobalRef(game_dir_class));
     s_game_dir_constructor = env->GetMethodID(game_dir_class, "<init>", "(Ljava/lang/String;Z)V");
     env->DeleteLocalRef(game_dir_class);
@@ -541,7 +541,7 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved)
     s_on_program_changed =
         env->GetStaticMethodID(s_native_library_class, "onProgramChanged", "(I)V");
 
-    const jclass game_class = env->FindClass("org/yuzu/yuzu_emu/model/Game");
+    const jclass game_class = env->FindClass("dev/volt_emu/volt/model/Game");
     s_game_class = reinterpret_cast<jclass>(env->NewGlobalRef(game_class));
     s_game_constructor = env->GetMethodID(game_class, "<init>",
                                           "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/"
@@ -567,7 +567,7 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved)
     env->DeleteLocalRef(pair_class);
 
     const jclass overlay_control_data_class =
-        env->FindClass("org/yuzu/yuzu_emu/overlay/model/OverlayControlData");
+        env->FindClass("dev/volt_emu/volt/overlay/model/OverlayControlData");
     s_overlay_control_data_class =
         reinterpret_cast<jclass>(env->NewGlobalRef(overlay_control_data_class));
     s_overlay_control_data_constructor =
@@ -587,7 +587,7 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved)
         env->GetFieldID(overlay_control_data_class, "individualScale", "F");
     env->DeleteLocalRef(overlay_control_data_class);
 
-    const jclass patch_class = env->FindClass("org/yuzu/yuzu_emu/model/Patch");
+    const jclass patch_class = env->FindClass("dev/volt_emu/volt/model/Patch");
     s_patch_class = reinterpret_cast<jclass>(env->NewGlobalRef(patch_class));
     s_patch_constructor = env->GetMethodID(
         patch_class, "<init>",
@@ -619,7 +619,7 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved)
     env->DeleteLocalRef(boolean_class);
 
     const jclass player_input_class =
-        env->FindClass("org/yuzu/yuzu_emu/features/input/model/PlayerInput");
+        env->FindClass("dev/volt_emu/volt/features/input/model/PlayerInput");
     s_player_input_class = reinterpret_cast<jclass>(env->NewGlobalRef(player_input_class));
     s_player_input_constructor = env->GetMethodID(
         player_input_class, "<init>",
@@ -650,7 +650,7 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved)
     env->DeleteLocalRef(player_input_class);
 
     const jclass yuzu_input_device_interface =
-        env->FindClass("org/yuzu/yuzu_emu/features/input/YuzuInputDevice");
+        env->FindClass("dev/volt_emu/volt/features/input/YuzuInputDevice");
     s_yuzu_input_device_interface =
         reinterpret_cast<jclass>(env->NewGlobalRef(yuzu_input_device_interface));
     s_yuzu_input_device_get_name =

@@ -14,7 +14,7 @@ namespace Common::Android::WebBrowser {
 
 void InitJNI(JNIEnv* env)
 {
-    const jclass local = env->FindClass("org/yuzu/yuzu_emu/NativeLibrary");
+    const jclass local = env->FindClass("dev/volt_emu/volt/NativeLibrary");
     s_native_library_class = static_cast<jclass>(env->NewGlobalRef(local));
     env->DeleteLocalRef(local);
     s_open_external_url =

@@ -1,4 +1,4 @@
-﻿// SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
+// SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 // SPDX-FileCopyrightText: Copyright 2023 yuzu Emulator Project
@@ -1850,7 +1850,7 @@ JNIEXPORT jobject JNICALL Java_org_yuzu_yuzu_1emu_NativeLibrary_checkForUpdate(J
     // If not, something has gone wrong, but the Kotlin side can handle it.
     const auto assets = release->GetPlatformAssets();
 
-    jclass updateResultClass = env->FindClass("org/yuzu/yuzu_emu/NativeLibrary$UpdateResult");
+    jclass updateResultClass = env->FindClass("dev/volt_emu/volt/NativeLibrary$UpdateResult");
     if (!updateResultClass) {
         LOG_ERROR(Frontend, "Could not find UpdateResult class");
         return nullptr;
