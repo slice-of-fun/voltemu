@@ -129,6 +129,11 @@ struct PerfStatsResults;
 FileSys::VirtualFile GetGameFileFromPath(const FileSys::VirtualFilesystem& vfs,
                                          const std::string& path);
 
+// Undefine X11 macro if it exists to avoid collisions with the enum
+#ifdef Success
+#undef Success
+#endif
+
 /// Enumeration representing the return values of the System Initialize and Load process.
 enum class SystemResultStatus : u32 {
     Success,             ///< Succeeded
