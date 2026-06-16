@@ -6,6 +6,9 @@
 
 #pragma once
 
+#include <memory>
+#include <vector>
+
 #include "core/hle/service/nvnflinger/buffer_item_consumer.h"
 #include "core/hle/service/nvnflinger/hwc_layer.h"
 

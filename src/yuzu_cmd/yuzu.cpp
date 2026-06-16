@@ -38,9 +38,10 @@
 #include "yuzu_cmd/emu_window/emu_window_sdl3_vk.h"
 
 #ifdef _WIN32
-// windows.h needs to be included before shellapi.h
-#include <shellapi.h>
+// clang-format off
 #include <windows.h>
+#include <shellapi.h>
+// clang-format on
 
 #include "common/windows/timer_resolution.h"
 #endif
