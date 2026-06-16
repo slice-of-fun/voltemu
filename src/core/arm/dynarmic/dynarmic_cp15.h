@@ -3,10 +3,10 @@
 
 #pragma once
 
+#include <dynarmic/interface/A32/coprocessor.h>
+
 #include <array>
 #include <optional>
-
-#include <dynarmic/interface/A32/coprocessor.h>
 
 #include "common/common_types.h"
 
