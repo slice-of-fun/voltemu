@@ -1,0 +1,80 @@
+name: Upstream Eden Sync
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # Run daily at midnight UTC
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  sync-upstream:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout Volt Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Full history needed for merge
+          submodules: recursive
+
+      - name: Sync upstream
+        id: sync
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git remote add upstream https://git.eden-emu.dev/eden-emu/eden.git || true
+          git fetch upstream
+          
+          # Check if our dev branch is already up-to-date with upstream/dev
+          git checkout dev
+          if git merge-base --is-ancestor upstream/dev dev; then
+            echo "Already up to date with upstream/dev. No sync needed."
+            echo "sync_needed=false" >> $GITHUB_OUTPUT
+          else
+            echo "New updates found. Staging merge..."
+            echo "sync_needed=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Merge upstream updates
+        if: steps.sync.outputs.sync_needed == 'true'
+        id: merge
+        run: |
+          # Perform merge without committing to let create-pull-request stage it
+          git merge upstream/dev --no-commit --no-ff
+
+      - name: Create Pull Request on Success
+        if: steps.sync.outputs.sync_needed == 'true' && success()
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore: sync upstream eden updates"
+          title: "Upstream Sync: Eden Updates"
+          body: |
+            Automated daily sync from upstream `eden-emu/eden`.
+            
+            This PR contains new updates fetched from the upstream `dev` branch.
+            - Standard PR tests will verify if the project compiles successfully with these updates.
+            - Please review and merge if everything is correct.
+          branch: auto-upstream-sync
+          base: dev
+
+      - name: Create Issue on Conflict/Failure
+        if: failure() && steps.sync.outputs.sync_needed == 'true'
+        uses: dacbd/create-issue-action@main
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          title: "🚨 Upstream Sync Failed: Merge Conflict with Eden"
+          body: |
+            The automated daily upstream sync failed because there is a merge conflict between your changes (branding/packaging) and the latest updates from the upstream `eden-emu/eden` repository.
+            
+            **Action Required**:
+            Please run these commands locally on your machine to resolve the merge conflict manually:
+            ```bash
+            git checkout dev
+            git pull origin dev
+            git remote add upstream https://git.eden-emu.dev/eden-emu/eden.git || true
+            git fetch upstream
+            git merge upstream/dev
+            # Resolve conflicts in your code editor
+            git add .
+            git commit -m "chore: manually resolve merge conflicts with upstream"
+            git push origin dev
+            ```
