@@ -1,7 +1,11 @@
 # SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-cmake_minimum_required(VERSION 3.31)
+if (CMAKE_SYSTEM_NAME STREQUAL "Android")
+    cmake_minimum_required(VERSION 3.22)
+else()
+    cmake_minimum_required(VERSION 3.31)
+endif()
 
 project(volt)
 
