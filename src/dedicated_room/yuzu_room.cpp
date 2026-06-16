@@ -17,8 +17,10 @@
 
 #ifdef _WIN32
 // windows.h needs to be included before shellapi.h
-#include <shellapi.h>
+// clang-format off
 #include <windows.h>
+#include <shellapi.h>
+// clang-format on
 #endif
 
 #include <openssl/evp.h>
