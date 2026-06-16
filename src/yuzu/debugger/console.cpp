@@ -10,8 +10,10 @@
 #include "qt_common/config/uisettings.h"
 
 #ifdef _WIN32
-#include <wincon.h>
+// clang-format off
 #include <windows.h>
+#include <wincon.h>
+// clang-format on
 #endif
 
 namespace Debugger {

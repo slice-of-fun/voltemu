@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <array>
 #include <dynarmic/interface/A32/coprocessor.h>
 
 #include <optional>
