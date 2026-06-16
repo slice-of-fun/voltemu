@@ -23,6 +23,14 @@ struct NvFence {
 };
 static_assert(sizeof(NvFence) == 8, "NvFence has wrong size");
 
+// X11 headers define these as macros, which conflict with the enum values below.
+#ifdef Success
+#undef Success
+#endif
+#ifdef BadValue
+#undef BadValue
+#endif
+
 enum class NvResult : u32 {
     Success = 0x0,
     NotImplemented = 0x1,
