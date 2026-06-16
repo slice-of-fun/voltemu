@@ -11,7 +11,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  VOLT_VERSION: ${{ github.ref_name }}
+  VOLT_VERSION: v0.1
 
 jobs:
   build-windows:
@@ -56,12 +56,20 @@ jobs:
       - name: Build
         run: cmake --build build/windows --config Release --parallel
 
+      - name: Stage Artifacts
+        run: |
+          New-Item -ItemType Directory -Force -Path build/windows/publish
+          Copy-Item -Path build/windows/bin/* -Destination build/windows/publish/ -Recurse -Force
+          Copy-Item -Path dist -Destination build/windows/publish/dist -Recurse -Force
+          Copy-Item -Path LICENSE.txt -Destination build/windows/publish/
+          Copy-Item -Path README.md -Destination build/windows/publish/
+
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         if: success()
         with:
-          name: volt-windows-x64-${{ github.sha }}
-          path: build/windows/bin/volt.exe
+          name: volt-${{ env.VOLT_VERSION }}-x64
+          path: build/windows/publish
           retention-days: 14
 
   build-linux:
@@ -118,7 +126,7 @@ jobs:
         uses: actions/upload-artifact@v4
         if: success()
         with:
-          name: volt-linux-x64-${{ github.sha }}
+          name: volt-${{ env.VOLT_VERSION }}-linux-x64
           path: build/linux/bin/volt
           retention-days: 14
 
@@ -150,12 +158,16 @@ jobs:
         working-directory: src/android
         run: ./gradlew assembleMainlineRelWithDebInfo
 
+      - name: Stage APK
+        run: |
+          find src/android/app/build/outputs/apk/ -name "*.apk" -exec cp {} volt-${{ env.VOLT_VERSION }}-arm64.apk \;
+
       - name: Upload APK
         uses: actions/upload-artifact@v4
         if: success()
         with:
-          name: volt-android-arm64-${{ github.sha }}.apk
-          path: src/android/app/build/outputs/apk/**/*.apk
+          name: volt-${{ env.VOLT_VERSION }}-arm64
+          path: volt-${{ env.VOLT_VERSION }}-arm64.apk
           retention-days: 14
 
   # ─────────────────────────────────────────────
